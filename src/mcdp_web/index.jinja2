@@ -21,6 +21,7 @@
 
         #buttons .ui-button { padding: 3px !important; }
 
+		img.icon { vertical-align: -0.4ex; height: 2.5ex; margin-right: 4pt}
     </style>
 </head>
 <body>
@@ -56,14 +57,14 @@
 
 <div id='actions'>
 
-<div style='display:none'>
+
 <h3>Learn</h3>
 
 <ul>
 <li><a href="http://mcdp.mit.edu/papers/">Papers and presentations</a></li>
-<li><a href="{{root}}/static/manual.html">The PyMCDP Manual</a></li>
+<li><a href="{{root}}/static/manual.pdf"><img src='{{root}}/static/pdf.png' class='icon'/>Language tutorial and reference</a></li>
 </ul>
-
+<div style='display:none'>
 
 <h3>Help</h3>
 
@@ -120,7 +121,7 @@
 	</div>
 	
 	<div id='buttons'>
-		<p><a id='create_library'>Create a new library</a></p>
+		<!--<p><a id='create_library'>Create a new library</a></p>-->
 		<p><a id='refresh' href='{{root}}/refresh'>Refresh list of libraries</a></p>
 	</div>
 </div>
