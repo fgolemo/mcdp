@@ -5,7 +5,7 @@ mcdp {
    provides power_profile using rtig
    requires mass, cost for rtig
    requires area >= 0 m^2
-   requires solar_radiation >= 0 W/m^2
+   requires solar_radiation >= 0 lux
    requires plutonium for rtig
 },
 solar:
