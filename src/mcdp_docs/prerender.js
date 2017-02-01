@@ -32,6 +32,20 @@ console.log('rendering...');
 
 // mjAPI.SetRenderer=SetRenderer;
 
+
+mjAPI.config({
+  MathJax: {
+      SVG: {
+            scale: 80,
+            // matchFontHeight: false,
+     },
+    //  "HTML-CSS": {
+    //   preferredFont: "STIX"
+    // }
+  }
+});
+
+
 mjAPI.start();
 // window.MathJax.Hub.Config({
 //     SVG: {
@@ -40,14 +54,16 @@ mjAPI.start();
 // });
 console.log('started');
 
+
 mjAPI.typeset({
   'html': document.body.innerHTML,
   // renderer: "NativeMML", // problme: sometimes doesnt work in prince for single docs; problem: ugly
   'renderer': "SVG", // problem: too large
+  // 'renderer': "HTML-CSS",
   // 'renderer': "PNG", // no
   // "output/SVG",
   'inputs': ["TeX"],
-  'xmlns': "mml",
+  // 'xmlns': "mml",
 }, function(result) {
     console.log('rendering done.')
   "use strict";

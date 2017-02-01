@@ -17,21 +17,21 @@ associated to them.
         <s>Python representation</s>
 
 
-        <pos np>Nat</pos>
+        <poset np>Nat</poset>
 
         <s>$\langle\mathbb{N} \cup \top, \leq\rangle$</s>
 
         <s><code>int</code> plus a special <code>Top</code> object</s>
 
 
-        <pos np>Rcomp</pos>
+        <poset np>Rcomp</poset>
 
         <s>$\langle{\mathbb{R}}_+ \cup \top, \leq\rangle$</s>
 
         <s><code>float</code> plus a special <code>Top</code> object</s>
 
 
-        <pos np>g</pos>
+        <poset np>g</poset>
 
         <s>$\langle\mathbb{R}^{[\text{g}]}_+\cup \top, \leq\rangle$</s>
 
@@ -40,18 +40,18 @@ associated to them.
 </col1>
 
 
-### Natural numbers <pos np>Nat</pos> <pos>Nat</pos>
+### Natural numbers <poset np>Nat</poset> <poset>Nat</poset>
 
 By $\overline{\mathbb{N}}$ we mean the completion of  $\mathbb{N}$ to include a
 top element $\top$. This makes the poset a [complete partial order](#def:cpo)
 ([](#def:cpo)).
 
 
-The natural numbers with completion are expressed as <q><pos np>Nat</pos></q>
-or with the Unicode letter <q><pos>Nat</pos></q>.
+The natural numbers with completion are expressed as <q><poset np>Nat</poset></q>
+or with the Unicode letter <q><poset>Nat</poset></q>.
 %
-Their values are denoted using the syntax <q><val np>Nat:42</val></q>
-or simply <q><val>42</val></q>.
+Their values are denoted using the syntax <q><value np>Nat:42</value></q>
+or simply <q><value>42</value></q>.
 
 Internally, $\mathbb{N}$ is represented by the [Python type `int`][int], which
 is equivalent to the 32 bits `signed long` type in C. So, it is really
@@ -59,7 +59,7 @@ a chain of $2^{31} + 1$ elements.
 
 [int]: https://docs.python.org/2/library/stdtypes.html#numeric-types-int-float-long-complex
 
-### Nonnegative floating point numbers <pos np>Rcomp</pos> <pos>Rcomp</pos>  {#subsub:Rcomp}
+### Nonnegative floating point numbers <poset np>Rcomp</poset> <poset>Rcomp</poset>  {#subsub:Rcomp}
 
 Let $\reals_{+}=\{x \mid x \geq 0\}$ be the nonnegative real numbers  and let
 $\overline{\reals}_{+} = \reals_{+} \cup \top$ be its completion. The $+$ and
@@ -71,9 +71,9 @@ following:
     \forall a:& \quad a \times \top &= \top
 \end{eqnarray}
 
-This poset is indicated in MCDPL by <pos np>Rcomp</pos> or <pos>Rcomp</pos>.
+This poset is indicated in MCDPL by <poset np>Rcomp</poset> or <poset>Rcomp</poset>.
 Values belonging to this poset are indicates with the syntax their values as
-<val np>Rcomp:42.0</val>, <val>Rcomp:42.0</val>, or simply <val>42.0</val>.
+<value np>Rcomp:42.0</value>, <value>Rcomp:42.0</value>, or simply <value>42.0</value>.
 
 Internally, $\Rcomp$ is approximated using double precision point numbers ([IEEE
 754]), corresponding to the <code>float</code> type used by Python and the
@@ -108,15 +108,15 @@ syntax in [](#tab:number-units).
         <!-- <span>…</span> -->
 
         <span>syntax&nbsp;for&nbsp;poset</span>
-        <pos>g</pos>
-        <pos>J</pos>
-        <pos>m/s</pos>
+        <poset>g</poset>
+        <poset>J</poset>
+        <poset>m/s</poset>
         <!-- <span>…</span> -->
 
          <span>syntax&nbsp;for&nbsp;values</span>
-         <val>1.2 g</val>
-         <val>20 J</val>
-         <val>23 m/s</val>
+         <value>1.2 g</value>
+         <value>20 J</value>
+         <value>23 m/s</value>
          <!-- <span>…</span> -->
     </col4>
 </center>
@@ -156,18 +156,18 @@ numerical value of $x$ (stripping the unit away). Then, if $x \in
 \mathbb{F}^{[u]}$  and $y \in \mathbb{F}^{[v]}$, their product is $x\cdot y \in
 \mathbb{F}^{[uv]} $ and $|x\cdot y| = |x|\cdot|y|$.
 
-Addition is defined only for compatible pairs of units (e.g., <pos>m</pos> and
-<pos>km</pos>), but it is not possible to sum, say, <pos>m</pos> and
-<pos>s</pos>. If $x \in \mathbb{F}^{[u]}$  and $y \in \mathbb{F}^{[v]}$, then $x +
+Addition is defined only for compatible pairs of units (e.g., <poset>m</poset> and
+<poset>km</poset>), but it is not possible to sum, say, <poset>m</poset> and
+<poset>s</poset>. If $x \in \mathbb{F}^{[u]}$  and $y \in \mathbb{F}^{[v]}$, then $x +
 y \in \mathbb{F}^{[u]} $, and $ x + y = |x| + \alpha^u_v |y| $, where
 $\alpha^u_v$ is a table of conversion factors, and $|x|$ is the absolute
 numerical value of $x$.
 
 
-In practice, this means that MCDPL thinks that <val>1 kg + 1 g</val> is equal to
-<val>1.001 kg</val>. Addition is not strictly commutative, because <val>1 g + 1
-kg</val> is equal to <val>1001 g</val>, which is equivalent, but not equal, to
-<val>1.001 kg</val>.
+In practice, this means that MCDPL thinks that <value>1 kg + 1 g</value> is equal to
+<value>1.001 kg</value>. Addition is not strictly commutative, because <value>1 g + 1
+kg</value> is equal to <value>1001 g</value>, which is equivalent, but not equal, to
+<value>1.001 kg</value>.
 
 
 
@@ -202,9 +202,9 @@ displayed in [](#fig:MyPosetHasse).
 The name of the poset, `MyPoset`, comes from the filename `MyPoset.mcdp_poset`.
 After the poset has been defined, it can be used in the definition of an MCDP,
 by referring to it by name using the backtick notation, as in
-<q><pos>`MyPoset</pos></q>.
+<q><poset>`MyPoset</poset></q>.
 
-To refer to its elements, use the notation <val>`MyPoset: element</val>
+To refer to its elements, use the notation <value>`MyPoset: element</value>
 ([](#code:one)).
 
 <col2>
@@ -239,7 +239,7 @@ create a poset product, using the syntax:
     </pre>
 </col2>
 
-For example, the expression <pos>J × A</pos> represents a product of Joules and
+For example, the expression <poset>J × A</poset> represents a product of Joules and
 Amperes.
 
 The elements of a poset product are called "tuples". These correspond exactly to
@@ -252,17 +252,16 @@ The elements of a poset product are called "tuples". These correspond exactly to
     </pre>
 </center>
 
-For example, the expression <q><val>&lt;2 J, 1 A&gt;</val></q> denotes a tuple
-with two elements, equal to <val>2 J</val> and <val>2 A</val>. An alternative
+For example, the expression <q><value>&lt;2 J, 1 A&gt;</value></q> denotes a tuple
+with two elements, equal to <value>2 J</value> and <value>2 A</value>. An alternative
 syntax uses the fancy Unicode brackets <q>&#x3008;</q> and <q>&#x3009;</q>, as
-in <q><val>⟨0 J, 1 A⟩</val></q>.
+in <q><value>⟨0 J, 1 A⟩</value></q>.
 
 [tuples]: https://docs.python.org/3/tutorial/datastructures.html#tuples-and-sequences
 
 
-Tuples can be nested. For example, you can describe a tuple like <val np>⟨ ⟨0 J,
-1 A⟩, ⟨1 m, 1 s, 42⟩ ⟩</val>, and its poset is denoted as <code>(</code><pos
-np>(J × A) × (m × s × Nat)</pos><code>)</code>.
+Tuples can be nested. For example, you can describe a tuple like <value np>⟨ ⟨0 J,
+1 A⟩, ⟨1 m, 1 s, 42⟩ ⟩</value>, and its poset is denoted as <code>(</code><poset np="1">(J × A) × (m × s × Nat)</poset><code>)</code>.
 
 
 ### Named Poset Products <k>product</k>
@@ -270,7 +269,7 @@ np>(J × A) × (m × s × Nat)</pos><code>)</code>.
 MCDPL also supports "named products". These are semantically equivalent to
 products, however, there is also a name associated to each entry. This allows to
 easily refer to the elements. For example, the following declares a product of
-the two spaces <pos>J</pos> and <pos>A</pos> with the two entries named
+the two spaces <poset>J</poset> and <poset>A</poset> with the two entries named
 ``energy`` and ``current``.
 
 <center>
@@ -315,8 +314,8 @@ set-building notation:
 </pre>
 </center>
 
-For example, the value <val>{1,2,3}</val>
-is an element of the poset <pos>℘(Nat)</pos>.
+For example, the value <value>{1,2,3}</value>
+is an element of the poset <poset>℘(Nat)</poset>.
 
 <h3>
     Upper and lower sets and closures

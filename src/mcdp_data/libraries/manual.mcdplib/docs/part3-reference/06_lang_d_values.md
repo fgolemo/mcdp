@@ -7,19 +7,19 @@
 To indicate top and bottom of a poset, use the syntax:
 
 <col2>
-        <val np>Top [["poset"]]</val>
-        <val>⊤ [["poset"]]</val>
-        <val np>Bottom [["poset"]]</val>
-        <val>⊥ [["poset"]]</val>
+        <value np>Top [["poset"]]</value>
+        <value>⊤ [["poset"]]</value>
+        <value np>Bottom [["poset"]]</value>
+        <value>⊥ [["poset"]]</value>
 </col2>
 
-For example, <q><val>Top V</val></q> indicates the top of the <pos>V</pos>.
+For example, <q><value>Top V</value></q> indicates the top of the <poset>V</poset>.
 
 
 ### Minimals and maximals  <k>Minimals</k> <k>Maximals</k>
 
-The expressions <val>Minimals [["poset"]]</val>
-and <val>Maximals [["poset"]]</val>
+The expressions <value>Minimals [["poset"]]</value>
+and <value>Maximals [["poset"]]</value>
 denote the set of minimal and maximal elements of a poset.
 
 
@@ -38,8 +38,8 @@ denote the set of minimal and maximal elements of a poset.
 </style>
 
 For example, assume that the poset <code>MyPoset</code> is defined as in
-[](#fig:hasse2). Then <val>Maximals &#96;MyPoset</val> is equivalent to `b` and
-`d`, and <val>Minimals &#96;MyPoset</val> is equivalent to `a`, `e`, `c`.
+[](#fig:hasse2). Then <value>Maximals &#96;MyPoset</value> is equivalent to `b` and
+`d`, and <value>Minimals &#96;MyPoset</value> is equivalent to `a`, `e`, `c`.
 
 <!--
 <pre class='mcdp_value' id='value1'>
@@ -60,8 +60,8 @@ EmptySet [[poset]]
 </pre>
 
 Note that empty sets are typed---this is different from set theory.
-<val>EmptySet J</val> is an empty set of energies,
-and <val>EmptySet V</val> is an empty set of voltages,
+<value>EmptySet J</value> is an empty set of energies,
+and <value>EmptySet V</value> is an empty set of voltages,
 and the two are not equivalent.
 
 <!-- or

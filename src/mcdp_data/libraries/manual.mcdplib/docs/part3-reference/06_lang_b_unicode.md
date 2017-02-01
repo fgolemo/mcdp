@@ -90,7 +90,7 @@ In the current implementation, all files on disk are assumed to be encoded in UT
 Comments work as in Python.
 Anything between the symbol `#` and a newline is ignored. Comments can include any Unicode character.
 
-TODO: markdown comments
+<!-- TODO: markdown comments -->
 
 
 
@@ -287,7 +287,7 @@ Every occurrence of a superscript of the digit *d* is interpreted as a power
     <code>a₇</code> <code>a_7</code>
     <code>a₈</code> <code>a_8</code>
     <code>a₉</code> <code>a_9</code>
-    <code>$</code> <code>USD</code>
+    <!-- <code>&#36;</code> <code>USD</code> -->
     <code>×</code> <code>x</code>
 </col2>
 

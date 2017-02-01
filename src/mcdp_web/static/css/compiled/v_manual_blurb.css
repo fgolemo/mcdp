@@ -2014,6 +2014,16 @@ h1::after {
     margin-top: 4em;
   }
 }
+.errored {
+  /*border: solid 2px red !important;*/
+  /*padding: 3px !important;*/
+  /*background-color: red;*/
+}
+.duplicated-id,
+.href-invalid,
+.href-replaced {
+  display: none;
+}
 /*
 
 
