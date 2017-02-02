@@ -10,8 +10,8 @@ dependencies:
     - curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash
     - sudo add-apt-repository -y ppa:lyx-devel/release
     - sudo apt-get update
-    - sudo apt-cache policy nodejs
-    - sudo apt-get -qq -y install build-essential nodejs=6.9.1
+    #- sudo apt-cache policy nodejs
+    - sudo apt-get -qq -y install build-essential nodejs
     - echo "Current directory:"
     - pwd
     - /usr/bin/npm config set loglevel warn
@@ -23,7 +23,7 @@ dependencies:
     - pip install numpy lxml matplotlib pillow junit_xml
     - sudo apt-get install lyx
     - lyx --version
-
+    - nodejs --version
 
 test:
   override:
