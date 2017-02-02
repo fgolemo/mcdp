@@ -18,6 +18,8 @@ from .highlight import fix_subfig_references, html_interpret,  mark_console_pres
 from .xmlutils import check_html_fragment, to_html_stripping_fragment, bs
 from mcdp_lang_utils.where_utils import location
 from mcdp_lang_utils.where import Where
+import warnings
+from mcdp_web.renderdoc.highlight import escape_for_mathjax_back
 
 
 __all__ = [
@@ -114,13 +116,15 @@ def render_complete(library, s, raise_errors, realpath, generate_pdf=False,
     s = other_abbrevs(s)
     
     
-    # need to process tabular before mathjax 
+    # need to process tabular before mathjax
     s = escape_for_mathjax(s)
 
 #     print(indent(s, 'before prerender_mathjax | '))
     # mathjax must be after markdown because of code blocks using "$"
     
     s = prerender_mathjax(s)
+    s = escape_for_mathjax_back(s)
+    
 #     print(indent(s, 'after prerender_mathjax | '))
     for k,v in mcdpenvs.items():
         # there is this case:
@@ -128,6 +132,7 @@ def render_complete(library, s, raise_errors, realpath, generate_pdf=False,
         # <pre> </pre>
         # ~~~
         s = s.replace(k, v)
+    
 
     s = s.replace('<p>DRAFT</p>', '<div class="draft">')
     

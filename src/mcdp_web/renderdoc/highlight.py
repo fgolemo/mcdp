@@ -268,25 +268,40 @@ def load_fragments(library, frag, realpath):
 
             library.file_to_contents[basename] = res
             
-            
+TAG_DOLLAR = 'tag-dollar'
+which = 'code, mcdp-poset, mcdp-value, mcdp-fvalue, mcdp-rvalue, render'
 def escape_for_mathjax(html):
     """ Escapes dollars in code 
      
     """
     soup = bs(html)
-    for code in soup.select('code, mcdp-poset, mcdp-value, mcdp-fvalue, mcdp-rvalue, render'):
+    for code in soup.select(which):
         if not code.string:
             continue
         #unicode
         s = code.string
         if '$' in code.string:
-            s = s.replace('$', 'DOLLAR')
+            s = s.replace('$', TAG_DOLLAR)
             
         code.string = s
     
     res = to_html_stripping_fragment(soup) 
     return res
 
+def escape_for_mathjax_back(html):
+    soup = bs(html)
+    for code in soup.select(which):
+        if not code.string:
+            continue
+        s = code.string
+        if TAG_DOLLAR in code.string:
+            s = s.replace(TAG_DOLLAR, '$')
+            
+        code.string = s
+    
+    res = to_html_stripping_fragment(soup) 
+    return res
+    return res
     
 def escape_ticks_before_markdown(html):
     """ Escapes backticks and quotes in code 

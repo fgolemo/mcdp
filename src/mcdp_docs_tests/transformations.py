@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from comptests.registrar import comptest
+from comptests.registrar import comptest, run_module_tests
 from contracts.utils import raise_desc, indent
 from mcdp_library.library import MCDPLibrary
 from mcdp_web.renderdoc.highlight import get_minimal_document
@@ -431,8 +431,31 @@ plus completeness is sufficient to ensure existence.
     
     assert not 'censored-code' in s
 
+
+
+@comptest
+def no_dollar():
+    # four spaces in the first line
+    s = r"""
+    
+<col2>
+    <span>&#36;</span> <span>alphanumeric</span>
+    <code>a₆</code> <code>a_6</code>
+    <code>&#36;</code> <code>USD</code>
+    <code>×</code> <code>x</code>
+</col2>
+
+"""
+    s2 = tryit(s)
+    
+#     print('original:')
+#     print indent_plus_invisibles(s)
+#     print('later:')
+#     print indent_plus_invisibles(s2)
+#     
+    assert not 'DOLLAR' in s2
     
 if __name__ == '__main__': 
-    another2()
-#     run_module_tests()
+#     another2()
+    run_module_tests()
     
