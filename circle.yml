@@ -1,4 +1,4 @@
-dependencies: 
+dependencies:
   pre:
     - mkdir ~/.fonts
     - wget -OSTIX.zip https://sourceforge.net/projects/stixfonts/files/Past%20Releases/STIXv1.1.0.zip/download
@@ -10,7 +10,8 @@ dependencies:
     - curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash
     - sudo add-apt-repository -y ppa:lyx-devel/release
     - sudo apt-get update
-    - sudo apt-get -qq -y install build-essential nodejs
+    - sudo apt-cache policy nodejs
+    - sudo apt-get -qq -y install build-essential nodejs=6.9.1
     - echo "Current directory:"
     - pwd
     - /usr/bin/npm config set loglevel warn
