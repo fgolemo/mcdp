@@ -17,6 +17,7 @@ from .namedtuple_tricks import recursive_print
 from .parse_actions import decorate_add_where
 from .parts import CDPLanguage
 from .utils_lists import get_odd_ops, unwrap_list
+import math
 
 
 CDP = CDPLanguage
@@ -72,6 +73,7 @@ def eval_constant(op, context):
         
         CDP.RcompConstant: eval_constant_RcompConstant,
         CDP.ConstantDivision: eval_constant_ConstantDivision,
+        CDP.SpecialConstant: eval_constant_SpecialConstant,
     }
     
     for klass, hook in cases.items():
@@ -83,6 +85,19 @@ def eval_constant(op, context):
         op = recursive_print(op)
         raise_desc(NotConstant, msg, op=op)
 
+def eval_constant_SpecialConstant(r, context):  # @UnusedVariable
+    check_isinstance(r, CDP.SpecialConstant)
+    constants = {
+        'pi': ValueWithUnits(math.pi, Rcomp()),    
+        'e': ValueWithUnits(math.pi, Rcomp()),
+    }
+    constants['π'] = constants['pi']
+
+    if not r.constant_name in constants:
+        msg = 'Could not find constant "%s".' % (r.constant_name)
+        raise_desc(DPInternalError, msg)
+
+    return constants[r.constant_name]
 
 def eval_constant_ConstantRef(rvalue, context):
     check_isinstance(rvalue, CDP.ConstantRef)

@@ -41,7 +41,7 @@ def eval_rvalue(rvalue, context):
         
     constants = (CDP.Collection, CDP.SimpleValue, CDP.SpaceCustomValue,
                  CDP.Top, CDP.Bottom, CDP.Maximals, CDP.Minimals,
-                 CDP.NatConstant, CDP.RcompConstant)
+                 CDP.NatConstant, CDP.RcompConstant, CDP.SpecialConstant)
 
     if isinstance(rvalue, constants):
         res = eval_constant(rvalue, context)

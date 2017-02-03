@@ -17,6 +17,8 @@ from .pyparsing_bundled import (
 from .syntax_utils import (
     COMMA, L, O, S, SCOLON, SCOMMA, SLPAR, SRPAR, keyword, sp, spk)
 from .utils_lists import make_list
+import math
+from mcdp_posets.rcomp import Rcomp
 
 
 ParserElement.enablePackrat()
@@ -53,6 +55,9 @@ class SyntaxBasics():
 class SyntaxIdentifiers():
     # unfortunately this needs to be maintained manually
     keywords = [
+        'pi',
+        'π',
+        'e',
         'constant',
         'take',
         'load',
@@ -524,7 +529,9 @@ class Syntax():
 
     valuewithunit_numbers = sp(integer_or_float + S(lbracket) + space + S(rbracket),
                                lambda t: CDP.SimpleValue(t[0], t[1]))
-
+    constant_e = sp(L('e'), lambda t: CDP.SpecialConstant(t[0]))
+    constant_pi = sp(L('π') | L('pi'), lambda t: CDP.SpecialConstant(t[0]))
+    
     mcdp_dev_warning('dimensionless not tested')
     dimensionless = sp((L('[') + L(']')) ^ Keyword('dimensionless'),
                        lambda _: CDP.RcompUnit('m/m'))
@@ -772,6 +779,8 @@ class Syntax():
         | constant_emptyset
         | rcomp_constant  # after valuewithunit
         | nat_constant2   # after valuewithunit and rcomp_constant
+        | constant_pi
+        | constant_e
     )
     definitely_constant_value_operand = (
         collection_of_constants
@@ -789,6 +798,9 @@ class Syntax():
         | constant_emptyset
         | rcomp_constant  # after valuewithunit
         | nat_constant2  # after valuewithunit and rcomp_constant
+        | constant_pi
+        | constant_e
+
     )
     definitely_constant_value << definitely_constant_value_operand
 #

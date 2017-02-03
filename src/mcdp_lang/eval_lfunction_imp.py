@@ -48,7 +48,8 @@ def eval_lfunction(lf, context):
 
     constants = (CDP.Collection, CDP.SimpleValue, CDP.SpaceCustomValue,
                  CDP.Top, CDP.Bottom, CDP.Minimals, CDP.Maximals, 
-                 CDP.NatConstant, CDP.RcompConstant, CDP.ConstantDivision)
+                 CDP.NatConstant, CDP.RcompConstant, CDP.ConstantDivision,
+                 CDP.SpecialConstant)
         
     if isinstance(lf, constants):
         from mcdp_lang.eval_constant_imp import eval_constant

@@ -467,3 +467,6 @@ class CDPLanguage():
     CommentRes = namedtuplewhere('CommentRes', 'comment_string')
     CommentVar = namedtuplewhere('CommentVar', 'comment_string')
     
+    SpecialConstant = namedtuplewhere('SpecialConstant', 'constant_name')
+    
+    
