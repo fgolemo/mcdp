@@ -4,22 +4,17 @@ from string import Template
 
 from contracts import contract
 from contracts.utils import raise_desc
-
 from mcdp_docs.manual_constants import MCDPManualConstants
+from mcdp_lang_utils import Where, location
 from mcdp_library import MCDPLibrary
 from mcdp_report.gg_utils import embed_images_from_library2
-from mcdp_web.renderdoc.xmlutils import describe_tag
 from mocdp import logger
 from mocdp.exceptions import DPInternalError, DPSyntaxError
 
 from .abbrevs import other_abbrevs
-from .highlight import fix_subfig_references, html_interpret,  mark_console_pres,\
+from .highlight import escape_for_mathjax_back, fix_subfig_references, html_interpret,  mark_console_pres,\
     escape_for_mathjax, make_figure_from_figureid_attr
-from .xmlutils import check_html_fragment, to_html_stripping_fragment, bs
-from mcdp_lang_utils.where_utils import location
-from mcdp_lang_utils.where import Where
-import warnings
-from mcdp_web.renderdoc.highlight import escape_for_mathjax_back
+from .xmlutils import check_html_fragment, to_html_stripping_fragment, bs, describe_tag
 
 
 __all__ = [

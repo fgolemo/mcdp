@@ -10,6 +10,7 @@ class ParsingElement():
     def __repr__(self):
         return 'ParsingElement(%s)' % self.name
 
+
 @contract(returns=ParsingElement)
 def find_parsing_element(x):
     from .syntax_codespec import SyntaxCodeSpec
