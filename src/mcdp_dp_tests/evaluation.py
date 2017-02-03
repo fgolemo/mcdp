@@ -43,7 +43,7 @@ def check_evaluate(id_dp, dp):
 
 
 @comptest_fails
-def check_evaluation():
+def to_be_updated_check_evaluation():
     ndp = parse_ndp("""
     mcdp {  
     sub f = instance mcdp {
@@ -113,7 +113,7 @@ def check_evaluation():
 
 
 @comptest_fails
-def check_evaluation2():
+def to_be_updated_check_evaluation2():
     ndp = parse_ndp("""
     mcdp {  
     sub f = instance mcdp {

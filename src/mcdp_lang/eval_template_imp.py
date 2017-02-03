@@ -2,7 +2,8 @@
 from contracts import contract
 from contracts.utils import raise_desc, check_isinstance
 from mocdp.comp.template_for_nameddp import TemplateForNamedDP
-from mocdp.exceptions import DPInternalError, DPSemanticError
+from mocdp.exceptions import DPInternalError, DPSemanticError,\
+    DPNotImplementedError
 
 from .namedtuple_tricks import recursive_print
 from .parse_actions import decorate_add_where
@@ -40,7 +41,8 @@ def eval_template_deriv(r, context):  # @UnusedVariable
     
 #     return ndp_deriv(r.ndp, name)
 
-    raise NotImplementedError
+    msg = 'deriv() not implemented'
+    raise_desc(DPNotImplementedError, msg)
     
     
 def eval_template_load(r, context):
@@ -77,7 +79,8 @@ def eval_template_load(r, context):
 
         return template
 
-    raise NotImplementedError(r)
+    msg = 'Expected TemplateName or TemplateNameWithLibrary'
+    raise_desc(DPInternalError, msg, r=r)
 
 def eval_template_spec(r, context):
 
