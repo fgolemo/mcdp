@@ -24,10 +24,8 @@ class AppStatus():
         pass
 
     def config(self, config):
-        base = '/status'
-
-        route = 'json'
-        config.add_route(route, base + '/status.json')
+        route = 'status_json'
+        config.add_route(route,'/status/status.json')
         config.add_view(self.view_status, route_name=route, renderer='jsonp',
                         permission=pyramid.security.NO_PERMISSION_REQUIRED)
 
