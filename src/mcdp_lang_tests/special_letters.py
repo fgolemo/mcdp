@@ -2,7 +2,8 @@
 from nose.tools import assert_equal
 
 from comptests.registrar import comptest, run_module_tests
-from mcdp_lang.dealing_with_special_letters import greek_letters, subscripts
+from mcdp_lang.dealing_with_special_letters import greek_letters, subscripts,\
+    greek_letters_utf8, subscripts_utf8
 from mcdp_lang.parse_interface import parse_ndp
 from mcdp_lang.syntax import SyntaxIdentifiers
 from mcdp_lang_tests.utils import parse_wrap_check, assert_syntax_error
@@ -76,13 +77,12 @@ def subscript_only_end():
 def special_letters_identifiers():
     examples = [] # ustring, 
     
-    for name, letter in greek_letters.items(): 
-        identifier = name.encode('utf8')
-        appears = letter
-        example = (identifier, appears)
+    for identifier, letter in greek_letters_utf8.items(): 
+        if letter == 'π': continue
+        example = (identifier, letter)
         examples.append(example)
     
-    for num, subscript in subscripts.items():
+    for num, subscript in subscripts_utf8.items():
         identifier = 'x_%d' % num
         appears = 'x' + subscript
         example = (identifier, appears)  
@@ -91,7 +91,6 @@ def special_letters_identifiers():
     idn = SyntaxIdentifiers.get_idn()
     
     for identifier, appears in examples:
-        appears = appears.encode('utf-8')
         
         res = parse_wrap_check(appears, idn)
         #print('- %r %r -> %r' % (identifier, appears, res))
