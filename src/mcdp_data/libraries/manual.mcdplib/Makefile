@@ -5,6 +5,7 @@ all::
 out=out-versions
 out_intermediate=$(out)/intermediate
 mcdp_render_manual_dir=$(out)/out-mcdp_render_manual
+mcdp_render_ready_dir=$(out)//out-mcdp_render_manual-ready
 manual_html=$(out_intermediate)/manual.html
 
 # vstring='1.0'
@@ -86,7 +87,7 @@ ready_src=manual-ready
 $(ready_html): $(generated) $(wildcard $(ready_src)/**/*)
 	DISABLE_CONTRACTS=1 mcdp-render-manual \
 		--src $(ready_src) \
-		-o $(mcdp_render_manual_dir) \
+		-o $(mcdp_render_ready_dir) \
 		--output_file $@ -c "config echo 1; rparmake"
 	#$(MAKE) extract-assets-manual
 
