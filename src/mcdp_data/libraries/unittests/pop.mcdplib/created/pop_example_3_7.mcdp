@@ -24,8 +24,8 @@ d = instance mcdp {
   d >= d
 }
 E = instance mcdp {
-  provides e [dimensionless]
-  requires e [dimensionless]
+  provides E [dimensionless]
+  requires E [dimensionless]
   E >= E
 }
 f = instance mcdp {

@@ -9,8 +9,8 @@ from mcdp_dp import (CatalogueDP, CoProductDP, NotFeasible, Template, Constant,
 from mcdp_lang.eval_warnings import MCDPWarnings
 from mcdp_lang.parse_actions import parse_wrap
 from mcdp_lang.parse_interface import parse_ndp, parse_poset, parse_constant
-from mcdp_lang.pyparsing_bundled import Literal
-from mcdp_lang.syntax import Syntax, SyntaxIdentifiers
+from mcdp_lang.pyparsing_bundled import Literal, Keyword
+from mcdp_lang.syntax import Syntax, SyntaxIdentifiers, SyntaxBasics
 from mcdp_lang.syntax_codespec import SyntaxCodeSpec
 from mcdp_lang_tests.utils import (assert_parsable_to_connected_ndp, assert_semantic_error,
                                    parse_wrap_check)
@@ -23,6 +23,7 @@ from mocdp.comp.context import ModelBuildingContext, Context
 from mocdp.comp.recursive_name_labeling import get_names_used
 from mocdp.exceptions import DPNotImplementedError, DPSemanticError,\
     DPSyntaxError
+from mcdp_lang.syntax_utils import L
 
 
 @comptest
@@ -1907,7 +1908,17 @@ def expect_sem_error():
 def math_constants3():
     parse_constant('pi^2')
     pow(3.14,2)
-        
+
+@comptest
+def units_pixels():
+    # so 'pi' is forbidden as a keyword
+    assert_raises(DPSyntaxError, parse_wrap, Keyword('pi'), 'pixels')
+    parse_wrap(SyntaxIdentifiers.not_keyword + L('pixels'), 'pixels')
+    parse_wrap(Syntax.pint_unit_simple, 'pixels')
+    parse_wrap(Syntax.space_pint_unit, 'pixels')
+    parse_wrap(Syntax.space_pint_unit, 'pixels/deg')
+    parse_poset('pixels/deg')
+    parse_constant(' 1.0 pixels/deg')        
 if __name__=='__main__':
     run_module_tests()
 

@@ -16,9 +16,7 @@ from .pyparsing_bundled import (
     sglQuotedString, FollowedBy, QuotedString, ParseExpression)
 from .syntax_utils import (
     COMMA, L, O, S, SCOLON, SCOMMA, SLPAR, SRPAR, keyword, sp, spk)
-from .utils_lists import make_list
-import math
-from mcdp_posets.rcomp import Rcomp
+from .utils_lists import make_list 
 
 
 ParserElement.enablePackrat()
@@ -137,8 +135,7 @@ class SyntaxIdentifiers():
     ]
 
     # remember to .copy() this otherwise things don't work
-    not_keyword = NotAny(
-        MatchFirst([Keyword(_) for _ in keywords]))
+    not_keyword = NotAny(MatchFirst([Keyword(_) for _ in keywords]))
 
     """
         Valid identifiers:
@@ -164,8 +161,7 @@ class SyntaxIdentifiers():
     _identifier = sp(combined,
                      lambda t: decode_identifier(t[0]))
 
-    _idn = (
-        not_keyword + _identifier).setName('identifier except keywords')
+    _idn = (not_keyword.copy() + _identifier).setName('identifier except keywords')
 
     @staticmethod
     def get_idn():
@@ -327,8 +323,10 @@ class Syntax():
 
     pint_alphas = Word(alphas + '$')
     pint_alphas.setWhitespaceChars(' ')
-    pint_unit_base = NotAny(
-        oneOf(SyntaxIdentifiers.keywords + ['x'])) + pint_alphas
+    
+    cant_be_units_kw = SyntaxIdentifiers.keywords + ['x']
+    cant_be_units = NotAny(MatchFirst([Keyword(_) for _ in cant_be_units_kw]))
+    pint_unit_base = cant_be_units + pint_alphas
     pint_unit_base.setWhitespaceChars(' ')
     pint_unit_power = ((L('^') + Word(nums)) | L('¹') | L('²') |  L('³') |  L('⁴') | \
         L('⁵') | L('⁶') | L('⁷') | L('⁸') | L('⁹')).setName('pint_unit_power')
