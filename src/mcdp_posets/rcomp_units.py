@@ -17,21 +17,27 @@ from .poset import is_top, is_bottom
 from .rcomp import RcompBase, Rbicomp
 from .space import Map
 
-
+# str -> conversion to dollars
+currencies = {
+    'CHF': 1.03, # in dollars
+    'EUR': 1.14,
+    'SGD': 0.70,
+    'JPY': 0.0088,
+    'GBP': 1.24,
+}
 
 class MyUnitRegistry(UnitRegistry):
     def __init__(self, *args, **kwargs):
         UnitRegistry.__init__(self, *args, **kwargs)
         self.define(' dollars = [cost] = USD')
+ 
         self.define(' flops = [flops]')
-        self.define(' pixels = [pixels]')
-        self.define(' episodes = [episodes]')
-        self.define(' CHF = 1.03 dollars')
-        self.define(' EUR = 1.14 dollars')
-        self.define(' SGD = 0.70 dollars')
-        self.define(' JPY = 0.0088 dollars')
-        self.define(' GBP = 1.24 dollars')
+        self.define(' pixels = [pixels] = pixel')
+        self.define(' episodes = [episodes] = episode')
         
+        for currency, value in currencies.items():
+            self.define(' %s = %s dollars' % (currency, value))
+            
         
 
 
