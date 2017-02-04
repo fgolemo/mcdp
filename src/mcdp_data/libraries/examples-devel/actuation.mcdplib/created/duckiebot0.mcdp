@@ -42,7 +42,7 @@
   }
 
 
-  p1 provided by fit ≽ payload required by pi
+  p1 provided by fit ≽ payload required by rpi
   p2 provided by fit ≽ payload required by dc_hat
   p3 provided by fit ≽ payload required by pi_camera
 
@@ -50,11 +50,11 @@
 
   provides motion using dagu_chassis
 
-  pisocketcom1 required by dc_hat ≼ pisocketcom provided by pi
+  pisocketcom1 required by dc_hat ≼ pisocketcom provided by rpi
   ignore pisocketcom1 provided by dc_hat
-  ignore ethcom provided by pi
+  ignore ethcom provided by rpi
   ignore usbcom1 required by rpi
-  ignore ethcom required by pi
+  ignore ethcom required by rpi
 
   out1 provided by dc_hat ≽ pwm1 required by dagu_chassis
   out2 provided by dc_hat ≽ pwm2 required by dagu_chassis

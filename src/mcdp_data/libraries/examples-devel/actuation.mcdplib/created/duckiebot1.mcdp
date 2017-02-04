@@ -18,20 +18,20 @@ mcdp {
   rgb_led4 = instance `RGBLED
   rgb_led5 = instance `RGBLED
 
-  pi_camera = instance `PICamera
+  rpi_camera = instance `PICamera
   joystick = instance `LogitechGamepadF710
   joystick_receiver = instance `LogitechReceiver
 
   com required by joystick_receiver ≼ com provided by joystick
   usb_to_barrel = instance `USB_to_barrel
-  gpiocom required by rpi ≼ com provided by pi_camera
+  gpiocom required by rpi ≼ com provided by rpi_camera
   usbcom1 required by rpi ≼ com provided by joystick_receiver
 
   ethcom required by rpi ≼ eth provided by buffalo
   ethcom provided by rpi ≽ eth required by buffalo
 
-  ignore usbcom1 provided by pi
-  ignore usbcom2 provided by pi
+  ignore usbcom1 provided by rpi
+  ignore usbcom2 provided by rpi
 
   router = instance `Linksys
 
@@ -68,12 +68,12 @@ mcdp {
 
 
   p1 provided by fit ≽ payload required by buffalo
-  p2 provided by fit ≽ payload required by pi
+  p2 provided by fit ≽ payload required by rpi
   p3 provided by fit ≽ payload required by dc_hat
   p4 provided by fit ≽ payload required by servo_hat
   p5 provided by fit ≽ payload required by lsd_hat
   p6 provided by fit ≽ payload required by duckie
-  p7 provided by fit ≽ payload required by pi_camera
+  p7 provided by fit ≽ payload required by rpi_camera
 
 
   payload required by fit ≼ payload_top provided by dagu_chassis
@@ -139,7 +139,7 @@ mcdp {
   provides visualization using duckietop
 
   pisocketcom required by servo_hat ≼ pisocketcom1 provided by dc_hat
-  pisocketcom1 required by dc_hat ≼ pisocketcom provided by pi
+  pisocketcom1 required by dc_hat ≼ pisocketcom provided by rpi
 
   out1 provided by dc_hat ≽ pwm1 required by dagu_chassis
   out2 provided by dc_hat ≽ pwm2 required by dagu_chassis
@@ -160,7 +160,7 @@ mcdp {
      budget required by rgb_led3 +
      budget required by rgb_led4 +
      budget required by rgb_led5 +
-     budget required by pi_camera +
+     budget required by rpi_camera +
      budget required by usb_to_barrel +
      budget required by USBMicroCharger +
      budget required by duckie +
