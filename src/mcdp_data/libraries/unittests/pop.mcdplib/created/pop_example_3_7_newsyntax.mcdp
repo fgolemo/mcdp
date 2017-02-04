@@ -1,6 +1,6 @@
 # not_implemented_error
 mcdp {
-    variable a, b, c, d, e, f [Rcomp]
+    variable a, b, c, d, E, f [Rcomp]
 
     a ≽ 0.50 * min(b, f)
     a ≽ 0.50 * min(c, d)
@@ -8,8 +8,8 @@ mcdp {
     c ≽ 0.45
     c ≽ 0.30
     d ≽ 1.00
-    e ≽ 0.50
-    f ≽ 0.90 * e
+    E ≽ 0.50
+    f ≽ 0.90 * E
 
-    requires objective = min(a, max(c, e))
+    requires objective = min(a, max(c, E))
 }

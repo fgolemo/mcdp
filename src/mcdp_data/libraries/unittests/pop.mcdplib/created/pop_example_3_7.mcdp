@@ -7,7 +7,7 @@ a = instance mcdp {
   requires a [dimensionless]
   a >= a
 }
- 
+
 b = instance mcdp {
   provides b [dimensionless]
   requires b [dimensionless]
@@ -23,10 +23,10 @@ d = instance mcdp {
   requires d [dimensionless]
   d >= d
 }
-e = instance mcdp {
+E = instance mcdp {
   provides e [dimensionless]
   requires e [dimensionless]
-  e >= e
+  E >= E
 }
 f = instance mcdp {
   provides f [dimensionless]
@@ -39,8 +39,8 @@ b.b >= 0.20 []
 c.c >= 0.45 []
 c.c >= 0.30 []
 d.d >= 1.00[]
-e.e >= 0.50 []
-f.f >= 0.90 [] * e.e
+E.E >= 0.50 []
+f.f >= 0.90 [] * E.E
 
-required objective >= min(a.a, max(c.c, e.e))
+required objective >= min(a.a, max(c.c, E.E))
 }

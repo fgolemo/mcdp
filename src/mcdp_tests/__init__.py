@@ -28,7 +28,7 @@ def load_tests_modules():
     # only do basic tests if we are #0
     i, n = get_test_index()
 
-    logger.info('Testing box #%d of %d' % (i+1, n))
+    #logger.info('Testing box #%d of %d' % (i+1, n))
     if n == 1:
         should_do_basic_tests = True
     else:

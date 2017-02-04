@@ -220,10 +220,9 @@ def mcdplib_test_setup_nameddps(context, libname):
                      
     
 def accepts_arg(f, name):
-    """ True if it supports the "library" argument """
+    """ True if the function f supports the "name" argument """
     import inspect
     args = inspect.getargspec(f)
-    # print args
     return name in args.args
 
 def mcdplib_test_setup_sources(context, libname):
