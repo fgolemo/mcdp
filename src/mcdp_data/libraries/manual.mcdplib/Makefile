@@ -25,6 +25,10 @@ cssdir=$(realpath ../../../mcdp_web/static/css)
 cssprefix=$(cssdir)/compiled
 
 
+all:: \
+	out-ready/ready-v_manual_blurb.pdf\
+	out-ready/ready-v_manual_blurb_ready.pdf
+
 all:: $(all_targets)
 
 
@@ -72,6 +76,16 @@ html: $(manual_html)
 
 $(manual_html): $(generated) $(wildcard docs/**/*)
 	DISABLE_CONTRACTS=1 mcdp-render-manual \
+		--src docs/ \
+		-o $(mcdp_render_manual_dir) \
+		--output_file $@ -c "config echo 1; rparmake"
+
+ready_html=out-ready/ready.html
+ready_src=manual-ready
+
+$(ready_html): $(generated) $(wildcard $(ready_src)/**/*)
+	DISABLE_CONTRACTS=1 mcdp-render-manual \
+		--src $(ready_src) \
 		-o $(mcdp_render_manual_dir) \
 		--output_file $@ -c "config echo 1; rparmake"
 	#$(MAKE) extract-assets-manual
@@ -106,8 +120,14 @@ css:
 $(out)/%.html: $(manual_html)
 	sed 's@VERSIONCSS@$(cssprefix)/$*.css@' < $< > $@
 
+%-v_manual_blurb.html: %.html
+	sed 's@VERSIONCSS@$(cssprefix)/v_manual_blurb.css@' < $< > $@
+%-v_manual_blurb_ready.html: %.html
+	sed 's@VERSIONCSS@$(cssprefix)/v_manual_blurb_ready.css@' < $< > $@
 
-$(out)/%.pdf: $(out)/%.html $(pdf_metadata) $(cssdir)/*less $(cssdir)/*css
+
+
+%.pdf: %.html $(pdf_metadata) $(cssdir)/*less $(cssdir)/*css
 	$(MAKE) css
 	prince --javascript $< -o $@.tmp
 	pdftk $@.tmp update_info $(pdf_metadata) output $@
