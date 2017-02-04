@@ -49,6 +49,8 @@ class SyntaxBasics():
     integer_or_float = sp(floatnumber | integer,
                           lambda t: CDP.ValueExpr(t[0])).setName('integer_or_float')
 
+def not_any_of_these(ks):
+    return NotAny(MatchFirst([Keyword(_) for _ in ks]))
 
 class SyntaxIdentifiers():
     # unfortunately this needs to be maintained manually
@@ -135,7 +137,8 @@ class SyntaxIdentifiers():
     ]
 
     # remember to .copy() this otherwise things don't work
-    not_keyword = NotAny(MatchFirst([Keyword(_) for _ in keywords]))
+    
+    not_keyword = not_any_of_these(keywords)
 
     """
         Valid identifiers:
@@ -325,7 +328,7 @@ class Syntax():
     pint_alphas.setWhitespaceChars(' ')
     
     cant_be_units_kw = SyntaxIdentifiers.keywords + ['x']
-    cant_be_units = NotAny(MatchFirst([Keyword(_) for _ in cant_be_units_kw]))
+    cant_be_units = not_any_of_these(cant_be_units_kw)
     pint_unit_base = cant_be_units + pint_alphas
     pint_unit_base.setWhitespaceChars(' ')
     pint_unit_power = ((L('^') + Word(nums)) | L('¹') | L('²') |  L('³') |  L('⁴') | \
@@ -375,7 +378,13 @@ class Syntax():
 
     FINITE_POSET = keyword('finite_poset', CDP.FinitePosetKeyword)
     POSET = keyword('poset', CDP.FinitePosetKeyword)
-    finite_poset_el = sp(get_idn(), lambda t: CDP.FinitePosetElement(t[0]))
+    
+    # we allow 'e' to be an element
+    deny = list(set(SyntaxIdentifiers.keywords) - set(['e']))
+    poset_el = ( not_any_of_these(deny) + SyntaxIdentifiers._identifier)
+        
+    finite_poset_el = sp(poset_el, 
+                         lambda t: CDP.FinitePosetElement(t[0]))
 
     finite_poset_chain_leq = sp(finite_poset_el + ZeroOrMore(LEQ + finite_poset_el),
                                 lambda t: CDP.FinitePosetChainLEQ(make_list(t)))

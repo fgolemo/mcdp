@@ -1918,7 +1918,13 @@ def units_pixels():
     parse_wrap(Syntax.space_pint_unit, 'pixels')
     parse_wrap(Syntax.space_pint_unit, 'pixels/deg')
     parse_poset('pixels/deg')
-    parse_constant(' 1.0 pixels/deg')        
+    parse_constant(' 1.0 pixels/deg')   
+    
+@comptest
+def use_e_as_poset_element():
+    parse_poset('poset{ a<=b<=e }')
+
+     
 if __name__=='__main__':
     run_module_tests()
 
