@@ -318,7 +318,7 @@ def check_addition_incompatible():
     }"""
     assert_raises(DPSemanticError, parse_ndp, s)
 
-@comptest_fails
+@comptest
 def check_addition_incompatible2():
     s="""mcdp {
       requires r [g]
@@ -340,7 +340,7 @@ def check_addition_incompatible3():
     }"""
     assert_raises(DPSemanticError, parse_ndp, s)
  
-@comptest_fails
+@comptest
 def check_addition_incompatible2_dual():
     s="""mcdp {
       requires r [g]

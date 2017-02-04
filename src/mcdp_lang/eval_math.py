@@ -427,32 +427,36 @@ def eval_PlusN(x, context, wants_constant):
 
 def eval_PlusN_(constants, resources, context):
     from .misc_math import plus_constantsN
-    # it's a constant value
-    if len(resources) == 0:
-        try:
+    
+    try:
+        # it's a constant value
+        if len(resources) == 0:
+#             try:
             return plus_constantsN(constants)
-        except ConstantsNotCompatibleForAddition as e:
-            raise_desc(DPSemanticError, str(e))
-
-    elif len(resources) == 1:
-        if len(constants) > 0:
-            c = plus_constantsN(constants)
-            return get_plus_op(context, r=resources[0], c=c)
-        else:
-            return resources[0]
-    else:
-        # there are some resources
-        r =  eval_PlusN_ops(resources, context) 
-        if not constants:
-            return r
-        else:
-            try:
+#             except ConstantsNotCompatibleForAddition as e:
+#                 raise_desc(DPSemanticError, str(e))
+    
+        elif len(resources) == 1:
+            if len(constants) > 0:
                 c = plus_constantsN(constants)
-            except ConstantsNotCompatibleForAddition as e:
-                raise_desc(DPSemanticError, str(e))
-
-            return get_plus_op(context, r=r, c=c)
-
+                return get_plus_op(context, r=resources[0], c=c)
+            else:
+                return resources[0]
+        else:
+            # there are some resources
+            r =  eval_PlusN_ops(resources, context) 
+            if not constants:
+                return r
+            else:
+#                 try:
+                c = plus_constantsN(constants)
+#                 except ConstantsNotCompatibleForAddition as e:
+#                     raise_wrapped(DPSemanticError, e, compact=True)
+    
+                return get_plus_op(context, r=r, c=c)
+    except ConstantsNotCompatibleForAddition as e:
+        msg = 'Incompatible units for addition'
+        raise_wrapped(DPSemanticError, e, msg, compact=True)
 
 def eval_PlusN_ops(resources, context):
     if MCDPConstants.force_plus_two_resources:

@@ -24,6 +24,7 @@ from .namedtuple_tricks import recursive_print
 from .parse_actions import decorate_add_where
 from .parts import CDPLanguage
 from .utils_lists import get_odd_ops, unwrap_list
+from mcdp_lang.misc_math import ConstantsNotCompatibleForAddition
 
 
 CDP = CDPLanguage
@@ -254,25 +255,28 @@ def eval_lfunction_invplus(lf, context):
     
     constants = pos_constants
     
-    if len(functions) == 0:
-        c = plus_constantsN(constants)
-        return get_valuewithunits_as_function(c, context)
-
-    elif len(functions) == 1:
-        if len(constants) > 0:
+    try:
+        if len(functions) == 0:
             c = plus_constantsN(constants)
-            return get_invplus_op(context, functions[0], c)
+            return get_valuewithunits_as_function(c, context)
+    
+        elif len(functions) == 1:
+            if len(constants) > 0:
+                c = plus_constantsN(constants)
+                return get_invplus_op(context, functions[0], c)
+            else:
+                return functions[0]
         else:
-            return functions[0]
-    else:
-        # there are some functions
-        r =  eval_lfunction_invplus_ops(functions, context) 
-        if not constants:
-            return r
-        else:
-            c = plus_constantsN(constants)
-            return get_invplus_op(context, r, c)
-
+            # there are some functions
+            r =  eval_lfunction_invplus_ops(functions, context) 
+            if not constants:
+                return r
+            else:
+                c = plus_constantsN(constants)
+                return get_invplus_op(context, r, c)
+    except ConstantsNotCompatibleForAddition as e:
+        msg = 'Incompatible units for addition.'
+        raise_wrapped(DPSemanticError, e, msg, compact=True)
 
 @contract(lf=CFunction, c=ValueWithUnits, returns=CFunction)
 def get_invplus_op(context, lf, c):
