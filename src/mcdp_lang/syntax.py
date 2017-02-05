@@ -200,6 +200,15 @@ def decode_identifier(s):
 
 
 class Syntax():
+    
+    __version__ = '1.0.0'
+    __changelog__ = {   
+        '1.0.0': "Arbitrarily named on 2017-02-01."
+    }
+    __deprecated__ = """
+        - `new`, to be replaced by instance 
+        - The old catalogue definition.
+    """
 
     # An expression that evaluates to a constant value
     constant_value = Forward()
@@ -252,35 +261,35 @@ class Syntax():
                                        | quoted) + SL(']') + SL(']').setName('placeholder')
 
     dpname_placeholder = sp(copy_expr_remove_action(
-        placeholder), lambda t: CDP.Placeholder_dpname(t[0])).setName('dpname_placeholder')
+        placeholder), lambda t: CDP.Placeholder_dpname(t[0]))
     constant_placeholder = sp(copy_expr_remove_action(
-        placeholder), lambda t: CDP.Placeholder_constant(t[0])).setName('constant_placeholder')
+        placeholder), lambda t: CDP.Placeholder_constant(t[0]))
     rvalue_placeholder = sp(copy_expr_remove_action(
-        placeholder), lambda t: CDP.Placeholder_rvalue(t[0])).setName('rvalue_placeholder')
+        placeholder), lambda t: CDP.Placeholder_rvalue(t[0]))
     fvalue_placeholder = sp(copy_expr_remove_action(
-        placeholder), lambda t: CDP.Placeholder_fvalue(t[0])).setName('fvalue_placeholder')
+        placeholder), lambda t: CDP.Placeholder_fvalue(t[0]))
     fname_placeholder = sp(copy_expr_remove_action(
-        placeholder), lambda t: CDP.Placeholder_fname(t[0])).setName('fname_placeholder')
+        placeholder), lambda t: CDP.Placeholder_fname(t[0]))
     rname_placeholder = sp(copy_expr_remove_action(
-        placeholder), lambda t: CDP.Placeholder_rname(t[0])).setName('rname_placeholder')
+        placeholder), lambda t: CDP.Placeholder_rname(t[0]))
     space_placeholder = sp(copy_expr_remove_action(
-        placeholder), lambda t: CDP.Placeholder_poset(t[0])).setName('space_placeholder')
+        placeholder), lambda t: CDP.Placeholder_poset(t[0]))
     ndpt_placeholder = sp(copy_expr_remove_action(
-        placeholder), lambda t: CDP.Placeholder_constant(t[0])).setName('constant_placeholder')
+        placeholder), lambda t: CDP.Placeholder_constant(t[0]))
     template_placeholder = sp(copy_expr_remove_action(
-        placeholder), lambda t: CDP.Placeholder_template(t[0])).setName('template_placeholder')
+        placeholder), lambda t: CDP.Placeholder_template(t[0]))
     primitivedp_placeholder = sp(copy_expr_remove_action(
-        placeholder), lambda t: CDP.Placeholder_primitivedp(t[0])).setName('primitivedp_placeholder')
+        placeholder), lambda t: CDP.Placeholder_primitivedp(t[0]))
     collection_placeholder = sp(copy_expr_remove_action(
-        placeholder), lambda t: CDP.Placeholder_collection(t[0])).setName('collection_placeholder')
+        placeholder), lambda t: CDP.Placeholder_collection(t[0]))
     integer_placeholder = sp(copy_expr_remove_action(
-        placeholder), lambda t: CDP.Placeholder_integer(t[0])).setName('integer_placeholder')
+        placeholder), lambda t: CDP.Placeholder_integer(t[0]))
     nonneg_integer_placeholder = sp(copy_expr_remove_action(
-        placeholder), lambda t: CDP.Placeholder_nonneg_integer(t[0])).setName('nonneg_integer_placeholder')
+        placeholder), lambda t: CDP.Placeholder_nonneg_integer(t[0]))
     index_label_placeholder = sp(copy_expr_remove_action(
-        placeholder), lambda t: CDP.Placeholder_index_label(t[0])).setName('index_label_placeholder')
+        placeholder), lambda t: CDP.Placeholder_index_label(t[0]))
     integer_or_float_placeholder = sp(copy_expr_remove_action(
-        placeholder), lambda t: CDP.Placeholder_integer_or_float(t[0])).setName('integer_or_float_placeholder')
+        placeholder), lambda t: CDP.Placeholder_integer_or_float(t[0]))
 
     integer = SyntaxBasics.integer | integer_placeholder
     integer_or_float = SyntaxBasics.integer_or_float | integer_or_float_placeholder
