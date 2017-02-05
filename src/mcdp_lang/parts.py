@@ -207,6 +207,7 @@ class CDPLanguage():
     eq = namedtuplewhere('eq', 'glyph')
     plus = namedtuplewhere('plus', 'glyph')
     minus = namedtuplewhere('minus', 'glyph')
+    plus_or_minus = namedtuplewhere('plus_or_minus', 'glyph')
     exponent = namedtuplewhere('exponent', 'glyph')
     times = namedtuplewhere('times', 'glyph')
     bar = namedtuplewhere('bar', 'glyph')
@@ -219,6 +220,7 @@ class CDPLanguage():
     RBRACKET  = namedtuplewhere('RBRACKET', 'glyph') 
     LPAR  = namedtuplewhere('LPAR', 'glyph') 
     RPAR  = namedtuplewhere('RPAR', 'glyph')
+    percent = namedtuplewhere('percent', 'glyph')
     
     MAPSFROM  = namedtuplewhere('MAPSFROM', 'glyph')
     MAPSTO  = namedtuplewhere('MAPSTO', 'glyph')
@@ -468,5 +470,14 @@ class CDPLanguage():
     CommentVar = namedtuplewhere('CommentVar', 'comment_string')
     
     SpecialConstant = namedtuplewhere('SpecialConstant', 'constant_name')
+    
+    BetweenKeyword = namedtuplewhere('BetweenKeyword', 'keyword')
+    BetweenAndKeyword = namedtuplewhere('BetweenAndKeyword', 'keyword')
+    RValueBetween = namedtuplewhere('RValueBetween', 'between lower and_keyword upper')
+    FValueBetween = namedtuplewhere('FValueBetween', 'between lower and_keyword upper')
+    RValuePlusOrMinus = namedtuplewhere('RValuePlusOrMinus', 'median pm extent')
+    FValuePlusOrMinus = namedtuplewhere('FValuePlusOrMinus', 'median pm extent')
+    RValuePlusOrMinusPercent = namedtuplewhere('RValuePlusOrMinusPercent', 'median pm perc percent')
+    FValuePlusOrMinusPercent = namedtuplewhere('FValuePlusOrMinusPercent', 'median pm perc percent')
     
     

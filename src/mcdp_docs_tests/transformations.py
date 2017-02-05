@@ -2,7 +2,7 @@
 from comptests.registrar import comptest, run_module_tests
 from contracts.utils import raise_desc, indent
 from mcdp_library.library import MCDPLibrary
-from mcdp_web.renderdoc.highlight import get_minimal_document
+from mcdp_web.renderdoc.highlight import get_minimal_document, TAG_DOLLAR
 from mcdp_web.renderdoc.main import render_complete
 from mcdp_web.renderdoc.markdown_transform import censor_markdown_code_blocks
 from mcdp_lang_tests.syntax_spaces import indent_plus_invisibles
@@ -27,7 +27,7 @@ def tryit(s, write_to=None, forbid=[]):
      'warn_centering': not 'centering' in s2,
      'warn_tabular': not 'tabular' in s2,
      'funny': not '&amp;#96;' in s2,
-     'dollarfix': not 'DOLLAR' in s2,
+     'dollarfix': not TAG_DOLLAR in s2,
 #     assert not '&#96;' in s2
 #     assert not '&amp;' in s2
 

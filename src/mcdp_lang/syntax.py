@@ -236,10 +236,8 @@ class Syntax():
 #     lpar = sp(L('('), lambda t: CDP.LPAR(t[0]))
 #     rpar = sp(L(')'), lambda t: CDP.RPAR(t[0]))
 #
-    python_style_multiline1 = QuotedString(
-        quoteChar='"""', escChar='\\', unquoteResults=True, multiline=True)
-    python_style_multiline2 = QuotedString(
-        quoteChar="'''", escChar='\\', unquoteResults=True, multiline=True)
+    python_style_multiline1 = QuotedString(quoteChar='"""', escChar='\\', unquoteResults=True, multiline=True)
+    python_style_multiline2 = QuotedString(quoteChar="'''", escChar='\\', unquoteResults=True, multiline=True)
     python_style_multiline = python_style_multiline1 | python_style_multiline2
     comment_string_simple = sp(copy_expr_remove_action(quoted),
                                lambda t: CDP.CommentStringSimple(t[0]))
@@ -247,23 +245,17 @@ class Syntax():
                                 lambda t: CDP.CommentStringTriple(t[0]))
 
     comment_model = sp(comment_string_simple | comment_string_complex,
-                       lambda t: CDP.CommentModel(t[0])).setName('comment_model')
-    comment_con = sp(copy_expr_remove_action(
-        comment_string_simple), lambda t: CDP.CommentCon(t[0])).setName('comment_con')
-    comment_fun = sp(copy_expr_remove_action(
-        comment_string_simple), lambda t: CDP.CommentFun(t[0])).setName('comment_fun')
-    comment_res = sp(copy_expr_remove_action(
-        comment_string_simple), lambda t: CDP.CommentRes(t[0])).setName('comment_res')
-    comment_var = sp(copy_expr_remove_action(
-        comment_string_simple), lambda t: CDP.CommentVar(t[0])).setName('comment_val')
+                       lambda t: CDP.CommentModel(t[0]))
+    comment_con = sp(copy_expr_remove_action(comment_string_simple), lambda t: CDP.CommentCon(t[0]))
+    comment_fun = sp(copy_expr_remove_action(comment_string_simple), lambda t: CDP.CommentFun(t[0]))
+    comment_res = sp(copy_expr_remove_action(comment_string_simple), lambda t: CDP.CommentRes(t[0]))
+    comment_var = sp(copy_expr_remove_action(comment_string_simple), lambda t: CDP.CommentVar(t[0]))
 
     placeholder = SL('[') + SL('[') - (SyntaxIdentifiers.get_identifier_unconstrained()
                                        | quoted) + SL(']') + SL(']').setName('placeholder')
 
-    dpname_placeholder = sp(copy_expr_remove_action(
-        placeholder), lambda t: CDP.Placeholder_dpname(t[0]))
-    constant_placeholder = sp(copy_expr_remove_action(
-        placeholder), lambda t: CDP.Placeholder_constant(t[0]))
+    dpname_placeholder = sp(copy_expr_remove_action(placeholder), lambda t: CDP.Placeholder_dpname(t[0]))
+    constant_placeholder = sp(copy_expr_remove_action(placeholder), lambda t: CDP.Placeholder_constant(t[0]))
     rvalue_placeholder = sp(copy_expr_remove_action(
         placeholder), lambda t: CDP.Placeholder_rvalue(t[0]))
     fvalue_placeholder = sp(copy_expr_remove_action(
@@ -306,6 +298,7 @@ class Syntax():
     REQUIRED = keyword('required', CDP.RequiredKeyword)
     GEQ = spk(L('>=') | L('≥') | L('≽'), CDP.geq)
     LEQ = spk(L('<=') | L('≤') | L('≼'), CDP.leq)
+    PERCENT = spk(L('%'), CDP.percent)
     MAPSTO = spk(L('⟼') ^ L('↦') ^ L('|->') ^ L('|-->') ^ L('|--->') ^ L('|---->') ^
                  L('->') ^ L('-->') ^ L('--->') ^ L('---->'),
                  CDP.MAPSTO).setName('⟼')
@@ -320,6 +313,8 @@ class Syntax():
     DOT = spk(L('.'), CDP.DotPrep)
     PLUS = spk(L('+'), CDP.plus)
     MINUS = spk(L('-'), CDP.minus)
+    PLUS_OR_MINUS = spk(L('+-') | L('±'), CDP.plus_or_minus)
+    
     TIMES = spk(L('*') | L('·'), CDP.times)
     BAR = spk(L('/'), CDP.bar)
 
@@ -857,6 +852,24 @@ class Syntax():
     UNCERTAIN = keyword('Uncertain', CDP.UncertainKeyword)
     constant_uncertain = sp(UNCERTAIN + SLPAR + rvalue + SCOMMA + rvalue + SRPAR,
                             lambda t: CDP.UncertainConstant(keyword=t[0], lower=t[1], upper=t[2]))
+
+    BETWEEN = keyword('between', CDP.BetweenKeyword)
+    BETWEEN_AND = keyword('and', CDP.BetweenAndKeyword)
+    rvalue_between = sp(BETWEEN + rvalue + BETWEEN_AND + rvalue,
+                        lambda t: CDP.RValueBetween(t[0], t[1], t[2], t[3]))
+    fvalue_between = sp(BETWEEN + fvalue + BETWEEN_AND + fvalue,
+                        lambda t: CDP.FValueBetween(t[0], t[1], t[2], t[3]))
+     
+    fvalue_plus_or_minus = sp(constant_value + PLUS_OR_MINUS + constant_value + NotAny(PERCENT),
+                              lambda t: CDP.FValuePlusOrMinus(t[0], t[1], t[2]))
+    rvalue_plus_or_minus = sp(constant_value + PLUS_OR_MINUS + constant_value + NotAny(PERCENT),
+                              lambda t: CDP.RValuePlusOrMinus(t[0], t[1], t[2]))
+
+    fvalue_plus_or_minus_percent = sp(constant_value + PLUS_OR_MINUS + integer_or_float + PERCENT,
+                              lambda t: CDP.FValuePlusOrMinusPercent(t[0], t[1], t[2], t[3]))
+    rvalue_plus_or_minus_percent = sp(constant_value + PLUS_OR_MINUS + integer_or_float + PERCENT,
+                              lambda t: CDP.RValuePlusOrMinusPercent(t[0], t[1], t[2], t[3]))
+    
 
     rvalue_uncertain = sp(UNCERTAIN + SLPAR + rvalue + SCOMMA + rvalue + SRPAR,
                           lambda t: CDP.UncertainRes(keyword=t[0], lower=t[1], upper=t[2]))
@@ -1421,6 +1434,9 @@ class Syntax():
         ^ rvalue_approx_u
         ^ rvalue_placeholder
         ^ rvalue_generic_op
+        ^ rvalue_between
+        ^ rvalue_plus_or_minus
+        ^ rvalue_plus_or_minus_percent
     )
 
     rvalue << operatorPrecedence(rvalue_operand, [
@@ -1445,7 +1461,11 @@ class Syntax():
         ^ fvalue_any_of
         ^ fvalue_placeholder
         ^ fvalue_generic_op
-        ^ constant_value_divided)
+        ^ constant_value_divided
+        ^ fvalue_between
+        ^ fvalue_plus_or_minus
+        ^ fvalue_plus_or_minus_percent
+    )
 
     # here we cannot use "|" because otherwise (cokode).id is not
     # parsedcorrectly

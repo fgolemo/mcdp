@@ -32,15 +32,13 @@ __all__ = [
     'eval_lfunction',
 ]
 
-
-def eval_lfunction_Function(lf, context):
-    return context.make_function(dp=lf.dp.value, s=lf.s.value)
+class DoesNotEvalToFunction(DPInternalError):
+    """ also called "rvalue" """
 
 @decorate_add_where
 @contract(returns=CFunction)
 def eval_lfunction(lf, context):
     check_isinstance(context, ModelBuildingContext)
-    
 
     if isinstance(lf, (CDP.NewFunction, CDP.DerivResourceRef)):
         msg = 'The functionality %r cannot be used on this side of the constraint.'
@@ -89,8 +87,12 @@ def eval_lfunction(lf, context):
         r = recursive_print(lf)
         msg = 'eval_lfunction(): cannot evaluate this as a function:'
         msg += '\n' + indent(r, '  ')
-        raise_desc(DPInternalError, msg) 
+        raise_desc(DoesNotEvalToFunction, msg) 
             
+
+def eval_lfunction_Function(lf, context):
+    return context.make_function(dp=lf.dp.value, s=lf.s.value)
+
 def eval_lfunction_anyoffun(lf, context):
     from .eval_constant_imp import eval_constant
     from mcdp_posets import FiniteCollectionsInclusion
