@@ -10,7 +10,12 @@ permalink: index.html
 <strong>MCDP<span style='color:darkred'>L</span></strong> is an extremely expressive language to describe MCDPs.
 **[PyMCDP][PyMCDP]** is a Python interpreter and "compiler" for MCDPL, as well as a solver.
 
-For more information, please see [the papers](/papers/) or [the PyMCDP manual](media/pymcdp-manual.html).
+For more information, please see:
+
+* [the papers](/papers/) 
+* a [demo][demo] with pointers to the manual.
+
+[demo]: http://demo.co-design.science/ 
 
 
 *Below, an example of a graphical representation of an MCDP (left)
