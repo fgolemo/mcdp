@@ -19,10 +19,14 @@ def add_other_fields(self, res, request):
     res['authenticated_userid'] = request.authenticated_userid
     
     if request.authenticated_userid is not None:
+        u0 = request.authenticated_userid
         from mcdp_web.security import USERS
-        u = USERS[request.authenticated_userid]._asdict()
-        del u['password']
-        res['user'] = u
+        if not u0 in USERS:
+            res['user'] = None
+        else:
+            u = USERS[u0]._asdict()
+            del u['password']
+            res['user'] = u
     else:
         res['user'] = None
     
