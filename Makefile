@@ -34,6 +34,10 @@ comptests-run-parallel-nocontracts: prepare_tests
 	MCDP_TEST_LIBRARIES_EXCLUDE="mcdp_theory,droneD_complete_templates" \
 		comptests -o $(out) --nonose -c "rparmake" $(package)
 
+circle-3-of-4:
+	CIRCLE_NODE_INDEX=2 CIRCLE_NODE_TOTAL=4 $(MAKE) circle
+
+
 circle: prepare_tests
 	echo Make: $(CIRCLE_NODE_INDEX) " of " $(CIRCLE_NODE_TOTAL)
 	DISABLE_CONTRACTS=1 \
@@ -121,3 +125,32 @@ show-unicode:
 
 serve-continuously:
 	./misc/serve_continuously.sh
+
+main_modules=\
+	src/mcdp\
+	src/mcdp_cli\
+	src/mcdp_depgraph\
+	src/mcdp_docs\
+	src/mcdp_dp\
+	src/mcdp_ext_libraries\
+	src/mcdp_figures\
+	src/mcdp_ipython_utils\
+	src/mcdp_lang\
+	src/mcdp_lang_utils\
+	src/mcdp_library\
+	src/mcdp_maps\
+	src/mcdp_opt\
+	src/mcdp_posets\
+	src/mcdp_report\
+	src/mcdp_web\
+	src/mocdp\
+	src/multi_index
+
+test-dependencies.deps:
+	sfood $(main_modules) > $@
+
+%.dot: %.deps
+	sfood-graph < $< > $@
+
+%.pdf: %.dot
+	dot -Tpdf -o$@ $<
