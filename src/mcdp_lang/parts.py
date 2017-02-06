@@ -185,6 +185,8 @@ class CDPLanguage():
     CatalogueTable = namedtuplewhere('CatalogueTable', 'rows')
     FromCatalogue = namedtuplewhere('FromCatalogue', 'keyword funres table')
 
+    CatalogueEntryConstant = namedtuplewhere('CatalogueEntryConstant', 'constant')
+    CatalogueEntryConstantUncertain = namedtuplewhere('CatalogueEntryConstantUncertain', 'constant_uncertain')
     CatalogueFunc = namedtuplewhere('CatalogueFun', 'ops')
     CatalogueRes = namedtuplewhere('CatalogueRes', 'ops')
     CatalogueRowMapsfromto = namedtuplewhere('CatalogueRowMapsfromto', 
@@ -473,10 +475,16 @@ class CDPLanguage():
     
     BetweenKeyword = namedtuplewhere('BetweenKeyword', 'keyword')
     BetweenAndKeyword = namedtuplewhere('BetweenAndKeyword', 'keyword')
+    
+    ConstantBetween = namedtuplewhere('ConstantBetween', 'between lower and_keyword upper')
     RValueBetween = namedtuplewhere('RValueBetween', 'between lower and_keyword upper')
     FValueBetween = namedtuplewhere('FValueBetween', 'between lower and_keyword upper')
+    
+    ConstantPlusOrMinus = namedtuplewhere('ConstantPlusOrMinus', 'median pm extent')
     RValuePlusOrMinus = namedtuplewhere('RValuePlusOrMinus', 'median pm extent')
     FValuePlusOrMinus = namedtuplewhere('FValuePlusOrMinus', 'median pm extent')
+    
+    ConstantPlusOrMinusPercent = namedtuplewhere('ConstantPlusOrMinusPercent', 'median pm perc percent')
     RValuePlusOrMinusPercent = namedtuplewhere('RValuePlusOrMinusPercent', 'median pm perc percent')
     FValuePlusOrMinusPercent = namedtuplewhere('FValuePlusOrMinusPercent', 'median pm perc percent')
     

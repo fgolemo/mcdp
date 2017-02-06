@@ -21,7 +21,7 @@ from mocdp.comp.make_approximation_imp import make_approximation
 from mocdp.comp.template_deriv import cndp_eversion
 from mocdp.exceptions import (DPInternalError, DPSemanticError,
                               DPSemanticErrorNotConnected, MCDPExceptionWithWhere, mcdp_dev_warning,
-                              )
+                              DPNotImplementedError)
 from mocdp.ndp.named_coproduct import NamedDPCoproduct
 
 from .eval_codespec_imp_utils_instantiate import ImportFailure, import_name
@@ -517,8 +517,13 @@ def eval_ndp_catalogue2(r, context):
         fs = get_odd_ops(unwrap_list(row.functions.ops))
         rs = get_odd_ops(unwrap_list(row.resources.ops))
         
-        fs_evaluated = [eval_constant(_, context) for _ in fs]
-        rs_evaluated = [eval_constant(_, context) for _ in rs]
+        for _ in list(fs) + list(rs):
+            if isinstance(_, CDP.CatalogueEntryConstantUncertain):
+                msg = 'Uncertain catalogue not implemented'
+                raise DPNotImplementedError(msg, where=_.where)
+        
+        fs_evaluated = [eval_constant(_.constant, context) for _ in fs]
+        rs_evaluated = [eval_constant(_.constant, context) for _ in rs]
 
         if len(Fs) == 0:
             # expect <>

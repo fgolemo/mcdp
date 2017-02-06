@@ -850,25 +850,35 @@ class Syntax():
 
     # Uncertain(<lower>, <upper>)
     UNCERTAIN = keyword('Uncertain', CDP.UncertainKeyword)
-    constant_uncertain = sp(UNCERTAIN + SLPAR + rvalue + SCOMMA + rvalue + SRPAR,
+    constant_uncertain1 = sp(UNCERTAIN + SLPAR + rvalue + SCOMMA + rvalue + SRPAR,
                             lambda t: CDP.UncertainConstant(keyword=t[0], lower=t[1], upper=t[2]))
 
     BETWEEN = keyword('between', CDP.BetweenKeyword)
     BETWEEN_AND = keyword('and', CDP.BetweenAndKeyword)
+
+    constant_between = sp(BETWEEN + fvalue + BETWEEN_AND + fvalue,
+                        lambda t: CDP.ConstantBetween(t[0], t[1], t[2], t[3]))
+
     rvalue_between = sp(BETWEEN + rvalue + BETWEEN_AND + rvalue,
                         lambda t: CDP.RValueBetween(t[0], t[1], t[2], t[3]))
     fvalue_between = sp(BETWEEN + fvalue + BETWEEN_AND + fvalue,
                         lambda t: CDP.FValueBetween(t[0], t[1], t[2], t[3]))
      
+    constant_plus_or_minus = sp(constant_value + PLUS_OR_MINUS + constant_value + NotAny(PERCENT),
+                              lambda t: CDP.ConstantPlusOrMinus(t[0], t[1], t[2]))
     fvalue_plus_or_minus = sp(constant_value + PLUS_OR_MINUS + constant_value + NotAny(PERCENT),
                               lambda t: CDP.FValuePlusOrMinus(t[0], t[1], t[2]))
     rvalue_plus_or_minus = sp(constant_value + PLUS_OR_MINUS + constant_value + NotAny(PERCENT),
                               lambda t: CDP.RValuePlusOrMinus(t[0], t[1], t[2]))
 
+    constant_plus_or_minus_percent = sp(constant_value + PLUS_OR_MINUS + integer_or_float + PERCENT,
+                              lambda t: CDP.ConstantPlusOrMinusPercent(t[0], t[1], t[2], t[3]))
     fvalue_plus_or_minus_percent = sp(constant_value + PLUS_OR_MINUS + integer_or_float + PERCENT,
                               lambda t: CDP.FValuePlusOrMinusPercent(t[0], t[1], t[2], t[3]))
     rvalue_plus_or_minus_percent = sp(constant_value + PLUS_OR_MINUS + integer_or_float + PERCENT,
-                              lambda t: CDP.RValuePlusOrMinusPercent(t[0], t[1], t[2], t[3]))
+                              lambda t: CDP.RValuePlusOrMinusPercent(t[0], t[1], t[2], t[3]))    
+
+    constant_uncertain2 = constant_between | constant_plus_or_minus | constant_plus_or_minus_percent
     
 
     rvalue_uncertain = sp(UNCERTAIN + SLPAR + rvalue + SCOMMA + rvalue + SRPAR,
@@ -1211,9 +1221,17 @@ class Syntax():
     imp_name = sp(get_idn(), lambda t: CDP.ImpName(t[0]))
     col_separator = L('|') | L('│')  # box drawing
 
-    catalogue_func = sp(constant_value + ZeroOrMore(COMMA + constant_value),
+    catalogue_entry_constant = sp(copy_expr_remove_action(constant_value),
+                                  lambda t: CDP.CatalogueEntryConstant(t[0]))
+    catalogue_entry_constant_uncertain = sp(copy_expr_remove_action(constant_uncertain2),
+                                  lambda t: CDP.CatalogueEntryConstantUncertain(t[0]))
+    
+    catalogue_entry =catalogue_entry_constant_uncertain |  catalogue_entry_constant  # order important 
+    catalogue_entry_list = catalogue_entry + ZeroOrMore(COMMA + catalogue_entry)
+    
+    catalogue_func = sp(catalogue_entry_list.copy(),
                         lambda t: CDP.CatalogueFunc(make_list(list(t))))
-    catalogue_res = sp(constant_value + ZeroOrMore(COMMA + constant_value),
+    catalogue_res = sp(catalogue_entry_list.copy(),
                        lambda t: CDP.CatalogueRes(make_list(list(t))))
     catalogue_row2 = sp(catalogue_func + MAPSFROM - imp_name - MAPSTO - catalogue_res,
                         lambda t: CDP.CatalogueRowMapsfromto(t[0], t[1], t[2], t[3], t[4]))

@@ -2,6 +2,8 @@
 from comptests.registrar import run_module_tests, comptest
 from mcdp_lang_tests.utils2 import parse_as_rvalue, parse_as_fvalue
 from mcdp_lang.parse_interface import parse_ndp
+from mcdp_lang.syntax import Syntax
+from mcdp_lang.parse_actions import parse_wrap
 
 @comptest
 def new_uncertainty00():
@@ -89,6 +91,28 @@ def new_uncertainty11():
     parse_ndp(s)
 
 
+@comptest
+def new_uncertainty12():
+    s = """
+    catalogue {
+        provides length [m]
+        requires weight [g]
+        1 m <--| imp |--> 10 kg 
+    }
+    """
+    parse_ndp(s)
+    
+    parse_wrap(Syntax.catalogue_entry_constant_uncertain, '10 kg +- 50 g')
+
+    s = """
+    catalogue {
+        provides length [m]
+        requires weight [g]
+        1 m <--| imp |--> 10 kg +- 50 g
+    }
+    """
+    parse_ndp(s)
+    
 
 if __name__ == '__main__': 
     
