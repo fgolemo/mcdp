@@ -63,7 +63,7 @@ mcdp {
 }
     
     """
-    e = assert_parse_ndp_semantic_error(s, contains="Missing value 'energy'")
+    assert_parse_ndp_semantic_error(s, contains="Missing value 'energy'")
     
 
 @comptest

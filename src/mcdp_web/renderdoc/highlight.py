@@ -586,7 +586,7 @@ def get_minimal_document(body_contents, title=None,
     
     head = Tag(name='head')
     body = Tag(name='body')
-    css = Tag(name='style', attrs=dict(type='text/css'))
+#     css = Tag(name='style', attrs=dict(type='text/css'))
     # <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 #     if False:
 #         meta = new_tag('meta')

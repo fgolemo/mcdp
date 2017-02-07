@@ -286,7 +286,7 @@ def latex_preprocessing(s):
 def maketabular(inside, opt):  # @UnusedVariable
     # get alignment like {ccc}
     arg, inside = get_balanced_brace(inside)
-    align = arg[1:-1]
+    _align = arg[1:-1]
 
     SEP = '\\\\'
     inside = inside.replace('\\tabularnewline', SEP)
@@ -323,7 +323,7 @@ def make_itemize(inside, opt):
     return make_list(inside, opt, 'ul')
 
 
-def make_list(inside, opt, name):
+def make_list(inside, opt, name):  # @UnusedVariable
     # get alignment like {ccc}
     assert name in ['ul', 'ol']
     items = inside.split('\\item')
@@ -410,7 +410,7 @@ def makeminipage(inside, opt):
     return res
 
 
-def makefigure(inside, opt, asterisk):
+def makefigure(inside, opt, asterisk):  # @UnusedVariable
     align = opt  # @UnusedVariable
 #     print('makefigure inside = %r' % inside)
 
@@ -815,7 +815,7 @@ def replace_captionsideleft(s):
 
     def match(matchobj):
         first = matchobj.group(1)
-        first2, label = get_s_without_label(first, labelprefix="fig:")
+        _first2, label = get_s_without_label(first, labelprefix="fig:")
         second = matchobj.group(2)
         if label is not None:
             idpart = ' id="%s"' % label
@@ -1042,7 +1042,7 @@ def extract_delimited(s, d1, d2, subs, domain, acceptance=None):
                 start_from = a + len(d1)
                 sb = s[start_from:]
 
-                def acceptance2(string, index):
+                def acceptance2(string, index):  # @UnusedVariable
                     #                     assert string == sb, (string, sb)
                     return acceptance(s, index + start_from)
                 sb2 = extract_delimited(

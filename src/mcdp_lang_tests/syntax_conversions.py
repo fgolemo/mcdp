@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
-from comptests.registrar import comptest, comptest_fails
+from comptests.registrar import comptest
 
-from .utils2 import eval_rvalue_as_constant_same_exactly
 
 # 
 # @comptest_fails
@@ -15,9 +14,6 @@ from .utils2 import eval_rvalue_as_constant_same_exactly
 # @comptest_fails
 # def check_lang_conversion3():
 #     eval_rvalue_as_constant_same_exactly("(as R) nat:1 ", "1.0[]")
-
-
-
 @comptest
 def check_lang_conversion4():
     pass

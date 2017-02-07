@@ -34,7 +34,6 @@ from mcdp_lang.parse_interface import( parse_ndp_eval, parse_ndp_refine,
     parse_template_eval, parse_template_refine, parse_constant_eval, 
     parse_constant_refine, parse_poset_eval, parse_poset_refine)
 from mcdp.utils.timing import timeit_wall
-import urlparse
 
 
 

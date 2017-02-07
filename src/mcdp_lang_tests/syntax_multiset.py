@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-from comptests.registrar import comptest, comptest_fails
-from mcdp_lang import parse_poset
+from comptests.registrar import comptest
 
 
 @comptest
