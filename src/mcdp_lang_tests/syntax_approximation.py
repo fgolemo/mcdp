@@ -109,23 +109,3 @@ def check_approx_res5():
     assert resl.minimals == set([0.01])
     assert resu.minimals == set([0.02])
 
-
-@comptest
-def check_approx_res6():
-    pass
-
-
-@comptest
-def check_approx_res7():
-    pass
-
-
-@comptest
-def check_approx_res8():
-    pass
-
-
-@comptest
-def check_approx_res9():
-    pass
-

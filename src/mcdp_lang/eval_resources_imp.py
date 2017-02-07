@@ -8,8 +8,7 @@ from mcdp_posets import (NotLeq, express_value_in_isomorphic_space,
 from mcdp_posets import RcompUnits
 from mocdp.comp.context import (CResource, ValueWithUnits, get_name_for_fun_node,
     ModelBuildingContext)
-from mocdp.exceptions import DPSemanticError, DPNotImplementedError,\
-    DPInternalError
+from mocdp.exceptions import DPSemanticError, DPNotImplementedError, DPInternalError
 
 from .eval_constant_imp import eval_constant
 from .eval_warnings import warn_language, MCDPWarnings
@@ -63,7 +62,11 @@ def eval_rvalue(rvalue, context):
     from .eval_resources_imp_tupleindex import eval_rvalue_resource_label_index
     from .eval_resources_imp_unary import  eval_rvalue_generic_operation
     from .eval_math import eval_rvalue_RValueMinusN
-
+    from .eval_uncertainty import eval_rvalue_RValuePlusOrMinus
+    from .eval_uncertainty import eval_rvalue_RValueBetween
+    from .eval_uncertainty import eval_rvalue_RValuePlusOrMinusPercent
+    
+    
     cases = {
         CDP.Resource: eval_rvalue_Resource,
         CDP.Power: eval_rvalue_Power,
@@ -87,6 +90,9 @@ def eval_rvalue(rvalue, context):
         CDP.ActualVarRef: eval_rvalue_ActualVarRef,
         CDP.ConstantRef: eval_rvalue_ConstantRef,
         CDP.DerivResourceRef: eval_rvalue_DerivResourceRef,
+        CDP.RValueBetween: eval_rvalue_RValueBetween,
+        CDP.RValuePlusOrMinus: eval_rvalue_RValuePlusOrMinus,
+        CDP.RValuePlusOrMinusPercent: eval_rvalue_RValuePlusOrMinusPercent,
         
     }
 

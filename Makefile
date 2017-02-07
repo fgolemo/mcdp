@@ -34,6 +34,10 @@ comptests-run-parallel-nocontracts: prepare_tests
 	MCDP_TEST_LIBRARIES_EXCLUDE="mcdp_theory,droneD_complete_templates" \
 		comptests -o $(out) --nonose -c "rparmake" $(package)
 
+circle-1-of-4:
+	CIRCLE_NODE_INDEX=0 CIRCLE_NODE_TOTAL=4 $(MAKE) circle
+
+
 circle-3-of-4:
 	CIRCLE_NODE_INDEX=2 CIRCLE_NODE_TOTAL=4 $(MAKE) circle
 

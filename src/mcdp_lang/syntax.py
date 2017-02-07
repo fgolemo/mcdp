@@ -870,6 +870,8 @@ class Syntax():
                               lambda t: CDP.FValuePlusOrMinus(t[0], t[1], t[2]))
     rvalue_plus_or_minus = sp(constant_value + PLUS_OR_MINUS + constant_value + NotAny(PERCENT),
                               lambda t: CDP.RValuePlusOrMinus(t[0], t[1], t[2]))
+    rvalue_uncertain = sp(UNCERTAIN + SLPAR + rvalue + SCOMMA + rvalue + SRPAR,
+                          lambda t: CDP.UncertainRes(keyword=t[0], lower=t[1], upper=t[2]))
 
     constant_plus_or_minus_percent = sp(constant_value + PLUS_OR_MINUS + integer_or_float + PERCENT,
                               lambda t: CDP.ConstantPlusOrMinusPercent(t[0], t[1], t[2], t[3]))
@@ -877,15 +879,13 @@ class Syntax():
                               lambda t: CDP.FValuePlusOrMinusPercent(t[0], t[1], t[2], t[3]))
     rvalue_plus_or_minus_percent = sp(constant_value + PLUS_OR_MINUS + integer_or_float + PERCENT,
                               lambda t: CDP.RValuePlusOrMinusPercent(t[0], t[1], t[2], t[3]))    
+    fvalue_uncertain = sp(UNCERTAIN + SLPAR + fvalue + SCOMMA + fvalue + SRPAR,
+                          lambda t: CDP.UncertainFun(keyword=t[0], lower=t[1], upper=t[2]))
 
     constant_uncertain2 = constant_between | constant_plus_or_minus | constant_plus_or_minus_percent
     
 
-    rvalue_uncertain = sp(UNCERTAIN + SLPAR + rvalue + SCOMMA + rvalue + SRPAR,
-                          lambda t: CDP.UncertainRes(keyword=t[0], lower=t[1], upper=t[2]))
 
-    fvalue_uncertain = sp(UNCERTAIN + SLPAR + fvalue + SCOMMA + fvalue + SRPAR,
-                          lambda t: CDP.UncertainFun(keyword=t[0], lower=t[1], upper=t[2]))
 
     # take(<a, b>, 0)
     TAKE = keyword('take', CDP.TakeKeyword)

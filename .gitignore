@@ -42,3 +42,5 @@ out_coverage
 tmp*
 src/mcdp_data/libraries/manual.mcdplib/attic/
 mcdp-users-db
+src/mcdp_data/libraries/manual.mcdplib/docs/part3-reference/06_lang_d2_uncertainty.html
+src/mcdp_data/libraries/manual.mcdplib/docs/part3-reference/06_lang_d2_uncertainty.pdf
