@@ -58,4 +58,4 @@ def check_generate_view_syntax(filename, source, libname):  # @UnusedVariable
     
     name, _ext = os.path.splitext(os.path.basename(filename))
     make_relative = lambda x: x
-    res = generate_view_syntax(libname, library, name,  spec, make_relative)
+    _res = generate_view_syntax(libname, library, name,  spec, make_relative)

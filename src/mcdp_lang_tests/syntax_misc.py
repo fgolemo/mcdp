@@ -10,8 +10,9 @@ from mcdp_lang.eval_warnings import MCDPWarnings
 from mcdp_lang.parse_actions import parse_wrap
 from mcdp_lang.parse_interface import parse_ndp, parse_poset, parse_constant
 from mcdp_lang.pyparsing_bundled import Literal, Keyword
-from mcdp_lang.syntax import Syntax, SyntaxIdentifiers, SyntaxBasics
+from mcdp_lang.syntax import Syntax, SyntaxIdentifiers
 from mcdp_lang.syntax_codespec import SyntaxCodeSpec
+from mcdp_lang.syntax_utils import L
 from mcdp_lang_tests.utils import (assert_parsable_to_connected_ndp, assert_semantic_error,
                                    parse_wrap_check)
 from mcdp_lang_tests.utils import assert_parse_ndp_semantic_error
@@ -23,7 +24,6 @@ from mocdp.comp.context import ModelBuildingContext, Context
 from mocdp.comp.recursive_name_labeling import get_names_used
 from mocdp.exceptions import DPNotImplementedError, DPSemanticError,\
     DPSyntaxError
-from mcdp_lang.syntax_utils import L
 
 
 @comptest
@@ -1141,7 +1141,7 @@ def check_lang89s(): # TODO: rename
     }
     """
     ndp = parse_ndp(s)
-    dp = ndp.get_dp()
+    ndp.get_dp()
     #print dp.repr_long()
     
 @comptest
@@ -1336,7 +1336,7 @@ def check_lang97(): # TODO: rename
       requires x
     }
     """
-    dp = parse_ndp(s).get_dp()
+    parse_ndp(s).get_dp()
 #     print dp.repr_long() 
     
     s = """
@@ -1360,7 +1360,7 @@ def check_lang98(): # TODO: rename
       provides x
     }
     """
-    dp = parse_ndp(s).get_dp()
+    parse_ndp(s).get_dp()
 #     print dp.repr_long() 
     
     s = """
@@ -1370,7 +1370,7 @@ def check_lang98(): # TODO: rename
       provides x, y
     }
     """
-    dp = parse_ndp(s).get_dp()
+    parse_ndp(s).get_dp()
 #     print dp.repr_long() 
 
     s = """
@@ -1379,7 +1379,7 @@ def check_lang98(): # TODO: rename
       requires x
     }
     """
-    dp = parse_ndp(s).get_dp()
+    parse_ndp(s).get_dp()
 #     print dp.repr_long() 
     
     s = """
@@ -1389,7 +1389,7 @@ def check_lang98(): # TODO: rename
       requires x, y
     }
     """
-    dp = parse_ndp(s).get_dp()
+    parse_ndp(s).get_dp()
 #     print dp.repr_long() 
 
     
@@ -1405,7 +1405,7 @@ def check_lang99(): # TODO: rename
       provides f
     }
     """
-    dp = parse_ndp(s).get_dp()
+    parse_ndp(s).get_dp()
 #     print dp.repr_long() 
 
     s = """
@@ -1415,7 +1415,7 @@ def check_lang99(): # TODO: rename
       provides f
     }
     """
-    dp = parse_ndp(s).get_dp()
+    parse_ndp(s).get_dp()
 #     print dp.repr_long() 
 
     s = """
@@ -1425,7 +1425,7 @@ def check_lang99(): # TODO: rename
       requires r
     }
     """
-    dp = parse_ndp(s).get_dp()
+    parse_ndp(s).get_dp()
 #     print dp.repr_long()
      
 

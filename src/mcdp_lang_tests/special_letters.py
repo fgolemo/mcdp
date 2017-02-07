@@ -2,11 +2,13 @@
 from nose.tools import assert_equal
 
 from comptests.registrar import comptest, run_module_tests
-from mcdp_lang.dealing_with_special_letters import greek_letters, subscripts,\
-    greek_letters_utf8, subscripts_utf8
 from mcdp_lang.parse_interface import parse_ndp
 from mcdp_lang.syntax import SyntaxIdentifiers
 from mcdp_lang_tests.utils import parse_wrap_check, assert_syntax_error
+
+
+from mcdp_lang.dealing_with_special_letters import subscripts,\
+    greek_letters_utf8, subscripts_utf8
 
 
 @comptest

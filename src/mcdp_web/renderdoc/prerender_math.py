@@ -31,7 +31,7 @@ def prerender_mathjax(s):
     STARTTAG = 'STARTHERE'
     ENDTAG = 'ENDHERE'
     s = STARTTAG +  get_mathjax_preamble() + ENDTAG + s
-    
+
     try:
         s = prerender_mathjax_(s)
     except PrerenderError:
@@ -40,13 +40,13 @@ def prerender_mathjax(s):
             logger.error(msg)
             return s
         else:
-            raise 
-    
-        
+            raise
+
+
     c0 = s.index(STARTTAG)
     c1 = s.index(ENDTAG) + len(ENDTAG)
     s = s[:c0] + s[c1:]
-    
+
 #     s = fix_vertical_align(s)
     return s
 
@@ -63,7 +63,7 @@ def fix_vertical_align(s, scale=0.8):
             s2 = re.sub(r'vertical-align: (.*?)ex', f, s)
             print('%s -> %s' % (s, s2))
             element['style'] = s2
-        
+
     return to_html_stripping_fragment(frag)
 
 
@@ -78,11 +78,11 @@ def get_mathjax_preamble():
     f += """
 <script type="text/x-mathjax-config">
     console.log('here!');
-    
-   MathJax.Hub.Config({ 
+
+   MathJax.Hub.Config({
        TeX: { extensions: ["color.js"] },
        SVG: {font:'STIX-Web'}
-   }); 
+   });
 </script>"""
 
     return f
@@ -95,7 +95,7 @@ def get_nodejs_bin():
     try:
         cmd= [tries[0], '--version']
         _res = system_cmd_result(
-                os.getcwd(), cmd, 
+                os.getcwd(), cmd,
                 display_stdout=False,
                 display_stderr=False,
                 raise_on_error=True)
@@ -104,7 +104,7 @@ def get_nodejs_bin():
         try:
             cmd= [tries[1], '--version']
             _res = system_cmd_result(
-                    os.getcwd(), cmd, 
+                    os.getcwd(), cmd,
                     display_stdout=False,
                     display_stderr=False,
                     raise_on_error=True)
@@ -114,41 +114,41 @@ def get_nodejs_bin():
             msg += '\nOn Ubuntu, it can be installed using:'
             msg += '\n\n\tsudo apt-get install -y nodejs'
             raise_wrapped(PrerenderError, e, msg, compact=True)
-            
-            
+
+
 @contract(returns=str, html=str)
 def prerender_mathjax_(html):
     """
         Runs the prerender.js script to pre-render the MathJax into images.
-        
+
         Raises PrerenderError.
     """
     assert not '<html>' in html, html
-    
+
     use = get_nodejs_bin()
-        
+
     html = html.replace('<p>$$', '\n$$')
     html = html.replace('$$</p>', '$$\n')
     script = get_prerender_js()
     mcdp_tmp_dir = get_mcdp_tmp_dir()
     prefix = 'prerender_mathjax_'
     d = mkdtemp(dir=mcdp_tmp_dir, prefix=prefix)
-    
+
     try:
         f_html = os.path.join(d, 'file.html')
         with open(f_html, 'w') as f:
             f.write(html)
-            
+
         try:
             f_out = os.path.join(d, 'out.html')
             cmd= [use, script, f_html, f_out]
             pwd = os.getcwd()
             res = system_cmd_result(
-                    pwd, cmd, 
+                    pwd, cmd,
                     display_stdout=True,
                     display_stderr=True,
                     raise_on_error=False)
-            
+
             if res.ret:
                 if 'Error: Cannot find module' in res.stderr:
                     msg = 'You have to install the MathJax and/or jsdom libraries.'
@@ -156,24 +156,24 @@ def prerender_mathjax_(html):
                     msg += '\n\n\tsudo apt-get install npm'
                     msg += '\n\n\tnpm install MathJax-node jsdom'
                     msg += '\n\n' + indent(res.stderr, '  |')
-                    raise PrerenderError(msg) 
-                
+                    raise PrerenderError(msg)
+
                 if 'parse error' in res.stderr:
                     lines = [_ for _ in res.stderr.split('\n')
                              if 'parse error' in _ ]
                     assert lines
                     msg = 'LaTeX conversion errors:\n\n' + '\n'.join(lines)
                     raise PrerenderError(msg)
-            
-                msg = 'Unknown error (ret = %d).' % res.ret 
+
+                msg = 'Unknown error (ret = %d).' % res.ret
                 msg += '\n\n' + indent(res.stderr, '  |')
                 raise PrerenderError(msg)
-            
+
             with open(f_out) as f:
-                data = f.read() 
-                
+                data = f.read()
+
             data = to_html_stripping_fragment(bs(data))
-            
+
             return data
         except CmdException as e:
             raise e
