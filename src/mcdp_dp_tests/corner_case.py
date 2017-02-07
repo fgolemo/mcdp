@@ -2,6 +2,7 @@
 from nose.tools import assert_raises, assert_equal
 
 from comptests.registrar import comptest, run_module_tests, comptest_fails
+from contracts import ContractNotRespected
 from mcdp_dp import JoinNDP, MeetNDP
 from mcdp_dp.dp_dummy import Template
 from mcdp_dp.dp_inv_mult import InvMult2Nat
@@ -17,16 +18,14 @@ from mcdp_maps import ProductNNatMap
 from mcdp_posets import Nat
 from mcdp_posets_tests.utils import assert_belongs, assert_does_not_belong
 from mcdp_report.html import ast_to_html
-
 from mcdp_web.editor_fancy.app_editor_fancy_generic import html_mark
+from mcdp_web.renderdoc.xmlutils import project_html
 from mocdp import MCDPConstants
 from mocdp.comp.composite_makecanonical import connect_resources_to_outside, \
     connect_functions_to_outside
 from mocdp.comp.context import Context
 from mocdp.comp.wrap import dpwrap
 from mocdp.exceptions import DPInternalError, DPSemanticError
-from contracts import ContractNotRespected
-from mcdp_web.renderdoc.xmlutils import project_html
 
 
 @comptest
@@ -267,7 +266,7 @@ mcdp {
                         encapsulate_in_precode=False,
                         postprocess=postprocess)
     
-    for where, replacement in suggestions:
+    for where, replacement in suggestions:  # @UnusedVariable
         #print('suggestion: %r' % replacement)
         html = html_mark(html, where, "suggestion")
         

@@ -1,8 +1,5 @@
 # -*- coding: utf-8 -*-
-import getpass
-
-from contracts import all_disabled
-import warnings
+from . import mcdp_dev_warning, do_extra_checks  # @UnusedImport
 
 
 class MCDPException(Exception):
@@ -87,5 +84,4 @@ def _get_where_with_filename(e, filename):
     return where
 
         
-from . import mcdp_dev_warning, do_extra_checks
 

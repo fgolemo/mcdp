@@ -113,4 +113,3 @@ def feat_import5():
     for w in context.warnings:
         print w.format_user()
     assert_equal(len(context.warnings), 1)
- 

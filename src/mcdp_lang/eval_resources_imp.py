@@ -49,6 +49,10 @@ def eval_rvalue(rvalue, context):
         assert isinstance(res, ValueWithUnits)
         return get_valuewithunits_as_resource(res, context)
 
+    if isinstance(rvalue, CDP.Ellipsis):
+        msg = 'Incomplete model (ellipsis)'
+        raise_desc(DPSemanticError, msg)
+        
     from .eval_resources_imp_power import eval_rvalue_Power
     from .eval_math import eval_rvalue_divide
     from .eval_math import eval_rvalue_MultN
@@ -272,6 +276,5 @@ def eval_rvalue_anyofres(r, context):
 
     dp = ConstantMinimals(R=P, values=minimals)
     return create_operation(context, dp=dp, resources=[],
-                               name_prefix='_anyof', op_prefix='_',
-                                res_prefix='_result')
+                               name_prefix='_anyof')
 
