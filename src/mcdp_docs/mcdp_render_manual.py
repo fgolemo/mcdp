@@ -21,9 +21,9 @@ from reprep.utils.natsorting import natsorted
 from .manual_join_imp import manual_join
 
 
-def get_manual_contents():
+def get_manual_contents(srcdir):
     root = os.getcwd()
-    directory = os.path.join(root, 'docs')
+    directory = os.path.join(root, srcdir)
     if not os.path.exists(directory):
         msg = 'Expected directory %s' % directory
         raise Exception(msg)
@@ -35,22 +35,11 @@ def get_manual_contents():
     ok = []
     for fn in filenames:
         fn = os.path.relpath(fn, root)
-        # accept the ones with at least two digits in it
-#         bn = 
-#         ndigits = len(list(_ for _ in os.path.basename(fn) if _.isdigit() ))
-#         if ndigits < 2:
-#             continue
-#         
-#         # only root files
-#         depth = len(fn.split('/'))
-#         if depth >= 3:
-#             continue
         if 'exclude' in fn:
             logger.info('Excluding file %r because of string "exclude" in it' % fn)
             continue
         ok.append(fn) 
     filenames = natsorted(ok)
-#     print "sorted:\n" + "\n - ".join(filenames)
     for f in filenames:
         docname, _extension = os.path.splitext(os.path.basename(f))
         yield 'manual', docname
@@ -59,15 +48,17 @@ class RenderManual(QuickApp):
     """ Renders the PyMCDP manual """
 
     def define_options(self, params):
+        params.add_string('src', help='Root directory with all contents')
         params.add_string('output_file', help='Output file')
         params.add_flag('cache')
         params.add_flag('pdf', help='Generate PDF version of code and figures.')
-
+        
     def define_jobs_context(self, context):
         logger.setLevel(logging.DEBUG)
-
+        
         options = self.get_options()
-        out_dir = None
+        src_dir = options.src
+        out_dir = options.output
 
         if out_dir is None:
             out_dir = os.path.join('out', 'mcdp_render_manual')
@@ -75,7 +66,7 @@ class RenderManual(QuickApp):
         generate_pdf = options.pdf
         files_contents = []
         
-        manual_contents = list(get_manual_contents()) 
+        manual_contents = list(get_manual_contents(src_dir)) 
         
         # check that all the docnames are unique
         pnames = [_[1] for _ in manual_contents]
@@ -83,7 +74,7 @@ class RenderManual(QuickApp):
             msg = 'Repeated names detected: %s' % pnames
             raise ValueError(msg)
         
-        local_files = list(locate_files('.', '*.md'))
+        local_files = list(locate_files(src_dir, '*.md'))
         basename2filename = dict( (os.path.basename(_), _) for _ in local_files)
         
         output_file = options.output_file
@@ -94,16 +85,16 @@ class RenderManual(QuickApp):
             res = context.comp(render, libname, docname, generate_pdf,
                                job_id=docname, main_file=output_file, 
                                out_part_basename=out_part_basename)
-            if libname == 'manual':
+#             if libname == 'manual':
                 
-                source = '%s.md' % docname
-                if source in basename2filename:
-                    filenames = [basename2filename[source]]
-                    erase_job_if_files_updated(context.cc, promise=res, 
-                                               filenames=filenames)
-                else:
-                    logger.debug('Could not find file %r for date check' % source)
-                    
+            source = '%s.md' % docname
+            if source in basename2filename:
+                filenames = [basename2filename[source]]
+                erase_job_if_files_updated(context.cc, promise=res, 
+                                           filenames=filenames)
+            else:
+                logger.debug('Could not find file %r for date check' % source)
+                
             files_contents.append(res)
 
         d = context.comp(manual_join, files_contents)

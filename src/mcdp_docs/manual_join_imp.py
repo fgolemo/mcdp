@@ -77,10 +77,15 @@ def manual_join(files_contents):
     assert toc_ul.name == 'ul'
     toc_ul['class'] = 'toc'
     toc_ul['id'] = 'main_toc'
-    toc_place = d.select('div#toc')[0]
     
-    #print('toc element: %s' % str(toc))
-    toc_place.replaceWith(toc_ul)
+    toc_selector = 'div#toc'
+    tocs = list(d.select(toc_selector))
+    if not tocs:
+        msg = 'Cannot find any element of type %r to put TOC inside.' % toc_selector
+        logger.warning(msg)
+    else:
+        toc_place = tocs[0]
+        toc_place.replaceWith(toc_ul)
 
 
     logger.info('external bib')
@@ -227,9 +232,9 @@ def reorganize_contents(body0):
                 current_section.append(x.__copy__())
         sections.append(current_section)     # XXX
         new_body = Tag(name=body.name)
-        if len(sections) < 3:
-            msg = 'Only %d sections found (%s).' % (len(sections), is_marker.__name__)
-            raise ValueError(msg)
+#         if len(sections) < 3:
+#             msg = 'Only %d sections found (%s).' % (len(sections), is_marker.__name__)
+#             raise ValueError(msg)
         
         logger.info('make_sections: %s found using marker %s' % (len(sections), is_marker.__name__))
         for i, s in enumerate(sections):
