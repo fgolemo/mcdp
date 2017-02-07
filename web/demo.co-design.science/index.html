@@ -5,6 +5,7 @@
 
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
 
+	<meta name="google-site-verification" content="-JCOymsaLTPTwqlN4-fmlzM2yTKJLEjd8HIyaKRngPw" />
   <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
   <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 
@@ -15,7 +16,7 @@
 	table,
 	body {
 		/*font-family: 'Anka/Coder Narrow','Monaco', monospace;*/
-		font-size: 10pt;
+/*		font-size: 10pt;*/
 	}
 
 	table {
@@ -82,13 +83,13 @@
 	#server { font-weight: bold;}
 </style>
 
-	<h4>PyMCDP online demo</h4>
 	<p>Please choose the server that is closest to you from the list below.
 		A low latency is important to use the online editor.
 	</p>
 
-	<p>For the servers marked &ldquo;🔒 private&rdquo; you need to have
-		an account. Please ask <a href="mailto:censi@mit.edu">Andrea</a>.
+	<p>The servers marked &ldquo;🔒 private&rdquo; require an account
+	(<a href="https://docs.google.com/forms/d/e/1FAIpQLSd62UrGvItpQJ2zm9IJMq41zOzx8giEBLMnWZw8UN9Lp4S6yQ/viewform?embedded=true">ask for one</a>). The servers marked &ldquo;🌎 public&rdquo;
+	allow anonymous access, but their contents is periodically erased.
 	</p>
 
 
@@ -207,8 +208,9 @@
 
 		function init(){
 			// go('row1', 'Local installation', 'http://127.0.0.1:8080');
-			go('row2', 'Demo server (EU)', 'https://demo.co-design.science/inst00');
-			// go('row3', 'Staging (EU)', 'https://demo.co-design.science/inst01');
+			go('row1', '🌎 Public demo server (EU)', 'https://demo.co-design.science/inst02');
+			go('row2', '🔒 Private demo server (EU)', 'https://demo.co-design.science/inst00');
+			go('row3', '🔒 Private development server (EU)', 'https://demo.co-design.science/inst01');
 			// go('row4', 'Production (US)', 'https://8.8.8.3');
 			// go('row5', 'Staging (US)', 'https://ares-super.lids.mit.edu/inst02');
 
