@@ -83,8 +83,10 @@ def create_operation(context, dp, resources, name_prefix=None, op_prefix=None, r
     return res
 
 
-def create_operation_lf(context, dp, functions, name_prefix, 
+def create_operation_lf(context, dp, functions, name_prefix=None, 
                         op_prefix='_op', res_prefix='_res', allow_conversion=True):
+    if name_prefix is None:
+        name_prefix = '_%s' % type(dp).__name__ 
     name = context.new_name(name_prefix)
     name_result = context.new_res_name(res_prefix)
     

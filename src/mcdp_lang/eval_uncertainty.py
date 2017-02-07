@@ -123,7 +123,7 @@ def eval_lfunction_FValuePlusOrMinus(r, context):
     median = eval_lfunction(r.median, context)
     extent = eval_constant(r.extent, context)
     
-    F = context.get_rtype(median)
+    F = context.get_ftype(median)
 
     # provides f = between 10 g and 20 g
     
@@ -135,8 +135,8 @@ def eval_lfunction_FValuePlusOrMinus(r, context):
     dpl =  MinusValueDP(F, extent.value, extent.unit)
     dpu =  PlusValueDP(F, extent.value, extent.unit)
     
-    fl = create_operation(context, dpl, resources=[median])
-    fu = create_operation(context, dpu, resources=[median])
+    fl = create_operation_lf(context, dpl, functions=[median])
+    fu = create_operation_lf(context, dpu, functions=[median])
      
     dp = UncertainGateSym(F)
     return create_operation_lf(context, dp=dp, functions=[fl, fu])
@@ -155,14 +155,15 @@ def eval_lfunction_FValuePlusOrMinusPercent(r, context):
     pl = 1 - p0 / 100.0
     pu = 1 + p0 / 100.0
     
-    Rl = context.get_rtype(median)
+    Rl = context.get_ftype(median)
 
     dpl = InvMultValueDP(Rl, Rl, R_dimensionless, pl)
     dpu = InvMultValueDP(Rl, Rl, R_dimensionless, pu)
     
-    rl = create_operation(context, dpl, resources=[median])
-    ru = create_operation(context, dpu, resources=[median])
+    from mcdp_lang.helpers import create_operation_lf
+    rl = create_operation_lf(context, dpl, functions=[median])
+    ru = create_operation_lf(context, dpu, functions=[median])
     
     dp = UncertainGateSym(Rl)
 
-    return create_operation(context, dp=dp, resources=[rl, ru]) 
+    return create_operation_lf(context, dp=dp, functions=[rl, ru]) 
