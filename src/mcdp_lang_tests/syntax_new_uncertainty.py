@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from nose.tools import assert_almost_equal
 
-from comptests.registrar import run_module_tests, comptest
+from comptests.registrar import run_module_tests, comptest, comptest_fails
 from mcdp_dp.dp_transformations import get_dp_bounds
 from mcdp_lang import parse_ndp
 from mcdp_lang.parse_actions import parse_wrap
@@ -137,7 +137,7 @@ def new_uncertainty11():
     parse_ndp(s)
 
 
-@comptest
+@comptest_fails
 def new_uncertainty12():
     s = """
     catalogue {
