@@ -60,11 +60,13 @@ def eval_lfunction(lf, context):
     from .eval_lfunction_imp_label_index import eval_lfunction_label_index
     from .eval_lfunction_imp_label_index import eval_lfunction_tupleindexfun
     
+    from mcdp_lang.eval_uncertainty import eval_lfunction_FValueBetween
+    from mcdp_lang.eval_uncertainty import eval_lfunction_FValuePlusOrMinus
+    from mcdp_lang.eval_uncertainty import eval_lfunction_FValuePlusOrMinusPercent
     cases = {
         CDP.Function: eval_lfunction_Function,
         CDP.NewResource: eval_lfunction_newresource,
         CDP.MakeTuple: eval_MakeTuple_as_lfunction,
-        CDP.UncertainFun: eval_lfunction_Uncertain,
         CDP.DisambiguationFun: eval_lfunction_disambiguation,
         CDP.FunctionLabelIndex: eval_lfunction_label_index,
         CDP.TupleIndexFun: eval_lfunction_tupleindexfun,
@@ -77,6 +79,12 @@ def eval_lfunction(lf, context):
         CDP.FValueMinusN: eval_lfunction_FValueMinusN,
         CDP.GenericOperationFun: eval_lfunction_genericoperationfun,
         CDP.ConstantRef: eval_lfunction_ConstantRef,
+        
+        
+        CDP.UncertainFun: eval_lfunction_Uncertain,
+        CDP.FValueBetween: eval_lfunction_FValueBetween,
+        CDP.FValuePlusOrMinus: eval_lfunction_FValuePlusOrMinus,
+        CDP.FValuePlusOrMinusPercent: eval_lfunction_FValuePlusOrMinusPercent,
     }
 
     for klass, hook in cases.items():

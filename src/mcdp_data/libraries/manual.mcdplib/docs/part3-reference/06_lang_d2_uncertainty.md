@@ -54,7 +54,7 @@ c = 10 kg ± 50 g
 
 <s> Median plus or minus percent </s>
 <pre class='mcdp_statements'>
-c = 10 kg ± 5&#37;
+c = 10 kg ± 0.5&#37;
 </pre>
 
 </col2>
@@ -81,7 +81,14 @@ catalogue {
 </pre>
 
 
+It is also possible to describe parametric uncertain relations:
 
-## Defining uncertain relations
+<pre class='mcdp' figure-id="code:parametric-uncertainty">
+mcdp {
+    provides energy [J]
+    requires mass [kg]
 
-It is also possible to describe
+    specific_energy = between 100 kWh/kg and 120 kWh/kg
+    required mass * specific_energy &gt;= provided energy
+}
+</pre>
