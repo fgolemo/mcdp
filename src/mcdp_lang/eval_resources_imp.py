@@ -8,8 +8,7 @@ from mcdp_posets import (NotLeq, express_value_in_isomorphic_space,
 from mcdp_posets import RcompUnits
 from mocdp.comp.context import (CResource, ValueWithUnits, get_name_for_fun_node,
     ModelBuildingContext)
-from mocdp.exceptions import DPSemanticError, DPNotImplementedError,\
-    DPInternalError
+from mocdp.exceptions import DPSemanticError, DPNotImplementedError, DPInternalError
 
 from .eval_constant_imp import eval_constant
 from .eval_warnings import warn_language, MCDPWarnings
