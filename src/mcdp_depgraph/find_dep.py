@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
-# from collections import namedtuple
-
 from contracts import contract
 from contracts.utils import raise_desc
+
 from mcdp_lang.namedtuple_tricks import (
     isnamedtupleinstance, isnamedtuplewhere)
 from mcdp_lang.parse_actions import parse_wrap

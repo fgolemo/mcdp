@@ -8,7 +8,8 @@ from mcdp_posets import (NotLeq, express_value_in_isomorphic_space,
 from mcdp_posets import RcompUnits
 from mocdp.comp.context import (CResource, ValueWithUnits, get_name_for_fun_node,
     ModelBuildingContext)
-from mocdp.exceptions import DPSemanticError, DPNotImplementedError
+from mocdp.exceptions import DPSemanticError, DPNotImplementedError,\
+    DPInternalError
 
 from .eval_constant_imp import eval_constant
 from .eval_warnings import warn_language, MCDPWarnings
@@ -21,7 +22,7 @@ from .parts import CDPLanguage
 CDP = CDPLanguage
 
 
-class DoesNotEvalToResource(DPSemanticError):
+class DoesNotEvalToResource(DPInternalError):
     """ also called "rvalue" """
     
 
@@ -48,6 +49,10 @@ def eval_rvalue(rvalue, context):
         assert isinstance(res, ValueWithUnits)
         return get_valuewithunits_as_resource(res, context)
 
+    if isinstance(rvalue, CDP.Ellipsis):
+        msg = 'Incomplete model (ellipsis)'
+        raise_desc(DPSemanticError, msg)
+        
     from .eval_resources_imp_power import eval_rvalue_Power
     from .eval_math import eval_rvalue_divide
     from .eval_math import eval_rvalue_MultN
@@ -271,6 +276,5 @@ def eval_rvalue_anyofres(r, context):
 
     dp = ConstantMinimals(R=P, values=minimals)
     return create_operation(context, dp=dp, resources=[],
-                               name_prefix='_anyof', op_prefix='_',
-                                res_prefix='_result')
+                               name_prefix='_anyof')
 

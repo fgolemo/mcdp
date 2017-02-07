@@ -7,6 +7,7 @@ from mocdp import logger
 
 from .utils import safe_makedirs
 
+
 __all__ = [
     'create_movie_from_png_sequence',
 ]

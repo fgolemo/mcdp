@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from _collections import defaultdict
+from collections import defaultdict
 
 from contracts import contract
 from contracts.utils import check_isinstance, raise_desc

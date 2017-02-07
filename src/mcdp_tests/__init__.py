@@ -21,20 +21,24 @@ def get_test_index():
     i = int(os.environ.get('CIRCLE_NODE_INDEX', 0))
     return i, n
 
-def load_tests_modules():
-    """ Loads all the mcdp_lang_tests that register using comptests facilities. """
-
+def should_do_basic_tests():
+    
     # if there is build parallelism
     # only do basic tests if we are #0
     i, n = get_test_index()
 
     #logger.info('Testing box #%d of %d' % (i+1, n))
-    if n == 1:
-        should_do_basic_tests = True
-    else:
-        should_do_basic_tests = (i == 0)
+    if n == 1: # only one total
+        should = True
+    else: # the first of many
+        should = (i == 0)
+        
+    return should
 
-    if should_do_basic_tests:
+def load_tests_modules():
+    """ Loads all the mcdp_lang_tests that register using comptests facilities. """
+
+    if should_do_basic_tests():
         import mcdp_posets_tests
         import mcdp_lang_tests
         import mcdp_dp_tests
@@ -64,8 +68,9 @@ def jobs_comptests(context):
     from mcdp_web_tests.test_md_rendering import define_tests_mcdp_web
     define_tests_mcdp_web(c2)
 
-    from mcdp_lang_tests.examples import define_tests
-    define_tests(context)
+    if should_do_basic_tests():
+        from mcdp_lang_tests.examples import define_tests
+        define_tests(context)
 
     # instantiation
     from comptests import jobs_registrar

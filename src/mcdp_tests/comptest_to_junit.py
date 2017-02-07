@@ -1,6 +1,6 @@
 import sys
 
-from junit_xml import TestSuite, TestCase
+from junit_xml import TestSuite, TestCase  # @UnresolvedImport
 
 from compmake.jobs.storage import all_jobs, get_job_cache
 from compmake.storage.filesystem import StorageFilesystem
