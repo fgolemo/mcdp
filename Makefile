@@ -124,6 +124,10 @@ list-ignored:
 big-files-in-git:
 	git rev-list --objects --all | grep "$(git verify-pack -v .git/objects/pack/*.idx | sort -k 3 -n | tail -10 | awk '{print$1}')"
 
+branches-to-merge:
+	@echo  "\nThese branches need to be merged in the current branch:\n"
+	@git branch --no-merged
+
 show-unicode:
 	cat src/mcdp_lang/*.py | python show_not_ascii.py
 
@@ -158,3 +162,6 @@ test-dependencies.deps:
 
 %.pdf: %.dot
 	dot -Tpdf -o$@ $<
+
+css:
+	$(MAKE) -C src/mcdp_web/static/css/

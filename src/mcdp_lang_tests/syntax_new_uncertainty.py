@@ -137,7 +137,7 @@ def new_uncertainty11():
     parse_ndp(s)
 
 
-@comptest_fails
+@comptest_fails 
 def new_uncertainty12():
     s = """
     catalogue {
