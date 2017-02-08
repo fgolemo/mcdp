@@ -15,6 +15,7 @@ from pyramid.response import Response
 from pyramid.security import Allow, Authenticated
 from pyramid.security import Everyone
 
+from compmake.utils.duration_hum import duration_compact
 from contracts import contract
 from contracts.utils import indent, raise_desc
 from mcdp_library import Librarian, MCDPLibrary
@@ -35,7 +36,6 @@ from .solver2.app_solver2 import AppSolver2
 from .status import AppStatus
 from .utils0 import add_std_vars
 from .visualization.app_visualization import AppVisualization
-from compmake.utils.duration_hum import duration_compact
 
 
 __all__ = [
@@ -66,11 +66,9 @@ class WebApp(AppVisualization, AppStatus,
 
         self._load_libraries()
 
-
         logger.info('Found %d libraries in %r.' %
                         (len(self.libraries), self.dirname))
 
-        
         AppVisualization.__init__(self)
         AppQR.__init__(self)
         AppSolver.__init__(self)
@@ -123,12 +121,11 @@ class WebApp(AppVisualization, AppStatus,
     @add_std_vars
     def view_index(self, request):  # @UnusedVariable
         return {}
-        
 
     @add_std_vars
     def view_list(self, request):  # @UnusedVariable
         return {}
-        
+    
     @add_std_vars
     def view_list_libraries(self, request):  # @UnusedVariable
         libraries = self.list_libraries()
