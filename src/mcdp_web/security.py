@@ -1,12 +1,13 @@
+from collections import namedtuple
 import os
+import urllib, hashlib    
 
 import pyramid
 from pyramid.httpexceptions import HTTPFound
 from pyramid.security import remember, forget
+import yaml
 
 from mocdp import logger
-from collections import namedtuple
-import yaml
 
 
 USERS = {}
@@ -48,12 +49,10 @@ def load_users(userdir):
         struct = UserInfo(**res)
         USERS[user] = struct
         
-    print USERS
-        
+    
 def gravatar(email, size, default=None):
-    # import code for encoding urls and generating md5 hashes
-    import urllib, hashlib
-    gravatar_url = "https://www.gravatar.com/avatar/" + hashlib.md5(email.lower()).hexdigest() + "?"
+    digest = hashlib.md5(email.lower()).hexdigest()
+    gravatar_url = "https://www.gravatar.com/avatar/" + digest + "?"
     p = {}
     p['s'] = str(size)
     if default:
@@ -75,7 +74,8 @@ class AppLogin():
 
         config.add_forbidden_view(self.view_forbidden, renderer='forbidden.jinja2')
         
-        load_users(self.options.users)
+        if self.options.users is not None:
+            load_users(self.options.users)
         
     def view_forbidden(self, request):
         logger.error(request.url)
@@ -94,19 +94,11 @@ class AppLogin():
         res['root'] =  self.get_root_relative_to_here(request)
         res['message'] = ''
         res['error'] = 'You need to login to access this resource.'
-        print res
         return res
 
 
     def login(self, request): 
-#         referrer = request.url
-#         if referrer == login_url:
-#             referrer = '/'  # never use login form itself as came_from
-#         if not 'came_from' in request.params:
-#             came_from = request.referrer
-#         else:
         came_from = request.params['came_from']
-        print('came_from: %r' % came_from)
         message = ''
         error = ''
         if 'form.submitted' in request.params:
