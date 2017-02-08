@@ -159,6 +159,33 @@ def new_uncertainty12():
     """
     parse_ndp(s)
     
+    
+
+@comptest
+def new_uncertainty_semantics01():
+    s = """
+    mcdp {
+        a = instance mcdp {
+            provides f = between 1W and 2W
+        }
+        provides f using a
+    } """
+    ndp = parse_ndp(s)
+    dp = ndp.get_dp()
+    
+    dpl, dpu = get_dp_bounds(dp, 1, 1)
+    rl = dpl.solve(1.5)
+    ru = dpu.solve(1.5)
+    feasible = lambda l: len(l.minimals) > 0
+        
+    UR = UpperSets(dp.get_res_space())
+    UR.check_leq(rl, ru)
+    assert feasible(rl)
+    assert not feasible(ru)
+    
+
+
+    
 
 if __name__ == '__main__': 
     
