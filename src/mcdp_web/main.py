@@ -678,8 +678,7 @@ class MCDPWeb(QuickAppBase):
         
     def go(self):
         options = self.get_options()
-        dirname = options.dir
-        wa = WebApp(dirname)
+        wa = WebApp(options)
         msg = """Welcome to PyMCDP!
         
 To access the interface, open your browser at the address
