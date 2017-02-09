@@ -1,7 +1,0 @@
-mcdp {
-    provides capacity [J]
-    requires mass [g]
-    rho = 100 kWh / kg # specific_energy
-    rho_1 = 2
-    required mass ≽ provided capacity / rho
-}
