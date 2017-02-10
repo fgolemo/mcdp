@@ -13,10 +13,10 @@ from contracts.utils import check_isinstance
 from mcdp_docs.manual_constants import MCDPManualConstants
 from mcdp_library import MCDPLibrary
 from mcdp_library.stdlib import get_test_librarian
-from mcdp_library.utils.locate_files_imp import locate_files
+from mcdp_library.utils import locate_files
 from mocdp import logger
 from quickapp import QuickApp
-from reprep.utils.natsorting import natsorted
+from reprep.utils import natsorted
 
 from .manual_join_imp import manual_join
 
@@ -159,7 +159,11 @@ def write(s, out):
 
 
 def render(libname, docname, generate_pdf, main_file, out_part_basename):
+    from mcdp_web.renderdoc.highlight import get_minimal_document
+    from mcdp_web.renderdoc.main import render_complete
+
     librarian = get_test_librarian()
+    librarian.find_libraries('.')
     library = librarian.load_library('manual')
 
     d = tempfile.mkdtemp()
@@ -170,8 +174,6 @@ def render(libname, docname, generate_pdf, main_file, out_part_basename):
     f = l._get_file_data(basename)
     data = f['data']
     realpath = f['realpath']
-    from mcdp_web.renderdoc.highlight import get_minimal_document
-    from mcdp_web.renderdoc.main import render_complete
 
     html_contents = render_complete(library=l,
                                     s=data, raise_errors=True, realpath=realpath,
