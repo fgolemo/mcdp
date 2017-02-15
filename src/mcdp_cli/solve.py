@@ -2,12 +2,12 @@
 import logging
 import os
 
+from contracts import disable_all
 from decent_params import UserError
 from mcdp import logger
 from quickapp import QuickAppBase
 
 from .solve_meat import solve_main
-from contracts.enabling import disable_all
 
 
 class SolveDP(QuickAppBase):

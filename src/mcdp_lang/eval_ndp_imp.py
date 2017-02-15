@@ -6,8 +6,7 @@ from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped, check_isinstance
 from mcdp_dp import (CatalogueDP, Conversion, JoinNDP, MeetNDualDP, get_conversion, make_series, VariableNode,
                      ConstantMinimals, LimitMaximals, OpaqueDP, FunctionNode, ResourceNode)
-from mcdp_posets import (
-    FiniteCollectionAsSpace, NotEqual, NotLeq, PosetProduct, get_types_universe)
+from mcdp_posets import FiniteCollectionAsSpace, NotEqual, NotLeq, PosetProduct, get_types_universe
 from mocdp.comp import (CompositeNamedDP, Connection, NamedDP, NotConnected,
                         SimpleWrap, dpwrap)
 from mocdp.comp.composite_makecanonical import cndp_makecanonical

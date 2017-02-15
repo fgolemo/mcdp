@@ -1,7 +1,13 @@
 """ Checks that all important dependencies are installed """
-from mcdp.logs import logger
+from .logs import logger
 
 __all__ = []
+
+import decent_logs
+import decent_params
+import quickapp
+
+
 
 def suggest_package(name):
     msg = """You could try installing the package using:

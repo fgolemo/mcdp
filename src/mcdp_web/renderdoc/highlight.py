@@ -30,7 +30,7 @@ from mcdp_web.renderdoc.xmlutils import bs, to_html_stripping_fragment,\
     check_html_fragment, to_html_stripping_fragment_document, describe_tag,\
     project_html
 from mcdp import logger, MCDPConstants
-from mocdp import get_mcdp_tmp_dir
+from mcdp.utils.tmpdir import get_mcdp_tmp_dir
 from mocdp.comp.context import Context
 from mcdp.exceptions import DPSemanticError, DPSyntaxError, DPInternalError
 from reprep import Report

@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
-from .debug_pickler import find_pickling_error
-from .safe_write import safe_read, safe_write
+import sys
+
 from contracts import describe_type
 from mcdp import logger
-import sys
+
+from .debug_pickler import find_pickling_error
+from .safe_write import safe_read, safe_write
+
 
 if sys.version_info[0] >= 3:
     import pickle  # @UnusedImport

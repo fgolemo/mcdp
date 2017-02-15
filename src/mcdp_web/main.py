@@ -18,10 +18,10 @@ from pyramid.security import Everyone
 from compmake.utils.duration_hum import duration_compact
 from contracts import contract
 from contracts.utils import indent, raise_desc
-from mcdp_library import Librarian, MCDPLibrary
-from mcdp_library.utils import dir_from_package_name
 from mcdp import logger
 from mcdp.exceptions import DPSemanticError, DPSyntaxError
+from mcdp_library import Librarian, MCDPLibrary
+from mcdp_library.utils import dir_from_package_name
 from quickapp import QuickAppBase
 
 from .confi import describe_mcdpweb_params, parse_mcdpweb_params_from_dict
@@ -356,9 +356,7 @@ class WebApp(AppVisualization, AppStatus,
         else:
             current_library = None
             library = None
-        
-        
-
+         
         d = {}
 
         d['current_thing'] = current_thing
@@ -494,11 +492,8 @@ class WebApp(AppVisualization, AppStatus,
         for sup in natural_sorted(path2libraries):
             r = (sup, natural_sorted(path2libraries[sup]))
             res.append(r)
-        return res
-        
-
+        return res 
     
-
     def _has_library_doc(self, request, document):
         l = self.get_library(request)
         filename = '%s.%s' % (document, MCDPLibrary.ext_doc_md)

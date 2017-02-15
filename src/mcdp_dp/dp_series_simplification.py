@@ -3,16 +3,16 @@ from abc import ABCMeta, abstractmethod
 
 from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped, check_isinstance
-from mcdp_dp.dp_limit import Limit
-from mcdp_posets import PosetProduct
 from mcdp import logger
-from mcdp.exceptions import DPInternalError
 from mcdp.development import do_extra_checks, mcdp_dev_warning
-from multi_index.get_it_test import compose_indices, get_id_indices
+from mcdp.exceptions import DPInternalError
+from mcdp_posets import PosetProduct
+from mcdp_utils_indexing.get_it_test import compose_indices, get_id_indices
 
 from .dp_constant import Constant
 from .dp_flatten import Mux, get_R_from_F_coords
 from .dp_identity import Identity
+from .dp_limit import Limit
 from .dp_parallel import Parallel
 from .dp_parallel_simplification import make_parallel
 from .dp_series import Series
@@ -61,57 +61,57 @@ class SeriesSimplificationRule():
 
 
 class RuleEvaluateMuxTimesLimit(SeriesSimplificationRule):
-    """ 
-    
-        if 
-        
+    """
+
+        if
+
             Series(a, b)
-            
-        and 
-        
+
+        and
+
             a = Mux
             b = Limit
-            
+
         then we can just evaluate it pointwise.
-              
+
     """
     def applies(self, dp1, dp2):
-        return isinstance(dp1, Mux) and isinstance(dp2, Limit) 
-        
+        return isinstance(dp1, Mux) and isinstance(dp2, Limit)
+
     def _execute(self, dp1, dp2):
         check_isinstance(dp1, Mux)
         check_isinstance(dp2, Limit)
         r = dp2.get_value()
         f = dp1.amap_dual(r)
         F = dp1.get_fun_space()
-        
+
         res = Limit(F, f)
 #         print('dp1: %s -> %s   dp2: %s -> %s ' % (dp1.get_fun_space(),dp1.get_res_space(),
 #                                                   dp2.get_fun_space(), dp2.get_res_space()))
 #         print('res: %s -> %s' % (res.get_fun_space(), res.get_res_space()))
         return res
-    
-        
-    
+
+
+
 class RuleEvaluateConstantTimesMux(SeriesSimplificationRule):
-    """ 
-    
-        if 
-        
+    """
+
+        if
+
             Series(a, b)
-            
-        and 
-        
+
+        and
+
             a = Constant
             b = Mux
-            
+
         then we can just evaluate it pointwise.
-          
-           
+
+
     """
     def applies(self, dp1, dp2):
         return isinstance(dp1, Constant) and isinstance(dp2, Mux)
-        
+
     def _execute(self, dp1, dp2):
         check_isinstance(dp1, Constant)
         check_isinstance(dp2, Mux)
@@ -119,21 +119,21 @@ class RuleEvaluateConstantTimesMux(SeriesSimplificationRule):
         r = dp2.amap(f)
         R = dp2.get_res_space()
         return Constant(R, r)
-    
-    
+
+
 # TODO: do the dual rule
 
 
 class RuleSimplifyLift(SeriesSimplificationRule):
-    """ 
+    """
                         |- A
         Mux([x, [y]]) --|
                         |- B
-                        
+
                         |-- A
         Mux([x, y]) ----|
                         |-- Mux([()]) - B
-    
+
     """
     def applies(self, dp1, dp2):
         if not isinstance(dp2, Parallel):
@@ -171,24 +171,24 @@ class RuleSimplifyLift(SeriesSimplificationRule):
 
 
 class RuleLoop1a(SeriesSimplificationRule):
-    """ 
-    
+    """
+
         TODO: this is only implemented for a special case.
-        
-        - | DP | - |m| 
+
+        - | DP | - |m|
         / |____| -
-         `-------`       
+         `-------`
 
         where m and DP[-1] are a Mux
-        
+
         - | DP | - |m| ----
         / |____| -- Id ---
-         `-----------------`       
+         `-----------------`
 
         Series( Loop(dp), m ) =
-        
-        Series( Loop(Series(dp, Par(m, Id))) ) 
-    
+
+        Series( Loop(Series(dp, Par(m, Id))) )
+
     """
     def applies(self, dp1, dp2):
         from .dp_loop2 import DPLoop2
@@ -201,12 +201,12 @@ class RuleLoop1a(SeriesSimplificationRule):
         if not isinstance(dp1, DPLoop2):
             return False
 
-        # the last one inside Loop must be Mux, otherwise it 
+        # the last one inside Loop must be Mux, otherwise it
         # doesn't simplify
         dp1s = unwrap_series(dp1.dp1)
         if not isinstance(dp1s[-1], Mux):
             return False
-        
+
         if dp2.coords == 0:
             pass
         else:
@@ -214,49 +214,49 @@ class RuleLoop1a(SeriesSimplificationRule):
                 ' for dp2.coords = {}'.format(dp2.coords)
             logger.debug(msg)
             return False
-        
+
         return True
 
     def _execute(self, dp1, dp2):
         from .dp_loop2 import DPLoop2
         assert isinstance(dp2, Mux)
         assert isinstance(dp1, DPLoop2)
-        
+
         # I want to create this:
-        #   -- |m| --- 
-        #   --  Id --- 
-        
+        #   -- |m| ---
+        #   --  Id ---
+
         if dp2.coords == 0:
             coords = [ (0, 0), 1]
         else:
             raise_desc(NotImplementedError, dp1=dp1,dp2=dp2)
-        
+
         m1 = Mux(dp1.dp1.get_res_space(), coords)
         res = DPLoop2(make_series(dp1.dp1, m1))
 
         return res
-    
+
 
 class RuleLoop1b(SeriesSimplificationRule):
-    """ 
-    
+    """
+
         TODO: this is only implemented for a special case,
         with m.coords = [()]
-        
-        |m| - | DP | - 
+
+        |m| - | DP | -
             / |____| -
-            `-------`       
+            `-------`
 
         where m and DP[0] are a Mux
-        
+
         --- |m| -- | DP | ----
         /-- Id  -- |____| -----
-         `-----------------`       
+         `-----------------`
 
         Series( m, Loop(dp)) =
-        
-        Series( Loop(Series(Par(m, Id), dp)) ) 
-    
+
+        Series( Loop(Series(Par(m, Id), dp)) )
+
     """
     def applies(self, dp1, dp2):
         # first must be Mux
@@ -268,12 +268,12 @@ class RuleLoop1b(SeriesSimplificationRule):
         if not isinstance(dp2, DPLoop2):
             return False
 
-        # the first one inside Loop must be Mux, otherwise it 
+        # the first one inside Loop must be Mux, otherwise it
         # doesn't simplify
         dp1s = unwrap_series(dp2.dp1)
         if not isinstance(dp1s[0], Mux):
             return False
-        
+
         if dp1.coords == [()]:
             pass
         else:
@@ -281,25 +281,25 @@ class RuleLoop1b(SeriesSimplificationRule):
                 ' for dp1.coords = {}'.format(dp1.coords)
             logger.debug(msg)
             return False
-        
+
         return True
 
     def _execute(self, dp1, dp2):
         from mcdp_dp.dp_loop2 import DPLoop2
         assert isinstance(dp1, Mux)
         assert isinstance(dp2, DPLoop2)
-        
+
         # I want to create this:
-        #  P   -- |m| --- (Px) 
-        #  F2  --  Id --- F2 
-        
+        #  P   -- |m| --- (Px)
+        #  F2  --  Id --- F2
+
         if dp1.coords == [()]:
             coords = [ [0], 1]
         else:
             raise_desc(NotImplementedError, dp1=dp1,dp2=dp2)
-        
+
         dp0 = dp2.dp1
-        
+
         F = dp0.get_fun_space()
         F2 = F[1]
         F1= F[0]
@@ -307,23 +307,23 @@ class RuleLoop1b(SeriesSimplificationRule):
         m1F = PosetProduct((P, F2))
         #print('m1F: %s' % m1F)
         m1 = Mux(m1F, coords)
-        
+
         #print 'm1', m1.tree_long()
         res = DPLoop2(make_series(m1, dp0))
 
         return res
-    
-    
+
+
 class RuleSimplifyLiftB(SeriesSimplificationRule):
-    """ 
+    """
                         |- A
         Mux([[x], y]) --|
                         |- B
-                        
+
                         |-- Mux([()]) - A
         Mux([x, y]) ----|
                         |-- B
-    
+
     """
     def applies(self, dp1, dp2):
         if not isinstance(dp2, Parallel):
@@ -366,7 +366,7 @@ def is_two_permutation(F, coords):
     if coords == [(1,), 0]:
         return True
     return False
-    
+
 class RuleMuxComposition(SeriesSimplificationRule):
     def applies(self, dp1, dp2):
         return isinstance(dp1, Mux) and isinstance(dp2, Mux)
@@ -376,33 +376,33 @@ class RuleMuxComposition(SeriesSimplificationRule):
         assert isinstance(dp2, Mux)
         return mux_composition(dp1, dp2)
 
-# 
+#
 # class RuleCommutativeF(SeriesSimplificationRule):
-#     """ 
-#         Commutative operators in functions. 
-#     
-#     
+#     """
+#         Commutative operators in functions.
+#
+#
 #     """
 #     def applies(self, dp1, dp2):
 #         return isinstance(dp1, Mux) and isinstance(dp2, Mux)
-# 
+#
 #     def _execute(self, dp1, dp2):
 #         assert isinstance(dp1, Mux)
 #         assert isinstance(dp2, Mux)
 #         return mux_composition(dp1, dp2)
 
-            
+
 class RuleSimplifyPermPar(SeriesSimplificationRule):
-    """ 
+    """
                       |- A - |
-        Mux([1, 0]) --|      | --- 
+        Mux([1, 0]) --|      | ---
                       |- B - |
-                        
+
                       |- B - |
-        --------------|      | --- Mux([1, 0]) 
+        --------------|      | --- Mux([1, 0])
                       |- A - |
-                        
-    
+
+
     """
     def applies(self, dp1, dp2):
         if not isinstance(dp2, Parallel):
@@ -429,18 +429,18 @@ class RuleSimplifyPermPar(SeriesSimplificationRule):
 
 
 class RuleJoinPar(SeriesSimplificationRule):
-    """ 
-            
-                        
-                      |- A - |     | - C 
-        --------------|      | --- |  
+    """
+
+
+                      |- A - |     | - C
+        --------------|      | --- |
                       |- B - |     | - D
-                      
-                      
+
+
                          |- A C
                      ----|
                          | - B D
-    
+
     """
     def applies(self, dp1, dp2):
         return isinstance(dp1, Parallel) and isinstance(dp2, Parallel)
@@ -627,7 +627,7 @@ def make_series(dp1, dp2):
                 msg = 'Invalid result of simplification rule.'
                 raise_wrapped(DPInternalError, e, msg, rule=rule,
                               result=r.repr_long())
-                
+
             first = wrap_series(dp1.get_fun_space(), dp1s[:-1])
             rest = wrap_series(dp2s[0].get_fun_space(), dp2s[1:])
             return make_series(first, make_series(r, rest))
@@ -643,8 +643,8 @@ def check_same_fun(dp1, dp2):
     if not (F1 == F2): # pragma: no cover
         msg = 'F not preserved'
         raise_desc(AssertionError, msg, F1=F1, F2=F2)
-    
-    
+
+
 def check_same_res(dp1, dp2):
     """ Checks that the two dps have same F """
     R1 = dp1.get_res_space()
@@ -653,10 +653,10 @@ def check_same_res(dp1, dp2):
     if not (R1 == R2): # pragma: no cover
         msg = 'R not preserved'
         raise_desc(AssertionError, msg, R1=R1,R2=R2)
-    
+
 def check_same_spaces(dp1, dp2):
     check_same_fun(dp1,dp2)
-    check_same_res(dp1, dp2) 
+    check_same_res(dp1, dp2)
 
 def unwrap_series(dp):
     if not isinstance(dp, Series):
@@ -729,4 +729,3 @@ def mux_composition(dp1, dp2):
         msg = 'Cannot create shortcut.'
         raise_wrapped(DPInternalError, e, msg,
                       dp1=dp1.repr_long(), dp2=dp2.repr_long())
-

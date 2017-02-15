@@ -1,19 +1,14 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
 from contracts.utils import raise_desc, check_isinstance, raise_wrapped, indent
+from mcdp.exceptions import (DPInternalError, DPNotImplementedError,
+                             DPSemanticError, mcdp_dev_warning)
 from mcdp_dp import (InvMult2, InvPlus2, InvPlus2Nat, InvMult2Nat,
                      InvMultValueNatDP, PlusValueNatDP,
-                     PlusValueRcompDP, PlusValueDP)
-from mcdp_dp.dp_minus import MinusValueDP, MinusValueRcompDP, MinusValueNatDP
-from mcdp_dp.dp_multvalue import InvMultValueDP
-from mcdp_posets import (Nat, RcompUnits, get_types_universe, mult_table,
-    poset_maxima)
-from mcdp_posets import Rcomp
-from mcdp_posets.rcomp_units import RbicompUnits
-from mocdp.comp.context import CFunction, get_name_for_res_node, ValueWithUnits, \
-    ModelBuildingContext
-from mcdp.exceptions import (DPInternalError, DPNotImplementedError,
-    DPSemanticError, mcdp_dev_warning)
+                     PlusValueRcompDP, PlusValueDP, InvMultValueDP,  MinusValueDP, MinusValueRcompDP, MinusValueNatDP)
+from mcdp_lang.misc_math import ConstantsNotCompatibleForAddition
+from mcdp_posets import (Nat, RcompUnits, get_types_universe, mult_table, poset_maxima, RbicompUnits, Rcomp)
+from mocdp.comp.context import CFunction, get_name_for_res_node, ValueWithUnits, ModelBuildingContext
 
 from .eval_constant_imp import NotConstant
 from .eval_resources_imp_unary import eval_lfunction_genericoperationfun
@@ -24,7 +19,6 @@ from .namedtuple_tricks import recursive_print
 from .parse_actions import decorate_add_where
 from .parts import CDPLanguage
 from .utils_lists import get_odd_ops, unwrap_list
-from mcdp_lang.misc_math import ConstantsNotCompatibleForAddition
 
 
 CDP = CDPLanguage

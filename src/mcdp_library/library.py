@@ -8,20 +8,17 @@ import sys
 from contracts import contract
 from contracts.utils import (check_isinstance, format_obs, raise_desc,
                              raise_wrapped)
+from mcdp import logger, MCDPConstants
+from mcdp.exceptions import DPSemanticError, MCDPExceptionWithWhere
 from mcdp_dp import PrimitiveDP
 from mcdp_lang import parse_ndp, parse_poset
 from mcdp_posets import Poset
-from mcdp import logger, MCDPConstants
-     
-from mocdp import get_mcdp_tmp_dir
 from mocdp.comp.context import Context, ValueWithUnits
 from mocdp.comp.interfaces import NamedDP
 from mocdp.comp.template_for_nameddp import TemplateForNamedDP
-from mcdp.exceptions import DPSemanticError, mcdp_dev_warning, MCDPExceptionWithWhere
 
-from .utils import memo_disk_cache2
-from .utils.locate_files_imp import locate_files
-
+from .utils import locate_files, memo_disk_cache2
+from mcdp.utils.tmpdir import get_mcdp_tmp_dir
 
 
 __all__ = [

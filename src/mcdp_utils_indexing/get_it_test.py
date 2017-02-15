@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from contracts.utils import raise_desc, raise_wrapped
-from multi_index import get_it
+from mcdp_utils_indexing import get_it
 
 
 A = ['a', ['b', 'c']]
