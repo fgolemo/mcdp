@@ -19,9 +19,8 @@ from bs4.element import Tag, NavigableString
 
 
 
-def get_bibliography():
-    fn = 'bibliography.html'
-    data = open(fn).read()
+def get_bibliography(bibfile):
+    data = open(bibfile).read()
     frag = bs(data)
     res = Tag(name='div')
     

@@ -33,10 +33,9 @@ def get_manual_css_frag():
         assert False
             
 @contract(files_contents='list( tuple( tuple(str,str), str) )', returns='str')
-def manual_join(files_contents):
+def manual_join(files_contents, bibfile):
     from mcdp_web.renderdoc.main import replace_macros
     from mcdp_web.renderdoc.xmlutils import bs
-
     
     fn = MCDPManualConstants.main_template
     if not os.path.exists(fn):
@@ -89,7 +88,7 @@ def manual_join(files_contents):
 
 
     logger.info('external bib')
-    bibliography_entries = get_bibliography()
+    bibliography_entries = get_bibliography(bibfile)
     bibliography_entries['id'] = 'bibliography_entries'
     body.append(bibliography_entries)
     bibhere = d.find('div', id='put-bibliography-here')

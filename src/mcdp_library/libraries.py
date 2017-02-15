@@ -3,11 +3,11 @@ import os
 
 from contracts import contract
 from contracts.utils import raise_desc, check_isinstance
+from mocdp import MCDPConstants, logger
 from mocdp.exceptions import DPSemanticError
 
 from .library import MCDPLibrary
 from .utils import locate_files
-from mocdp import MCDPConstants, logger
 
 
 __all__ = [
@@ -53,13 +53,14 @@ class Librarian():
             short, data = self._load_entry(path)
             if short in self.libraries:
                 entry = self.libraries[short]
-                if entry['path'] != path:
+                if entry['path'] != data['path']:
                     msg = 'I already know library "%s".\n' % short
                     msg += 'Current entry path:  %s\n' % path
                     msg += 'Previous entry path: %s\n' % entry['path']
                     raise_desc(ValueError, msg)
                 else:
-                    logger.debug('Reached "%s" twice' % path)
+                    msg = 'Reached library "%s" twice (path = %s).' % (short, path)
+                    logger.debug(msg)
             self.libraries[short] = data
             
         # get all the images

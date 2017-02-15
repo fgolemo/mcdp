@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from comptests.registrar import comptest, run_module_tests
+from comptests.registrar import comptest, run_module_tests, comptest_fails
 from contracts.utils import raise_desc, indent
 from mcdp_library.library import MCDPLibrary
 from mcdp_web.renderdoc.highlight import get_minimal_document, TAG_DOLLAR
@@ -454,6 +454,18 @@ def no_dollar():
 #     print indent_plus_invisibles(s2)
 #     
     assert not 'DOLLAR' in s2
+    
+
+@comptest_fails
+def splittag():
+    # four spaces in the first line
+    s = r"""
+        
+Please send any comments, suggestions, or bug reports to <a
+href="mailto:censi@mit.edu">censi@mit.edu</a>.
+
+"""
+    s2 = tryit(s) 
     
 if __name__ == '__main__': 
 #     another2()

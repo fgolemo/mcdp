@@ -60,6 +60,8 @@ class RenderManual(QuickApp):
         src_dir = options.src
         out_dir = options.output
 
+        bibfile = os.path.join(src_dir, 'bibliography/bibliography.html')
+        
         if out_dir is None:
             out_dir = os.path.join('out', 'mcdp_render_manual')
 
@@ -97,7 +99,7 @@ class RenderManual(QuickApp):
                 
             files_contents.append(res)
 
-        d = context.comp(manual_join, files_contents)
+        d = context.comp(manual_join, files_contents, bibfile=bibfile)
         context.comp(write, d, output_file)
         
         context.comp(generate_metadata)
