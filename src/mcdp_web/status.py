@@ -11,7 +11,7 @@ from compmake.utils import duration_compact
 from system_cmd.meat import system_cmd_result
 
 import mocdp
-from mocdp.memoize_simple_imp import memoize_simple
+from mcdp.utils.memoize_simple_imp import memoize_simple
 import mcdp
 
 

@@ -20,7 +20,7 @@ from mocdp.comp.recursive_name_labeling import (get_imp_as_recursive_dict,
                                                 get_labelled_version)
 from mocdp.comp.wrap import SimpleWrap
 from mocdp.exceptions import DPInternalError
-from mocdp.memoize_simple_imp import memoize_simple
+from mcdp.utils.memoize_simple_imp import memoize_simple
 from mocdp.ndp.named_coproduct import NamedDPCoproduct
 from reprep import Report
 

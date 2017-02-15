@@ -16,7 +16,7 @@ from mocdp.comp.flattening.flatten import cndp_flatten
 from mocdp.comp.interfaces import NotConnected
 from mocdp.comp.wrap import SimpleWrap, dpwrap
 from mocdp.exceptions import DPSemanticErrorNotConnected
-from mocdp.memoize_simple_imp import memoize_simple
+from mcdp.utils.memoize_simple_imp import memoize_simple
 import numpy as np
 
 

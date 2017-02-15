@@ -8,7 +8,7 @@ from contracts.utils import raise_wrapped, indent
 from mcdp_library.utils import dir_from_package_name
 from mcdp_web.renderdoc.xmlutils import bs, to_html_stripping_fragment
 from mocdp import get_mcdp_tmp_dir, logger
-from mocdp.memoize_simple_imp import memoize_simple
+from mcdp.utils.memoize_simple_imp import memoize_simple
 from system_cmd import CmdException, system_cmd_result
 
 

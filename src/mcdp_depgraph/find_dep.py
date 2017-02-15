@@ -9,7 +9,7 @@ from mcdp_lang.parts import CDPLanguage
 from mcdp_lang.syntax import Syntax
 from mcdp_library import Librarian, MCDPLibrary
 from mocdp.exceptions import DPSemanticError
-from mocdp.memoize_simple_imp import memoize_simple
+from mcdp.utils.memoize_simple_imp import memoize_simple
 import networkx as nx
 
 

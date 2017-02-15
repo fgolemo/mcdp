@@ -5,7 +5,7 @@ from mcdp_posets import (NotBelongs, UpperSet,
 from mcdp_posets import LowerSets, LowerSet
 from mcdp_posets.find_poset_minima.baseline_n2 import poset_maxima
 from mocdp.exceptions import DPInternalError, do_extra_checks, mcdp_dev_warning
-from mocdp.memoize_simple_imp import memoize_simple
+from mcdp.utils.memoize_simple_imp import memoize_simple
 
 from .primitive import NotFeasible, PrimitiveDP
 from .tracer import Tracer

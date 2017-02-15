@@ -8,7 +8,7 @@ from contracts.utils import check_isinstance, raise_wrapped, raise_desc
 from mocdp import ATTRIBUTE_NDP_RECURSIVE_NAME
 from mocdp.exceptions import DPSyntaxError, do_extra_checks, mcdp_dev_warning, \
     DPSemanticError
-from mocdp.memoize_simple_imp import memoize_simple
+from mcdp.utils.memoize_simple_imp import memoize_simple
 from pint import UnitRegistry  # @UnresolvedImport
 from pint import UndefinedUnitError  # @UnresolvedImport
 

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from collections import namedtuple, defaultdict
-from mocdp.memoize_simple_imp import memoize_simple
+from mcdp.utils.memoize_simple_imp import memoize_simple
 
 
 def replace_inside_equations(s):

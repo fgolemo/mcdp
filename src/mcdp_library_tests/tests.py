@@ -15,7 +15,7 @@ from mcdp_tests.generation import for_all_source_mcdp,\
 from mocdp import logger, get_mcdp_tmp_dir
 from mocdp.comp.context import Context
 from mocdp.exceptions import DPSemanticError, DPNotImplementedError
-from mocdp.memoize_simple_imp import memoize_simple  # XXX: move sooner
+from mcdp.utils.memoize_simple_imp import memoize_simple  # XXX: move sooner
 
 
 __all__ = [
