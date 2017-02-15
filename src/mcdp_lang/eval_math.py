@@ -420,9 +420,7 @@ def eval_PlusN(x, context, wants_constant):
                     
         dp = MinusValueDP(F=F, c_value=valuepos2, c_space=c_space)
 
-        r2 = create_operation(context, dp, resources=[res],
-                              name_prefix='_minus', op_prefix='_x',
-                              res_prefix='_y')
+        r2 = create_operation(context, dp, resources=[res])
         return r2
 
 def eval_PlusN_(constants, resources, context):

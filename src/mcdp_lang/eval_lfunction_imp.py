@@ -80,6 +80,8 @@ def eval_lfunction(lf, context):
         CDP.FValueBetween: eval_lfunction_FValueBetween,
         CDP.FValuePlusOrMinus: eval_lfunction_FValuePlusOrMinus,
         CDP.FValuePlusOrMinusPercent: eval_lfunction_FValuePlusOrMinusPercent,
+        
+        CDP.SumFunctions: eval_fvalue_SumFunctions,
     }
 
     for klass, hook in cases.items():
@@ -92,6 +94,22 @@ def eval_lfunction(lf, context):
         msg += '\n' + indent(r, '  ')
         raise_desc(DoesNotEvalToFunction, msg) 
             
+            
+def eval_fvalue_SumFunctions(lf, context):
+    from mcdp_lang.eval_resources_imp import iterate_normal_ndps
+    check_isinstance(lf, CDP.SumFunctions)
+    fname = lf.fname.value
+    
+    cfunctions = []
+    for n, ndp in iterate_normal_ndps(context):
+        if fname in ndp.get_fnames():
+            cr = CFunction(n, fname)
+            cfunctions.append(cr)
+
+    if len(cfunctions) == 1:
+        return cfunctions[0]
+    else:
+        return eval_lfunction_invplus_ops(fs=cfunctions, context=context)
 
 def eval_lfunction_Function(lf, context):
     return context.make_function(dp=lf.dp.value, s=lf.s.value)
@@ -118,8 +136,7 @@ def eval_lfunction_anyoffun(lf, context):
         raise_desc(DPSemanticError, msg, elements=elements, maximals=maximals)
 
     dp = LimitMaximals(values=maximals, F=P)
-    return create_operation_lf(context, dp=dp, functions=[],
-                               name_prefix='_anyof')
+    return create_operation_lf(context, dp=dp, functions=[])
 
 
 def eval_lfunction_disambiguation(lf, context):

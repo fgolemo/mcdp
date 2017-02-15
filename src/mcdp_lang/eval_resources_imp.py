@@ -94,6 +94,7 @@ def eval_rvalue(rvalue, context):
         CDP.RValuePlusOrMinus: eval_rvalue_RValuePlusOrMinus,
         CDP.RValuePlusOrMinusPercent: eval_rvalue_RValuePlusOrMinusPercent,
         
+        CDP.SumResources: eval_rvalue_SumResources,
     }
 
     for klass, hook in cases.items():
@@ -105,6 +106,28 @@ def eval_rvalue(rvalue, context):
         rvalue = recursive_print(rvalue)
         raise_desc(DoesNotEvalToResource, msg, rvalue=rvalue)
  
+def iterate_normal_ndps(context):
+    for n, ndp in context.names.items():
+        normal = not context.is_new_function(n) and not context.is_new_resource(n)
+        if normal:
+            yield n, ndp
+            
+def eval_rvalue_SumResources(rvalue, context):
+    check_isinstance(rvalue, CDP.SumResources)
+    rname = rvalue.rname.value
+    
+    cresources = []
+    for n, ndp in iterate_normal_ndps(context):
+        if rname in ndp.get_rnames():
+            cr = CResource(n, rname)
+            cresources.append(cr)
+
+    from mcdp_lang.eval_math import eval_PlusN_
+    if len(cresources) == 1:
+        return cresources[0]
+    else:
+        return eval_PlusN_(constants=[], resources=cresources, context=context)
+
 def eval_rvalue_Resource(rvalue, context):
     if isinstance(rvalue, CDP.Resource):
         return context.make_resource(dp=rvalue.dp.value, s=rvalue.s.value)

@@ -55,6 +55,7 @@ def not_any_of_these(ks):
 class SyntaxIdentifiers():
     # unfortunately this needs to be maintained manually
     keywords = [
+        'sum',
         'pi',
         'π',
         'e',
@@ -318,6 +319,9 @@ class Syntax():
     TIMES = spk(L('*') | L('·'), CDP.times)
     BAR = spk(L('/'), CDP.bar)
 
+    SUM = spk(L('sum') | L('∑'), CDP.sum)
+
+
     # "call"
 #     C = lambda x, b: x.setResultsName(b)
 
@@ -477,6 +481,7 @@ class Syntax():
         (PRODUCT, 2, opAssoc.LEFT, space_product_parse_action),
     ])  # , lpar='(', rpar=')')
 #     space_prec
+
     nat_constant = sp(K('nat') - L(':') - nonneg_integer,
                       lambda t: CDP.NatConstant(t[0], t[1], t[2]))
 
@@ -694,6 +699,12 @@ class Syntax():
     tuple_of_constants = sp(OPEN_BRACE - O(constant_value -
                                            ZeroOrMore(COMMA - constant_value)) - CLOSE_BRACE,
                             lambda t: CDP.MakeTuple(t[0], make_list(list(t)[1:-1], where=t[0].where), t[-1]))
+
+    ASTERISK = spk(L('*'), CDP.asterisk)
+    rvalue_sum_over_resources = sp(SUM + rname + REQUIRED_BY + ASTERISK,
+                            lambda t: CDP.SumResources(t[0],t[1],t[2],t[3]))
+    fvalue_sum_over_functions = sp(SUM + fname + PROVIDED_BY + ASTERISK,
+                            lambda t: CDP.SumFunctions(t[0],t[1],t[2],t[3]))    
 
     rvalue_make_tuple = sp(OPEN_BRACE - rvalue -
                            ZeroOrMore(COMMA - rvalue) - CLOSE_BRACE,
@@ -1436,6 +1447,8 @@ class Syntax():
     ndpt_dp_rvalue << (ndpt_dp_operand | (SLPAR - ndpt_dp_operand - SRPAR))
 
     rvalue_operand = (
+        rvalue_sum_over_resources 
+        |
         rvalue_new_function
         ^ rvalue_new_function2
         ^ rvalue_resource
@@ -1465,7 +1478,8 @@ class Syntax():
     ])
 
     fvalue_operand = (
-        constant_value
+        fvalue_sum_over_functions 
+        | constant_value
         ^ fvalue_simple
         ^ fvalue_fancy
         ^ fvalue_new_resource2
@@ -1482,7 +1496,7 @@ class Syntax():
         ^ constant_value_divided
         ^ fvalue_between
         ^ fvalue_plus_or_minus
-        ^ fvalue_plus_or_minus_percent
+        ^ fvalue_plus_or_minus_percent 
     )
 
     # here we cannot use "|" because otherwise (cokode).id is not

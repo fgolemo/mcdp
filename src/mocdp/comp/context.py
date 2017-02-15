@@ -338,6 +338,7 @@ class Context():
         self.rnames.append(rname)
         return name
 
+
     def iterate_new_functions(self):
         for fname in self.fnames:
             name = get_name_for_fun_node(fname)
