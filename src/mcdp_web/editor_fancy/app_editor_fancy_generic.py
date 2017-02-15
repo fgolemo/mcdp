@@ -12,36 +12,38 @@ from contracts import contract
 from contracts.utils import check_isinstance, raise_desc
 from mcdp import logger
 from mcdp.exceptions import DPInternalError, DPSemanticError, DPSyntaxError
+from mcdp.utils.string_utils import get_sha1
 from mcdp.utils.timing import timeit_wall
+from mcdp_lang.parse_interface import (parse_ndp_eval, parse_ndp_refine, 
+    parse_template_eval, parse_template_refine, parse_constant_eval, 
+    parse_constant_refine, parse_poset_eval, parse_poset_refine)
 from mcdp_lang.suggestions import get_suggestions, apply_suggestions
 from mcdp_lang.syntax import Syntax
 from mcdp_library import MCDPLibrary
 from mcdp_report.html import ast_to_html, ATTR_WHERE_CHAR, ATTR_WHERE_CHAR_END
-from mcdp_web.editor_fancy.image import get_png_data_model, \
-    ndp_template_enclosed, get_png_data_unavailable, get_png_data_poset,\
-    get_png_data_syntax_model
-from mcdp_web.editor_fancy.warnings_unconnected import generate_unconnected_warnings
 from mcdp_web.utils import (ajax_error_catch,
                             format_exception_for_ajax_response, response_image)
 from mcdp_web.utils.response import response_data
 from mcdp_web.utils0 import add_other_fields
 from mocdp.comp.interfaces import NamedDP
 
-from mcdp_lang.parse_interface import( parse_ndp_eval, parse_ndp_refine, 
-    parse_template_eval, parse_template_refine, parse_constant_eval, 
-    parse_constant_refine, parse_poset_eval, parse_poset_refine)
-from mcdp.utils.string_utils import get_sha1
+from .image import get_png_data_model, \
+    ndp_template_enclosed, get_png_data_unavailable, get_png_data_poset,\
+    get_png_data_syntax_model
+from .warnings_unconnected import generate_unconnected_warnings
 
 
-
-Spec = namedtuple('Spec', 'url_part url_variable extension '
-                  ' parse ' # function that returns the object
-                            # composition of the following:
+Spec = namedtuple('Spec', 
+                  ' url_part '
+                  ' url_variable'
+                  ' extension '
+                  ' parse ' # function that returns the object.
+                            # It is a composition of the following:
                   ' parse_expr ' #  expr = parse_wrap(string, expr)
                   ' parse_refine ' # expr2 = parse_refine(expr, context)
                   ' parse_eval '   # ndp = parse_eval(expr2, context
                   ' load ' # load(name, context)
-                  'get_png_data'
+                  ' get_png_data'
                   ' get_png_data_syntax'
                   ' write minimal_source_code')
 specs = {}

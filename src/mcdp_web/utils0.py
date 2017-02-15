@@ -8,7 +8,7 @@ import mcdp
 def add_other_fields(self, res, request):
     res['navigation'] = self.get_navigation_links(request)    
     res['version'] = lambda: mcdp.__version__  # @UndefinedVariable
-    res['root'] =  self.get_root_relative_to_here(request)
+    res['root'] = self.get_root_relative_to_here(request)
 
     # template functions
     res['render_library_doc'] = lambda docname: self._render_library_doc(request, docname)
