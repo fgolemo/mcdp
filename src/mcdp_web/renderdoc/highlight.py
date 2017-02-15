@@ -29,9 +29,10 @@ from mcdp_web.images.images import (get_mime_for_format)
 from mcdp_web.renderdoc.xmlutils import bs, to_html_stripping_fragment,\
     check_html_fragment, to_html_stripping_fragment_document, describe_tag,\
     project_html
-from mocdp import ATTR_LOAD_NAME, logger, get_mcdp_tmp_dir, MCDPConstants
+from mcdp import logger, MCDPConstants
+from mocdp import get_mcdp_tmp_dir
 from mocdp.comp.context import Context
-from mocdp.exceptions import DPSemanticError, DPSyntaxError, DPInternalError
+from mcdp.exceptions import DPSemanticError, DPSyntaxError, DPInternalError
 from reprep import Report
 from system_cmd import CmdException, system_cmd_result
 
@@ -1144,14 +1145,15 @@ def make_figures(library, frag, raise_error_dp, raise_error_others, realpath, ge
 
             div = Tag(name='div')
 
+            att = MCDPConstants.ATTR_LOAD_NAME
             if tag0.has_attr('id'):
                 basename = tag0['id']
-            elif ndp is not None and hasattr(ndp, ATTR_LOAD_NAME):
-                basename = getattr(ndp, ATTR_LOAD_NAME)
-            elif template is not None and hasattr(template, ATTR_LOAD_NAME):
-                basename = getattr(template, ATTR_LOAD_NAME)
-            elif poset is not None and hasattr(poset, ATTR_LOAD_NAME):
-                basename = getattr(poset, ATTR_LOAD_NAME)
+            elif ndp is not None and hasattr(ndp, att):
+                basename = getattr(ndp, att)
+            elif template is not None and hasattr(template, att):
+                basename = getattr(template, att)
+            elif poset is not None and hasattr(poset, att):
+                basename = getattr(poset, att)
             else:
                 hashcode = hashlib.sha224(tag0.string).hexdigest()[-8:]
                 basename = 'code-%s' % (hashcode)

@@ -5,7 +5,7 @@ import os
 
 import numpy
 
-from mocdp import MCDPConstants
+from mcdp import MCDPConstants
 
 
 if 'raise_if_test_included' in os.environ:
@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 def get_test_index():
-    """ Returns i,n: machine index and tests """
+    """ Returns i,n: machine index and mcdp_comp_tests """
     n = int(os.environ.get('CIRCLE_NODE_TOTAL', 1))
     i = int(os.environ.get('CIRCLE_NODE_INDEX', 0))
     return i, n
@@ -24,7 +24,7 @@ def get_test_index():
 def should_do_basic_tests():
     
     # if there is build parallelism
-    # only do basic tests if we are #0
+    # only do basic mcdp_comp_tests if we are #0
     i, n = get_test_index()
 
     #logger.info('Testing box #%d of %d' % (i+1, n))
@@ -48,7 +48,7 @@ def load_tests_modules():
         import mcdp_report_ndp_tests
 
         from mocdp.comp.flattening import tests  # @Reimport
-        from mocdp.comp import tests  # @Reimport
+        import mcdp_comp_tests
 
         vname = MCDPConstants.ENV_TEST_SKIP_MCDPOPT
         if vname in os.environ:

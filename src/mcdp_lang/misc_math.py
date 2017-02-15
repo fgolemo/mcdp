@@ -10,7 +10,7 @@ from mcdp_posets.nat import Nat_mult_uppersets_continuous, Nat_add
 from mcdp_posets.rcomp_units import (R_dimensionless, mult_table_seq,
     RbicompUnits, rcomp_add,inverse_of_unit)
 from mocdp.comp.context import ValueWithUnits
-from mocdp.exceptions import DPSemanticError, DPNotImplementedError
+from mcdp.exceptions import DPSemanticError, DPNotImplementedError
 from mcdp_posets.poset import NotLeq
 
 inv_unit = inverse_of_unit

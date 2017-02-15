@@ -8,8 +8,8 @@ from mcdp_docs.manual_constants import MCDPManualConstants
 from mcdp_lang_utils import Where, location
 from mcdp_library import MCDPLibrary
 from mcdp_report.gg_utils import embed_images_from_library2
-from mocdp import logger
-from mocdp.exceptions import DPInternalError, DPSyntaxError
+from mcdp import logger
+from mcdp.exceptions import DPInternalError, DPSyntaxError
 
 from .abbrevs import other_abbrevs
 from .highlight import escape_for_mathjax_back, fix_subfig_references, html_interpret,  mark_console_pres,\

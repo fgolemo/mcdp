@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from ..exceptions import *
+from mcdp.exceptions import *
 
 from .context import *
 from .connection import *

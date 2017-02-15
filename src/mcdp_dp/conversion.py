@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
 from mcdp_posets import NotLeq, get_types_universe
-from mocdp.exceptions import  mcdp_dev_warning
+from mcdp.exceptions import  mcdp_dev_warning
 
 from .dp_generic_unary import WrapAMap
 from .primitive import PrimitiveDP

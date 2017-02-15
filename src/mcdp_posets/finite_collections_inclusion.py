@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
 from contracts.utils import raise_desc, check_isinstance
-from mocdp.exceptions import do_extra_checks, mcdp_dev_warning
+from mcdp.development import do_extra_checks, mcdp_dev_warning
 
 from .finite_collection import FiniteCollection
 from .finite_collection_as_space import FiniteCollectionAsSpace

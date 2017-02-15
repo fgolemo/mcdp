@@ -7,7 +7,7 @@ from contracts import contract
 from contracts.utils import indent, raise_desc
 from mcdp_posets import (LowerSet, NotBelongs, Poset, Space,
     SpaceProduct, UpperSet, UpperSets, poset_minima)
-from mocdp.exceptions import do_extra_checks
+from mcdp.development import do_extra_checks
 
 from .primitive_meta import PrimitiveMeta
 

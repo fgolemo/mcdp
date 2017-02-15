@@ -7,7 +7,7 @@ from pyramid.httpexceptions import HTTPFound
 from pyramid.security import remember, forget
 import yaml
 
-from mocdp import logger
+from mcdp import logger
 
 
 USERS = {}

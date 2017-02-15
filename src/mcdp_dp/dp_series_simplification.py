@@ -5,8 +5,9 @@ from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped, check_isinstance
 from mcdp_dp.dp_limit import Limit
 from mcdp_posets import PosetProduct
-from mocdp import logger
-from mocdp.exceptions import DPInternalError, do_extra_checks, mcdp_dev_warning
+from mcdp import logger
+from mcdp.exceptions import DPInternalError
+from mcdp.development import do_extra_checks, mcdp_dev_warning
 from multi_index.get_it_test import compose_indices, get_id_indices
 
 from .dp_constant import Constant

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from contracts.utils import check_isinstance
-from mocdp.exceptions import mcdp_dev_warning
+from mcdp.exceptions import mcdp_dev_warning
 
 from .dealing_with_special_letters import greek_letters, subscripts, subscripts_utf8, greek_letters_utf8
 from .parse_actions import (divide_parse_action,

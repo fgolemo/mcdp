@@ -1,4 +1,4 @@
-from mocdp import logger
+from mcdp import logger
 from bs4.element import Comment, Tag
 from mcdp_web.renderdoc.highlight import add_class
 

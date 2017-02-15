@@ -6,11 +6,11 @@ from contracts.utils import raise_desc
 from mcdp_dp import DPLoop2, Mux
 from mcdp_dp.dp_series_simplification import make_series
 from mcdp_posets import PosetProduct, get_types_universe
-from mocdp import logger
+from mcdp import logger
 from mocdp.comp.composite import CompositeNamedDP
 from mocdp.comp.context_functions import dpgraph_making_sure_no_reps
 from mocdp.comp.wrap import SimpleWrap
-from mocdp.exceptions import mcdp_dev_warning
+from mcdp.exceptions import mcdp_dev_warning
 
 
 @contract(ndp=CompositeNamedDP, returns=SimpleWrap)

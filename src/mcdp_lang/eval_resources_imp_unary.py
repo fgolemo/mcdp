@@ -15,7 +15,7 @@ from .utils_lists import unwrap_list
 from mcdp_posets import Nat, Rcomp, RcompUnits
 from mcdp_posets import NotLeq, get_types_universe
 from mocdp.comp.context import ValueWithUnits
-from mocdp.exceptions import DPSemanticError
+from mcdp.exceptions import DPSemanticError
 
 from .helpers import create_operation
 from .parts import CDPLanguage

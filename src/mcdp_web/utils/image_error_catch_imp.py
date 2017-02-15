@@ -2,7 +2,7 @@
 from .response import response_data
 from PIL import ImageFont
 import os
-from mocdp import logger
+from mcdp import logger
 
 
 def break_lines(s, maxwidth):

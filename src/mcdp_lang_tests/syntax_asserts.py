@@ -2,7 +2,7 @@
 from comptests.registrar import comptest
 from contracts.utils import raise_desc
 from mcdp_lang import parse_constant
-from mocdp.exceptions import DPUserAssertion
+from mcdp.exceptions import DPUserAssertion
 
 
 def expect(exc, f, *args):

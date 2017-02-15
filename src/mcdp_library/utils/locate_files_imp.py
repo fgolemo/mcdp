@@ -4,7 +4,7 @@ import fnmatch
 import os
 
 from contracts import contract
-from mocdp import MCDPConstants, logger
+from mcdp import MCDPConstants, logger
 import time
 from contracts.utils import check_isinstance
 

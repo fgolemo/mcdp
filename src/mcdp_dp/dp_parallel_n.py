@@ -6,7 +6,7 @@ from contracts.utils import indent
 from mcdp_dp.repr_strings import repr_h_map_parallel
 from mcdp_posets import PosetProduct
 from mcdp_posets.uppersets import lowerset_product_multi, upperset_product_multi
-from mocdp.exceptions import do_extra_checks
+from mcdp.development import do_extra_checks
 
 from .dp_series import get_product_compact
 from .primitive import PrimitiveDP

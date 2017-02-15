@@ -19,11 +19,11 @@ from mcdp_lang_tests.utils import assert_parse_ndp_semantic_error
 from mcdp_posets import LowerSets, Rcomp, UpperSet, UpperSets, PosetProduct, get_product_compact
 from mcdp_posets import Nat
 from mcdp_posets.rcomp_units import R_dimensionless
-from mocdp import ATTRIBUTE_NDP_RECURSIVE_NAME
 from mocdp.comp.context import ModelBuildingContext, Context
 from mocdp.comp.recursive_name_labeling import get_names_used
-from mocdp.exceptions import DPNotImplementedError, DPSemanticError,\
+from mcdp.exceptions import DPNotImplementedError, DPSemanticError,\
     DPSyntaxError
+from mcdp.constants import MCDPConstants
 
 
 @comptest
@@ -400,16 +400,16 @@ def check_get_names_used1():
 # . L . . . . . . . . . \ ProductN(R[N]×R[N] -> R[N²]) named: ('actuation', '_prod1') I = PosetProduct(R[N],R[N])
 # . L . . . . . . . . . \ GenericUnary(<mcdp_lang.misc_math.MultValue instance at 0x10d8dcbd8>) named: ('actuation', '_mult1
 # ') I = R[N²]
-
+    att =  MCDPConstants.ATTRIBUTE_NDP_RECURSIVE_NAME
     S1 = parse_poset('N')
-    setattr(S1, ATTRIBUTE_NDP_RECURSIVE_NAME, ('S1',))
+    setattr(S1, att, ('S1',))
     S2 = parse_poset('kg')
-    setattr(S2, ATTRIBUTE_NDP_RECURSIVE_NAME, ('S2',))
+    setattr(S2, att, ('S2',))
     S12 = PosetProduct((S1, S2))
     names = get_names_used(S12)
     assert names == [('S1',), ('S2',)], names
     P = parse_poset('J x W')
-    setattr(P, ATTRIBUTE_NDP_RECURSIVE_NAME, ('prod',))
+    setattr(P, att, ('prod',))
 
     S, _pack, _unpack = get_product_compact(P, S12)
     print S.__repr__()

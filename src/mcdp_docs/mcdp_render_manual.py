@@ -14,7 +14,7 @@ from mcdp_docs.manual_constants import MCDPManualConstants
 from mcdp_library import MCDPLibrary
 from mcdp_library.stdlib import get_test_librarian
 from mcdp_library.utils import locate_files
-from mocdp import logger
+from mcdp import logger
 from quickapp import QuickApp
 from reprep.utils import natsorted
 

@@ -2,10 +2,10 @@
 from collections import namedtuple
 
 from contracts.utils import indent, raise_desc, raise_wrapped
+from mcdp.development import do_extra_checks
 from mcdp_posets import (LowerSet, NotEqual, NotLeq, PosetProduct, UpperSet,
     UpperSets, get_types_universe, poset_maxima, poset_minima)
 from mcdp_posets.uppersets import upperset_project, LowerSets, lowerset_project
-from mocdp.exceptions import do_extra_checks
 
 from .primitive import Feasible, NotFeasible, PrimitiveDP
 from .tracer import Tracer

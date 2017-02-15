@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from contracts.utils import check_isinstance
 from mcdp_posets import R_dimensionless
-from mocdp.exceptions import mcdp_dev_warning
+from mcdp.exceptions import mcdp_dev_warning
 
 from .helpers import create_operation
 from .parts import CDPLanguage

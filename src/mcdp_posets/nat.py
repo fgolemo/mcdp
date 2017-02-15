@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
+import functools
 import random
+import sys
 
 from contracts.utils import raise_desc
-from mocdp.exceptions import do_extra_checks, mcdp_dev_warning
+from mcdp import MCDPConstants
+from mcdp.development import do_extra_checks, mcdp_dev_warning
 
 from .poset import NotLeq, Poset
 from .space import NotBelongs, NotEqual
-from mocdp import MCDPConstants
 
 
 __all__ = [
@@ -77,7 +79,6 @@ class Nat(Poset):
         assert False # pragma: no cover
 
     def get_test_chain(self, n):
-        import sys
         s = [0]
         
         if MCDPConstants.Nat_chain_include_maxint:
@@ -165,7 +166,6 @@ def Nat_add(a, b):
     assert isinstance(res, int), (res, type(res))
     return res
 
-import sys
 
 def Nat_mult_uppersets_continuous_seq(seq):
     """ Multiplication on Nat, extended for top, so that top*0 = Top """
@@ -195,7 +195,6 @@ def Nat_mult_uppersets_continuous(a, b):
     assert isinstance(res, int), (res, type(res))
     return res
 
-import functools
 
 def Nat_mult_lowersets_continuous(a, b):
     """ Multiplication on Nat, extended for top, so that top*0 = Top """

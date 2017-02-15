@@ -5,7 +5,7 @@ from mcdp_dp.dp_transformations import get_dp_bounds
 from mcdp_dp.primitive import ApproximableDP
 from mcdp_posets import LowerSets, NotBounded, UpperSets, NotLeq
 from mcdp_tests.generation import for_all_dps, primitive_dp_test
-from mocdp.exceptions import DPNotImplementedError
+from mcdp.exceptions import DPNotImplementedError
 
 
 @for_all_dps

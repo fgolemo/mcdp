@@ -1,5 +1,12 @@
 
-class BranchInfo:
+__all__ = [
+    '__version__', 
+    'BranchInfo',
+]
+
+__version__ = '3.1.0'
+
+class BranchInfo():
     """ Information about this particular branch """
-    branch_name = "inst02"
-    branch_topic = "Branch for public server"
+    branch_name = "1702-plane"
+    branch_topic = "Experiments on the plane"

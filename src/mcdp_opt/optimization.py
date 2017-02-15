@@ -6,7 +6,6 @@ import shutil
 from contracts import contract
 from mcdp_dp.dp_limit import Limit
 from mcdp_library import MCDPLibrary
-from mcdp_library.library import ATTR_LOAD_NAME
 from mcdp_opt.cachedp import CacheDP
 from mcdp_opt.compare_different_resources import less_resources2
 from mcdp_opt.context_utils import create_context0
@@ -22,10 +21,11 @@ from mocdp.comp.composite import CompositeNamedDP
 from mocdp.comp.context import CResource, get_name_for_fun_node
 from mocdp.comp.interfaces import NotConnected
 from mocdp.comp.wrap import SimpleWrap, dpwrap
-from mocdp.exceptions import mcdp_dev_warning
+from mcdp.exceptions import mcdp_dev_warning
 from mcdp.utils.memoize_simple_imp import memoize_simple
 import networkx as nx
 from reprep import Report
+from mcdp.constants import MCDPConstants
 
 
 _ = UpperSet, CResource, Poset
@@ -457,12 +457,13 @@ class Optimization():
 
         ndp = self.library.load_ndp(id_ndp)
 
-        a = getattr(ndp, ATTR_LOAD_NAME, None)
+        att = MCDPConstants.ATTR_LOAD_NAME
+        a = getattr(ndp, att, None)
 
         # TODO: check if there is a loop
         ndp = ndp.abstract()
         if a:
-            setattr(ndp, ATTR_LOAD_NAME, a)
+            setattr(ndp, att, a)
 
         assert isinstance(ndp, SimpleWrap)
 

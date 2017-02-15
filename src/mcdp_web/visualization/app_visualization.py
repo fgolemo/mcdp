@@ -16,7 +16,7 @@ from mcdp_web.renderdoc.xmlutils import to_html_stripping_fragment, bs
 from mcdp_web.utils0 import add_std_vars, add_other_fields
 from mcdp_web.visualization.add_html_links_imp import add_html_links
 from mocdp.comp.context import Context
-from mocdp.exceptions import DPSyntaxError, DPSemanticError,\
+from mcdp.exceptions import DPSyntaxError, DPSemanticError,\
     DPNotImplementedError, DPInternalError
 
 

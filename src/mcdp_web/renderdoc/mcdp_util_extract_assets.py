@@ -4,7 +4,7 @@ import sys
 from bs4 import BeautifulSoup
 
 from mcdp_report.embedded_images import extract_img_to_file
-from mocdp import logger
+from mcdp import logger
 
 
 def go():

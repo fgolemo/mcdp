@@ -12,7 +12,7 @@ from mcdp_posets import Rcomp
 from mcdp_posets.rcomp_units import RbicompUnits
 from mocdp.comp.context import CFunction, get_name_for_res_node, ValueWithUnits, \
     ModelBuildingContext
-from mocdp.exceptions import (DPInternalError, DPNotImplementedError,
+from mcdp.exceptions import (DPInternalError, DPNotImplementedError,
     DPSemanticError, mcdp_dev_warning)
 
 from .eval_constant_imp import NotConstant

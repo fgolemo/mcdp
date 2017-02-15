@@ -2,7 +2,7 @@
 from mcdp_report.report import report_dp1
 from mcdp_tests.generation import for_all_nameddps_dyn
 from mocdp.comp.interfaces import NotConnected
-from mocdp.exceptions import mcdp_dev_warning
+from mcdp.exceptions import mcdp_dev_warning
 
 
 @for_all_nameddps_dyn

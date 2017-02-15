@@ -2,7 +2,7 @@
 from contracts import contract
 from contracts.utils import raise_wrapped
 from mcdp_posets import Map, PosetProduct
-from mocdp.exceptions import DPInternalError
+from mcdp.exceptions import DPInternalError
 from multi_index import get_it
 from multi_index.inversion import transform_pretty_print, transform_right_inverse
 

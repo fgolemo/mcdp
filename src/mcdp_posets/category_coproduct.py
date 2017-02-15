@@ -3,9 +3,9 @@ import random
 
 from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped, indent
-from mocdp import ATTRIBUTE_NDP_RECURSIVE_NAME
 
 from .space import NotBelongs, NotEqual, Space
+from mcdp.constants import MCDPConstants
 
 
 __all__ = [
@@ -143,8 +143,9 @@ class Coproduct1Labels(Space):
             prefix0 = " %s. " % label
             prefix1 = " " * len(prefix0)
             s += "\n" + indent(S.repr_long(), prefix1, first=prefix0)
-            if hasattr(S, ATTRIBUTE_NDP_RECURSIVE_NAME):
-                a = getattr(S, ATTRIBUTE_NDP_RECURSIVE_NAME)
+            att = MCDPConstants.ATTRIBUTE_NDP_RECURSIVE_NAME
+            if hasattr(S, att):
+                a = getattr(S, att)
                 s += '\n  labeled as %s' % a.__str__()
         return s
 

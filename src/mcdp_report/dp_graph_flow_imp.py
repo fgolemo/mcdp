@@ -2,7 +2,7 @@
 from contracts import contract
 from mcdp_dp import DPLoop2, Parallel, PrimitiveDP, Series0
 from mcdp_dp.dp_parallel_n import ParallelN
-from mocdp.exceptions import mcdp_dev_warning
+from mcdp.exceptions import mcdp_dev_warning
 
 
 __all__ = [

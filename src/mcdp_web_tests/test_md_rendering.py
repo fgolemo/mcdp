@@ -9,8 +9,9 @@ from mcdp_library_tests.tests import enumerate_test_libraries, get_test_library
 from mcdp_web.renderdoc.highlight import get_minimal_document
 from mcdp_web.renderdoc.main import render_complete
 from mcdp_web_tests.test_server import test_mcdpweb_server
-from mocdp import get_mcdp_tmp_dir, logger
-from mocdp.exceptions import mcdp_dev_warning, DPSyntaxError
+from mocdp import get_mcdp_tmp_dir
+from mcdp import  logger
+from mcdp.exceptions import mcdp_dev_warning, DPSyntaxError
 from contracts.utils import check_isinstance
 from contextlib import contextmanager
 

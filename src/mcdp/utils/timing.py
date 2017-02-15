@@ -1,11 +1,14 @@
 from contextlib import contextmanager
 import time
-from mocdp import logger
 
-__all__ = ['timeit', 'timeit_wall']
+__all__ = [
+    'timeit', 
+    'timeit_wall',
+]
 
 @contextmanager
 def timeit(desc, minimum=None):
+    from mcdp import logger
     t0 = time.clock()
     yield
     t1 = time.clock()
@@ -15,8 +18,10 @@ def timeit(desc, minimum=None):
             return
     logger.debug('timeit %s: %.2f s (>= %s)' % (desc, delta, minimum))
 
+
 @contextmanager
 def timeit_wall(desc, minimum=None):
+    from mcdp import logger
     t0 = time.time()
     yield
     t1 = time.time()

@@ -8,8 +8,8 @@ from mcdp_report.movies import create_movie_from_png_sequence
 from mcdp_report.plotters.get_plotters_imp import get_all_available_plotters, \
     get_plotters
 from mcdp_report.plotters.interface import NotPlottable
-from mocdp import logger
-from mocdp.exceptions import DPInternalError
+from mcdp import logger
+from mcdp.exceptions import DPInternalError
 from reprep.config import RepRepDefaults
 from reprep.plot_utils.styles import ieee_spines, ieee_fonts
 

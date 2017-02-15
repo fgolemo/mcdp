@@ -43,14 +43,14 @@ from contracts import contract
 from contracts.utils import raise_desc
 from mcdp_dp import IdentityDP, Mux
 from mcdp_posets import Coproduct1Labels, SpaceProduct
-from mocdp import ATTRIBUTE_NDP_MAKE_FUNCTION, ATTRIBUTE_NDP_RECURSIVE_NAME
 from mocdp.comp.composite import CompositeNamedDP, cndp_get_name_ndp_notfunres
 from mocdp.comp.context import Context
 from mocdp.comp.interfaces import NamedDP
 from mocdp.comp.labelers import LabelerNDP
 from mocdp.comp.wrap import SimpleWrap
-from mocdp.exceptions import DPInternalError, mcdp_dev_warning
+from mcdp.exceptions import DPInternalError, mcdp_dev_warning
 from mocdp.ndp.named_coproduct import NamedDPCoproduct
+from mcdp.constants import MCDPConstants
 
 __all__ = [
     'get_labelled_version',
@@ -116,14 +116,15 @@ def get_names_used(I):
     
         Returns list of names or None.
     """
-    if hasattr(I, ATTRIBUTE_NDP_RECURSIVE_NAME):
-        return [getattr(I, ATTRIBUTE_NDP_RECURSIVE_NAME)]
+    att = MCDPConstants.ATTRIBUTE_NDP_RECURSIVE_NAME
+    if hasattr(I, att):
+        return [getattr(I, att)]
     
     if isinstance(I, SpaceProduct):
         res = []
         for sub in I.subs:
-            if hasattr(sub, ATTRIBUTE_NDP_RECURSIVE_NAME):
-                name = getattr(sub, ATTRIBUTE_NDP_RECURSIVE_NAME)
+            if hasattr(sub, att):
+                name = getattr(sub, att)
                 assert isinstance(name, tuple)
                 res.append(name)
             else:
@@ -151,8 +152,9 @@ def collect(I, imp):
         pass
         
     mcdp_dev_warning('a little more thought')
-    if not res and hasattr(I, ATTRIBUTE_NDP_RECURSIVE_NAME):
-        name = getattr(I, ATTRIBUTE_NDP_RECURSIVE_NAME)
+    att = MCDPConstants.ATTRIBUTE_NDP_RECURSIVE_NAME
+    if not res and hasattr(I, att):
+        name = getattr(I, att)
         return {name: imp}
 
     return res
@@ -214,8 +216,9 @@ def make_identity(a):  # @UnusedVariable
     return a.subresult
 
 def get_make_functions(ndp):
-    if hasattr(ndp, ATTRIBUTE_NDP_MAKE_FUNCTION):
-        return getattr(ndp, ATTRIBUTE_NDP_MAKE_FUNCTION)
+    att = MCDPConstants.ATTRIBUTE_NDP_MAKE_FUNCTION
+    if hasattr(ndp, att):
+        return getattr(ndp, att)
     else:
         return [ ('default', make_identity) ]
 

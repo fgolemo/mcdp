@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
 from contracts.utils import check_isinstance, raise_desc, raise_wrapped
-from mcdp_posets import PosetProduct, is_top
-from mcdp_posets.nat import Nat
+from mcdp_posets import PosetProduct, is_top, Nat
 from mcdp_posets.rcomp import finfo
 from mcdp_posets.utils import check_minimal
-from mocdp import MCDPConstants
-from mocdp.exceptions import mcdp_dev_warning, do_extra_checks
+from mcdp import MCDPConstants
+from mcdp.development import mcdp_dev_warning, do_extra_checks
 import numpy as np
 
 

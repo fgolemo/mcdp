@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from mocdp import logger
+from mcdp import logger
 
 from .context import Connection
 

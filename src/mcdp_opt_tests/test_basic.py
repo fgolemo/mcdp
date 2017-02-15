@@ -6,7 +6,6 @@ from comptests.registrar import comptest, comptest_fails
 from contracts import contract
 from mcdp_lang import parse_constant, parse_poset
 from mcdp_library import Librarian, MCDPLibrary
-from mcdp_library.library import ATTR_LOAD_NAME
 from mcdp_library.utils import dir_from_package_name
 from mcdp_opt.compare_different_resources import less_resources2
 from mcdp_opt.optimization import Optimization
@@ -17,8 +16,9 @@ from mcdp_report.gg_ndp import gvgen_from_ndp
 from mcdp_report.gg_utils import gg_figure
 from mocdp.comp.composite import cndp_get_name_ndp_notfunres
 from mocdp.comp.composite_templatize import cndp_templatize_children
-from mocdp.exceptions import mcdp_dev_warning
+from mcdp.exceptions import mcdp_dev_warning
 from reprep import Report
+from mcdp.constants import MCDPConstants
 
 
 def get_test_library2(libnames):
@@ -391,8 +391,8 @@ def opt_basic_8():
 
     ndp = library.load_ndp('DaguChassis')
     R = ndp.get_rtype('pwm1')
-    assert getattr(R, ATTR_LOAD_NAME) == 'PWM'
+    assert getattr(R, MCDPConstants.ATTR_LOAD_NAME) == 'PWM'
 
     ndp = library.load_ndp('DaguChassis')
     R = ndp.get_rtype('pwm1')
-    assert getattr(R, ATTR_LOAD_NAME) == 'PWM'
+    assert getattr(R, MCDPConstants.ATTR_LOAD_NAME) == 'PWM'

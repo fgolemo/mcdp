@@ -10,7 +10,7 @@ from mocdp.comp.context import (Connection, get_name_for_fun_node,
 from mocdp.comp.labelers import LabelerNDP
 from mocdp.comp.simplify_identities_imp import simplify_identities
 from mocdp.comp.wrap import SimpleWrap
-from mocdp.exceptions import DPInternalError
+from mcdp.exceptions import DPInternalError
 from mocdp.ndp.named_coproduct import NamedDPCoproduct
 
 

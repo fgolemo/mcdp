@@ -11,8 +11,8 @@ from mcdp_lang.parts import CDPLanguage
 from mcdp_lang.refinement import namedtuple_visitor_ext
 from mcdp_lang.syntax import Syntax
 from mcdp_lang.utils_lists import is_a_special_list
-from mocdp import MCDPConstants
-from mocdp.exceptions import DPSyntaxError, DPInternalError
+from mcdp import MCDPConstants
+from mcdp.exceptions import DPSyntaxError, DPInternalError
 
 
 unparsable_marker = '#@'

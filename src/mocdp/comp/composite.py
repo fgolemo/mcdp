@@ -6,14 +6,14 @@ from contracts.utils import (format_dict_long, format_list_long, raise_desc,
     raise_wrapped)
 from mcdp_dp import Mux
 from mcdp_posets import NotEqual, PosetProduct
-from mocdp import ATTR_LOAD_NAME
 from mocdp.comp.context import Context, is_fun_node_name
 from mocdp.comp.wrap import SimpleWrap
-from mocdp.exceptions import DPSemanticError
+from mcdp.exceptions import DPSemanticError
 
 from .context import Connection  # @UnusedImport
 from .interfaces import NamedDP
 from mocdp.comp.interfaces import NotConnected
+from mcdp.constants import MCDPConstants
 
 
 __all__ = [
@@ -152,8 +152,9 @@ class CompositeNamedDP(NamedDP):
     def __repr__(self):
         s = 'CompositeNDP'
 
-        if hasattr(self, ATTR_LOAD_NAME):
-            s += '\n (loaded as %r)' % getattr(self, ATTR_LOAD_NAME)
+        att = MCDPConstants.ATTR_LOAD_NAME
+        if hasattr(self, att):
+            s += '\n (loaded as %r)' % getattr(self, att)
 #         if hasattr(self, ATTRIBUTE_NDP_RECURSIVE_NAME):
 #             s += '\n (labeled as %s)' % getattr(self, ATTRIBUTE_NDP_RECURSIVE_NAME).__str__()
         for f in self._fnames:

@@ -6,7 +6,7 @@ from mcdp_dp_tests.basic import check_solve_r_chain, check_solve_f_chain
 from mcdp_dp_tests.dual import dual01_chain
 from mcdp_posets import UpperSets
 from mcdp_tests.generation import for_all_nameddps
-from mocdp import MCDPConstants
+from mcdp import MCDPConstants
 from mocdp.comp.interfaces import  NotConnected
 
 

@@ -4,11 +4,11 @@ from mcdp_posets import (NotBelongs, UpperSet,
     UpperSets, get_product_compact, poset_minima)
 from mcdp_posets import LowerSets, LowerSet
 from mcdp_posets.find_poset_minima.baseline_n2 import poset_maxima
-from mocdp.exceptions import DPInternalError, do_extra_checks, mcdp_dev_warning
+from mcdp.exceptions import DPInternalError
 from mcdp.utils.memoize_simple_imp import memoize_simple
-
 from .primitive import NotFeasible, PrimitiveDP
 from .tracer import Tracer
+from mcdp.development import do_extra_checks, mcdp_dev_warning
 
 
 __all__ = [

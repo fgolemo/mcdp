@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from . import mcdp_dev_warning, do_extra_checks  # @UnusedImport
+from .development import mcdp_dev_warning  
 
 
 class MCDPException(Exception):

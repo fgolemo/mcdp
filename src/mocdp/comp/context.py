@@ -6,11 +6,11 @@ from contracts.utils import check_isinstance, raise_desc
 from mcdp_dp import FunctionNode, PrimitiveDP, ResourceNode
 from mcdp_posets import FinitePoset , NotBounded, Poset, Space, PosetProductWithLabels
 from mcdp_posets.types_universe import express_value_in_isomorphic_space
-from mocdp import logger
+from mcdp import logger
 from mocdp.comp.interfaces import NamedDP
 from mocdp.comp.template_for_nameddp import TemplateForNamedDP
 from mocdp.comp.wrap import dpwrap
-from mocdp.exceptions import DPInternalError, DPSemanticError, mcdp_dev_warning
+from mcdp.exceptions import DPInternalError, DPSemanticError, mcdp_dev_warning
 
 
 _ = logger

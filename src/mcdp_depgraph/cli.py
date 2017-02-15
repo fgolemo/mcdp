@@ -22,7 +22,7 @@ class Depgraph(QuickApp):
         #         params.add_flag('cache')
 
     def define_jobs_context(self, context):
-        from mocdp import logger
+        from mcdp import logger
         logger.setLevel(logging.DEBUG)
 
         options = self.get_options()

@@ -2,7 +2,7 @@
 # from contracts import contract
 # from mcdp_dp import PrimitiveDP
 # from mcdp_posets import PosetProduct, Rcomp
-# from mocdp.exceptions import mcdp_dev_warning
+# from mcdp.exceptions import mcdp_dev_warning
 #
 #
 # __all__ = [

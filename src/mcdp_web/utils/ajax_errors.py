@@ -2,7 +2,7 @@
 import cgi
 import traceback
 
-from mocdp.exceptions import DPSemanticError, DPSyntaxError
+from mcdp.exceptions import DPSemanticError, DPSyntaxError
 
 
 __all__ = [
@@ -12,7 +12,7 @@ __all__ = [
 
 def format_exception_for_ajax_response(e, quiet=()):
     s = e.__repr__().decode('ascii', 'ignore')
-    from mocdp import logger
+    from mcdp import logger
     try:
         logger.error(s)
     except UnicodeEncodeError:

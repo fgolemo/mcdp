@@ -13,7 +13,7 @@ from mocdp.comp.composite import CompositeNamedDP
 from mocdp.comp.connection_reps import (relabel, there_are_repetitions,
     there_are_reps)
 from mocdp.comp.wrap import SimpleWrap
-from mocdp.exceptions import DPInternalError, DPSemanticError
+from mcdp.exceptions import DPInternalError, DPSemanticError
 
 from .context import Connection
 from .interfaces import NamedDP

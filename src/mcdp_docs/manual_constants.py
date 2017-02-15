@@ -1,7 +1,6 @@
 import datetime
-import mocdp
-from mocdp import MCDPConstants
-
+import mcdp
+from mcdp import MCDPConstants
 
 class MCDPManualConstants:
     
@@ -10,7 +9,7 @@ class MCDPManualConstants:
     main_template = '00_main_template.html'
     
     macros = {}
-    macros['PYMCDP_VERSION'] = mocdp.__version__
+    macros['PYMCDP_VERSION'] = mcdp.__version__
     # 'July 23, 2010'
     now = datetime.datetime.now()
     today = datetime.date.today()
@@ -25,9 +24,9 @@ class MCDPManualConstants:
     keywords = ['co-design', 'optimization', 'systems']
     macros['KEYWORDS_PDF'] = "; ".join(keywords)
     macros['KEYWORDS_HTML'] = ", ".join(keywords)
-    macros['PRODUCER'] = 'PyMCDP %s + PrinceXML + pdftk' % mocdp.__version__
+    macros['PRODUCER'] = 'PyMCDP %s + PrinceXML + pdftk' % mcdp.__version__
     macros['GENERATOR'] = macros['PRODUCER']
-    macros['CREATOR'] = 'PyMCDP %s' % mocdp.__version__
+    macros['CREATOR'] = 'PyMCDP %s' % mcdp.__version__
     
     # D:19970915110347
     macros['CREATION_DATE_PDF'] = "D:" + now.strftime("%Y%m%d%H%M%S-05'00'")

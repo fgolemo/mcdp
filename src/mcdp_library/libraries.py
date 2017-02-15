@@ -3,8 +3,8 @@ import os
 
 from contracts import contract
 from contracts.utils import raise_desc, check_isinstance
-from mocdp import MCDPConstants, logger
-from mocdp.exceptions import DPSemanticError
+from mcdp import MCDPConstants, logger
+from mcdp.exceptions import DPSemanticError
 
 from .library import MCDPLibrary
 from .utils import locate_files

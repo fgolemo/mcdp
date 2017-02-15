@@ -10,13 +10,13 @@ from contracts import contract
 from mcdp_docs.manual_constants import MCDPManualConstants
 from mcdp_docs.read_bibtex import get_bibliography
 from mcdp_web.renderdoc.highlight import add_class
-from mocdp import logger
+from mcdp import logger
 
 
 def get_manual_css_frag():
     """ Returns fragment of doc with CSS, either inline or linked,
         depending on MCDPConstants.manual_link_css_instead_of_including. """
-    from mocdp import MCDPConstants 
+    from mcdp import MCDPConstants 
     
     link_css = MCDPConstants.manual_link_css_instead_of_including
     

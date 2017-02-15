@@ -3,7 +3,7 @@ import logging
 import os
 
 from decent_params import UserError
-from mocdp import logger
+from mcdp import logger
 from quickapp import QuickAppBase
 
 from .solve_meat import solve_main

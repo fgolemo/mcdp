@@ -20,8 +20,8 @@ from contracts import contract
 from contracts.utils import indent, raise_desc
 from mcdp_library import Librarian, MCDPLibrary
 from mcdp_library.utils import dir_from_package_name
-from mocdp import logger
-from mocdp.exceptions import DPSemanticError, DPSyntaxError
+from mcdp import logger
+from mcdp.exceptions import DPSemanticError, DPSyntaxError
 from quickapp import QuickAppBase
 
 from .confi import describe_mcdpweb_params, parse_mcdpweb_params_from_dict

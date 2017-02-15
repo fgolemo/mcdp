@@ -12,9 +12,10 @@ from mcdp_tests import get_test_index
 from mcdp_tests.generation import for_all_source_mcdp,\
     for_all_source_mcdp_template, for_all_source_mcdp_poset,\
     for_all_source_mcdp_value, for_all_source_all
-from mocdp import logger, get_mcdp_tmp_dir
+from mcdp import logger
+from mocdp import get_mcdp_tmp_dir
 from mocdp.comp.context import Context
-from mocdp.exceptions import DPSemanticError, DPNotImplementedError
+from mcdp.exceptions import DPSemanticError, DPNotImplementedError
 from mcdp.utils.memoize_simple_imp import memoize_simple  # XXX: move sooner
 
 

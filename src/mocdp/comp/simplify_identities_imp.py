@@ -6,7 +6,7 @@ from mocdp.comp.composite import CompositeNamedDP, cndp_get_name_ndp_notfunres
 from mocdp.comp.context import Connection
 from mocdp.comp.interfaces import NotConnected
 from mocdp.comp.wrap import SimpleWrap
-from mocdp.exceptions import DPInternalError
+from mcdp.exceptions import DPInternalError
 
 
 __all__ = [

@@ -3,8 +3,9 @@ import copy
 
 from contracts import contract
 from contracts.utils import indent
-from mcdp_dp.primitive import PrimitiveDP
-from mocdp import ATTRIBUTE_NDP_RECURSIVE_NAME
+from mcdp import MCDPConstants
+
+from .primitive import PrimitiveDP
 
 
 __all__ = [
@@ -20,7 +21,7 @@ class LabelerDP(PrimitiveDP):
         R = dp.get_res_space()
         I0 = dp.get_imp_space()
         Imarked = copy.copy(I0)
-        setattr(Imarked, ATTRIBUTE_NDP_RECURSIVE_NAME, recname)
+        setattr(Imarked, MCDPConstants.ATTRIBUTE_NDP_RECURSIVE_NAME, recname)
         PrimitiveDP.__init__(self, F=F, R=R, I=Imarked)
         self.recname = recname
 

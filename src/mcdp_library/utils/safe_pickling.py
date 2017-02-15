@@ -2,7 +2,7 @@
 from .debug_pickler import find_pickling_error
 from .safe_write import safe_read, safe_write
 from contracts import describe_type
-from mocdp import logger
+from mcdp import logger
 import sys
 
 if sys.version_info[0] >= 3:

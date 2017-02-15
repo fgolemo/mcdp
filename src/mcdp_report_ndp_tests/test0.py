@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from comptests.registrar import comptest_fails
+from mcdp import logger
 from mcdp_lang.syntax import Syntax
 from mcdp_lang_tests.syntax_spaces import assert_equal_string
 from mcdp_report.gg_ndp import gvgen_from_ndp
@@ -8,7 +9,6 @@ from mcdp_report.report import report_dp1, report_ndp1
 from mcdp_tests.generation import (for_all_dps_dyn, for_all_nameddps,
                                    for_all_nameddps_dyn, for_all_source_mcdp)
 from mcdp_web.renderdoc.xmlutils import project_html
-from mocdp import logger
 
 
 @for_all_source_mcdp
@@ -71,20 +71,20 @@ if False:
     def graph_greenredsym(_, ndp):
         _gg = gvgen_from_ndp(ndp, style='greenredsym')
 
-
-@comptest_fails
-def parcheck_space():
-    sources = [
-        "(J × A) × (m × s × Nat)",
-        "J x A",
-        "(J x A)",
-    ]
-    filename = None
-    parse_expr = Syntax.space_prec
-    # print parse_expr
-    for source in sources:
-        print('source = %r' % source)
-        check_syntax(filename, source, parse_expr=parse_expr)
+# 
+# @comptest_fails
+# def parcheck_space():
+#     sources = [
+#         "(J × A) × (m × s × Nat)",
+#         "J x A",
+#         "(J x A)",
+#     ]
+#     filename = None
+#     parse_expr = Syntax.space_prec
+#     # print parse_expr
+#     for source in sources:
+#         print('source = %r' % source)
+#         check_syntax(filename, source, parse_expr=parse_expr)
 
 @comptest_fails 
 def parcheck_fvalue():

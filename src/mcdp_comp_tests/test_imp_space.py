@@ -10,7 +10,7 @@ from mcdp_posets import SpaceProduct
 from mcdp_report.gg_ndp import gvgen_from_ndp
 from mcdp_report_ndp_tests.test1 import GetValues
 from mcdp_tests.generation import for_all_nameddps
-from mocdp import ATTRIBUTE_NDP_RECURSIVE_NAME
+from mcdp import MCDPConstants
 from mocdp.comp.composite import CompositeNamedDP
 from mocdp.comp.composite_makecanonical import cndp_makecanonical
 from mocdp.comp.interfaces import NotConnected
@@ -52,16 +52,16 @@ def make_a2(a):
 @comptest
 def test_imp_space_2():
     ndp0 = parse_ndp("""
-addmake(root: code mocdp.comp.tests.test_imp_space.make_root)
+addmake(root: code mcdp_comp_tests.test_imp_space.make_root)
 mcdp {
     a = instance 
         
-        addmake(root: code mocdp.comp.tests.test_imp_space.make_a)
+        addmake(root: code mcdp_comp_tests.test_imp_space.make_a)
         mcdp {
         
         a2 = instance 
         
-        addmake(root: code mocdp.comp.tests.test_imp_space.make_a2) 
+        addmake(root: code mcdp_comp_tests.test_imp_space.make_a2) 
         catalogue {
             provides capacity [J]
             requires mass [g]
@@ -75,7 +75,7 @@ mcdp {
     }
     
     b = instance 
-    addmake(root: code mocdp.comp.tests.test_imp_space.make_b)
+    addmake(root: code mcdp_comp_tests.test_imp_space.make_b)
     catalogue {
         provides capacity [J]
         requires mass [g]
@@ -283,7 +283,7 @@ mcdp {
     ur = dp.solve(f)
     I = dp.get_imp_space()
     assert isinstance(I, SpaceProduct)
-    print(getattr(I, ATTRIBUTE_NDP_RECURSIVE_NAME, 'no attr'))
+    print(getattr(I, MCDPConstants.ATTRIBUTE_NDP_RECURSIVE_NAME, 'no attr'))
     print('I: %s' % I)
     print('get_names_used: %s' % get_names_used(I))
 

@@ -13,7 +13,7 @@ from mcdp_dp.dp_labeler import LabelerDP
 from mcdp_dp.dp_max import MaxF1DP, MinR1DP, MaxR1DP, MinF1DP
 from mcdp_lang import parse_poset
 from mcdp_posets import FiniteCollectionAsSpace, PosetProduct, Nat, Rcomp
-from mocdp import MCDPConstants
+from mcdp import MCDPConstants
 
 
 all_primitivedps_tests = []

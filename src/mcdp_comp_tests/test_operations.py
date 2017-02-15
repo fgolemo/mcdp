@@ -3,7 +3,7 @@ from mcdp_tests.generation import for_all_nameddps
 from mocdp.comp.composite import CompositeNamedDP
 from mocdp.comp.interfaces import NotConnected
 from mocdp.comp.wrap import SimpleWrap
-from mocdp.exceptions import DPSemanticErrorNotConnected, mcdp_dev_warning
+from mcdp.exceptions import DPSemanticErrorNotConnected, mcdp_dev_warning
 
 
 @for_all_nameddps

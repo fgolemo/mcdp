@@ -5,9 +5,9 @@ from mcdp_lang_utils.where import Where
 from mcdp_lang_utils.where_utils import location
 from mcdp_web.renderdoc.latex_preprocess import extract_maths
 from mcdp_web.renderdoc.markdown_transform import censor_markdown_code_blocks
-from mocdp import MCDPConstants
-from mocdp import logger
-from mocdp.exceptions import DPSyntaxError
+from mcdp import MCDPConstants
+from mcdp import logger
+from mcdp.exceptions import DPSyntaxError
 
 
 # from mcdp_web.renderdoc.latex_preprocess import extract_maths

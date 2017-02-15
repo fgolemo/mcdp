@@ -3,7 +3,7 @@ from contracts import contract
 from contracts.utils import raise_desc
 from mcdp_dp import NotFeasible
 from mcdp_posets import LowerSet, Poset, UpperSet, poset_maxima, poset_minima
-from mocdp.exceptions import do_extra_checks
+from mcdp.development import do_extra_checks
 
 from .primitive import PrimitiveDP
 

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from contracts.utils import raise_desc, raise_wrapped
 from mcdp_lang_utils import Where
-from mocdp.exceptions import DPInternalError
+from mcdp.exceptions import DPInternalError
 
 from .namedtuple_tricks import namedtuplewhere
 

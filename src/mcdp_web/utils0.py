@@ -1,13 +1,13 @@
 from contracts.utils import check_isinstance, indent
-import mocdp
-from mocdp import logger
+import mcdp
+from mcdp import logger
 import traceback
 from compmake.utils.duration_hum import duration_compact
 
 def add_other_fields(self, res, request):
     res['navigation'] = self.get_navigation_links(request)
     
-    res['version'] = lambda: mocdp.__version__
+    res['version'] = lambda: mcdp.__version__
     res['root'] =  self.get_root_relative_to_here(request)
 
     # template functions

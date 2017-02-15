@@ -7,7 +7,7 @@ from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped
 from mcdp_dp import Identity, Mux
 from mcdp_posets import PosetProduct, get_types_universe
-from mocdp import logger
+from mcdp import logger
 from mocdp.comp.composite import CompositeNamedDP
 from mocdp.comp.connection import get_connection_multigraph
 from mocdp.comp.context import (CResource, Connection, get_name_for_fun_node,
@@ -15,7 +15,7 @@ from mocdp.comp.context import (CResource, Connection, get_name_for_fun_node,
 from mocdp.comp.flattening.flatten import cndp_flatten
 from mocdp.comp.interfaces import NotConnected
 from mocdp.comp.wrap import SimpleWrap, dpwrap
-from mocdp.exceptions import DPSemanticErrorNotConnected
+from mcdp.exceptions import DPSemanticErrorNotConnected
 from mcdp.utils.memoize_simple_imp import memoize_simple
 import numpy as np
 

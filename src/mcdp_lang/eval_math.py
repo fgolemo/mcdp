@@ -14,9 +14,9 @@ from mcdp_posets import (Int, Nat, RbicompUnits, RcompUnits,
 from mcdp_posets import is_top
 from mcdp_posets.rcomp_units import (RbicompUnits_subtract, RbicompUnits_reflect,
                                      R_dimensionless)
-from mocdp import MCDPConstants
+from mcdp import MCDPConstants
 from mocdp.comp.context import CResource, ValueWithUnits
-from mocdp.exceptions import DPInternalError, DPSemanticError,\
+from mcdp.exceptions import DPInternalError, DPSemanticError,\
     DPNotImplementedError
 
 from .eval_constant_imp import NotConstant

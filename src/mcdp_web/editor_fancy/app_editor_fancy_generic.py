@@ -25,9 +25,9 @@ from mcdp_web.utils import (ajax_error_catch,
                             format_exception_for_ajax_response, response_image)
 from mcdp_web.utils.response import response_data
 from mcdp_web.utils0 import add_other_fields
-from mocdp import logger
+from mcdp import logger
 from mocdp.comp.interfaces import NamedDP, NotConnected
-from mocdp.exceptions import DPInternalError, DPSemanticError, DPSyntaxError
+from mcdp.exceptions import DPInternalError, DPSemanticError, DPSyntaxError
 
 
 from mcdp_lang.parse_interface import( parse_ndp_eval, parse_ndp_refine, 

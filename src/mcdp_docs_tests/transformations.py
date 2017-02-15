@@ -466,6 +466,10 @@ href="mailto:censi@mit.edu">censi@mit.edu</a>.
 
 """
     s2 = tryit(s) 
+    print s2
+    
+    sub = r"""<p>Please send any comments, suggestions, or bug reports to <a href="mailto:censi@mit.edu">censi@mit.edu.</p>"""
+    assert sub in s2
     
 if __name__ == '__main__': 
 #     another2()

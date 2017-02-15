@@ -2,7 +2,7 @@
 from contracts.utils import raise_desc
 from mcdp_dp import RcompUnitsPowerDP
 from mcdp_posets import RcompUnits
-from mocdp.exceptions import DPSemanticError
+from mcdp.exceptions import DPSemanticError
 
 from .parts import CDPLanguage
 

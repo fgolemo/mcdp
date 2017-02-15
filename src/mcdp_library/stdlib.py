@@ -4,7 +4,7 @@ import os
 from contracts.utils import raise_desc
 from mcdp_library import Librarian
 from mcdp_library.utils import dir_from_package_name
-from mocdp import logger, MCDPConstants
+from mcdp import logger, MCDPConstants
 from mcdp.utils.memoize_simple_imp import memoize_simple
 
 

@@ -42,7 +42,7 @@ for_all_nameddps_dyn = make_accumulator()
 # @decorator
 # def primitive_dp_test(f):
 #     print('decorating %s' % f)
-#     from mocdp import logger
+#     from mcdp import logger
 #     def f0(id_dp, dp):
 #         try:
 #             return f(id_dp, dp)
@@ -55,7 +55,7 @@ for_all_nameddps_dyn = make_accumulator()
 
 @contextmanager
 def primitive_dp_test(id_dp, dp):
-    from mocdp import logger
+    from mcdp import logger
     try:
         yield
     except:
