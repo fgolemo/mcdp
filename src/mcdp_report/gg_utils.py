@@ -1,21 +1,21 @@
 # -*- coding: utf-8 -*-
 """ Utils for graphgen """
-
 import codecs
-from contextlib import contextmanager
 from copy import deepcopy
 import os
 import traceback
 
 from contracts import contract
 from contracts.utils import check_isinstance, raise_desc, indent
-from mcdp.utils.string_utils import get_md5
-from mcdp.utils.timing import timeit_wall
 from mcdp import logger, MCDPConstants
 from mcdp.exceptions import mcdp_dev_warning, DPSemanticError
+from mcdp.utils.string_utils import get_md5
+from mcdp.utils.timing import timeit_wall
+from mcdp_utils_xml import bs
 import networkx as nx  # @UnresolvedImport
 from reprep.constants import MIME_PDF, MIME_PLAIN, MIME_PNG, MIME_SVG
 from system_cmd import CmdException, system_cmd_result
+from mcdp.utils.tmpdir import tmpfile
 
 
 def graphviz_run(filename_dot, output, prog='dot'):
@@ -27,16 +27,12 @@ def graphviz_run(filename_dot, output, prog='dot'):
 
     cmd = [prog, '-T%s' % encoder, '-o', output, filename_dot]
     
-#     system_cmd_result(cwd='.', cmd=['cp', filename_dot, 'last_processed.dot'])
-#     print('just before running graphviz')
     with timeit_wall('running graphviz on %s' % filename_dot, 1.0):
         try:
             # print('running graphviz')
             system_cmd_result(cwd='.', cmd=cmd,
-                     #display_stdout=False,
-                     display_stdout=True,
-                     #display_stderr=False,
-                     display_stderr=True,
+                     display_stdout=False,
+                     display_stderr=False,
                      raise_on_error=True,
                      )
             # print('done')
@@ -46,7 +42,6 @@ def graphviz_run(filename_dot, output, prog='dot'):
             contents = open(filename_dot).read()
             with open(emergency, 'w') as f:
                 f.write(contents)
-            # print(contents)
             raise
     
 
@@ -127,12 +122,11 @@ def gg_figure(r, name, ggraph, do_png=True, do_pdf=True, do_svg=True,
                 with f.data_file('graph_svg', MIME_SVG) as filename:
                     graphviz_run(filename_dot, filename, prog=prog)
                     
-                    from mcdp_web.renderdoc.xmlutils import bs
                     from mcdp_report.embedded_images import embed_svg_images
                     data = open(filename).read()
                     soup = bs(data)
                     embed_svg_images(soup)
-#                     data = to_html_stripping_fragment(soup)
+                    # does not keep doctype: s = to_html_stripping_fragment(soup)
                     # this will keep the doctype
                     s = str(soup)
                     s = s.replace('<fragment>','')
@@ -162,10 +156,7 @@ def write_bytes_to_file_as_utf8(s, filename):
     check_isinstance(s, bytes)
     u = unicode(s, 'utf-8')
     with codecs.open(filename, 'w', encoding='utf-8') as ff:
-        ff.write(u)
-    
-                            
-                            
+        ff.write(u)     
 
 allowed_formats = ['png', 'pdf', 'svg', 'dot']
 
@@ -247,10 +238,3 @@ def embed_images_from_library2(soup, library, raise_errors=True):
     return None
          
 
-@contextmanager
-def tmpfile(suffix):
-    """ Yields the name of a temporary file """
-    import tempfile
-    temp_file = tempfile.NamedTemporaryFile(suffix=suffix)
-    yield temp_file.name
-    temp_file.close()

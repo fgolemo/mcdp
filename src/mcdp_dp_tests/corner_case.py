@@ -3,12 +3,9 @@ from nose.tools import assert_raises, assert_equal
 
 from comptests.registrar import comptest, run_module_tests, comptest_fails
 from contracts import ContractNotRespected
-from mcdp_dp import JoinNDP, MeetNDP
-from mcdp_dp.dp_dummy import Template
-from mcdp_dp.dp_inv_mult import InvMult2Nat
-from mcdp_dp.dp_inv_plus import InvPlus2, InvPlus2Nat
-from mcdp_dp.dp_series import Series
-from mcdp_dp.primitive import NotSolvableNeedsApprox
+from mcdp import MCDPConstants
+from mcdp.exceptions import DPInternalError, DPSemanticError
+from mcdp_dp import InvMult2Nat, InvPlus2, InvPlus2Nat, JoinNDP, MeetNDP, NotSolvableNeedsApprox, Series, Template
 from mcdp_lang.parse_actions import parse_wrap
 from mcdp_lang.parse_interface import parse_poset, parse_template, parse_ndp, parse_ndp_refine
 from mcdp_lang.suggestions import apply_suggestions, get_suggestions
@@ -17,13 +14,11 @@ from mcdp_maps import ProductNNatMap
 from mcdp_posets import Nat
 from mcdp_posets_tests.utils import assert_belongs, assert_does_not_belong
 from mcdp_report.html import ast_to_html
+from mcdp_utils_xml import project_html
 from mcdp_web.editor_fancy.app_editor_fancy_generic import html_mark
-from mcdp_web.renderdoc.xmlutils import project_html
-from mcdp import MCDPConstants
 from mocdp.comp.composite_makecanonical import connect_resources_to_outside, connect_functions_to_outside
 from mocdp.comp.context import Context
 from mocdp.comp.wrap import dpwrap
-from mcdp.exceptions import DPInternalError, DPSemanticError
 
 
 @comptest

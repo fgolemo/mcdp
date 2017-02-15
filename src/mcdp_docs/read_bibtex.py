@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from mcdp_web.renderdoc.xmlutils import bs
+from mcdp_utils_xml import bs
 from bs4.element import Tag, NavigableString
 
 # 

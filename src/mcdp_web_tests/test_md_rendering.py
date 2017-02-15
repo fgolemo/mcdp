@@ -1,19 +1,20 @@
 # -*- coding: utf-8 -*-
+import codecs
+from contextlib import contextmanager
 import os
 import shutil
 import tempfile
 
+from contracts.utils import check_isinstance
+from mcdp import  logger
+from mcdp.exceptions import mcdp_dev_warning, DPSyntaxError
+from mcdp.utils.tmpdir import get_mcdp_tmp_dir
 from mcdp_library import MCDPLibrary
 from mcdp_library.library_utils import list_library_files
 from mcdp_library_tests.tests import enumerate_test_libraries, get_test_library
 from mcdp_web.renderdoc.highlight import get_minimal_document
 from mcdp_web.renderdoc.main import render_complete
 from mcdp_web_tests.test_server import test_mcdpweb_server
-from mcdp.utils.tmpdir import get_mcdp_tmp_dir
-from mcdp import  logger
-from mcdp.exceptions import mcdp_dev_warning, DPSyntaxError
-from contracts.utils import check_isinstance
-from contextlib import contextmanager
 
 
 def define_tests_mcdp_web(context):
@@ -46,7 +47,6 @@ def read_file_encoded_as_utf8(filename):
     s = u.encode('utf-8')
     return s
 
-import codecs
     
 def write_file_encoded_as_utf8(filename, data):
     check_isinstance(data, str)

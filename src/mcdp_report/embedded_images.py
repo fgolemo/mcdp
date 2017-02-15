@@ -360,7 +360,6 @@ def parse_includegraphics_option_string(latex_options):
     return props
     
     
-
 def get_length_in_inches(s):
     """ "1cm" = 0.393 """
 #     s = s.replace('\\columnwidth', '8.')

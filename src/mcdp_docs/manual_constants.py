@@ -1,6 +1,8 @@
 import datetime
-import mcdp
+
 from mcdp import MCDPConstants
+import mcdp
+
 
 class MCDPManualConstants:
     

@@ -5,9 +5,9 @@ import re
 from contracts import contract
 from contracts.interface import Where
 from contracts.utils import raise_desc, raise_wrapped, check_isinstance
-from mcdp.utils.string_utils import get_md5
 from mcdp import logger
 from mcdp.exceptions import DPSyntaxError
+from mcdp.utils.string_utils import get_md5
 
 from .latex_inside_equation_abbrevs import replace_inside_equations
 from .markdown_transform import is_inside_markdown_quoted_block

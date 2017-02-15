@@ -3,11 +3,6 @@ from .logs import logger
 
 __all__ = []
 
-import decent_logs
-import decent_params
-import quickapp
-
-
 
 def suggest_package(name):
     msg = """You could try installing the package using:
@@ -16,6 +11,15 @@ def suggest_package(name):
 """ % name
     logger.info(msg)
     
+try:    
+    import decent_logs  # @UnusedImport
+    import decent_params  # @UnusedImport
+    import quickapp  # @UnusedImport
+except ImportError as e:
+    logger.error(e)
+    suggest_package('python-numpy')
+    raise Exception('Numpy not available')
+
 try:
     import numpy
     numpy.seterr('raise')

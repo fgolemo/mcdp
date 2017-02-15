@@ -26,7 +26,7 @@ from mcdp_report.generic_report_utils import (
 from mcdp_report.html import ast_to_html, get_css_filename
 from mcdp_report.plotters.get_plotters_imp import get_all_available_plotters
 from mcdp_web.images.images import (get_mime_for_format)
-from mcdp_web.renderdoc.xmlutils import bs, to_html_stripping_fragment,\
+from mcdp_utils_xml import bs, to_html_stripping_fragment,\
     check_html_fragment, to_html_stripping_fragment_document, describe_tag,\
     project_html
 from mcdp import logger, MCDPConstants

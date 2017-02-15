@@ -1,6 +1,6 @@
 from bs4.element import NavigableString, Tag
 
-from mcdp_web.renderdoc.xmlutils import bs
+from mcdp_utils_xml import bs
 
 
 def add_html_links(frag, library_name, get_link):

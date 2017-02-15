@@ -1,6 +1,6 @@
 from bs4.element import Tag
 from mcdp_web.renderdoc.highlight import add_class
-from mcdp_web.renderdoc.xmlutils import to_html_stripping_fragment, bs
+from mcdp_utils_xml import to_html_stripping_fragment, bs
 
 def other_abbrevs(s):
     """

@@ -36,7 +36,7 @@ class AppStatus():
         
         access = 'public' if self.options.allow_anonymous else 'private'
         res = {
-            'version': mcdp.__version__,
+            'version': mcdp.__version__,  # @UndefinedVariable
             'server-name': socket.gethostname(),
             'access': access,
             'geoip': geoip(),

@@ -8,7 +8,7 @@ from mcdp_report.html import ast_to_html
 from mcdp_report.report import report_dp1, report_ndp1
 from mcdp_tests.generation import (for_all_dps_dyn, for_all_nameddps,
                                    for_all_nameddps_dyn, for_all_source_mcdp)
-from mcdp_web.renderdoc.xmlutils import project_html
+from mcdp_utils_xml import project_html
 
 
 @for_all_source_mcdp

@@ -10,30 +10,27 @@ from pyramid.renderers import render_to_response  # @UnresolvedImport
 
 from contracts import contract
 from contracts.utils import check_isinstance, raise_desc
-from mcdp_lang.eval_warnings import warn_language, MCDPWarnings
-from mcdp_lang.parts import CDPLanguage
-from mcdp_lang.refinement import SemanticInformation, infer_types_of_variables
+from mcdp import logger
+from mcdp.exceptions import DPInternalError, DPSemanticError, DPSyntaxError
+from mcdp.utils.timing import timeit_wall
 from mcdp_lang.suggestions import get_suggestions, apply_suggestions
 from mcdp_lang.syntax import Syntax
-from mcdp_lang.utils_lists import unwrap_list
 from mcdp_library import MCDPLibrary
 from mcdp_report.html import ast_to_html, ATTR_WHERE_CHAR, ATTR_WHERE_CHAR_END
 from mcdp_web.editor_fancy.image import get_png_data_model, \
     ndp_template_enclosed, get_png_data_unavailable, get_png_data_poset,\
     get_png_data_syntax_model
+from mcdp_web.editor_fancy.warnings_unconnected import generate_unconnected_warnings
 from mcdp_web.utils import (ajax_error_catch,
                             format_exception_for_ajax_response, response_image)
 from mcdp_web.utils.response import response_data
 from mcdp_web.utils0 import add_other_fields
-from mcdp import logger
-from mocdp.comp.interfaces import NamedDP, NotConnected
-from mcdp.exceptions import DPInternalError, DPSemanticError, DPSyntaxError
-
+from mocdp.comp.interfaces import NamedDP
 
 from mcdp_lang.parse_interface import( parse_ndp_eval, parse_ndp_refine, 
     parse_template_eval, parse_template_refine, parse_constant_eval, 
     parse_constant_refine, parse_poset_eval, parse_poset_refine)
-from mcdp.utils.timing import timeit_wall
+from mcdp.utils.string_utils import get_sha1
 
 
 
@@ -124,7 +121,6 @@ class AppEditorFancyGeneric():
         config.add_route(route, url)
         config.add_view(view, route_name=route, renderer=renderer)
 
-
         parse = lambda req: self.ajax_parse_generic(req, spec)
         route = spec.url_part + '_ajax_parse'
         url2 = url + 'ajax_parse'
@@ -133,7 +129,7 @@ class AppEditorFancyGeneric():
 
         graph = lambda req: self.graph_generic(req, spec)
         route = spec.url_part + '_graph'
-        url2 = url + 'graph.{data_format}'
+        url2 = url + 'graph.{text_hash}.{data_format}'
         config.add_route(route, url2)
         config.add_view(graph, route_name=route)
 
@@ -163,9 +159,7 @@ class AppEditorFancyGeneric():
 
         return ajax_error_catch(go)
 
-    #@add_std_vars
     def view_edit_form_fancy_generic(self, request, spec):
-#         print('view_edit_form_fancy_generic request.url: %s' % request.url)
         widget_name = self.get_widget_name(request, spec)
 
         filename = '%s.%s' % (widget_name, spec.extension)
@@ -177,16 +171,17 @@ class AppEditorFancyGeneric():
         nrows = min(nrows, 25)
 
         source_code = cgi.escape(source_code)
-        res=  {'source_code': unicode(source_code, 'utf-8'),
-                'source_code_json': unicode(json.dumps(source_code), 'utf-8'),
-                'realpath': realpath,
-                spec.url_variable: widget_name,
-                'rows': nrows,
-                'navigation': self.get_navigation_links(request),
-
-                'ajax_parse': spec.url_part + '_ajax_parse',
-                'error': None,
-                'url_part': spec.url_part}
+        res = {
+            'source_code': unicode(source_code, 'utf-8'),
+            'source_code_json': unicode(json.dumps(source_code), 'utf-8'),
+            'realpath': realpath,
+            spec.url_variable: widget_name,
+            'rows': nrows,
+            'navigation': self.get_navigation_links(request),
+            'ajax_parse': spec.url_part + '_ajax_parse',
+            'error': None,
+            'url_part': spec.url_part,
+        }
 
         add_other_fields(self, res, request)
         return res
@@ -209,18 +204,20 @@ class AppEditorFancyGeneric():
     def ajax_parse_generic(self, request, spec):
         widget_name = self.get_widget_name(request, spec)
         string = self.get_text_from_request2(request)
+        text = request.json_body['text'].encode('utf8')
         req = {'text': request.json_body['text']}
         library_name = self.get_current_library_name(request)
-        key = (library_name, spec, widget_name)
+        text_hash = get_sha1(text)
+        key = (library_name, spec.url_part, widget_name, text_hash)
 
         library = self.get_library(request)
         cache = self.last_processed2
-
 
         def go():
             with timeit_wall('process_parse_request'):
                 res = process_parse_request(library, string, spec, key, cache)
             res['request'] = req
+            
             return res
 
         return ajax_error_catch(go)
@@ -229,12 +226,16 @@ class AppEditorFancyGeneric():
         def go():
             with timeit_wall('graph_generic', 1.0):
                 data_format = str(request.matchdict['data_format'])  # unicode
+                text_hash = str(request.matchdict['text_hash'])
                 library = self.get_library(request)
                 widget_name = self.get_widget_name(request, spec)
                 library_name = self.get_current_library_name(request)
-                key = (library_name, spec, widget_name)
+                
+                key = (library_name, spec.url_part, widget_name, text_hash)
     
                 if not key in self.last_processed2:
+                    logger.error('Cannot find key %s' % str(key))
+                    logger.error('keys: %s' % list(self.last_processed2))
                     l = self.get_library(request)
                     context = l._generate_context_with_hooks()
                     thing = spec.load(l, widget_name, context=context)
@@ -259,22 +260,8 @@ class AppEditorFancyGeneric():
 
         basename = '%s.%s' % (widget_name, spec.extension)
         l = self.get_library(request)
-
-#         url_edit0 = ('/libraries/%s/%s/%s/views/edit_fancy/' %
-#                     (library, spec.url_part, widget_name))
-#         url_edit = self.make_relative(request, url_edit0)
-#         
-#         path = urlparse.urlparse(request.url).path + '/'
-#         r = os.path.relpath('/', path)
-#         url_edit2 = r + url_edit0
-        
         url_edit = '../%s/views/edit_fancy/' % widget_name
-#         
-#         print('request.url: %s' % request.url)
-        print('url_edit: %s' % url_edit)
-#         print('r: %s' % r)
-#         print('url_edit2: %s' % url_edit2)
-#         
+
         if l.file_exists(basename):
             error = 'File %r already exists.' % basename
             template = 'editor_fancy/error_model_exists_generic.jinja2'
@@ -494,31 +481,3 @@ def format_syntax_error2(parse_expr, string, e):
      
     return res
     
-
-def generate_unconnected_warnings(ndp, context0, x):
-    CDP = CDPLanguage
-    
-    if isinstance(x, CDP.BuildProblem):
-        si = SemanticInformation()
-        line_exprs = unwrap_list(x.statements.statements)
-        infer_types_of_variables(line_exprs, context0, si)
-        try:
-            ndp.check_fully_connected()
-        except NotConnected as e:
-            if hasattr(e, 'unconnected_fun'):
-                ufs = e.unconnected_fun
-                urs = e.unconnected_res
-                
-                for uf in ufs:
-                    if uf.dp in si.instances:    
-                        msg = 'Unconnected function “%s”.' % uf.s
-                        element = si.instances[uf.dp].element_defined
-                        which = MCDPWarnings.UNCONNECTED_FUNCTION
-                        warn_language(element, which, msg, context0)
-    
-                for ur in urs:
-                    if ur.dp in si.instances:
-                        msg = 'Unconnected resource “%s”.' % ur.s
-                        element = si.instances[ur.dp].element_defined
-                        which = MCDPWarnings.UNCONNECTED_RESOURCE 
-                        warn_language(element, which, msg, context0)

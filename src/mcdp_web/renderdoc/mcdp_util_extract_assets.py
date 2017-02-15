@@ -3,8 +3,8 @@ import sys
 
 from bs4 import BeautifulSoup
 
-from mcdp_report.embedded_images import extract_img_to_file
 from mcdp import logger
+from mcdp_report.embedded_images import extract_img_to_file
 
 
 def go():

@@ -581,7 +581,7 @@ class WebApp(AppVisualization, AppStatus,
         
         config = Configurator(root_factory=Root)
         
-        config.include('pyramid_debugtoolbar')
+        # config.include('pyramid_debugtoolbar')
 
         authn_policy = AuthTktAuthenticationPolicy('seekrit', hashalg='sha512')
         authz_policy = ACLAuthorizationPolicy()
