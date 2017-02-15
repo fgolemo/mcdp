@@ -9,9 +9,10 @@ from .parts import CDPLanguage
 
 CDP = CDPLanguage
 
+
 def eval_rvalue_Uncertain(r, context):
-    from .eval_resources_imp import eval_rvalue
     from mcdp_dp import UncertainGate
+    from .eval_resources_imp import eval_rvalue
 
     check_isinstance(r, CDP.UncertainRes)
 
@@ -111,9 +112,7 @@ def eval_lfunction_FValueBetween(r, context):
     return create_operation_lf(context, dp=dp, functions=[fl, fu])
 
 def eval_lfunction_FValuePlusOrMinus(r, context):
-    from mcdp_dp import UncertainGateSym
-    from mcdp_dp import MinusValueDP
-    from mcdp_dp import PlusValueDP
+    from mcdp_dp import UncertainGateSym, MinusValueDP, PlusValueDP
 
     from .eval_lfunction_imp import eval_lfunction
     from .eval_constant_imp import eval_constant
@@ -144,8 +143,8 @@ def eval_lfunction_FValuePlusOrMinus(r, context):
 
 def eval_lfunction_FValuePlusOrMinusPercent(r, context):
     from mcdp_lang.eval_lfunction_imp import eval_lfunction
-    from mcdp_dp import InvMultValueDP
-    from mcdp_dp.dp_uncertain import UncertainGateSym
+    from mcdp_lang.helpers import create_operation_lf
+    from mcdp_dp import InvMultValueDP, UncertainGateSym
     
     check_isinstance(r, CDP.FValuePlusOrMinusPercent)
     median = eval_lfunction(r.median, context)
@@ -160,7 +159,6 @@ def eval_lfunction_FValuePlusOrMinusPercent(r, context):
     dpl = InvMultValueDP(Rl, Rl, R_dimensionless, pl)
     dpu = InvMultValueDP(Rl, Rl, R_dimensionless, pu)
     
-    from mcdp_lang.helpers import create_operation_lf
     rl = create_operation_lf(context, dpl, functions=[median])
     ru = create_operation_lf(context, dpu, functions=[median])
     
