@@ -146,7 +146,7 @@ That is, $F=\mathbb{R}_{+}^{[\text{J}]}$ and $R=\mathbb{R}_{+}^{[\text{g}]}$.
 
 and $c=d_e$ and ``code_b`` and <code>a_b</code>. 
 """
-    s2 = tryit(s, write_to="f3.html", forbid=['<em'])
+    tryit(s, write_to="f3.html", forbid=['<em'])
 #     print s2
     
     
@@ -161,7 +161,7 @@ Try:
 $$%s$$
 
 """ % (m, m)
-    s2 = tryit(s, write_to="f4.html",
+    tryit(s, write_to="f4.html",
                forbid=['<em'])
     
 @comptest
@@ -175,7 +175,7 @@ is the maximum cardinality of a chain in~$\\posA$.
 \\end{defn}
 
 """
-    s2 = tryit(s, write_to="f52.html")
+    tryit(s, write_to="f52.html")
 
 @comptest
 def conv_f5():
@@ -190,8 +190,7 @@ This is code: ``two``
 Should be fine <strong>&#96;bold</strong> and <strong>`brave</strong>.
 
 """
-    s2 = tryit(s, write_to="f5.html",
-               forbid=['&gt;'])
+    tryit(s, write_to="f5.html", forbid=['&gt;'])
     
 
 @comptest
