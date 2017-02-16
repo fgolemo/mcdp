@@ -6,7 +6,7 @@ from tempfile import mkdtemp
 from contracts.utils import check_isinstance
 from mcdp_library.utils.dir_from_package_nam import dir_from_package_name
 from mcdp_library.utils.locate_files_imp import locate_files
-from mcdp.utils.tmpdir import get_mcdp_tmp_dir
+from mcdp.utils.fileutils import get_mcdp_tmp_dir
 from mcdp import MCDPConstants
 from mcdp.exceptions import mcdp_dev_warning
 from mcdp.utils.memoize_simple_imp import memoize_simple

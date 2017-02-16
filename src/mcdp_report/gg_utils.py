@@ -15,7 +15,7 @@ from mcdp_utils_xml import bs
 import networkx as nx  # @UnresolvedImport
 from reprep.constants import MIME_PDF, MIME_PLAIN, MIME_PNG, MIME_SVG
 from system_cmd import CmdException, system_cmd_result
-from mcdp.utils.tmpdir import tmpfile
+from mcdp.utils.fileutils import tmpfile
 
 
 def graphviz_run(filename_dot, output, prog='dot'):

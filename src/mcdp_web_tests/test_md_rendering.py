@@ -8,7 +8,7 @@ import tempfile
 from contracts.utils import check_isinstance
 from mcdp import  logger
 from mcdp.exceptions import mcdp_dev_warning, DPSyntaxError
-from mcdp.utils.tmpdir import get_mcdp_tmp_dir
+from mcdp.utils.fileutils import get_mcdp_tmp_dir
 from mcdp_library import MCDPLibrary
 from mcdp_library.library_utils import list_library_files
 from mcdp_library_tests.tests import enumerate_test_libraries, get_test_library
