@@ -1,9 +1,10 @@
+
 mcdp {
     '''
-        This is a design in which the plate is fixed and an XYZ mechanism
-        moves the extruder.
+    This is a design in which the plate is fixed and an XYZ mechanism
+    moves the extruder.
         
-        TO COMPLETE
+    TO COMPLETE
     '''
     implements `PartProducerInterface
     

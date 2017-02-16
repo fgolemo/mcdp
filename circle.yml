@@ -21,8 +21,10 @@ dependencies:
     - sudo apt-get -qq install -y graphviz python-numpy python-yaml python-dev python-setproctitle python-psutil python-lxml python-PIL python-matplotlib python-yaml python-pip python-tk idle python-pmw python-imaging
     # no sudo here:
     - pip install numpy lxml matplotlib pillow junit_xml
-    - sudo apt-get install lyx
-    - lyx --version
+
+    # only needed for manual
+    #- sudo apt-get install lyx
+    # - lyx --version
     - nodejs --version
     - make css
 
