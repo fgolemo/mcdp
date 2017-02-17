@@ -37,14 +37,7 @@ mcdp {
     required budget_per_part ≽ cost_of_filament
     
     # The total budget is the sum of budgets
-    required budget ≽ ( 
-    budget required by liquefier 
-    + budget required by nozzle
-    + budget required by actuated_gears) 
-    # Standard relations: power and mass
-    required electric_power ≽ electric_power required by liquefier + electric_power required by actuated_gears
-    required mass ≽ ( 
-    mass required by liquefier 
-    + mass required by nozzle
-    + mass required by actuated_gears)
+    required budget ≽  ∑ budget required by * 
+    required electric_power ≽ ∑ electric_power required by *
+    required mass ≽ ∑ mass required by *
 }

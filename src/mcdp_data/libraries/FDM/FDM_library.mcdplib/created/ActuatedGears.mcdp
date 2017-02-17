@@ -11,9 +11,7 @@ mcdp {
     torque_i required by transmission ≼ torque provided by motor
     torque required by gears ≼ torque_o provided by transmission
    
-    requires mass = mass required by gears + mass required by transmission + mass required by motor
-    requires budget = budget required by gears + budget required by transmission + budget required by motor
-    # requires mass = ∑ mass required by *
-    # requires budget = ∑ mass required by *
+    requires mass = ∑ mass required by *
+    requires budget = ∑ budget required by *
     requires electric_power for motor
 }
