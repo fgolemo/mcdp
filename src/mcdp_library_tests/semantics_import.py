@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
+from nose.tools import assert_equal
+
 from comptests.registrar import comptest
 from mcdp_library import Librarian
+from mocdp.comp.context import Context
 
 from .create_mockups import create_hierarchy
-from nose.tools import assert_equal
-from mocdp.comp.context import Context
 
 
 @comptest

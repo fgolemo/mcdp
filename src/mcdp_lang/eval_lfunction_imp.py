@@ -6,7 +6,6 @@ from mcdp.exceptions import (DPInternalError, DPNotImplementedError,
 from mcdp_dp import (InvMult2, InvPlus2, InvPlus2Nat, InvMult2Nat,
                      InvMultValueNatDP, PlusValueNatDP,
                      PlusValueRcompDP, PlusValueDP, InvMultValueDP,  MinusValueDP, MinusValueRcompDP, MinusValueNatDP)
-from mcdp_lang.misc_math import ConstantsNotCompatibleForAddition
 from mcdp_posets import (Nat, RcompUnits, get_types_universe, mult_table, poset_maxima, RbicompUnits, Rcomp)
 from mocdp.comp.context import CFunction, get_name_for_res_node, ValueWithUnits, ModelBuildingContext
 
@@ -14,6 +13,7 @@ from .eval_constant_imp import NotConstant
 from .eval_resources_imp_unary import eval_lfunction_genericoperationfun
 from .eval_warnings import MCDPWarnings, warn_language
 from .helpers import create_operation_lf, get_valuewithunits_as_function
+from .misc_math import ConstantsNotCompatibleForAddition
 from .misc_math import plus_constantsN
 from .namedtuple_tricks import recursive_print
 from .parse_actions import decorate_add_where
