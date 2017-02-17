@@ -39,7 +39,7 @@ def feat_import2():
     
         'lib2.mcdplib/model3.mcdp': """\
         mcdp {
-            a = new lib1.model1
+            a = instance `lib1.model1
         }
         """
     }
