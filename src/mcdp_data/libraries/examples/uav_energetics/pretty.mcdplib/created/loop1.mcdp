@@ -1,11 +1,11 @@
 mcdp {
     provides endurance     [s]
     provides extra_payload [kg]
-    provides extra_power   [W] 
+    provides extra_power   [W]
     requires total_cost [$]
- 
-    battery = new Battery3
-    actuation = new Actuation3
+
+    battery = instance `Battery3
+    actuation = instance `Actuation3
 
     total_power = power required by actuation + extra_power
     capacity provided by battery >= endurance * total_power
@@ -15,11 +15,11 @@ mcdp {
     gravity = 9.81 m/s^2
     weight = total_mass * gravity
 
-    lift provided by actuation >= weight 
-  
-    total_cost >= (
-    cost required by actuation +
-    cost required by battery)
+    lift provided by actuation >= weight
 
-    requires total_mass >= total_mass   
+    total_cost >= (
+      cost required by actuation +
+      cost required by battery)
+
+    requires total_mass >= total_mass
 }
