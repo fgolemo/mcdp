@@ -39,6 +39,7 @@ span.ForKeyword,
 span.UsingKeyword,
 span.LoadKeyword, span.CodeKeyword,
 span.leq, span.geq, span.OpKeyword, span.eq, span.plus, span.times, span.exponent, span.product,
+span.sum,
 span.OpenBraceKeyword,
 span.CloseBraceKeyword,
 span.comma,
@@ -101,19 +102,22 @@ span.BetweenAndKeyword
 
 }
 
-span.MAPSTO { font-weight: bold; color: darkred;}
-span.MAPSFROM  { font-weight: bold; color: darkgreen;}
+span.MAPSTO { font-weight: bold; color: @rcolor;}
+span.MAPSFROM  { font-weight: bold; color: @fcolor;}
 
 
 span.VName { color: blue; }
 /* constant */
 span.CName { color: #333;
 }
-span.SetNameRValue > span.RName { color: darkred; }
-span.SetNameFValue > span.FName { color: darkgreen; }
+span.SetNameRValue > span.RName { color: @rcolor; }
+span.SetNameFValue > span.FName { color: @fcolor; }
 
-span.DerivFunctionName { color: darkgreen; }
-span.DerivResourceName { color: darkred; }
+span.SumResources > span.RName { color: @rcolor; }
+span.SumFunctions > span.FName { color: @fcolor; }
+
+span.DerivFunctionName { color: @fcolor; }
+span.DerivResourceName { color: @rcolor; }
 
 
 span.ProvideKeyword, span.RequireKeyword  {
@@ -128,31 +132,31 @@ span.ProductWithLabelsLabel, span.IndexLabel  {
 /* f provided by s */
 span.ProvidedByKeyword,
 span.Function > span.FName {
-    color: darkgreen;
+    color: @fcolor;
 }
 
 /* f required by s */
 span.RequiredByKeyword,
 span.Resource > span.RName {
-    color: darkred;
+    color: @rcolor;
 }
 
 /* required rname - this is a function inside */
 span.RequiredKeyword,
 span.NewResource > span.RName {
-    color: darkgreen;
+    color: @fcolor;
 }
 
 /* provided fname - this is a resource inside */
 span.ProvidedKeyword,
 span.NewFunction > span.FName {
-    color: darkred;
+    color: @rcolor;
 }
 
 /* provides f [m] */
 
 span.ProvideKeyword {
-    color: darkgreen;
+    color: @fcolor;
 }
 
 span.FunStatement > span.FName,
@@ -163,7 +167,7 @@ span.FunShortcut3 > span.FName,
 span.FunShortcut4 > span.FName,
 span.FunShortcut5 > span.FName
 {
-    color: darkgreen;
+    color: @fcolor;
 }
 
 /* requires r [m] */
@@ -171,7 +175,7 @@ span.FunShortcut5 > span.FName
 /* requires r1, r2*/
 
 span.RequireKeyword {
-    color: darkred;
+    color: @rcolor;
 }
 
 span.ResStatement > span.RName,
@@ -181,14 +185,14 @@ span.ResShortcut2 > span.RName,
 span.ResShortcut3 > span.RName,
 span.ResShortcut4 > span.RName,
 span.ResShortcut5 > span.RName {
-    color: darkred;
+    color: @rcolor;
 }
 
 span.SetNameRValue > span.SetNameGenericVar {
-    color: darkred;
+    color: @rcolor;
 }
 span.SetNameFValue > span.SetNameGenericVar {
-    color: darkgreen;
+    color: @fcolor;
 }
 /* There is a bug that prevents this from working correctly. */
 /* span.ImpName { color: #cc6600; } */
@@ -229,12 +233,12 @@ span.CommentModel {
 }
 
 span.CommentFun {
-    color: darkgreen;
+    color: @fcolor;
     font-weight: bold;
 }
 
 span.CommentRes {
-    color: darkred;
+    color: @rcolor;
     font-weight: bold;
 }
 
@@ -251,7 +255,10 @@ span.leq, span.geq {
     // font-size: 75%;
     font-weight: normal !important;
 }
-
+span.sum {
+    font-family: "FreeSerif";
+    font-weight: bold;
+}
 
 
 span.semantic_error {
@@ -297,8 +304,8 @@ code.keyword {
 }
 
 /* allow for manual */
-code.FName { color: darkgreen; }
-code.RName { color: darkred; }
+code.FName { color: @fcolor; }
+code.RName { color: @rcolor; }
 
 span.ImpName { color: #cc7a00; }
 
@@ -316,10 +323,10 @@ code.rvalue {
 /* for catalogue */
 .CatalogueFun span.ValueExpr,
 .CatalogueFun span.RcompUnit
- { color: darkgreen !important; }
+ { color: @fcolor !important; }
 .CatalogueRes span.ValueExpr,
 .CatalogueRes span.RcompUnit
-{ color: darkred !important; }
+{ color: @rcolor !important; }
 
 
 

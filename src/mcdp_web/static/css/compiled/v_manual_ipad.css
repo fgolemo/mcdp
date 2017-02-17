@@ -652,6 +652,7 @@ span.plus,
 span.times,
 span.exponent,
 span.product,
+span.sum,
 span.OpenBraceKeyword,
 span.CloseBraceKeyword,
 span.comma,
@@ -730,6 +731,12 @@ span.SetNameRValue > span.RName {
   color: darkred;
 }
 span.SetNameFValue > span.FName {
+  color: darkgreen;
+}
+span.SumResources > span.RName {
+  color: darkred;
+}
+span.SumFunctions > span.FName {
   color: darkgreen;
 }
 span.DerivFunctionName {
@@ -854,6 +861,10 @@ span.leq,
 span.geq {
   font-family: "FreeSerif";
   font-weight: normal !important;
+}
+span.sum {
+  font-family: "FreeSerif";
+  font-weight: bold;
 }
 span.semantic_error {
   background-color: pink;
