@@ -4,7 +4,7 @@ from contracts.utils import indent
 from mcdp_dp import LabelerDP, PrimitiveDP
 from mocdp.comp.interfaces import NamedDP
 from mocdp.comp.wrap import dpwrap
-from mocdp.exceptions import mcdp_dev_warning
+from mcdp.exceptions import mcdp_dev_warning
 
 
 __all__ = [

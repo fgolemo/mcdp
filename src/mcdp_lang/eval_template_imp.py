@@ -2,7 +2,7 @@
 from contracts import contract
 from contracts.utils import raise_desc, check_isinstance
 from mocdp.comp.template_for_nameddp import TemplateForNamedDP
-from mocdp.exceptions import DPInternalError, DPSemanticError,\
+from mcdp.exceptions import DPInternalError, DPSemanticError,\
     DPNotImplementedError
 
 from .namedtuple_tricks import recursive_print

@@ -1,19 +1,14 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
 from contracts.utils import raise_desc, check_isinstance, raise_wrapped, indent
+from mcdp.exceptions import (DPInternalError, DPNotImplementedError,
+                             DPSemanticError, mcdp_dev_warning)
 from mcdp_dp import (InvMult2, InvPlus2, InvPlus2Nat, InvMult2Nat,
                      InvMultValueNatDP, PlusValueNatDP,
-                     PlusValueRcompDP, PlusValueDP)
-from mcdp_dp.dp_minus import MinusValueDP, MinusValueRcompDP, MinusValueNatDP
-from mcdp_dp.dp_multvalue import InvMultValueDP
-from mcdp_posets import (Nat, RcompUnits, get_types_universe, mult_table,
-    poset_maxima)
-from mcdp_posets import Rcomp
-from mcdp_posets.rcomp_units import RbicompUnits
-from mocdp.comp.context import CFunction, get_name_for_res_node, ValueWithUnits, \
-    ModelBuildingContext
-from mocdp.exceptions import (DPInternalError, DPNotImplementedError,
-    DPSemanticError, mcdp_dev_warning)
+                     PlusValueRcompDP, PlusValueDP, InvMultValueDP,  MinusValueDP, MinusValueRcompDP, MinusValueNatDP)
+from mcdp_lang.misc_math import ConstantsNotCompatibleForAddition
+from mcdp_posets import (Nat, RcompUnits, get_types_universe, mult_table, poset_maxima, RbicompUnits, Rcomp)
+from mocdp.comp.context import CFunction, get_name_for_res_node, ValueWithUnits, ModelBuildingContext
 
 from .eval_constant_imp import NotConstant
 from .eval_resources_imp_unary import eval_lfunction_genericoperationfun
@@ -24,7 +19,6 @@ from .namedtuple_tricks import recursive_print
 from .parse_actions import decorate_add_where
 from .parts import CDPLanguage
 from .utils_lists import get_odd_ops, unwrap_list
-from mcdp_lang.misc_math import ConstantsNotCompatibleForAddition
 
 
 CDP = CDPLanguage
@@ -86,6 +80,8 @@ def eval_lfunction(lf, context):
         CDP.FValueBetween: eval_lfunction_FValueBetween,
         CDP.FValuePlusOrMinus: eval_lfunction_FValuePlusOrMinus,
         CDP.FValuePlusOrMinusPercent: eval_lfunction_FValuePlusOrMinusPercent,
+        
+        CDP.SumFunctions: eval_fvalue_SumFunctions,
     }
 
     for klass, hook in cases.items():
@@ -98,6 +94,22 @@ def eval_lfunction(lf, context):
         msg += '\n' + indent(r, '  ')
         raise_desc(DoesNotEvalToFunction, msg) 
             
+            
+def eval_fvalue_SumFunctions(lf, context):
+    from mcdp_lang.eval_resources_imp import iterate_normal_ndps
+    check_isinstance(lf, CDP.SumFunctions)
+    fname = lf.fname.value
+    
+    cfunctions = []
+    for n, ndp in iterate_normal_ndps(context):
+        if fname in ndp.get_fnames():
+            cr = CFunction(n, fname)
+            cfunctions.append(cr)
+
+    if len(cfunctions) == 1:
+        return cfunctions[0]
+    else:
+        return eval_lfunction_invplus_ops(fs=cfunctions, context=context)
 
 def eval_lfunction_Function(lf, context):
     return context.make_function(dp=lf.dp.value, s=lf.s.value)
@@ -124,8 +136,7 @@ def eval_lfunction_anyoffun(lf, context):
         raise_desc(DPSemanticError, msg, elements=elements, maximals=maximals)
 
     dp = LimitMaximals(values=maximals, F=P)
-    return create_operation_lf(context, dp=dp, functions=[],
-                               name_prefix='_anyof')
+    return create_operation_lf(context, dp=dp, functions=[])
 
 
 def eval_lfunction_disambiguation(lf, context):

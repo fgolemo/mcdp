@@ -7,16 +7,16 @@ from bs4 import BeautifulSoup
 from bs4.element import Comment, Tag, NavigableString
 
 from contracts import contract
+from mcdp import logger
 from mcdp_docs.manual_constants import MCDPManualConstants
 from mcdp_docs.read_bibtex import get_bibliography
 from mcdp_web.renderdoc.highlight import add_class
-from mocdp import logger
 
 
 def get_manual_css_frag():
     """ Returns fragment of doc with CSS, either inline or linked,
         depending on MCDPConstants.manual_link_css_instead_of_including. """
-    from mocdp import MCDPConstants 
+    from mcdp import MCDPConstants 
     
     link_css = MCDPConstants.manual_link_css_instead_of_including
     
@@ -33,10 +33,9 @@ def get_manual_css_frag():
         assert False
             
 @contract(files_contents='list( tuple( tuple(str,str), str) )', returns='str')
-def manual_join(files_contents):
+def manual_join(files_contents, bibfile):
     from mcdp_web.renderdoc.main import replace_macros
-    from mcdp_web.renderdoc.xmlutils import bs
-
+    from mcdp_utils_xml import bs
     
     fn = MCDPManualConstants.main_template
     if not os.path.exists(fn):
@@ -89,7 +88,7 @@ def manual_join(files_contents):
 
 
     logger.info('external bib')
-    bibliography_entries = get_bibliography()
+    bibliography_entries = get_bibliography(bibfile)
     bibliography_entries['id'] = 'bibliography_entries'
     body.append(bibliography_entries)
     bibhere = d.find('div', id='put-bibliography-here')
@@ -401,7 +400,7 @@ def generate_doc(soup):
     print('numbering items')
     root.number_items(prefix='', level=0)
 
-    from mcdp_web.renderdoc.xmlutils import bs
+    from mcdp_utils_xml import bs
 
     print('toc iterating')
     # iterate over chapters (below each h1)

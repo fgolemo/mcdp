@@ -10,7 +10,7 @@ def describe_mcdpweb_params(dp):
                   help='Library directories containing models.') 
                   
     dp.add_bool('libraries_writable', default=True)
-    dp.add_string('users', help='Directories for user data.')
+    dp.add_string('users', help='Directories for user data.', default=None)
     return dp
 
 @contract(x=dict)

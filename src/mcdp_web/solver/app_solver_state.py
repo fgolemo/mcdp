@@ -61,7 +61,7 @@ class SolverState():
             raise_wrapped(ValueError, e, "Point does not belong.", compact=True)
         self.fun.append(fv)
 
-        from mocdp import logger
+        from mcdp import logger
         trace = Tracer(logger=logger)
         print('solving... %s' % F.format(fv))
         ures = self.dp.solve_trace(fv, trace)

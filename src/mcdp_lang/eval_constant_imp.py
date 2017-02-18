@@ -1,13 +1,15 @@
 # -*- coding: utf-8 -*-
+import math
+
 from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped, check_isinstance
+from mcdp.development import  mcdp_dev_warning, do_extra_checks
+from mcdp.exceptions import (DPInternalError, DPSemanticError)
 from mcdp_posets import (FiniteCollection, FiniteCollectionsInclusion, Int, Nat,
                          NotBelongs, NotLeq, PosetProduct, Rcomp, Space, UpperSet, UpperSets,
                          get_types_universe, poset_minima)
 from mcdp_posets import FiniteCollectionAsSpace, LowerSets, LowerSet, RbicompUnits, RcompUnits
 from mocdp.comp.context import ValueWithUnits
-from mocdp.exceptions import (DPInternalError, DPSemanticError, mcdp_dev_warning,
-                              do_extra_checks)
 
 from .eval_constant_asserts import (eval_assert_empty, eval_assert_equal,
                                     eval_assert_geq, eval_assert_gt, eval_assert_leq, eval_assert_lt,
@@ -17,7 +19,6 @@ from .namedtuple_tricks import recursive_print
 from .parse_actions import decorate_add_where
 from .parts import CDPLanguage
 from .utils_lists import get_odd_ops, unwrap_list
-import math
 
 
 CDP = CDPLanguage

@@ -1,7 +1,7 @@
 # # -*- coding: utf-8 -*-
 # from contracts import contract
 # from mcdp_dp.solver import SolverTrace
-# from mocdp.exceptions import do_extra_checks
+# from mcdp.development import do_extra_checks
 # from mcdp_dp.dp_transformations import get_dp_bounds
 # from mcdp_posets.uppersets import UpperSets
 # 

@@ -8,10 +8,10 @@ from mcdp_dp import (Constant, ConstantMinimals, Limit, LimitMaximals,
 from mcdp_posets import NotLeq, Poset, get_types_universe
 from mocdp.comp import Connection, dpwrap
 from mocdp.comp.context import CResource, ValueWithUnits
-from mocdp.exceptions import DPSemanticError, DPInternalError, mcdp_dev_warning
+from mcdp.exceptions import DPSemanticError, DPInternalError, mcdp_dev_warning
 
 
-# from mocdp import logger
+# from mcdp import logger
 @contract(resources='seq')
 def create_operation(context, dp, resources, name_prefix=None, op_prefix=None, res_prefix=None):
     """

@@ -8,11 +8,9 @@ from dateutil.parser import parse
 import pyramid
 
 from compmake.utils import duration_compact
-from system_cmd.meat import system_cmd_result
-
-import mocdp
-from mocdp.memoize_simple_imp import memoize_simple
 import mcdp
+from mcdp.utils.memoize_simple_imp import memoize_simple
+from system_cmd import system_cmd_result
 
 
 class AppStatus():
@@ -38,7 +36,7 @@ class AppStatus():
         
         access = 'public' if self.options.allow_anonymous else 'private'
         res = {
-            'version': mocdp.__version__,
+            'version': mcdp.__version__,  # @UndefinedVariable
             'server-name': socket.gethostname(),
             'access': access,
             'geoip': geoip(),

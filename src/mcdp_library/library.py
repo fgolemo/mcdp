@@ -8,26 +8,21 @@ import sys
 from contracts import contract
 from contracts.utils import (check_isinstance, format_obs, raise_desc,
                              raise_wrapped)
+from mcdp import logger, MCDPConstants
+from mcdp.exceptions import DPSemanticError, MCDPExceptionWithWhere
 from mcdp_dp import PrimitiveDP
 from mcdp_lang import parse_ndp, parse_poset
 from mcdp_posets import Poset
-from mocdp import ATTR_LOAD_LIBNAME, ATTR_LOAD_NAME, logger, ATTR_LOAD_REALPATH, \
-    get_mcdp_tmp_dir, MCDPConstants
 from mocdp.comp.context import Context, ValueWithUnits
 from mocdp.comp.interfaces import NamedDP
 from mocdp.comp.template_for_nameddp import TemplateForNamedDP
-from mocdp.exceptions import DPSemanticError, mcdp_dev_warning, MCDPExceptionWithWhere
 
-from .utils import memo_disk_cache2
-from .utils.locate_files_imp import locate_files
+from .utils import locate_files, memo_disk_cache2
+from mcdp.utils.fileutils import get_mcdp_tmp_dir
 
-
-mcdp_dev_warning('move away')
-log_duplicates = False
 
 __all__ = [
-    'MCDPLibrary',
-    'ATTR_LOAD_NAME',
+    'MCDPLibrary', 
 ]
 
 
@@ -185,7 +180,7 @@ class MCDPLibrary():
             context_mine = Context()
             res = parsing_function(l, data, realpath, context=context_mine)
 
-            setattr(res, ATTR_LOAD_NAME, name)
+            setattr(res, MCDPConstants.ATTR_LOAD_NAME, name)
             return dict(res=res, 
                         context_warnings=context_mine.warnings,
                         generation=current_generation)
@@ -250,13 +245,13 @@ class MCDPLibrary():
     def parse_template(self, string, realpath=None, context=None):
         from mcdp_lang.parse_interface import parse_template
         template = self._parse_with_hooks(parse_template, string, realpath, context)
-        if hasattr(template, ATTR_LOAD_LIBNAME):
-            _prev = getattr(template, ATTR_LOAD_LIBNAME)
+        if hasattr(template,  MCDPConstants.ATTR_LOAD_LIBNAME):
+            _prev = getattr(template,  MCDPConstants.ATTR_LOAD_LIBNAME)
             # print('library %r gets something from %r' % (self.library_name, _prev))
         else:
             # print('parsed original template at %s' % self.library_name)
-            setattr(template, ATTR_LOAD_LIBNAME, self.library_name)
-            setattr(template, ATTR_LOAD_REALPATH, realpath)
+            setattr(template,  MCDPConstants.ATTR_LOAD_LIBNAME, self.library_name)
+            setattr(template,  MCDPConstants.ATTR_LOAD_REALPATH, realpath)
         return template
 
     @contextmanager
@@ -462,7 +457,7 @@ class MCDPLibrary():
                 else:
                     msg = 'Found duplicated file %r.' % basename
                     if not strict:
-                        if log_duplicates:
+                        if MCDPConstants.log_duplicates:
                             logger.warning(msg + "\n" +
                                            format_obs(dict(path1=realpath1,
                                                       path2=res['realpath'])))

@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 import os
 
-from mocdp import logger
+from mcdp import logger
 from contracts import contract
 from mcdp_cli.plot import allplots
 from mcdp_lang.syntax import Syntax
 from mcdp_library import Librarian
 from mcdp_report.gdc import STYLE_GREENREDSYM
 from mcdp_web.renderdoc.highlight import get_ast_as_pdf
-from mocdp.exceptions import DPSemanticError
+from mcdp.exceptions import DPSemanticError
 from system_cmd import CmdException
 
 from .find_dep import EntryNDP, EntryTemplate, FindDependencies

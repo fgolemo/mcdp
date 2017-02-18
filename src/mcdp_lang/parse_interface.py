@@ -5,8 +5,8 @@ import sys
 from contracts import contract
 from mcdp_dp import PrimitiveDP
 from mcdp_posets import Poset
-from mocdp import logger
-from mocdp.exceptions import MCDPExceptionWithWhere
+from mcdp import logger
+from mcdp.exceptions import MCDPExceptionWithWhere
 
 from .parse_actions import parse_wrap
 from .refinement import apply_refinement

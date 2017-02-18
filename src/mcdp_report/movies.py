@@ -3,9 +3,10 @@ import os
 from tempfile import mkdtemp
 
 from contracts import contract
-from mocdp import logger
+from mcdp import logger
 
 from .utils import safe_makedirs
+from mcdp.development import mcdp_dev_warning
 
 
 __all__ = [
@@ -36,6 +37,8 @@ def create_movie_from_png_sequence(sequence, out, fps=1.0):
         join_video_29_fixed(output=out, dirname=tmpdir,
                             pattern='.*.png', fps=fps)
 
+mcdp_dev_warning('Add procgraph as dependency')
+
 def join_video_29_fixed(output, dirname, pattern, fps):
     """ 
         Note that the pattern is a Python regex:
@@ -43,8 +46,8 @@ def join_video_29_fixed(output, dirname, pattern, fps):
         pg-video-join -d anim-simple/ -p '*.png' -o anim-simple-collate.mp4 --fps 1 
         
     """
-    from procgraph.core.registrar_other import register_model_spec
-    from procgraph import pg
+    from procgraph.core.registrar_other import register_model_spec  # @UnresolvedImport
+    from procgraph import pg # @UnresolvedImport
 
     register_model_spec("""
 --- model join_video_helper_29

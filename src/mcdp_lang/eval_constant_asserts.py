@@ -2,9 +2,9 @@
 from contracts.utils import raise_desc, raise_wrapped
 from mcdp_posets import (FiniteCollectionsInclusion, LowerSets, PosetProduct,
     UpperSets, express_value_in_isomorphic_space, NotLeq, get_types_universe)
-from mocdp import logger
+from mcdp import logger
 from mocdp.comp.context import ValueWithUnits
-from mocdp.exceptions import DPSemanticError, DPUserAssertion
+from mcdp.exceptions import DPSemanticError, DPUserAssertion
 
 from .parts import CDPLanguage
 

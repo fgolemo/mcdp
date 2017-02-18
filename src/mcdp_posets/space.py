@@ -2,7 +2,7 @@
 from abc import ABCMeta, abstractmethod
 
 from contracts import contract, raise_wrapped
-from mocdp.exceptions import do_extra_checks
+from mcdp.development import do_extra_checks
 
 from .space_meta import SpaceMeta
 

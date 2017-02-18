@@ -109,7 +109,7 @@ def solve_stats(ndp):
     F = dp0.get_fun_space()
     F.belongs(f)
 
-    from mocdp import logger
+    from mcdp import logger
     traceL = Tracer(logger=logger)
     resL = dpL.solve_trace(f, traceL)
     traceU = Tracer(logger=logger)

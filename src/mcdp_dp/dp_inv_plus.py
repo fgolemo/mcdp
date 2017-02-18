@@ -4,12 +4,12 @@ from contracts.utils import check_isinstance, raise_desc
 from mcdp_posets import Nat, Poset, PosetProduct, RcompUnits
 from mcdp_posets import Rcomp, get_types_universe, is_top
 from mcdp_posets.nat import Nat_add
-from mocdp.exceptions import DPInternalError, mcdp_dev_warning
+from mcdp.exceptions import DPInternalError, mcdp_dev_warning
 
 from .primitive import ApproximableDP, NotSolvableNeedsApprox, PrimitiveDP
 from .repr_strings import invplus2_repr_h_map, invplus2_repr_hd_map
 from .sequences_invplus import sample_sum_lowerbound, sample_sum_upperbound
-from mocdp import MCDPConstants
+from mcdp import MCDPConstants
 
 
 _ = Nat, Poset

@@ -7,7 +7,7 @@ import traceback
 
 from contracts.interface import describe_type
 
-from mocdp import logger
+from mcdp import logger
 
 
 def find_pickling_error(obj, protocol=pickle.HIGHEST_PROTOCOL):

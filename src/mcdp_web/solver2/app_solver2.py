@@ -16,8 +16,8 @@ from mcdp_report.plotters.get_plotters_imp import get_best_plotter
 from mcdp_web.utils import ajax_error_catch, memoize_simple, response_data
 from mcdp_web.utils.image_error_catch_imp import response_image
 from mcdp_web.utils0 import add_std_vars
-from mocdp import logger
-from mocdp.exceptions import DPSyntaxError, mcdp_dev_warning, DPSemanticError, \
+from mcdp import logger
+from mcdp.exceptions import DPSyntaxError, mcdp_dev_warning, DPSemanticError, \
     DPInternalError
 import numpy as np
 from reprep import Report

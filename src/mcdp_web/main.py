@@ -1,44 +1,42 @@
 # -*- coding: utf-8 -*-
 import os
+import sys
 import time
 import urlparse
 from wsgiref.simple_server import make_server
+
+import pyramid
+from pyramid.authentication import AuthTktAuthenticationPolicy
+from pyramid.authorization import ACLAuthorizationPolicy
+from pyramid.config import Configurator  
+from pyramid.httpexceptions import HTTPFound
+from pyramid.renderers import JSONP
+from pyramid.response import Response  
 from pyramid.security import Allow, Authenticated
 from pyramid.security import Everyone
-
-from pyramid.config import Configurator  # @UnresolvedImport
-from pyramid.httpexceptions import HTTPFound  # @UnresolvedImport
-from pyramid.renderers import JSONP
-from pyramid.response import Response  # @UnresolvedImport
 
 from compmake.utils.duration_hum import duration_compact
 from contracts import contract
 from contracts.utils import indent, raise_desc
+from mcdp import logger
+from mcdp.exceptions import DPSemanticError, DPSyntaxError
 from mcdp_library import Librarian, MCDPLibrary
-from mcdp_library.utils.dir_from_package_nam import dir_from_package_name
-from mcdp_web.utils0 import add_std_vars
-from mocdp import logger
-from mocdp.exceptions import DPSemanticError, DPSyntaxError
+from mcdp_library.utils import dir_from_package_name
 from quickapp import QuickAppBase
 
-from .confi import parse_mcdpweb_params_from_dict
-from .editor_fancy.app_editor_fancy_generic import AppEditorFancyGeneric
+from .confi import describe_mcdpweb_params, parse_mcdpweb_params_from_dict
+from .editor_fancy import AppEditorFancyGeneric
 from .images.images import WebAppImages, get_mime_for_format
 from .interactive.app_interactive import AppInteractive
 from .qr.app_qr import AppQR
 from .renderdoc.main import render_complete
+from .security import AppLogin
 from .solver.app_solver import AppSolver
 from .solver2.app_solver2 import AppSolver2
-
 from .status import AppStatus
+from .utils0 import add_std_vars
 from .visualization.app_visualization import AppVisualization
-from .confi import describe_mcdpweb_params
 
-from pyramid.authentication import AuthTktAuthenticationPolicy
-from pyramid.authorization import ACLAuthorizationPolicy
-from mcdp_web.security import AppLogin
-import pyramid
-import sys
 
 __all__ = [
     'mcdp_web_main',
@@ -68,11 +66,9 @@ class WebApp(AppVisualization, AppStatus,
 
         self._load_libraries()
 
-
         logger.info('Found %d libraries in %r.' %
                         (len(self.libraries), self.dirname))
 
-        
         AppVisualization.__init__(self)
         AppQR.__init__(self)
         AppSolver.__init__(self)
@@ -125,12 +121,11 @@ class WebApp(AppVisualization, AppStatus,
     @add_std_vars
     def view_index(self, request):  # @UnusedVariable
         return {}
-        
 
     @add_std_vars
     def view_list(self, request):  # @UnusedVariable
         return {}
-        
+    
     @add_std_vars
     def view_list_libraries(self, request):  # @UnusedVariable
         libraries = self.list_libraries()
@@ -361,9 +356,7 @@ class WebApp(AppVisualization, AppStatus,
         else:
             current_library = None
             library = None
-        
-        
-
+         
         d = {}
 
         d['current_thing'] = current_thing
@@ -499,11 +492,8 @@ class WebApp(AppVisualization, AppStatus,
         for sup in natural_sorted(path2libraries):
             r = (sup, natural_sorted(path2libraries[sup]))
             res.append(r)
-        return res
-        
-
+        return res 
     
-
     def _has_library_doc(self, request, document):
         l = self.get_library(request)
         filename = '%s.%s' % (document, MCDPLibrary.ext_doc_md)
@@ -559,7 +549,6 @@ class WebApp(AppVisualization, AppStatus,
         setattr(self.server, '_BaseServer__shutdown_request', True)
         howlong = duration_compact(self.get_uptime_s())
         return "Bye. Uptime: %s." % howlong
-#         return {'text':'Bye. Uptime: %s.' % howlong}
 
     def get_uptime_s(self):
         return time.time() - self.time_start
@@ -573,7 +562,6 @@ class WebApp(AppVisualization, AppStatus,
         self.time_start = time.time()
         
         options = self.options
-        print options
         class Root(object):
             __acl__ = [
                 #(Allow, Everyone, 'view'),
@@ -593,7 +581,7 @@ class WebApp(AppVisualization, AppStatus,
         
         config = Configurator(root_factory=Root)
         
-        config.include('pyramid_debugtoolbar')
+        # config.include('pyramid_debugtoolbar')
 
         authn_policy = AuthTktAuthenticationPolicy('seekrit', hashalg='sha512')
         authz_policy = ACLAuthorizationPolicy()
@@ -682,8 +670,7 @@ class MCDPWeb(QuickAppBase):
         
     def go(self):
         options = self.get_options()
-        dirname = options.dir
-        wa = WebApp(dirname)
+        wa = WebApp(options)
         msg = """Welcome to PyMCDP!
         
 To access the interface, open your browser at the address
@@ -698,7 +685,6 @@ Use Chrome, Firefox, or Opera - Internet Explorer is not supported.
             wa._refresh_library(None)
         logger.info(msg)
         wa.serve(port=options.port)
-
 
 def get_only_prefixed(settings, prefix):
     res = {}
@@ -717,10 +703,7 @@ def app_factory(global_config, **settings):  # @UnusedVariable
     app = wa.get_app()
     return app
 
-
 mcdp_web_main = MCDPWeb.get_sys_main()
-
-
 
 def natural_sorted(seq):
     return sorted(seq, key=lambda s: s.lower())

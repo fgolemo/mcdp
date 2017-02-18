@@ -5,11 +5,12 @@ import os
 from contracts.enabling import disable_all
 from contracts.utils import raise_desc
 from decent_params import UserError
+from mcdp.constants import MCDPConstants
 from mcdp_library import Librarian, MCDPLibrary
-from mocdp import logger
-from quickapp import QuickAppBase
-from system_cmd.interface import system_cmd_show
 from mcdp_report.html import get_css_filename
+from mcdp import logger, mcdp_dev_warning
+from quickapp import QuickAppBase
+from system_cmd import system_cmd_show
 
 
 class Render(QuickAppBase):
@@ -111,6 +112,14 @@ def run_prince(html_filename):
 #             os.unlink(pdf)
 #     
 def render(library, docname, data, realpath, out_dir, generate_pdf, stylesheet):
+    
+    
+    if MCDPConstants.pdf_to_png_dpi < 300:
+        msg =( 'Note that pdf_to_png_dpi is set to %d, which is not suitable for printing'
+               % MCDPConstants.pdf_to_png_dpi)
+        mcdp_dev_warning(msg)
+
+
     from mcdp_web.renderdoc.highlight import get_minimal_document
     from mcdp_web.renderdoc.main import render_complete
 

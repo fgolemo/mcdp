@@ -3,7 +3,7 @@ import random
 
 from contracts import contract
 from contracts.utils import raise_desc, check_isinstance
-from mocdp.exceptions import mcdp_dev_warning
+from mcdp.exceptions import mcdp_dev_warning
 
 from .category_coproduct import Coproduct1, Coproduct1Labels
 from .poset import NotBounded, Poset, NotLeq

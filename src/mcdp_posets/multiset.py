@@ -4,7 +4,7 @@ import itertools
 
 from contracts import contract
 from contracts.utils import raise_desc
-from mocdp.exceptions import mcdp_dev_warning, do_extra_checks
+from mcdp.development import mcdp_dev_warning, do_extra_checks
 
 from .frozendict import frozendict2
 from .nat import NatTop, Nat_add, Nat

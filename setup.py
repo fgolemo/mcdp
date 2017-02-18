@@ -15,7 +15,7 @@ def get_version(filename):
         raise ValueError(filename)
     return version
 
-version = get_version(filename='src/mocdp/__init__.py')
+version = get_version(filename='src/mcdp/branch_info.py')
 
 name = 'PyMCDP'
 

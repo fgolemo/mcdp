@@ -26,7 +26,7 @@ from bs4.element import NavigableString, Tag, Comment
 
 from contracts.utils import raise_desc
 from mcdp_web.renderdoc.highlight import add_class
-from mcdp_web.renderdoc.xmlutils import bs, to_html_stripping_fragment, describe_tag
+from mcdp_utils_xml import bs, to_html_stripping_fragment, describe_tag
 
 
 __all__ = [

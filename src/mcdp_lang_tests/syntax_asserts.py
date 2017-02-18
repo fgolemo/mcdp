@@ -2,7 +2,7 @@
 from comptests.registrar import comptest
 from contracts.utils import raise_desc
 from mcdp_lang import parse_constant
-from mocdp.exceptions import DPUserAssertion
+from mcdp.exceptions import DPUserAssertion
 
 
 def expect(exc, f, *args):
@@ -49,61 +49,5 @@ def check_asserts5():
 def check_asserts6():
 
     parse_constant('assert_nonempty(solve(<>, mcdp{}))')
-    pass
-
-@comptest
-def check_asserts7():
-    pass
-
-@comptest
-def check_asserts8():
-    pass
-
-@comptest
-def check_asserts9():
-    pass
-
-@comptest
-def check_asserts10():
-    pass
-
-@comptest
-def check_asserts11():
-    pass
-
-@comptest
-def check_asserts12():
-    pass
-
-@comptest
-def check_asserts13():
-    pass
-
-@comptest
-def check_asserts14():
-    pass
-
-@comptest
-def check_asserts15():
-    pass
-
-@comptest
-def check_asserts16():
-    pass
-
-@comptest
-def check_asserts17():
-    pass
-
-@comptest
-def check_asserts18():
-    pass
-
-@comptest
-def check_asserts19():
-    pass
-
-@comptest
-def check_asserts20():
     pass
 

@@ -1,3 +1,8 @@
+tr, td {
+    margin: 0;
+    padding: 0;
+}
+
 #syntax_error, #language_warnings {
     /* at most 100 chars (approximately) */
     white-space: pre-wrap;
@@ -29,7 +34,7 @@
     box-shadow: 1px 1px 4px lightgrey;
     padding: 10px;
     border-radius: 5px;
-    background-color: #ffdddd;  
+    background-color: #ffdddd;
 }
 
 
@@ -37,14 +42,17 @@
 	color: red;
 }
 
+/* div#around_editor pre code#editor */
 #around_editor > pre  {
     min-height: 20em;
+    line-width: 120%; /* to compensate for variations in fonts */
 }
 #editor {
 	font-size: 75%;
 	min-width: 40em;
     /*font-family: "Andale Mono", Courier, monospace;*/
-    // font-family:  "Anka/Coder Narrow", Courier, monospace;
+    /*font-family:  "Anka/Coder Narrow", Courier, monospace;*/
+
 
 }
 

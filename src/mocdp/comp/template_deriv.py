@@ -1,7 +1,7 @@
 from contracts import contract
 from contracts.utils import check_isinstance, raise_desc
 from mocdp.comp.context import Connection
-from mocdp.exceptions import DPSemanticError
+from mcdp.exceptions import DPSemanticError
 
 from .composite import CompositeNamedDP
 

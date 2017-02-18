@@ -2,7 +2,7 @@
 from contracts import contract
 from mcdp_posets import Map, Space
 from mcdp_posets.poset import is_top
-from mocdp.exceptions import DPInternalError
+from mcdp.exceptions import DPInternalError
 from contracts.utils import raise_wrapped
 
 

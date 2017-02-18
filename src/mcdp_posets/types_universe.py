@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped, check_isinstance
-from mocdp.exceptions import DPInternalError, mcdp_dev_warning
+from mcdp.exceptions import DPInternalError, mcdp_dev_warning
 
 from .nat import Int, Nat
 from .poset import NotLeq, Preorder

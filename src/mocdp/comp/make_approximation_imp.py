@@ -9,7 +9,7 @@ from mocdp.comp.context import (Connection, get_name_for_fun_node,
     get_name_for_res_node)
 from mocdp.comp.interfaces import NamedDP
 from mocdp.comp.wrap import dpwrap
-from mocdp.exceptions import DPNotImplementedError
+from mcdp.exceptions import DPNotImplementedError
 
 
 __all__ = ['make_approximation']

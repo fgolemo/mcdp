@@ -4,7 +4,7 @@ from contracts.utils import check_isinstance, indent, raise_desc
 from mcdp_posets import (
     Coproduct1, NotBelongs, NotEqual, get_types_universe, poset_minima)
 from mcdp_posets.find_poset_minima.baseline_n2 import poset_maxima
-from mocdp.exceptions import do_extra_checks, mcdp_dev_warning
+from mcdp.development import do_extra_checks, mcdp_dev_warning
 
 from .primitive import NotFeasible, PrimitiveDP
 

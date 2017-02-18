@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import os
-if 'raise_if_test_included' in os.environ:
-    raise Exception()
 
 """
     
@@ -79,3 +77,5 @@ from .detection_unused_constants import *
 from .corrections import *
 from .constants import *
 from .syntax_new_uncertainty import *
+
+from .syntax_sum import *

@@ -2,7 +2,7 @@
 import os
 
 from contracts import contract
-from mocdp import MCDPConstants
+from mcdp import MCDPConstants
 
 from .safe_pickling import safe_pickle_dump, safe_pickle_load
 
@@ -15,7 +15,7 @@ def memo_disk_cache2(cache_file, data, f):
         
         
     """
-    from mocdp import logger
+    from mcdp import logger
 
     dirname = os.path.dirname(cache_file)
     cachedir = os.path.join(dirname)

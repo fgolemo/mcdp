@@ -1,7 +1,7 @@
-from mocdp import logger
+from mcdp import logger
 from contracts.utils import indent, check_isinstance
 from collections import namedtuple
-from mocdp.exceptions import DPInternalError
+from mcdp.exceptions import DPInternalError
 from mcdp_lang_utils import format_where
 
 

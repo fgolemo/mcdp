@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
 from contracts.utils import check_isinstance, indent, raise_desc
-from mocdp.exceptions import DPInternalError
+from mcdp.exceptions import DPInternalError
 
 from .primitive import PrimitiveDP
 

@@ -3,7 +3,7 @@ from contracts import contract
 from contracts.utils import raise_wrapped
 from mcdp_dp import (
     CoProductDP, CoProductDPLabels, DPLoop2, LabelerDP, OpaqueDP, ParallelN)
-from mocdp.exceptions import DPInternalError
+from mcdp.exceptions import DPInternalError
 
 from .primitive import ApproximableDP, PrimitiveDP
 

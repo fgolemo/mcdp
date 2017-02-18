@@ -3,7 +3,7 @@ from abc import abstractmethod
 
 from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped
-from mocdp.exceptions import do_extra_checks
+from mcdp.development import do_extra_checks
 
 from .space import Space
 

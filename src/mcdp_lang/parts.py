@@ -213,6 +213,7 @@ class CDPLanguage():
     exponent = namedtuplewhere('exponent', 'glyph')
     times = namedtuplewhere('times', 'glyph')
     bar = namedtuplewhere('bar', 'glyph')
+    sum = namedtuplewhere('sum', 'glyph')
     coprod = namedtuplewhere('coprod', 'glyph')
     DotPrep = namedtuplewhere('DotPrep', 'glyph')
     comma = namedtuplewhere('comma', 'glyph')
@@ -223,6 +224,7 @@ class CDPLanguage():
     LPAR  = namedtuplewhere('LPAR', 'glyph') 
     RPAR  = namedtuplewhere('RPAR', 'glyph')
     percent = namedtuplewhere('percent', 'glyph')
+    asterisk = namedtuplewhere('asterisk', 'glyph')
     
     MAPSFROM  = namedtuplewhere('MAPSFROM', 'glyph')
     MAPSTO  = namedtuplewhere('MAPSTO', 'glyph')
@@ -488,4 +490,8 @@ class CDPLanguage():
     RValuePlusOrMinusPercent = namedtuplewhere('RValuePlusOrMinusPercent', 'median pm perc percent')
     FValuePlusOrMinusPercent = namedtuplewhere('FValuePlusOrMinusPercent', 'median pm perc percent')
     
+    SumResources = namedtuplewhere('SumResources', 'sum rname required_by asterisk')
+    SumFunctions = namedtuplewhere('SumFunctions', 'sum fname provided_by asterisk')
+    
+
     

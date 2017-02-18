@@ -4,8 +4,8 @@ from comptests.registrar import comptest
 from mcdp_figures import MakeFiguresNDP
 from mcdp_lang.parse_interface import parse_ndp
 from mcdp_tests.generation import for_all_nameddps_dyn
-from mocdp import MCDPConstants
-from mocdp.exceptions import DPSemanticError
+from mcdp import MCDPConstants
+from mcdp.exceptions import DPSemanticError
 from reprep import Report
 from reprep.datanode import DataNode
 

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from mcdp_web.renderdoc.xmlutils import bs
+from mcdp_utils_xml import bs
 from bs4.element import Tag, NavigableString
 
 # 
@@ -19,9 +19,8 @@ from bs4.element import Tag, NavigableString
 
 
 
-def get_bibliography():
-    fn = 'bibliography.html'
-    data = open(fn).read()
+def get_bibliography(bibfile):
+    data = open(bibfile).read()
     frag = bs(data)
     res = Tag(name='div')
     

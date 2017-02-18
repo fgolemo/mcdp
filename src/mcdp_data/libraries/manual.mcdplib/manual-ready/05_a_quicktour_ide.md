@@ -1,1 +1,0 @@
-../docs/part1-intro/05_a_quicktour_ide.md

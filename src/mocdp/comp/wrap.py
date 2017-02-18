@@ -6,9 +6,10 @@ from contracts.utils import indent, raise_desc, check_isinstance
 from mcdp_dp import PrimitiveDP
 from mcdp_dp.dp_flatten import get_it
 from mcdp_posets import PosetProduct
-from mocdp.exceptions import DPInternalError
+from mcdp.exceptions import DPInternalError
 
 from .interfaces import NamedDP
+from mcdp.constants import MCDPConstants
 
 
 __all__ = [
@@ -217,9 +218,9 @@ class SimpleWrap(NamedDP):
 
     def desc(self):
         s = 'SimpleWrap'
-        from mcdp_library.library import ATTR_LOAD_NAME
-        if hasattr(self, ATTR_LOAD_NAME):
-            s += '\n (loaded as %r)' % getattr(self, ATTR_LOAD_NAME)
+        att = MCDPConstants.ATTR_LOAD_NAME
+        if hasattr(self, att):
+            s += '\n (loaded as %r)' % getattr(self, att)
         for f in self.get_fnames():
             s += '\n  provides %10s (%s) ' % (f, self.get_ftype(f))
         for r in self.get_rnames():

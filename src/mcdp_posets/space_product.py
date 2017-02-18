@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
 from contracts.utils import check_isinstance, indent, raise_desc
-from mocdp import ATTRIBUTE_NDP_RECURSIVE_NAME, ATTR_LOAD_NAME
 
 from .space import NotBelongs, NotEqual, Space
+from mcdp.constants import MCDPConstants
 
 
 __all__ = [
@@ -97,8 +97,9 @@ class SpaceProduct(Space):
         args = []
         for s in self.subs:
             res = s.__repr__()
-            if hasattr(s, ATTRIBUTE_NDP_RECURSIVE_NAME):
-                a = getattr(s, ATTRIBUTE_NDP_RECURSIVE_NAME)
+            att = MCDPConstants.ATTRIBUTE_NDP_RECURSIVE_NAME
+            if hasattr(s, att):
+                a = getattr(s, att)
                 res += '{%s}' % "/".join(a)
             args.append(res)
 
@@ -110,20 +111,22 @@ class SpaceProduct(Space):
             prefix0 = " %d. " % i
             prefix1 = "    "
             s += "\n" + indent(S.repr_long(), prefix1, first=prefix0)
-            if hasattr(S, ATTRIBUTE_NDP_RECURSIVE_NAME):
-                a = getattr(S, ATTRIBUTE_NDP_RECURSIVE_NAME)
+            att = MCDPConstants.ATTRIBUTE_NDP_RECURSIVE_NAME
+            if hasattr(S, att):
+                a = getattr(S, att)
                 s += '\n  labeled as %s' % a.__str__()
 
         return s
 
 
     def __str__(self):
-        if hasattr(self, ATTR_LOAD_NAME):
-            return "`" + getattr(self, ATTR_LOAD_NAME)
+        att = MCDPConstants.ATTR_LOAD_NAME
+        if hasattr(self, att):
+            return "`" + getattr(self, att)
 
         def f(x):
-            if hasattr(x, ATTR_LOAD_NAME):
-                res = '`' + getattr(x, ATTR_LOAD_NAME)
+            if hasattr(x, att):
+                res = '`' + getattr(x, att)
             else:
                 r = x.__str__()
                 if  r[-1] != ')' and (isinstance(x, SpaceProduct) or ("×" in r)):
@@ -131,8 +134,9 @@ class SpaceProduct(Space):
                 else:
                     res = r
 
-            if hasattr(x, ATTRIBUTE_NDP_RECURSIVE_NAME):
-                a = getattr(x, ATTRIBUTE_NDP_RECURSIVE_NAME)
+            att2 = MCDPConstants.ATTRIBUTE_NDP_RECURSIVE_NAME
+            if hasattr(x, att2):
+                a = getattr(x, att2)
                 res += '{%s}' % "/".join(a)
             return res
 

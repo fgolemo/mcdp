@@ -1,9 +1,9 @@
 from contracts.utils import raise_wrapped
 from mcdp_report.gg_ndp import gvgen_from_ndp
-from mocdp import ATTR_LOAD_NAME
 
 from .figure_interface import MakeFigures
 from .formatters import MakeFigures_Formatter, TextFormatter, GGFormatter
+from mcdp.constants import MCDPConstants
 
 
 __all__ = [
@@ -183,8 +183,8 @@ class Templatized(GGFormatter):
         
         yourname = None 
         if self.labeled:
-            if hasattr(ndp, ATTR_LOAD_NAME):
-                yourname = getattr(ndp, ATTR_LOAD_NAME)
+            if hasattr(ndp, MCDPConstants.ATTR_LOAD_NAME):
+                yourname = getattr(ndp,MCDPConstants.ATTR_LOAD_NAME)
 
         from mocdp.comp.composite_templatize import ndp_templatize
         ndp = ndp_templatize(ndp, mark_as_template=False)

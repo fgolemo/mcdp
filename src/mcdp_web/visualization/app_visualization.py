@@ -12,11 +12,11 @@ from mcdp_lang.utils_lists import unwrap_list
 from mcdp_report.html import ast_to_html
 from mcdp_web.editor_fancy.app_editor_fancy_generic import specs
 from mcdp_web.renderdoc.highlight import add_style
-from mcdp_web.renderdoc.xmlutils import to_html_stripping_fragment, bs
+from mcdp_utils_xml import to_html_stripping_fragment, bs
 from mcdp_web.utils0 import add_std_vars, add_other_fields
 from mcdp_web.visualization.add_html_links_imp import add_html_links
 from mocdp.comp.context import Context
-from mocdp.exceptions import DPSyntaxError, DPSemanticError,\
+from mcdp.exceptions import DPSyntaxError, DPSemanticError,\
     DPNotImplementedError, DPInternalError
 
 

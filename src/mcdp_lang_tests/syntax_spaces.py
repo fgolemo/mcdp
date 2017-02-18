@@ -13,9 +13,9 @@ from mcdp_lang.syntax import Syntax
 from mcdp_lang_tests.utils import parse_wrap_check, TestFailed
 from mcdp_lang_tests.utils2 import eval_rvalue_as_constant
 from mcdp_report.out_mcdpl import extract_ws
-from mocdp import MCDPConstants
+from mcdp import MCDPConstants
 from mocdp.comp.context import Context
-from mocdp.exceptions import DPSemanticError
+from mcdp.exceptions import DPSemanticError
 
 
 @comptest

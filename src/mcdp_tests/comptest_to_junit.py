@@ -5,7 +5,7 @@ from junit_xml import TestSuite, TestCase  # @UnresolvedImport
 from compmake.jobs.storage import all_jobs, get_job_cache
 from compmake.storage.filesystem import StorageFilesystem
 from compmake.structures import Cache
-from mocdp import logger
+from mcdp import logger
 
 
 def junit_xml(compmake_db):

@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
+from mcdp.constants import MCDPConstants
 from mcdp_dp import Dummy
 from mcdp_posets import PosetProduct
 from mocdp.comp.composite import CompositeNamedDP
 from mocdp.comp.interfaces import NamedDP
 from mocdp.comp.wrap import SimpleWrap
 from mocdp.ndp.named_coproduct import NamedDPCoproduct
+
 
 def cndp_templatize_children(cndp):
     """ Replaces all sub composites with the corresponding template """
@@ -35,16 +37,16 @@ def ndpcoproduct_templatize(ndp):
 
 @contract(ndp=NamedDP, returns=SimpleWrap)
 def ndp_templatize(ndp, mark_as_template=False):
-    """ 
+    """
         Creates a template based on the interface of the ndp.
-    
+
         The dp is Dummy.
-        
-        The ndp is either 
+
+        The ndp is either
         - OnlyTemplate (placeholder, drawn with
         dashed lines)  [using mark_as_template]
         - Templatized (drawn with solid black line)
-        
+
         Copies attributes: ATTR_LOAD_NAME
     """
     fnames = ndp.get_fnames()
@@ -70,13 +72,13 @@ def ndp_templatize(ndp, mark_as_template=False):
 #         raise Exception()
     else:
         klass = Templatized
-        
+
     res = klass(dp, fnames, rnames)
 
-    from mcdp_library.library import ATTR_LOAD_NAME
-    if hasattr(ndp, ATTR_LOAD_NAME):
-        x = getattr(ndp, ATTR_LOAD_NAME)
-        setattr(res, ATTR_LOAD_NAME, x)
+    att = MCDPConstants.ATTR_LOAD_NAME
+    if hasattr(ndp, att):
+        x = getattr(ndp, att)
+        setattr(res, att, x)
     return res
 
 
@@ -86,5 +88,3 @@ class OnlyTemplate(SimpleWrap):
 
 class Templatized(SimpleWrap):
     pass
-
-

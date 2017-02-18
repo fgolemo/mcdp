@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 import tempfile
-from mocdp import get_mcdp_tmp_dir
+from mcdp.utils.fileutils import get_mcdp_tmp_dir
 
 __all__ = ['create_hierarchy']
 

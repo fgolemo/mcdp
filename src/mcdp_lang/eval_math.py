@@ -14,9 +14,9 @@ from mcdp_posets import (Int, Nat, RbicompUnits, RcompUnits,
 from mcdp_posets import is_top
 from mcdp_posets.rcomp_units import (RbicompUnits_subtract, RbicompUnits_reflect,
                                      R_dimensionless)
-from mocdp import MCDPConstants
+from mcdp import MCDPConstants
 from mocdp.comp.context import CResource, ValueWithUnits
-from mocdp.exceptions import DPInternalError, DPSemanticError,\
+from mcdp.exceptions import DPInternalError, DPSemanticError,\
     DPNotImplementedError
 
 from .eval_constant_imp import NotConstant
@@ -420,9 +420,7 @@ def eval_PlusN(x, context, wants_constant):
                     
         dp = MinusValueDP(F=F, c_value=valuepos2, c_space=c_space)
 
-        r2 = create_operation(context, dp, resources=[res],
-                              name_prefix='_minus', op_prefix='_x',
-                              res_prefix='_y')
+        r2 = create_operation(context, dp, resources=[res])
         return r2
 
 def eval_PlusN_(constants, resources, context):

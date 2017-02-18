@@ -9,9 +9,9 @@ from bs4.element import Tag
 
 from contracts import contract
 from contracts.utils import check_isinstance
+from mcdp import logger
 from mcdp.utils.string_utils import get_md5
 from mcdp_web.renderdoc.highlight import add_style
-from mocdp import logger
 
 from .pdf_conversion import png_from_pdf
 
@@ -339,7 +339,7 @@ def embed_pdf_image(tag, resolve, density):
 
 def get_pixel_width_height_of_png(data_png):
     from PIL import Image
-    im = Image.open(cStringIO.StringIO(data_png))
+    im = Image.open(cStringIO.StringIO(data_png))  # @UndefinedVariable
     width_px, height_px = im.size # (wid
     return width_px, height_px 
         
@@ -360,7 +360,6 @@ def parse_includegraphics_option_string(latex_options):
     return props
     
     
-
 def get_length_in_inches(s):
     """ "1cm" = 0.393 """
 #     s = s.replace('\\columnwidth', '8.')

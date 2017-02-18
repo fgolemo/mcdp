@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
-from mocdp.exceptions import do_extra_checks
+from mcdp.development import do_extra_checks
 
 from .space import NotBelongs, Space
 

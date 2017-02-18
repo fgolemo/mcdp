@@ -6,9 +6,7 @@ from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped, check_isinstance
 from mcdp_dp import (CatalogueDP, Conversion, JoinNDP, MeetNDualDP, get_conversion, make_series, VariableNode,
                      ConstantMinimals, LimitMaximals, OpaqueDP, FunctionNode, ResourceNode)
-from mcdp_posets import (
-    FiniteCollectionAsSpace, NotEqual, NotLeq, PosetProduct, get_types_universe)
-from mocdp import ATTRIBUTE_NDP_MAKE_FUNCTION
+from mcdp_posets import FiniteCollectionAsSpace, NotEqual, NotLeq, PosetProduct, get_types_universe
 from mocdp.comp import (CompositeNamedDP, Connection, NamedDP, NotConnected,
                         SimpleWrap, dpwrap)
 from mocdp.comp.composite_makecanonical import cndp_makecanonical
@@ -19,7 +17,7 @@ from mocdp.comp.context import (CFunction, CResource, NoSuchMCDPType,
 from mocdp.comp.ignore_some_imp import ignore_some
 from mocdp.comp.make_approximation_imp import make_approximation
 from mocdp.comp.template_deriv import cndp_eversion
-from mocdp.exceptions import (DPInternalError, DPSemanticError,
+from mcdp.exceptions import (DPInternalError, DPSemanticError,
                               DPSemanticErrorNotConnected, MCDPExceptionWithWhere, mcdp_dev_warning,
                               DPNotImplementedError)
 from mocdp.ndp.named_coproduct import NamedDPCoproduct
@@ -38,6 +36,7 @@ from .parse_actions import (add_where_information, decorate_add_where, raise_wit
 from .parts import CDPLanguage
 from .utils_lists import get_odd_ops, unwrap_list
 import warnings
+from mcdp.constants import MCDPConstants
 
 
 CDP = CDPLanguage
@@ -153,10 +152,11 @@ def eval_ndp_addmake(r, context):
 
     function = ImportedFunction(function_name)
     
-    if not hasattr(ndp, ATTRIBUTE_NDP_MAKE_FUNCTION):
-        setattr(ndp, ATTRIBUTE_NDP_MAKE_FUNCTION, [])
+    att = MCDPConstants.ATTRIBUTE_NDP_MAKE_FUNCTION
+    if not hasattr(ndp, att):
+        setattr(ndp, att, [])
 
-    res = getattr(ndp, ATTRIBUTE_NDP_MAKE_FUNCTION)
+    res = getattr(ndp, att)
     res.append((what, function))
     return ndp
 

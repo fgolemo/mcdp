@@ -2,7 +2,7 @@
 from contracts import contract
 from contracts.utils import check_isinstance, raise_wrapped
 from mcdp_lang.parse_actions import decorate_add_where
-from mocdp.exceptions import DPSemanticError
+from mcdp.exceptions import DPSemanticError
 
 from .eval_codespec_imp_utils import InstantiationException, instantiate_spec
 from .parts import CDPLanguage

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from mcdp_dp import PrimitiveDP
-from mocdp.memoize_simple_imp import memoize_simple
+from mcdp.utils.memoize_simple_imp import memoize_simple
 
 
 __all__ = [

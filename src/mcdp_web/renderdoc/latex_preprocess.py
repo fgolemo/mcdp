@@ -1,4 +1,3 @@
-
 # -*- coding: utf-8 -*-
 import os
 import re
@@ -6,14 +5,15 @@ import re
 from contracts import contract
 from contracts.interface import Where
 from contracts.utils import raise_desc, raise_wrapped, check_isinstance
+from mcdp import logger
+from mcdp.exceptions import DPSyntaxError
 from mcdp.utils.string_utils import get_md5
-from mcdp_web.renderdoc.latex_inside_equation_abbrevs import replace_inside_equations
-from mcdp_web.renderdoc.markdown_transform import is_inside_markdown_quoted_block
-from mocdp import logger
-from mocdp.exceptions import DPSyntaxError
+
+from .latex_inside_equation_abbrevs import replace_inside_equations
+from .markdown_transform import is_inside_markdown_quoted_block
 
 
-class LatexProcessingConstants:
+class LatexProcessingConstants():
     justignore = [
         'vfill', 'pagebreak', 'leavevmode', 'clearpage', 'hline',
         'hfill', 'quad', 'qquad', 'noindent',
@@ -972,7 +972,7 @@ def get_next_unescaped_appearance(s, d1, search_from, next_char_not_word=False):
             nextchar_i = maybe + len(d1)
             nextchar = s[nextchar_i] if nextchar_i < len(s) else 'o'
             if next_char_not_word and can_be_used_in_command(nextchar):
-                print('skipping because nextchar = %r' % nextchar)
+                #print('skipping because nextchar = %r' % nextchar)
                 search_from = maybe + 1
                 continue
 #             print('found %r at %r ' % (d1, s[maybe:]))

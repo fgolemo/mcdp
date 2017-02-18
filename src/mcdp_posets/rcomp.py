@@ -2,12 +2,13 @@
 import functools
 
 from contracts.utils import raise_desc
-from mocdp import MCDPConstants
-from mocdp.exceptions import do_extra_checks, mcdp_dev_warning, DPInternalError
+from mcdp import MCDPConstants
+from mcdp.development import do_extra_checks, mcdp_dev_warning
 import numpy as np
 
 from .poset import NotLeq, Poset, is_top
 from .space import NotBelongs, NotEqual
+from mcdp.exceptions import DPInternalError
 
 
 __all__ = [
