@@ -14,11 +14,11 @@ def check_from_library1():
     parse_wrap(Syntax.dpinstance_expr, "instance load 'Sa'")[0]
     parse_wrap(Syntax.dpinstance_expr, "instance load('Sa')")[0]
 
-    parse_wrap(Syntax.dpinstance_expr, "new Sa")[0]
-    parse_wrap(Syntax.dpinstance_expr, "new ('Sa')")[0]
-    parse_wrap(Syntax.dpinstance_expr, "new('Sa')")[0]
-    parse_wrap(Syntax.dpinstance_expr, "new 'Sa' ")[0]
-    parse_wrap(Syntax.dpinstance_expr, "new Sa ")[0]
+#     parse_wrap(Syntax.dpinstance_expr, "new Sa")[0]
+#     parse_wrap(Syntax.dpinstance_expr, "new ('Sa')")[0]
+#     parse_wrap(Syntax.dpinstance_expr, "new('Sa')")[0]
+#     parse_wrap(Syntax.dpinstance_expr, "new 'Sa' ")[0]
+#     parse_wrap(Syntax.dpinstance_expr, "new Sa ")[0]
 
 
     parse_wrap(Syntax.code_spec, "code functions.call() ")

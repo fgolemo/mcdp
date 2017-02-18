@@ -5,9 +5,9 @@ mcdp {
 
     requires total_cost_ownership [$]
 
-    strategy = new Strategy
+    strategy =  instance `Strategy
 
-    actuation_energetics = new ActuationEnergetics
+    actuation_energetics =  instance `ActuationEnergetics
 
     endurance provided by actuation_energetics>= endurance required by strategy
     velocity provided by actuation_energetics>= velocity required by strategy
@@ -15,12 +15,12 @@ mcdp {
     extra_payload provided by actuation_energetics>= provided carry_payload
     distance provided by strategy >= provided travel_distance
 
-    computer = new Computer
-    perception = new Perception
+    computer = instance `Computer
+    perception =  instance `Perception
     computation provided by computer>= computation required by perception
 
 
-    sensor = new Sensor
+    sensor = instance `Sensor
     resolution provided by sensor >= camera_resolution required by perception
     framerate provided by sensor >= camera_framerate required by perception
     fov provided by sensor >= camera_fov required by perception
@@ -29,7 +29,7 @@ mcdp {
     extra_power provided by actuation_energetics >= power required by computer + power required by sensor
 
     # We can take into account the shipping cost
-    shipping = new Shipping
+    shipping = instance `Shipping
 
     total_mass = total_mass required by actuation_energetics
 

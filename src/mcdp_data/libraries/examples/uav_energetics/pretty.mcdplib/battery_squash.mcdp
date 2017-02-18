@@ -1,5 +1,5 @@
 mcdp {
-    battery = new Batteries
+    battery = instance `Batteries
 
     provides capacity <= capacity provided by battery
     provides missions <= missions provided by battery

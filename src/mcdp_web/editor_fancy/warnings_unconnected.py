@@ -3,12 +3,7 @@ from mcdp_lang.eval_warnings import warn_language, MCDPWarnings
 from mcdp_lang.parts import CDPLanguage
 from mcdp_lang.refinement import SemanticInformation, infer_types_of_variables
 from mcdp_lang.utils_lists import unwrap_list
-
-
-
 from mocdp.comp.interfaces import NotConnected
-
-
 
 
 __all__ = ['generate_unconnected_warnings']

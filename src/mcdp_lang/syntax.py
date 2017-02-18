@@ -617,12 +617,12 @@ class Syntax():
                               lambda t: CDP.DPInstance(t[0], t[1]))
 
     # new Name ~= instance `Name
-    NEW = keyword('new', CDP.FromLibraryKeyword)
-    dpinstance_from_library_shortcut = \
-        sp(NEW - (ndpname_with_library | ndpname | (SLPAR - ndpname + SRPAR)),
-           lambda t: CDP.DPInstanceFromLibrary(t[0], t[1]))
+#     NEW = keyword('new', CDP.FromLibraryKeyword)
+#     dpinstance_from_library_shortcut = \
+#         sp(NEW - (ndpname_with_library | ndpname | (SLPAR - ndpname + SRPAR)),
+#            lambda t: CDP.DPInstanceFromLibrary(t[0], t[1]))
 
-    dpinstance_expr = dpinstance_from_type | dpinstance_from_library_shortcut
+    dpinstance_expr = dpinstance_from_type # | dpinstance_from_library_shortcut
 
     SUB = keyword('sub', CDP.SubKeyword)
     setname_ndp_instance1 = sp(SUB - dpname - EQ - dpinstance_expr,

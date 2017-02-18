@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped, check_isinstance
+from mcdp.exceptions import DPSemanticError, DPNotImplementedError, DPInternalError
 from mcdp_dp import PlusValueDP, UncertainGate
 from mcdp_dp.dp_approximation import makeLinearCeilDP, makeLinearFloor0DP
 from mcdp_posets import (NotLeq, express_value_in_isomorphic_space,
@@ -8,7 +9,6 @@ from mcdp_posets import (NotLeq, express_value_in_isomorphic_space,
 from mcdp_posets import RcompUnits
 from mocdp.comp.context import (CResource, ValueWithUnits, get_name_for_fun_node,
     ModelBuildingContext)
-from mcdp.exceptions import DPSemanticError, DPNotImplementedError, DPInternalError
 
 from .eval_constant_imp import eval_constant
 from .eval_warnings import warn_language, MCDPWarnings

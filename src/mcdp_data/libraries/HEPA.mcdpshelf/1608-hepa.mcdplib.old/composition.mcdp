@@ -5,7 +5,7 @@ mcdp {
   requires budget [USD]
 
 
-  ip = new image_processing
+  ip = instance `image_processing
 
   strategy = instance catalogue {
     provides mtbf [s]
@@ -15,14 +15,14 @@ mcdp {
 
   strategy.mtbf >= mtbf
 
-  
+
 
   sensor1 = mcdp {
     requires power [W]
     requires budget [$]
     provides spatial_resolution [pixels/deg]
     provides temporal_resolution [Hz]
-    power >= 10W   
+    power >= 10W
     budget >= 50 USD
     spatial_resolution <= 50 pixels/deg
     temporal_resolution <= 30 Hz
@@ -45,8 +45,8 @@ mcdp {
   ip.fps >= strategy.processing_frequency
 
   power >= watts required by ip + power required by sensor
-  budget >= budget required by sensor 
+  budget >= budget required by sensor
 
 
- 
+
 }
