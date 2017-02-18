@@ -1,7 +1,0 @@
-template mcdp {
-    provides torque [N*m]
-    provides velocity [rad/s]
-    requires electric_power [W] 
-    requires mass [g]
-    requires budget [USD]
-}

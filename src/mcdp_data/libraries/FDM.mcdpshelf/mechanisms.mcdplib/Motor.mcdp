@@ -1,7 +1,7 @@
 template mcdp {
     provides torque [N*m]
-    provides rotational_velocity [deg/s]
+    provides velocity [rad/s]
+    requires electric_power [W] 
     requires mass [g]
-    requires budget [$]
-    requires electric_power [W]
+    requires budget [USD]
 }

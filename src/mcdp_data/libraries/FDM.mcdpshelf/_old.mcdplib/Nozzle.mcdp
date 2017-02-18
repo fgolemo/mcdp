@@ -1,9 +1,0 @@
-template mcdp {
-    provides part_resolution [1/mm] "Part resolution"
-    
-    requires time_per_unit_volume [s/mm³]  # not sure about unit
-    requires force [N]
-    
-    requires mass [kg]  "Mass of the nozzle" 
-    requires budget [$] "Cost of the nozzle"
-} 
