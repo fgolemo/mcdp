@@ -6,8 +6,16 @@ body {
     white-space: pre-wrap;
     word-wrap: break-word;
     width: 100ex;
-    font-weight: bold;
     font-size: 70%;
+
+    color: red;
+    font-weight: bold;
+
+     margin-left: 10px;
+    box-shadow: 1px 1px 4px lightgrey;
+    padding: 10px;
+    border-radius: 5px;
+    background-color: #ffdddd;
 }
 
 div#code {
@@ -60,11 +68,6 @@ table#main td {
     vertical-align: top;
 }
 
-.DPSyntaxError {
-    color: red;
-    font-weight: bold;
-    font-size: smaller;
-}
 
 table#main {
     width: 100%;
@@ -128,4 +131,14 @@ svg text {
     font-size: 60%;
     text-align: center;
     margin-top: 3em;
+}
+
+.DPSyntaxError {
+    /* at most 100 chars (approximately) */
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    max-width: 100ex;
+    /*color: red !important;*/
+    font-weight: bold;
+    font-size: 70%;
 }

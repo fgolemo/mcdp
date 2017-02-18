@@ -106,6 +106,11 @@ def eval_fvalue_SumFunctions(lf, context):
             cr = CFunction(n, fname)
             cfunctions.append(cr)
 
+
+    if not cfunctions:
+        msg = 'Cannot find any sub-design problem with functionality "%s".' % fname
+        raise DPSemanticError(msg, where=lf.fname.where)
+    
     if len(cfunctions) == 1:
         return cfunctions[0]
     else:

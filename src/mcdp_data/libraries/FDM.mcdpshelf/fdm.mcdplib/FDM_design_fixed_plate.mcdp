@@ -1,55 +1,39 @@
-
 mcdp {
     '''
     This is a design in which the plate is fixed and an XYZ mechanism
-    moves the extruder.
-        
-    TO COMPLETE
+    moves the extruder. 
     '''
     implements `PartProducerInterface
-    
-    # extruder 
-    extruder = instance `FDM_library.Extruder
+
+    extruder = instance `Extruder
     min_workspace = provided part_length
-     
+
     part_volume = (provided part_length)³
     part_volume provided by extruder ≽ part_volume
     service_temperature provided by extruder ≽ provided service_temperature
     part_resolution provided by extruder ≽ provided part_resolution
-    
-    # XY moves around the extruder
-    XY = instance `mechanisms.XY_concrete
-    workspace provided by XY ≽ min_workspace
-    precision provided by XY ≽ provided part_resolution
-    payload_mass provided by XY ≽ mass required by extruder
-    velocity provided by XY ≽ 2mm/s
-    force provided by XY ≽ 0 N # extruder does not excert force (?)
-    
+
+    # XYZ moves around the extruder
+    XYZ = instance `mechanisms.XYZ_concrete
+
+    workspace provided by XYZ ≽ min_workspace
+    precision provided by XYZ ≽ provided part_resolution
+    payload_mass provided by XYZ ≽ mass required by extruder
+    velocity provided by XYZ ≽ 2mm/s
+    acceleration provided by XYZ >= 0 m/s^2
+    # the extruder does not exert force on the part (to check)
+    force provided by XYZ ≽ 0 N
+
     part_density = 0.0 kg/mm³ # XXX
     part_mass = (provided part_length)³ · part_density
     gravity = 9.81 m/s²
     weight = part_mass · gravity
-    
-    # Z moves around the plate
-    Z = instance `mechanisms.Xjoint
-    workspace provided by Z ≽ min_workspace
-    precision provided by Z ≽ provided part_resolution
-    velocity provided by Z ≽ 0.1 mm/s # can be very slow
-    payload_mass provided by Z ≽ part_mass
-    force provided by Z ≽ weight
-    precision provided by Z ≽ provided part_resolution
-    # acceleration is negligible
-    acceleration provided by Z ≽0 m/s²
-    acceleration provided by XY ≽0 m/s²
-    
-    required mass ≽ mass required by Z + mass required by XY + mass required by extruder
-    required initial_investment ≽  (
-    cost required by Z
-    + cost required by XY 
-    + budget required by extruder)
-    required electric_power ≽ (
-    electric_power required by Z 
-    + electric_power required by XY
-    + electric_power required by extruder)
+
+    required budget_per_part >= budget_per_part required by extruder
     required time_per_part ≽ time required by extruder
+
+    required mass ≽ ∑ mass required by *
+    required initial_investment ≽ ∑ budget required by *
+    required electric_power ≽ ∑ electric_power required by *
+
 }

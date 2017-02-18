@@ -1,6 +1,7 @@
 from bs4.element import NavigableString, Tag
 
 from mcdp_utils_xml import bs
+from mcdp_utils_xml.parsing import to_html_stripping_fragment
 
 
 def add_html_links(frag, library_name, get_link):
@@ -141,7 +142,8 @@ def add_html_links(frag, library_name, get_link):
             new_tag.string = text
             tag.append(new_tag)
 
-    return soup.prettify()
+    return to_html_stripping_fragment(soup)
+    #return soup.prettify()
 
 def break_string(s):
     """ Returns initial ws, middle, final ws. """

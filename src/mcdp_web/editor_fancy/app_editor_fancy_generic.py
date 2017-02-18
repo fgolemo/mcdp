@@ -31,6 +31,7 @@ from .image import (get_png_data_model,
     ndp_template_enclosed, get_png_data_unavailable, get_png_data_poset,
     get_png_data_syntax_model)
 from .warnings_unconnected import generate_unconnected_warnings
+from mcdp_web.visualization.add_html_links_imp import add_html_links
 
 
 Spec = namedtuple('Spec', 
@@ -219,9 +220,10 @@ class AppEditorFancyGeneric():
         library = self.get_library(request)
         cache = self.last_processed2
 
+        make_relative = lambda s: self.make_relative(request, s)
         def go():
             with timeit_wall('process_parse_request'):
-                res = process_parse_request(library, string, spec, key, cache)
+                res = process_parse_request(library, library_name, string, spec, key, cache, make_relative)
             res['request'] = req
             
             return res
@@ -359,7 +361,7 @@ def html_mark_syntax_error(string, e):
     s = "" + first + '<span style="color:red">'+rest + '</span>'
     return s 
 
-def process_parse_request(library, string, spec, key, cache):
+def process_parse_request(library, library_name, string, spec, key, cache, make_relative):
     """ returns a dict to be used as the request,
         or raises an exception """
     from mcdp_report.html import sanitize
@@ -430,7 +432,15 @@ def process_parse_request(library, string, spec, key, cache):
     x = ['<div class="language_warning_entry">%s</div>' % w 
          for w in warnings]
     language_warnings_html = "\n".join(x)
-                               
+                           
+    def get_link(specname, libname, thingname):
+        spec = specs[specname]
+        url0 =  ("/libraries/%s/%s/%s/views/syntax/" %  
+                    (libname, spec.url_part, thingname))
+        return make_relative(url0)
+        
+    highlight2 = add_html_links(highlight, library_name, get_link)
+    print highlight2
     res = {
         'ok': True, 
         'highlight': unicode(highlight, 'utf8'),

@@ -21,7 +21,7 @@ mcdp {
     total_payload_mass = mass required by Z + provided payload_mass
     payload_mass provided by XY ≽ total_payload_mass
     
-    required electric_power ≽ electric_power required by Z + electric_power required by XY
-    required mass ≽ mass required by Z + mass required by XY
-    required cost ≽ cost required by Z + cost required by XY 
+    required electric_power ≽ ∑ electric_power required by *
+    required mass ≽ ∑ mass required by *
+    required budget ≽ ∑ budget required by *
 }

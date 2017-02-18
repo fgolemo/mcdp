@@ -1,7 +1,7 @@
 mcdp {
     gears = instance `Gears 
     transmission = instance `Transmission
-    motor = instance `Motor
+    motor = instance `mechanisms.Motor
  
     provides force using gears  
     velocity provided by gears ≽ 3 mm/s # what is this depending on?

@@ -34,7 +34,8 @@ def check_editor_response(filename, source, libname):  # @UnusedVariable
    
     key = ()
     cache = {}
-    res = process_parse_request(library, string, spec, key, cache)
+    make_relative = lambda x: x
+    res = process_parse_request(library, libname, string, spec, key, cache, make_relative)
     
     if res['ok']:
         

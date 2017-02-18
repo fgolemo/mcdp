@@ -121,6 +121,10 @@ def eval_rvalue_SumResources(rvalue, context):
         if rname in ndp.get_rnames():
             cr = CResource(n, rname)
             cresources.append(cr)
+            
+    if not cresources:
+        msg = 'Cannot find any sub-design problem with resource "%s".' % rname
+        raise DPSemanticError(msg, where=rvalue.rname.where)
 
     from mcdp_lang.eval_math import eval_PlusN_
     if len(cresources) == 1:

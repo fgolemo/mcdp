@@ -6,18 +6,18 @@ from bs4.element import Declaration, ProcessingInstruction, Doctype, Comment,\
     Tag
 
 from contracts.utils import check_isinstance, indent
+from mcdp.exceptions import DPSyntaxError, DPSemanticError,\
+    DPNotImplementedError, DPInternalError
 from mcdp_lang.namedtuple_tricks import recursive_print
 from mcdp_lang.parts import CDPLanguage
 from mcdp_lang.utils_lists import unwrap_list
 from mcdp_report.html import ast_to_html
+from mcdp_utils_xml import to_html_stripping_fragment, bs
 from mcdp_web.editor_fancy.app_editor_fancy_generic import specs
 from mcdp_web.renderdoc.highlight import add_style
-from mcdp_utils_xml import to_html_stripping_fragment, bs
 from mcdp_web.utils0 import add_std_vars, add_other_fields
 from mcdp_web.visualization.add_html_links_imp import add_html_links
 from mocdp.comp.context import Context
-from mcdp.exceptions import DPSyntaxError, DPSemanticError,\
-    DPNotImplementedError, DPInternalError
 
 
 class AppVisualization():
@@ -147,6 +147,7 @@ class AppVisualization():
         
         return res
     
+    
 def generate_view_syntax(library_name, library, name,  spec, make_relative):
     ext = spec.extension
     expr = spec.parse_expr
@@ -156,20 +157,6 @@ def generate_view_syntax(library_name, library, name,  spec, make_relative):
     f = library._get_file_data(filename)
     source_code = f['data']
     realpath = f['realpath']
-#     
-#     md1 = '%s.%s' % (name, MCDPLibrary.ext_explanation1)
-#     if library.file_exists(md1):
-#         fd = library._get_file_data(md1)
-#         html1 = self.render_markdown(fd['data'])
-#     else:
-#         html1 = None
-# 
-#     md2 = '%s.%s' % (name, MCDPLibrary.ext_explanation2)
-#     if library.file_exists(md2):
-#         fd = library._get_file_data(md2)
-#         html2 = self.render_markdown(fd['data'])
-#     else:
-#         html2 = None
         
     context = Context()
     class Tmp:
@@ -202,26 +189,31 @@ def generate_view_syntax(library_name, library, name,  spec, make_relative):
         highlight = '<pre class="source_code_with_error">%s</pre>' % source_code
         error = e.__str__()
         parses = False
-        
      
     
     if parses:
         context = library._generate_context_with_hooks()
         try:
-            thing = spec.load(library, name, context=context)    
+            thing = spec.load(library, name, context=context)
+                
             svg_data = get_svg_for_visualization(library, library_name, spec, 
                                                      name, thing, Tmp.refined, 
                                                      make_relative)
         except (DPSemanticError, DPNotImplementedError) as e:
-            error = e.__str__()
+            
+            from mcdp_web.editor_fancy.app_editor_fancy_generic import html_mark
+            highlight = html_mark(highlight, e.where, "semantic_error")
+
+            error = e.error
             svg_data = None
     else:
         svg_data = None
         
+    check_isinstance(highlight, str)
     res= {
         'source_code': source_code,
         'error': unicode(error, 'utf-8'),
-        'highlight': highlight,
+        'highlight': unicode(highlight, 'utf-8'),
         'realpath': realpath,
         'current_view': 'syntax', 
         'explanation1_html': None,

@@ -3,7 +3,7 @@ from contextlib import contextmanager
 import sys
 
 from contracts import contract
-from contracts.utils import raise_desc, raise_wrapped, check_isinstance
+from contracts.utils import raise_desc, raise_wrapped, check_isinstance, indent
 from mcdp_dp import (CatalogueDP, Conversion, JoinNDP, MeetNDualDP, get_conversion, make_series, VariableNode,
                      ConstantMinimals, LimitMaximals, OpaqueDP, FunctionNode, ResourceNode)
 from mcdp_posets import FiniteCollectionAsSpace, NotEqual, NotLeq, PosetProduct, get_types_universe
@@ -19,7 +19,7 @@ from mocdp.comp.make_approximation_imp import make_approximation
 from mocdp.comp.template_deriv import cndp_eversion
 from mcdp.exceptions import (DPInternalError, DPSemanticError,
                               DPSemanticErrorNotConnected, MCDPExceptionWithWhere, mcdp_dev_warning,
-                              DPNotImplementedError)
+                              DPNotImplementedError, DPSyntaxError)
 from mocdp.ndp.named_coproduct import NamedDPCoproduct
 
 from .eval_codespec_imp_utils_instantiate import ImportFailure, import_name
@@ -232,29 +232,37 @@ def eval_ndp_load(r, context):
     arg = r.load_arg
     check_isinstance(arg, (CDP.NDPName, CDP.NDPNameWithLibrary))
 
-    if isinstance(arg, CDP.NDPNameWithLibrary):
-        check_isinstance(arg.library, CDP.LibraryName), arg
-        check_isinstance(arg.name, CDP.NDPName), arg
-        libname = arg.library.value
-        name = arg.name.value
-        library = context.load_library(libname)
-         
-        context2 = context.child()
-        res = library.load_ndp(name, context2)
-
-        msg = 'While loading MCDP %r from library %r:' % (name, libname)
-        warnings_copy_from_child_make_nested2(context, context2, r.where, msg)
-        return res
-
-    if isinstance(arg, CDP.NDPName):
-        name = arg.value
-
-        context2 = context.child()
-        ndp = context2.load_ndp(name)
-        msg = 'While loading MCDP %r:' % (name)
-        warnings_copy_from_child_make_nested2(context, context2, r.where, msg)
-        return ndp
-
+    try:
+        if isinstance(arg, CDP.NDPNameWithLibrary):
+            check_isinstance(arg.library, CDP.LibraryName), arg
+            check_isinstance(arg.name, CDP.NDPName), arg
+            libname = arg.library.value
+            name = arg.name.value
+            library = context.load_library(libname)
+             
+            context2 = context.child()
+            res = library.load_ndp(name, context2)
+    
+            msg = 'While loading MCDP %r from library %r:' % (name, libname)
+            warnings_copy_from_child_make_nested2(context, context2, r.where, msg)
+            return res
+    
+        if isinstance(arg, CDP.NDPName):
+            name = arg.value
+    
+            context2 = context.child()
+            res = context2.load_ndp(name)
+            msg = 'While loading MCDP %r:' % (name)
+            warnings_copy_from_child_make_nested2(context, context2, r.where, msg)
+            return res
+    except DPSyntaxError as e:
+        msg = 'Syntax error while loading %s:' % (name)
+        s = str(e)
+        print s
+        msg += '\n\n' + indent(str(e), '   ')
+        raise DPSemanticError(msg, where=arg.where)
+        #raise_wrapped(DPSemanticError, e, msg, compact=True)
+        
     if True: # pragma: no cover
         msg = 'Unknown construct.'
         raise_desc(DPInternalError, msg, r=r)
