@@ -7,12 +7,12 @@ mcdp {
     cost_of_power = 0.001 $ / kWh   
     
     initial_investment = initial_investment required by technology
-    
-     cost_of_electricity = (
-      cost_of_power · 
-      electric_power required by technology · 
-      time_per_part required by technology · 
-      provided num_parts)
+
+    cost_of_electricity = (
+     cost_of_power · 
+     electric_power required by technology · 
+     time_per_part required by technology · 
+     provided num_parts)
     cost_of_materials = provided num_parts · budget_per_part required by technology
     requires total_cost = cost_of_electricity + initial_investment + cost_of_materials
     
