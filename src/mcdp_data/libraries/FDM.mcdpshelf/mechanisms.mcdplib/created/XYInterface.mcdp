@@ -10,5 +10,5 @@ interface mcdp {
 
     requires electric_power [W]
     requires mass [g]
-    requires cost [$]
+    requires budget [$]
 }

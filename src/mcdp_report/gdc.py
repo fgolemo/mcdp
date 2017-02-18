@@ -29,13 +29,14 @@ COLOR_DARKRED = '#861109'
 
 class GraphDrawingContext():
     
-    def __init__(self, gg, parent, yourname, level=0,
+    def __init__(self, gg, parent, yourname, library, level=0,
                  tmppath=None, style='default',
                  images_paths=[], skip_initial=True):
         self.gg = gg
         self.parent = parent
         self.yourname = yourname
         self.level = level
+        self.library = library
 
         if tmppath is None:
             d = get_mcdp_tmp_dir()
@@ -54,6 +55,7 @@ class GraphDrawingContext():
     def child_context(self, parent, yourname):
         c = GraphDrawingContext(gg=self.gg,
                                 parent=parent,
+                                library=self.library,
                                 yourname=yourname,
                                 level=self.level + 1,
                                 tmppath=self.tmppath,
@@ -159,14 +161,22 @@ class GraphDrawingContext():
         if not os.path.exists(imagepath):
             raise ValueError('Icons path does not exist: %r' % imagepath)
         return imagepath
-
+    
     def get_icon(self, options):
         tmppath = self.get_temp_path()
         imagepaths = [self._get_default_imagepath()]
         imagepaths.extend(self.images_paths)
-        #print('options: %s in %r' % (options, imagepaths))
+        
+        libraries = os.path.join(dir_from_package_name('mcdp_data'), 'libraries')
+        imagepaths.append(os.path.join(libraries, 'FDM.mcdpshelf', 'fdm.mcdplib'))
+        imagepaths.append(os.path.join(libraries, 'FDM.mcdpshelf', 'mechanisms.mcdplib'))
+        
+#         print 'library (%s)' % self.library.search_dirs
+#         extra_hint = os.path.join('/Volumes/1604-mcdp/data/env_mcdp/src/mcdp/src/mcdp_data/libraries/FDM.mcdpshelf/mechanisms.mcdplib'
+        
+        print('options: %s in %r' % (options, "\n ".join(imagepaths)))
         best = choose_best_icon(options, imagepaths)
-        #print('best: %s' % best)
+        print('best: %s' % best)
         resized = resize_icon(best, tmppath, 150)
         return resized
 

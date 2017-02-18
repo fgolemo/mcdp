@@ -121,7 +121,7 @@ class Normal(GGFormatter):
         
         images_paths = library.get_images_paths() if library else []
 
-        gg = gvgen_from_ndp(ndp, self. style, images_paths=images_paths,
+        gg = gvgen_from_ndp(ndp, self. style, library=library, images_paths=images_paths,
                             yourname=yourname, direction=self.direction,
                             skip_initial=True)
         return gg
@@ -165,7 +165,7 @@ class Enclosed(GGFormatter):
         yourname = None  # name
         
         gg = gvgen_from_ndp(ndp2, style=self.style, direction=self.direction,
-                            images_paths=images_paths, yourname=yourname,
+                            images_paths=images_paths, library=library,  yourname=yourname,
                             skip_initial=self.skip_initial)
         
         return gg
@@ -191,16 +191,16 @@ class Templatized(GGFormatter):
         
         images_paths = library.get_images_paths() if library else []
     
-        gg = gvgen_from_ndp(ndp, self.style, yourname=yourname,
+        gg = gvgen_from_ndp(ndp, self.style, library=library, yourname=yourname,
                             images_paths=images_paths, direction=self.direction,
                             skip_initial=True)
         return gg
 
 class Expand(GGFormatter):
+
     def __init__(self, direction, style):
         self.direction = direction
         self.style = style
-
 
     def get_gg(self, mf):
         """ This expands the children, forces the enclosure """
@@ -208,7 +208,7 @@ class Expand(GGFormatter):
         images_paths = library.get_images_paths() if library is not None else []
         ndp = mf.get_ndp()
         yourname = None  # name
-        gg = gvgen_from_ndp(ndp, style=self.style, direction=self.direction,
+        gg = gvgen_from_ndp(ndp, style=self.style, library=library,  direction=self.direction,
                             images_paths=images_paths, yourname=yourname,
                             skip_initial=True)
         return gg

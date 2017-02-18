@@ -70,7 +70,7 @@ class RecursiveEdgeLabeling(PlottingInfo):
 
 @contract(ndp=NamedDP, direction='str', yourname='str|None')
 def gvgen_from_ndp(ndp, style='default', direction='LR', images_paths=[], yourname=None,
-                   plotting_info=None, skip_initial=True):
+                   plotting_info=None, skip_initial=True, library=None):
     if plotting_info is None:
         plotting_info = PlottingInfo()
 
@@ -79,6 +79,14 @@ def gvgen_from_ndp(ndp, style='default', direction='LR', images_paths=[], yourna
         plotting_info(ndp_name=('name', 'sub'), fname='f1', rname=None)
 
     """
+#     
+#     if hasattr(ndp, MCDPConstants.ATTR_LOAD_LIBNAME):
+#         use = getattr(ndp, MCDPConstants.ATTR_LOAD_LIBNAME)
+#         print('using library %r' % use)
+#         library = library.load_library(use)
+#     else:
+#         print('No ATTR_LOAD_LIBNAME')
+    
     assert isinstance(ndp, NamedDP)
     assert isinstance(direction, str), direction.__repr__()
     assert isinstance(yourname, (NoneType, str)), yourname.__repr__()
@@ -118,7 +126,7 @@ def gvgen_from_ndp(ndp, style='default', direction='LR', images_paths=[], yourna
 
 
     from .gdc import GraphDrawingContext
-    gdc = GraphDrawingContext(gg=gg, parent=None,
+    gdc = GraphDrawingContext(gg=gg, parent=None, library=library,
                               yourname=yourname, images_paths=images_paths,
                               skip_initial=skip_initial)
     gdc.set_style(style)

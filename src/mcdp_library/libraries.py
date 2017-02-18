@@ -8,6 +8,7 @@ from mcdp.exceptions import DPSemanticError
 
 from .library import MCDPLibrary
 from .utils import locate_files
+from mcdp_library.utils.dir_from_package_nam import dir_from_package_name
 
 
 __all__ = [
@@ -37,6 +38,10 @@ class Librarian():
     
     @contract(dirname=str, returns='None')
     def find_libraries(self, dirname):
+        if is_python_module_name(dirname):
+            package = dir_from_package_name(dirname)
+            logger.info('%s -> %s' % (dirname, package))
+            dirname = package
 
         if dirname.endswith('.mcdplib'):
             libraries = [dirname]
@@ -127,3 +132,8 @@ class Librarian():
         _short, data = self._load_entry(dirname)
         data['library'].library_name = _short
         return data['library']
+
+def is_python_module_name(x):
+    from pkgutil import iter_modules
+    return x in (name for loader, name, ispkg in iter_modules())
+    

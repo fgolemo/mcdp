@@ -9,7 +9,7 @@ mcdp {
     acceleration provided by XY ≽ provided acceleration
     force provided by XY ≽ provided force
     
-    Z = instance `Xjoint
+    Z = instance `Joint
     payload_mass provided by Z ≽ provided payload_mass
     velocity provided by Z ≽ provided velocity
     acceleration provided by Z ≽ provided acceleration

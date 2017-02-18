@@ -439,8 +439,8 @@ def process_parse_request(library, library_name, string, spec, key, cache, make_
                     (libname, spec.url_part, thingname))
         return make_relative(url0)
         
-    highlight2 = add_html_links(highlight, library_name, get_link)
-    print highlight2
+#     highlight2 = add_html_links(highlight, library_name, get_link)
+#     print highlight2
     res = {
         'ok': True, 
         'highlight': unicode(highlight, 'utf8'),

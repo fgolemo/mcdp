@@ -415,7 +415,13 @@ class MCDPLibrary():
                                   followlinks=True)
         for f in files_mcdp:
             assert isinstance(f, str)
+            if os.path.islink(f):
+                if not os.path.exists(f):
+                    msg = 'Ignoring broken link %s' % f
+                    logger.warning(msg)
+                    continue 
             self._update_file(f, from_search_dir=d)
+
 
     @contract(f=str)
     def _update_file_from_editor(self, f):
@@ -424,7 +430,9 @@ class MCDPLibrary():
     @contract(f=str)
     def _update_file(self, f, from_search_dir=None):
         """ from_search_dir: from whence we arrived at this file. """
-        assert os.path.exists(f)
+        if not os.path.exists(f):
+            msg = 'File does not exist: %s' % f
+            raise ValueError(msg)
         basename = os.path.basename(f)
         check_isinstance(basename, str)
         # This will fail because then in pyparsing everything is unicode

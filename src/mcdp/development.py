@@ -21,5 +21,6 @@ def do_extra_checks():
 
 def mcdp_dev_warning(s):  # @UnusedVariable
     if get_user() in  ['andrea']:
-        warnings.warn(s)
+        #warnings.warn(s)
+        pass
 

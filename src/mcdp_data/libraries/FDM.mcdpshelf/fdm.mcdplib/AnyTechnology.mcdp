@@ -1,6 +1,5 @@
 mcdp {
     provides num_parts [ℕ] 'Number of parts to produce'
-    
     technology = instance choose(fdm:`FDM, other_technology:`OtherTechnology)
     provides part_length, part_resolution, service_temperature using technology 
     
@@ -14,7 +13,9 @@ mcdp {
      time_per_part required by technology · 
      provided num_parts)
     cost_of_materials = provided num_parts · budget_per_part required by technology
-    requires total_cost = cost_of_electricity + initial_investment + cost_of_materials
+
+    requires total_cost [USD]
+    required total_cost  ≽ cost_of_electricity + initial_investment + cost_of_materials
     
     requires mass for technology # mass of the thing ~ might be negligible
 }
