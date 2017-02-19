@@ -8,7 +8,7 @@ libraries=src/mcdp_data/libraries
 prepare_tests:
 	mkdir -p $(out)
 
-	$(MAKE) -C $(libraries)/unittests/basic.mcdplib/generated_dps/ clean all
+	$(MAKE) -C $(libraries)/unittests.mcdpshelf/basic.mcdplib/generated_dps/ clean all
 
 comptests: prepare_tests
 	comptests -o $(out) --contracts --nonose --console $(package)
