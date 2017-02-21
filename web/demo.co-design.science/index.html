@@ -83,14 +83,14 @@
 	#server { font-weight: bold;}
 </style>
 
-	<p>Please choose the server that is closest to you from the list below.
+<p>Please choose the server that is closest to you from the list below. <br/>
 		A low latency is important to use the online editor.
 	</p>
 
-	<p>The servers marked &ldquo;🔒 private&rdquo; require an account
+	<!--<p>The servers marked &ldquo;🔒 private&rdquo; require an account
 	(<a href="https://docs.google.com/forms/d/e/1FAIpQLSd62UrGvItpQJ2zm9IJMq41zOzx8giEBLMnWZw8UN9Lp4S6yQ/viewform?embedded=true">ask for one</a>). The servers marked &ldquo;🌎 public&rdquo;
 	allow anonymous access, but their contents is periodically erased.
-	</p>
+	</p>-->
 
 
 	<div id='destination:outside'>
@@ -205,18 +205,23 @@
 		function click_show_circle() {
 			$('#tests-outside').toggle();
 		}
+		function click_show_uptime() {
+			$('#uptime-img').toggle();
+		}
 
 		function init(){
 			// go('row1', 'Local installation', 'http://127.0.0.1:8080');
-			go('row1', '🌎 Public demo server (EU)', 'https://demo.co-design.science/inst02');
-			go('row2', '🔒 Private demo server (EU)', 'https://demo.co-design.science/inst00');
-			go('row3', '🔒 Private development server (EU)', 'https://demo.co-design.science/inst01');
+			go('row1', '&#x1F30D; Public demo server (EU)', 'https://demo.co-design.science/inst02');
+			go('row2', '&#x1F512; Private demo server (EU)', 'https://demo.co-design.science/inst00');
+			go('row3', '&#x1F512; Private FDM MCDP development (EU)', 'https://demo.co-design.science/inst01');
 			// go('row4', 'Production (US)', 'https://8.8.8.3');
 			// go('row5', 'Staging (US)', 'https://ares-super.lids.mit.edu/inst02');
 
+			go('row5', '&#127758; Public demo server (US)', 'https://arlington.co-design.science/arl00');
 			// $('#details').button();
 			$('#details').click(click_details);
 			$('#show-circle').click(click_show_circle);
+			$('#show-uptime').click(click_show_uptime);
 		}
 		$( document ).ready(init);
 	</script>
@@ -1996,11 +2001,12 @@
 			<li>
 				<a href="#" id=details>Show more details about the servers above.</a>
 			</li>
-			<li>
+			<!--<li>
 				<a href="#" id='show-circle'>Show the unittests status.</a>
-			</li>
+			</li>-->
 			<li>
-				<a href="http://status.co-design.science/">See historical uptime statistics (new page)</a>
+			<!--	<a href="http://status.co-design.science/">See historical uptime statistics (new page)</a>
+			-->	<a href='#' id='show-uptime'>See historical uptime statistics</a>
 			</li>
 		</ul>
 
@@ -2040,6 +2046,10 @@
 		</table>
 	</div>
 
+	<div id='uptime-img' style='display:none'>
+	<img src='status.png' style='width: 40em;' />
+	<p><a href='status.timestamp.txt'>last updated</a></p>
+	</div>
 </body>
 
 </html>
