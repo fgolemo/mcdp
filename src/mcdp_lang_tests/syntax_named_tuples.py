@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
-from comptests.registrar import comptest, comptest_fails
+from comptests.registrar import comptest, run_module_tests
 from mcdp_lang import parse_ndp, parse_poset
 from mcdp_lang.parse_actions import parse_wrap
 from mcdp_lang.syntax import Syntax
+from mcdp_lang_tests.utils import assert_parse_ndp_semantic_error
 
 
 @comptest
@@ -47,10 +48,10 @@ mcdp {
 
 
 
-@comptest_fails
+@comptest
 def check_lang_namedtuple4():
 
-    parse_ndp("""
+    s = """
     
 mcdp {
 
@@ -61,7 +62,9 @@ mcdp {
     
 }
     
-    """)
+    """
+    e = assert_parse_ndp_semantic_error(s, contains="Missing value 'energy'")
+    
 
 @comptest
 def check_lang_namedtuple5():
@@ -107,3 +110,9 @@ def check_lang_namedtuple6():
 def check_lang_namedtuple7():
     pass
 
+
+if __name__ == '__main__': 
+    
+    run_module_tests()
+    
+    
