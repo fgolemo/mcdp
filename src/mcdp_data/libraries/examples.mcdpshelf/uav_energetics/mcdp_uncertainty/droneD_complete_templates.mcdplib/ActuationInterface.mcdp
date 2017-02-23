@@ -1,0 +1,8 @@
+template mcdp {     
+    provides lift  [N]
+    provides velocity [m/s]
+
+    requires power [W]
+    requires actuator_mass [g]
+    requires cost [$]
+}

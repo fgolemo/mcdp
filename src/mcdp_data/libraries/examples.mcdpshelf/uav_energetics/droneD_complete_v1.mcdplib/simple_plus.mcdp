@@ -1,0 +1,8 @@
+mcdp {
+  provides f1 [dimensionless] 
+  requires r1 [dimensionless]
+  requires r2 [dimensionless]
+
+  f1  <= 1 [] + (r1 * r2  )
+
+}

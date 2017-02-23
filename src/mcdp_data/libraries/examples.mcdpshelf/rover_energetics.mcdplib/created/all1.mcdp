@@ -1,0 +1,10 @@
+mcdp {
+    energetics = instance `EnergySources
+    getting_plutonium = instance `GettingPlutonium
+    plutonium required by energetics <= plutonium provided by getting_plutonium
+
+    enclosure = instance `Enclosure
+    area_to_expose provided by enclosure >= area required by energetics
+
+    total_mass = mass required by enclosure + mass required by energetics
+}

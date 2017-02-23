@@ -1,0 +1,22 @@
+mcdp {
+    provides out1 [`AC_power]
+    provides out2 [`AC_power]
+    requires in  [`AC_power] 
+    requires budget [USD]
+
+    budget >= 6.31 USD
+ 
+    (required in).socket >= `socket_type : TypeM
+
+    (provided out1).socket <= any-of({`socket_type : TypeA, `socket_type : TypeC})
+    (provided out2).socket <= any-of({`socket_type : TypeA, `socket_type : TypeC})
+
+    # this forces the two voltages to be the same
+    (required in).voltage   >=  (provided out1).voltage
+    (required in).voltage   >=  (provided out2).voltage
+    (required in).frequency >=  (provided out1).frequency
+    (required in).frequency >=  (provided out2).frequency
+    # this says that the power sums
+    total_power = (provided out1).watts + (provided out2).watts
+    (required in).watts >=  total_power
+}

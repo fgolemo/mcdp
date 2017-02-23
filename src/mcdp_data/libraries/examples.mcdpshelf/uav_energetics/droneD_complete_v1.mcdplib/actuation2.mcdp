@@ -1,0 +1,22 @@
+approx(power,0%,0.1W,100 W) 
+
+mcdp {
+    provides lift  [N]
+    provides velocity [m/s]
+    provides agility [m/s^2]
+
+    provided agility <= 1000 m/s^2
+
+    requires power [W]
+    requires actuator_mass [g]
+    requires cost [$]
+    
+    p0 = 2 W
+    p1 = 1.5 W/N^2
+
+    power >= p0 + (lift^2) * p1
+
+    required actuator_mass >= 100 g
+    required cost >= 100 $
+    provided velocity <= 3 m/s
+}

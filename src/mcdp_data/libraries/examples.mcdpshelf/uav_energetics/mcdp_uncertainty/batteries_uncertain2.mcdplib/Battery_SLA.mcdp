@@ -1,0 +1,29 @@
+mcdp {
+    provides capacity [J]
+    provides missions [dimensionless]
+
+    requires mass     [g]
+    requires cost     [USD]
+
+    # Number of replacements
+    requires maintenance [dimensionless]
+
+    # Battery properties
+    specific_energy_inv = Uncertain(1.0 []/ 33 Wh/kg, 1.0 [] /  27 Wh/kg)
+    specific_cost_inv = Uncertain(1.0 [] / 7.7 Wh/USD, 1.0 [] / 6.3 Wh/USD)
+    cycles_inv = Uncertain(1.0 []/550.0 [], 1.0[]/ 450.0 [])
+
+    # Constraint between mass and capacity
+    massc = provided capacity * specific_energy_inv
+
+    # How many times should it be replaced?
+    num_replacements = ceil(provided missions * cycles_inv)
+    required maintenance >= num_replacements
+
+    # Cost is proportional to number of replacements
+    costc = (provided capacity * specific_cost_inv) * num_replacements
+
+    required cost >= costc
+    required mass >= massc
+}
+

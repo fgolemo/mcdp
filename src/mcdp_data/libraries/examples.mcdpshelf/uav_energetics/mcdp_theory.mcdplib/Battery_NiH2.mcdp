@@ -1,0 +1,28 @@
+
+
+
+mcdp {
+    provides capacity [J]
+    provides missions [dimensionless]
+
+    requires mass     [g]
+    requires cost     [$]
+    
+    # Number of replacements
+    requires maintenance [dimensionless]
+
+    # Battery properties
+    specific_energy =  45 Wh/kg
+    specific_cost = 10.50 Wh/$
+    cycles = 20000 []
+
+    # Constraint between mass and capacity
+    mass >= capacity / specific_energy
+
+    # How many times should it be replaced?
+    num_replacements = ceil(missions / cycles)
+    maintenance >= num_replacements
+
+    # Cost is proportional to number of replacements
+    cost >= (capacity / specific_cost) * num_replacements
+}

@@ -1,0 +1,17 @@
+mcdp {
+  provides capacity [J]
+  provides missions [dimensionless]
+
+  requires cost [$]
+
+  battery = instance `Batteries
+
+  provided capacity <= capacity provided by battery
+  provided missions <= missions provided by battery
+
+  mass required by battery <= 3 kg
+
+  ignore maintenance required by battery 
+
+  required cost >= cost required by battery
+}

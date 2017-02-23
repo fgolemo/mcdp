@@ -1,0 +1,6 @@
+mcdp {
+    variable x, y [ℕ]
+    x + y ≽ ceil(sqrt(x)) + ceil(sqrt(y)) + 10
+    # x + y >= ⌈√x⌉ + ⌈√y⌉ + 10
+    requires x, y
+}

@@ -1,0 +1,10 @@
+template mcdp {
+    provides capacity [J]
+    provides missions [dimensionless]
+
+    requires mass     [g]
+    requires cost     [$]
+    
+    # Number of replacements
+    requires maintenance [dimensionless]
+}

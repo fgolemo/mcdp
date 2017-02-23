@@ -1,0 +1,4 @@
+product(
+    dc: `DC_power,
+    duration: s
+)

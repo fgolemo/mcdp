@@ -1,0 +1,9 @@
+choose(
+        NiMH: `Battery_NiMH,
+         LCO: `Battery_LCO,
+         LMO: `Battery_LMO,
+       NiCad: `Battery_NiCad,
+         SLA: `Battery_SLA,
+        LiPo: `Battery_LiPo,
+         LFP: `Battery_LFP
+    )

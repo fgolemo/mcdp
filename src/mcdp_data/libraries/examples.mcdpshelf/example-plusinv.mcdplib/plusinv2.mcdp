@@ -1,0 +1,12 @@
+mcdp {
+    provides a [dimensionless]
+    
+    requires x [dimensionless]
+    requires y [dimensionless]
+    requires z [dimensionless]
+    
+    required x + required y · required z ≽ provided a
+    
+    b = instance mcdp { 
+}
+}
