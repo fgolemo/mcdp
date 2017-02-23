@@ -1,4 +1,0 @@
-assert_equal(
-    solve(1 MJ, `battery),
-    upperclosure { 2.778 kg}
-)

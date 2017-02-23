@@ -1,6 +1,0 @@
-mcdp {
-    provides power [W]
-    requires power [W]
-
-    provided power <= required power
-}

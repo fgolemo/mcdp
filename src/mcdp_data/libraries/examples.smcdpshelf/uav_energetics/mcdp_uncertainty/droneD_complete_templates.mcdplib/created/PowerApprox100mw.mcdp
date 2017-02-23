@@ -1,6 +1,0 @@
-mcdp {
-    provides power [W]
-    requires power [W]
-
-    required power  >= approxu(provided power, 100 mW)
-}

@@ -1,6 +1,0 @@
-poset {
-  find_ancient_life
-  find_current_life
-   
-  find_ancient_life <= find_current_life
-}

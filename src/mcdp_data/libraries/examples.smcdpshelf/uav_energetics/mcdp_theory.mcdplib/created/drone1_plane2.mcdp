@@ -1,8 +1,0 @@
-mcdp {
-   drone1 = instance `Drone1
-   requires total_mass, total_cost for drone1
-   provides endurance, extra_payload using drone1
-   num_missions provided by drone1 >= 500 dimensionless
-   extra_power provided by drone1 >= 1 W
-   ignore velocity provided by drone1
-}

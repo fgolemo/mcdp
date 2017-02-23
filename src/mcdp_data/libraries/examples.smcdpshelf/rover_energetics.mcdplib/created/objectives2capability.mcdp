@@ -1,3 +1,0 @@
-mcdp {
-    a = instance mcdp {}
-}
