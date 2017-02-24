@@ -3,4 +3,5 @@ layout: page
 title: Manual
 ---
 
-[The PyMCDP manual](/media/pymcdp-manual.html)
+
+[The PyMCDP manual](/media/manual.pdf)

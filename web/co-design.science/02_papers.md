@@ -77,66 +77,51 @@ permalink: /papers/
 
 This paper is currently the best reference:
 
+
 <div class='pub-ref-desc'>
-    <img class='icon' src='http://purl.org/censi/web/media/paper-icons/censi16codesign.png'/>
-    <p class='pub-ref-short'><span class="author">A.C..</span>
-    <span class="title">A mathematical theory of codesign.</span>
-    Technical Report, Laboratory for Information and Decision Systems/MIT, January 2016.
-    <span class="links"><span class="pdf"><a href="http://tiny.cc/co-design"><img style='border:0; margin-bottom:-6px'  src='/media/pdf.gif'/> pdf</a></span></span><a class='pub-ref-bibtex-link' onclick='javascript:$("#censi16codesign").toggle();' href='javascript:void(0)'>bibtex</a><pre class='pub-ref-bibtex' id='censi16codesign' style='display: none;'>@techreport{censi16codesign,
+    <img class='icon' src='https://censi.science/media/paper-icons/censi16codesign.png'/>
+    <p class='pub-ref-short'><span class="author"><span class="author-ac">Andrea Censi</span>.</span>
+    <span class="title">A mathematical theory of co-design.</span>
+    Technical Report, Laboratory for Information and Decision Systems, MIT, September 2016.
+    <span class="links"><span class="pdf"><a href="https://arxiv.org/pdf/1512.08055"><img style='border:0; margin-bottom:-6px'  src='/media/pdf.gif'/> pdf</a></span><span class="url"><a href="https://arxiv.org/abs/1512.08055"><img style='border:0; margin-bottom:-6px; height: 17px'  src='/media/web.gif'/> supp. material</a></span></span><a class='pub-ref-bibtex-link' onclick='javascript:$("#censi16codesign").toggle();' href='javascript:void(0)'>bibtex</a><pre class='pub-ref-bibtex' id='censi16codesign' style='display: none;'>@techreport{censi16codesign,
         author = "Censi, Andrea",
-        title = "A Mathematical Theory of Codesign",
-        month = "January",
+        title = "A Mathematical Theory of Co-Design",
+        url = "https://arxiv.org/abs/1512.08055",
+        month = "September",
         year = "2016",
-        pdf = "http://tiny.cc/co-design",
-        institution = "Laboratory for Information and Decision Systems/MIT"
-    }</pre></p>
-    <div class='desc'>
-        
-        
-    </div><div style='clear:both'></div>
-</div>
-
-This is a rather technical paper with more examples and the description
-of the certainty handling mechanism currently implemented:
-
-<div class='pub-ref-compact'>
-    <img class='icon' src='http://purl.org/censi/web/media/paper-icons/censi16uncertainty.png'/>
-    <p class='pub-ref-short'><span class="author">A.C..</span>
-    <span class="title">Handling uncertainty in monotone co-design problems.</span>
-    Technical Report, Laboratory for Information and Decision Systems, MIT, October 2016.
-    <span class="links"><span class="pdf"><a href="https://arxiv.org/pdf/1609.03103v1"><img style='border:0; margin-bottom:-6px'  src='/media/pdf.gif'/> pdf</a></span><span class="url"><a href="https://arxiv.org/abs/1609.03103"><img style='border:0; margin-bottom:-6px; height: 17px'  src='/media/web.gif'/> supp. material</a></span></span><a class='pub-ref-bibtex-link' onclick='javascript:$("#censi16uncertainty").toggle();' href='javascript:void(0)'>bibtex</a><pre class='pub-ref-bibtex' id='censi16uncertainty' style='display: none;'>@techreport{censi16uncertainty,
-        author = "Censi, Andrea",
-        title = "Handling Uncertainty in Monotone Co-Design Problems",
-        url = "https://arxiv.org/abs/1609.03103",
-        month = "October",
-        year = "2016",
-        pdf = "https://arxiv.org/pdf/1609.03103v1",
+        pdf = "https://arxiv.org/pdf/1512.08055",
         institution = "Laboratory for Information and Decision Systems, MIT"
-    }</pre></p><div style='clear:both'></div>
-</div>
-
-<!-- 
-These two papers describe more examples for the simple case of a MCDP with only one cycle:
-
-
-<div class='pub-ref-desc'>
-    <img class='icon' src='http://censi.mit.edu/media/paper-icons/censi15monotone.png'/>
-    <p class='pub-ref-short'><span class="author">A.C..</span>
-    <span class="title">Monotone co-design problems and their systematic solution.</span>
-    Technical Report, Laboratory for Information and Decision Systems/MIT, October 2015.
-    <span class="links"><span class="pdf"><a href="http://purl.org/censi/research/201510-monotone/1-MonotoneCodesign.pdf"><img style='border:0; margin-bottom:-6px'  src='/media/pdf.gif'/> pdf</a></span></span><a class='pub-ref-bibtex-link' onclick='javascript:$("#censi15monotone").toggle();' href='javascript:void(0)'>bibtex</a><pre class='pub-ref-bibtex' id='censi15monotone' style='display: none;'>@techreport{censi15monotone,
-        author = "Censi, Andrea",
-        title = "Monotone Co-Design Problems and their Systematic Solution",
-        month = "October",
-        year = "2015",
-        pdf = "http://purl.org/censi/research/201510-monotone/1-MonotoneCodesign.pdf",
-        institution = "Laboratory for Information and Decision Systems/MIT"
     }</pre></p>
     <div class='desc'>
-        
-        
+        <p>This paper introduces a theory of co-design that describes "design problems", defined as tuples of "functionality space", "implementation space", and "resources space", together with a feasibility relation that relates the three spaces. Design problems can be interconnected together to create "co-design problems", which describe possibly recursive co-design constraints among subsystems.</p>
+        <p class='read-more'><a href='https://arxiv.org/abs/1512.08055'>read more...</a></p>
     </div><div style='clear:both'></div>
-</div> -->
+</div>
+
+This is a rather technical paper with more examples and the description of the certainty handling mechanism currently implemented:
+
+<div class='pub-ref-desc'>
+    <img class='icon' src='https://censi.science/media/paper-icons/censi17uncertainty.png'/>
+    <p class='pub-ref-short'><span class="author"><span class="author-ac">Andrea Censi</span>.</span>
+    <span class="title">Uncertainty in monotone co-design problems.</span>
+    <em>Robotics and Automation Letters</em>, 2017.
+    <span class="links"><span class="pdf"><a href="https://arxiv.org/pdf/1609.03103"><img style='border:0; margin-bottom:-6px'  src='/media/pdf.gif'/> pdf</a></span><span class="url"><a href="https://arxiv.org/abs/1609.03103"><img style='border:0; margin-bottom:-6px; height: 17px'  src='/media/web.gif'/> supp. material</a></span></span><a class='pub-ref-bibtex-link' onclick='javascript:$("#censi17uncertainty").toggle();' href='javascript:void(0)'>bibtex</a><pre class='pub-ref-bibtex' id='censi17uncertainty' style='display: none;'>@article{censi17uncertainty,
+        author = "Censi, Andrea",
+        title = "Uncertainty in Monotone Co-Design Problems",
+        url = "https://arxiv.org/abs/1609.03103",
+        journal = "Robotics and Automation Letters",
+        year = "2017",
+        pdf = "https://arxiv.org/pdf/1609.03103",
+        institution = "Laboratory for Information and Decision Systems, MIT"
+    }</pre></p>
+    <div class='desc'>
+        <p>This paper concerns the introduction of uncertainty in the MCDP framework. Uncertainty has two roles: first, it allows to deal with limited knowledge in the models; second, it also can be used to generate consistent relaxations of a problem, as the computation requirements can be lowered should the user accept some uncertainty in the answer.</p>
+        <p class='read-more'><a href='https://arxiv.org/abs/1609.03103'>read more...</a></p>
+    </div><div style='clear:both'></div>
+</div>
+
+
+
 
 
 <!--
