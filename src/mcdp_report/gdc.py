@@ -174,9 +174,9 @@ class GraphDrawingContext():
 #         print 'library (%s)' % self.library.search_dirs
 #         extra_hint = os.path.join('/Volumes/1604-mcdp/data/env_mcdp/src/mcdp/src/mcdp_data/libraries/FDM.mcdpshelf/mechanisms.mcdplib'
         
-        print('options: %s in %r' % (options, "\n ".join(imagepaths)))
+        #print('options: %s in %r' % (options, "\n ".join(imagepaths)))
         best = choose_best_icon(options, imagepaths)
-        print('best: %s' % best)
+        #print('best: %s' % best)
         resized = resize_icon(best, tmppath, 150)
         return resized
 

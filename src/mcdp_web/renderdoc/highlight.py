@@ -919,11 +919,14 @@ def highlight_mcdp_code(library, frag, realpath, generate_pdf=False, raise_error
         # tag name:  (new name, classes to add)
         'fname': ('code', ['FName']),
         'rname': ('code', ['RName']),
+        'poset': ('code', ['mcdp_poset']),
+        'value': ('code', ['mcdp_value']),
         'fvalue': ('code', ['mcdp_value', 'fvalue']),
         'rvalue': ('code', ['mcdp_value', 'rvalue']),
         'impname': ('code', ['impname']),
         'k': ('code', ['keyword']),
         'program': ('code', ['program']),
+        
         'f': ('span', ['f']),
         'r': ('span', ['r']),
         'imp': ('span', ['imp']),

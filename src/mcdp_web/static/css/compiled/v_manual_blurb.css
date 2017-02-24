@@ -217,6 +217,11 @@ blockquote {
 em {
   font-style: italic;
 }
+h1.draft,
+h2.draft,
+h3.draft {
+  color: red;
+}
 .figcontent {
   margin: 0;
   padding: 0;

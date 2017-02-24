@@ -28,7 +28,12 @@
 
 
 
-*/span.Unit,
+*/h1.draft,
+h2.draft,
+h3.draft {
+  color: red;
+}
+span.Unit,
 span.Nat,
 span.Int,
 span.Rcomp {

@@ -217,6 +217,11 @@ blockquote {
 em {
   font-style: italic;
 }
+h1.draft,
+h2.draft,
+h3.draft {
+  color: red;
+}
 .figcontent {
   margin: 0;
   padding: 0;
@@ -2042,7 +2047,8 @@ h1::after {
   display: none;
 }
 .todo {
-  display: none;
+  display: none !important;
+  /* already defined as inline-block */
 }
 /*
 

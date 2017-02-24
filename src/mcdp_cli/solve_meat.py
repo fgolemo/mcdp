@@ -231,7 +231,10 @@ def solve_meat_solve_ftor(trace, ndp, dp, fg, intervals, max_steps, exp_advanced
             rnames = ndp.get_rnames()
             x = ", ".join(rnames)
             # todo: add better formatting
-            trace.log('Minimal resources needed: %s = %s' % (x, UR.format(res)))
+            if res.minimals:
+                trace.log('Minimal resources needed: %s = %s' % (x, UR.format(res)))
+            else:
+                trace.log('This problem is unfeasible.')
 #         else:
 #             try:
 #                 trace = generic_solve(dp, f=fg, max_steps=max_steps)
