@@ -14,6 +14,10 @@ from bs4.element import NavigableString, Tag
 
 from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped, indent
+from mcdp import logger, MCDPConstants
+from mcdp.exceptions import DPSemanticError, DPSyntaxError, DPInternalError
+from mcdp.utils.fileutils import get_mcdp_tmp_dir
+from mcdp_figures import (MakeFiguresNDP, MakeFiguresTemplate, MakeFiguresPoset)
 from mcdp_lang.parse_actions import parse_wrap
 from mcdp_lang.parse_interface import (parse_template_refine, parse_poset_refine,
                                        parse_ndp_refine)
@@ -25,20 +29,13 @@ from mcdp_report.generic_report_utils import (
     NotPlottable, enlarge, get_plotters)
 from mcdp_report.html import ast_to_html, get_css_filename
 from mcdp_report.plotters.get_plotters_imp import get_all_available_plotters
-from mcdp_web.images.images import (get_mime_for_format)
 from mcdp_utils_xml import bs, to_html_stripping_fragment,\
     check_html_fragment, to_html_stripping_fragment_document, describe_tag,\
     project_html
-from mcdp import logger, MCDPConstants
-from mcdp.utils.fileutils import get_mcdp_tmp_dir
+from mcdp_web.images.images import (get_mime_for_format)
 from mocdp.comp.context import Context
-from mcdp.exceptions import DPSemanticError, DPSyntaxError, DPInternalError
 from reprep import Report
 from system_cmd import CmdException, system_cmd_result
-
-
-from mcdp_figures import( MakeFiguresNDP, MakeFiguresTemplate, 
-    MakeFiguresPoset)
 
 
 @contract(returns=str, html=str)

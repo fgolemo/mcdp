@@ -201,11 +201,6 @@ def reorganize_contents(body0):
             h1
         
     """ 
-    def is_chapter_marker(x):
-        return isinstance(x, Tag) and x.name == 'h1' and (not 'part' in x.attrs.get('id',''))
-    
-    def is_part_marker(x):
-        return isinstance(x, Tag) and x.name == 'h1' and 'part' in x.attrs.get('id','')
 
     def make_sections(body, is_marker, preserve = lambda _: False, element_name='section'):
         sections = []
@@ -219,6 +214,7 @@ def reorganize_contents(body0):
                     sections.append(current_section)
                 current_section = Tag(name=element_name)
                 current_section['id'] = x.attrs.get('id', 'unnamed-h1') + ':' + element_name
+                current_section['class'] = x.attrs.get('class', '')
                 #print('%s/section %s %s' % (is_marker.__name__, x.attrs.get('id','unnamed'), current_section['id']))
                 current_section.append(x.__copy__())
             elif preserve(x):
@@ -246,10 +242,25 @@ def reorganize_contents(body0):
             new_body.append('\n')
         return new_body
     
-    body1 = make_sections(body0, is_chapter_marker, is_part_marker)
-    body2 = make_sections(body1, is_part_marker)
+    def is_section_marker(x):
+        return isinstance(x, Tag) and x.name == 'h2'
+
+    def is_chapter_marker(x):
+        return isinstance(x, Tag) and x.name == 'h1' and (not 'part' in x.attrs.get('id',''))
+    
+    def is_part_marker(x):
+        return isinstance(x, Tag) and x.name == 'h1' and 'part' in x.attrs.get('id','')
+
+    body = make_sections(body0, is_section_marker, is_chapter_marker)
+    body = make_sections(body, is_chapter_marker, is_part_marker)
+    body = make_sections(body, is_part_marker)
+    
+    def is_h2(x):
+        return isinstance(x, Tag) and x.name == 'h2'
+     
+    body = make_sections(body, is_h2)
             
-    return body2
+    return body
     
     
     

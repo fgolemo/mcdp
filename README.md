@@ -1,6 +1,6 @@
+<!--
 
-
-<table> 
+<table>
 <tr>
 <td>Production server (EU)</td>
 <td><a href="https://circleci.com/gh/AndreaCensi/mcdp/tree/inst00"><img src="https://circleci.com/gh/AndreaCensi/mcdp/tree/inst00.png?style=shield&amp;circle-token=f59172bb200232cffc45e43473c4eaf5c2b3e776"/></a>
@@ -21,16 +21,16 @@
 <td><a href="https://circleci.com/gh/AndreaCensi/mcdp/tree/last"><img src="https://circleci.com/gh/AndreaCensi/mcdp/tree/last.png?style=shield&amp;circle-token=f59172bb200232cffc45e43473c4eaf5c2b3e776"/></a>
 </td>
 </tr>
-</table>
+</table> -->
 
 
 **PyMCDP** is a Python interpreter and solver for Monotone Co-Design Problems.
-It is currently in beta-testing. Please email censi@mit.edu if you wish to help.
 
-Please see <http://mcdp.mit.edu> for an introduction (or see [the manual][manual]).
+Please see [the manual (PDF)][manual], which contains up-to-date installation instructions.
 
-[manual]: http://mcdp.mit.edu/media/pymcdp-manual.html
+[manual]: http://co-design.science/media/manual.pdf
 
+<!--
 *Below, an example of a graphical representation of an MCDP (left)
 along with the MCDPL snippet that describes it (right)*
 
@@ -188,4 +188,4 @@ of monotone problems.)
 
 <h2>More information</h2>
 
-For more information, please see <http://mcdp.mit.edu>.
+For more information, please see <http://co-design.science>. -->
