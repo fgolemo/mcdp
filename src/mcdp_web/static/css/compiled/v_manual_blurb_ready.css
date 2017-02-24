@@ -220,7 +220,7 @@ em {
 h1.draft,
 h2.draft,
 h3.draft {
-  color: red;
+  color: red !important;
 }
 .figcontent {
   margin: 0;
@@ -2049,6 +2049,9 @@ h1::after {
 .todo {
   display: none !important;
   /* already defined as inline-block */
+}
+.draft {
+  display: none !important;
 }
 /*
 

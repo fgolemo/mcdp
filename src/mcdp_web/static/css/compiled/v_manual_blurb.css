@@ -220,7 +220,7 @@ em {
 h1.draft,
 h2.draft,
 h3.draft {
-  color: red;
+  color: red !important;
 }
 .figcontent {
   margin: 0;
