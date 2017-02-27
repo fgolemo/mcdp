@@ -202,7 +202,7 @@ def reorganize_contents(body0):
         
     """ 
 
-    def make_sections(body, is_marker, preserve = lambda _: False, element_name='section'):
+    def make_sections(body, is_marker, preserve = lambda _: False, element_name='section', copy=True):
         sections = []
         current_section = Tag(name=element_name)
         current_section['id'] = 'before-any-match-of-%s' % is_marker.__name__
@@ -214,6 +214,7 @@ def reorganize_contents(body0):
                     sections.append(current_section)
                 current_section = Tag(name=element_name)
                 current_section['id'] = x.attrs.get('id', 'unnamed-h1') + ':' + element_name
+                print('marker %s' % current_section['id'])
                 current_section['class'] = x.attrs.get('class', '')
                 #print('%s/section %s %s' % (is_marker.__name__, x.attrs.get('id','unnamed'), current_section['id']))
                 current_section.append(x.__copy__())
@@ -223,8 +224,10 @@ def reorganize_contents(body0):
                 #print('%s/preserve %s' % (preserve.__name__, current_section['id']))
                 sections.append(x.__copy__())
                 current_section = Tag(name=element_name)
-            else:
-                current_section.append(x.__copy__())
+            else:    
+                #x2 = x.__copy__() if copy else x
+                x2 = x.__copy__() if copy else x.extract()
+                current_section.append(x2)
         sections.append(current_section)     # XXX
         new_body = Tag(name=body.name)
 #         if len(sections) < 3:
@@ -251,8 +254,11 @@ def reorganize_contents(body0):
     def is_part_marker(x):
         return isinstance(x, Tag) and x.name == 'h1' and 'part' in x.attrs.get('id','')
 
-    body = make_sections(body0, is_section_marker, is_chapter_marker)
-    body = make_sections(body, is_chapter_marker, is_part_marker)
+    def is_chapter_or_part_marker(x):
+        return is_chapter_marker(x) or is_part_marker(x)
+    
+    #body = make_sections(body0, is_section_marker, is_chapter_or_part_marker)
+    body = make_sections(body0, is_chapter_marker, is_part_marker)
     body = make_sections(body, is_part_marker)
     
     def is_h2(x):
