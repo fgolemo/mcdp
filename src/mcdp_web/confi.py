@@ -1,5 +1,6 @@
-from decent_params.decent_params_imp import DecentParams
 from contracts import contract
+from decent_params.decent_params_imp import DecentParams
+
 
 def describe_mcdpweb_params(dp):
     dp.add_int('allow_anonymous', default=1)

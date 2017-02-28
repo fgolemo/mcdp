@@ -142,13 +142,11 @@ def generate_metadata():
     out = MCDPManualConstants.pdf_metadata
     s = open(template).read()
     
-
     from mcdp_web.renderdoc.main import replace_macros
 
     s = replace_macros(s)
     with open(out, 'w') as f:
         f.write(s)
-    #print(s)
     
 
 def write(s, out):
