@@ -6,11 +6,11 @@ from mcdp import logger
 from mcdp.exceptions import DPSyntaxError
 from mcdp_lang_utils import Where
 from mcdp_lang_utils import location
-from .latex_preprocess import extract_maths
-from .markdown_transform import censor_markdown_code_blocks
+from mcdp_docs.latex.latex_preprocess import extract_maths
+from mcdp_docs.mark.markdown_transform import censor_markdown_code_blocks
 
 
-# from mcdp_web.renderdoc.latex_preprocess import extract_maths
+# from mcdp_docs.latex.latex_preprocess import extract_maths
 __all__ = ['do_preliminary_checks_and_fixes']
 
 def do_preliminary_checks_and_fixes(s):

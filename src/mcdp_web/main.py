@@ -20,6 +20,7 @@ from contracts import contract
 from contracts.utils import indent, raise_desc
 from mcdp import logger
 from mcdp.exceptions import DPSemanticError, DPSyntaxError
+from mcdp_docs.pipeline import render_complete
 from mcdp_library import Librarian, MCDPLibrary
 from mcdp_library.utils import dir_from_package_name
 from quickapp import QuickAppBase
@@ -29,7 +30,6 @@ from .editor_fancy import AppEditorFancyGeneric
 from .images.images import WebAppImages, get_mime_for_format
 from .interactive.app_interactive import AppInteractive
 from .qr.app_qr import AppQR
-from .renderdoc.main import render_complete
 from .security import AppLogin
 from .solver.app_solver import AppSolver
 from .solver2.app_solver2 import AppSolver2

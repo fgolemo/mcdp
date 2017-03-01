@@ -11,6 +11,7 @@ from mcdp_report.html import get_css_filename
 from mcdp import logger, mcdp_dev_warning
 from quickapp import QuickAppBase
 from system_cmd import system_cmd_show
+from mcdp_docs.minimal_doc import get_minimal_document
 
 
 class Render(QuickAppBase):
@@ -100,19 +101,15 @@ def run_prince(html_filename):
     cwd = '.'
     cmd = ['prince', 
            '-o', pdf, 
-           html_filename]
-#     try:
+           html_filename] 
     system_cmd_show(cwd, cmd)
     
     cwd = os.getcwd()
     rel = os.path.relpath(pdf, cwd)
-    logger.info('Written %s' % rel)
-#     finally:
-#         if os.path.exists(pdf):
-#             os.unlink(pdf)
-#     
-def render(library, docname, data, realpath, out_dir, generate_pdf, stylesheet):
+    logger.info('Written %s' % rel) 
     
+    
+def render(library, docname, data, realpath, out_dir, generate_pdf, stylesheet):
     
     if MCDPConstants.pdf_to_png_dpi < 300:
         msg =( 'Note that pdf_to_png_dpi is set to %d, which is not suitable for printing'
@@ -120,8 +117,7 @@ def render(library, docname, data, realpath, out_dir, generate_pdf, stylesheet):
         mcdp_dev_warning(msg)
 
 
-    from mcdp_web.renderdoc.highlight import get_minimal_document
-    from mcdp_web.renderdoc.main import render_complete
+    from mcdp_docs.pipeline import render_complete
 
     out = os.path.join(out_dir, docname + '.html')
     
@@ -130,6 +126,7 @@ def render(library, docname, data, realpath, out_dir, generate_pdf, stylesheet):
                                     generate_pdf=generate_pdf)
 
     title = docname
+    
     doc = get_minimal_document(html_contents, title=title, stylesheet=stylesheet,
                                add_markdown_css=True, add_manual_css=True)
 

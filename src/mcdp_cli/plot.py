@@ -16,12 +16,12 @@ from mcdp_library import Librarian
 from mcdp_report.dp_graph_tree_imp import dp_graph_tree
 from mcdp_report.gg_utils import gg_get_formats
 from mcdp_web.editor_fancy.app_editor_fancy_generic import html_mark
-from mcdp_web.renderdoc.highlight import get_minimal_document
 from mocdp.comp.recursive_name_labeling import get_labelled_version
 from quickapp import QuickAppBase
 from system_cmd import CmdException, system_cmd_result
 
 from .utils_mkdir import mkdirs_thread_safe
+from mcdp_docs.minimal_doc import get_minimal_document
 
 
 def get_ndp(data):
@@ -112,7 +112,8 @@ def syntax_pdf(data):
     def ignore_line(lineno):
         return lineno  in lines_to_hide
     contents = ast_to_html(s,  
-                       ignore_line=ignore_line, parse_expr=Syntax.ndpt_dp_rvalue,
+                       ignore_line=ignore_line, 
+                       parse_expr=Syntax.ndpt_dp_rvalue,
                        )
     html = get_minimal_document(contents)
 

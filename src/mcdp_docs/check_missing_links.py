@@ -1,6 +1,6 @@
-from mcdp import logger
+from mcdp.logs import logger
 from bs4.element import Comment, Tag
-from mcdp_web.renderdoc.highlight import add_class
+from mcdp_utils_xml.add_class_and_style import add_class
 
 def get_id2element(soup):
     id2element = {}
@@ -42,7 +42,6 @@ def check_if_any_href_is_invalid(soup):
     
     # let's first find all the IDs
     id2element, duplicates = get_id2element(soup)
-    
     
     for a in soup.select('a[href^="#"]'):
         href = a['href']
@@ -115,3 +114,21 @@ def check_if_any_href_is_invalid(soup):
             errors.append(msg)
             
     return errors, math_errors
+
+
+
+def fix_subfig_references(soup):
+    """
+        Changes references like #fig:x to #subfig:x if it exists.
+    """ 
+
+    for a in soup.select('a[href^="#fig:"]'):
+        name = a['href'][1:]
+        
+        alternative = 'sub' + name
+#         print('considering if it exists %r' % alternative)
+        if list(soup.select('#' +alternative)):
+            newref = '#sub' + name
+#             logger.debug('changing ref %r to %r' % (a['href'],newref))
+            a['href'] = newref
+         

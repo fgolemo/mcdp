@@ -17,6 +17,36 @@ __all__ = [
     'prerender_mathjax',
 ]
 
+      
+TAG_DOLLAR = 'tag-dollar'
+which = 'code, mcdp-poset, mcdp-value, mcdp-fvalue, mcdp-rvalue, render'
+def escape_for_mathjax(soup):
+    """ Escapes dollars in code 
+     
+    """
+    for code in soup.select(which):
+        if not code.string:
+            continue
+        #unicode
+        s = code.string
+        if '$' in code.string:
+            s = s.replace('$', TAG_DOLLAR)
+            
+        code.string = s
+    
+
+def escape_for_mathjax_back(soup):
+
+    for code in soup.select(which):
+        if not code.string:
+            continue
+        s = code.string
+        if TAG_DOLLAR in code.string:
+            s = s.replace(TAG_DOLLAR, '$')
+            
+        code.string = s
+     
+
 @memoize_simple
 def get_prerender_js():
     package = dir_from_package_name('mcdp_docs')

@@ -11,9 +11,9 @@ from contracts import contract
 from contracts.utils import check_isinstance
 from mcdp import logger
 from mcdp.utils.string_utils import get_md5
-from mcdp_web.renderdoc.highlight import add_style
 
 from .pdf_conversion import png_from_pdf
+from mcdp_utils_xml.add_class_and_style import add_style
 
 
 # def embed_images(html, basedir):
@@ -292,7 +292,7 @@ def embed_pdf_image(tag, resolve, density):
     assert tag.name == 'img'
     assert tag.has_attr('src')
     # load pdf data
-    from mcdp_web.renderdoc.highlight import add_class # XXX
+    from mcdp_docs.highlight import add_class # XXX
     
     data_pdf = resolve(tag['src'])
     if data_pdf is None:

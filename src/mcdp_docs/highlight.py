@@ -1,48 +1,30 @@
 # -*- coding: utf-8 -*-
-import base64
 import hashlib
 import os
-import shutil
 import sys
-from tempfile import mkdtemp
 import textwrap
-import traceback
 
 from bs4 import BeautifulSoup
-import bs4
 from bs4.element import NavigableString, Tag
 
-from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped, indent
+from mcdp import logger, MCDPConstants
+from mcdp.exceptions import DPSemanticError, DPSyntaxError, DPInternalError
+from mcdp_docs.make_plots_imp import make_plots
+from mcdp_docs.pdf_ops import crop_pdf, get_ast_as_pdf
+from mcdp_figures import MakeFiguresNDP, MakeFiguresTemplate, MakeFiguresPoset
 from mcdp_lang.parse_actions import parse_wrap
 from mcdp_lang.parse_interface import (parse_template_refine, parse_poset_refine,
                                        parse_ndp_refine)
-from mcdp_lang.suggestions import get_suggestions, apply_suggestions,\
-    get_suggested_identifier
+from mcdp_lang.suggestions import get_suggestions, apply_suggestions, get_suggested_identifier
 from mcdp_lang.syntax import Syntax
 from mcdp_library import MCDPLibrary
-from mcdp_report.generic_report_utils import (
-    NotPlottable, enlarge, get_plotters)
-from mcdp_report.html import ast_to_html, get_css_filename
-from mcdp_report.plotters.get_plotters_imp import get_all_available_plotters
-from mcdp_web.images.images import (get_mime_for_format)
-from mcdp_utils_xml import bs, to_html_stripping_fragment,\
-    check_html_fragment, to_html_stripping_fragment_document, describe_tag,\
-    project_html
-from mcdp import logger, MCDPConstants
-from mcdp.utils.fileutils import get_mcdp_tmp_dir
+from mcdp_report.html import ast_to_html
+from mcdp_utils_xml import add_class, bs, to_html_stripping_fragment, describe_tag, project_html, create_img_png_base64, create_a_to_data , note_error
 from mocdp.comp.context import Context
-from mcdp.exceptions import DPSemanticError, DPSyntaxError, DPInternalError
-from reprep import Report
-from system_cmd import CmdException, system_cmd_result
 
 
-from mcdp_figures import( MakeFiguresNDP, MakeFiguresTemplate, 
-    MakeFiguresPoset)
-
-
-@contract(returns=str, html=str)
-def html_interpret(library, html, raise_errors=False, 
+def html_interpret(library, soup, raise_errors=False, 
                    generate_pdf=False, realpath='unavailable'):
     # clone library, so that we don't pollute it 
     # with our private definitions
@@ -51,25 +33,24 @@ def html_interpret(library, html, raise_errors=False,
         logger.error('raise_errors is False: we add errors in the document')
         
     library = library.clone()
-    load_fragments(library, html, realpath=realpath)
+    load_fragments(library, soup, realpath=realpath)
 
-    html = highlight_mcdp_code(library, html,
+    highlight_mcdp_code(library, soup,
                                generate_pdf=generate_pdf,
                                raise_errors=raise_errors,
                                realpath=realpath)
 
-    html = make_plots(library, html,
+    make_plots(library, soup,
                       raise_errors=raise_errors,
                       realpath=realpath)
     # let's do make_plots first; then make_figures will 
     # check for remaining <render> elements.
-    html = make_figures(library, html,
+    make_figures(library, soup,
                         generate_pdf=generate_pdf,
                         raise_error_dp=raise_errors,
                         raise_error_others=raise_errors,
                         realpath=realpath)
-
-    return html
+ 
 
 def make_image_tag_from_png(f):
     def ff(*args, **kwargs):
@@ -114,95 +95,6 @@ def load_or_parse_from_tag(tag, load, parse):
         source_code = get_source_code(tag)
         vu = parse(source_code)    
     return vu
-
-@contract(frag=str, returns=str)
-def make_plots(library, frag, raise_errors, realpath):
-    """
-        Looks for things like:
-        
-         
-        <img class="value_plot_generic">VALUE</img>
-        <img class="value_plot_generic" id='value"/>
-        
-        <pre class="print_value" id='value"/>
-        <pre class="print_value">VALUE</img>
-    
-    """
-    soup = bs(frag)
-
-    def go(selector, plotter, load, parse):
-        for tag in soup.select(selector):
-
-            try:
-                # load value with units in vu
-                
-                def parsing(source_code):
-                    context = Context()
-                    return parse(source_code, realpath=realpath, context=context)
-                    
-                vu = load_or_parse_from_tag(tag, load, parsing) 
-                
-                rendered = plotter(tag, vu)
-
-                if tag.has_attr('style'):
-                    style = tag['style']
-                else:
-                    style = ''
-
-                if style:
-                    rendered['style'] = style
-                tag.replaceWith(rendered)
-
-            except (DPSyntaxError, DPSemanticError) as e:
-                if raise_errors:
-                    raise
-                else:
-                    note_error(tag, e)
-            except Exception as e:
-                if raise_errors:
-                    raise
-                else:
-                    note_error(tag, e)
-    
-    @make_image_tag_from_png
-    def plot_value_generic(tag, vu):  # @UnusedVariable
-        r = Report()
-        f = r.figure()
-        try:
-            available = dict(get_plotters(get_all_available_plotters(), vu.unit))
-            assert available
-        except NotPlottable as e:
-            msg = 'No plotters available for %s' % vu.unit
-            raise_wrapped(ValueError, e, msg, compact=True)
-
-        plotter = list(available.values())[0]
-
-        axis = plotter.axis_for_sequence(vu.unit, [vu.value])
-        axis = enlarge(axis, 0.15)
-        with f.plot('generic') as pylab:
-            plotter.plot(pylab, axis, vu.unit, vu.value, params={})
-            pylab.axis(axis)
-        png_node = r.resolve_url('png')
-        png = png_node.get_raw_data()
-        return png
-    
-    @make_pre
-    def print_value(tag, vu):  # @UnusedVariable
-        s = vu.unit.format(vu.value)
-        return s
-    
-    @make_pre
-    def print_mcdp(tag, ndp):  # @UnusedVariable
-        return ndp.__str__()
-    
-    # parse(string, realpath)
-    const = dict(load=library.load_constant, parse=library.parse_constant)
-    mcdp = dict(load=library.load_ndp, parse=library.parse_ndp)
-    go("img.plot_value_generic", plot_value_generic, **const)
-    go("render.plot_value_generic", plot_value_generic, **const)
-    go("pre.print_value", print_value, **const)
-    go("pre.print_mcdp", print_mcdp, **mcdp)
-    return to_html_stripping_fragment(soup)
 
 def load_fragments(library, frag, realpath):
     """
@@ -268,262 +160,9 @@ def load_fragments(library, frag, realpath):
                            known=library.file_to_contents[basename])
 
             library.file_to_contents[basename] = res
-            
-TAG_DOLLAR = 'tag-dollar'
-which = 'code, mcdp-poset, mcdp-value, mcdp-fvalue, mcdp-rvalue, render'
-def escape_for_mathjax(html):
-    """ Escapes dollars in code 
-     
-    """
-    soup = bs(html)
-    for code in soup.select(which):
-        if not code.string:
-            continue
-        #unicode
-        s = code.string
-        if '$' in code.string:
-            s = s.replace('$', TAG_DOLLAR)
-            
-        code.string = s
+      
     
-    res = to_html_stripping_fragment(soup) 
-    return res
 
-def escape_for_mathjax_back(html):
-    soup = bs(html)
-    for code in soup.select(which):
-        if not code.string:
-            continue
-        s = code.string
-        if TAG_DOLLAR in code.string:
-            s = s.replace(TAG_DOLLAR, '$')
-            
-        code.string = s
-    
-    res = to_html_stripping_fragment(soup) 
-    return res
-    return res
-    
-def escape_ticks_before_markdown(html):
-    """ Escapes backticks and quotes in code 
-    
-        Also removes comments <!--- -->
-    """
-    soup = bs(html)
-    for code in soup.select('code, pre, mcdp-poset, mcdp-value, mcdp-fvalue, mcdp-rvalue, render'):
-        if not code.string:
-            continue
-        #unicode
-        s = code.string
-        if '`' in code.string:
-            s = s.replace('`', '&#96;')
-#             print('replacing %r -> %r' %(code.string, s))
-            
-        if '"' in code.string:
-            s = s.replace('"', '&quot;')
-#             print('replacing %r -> %r' %(code.string, s))
-            
-        code.string = s
-    
-    comments=soup.find_all(string=lambda text:isinstance(text, bs4.Comment))
-    for c in comments:
-#         print('stripping comment %s' % str(c))
-        c.extract()
-    
-    res = to_html_stripping_fragment(soup)
-     
-    return res
-
-def fix_subfig_references(html):
-    """
-        Changes references like #fig:x to #subfig:x if it exists.
-    """
-    soup = bs(html) 
-
-    for a in soup.select('a[href^="#fig:"]'):
-        name = a['href'][1:]
-        
-        alternative = 'sub' + name
-#         print('considering if it exists %r' % alternative)
-        if list(soup.select('#' +alternative)):
-            newref = '#sub' + name
-#             logger.debug('changing ref %r to %r' % (a['href'],newref))
-            a['href'] = newref
-        
-    res = to_html_stripping_fragment(soup)
-    return res
-
-def make_figure_from_figureid_attr(html):
-    """
-        Makes a figure:
-            <e figure-id='fig:ure' figure-caption='ciao'/> 
-                    
-        <figure id="fig:ure">
-            <e figure-id='fig:ure' figure-caption='ciao'/>
-            <figcaption>ciao</figcaption>
-        </figure>
-
-        Makes a table:
-            <e figure-id='tab:ure' figure-caption='ciao'/>
-            
-        becomes
-        
-        
-        
-        
-    """
-    soup = bs(html) 
-    
-    for towrap in soup.select('[figure-id]'):
-        ID = towrap['figure-id']
-        parent = towrap.parent
-        fig = Tag(name='figure')
-        fig['id'] = ID
-        caption_below = True
-        if ID.startswith('fig:'):
-            add_class(fig, 'figure')
-        elif ID.startswith('subfig:'):
-            add_class(fig, 'subfloat')
-        elif ID.startswith('tab:'):
-            add_class(fig, 'table')
-            caption_below = False
-        elif ID.startswith('code:'):
-            add_class(fig, 'code')
-            pass
-        else:
-            msg = 'The ID %r should start with fig: or tab: or code:' % ID
-            raise_desc(ValueError, msg, tag=describe_tag(towrap))
-            
-        if 'caption-left' in towrap.attrs.get('figure-class', ''): 
-            caption_below = False
-        external_caption_id = '%s:caption' % ID
-        external_caption = soup.find(id=external_caption_id)
-        if external_caption is not None:
-#             print('using external caption %s' % str(external_caption))
-            external_caption.extract()
-            if external_caption.name != 'figcaption':
-                logger.error('Element %s#%r should have name figcaption.' %
-                             (external_caption.name, external_caption_id))
-                external_caption.name = 'figcaption'
-            figcaption = external_caption
-            
-            if towrap.has_attr('figure-caption'):
-                msg = 'Already using external caption for %s' % ID
-                raise_desc(ValueError, msg, describe_tag(towrap))
-        else:
-#             print('could not find external caption %s' % external_caption_id)
-            if towrap.has_attr('figure-caption'):
-                caption = towrap['figure-caption']
-            else:
-                caption = ''
-            figcaption = Tag(name='figcaption')
-            figcaption.append(NavigableString(caption))
-        
-        outside = Tag(name='div')
-        outside['id'] = ID + '-wrap'
-        if towrap.has_attr('figure-class'):
-            for k in towrap['figure-class'].split(' '):
-                add_class(towrap, k)
-                add_class(outside, k )
-        
-        i = parent.index(towrap)
-        towrap.extract()
-        figcontent = Tag(name='div', attrs={'class':'figcontent'})
-        figcontent.append(towrap)
-        fig.append(figcontent)
-        
-        if caption_below:
-            fig.append(figcaption)
-        else:
-            fig.insert(0, figcaption)
-        
-        add_class(outside, 'generated-figure-wrap')
-        add_class(fig, 'generated-figure')
-        outside.append(fig)
-        parent.insert(i, outside)
-        
-    res = to_html_stripping_fragment(soup)
-    return res
-
-def mark_console_pres(html):
-    soup = bs(html)
-    #     print indent(html, 'mark_console_pres ')
-    
-    for code in soup.select('pre code'):
-        pre = code.parent
-        if code.string is None:
-            continue
-        s0 = code.string
-        
-        from HTMLParser import HTMLParser
-        h = HTMLParser()
-        s = h.unescape(s0)
-        if s != s0:
-#             print('decoded %r -> %r' % (s0, s))
-            pass  
-        
-        beg = s.strip()
-        if beg.startswith('DOLLAR') or beg.startswith('$'):
-            pass
-#             print('it is console (%r)' % s)
-        else:
-#             print('not console (%r)' % s)
-            continue
-
-        add_class(pre, 'console')
-
-        code.string = ''
-        
-        lines = s.split('\n')
-        
-        programs = ['sudo', 'pip', 'git', 'python', 'cd', 'apt-get',
-                    'mcdp-web', 'mcdp-solve', 'mcdp-render', 'npm',
-                    'mcdp-plot','mcdp-eval','mcdp-render-manual']
-        program_commands = ['install', 'develop', 'clone']
-        
-        def is_program(x, l):
-            if x == 'git' and 'apt-get' in l:
-                return False
-            return x in programs
-            
-        for j, line in enumerate(lines):
-            tokens = line.split(' ')
-            for i, token in enumerate(tokens):
-                if token in  ['$', 'DOLLAR']:
-                    # add <span class=console_sign>$</span>
-                    e = Tag(name='span')
-                    e['class'] = 'console_sign'
-                    e.string = '$'
-                    code.append(e)
-                elif is_program(token, line):
-                    e = Tag(name='span')
-                    e['class'] = '%s program' % token
-                    e.string = token
-                    code.append(e)
-                elif token in program_commands:
-                    e = Tag(name='span')
-                    e['class'] = '%s program_command' % token
-                    e.string = token
-                    code.append(e)
-                elif token and token[0] == '-':
-                    e = Tag(name='span')
-                    e['class'] = 'program_option'
-                    e.string = token
-                    code.append(e)
-                else:
-                    code.append(NavigableString(token))
-                    
-                is_last = i == len(tokens) - 1
-                if not is_last:
-                    code.append(NavigableString(' '))
-            
-            is_last_line = j == len(lines) - 1
-            if not is_last_line:
-                code.append(NavigableString('\n'))
-
-        
-    res = to_html_stripping_fragment(soup) 
-    return res
 
 def get_source_code(tag):
     """ Gets the string attribute. 
@@ -567,168 +206,7 @@ def get_source_code(tag):
     return source_code
 
 
-@contract(body_contents=str, returns=str)
-def get_minimal_document(body_contents, title=None,
-                         add_markdown_css=False, add_manual_css=False, stylesheet=None):
-    """ Creates the minimal html document with MCDPL css.
-    
-        add_markdown_css: language + markdown
-        add_manual_css: language + markdown + (manual*)
-    
-     """
-    check_html_fragment(body_contents)
-    soup = bs("")
-    assert soup.name == 'fragment'
-    
-    if title is None:
-        title = ''
-        
-    html = Tag(name='html')
-    
-    head = Tag(name='head')
-    body = Tag(name='body')
-#     css = Tag(name='style', attrs=dict(type='text/css'))
-    # <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-#     if False:
-#         meta = new_tag('meta')
-#         meta['http-equiv'] = "Content-Type"
-#         ctype = 'application/xhtml+xml' 
-#         meta['content'] = "%s; charset=utf-8" % ctype
-#         head.append(meta)
-#     if True:
-#     head.append(Tag(name='meta', attrs=dict(charset='UTF-8')))
-#     head.append(Tag(name='meta', attrs={'http-equiv':"Content-Type",
-#                                         'content': "text/html; charset=utf-8"}))
-    head.append(Tag(name='meta', attrs={'http-equiv':"Content-Type",
-                                        'content': "application/xhtml+xml; charset=utf-8"}))
-    
-    if stylesheet is None:
-        stylesheet = 'v_mcdp_render_default'
-    if add_markdown_css or add_manual_css:
-        link = Tag(name='link')
-        link['rel'] = 'stylesheet'
-        link['type'] = 'text/css'
-        link['href'] = get_css_filename('compiled/%s' % stylesheet)
-        head.append(link) 
-        
-
-    tag_title = Tag(name='title')
-    tag_title.append(NavigableString(title))
-    head.append(tag_title)
-# 
-#     if add_markdown_css and not add_manual_css:
-#         from mcdp_report.html import get_language_css
-#         mcdp_css = get_language_css()
-#         markdown_css = get_markdown_css()
-#         allcss = mcdp_css + '\n' + markdown_css
-#         css.append(NavigableString(allcss))
-#         head.append(css)
-#     
-#     if add_manual_css:
-#         from mcdp_docs.manual_join_imp import get_manual_css_frag
-#         frags = indent(get_manual_css_frag(), ' '*10)
-#         frag = bs(frags)
-# 
-#         children = list(frag.children)
-#         for element in children:
-#             head.append(element)
-#     
-    parsed = bs(body_contents)
-    
-#     assert parsed.html is not None
-#     assert parsed.html.body is not None
-    assert parsed.name == 'fragment'
-    parsed.name = 'div'
-    body.append(parsed)
-    html.append(head)
-    html.append(body)
-    soup.append(html)
-    s = to_html_stripping_fragment_document(soup)
-    assert not 'DOCTYPE' in s
-#     s = html.prettify() # not it removes empty text nodes
-
-#     ns="""<?xml version="1.0" encoding="utf-8" ?>"""
-    ns="""<!DOCTYPE html PUBLIC
-    "-//W3C//DTD XHTML 1.1 plus MathML 2.0 plus SVG 1.1//EN"
-    "http://www.w3.org/2002/04/xhtml-math-svg/xhtml-math-svg.dtd">"""
-    res = ns + '\n' +  s
-    
-#     if add_manual_css and MCDPConstants.manual_link_css_instead_of_including:
-#         assert 'manual.css' in res, res
-    
-    res = res.replace('<div><!DOCTYPE html>', '<div>')
-        
-    return res
-
-
-def get_ast_as_pdf(s, parse_expr):
-    s = s.replace('\t', '    ')
-    contents = ast_to_html(s,
-                       ignore_line=None, parse_expr=parse_expr,
-                       add_line_gutter=False)
-    html = get_minimal_document(contents)
-    
-    mcdp_tmp_dir = get_mcdp_tmp_dir()
-    prefix = 'get_ast_as_pdf()'
-    d = mkdtemp(dir=mcdp_tmp_dir, prefix=prefix)
-    
-    try:
-        f_html = os.path.join(d, 'file.html')
-        with open(f_html, 'w') as f:
-            f.write(html)
-            
-        try:
-            f_pdf = os.path.join(d, 'file.pdf')
-            cmd= ['wkhtmltopdf','-s','A1',f_html,f_pdf]
-            system_cmd_result(
-                    d, cmd, 
-                    display_stdout=False,
-                    display_stderr=False,
-                    raise_on_error=True)
-    
-            with open(f_pdf) as f:
-                data = f.read()
-            
-            data = crop_pdf(data, margins=0)
-    
-            return data
-        except CmdException as e:
-            raise e
-    finally:
-        shutil.rmtree(d)
-
-
-def crop_pdf(pdf, margins=0):
-    
-    mcdp_tmp_dir = get_mcdp_tmp_dir()
-    prefix = 'crop_pdf()'
-    d = mkdtemp(dir=mcdp_tmp_dir, prefix=prefix)
-    
-    try:
-        f_pdf = os.path.join(d, 'file.pdf')
-        with open(f_pdf, 'w') as f:
-            f.write(pdf)
-        f_pdf_crop = os.path.join(d, 'file_crop.pdf')
-        cmd = [
-            'pdfcrop', 
-            '--margins', 
-            str(margins), 
-            f_pdf, 
-            f_pdf_crop,
-        ]
-        system_cmd_result(
-                d, cmd,
-                display_stdout=False,
-                display_stderr=False,
-                raise_on_error=True)
-    
-        with open(f_pdf_crop) as f:
-            data = f.read()
-        return data
-    finally:
-        shutil.rmtree(d)
-        
-def highlight_mcdp_code(library, frag, realpath, generate_pdf=False, raise_errors=False):
+def highlight_mcdp_code(library, soup, realpath, generate_pdf=False, raise_errors=False):
 #     print(indent(frag, 'highlight_mcdp_code '))
     """ Looks for codes like:
     
@@ -739,8 +217,7 @@ def highlight_mcdp_code(library, frag, realpath, generate_pdf=False, raise_error
     
         and does syntax hihglighting.
     """
-
-    soup = bs(frag)
+ 
     assert soup.name == 'fragment'
 
     def go(selector, parse_expr, extension, use_pre=True, refine=None):
@@ -904,16 +381,7 @@ def highlight_mcdp_code(library, frag, realpath, generate_pdf=False, raise_error
                 msg = 'Error while interpreting the code:\n\n'
                 msg += indent(source_code, '  | ')
                 raise_wrapped(DPInternalError, e,msg, exc=sys.exc_info())
-                
-    # <k>A</k> ==> <code class=keyword>A</code>
-#     for e in soup.select('k'):
-#         e.name = 'code'
-#         add_class(e, 'keyword')
-        
-    # <program>A</program> ==> <code class=program>A</code>
-#     for e in soup.select('program'):
-#         e.name = 'code'
-#         add_class(e, 'program')
+                 
 
     abbrevs = {
         # tag name:  (new name, classes to add)
@@ -975,9 +443,6 @@ def highlight_mcdp_code(library, frag, realpath, generate_pdf=False, raise_error
     # text rather than the actual tag (!).
     soup = bs(to_html_stripping_fragment(soup)) 
     assert soup.name == 'fragment'       
-#     print('final code.mcdp_poset: %s' % len(list(soup.select('code.mcdp_poset'))))
-#     print('final code.mcdp_value: %s' % len(list(soup.select('code.mcdp_value'))))
-    
     
     
     go('pre.mcdp', Syntax.ndpt_dp_rvalue,  "mcdp", use_pre=True, refine=parse_ndp_refine)
@@ -996,91 +461,22 @@ def highlight_mcdp_code(library, frag, realpath, generate_pdf=False, raise_error
     go('code.mcdp_value', Syntax.rvalue, "mcdp_value", use_pre=False)
     go('code.mcdp_template', Syntax.template, "mcdp_template", use_pre=False)
 
-
-#     compute_size_for_pre_without_class(soup)
-
+ 
     # this is a bug with bs4...
     for pre in soup.select('pre + pre'):
 #         print('adding br between PREs')
         br = Tag(name='br')
         br['class'] = 'pre_after_pre'
         pre.parent.insert(pre.parent.index(pre), br)
-  
-    res = to_html_stripping_fragment(soup)
-#     print 'highlight_mcdp_code: %s' % res
-    return res
-# 
-# def copy_string_and_attrs(e, e2):
-#     if e.string is not None:
-#         e2.string = e.string
-#     # copy attributes
-#     for k, v in e.attrs.items():
-#         e2[k] = v
-# #                 
-# def add_br_before_pres(html):
-#     soup = bs(html)
-#     pres = list(soup.select('pre'))
-# #     print('pres: %d %s' %(len(pres), pres))
-#     for pre in pres:
-#         p = pre.previousSibling
-#         if p is not None:
-#             if isinstance(p, NavigableString):
-#                 if '\n' in p:
-# #                     print('pre: %s' % str(pre))
-# #                     print 'soup', soup
-# #                     print 'soup dict', soup.__dict__
-# #                     print 'soup.parser_class.new_tag', soup.parser_class.new_tag
-#                     br =Tag(name='br')
-#                     br.string = ''
-#                     br['class'] = 'added_before_pre'
-#                     br['orig'] = unicode(p).__repr__()
-#                     br['reference'] = "pre: %s p: %s" % (str(id(pre)), str(id(p)))
-# #                     print  br['reference']
-# #                     print('adding tag br')
-# #                     pre.insert_before(br)
-#                     pre.parent.insert(pre.parent.index(pre), br)
-#     return to_html_stripping_fragment(soup)
+   
 
-def add_style(tag, **kwargs):
-    """    
-        add_style(tag, width="2in")
-    """
-    def quote(x):
-        return x
-    s1 = '; '.join('%s: %s' % (k, quote(v)) for k,v in kwargs.items())
-    s0 = tag.attrs.get('style', None)
-    
-    if s0 is None:
-        s = s1
-    else:
-        s0 = s0.rstrip();
-        if not s0.endswith(';'):
-            s0 += ';'
-        s = s0 + s1 
-    tag['style'] = s
-    
-def add_class(e, c):
-    if isinstance(c, str):    
-        cc = c.split(' ')
-    elif isinstance(c, list):
-        cc = c
-    else:
-        raise ValueError(c)
-    cur = e.get('class', [])
-    if isinstance(cur, str):
-        cur = cur.split()
-    cur = cur + cc
-    e['class'] = cur 
-    
 def max_len_of_pre_html(html):
     source2 = project_html(html)
     line_len = lambda _: len(unicode(_, 'utf-8').rstrip())
     max_len = max(map(line_len, source2.split('\n')))
     return max_len 
-
-
-@contract(frag=str, returns=str)
-def make_figures(library, frag, raise_error_dp, raise_error_others, realpath, generate_pdf):
+ 
+def make_figures(library, soup, raise_error_dp, raise_error_others, realpath, generate_pdf):
     """ Looks for codes like:
 
     <pre><code class="mcdp_ndp_graph_templatized">mcdp {
@@ -1090,9 +486,7 @@ def make_figures(library, frag, raise_error_dp, raise_error_others, realpath, ge
     
         and creates a link to the image
     """
-
-    soup = bs(frag)
-
+ 
     def go(s0, func):
         selectors = s0.split(',')
         for selector in selectors:
@@ -1247,50 +641,15 @@ def make_figures(library, frag, raise_error_dp, raise_error_others, realpath, ge
     return to_html_stripping_fragment(soup)
 
 
-def note_error(tag0, e):
-    add_class(tag0, 'errored')
-    logger.error(str(e))  # XXX
-    t = Tag(name='pre', attrs={'class': 'error %s' % type(e).__name__})
-    # t.string = str(e)
-    # logger.error(unicode(e.__str__(), 'utf-8'))
-    t.string = traceback.format_exc(e)
-    tag0.insert_after(t)
-#     msg = 'Error while parsing this tag:\n\n'
-#     msg += indent(str(tag), '   ')
-#      
-#     msg += '\n\n' + 'source code:' + '\n\n'
-#     msg += indent(source_code, '   ')
-#     logger.error(msg)
-#     raise
-
-    
-@contract(data_format=str, data=str, download=str)
-def create_a_to_data(download, data_format, data):
-    """ Returns a tag with base64 encoded data """
-    assert data_format in ['pdf', 'png']
-    mime = get_mime_for_format(data_format)
-    encoded = base64.b64encode(data)
-    href = 'data:%s;base64,%s' % (mime, encoded)
-    attrs = dict(href=href, download=download)
-    return Tag(name='a', attrs=attrs)
-
-
-def create_img_png_base64(png, **attrs):
-    encoded = base64.b64encode(png)
-    src = 'data:image/png;base64,%s' % encoded
-    attrs = dict(**attrs)
-    attrs['src'] =src
-    return Tag(name='img', attrs=attrs)
-
-
-def bool_from_string(b):
-    yes = ['True', 'true', '1', 'yes']
-    no = ['False', 'false', '0', 'no']
-    if b in yes:
-        return True
-    if b in no:
-        return False
-    msg = 'Cannot interpret string as boolean.'
-    raise_desc(ValueError, msg, b=b)
+# 
+# def bool_from_string(b):
+#     yes = ['True', 'true', '1', 'yes']
+#     no = ['False', 'false', '0', 'no']
+#     if b in yes:
+#         return True
+#     if b in no:
+#         return False
+#     msg = 'Cannot interpret string as boolean.'
+#     raise_desc(ValueError, msg, b=b)
     
 

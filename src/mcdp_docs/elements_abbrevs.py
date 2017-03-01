@@ -1,8 +1,7 @@
 from bs4.element import Tag
-from mcdp_web.renderdoc.highlight import add_class
-from mcdp_utils_xml import to_html_stripping_fragment, bs
+from mcdp_utils_xml.add_class_and_style import add_class
 
-def other_abbrevs(s):
+def other_abbrevs(soup):
     """
         v, val, value   --> mcdp-value
            pos, poset   --> mcdp-poset
@@ -13,8 +12,7 @@ def other_abbrevs(s):
         <s> (strikeout!) -> <span> 
         
         <p>TODO:...</p> -> <div class="todo"><p><span>TODO:</span></p>
-    """
-    soup = bs(s)
+    """ 
     
     translate = {
         'v': 'mcdp-value',
@@ -48,5 +46,3 @@ def other_abbrevs(s):
                 div.append(p)
                 parent.insert(i, div)
 
-    res = to_html_stripping_fragment(soup) 
-    return res

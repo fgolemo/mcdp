@@ -7,11 +7,10 @@ from bs4 import BeautifulSoup
 from bs4.element import Comment, Tag, NavigableString
 
 from contracts import contract
-from mcdp import logger
+from mcdp.logs import logger
 from mcdp_docs.manual_constants import MCDPManualConstants
 from mcdp_docs.read_bibtex import get_bibliography
-from mcdp_web.renderdoc.highlight import add_class
-
+from mcdp_utils_xml.add_class_and_style import add_class
 
 def get_manual_css_frag():
     """ Returns fragment of doc with CSS, either inline or linked,
@@ -33,8 +32,8 @@ def get_manual_css_frag():
         assert False
             
 @contract(files_contents='list( tuple( tuple(str,str), str) )', returns='str')
-def manual_join(files_contents, bibfile):
-    from mcdp_web.renderdoc.main import replace_macros
+def manual_join(files_contents, bibfile, stylesheet):
+    from mcdp_docs.pipeline import replace_macros
     from mcdp_utils_xml import bs
     
     fn = MCDPManualConstants.main_template
@@ -52,11 +51,19 @@ def manual_join(files_contents, bibfile):
     assert head is not None
     for x in get_manual_css_frag().contents:
         head.append(x.__copy__())
+        
+    if stylesheet is not None:
+        link = Tag(name='link')
+        link['rel'] = 'stylesheet'
+        link['type'] = 'text/css'
+        from mcdp_report.html import get_css_filename
+        link['href'] = get_css_filename('compiled/%s' % stylesheet)
+        head.append(link) 
 
     body = d.find('body')
     for (_libname, docname), data in files_contents:
         logger.debug('docname %r -> %s KB' % (docname, len(data)/1024))
-        from mcdp_web.renderdoc.latex_preprocess import assert_not_inside
+        from mcdp_docs.latex.latex_preprocess import assert_not_inside
         assert_not_inside(data, 'DOCTYPE')
         frag = bs(data) 
         body.append(NavigableString('\n\n'))
@@ -88,11 +95,14 @@ def manual_join(files_contents, bibfile):
 
 
     logger.info('external bib')
-    bibliography_entries = get_bibliography(bibfile)
-    bibliography_entries['id'] = 'bibliography_entries'
-    body.append(bibliography_entries)
-    bibhere = d.find('div', id='put-bibliography-here')
-    do_bib(d, bibhere)
+    if not os.path.exists(bibfile):
+        logger.error('Cannot find bib file %s' % bibfile)
+    else:
+        bibliography_entries = get_bibliography(bibfile)
+        bibliography_entries['id'] = 'bibliography_entries'
+        body.append(bibliography_entries)
+        bibhere = d.find('div', id='put-bibliography-here')
+        do_bib(d, bibhere)
 
     logger.info('reorganizing contents in <sections>')    
     body2 = reorganize_contents(d.find('body'))

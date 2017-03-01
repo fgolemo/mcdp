@@ -30,3 +30,4 @@ def timeit_wall(desc, minimum=None):
         if delta < minimum:
             return
     logger.debug('timeit(wall) %s: %.2f s (>= %s)' % (desc, delta, minimum))
+    
