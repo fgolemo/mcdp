@@ -22,6 +22,7 @@ from mcdp_library import MCDPLibrary
 from mcdp_report.html import ast_to_html
 from mcdp_utils_xml import add_class, bs, to_html_stripping_fragment, describe_tag, project_html, create_img_png_base64, create_a_to_data , note_error
 from mocdp.comp.context import Context
+from mcdp.development import mcdp_dev_warning
 
 
 def html_interpret(library, soup, raise_errors=False, 
@@ -96,7 +97,7 @@ def load_or_parse_from_tag(tag, load, parse):
         vu = parse(source_code)    
     return vu
 
-def load_fragments(library, frag, realpath):
+def load_fragments(library, soup, realpath):
     """
         loads all the codes specified as
          
@@ -104,8 +105,7 @@ def load_fragments(library, frag, realpath):
             <pre class="mcdp_poset" id='...'>...</pre>
             <pre class="mcdp_template" id='...'>...</pre>
         
-    """
-    soup = bs(frag)
+    """ 
 
     for tag in soup.select('pre.mcdp'):
         if tag.string is None or not tag.string.strip():
@@ -439,10 +439,11 @@ def highlight_mcdp_code(library, soup, realpath, generate_pdf=False, raise_error
             e.text = unicode(x1, 'utf-8')
             
     
+    mcdp_dev_warning('lets try if this goes away') # XXX
     # this is a bug with bs4. The replace_with above only adds an escaped
     # text rather than the actual tag (!).
-    soup = bs(to_html_stripping_fragment(soup)) 
-    assert soup.name == 'fragment'       
+    #soup = bs(to_html_stripping_fragment(soup)) 
+    #assert soup.name == 'fragment'       
     
     
     go('pre.mcdp', Syntax.ndpt_dp_rvalue,  "mcdp", use_pre=True, refine=parse_ndp_refine)
