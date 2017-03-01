@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 from contracts.utils import raise_desc
 
-from .get_it_test import is_iterable
+
 from .imp import get_it
+from .composition import is_iterable
 
 
 def get_letter_proxy(P, start_letter='a'):
