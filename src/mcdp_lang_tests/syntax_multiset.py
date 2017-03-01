@@ -12,4 +12,3 @@ def check_lang_multiset1():
 def check_lang_multiset2():
     #     eval_rvalue_as_constant("Bot set-of(V)")
     pass
- 
