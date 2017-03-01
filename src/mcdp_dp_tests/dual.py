@@ -10,8 +10,7 @@ from mcdp_lang.parse_interface import parse_poset
 from mcdp_posets import LowerSets, UpperSets, NotBelongs, PosetProduct, Rcomp
 from mcdp_posets.utils import poset_check_chain
 from mcdp_tests.generation import for_all_dps, primitive_dp_test
-from mcdp_utils_indexing.get_it_test import compose_indices, get_id_indices
-from mcdp_utils_indexing.inversion import transform_right_inverse
+from mcdp_utils_indexing import compose_indices, get_id_indices, transform_right_inverse
 
 
 if MCDPConstants.test_dual01_chain:

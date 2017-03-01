@@ -9,8 +9,8 @@ from mcdp import logger
 from mcdp.exceptions import DPSyntaxError
 from mcdp.utils.string_utils import get_md5
 
-from .latex_inside_equation_abbrevs import replace_inside_equations
-from .markdown_transform import is_inside_markdown_quoted_block
+from mcdp_docs.latex.latex_inside_equation_abbrevs import replace_inside_equations
+from mcdp_docs.mark.markdown_transform import is_inside_markdown_quoted_block
 
 
 class LatexProcessingConstants():

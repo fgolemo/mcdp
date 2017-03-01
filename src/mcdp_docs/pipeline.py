@@ -6,15 +6,19 @@ from contracts import contract
 from contracts.utils import raise_desc
 from mcdp import logger
 from mcdp.exceptions import DPInternalError, DPSyntaxError
-from mcdp_docs.manual_constants import MCDPManualConstants
 from mcdp_lang_utils import Where, location
 from mcdp_library import MCDPLibrary
 from mcdp_report.gg_utils import embed_images_from_library2
-from mcdp_utils_xml import check_html_fragment, to_html_stripping_fragment, bs, describe_tag
+from mcdp_utils_xml import to_html_stripping_fragment, bs, describe_tag
 
-from .abbrevs import other_abbrevs
-from .highlight import escape_for_mathjax_back, fix_subfig_references, html_interpret,  mark_console_pres,\
-    escape_for_mathjax, make_figure_from_figureid_attr
+from .check_missing_links import check_if_any_href_is_invalid, fix_subfig_references
+from .elements_abbrevs import other_abbrevs
+from .lessc import run_lessc
+from .make_console_pre import mark_console_pres
+from .make_figures import make_figure_from_figureid_attr
+from .manual_constants import MCDPManualConstants
+from .prerender_math import escape_for_mathjax_back, escape_for_mathjax
+
 
 
 __all__ = [
@@ -31,14 +35,13 @@ def render_complete(library, s, raise_errors, realpath, generate_pdf=False,
         
         Returns an HTML string; not a complete document.
     """
-    from .latex_preprocess import extract_maths, extract_tabular
-    from .latex_preprocess import latex_preprocessing
-    from .lessc import preprocess_lessc
+    from .latex.latex_preprocess import extract_maths, extract_tabular
+    from .latex.latex_preprocess import latex_preprocessing
+    from .latex.latex_preprocess import replace_equations
     from .macro_col2 import col_macros, col_macros_prepare_before_markdown
-    from .markd import render_markdown
+    from .mark.markd import render_markdown
     from .preliminary_checks import do_preliminary_checks_and_fixes
     from .prerender_math import prerender_mathjax
-    from .latex_preprocess import replace_equations
 
     if isinstance(s, unicode):
         msg = 'I expect a str encoded with utf-8, not unicode.'
@@ -55,7 +58,6 @@ def render_complete(library, s, raise_errors, realpath, generate_pdf=False,
         assert k in s
         s = s.replace(k, v)
         
-    
     # copy all math content,
     #  between $$ and $$
     #  between various limiters etc.
@@ -108,18 +110,23 @@ def render_complete(library, s, raise_errors, realpath, generate_pdf=False,
     s = s.replace('\\*}', '*}')
 
     # this parses the XML
-    s = other_abbrevs(s)
+    soup = bs(s)
     
+    other_abbrevs(soup)
     
     # need to process tabular before mathjax
-    s = escape_for_mathjax(s)
-
+    escape_for_mathjax(soup)
+    
 #     print(indent(s, 'before prerender_mathjax | '))
     # mathjax must be after markdown because of code blocks using "$"
     
+    s = to_html_stripping_fragment(soup)
     s = prerender_mathjax(s)
-    s = escape_for_mathjax_back(s)
-    
+
+    soup = bs(s)
+    escape_for_mathjax_back(soup)
+    s = to_html_stripping_fragment(soup)
+
 #     print(indent(s, 'after prerender_mathjax | '))
     for k,v in mcdpenvs.items():
         # there is this case:
@@ -133,45 +140,33 @@ def render_complete(library, s, raise_errors, realpath, generate_pdf=False,
     
     s = s.replace('<p>/DRAFT</p>', '</div>')
     
-    s = mark_console_pres(s)
-    s = make_figure_from_figureid_attr(s)
-    
-    s = col_macros(s)
-    
-#     print(indent(s, 'after  col_macros | '))
-    s = fix_subfig_references(s)
-    check_html_fragment(s)
-    
-#     print(indent(s, 'before  html_interpret | '))
-    library = get_library_from_document(s=s, default_library=library)
-    s = html_interpret(library, s, generate_pdf=generate_pdf,
-                           raise_errors=raise_errors, realpath=realpath)
-
-    check_html_fragment(s)
-    
-    raise_missing_image_errors = False
     
     soup = bs(s)
+    mark_console_pres(soup)
+    make_figure_from_figureid_attr(soup)
+    col_macros(soup)
+    fix_subfig_references(soup)  
+    
+    library = get_library_from_document(soup, default_library=library)
+    from mcdp_docs.highlight import html_interpret
+    html_interpret(library, soup, generate_pdf=generate_pdf,
+                            raise_errors=raise_errors, realpath=realpath)
+    
+    raise_missing_image_errors = False
     
     embed_images_from_library2(soup=soup, library=library, 
                               raise_errors=raise_missing_image_errors)
         
     if check_refs:    
-        from mcdp_docs.check_missing_links import check_if_any_href_is_invalid
-        check_if_any_href_is_invalid(soup=soup)
-        
-    s = to_html_stripping_fragment(soup)
-
-    check_html_fragment(s) 
+        check_if_any_href_is_invalid(soup)
+            
+    run_lessc(soup)
+    fix_validation_problems(soup)
     
-    s = preprocess_lessc(s)
-    
-    s = fix_validation_problems(s)
-    return s
+    return to_html_stripping_fragment(soup)
 
-def get_document_properties(s):
+def get_document_properties(soup):
     """ Reads a document's <meta> tags into a dict """
-    soup = bs(s)
     metas = list(soup.select('meta'))
     FK, FV = 'name', 'content'
     properties = {}
@@ -183,14 +178,14 @@ def get_document_properties(s):
         properties[e[FK]] = e[FV]
     return properties
     
-def get_library_from_document(s, default_library):
+def get_library_from_document(soup, default_library):
     """
         Reads a tag like this:
         
             <meta name="mcdp-library" content='am'/>
 
     """ 
-    properties = get_document_properties(s)
+    properties = get_document_properties(soup)
         
     KEY_MCDP_LIBRARY = 'mcdp-library'
     if KEY_MCDP_LIBRARY in properties:
@@ -232,9 +227,8 @@ def replace_macros(s):
         raise DPSyntaxError(msg, where=w)
     return s2 
 
-def fix_validation_problems(s):
+def fix_validation_problems(soup):
     """ Fixes things that make the document not validate. """
-    soup = bs(s)
     
     # remove the attributes span.c and span.ce used in ast_to_html
     for e in soup.select('span[c]'):
@@ -268,9 +262,7 @@ def fix_validation_problems(s):
 #     for e in soup.select('svg'):
 #         xmlns = "http://www.w3.org/2000/svg"
 #         if not 'xmlns' in e.attrs:
-#             e.attrs['xmlns'] = xmlns
-            
-    return to_html_stripping_fragment(soup)
+#             e.attrs['xmlns'] = xmlns 
 
 # def get_mathjax_preamble():
 #     symbols = '/Users/andrea/env_mcdp/src/mcdp/libraries/manual.mcdplib/symbols.tex'
@@ -284,7 +276,7 @@ def fix_validation_problems(s):
 #     return frag
 
 def protect_my_envs(s):
-    from .markdown_transform import is_inside_markdown_quoted_block
+    from mcdp_docs.mark.markdown_transform import is_inside_markdown_quoted_block
 
     # we don't want MathJax to look inside these
     elements = ['mcdp-value', 'mcdp-poset', 'pre', 'render', 
@@ -304,7 +296,7 @@ def protect_my_envs(s):
         
     subs = {}
     for d1, d2 in delimiters:
-        from mcdp_web.renderdoc.latex_preprocess import extract_delimited
+        from mcdp_docs.latex.latex_preprocess import extract_delimited
         s = extract_delimited(s, d1, d2, subs, 'MYENVS')
         
     for k, v in list(subs.items()):

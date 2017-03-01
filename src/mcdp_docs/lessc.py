@@ -10,11 +10,6 @@ from system_cmd.meat import system_cmd_result
 from system_cmd.structures import CmdException
 
 
-def preprocess_lessc(s):
-    soup = bs(s)
-    run_lessc(soup)
-    return to_html_stripping_fragment(soup)
-
 def unescape_entities(s):
     from HTMLParser import HTMLParser
     h = HTMLParser()

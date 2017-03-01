@@ -25,8 +25,10 @@ import re
 from bs4.element import NavigableString, Tag, Comment
 
 from contracts.utils import raise_desc
-from mcdp_web.renderdoc.highlight import add_class
-from mcdp_utils_xml import bs, to_html_stripping_fragment, describe_tag
+
+
+from mcdp_utils_xml import describe_tag
+from mcdp_utils_xml.add_class_and_style import add_class
 
 
 __all__ = [
@@ -48,14 +50,12 @@ def col_macros_prepare_before_markdown(s):
 
     return s
 
-def col_macros(html):
+def col_macros(soup):
     for n in ns:
-        html = col_macro(html, n)
-    return html
+        col_macro(soup, n)
 
-def col_macro(html, n):
+def col_macro(soup, n):
     assert n in ns
-    soup = bs(html)
     selector = 'div[make-col%d]' % n
     num = 0
     for e in soup.select(selector):
@@ -67,8 +67,6 @@ def col_macro(html, n):
     else:
         pass
         #logger.debug('Found %d elements matching %r.' % (num, selector))
-    res = to_html_stripping_fragment(soup) 
-    return res
 
 def col_macro_(e, ncols):
     """

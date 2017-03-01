@@ -30,8 +30,7 @@ from mocdp.comp.interfaces import NamedDP
 from .image import (get_png_data_model,
     ndp_template_enclosed, get_png_data_unavailable, get_png_data_poset,
     get_png_data_syntax_model)
-from .warnings_unconnected import generate_unconnected_warnings
-from mcdp_web.visualization.add_html_links_imp import add_html_links
+from .warnings_unconnected import generate_unconnected_warnings 
 
 
 Spec = namedtuple('Spec', 
