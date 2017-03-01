@@ -126,7 +126,7 @@ big-files-in-git:
 
 branches-to-merge:
 	@echo  "\nThese branches need to be merged in the current branch:\n"
-	@git branch --no-merged
+	@git branch -a --no-merged
 
 show-unicode:
 	cat src/mcdp_lang/*.py | python show_not_ascii.py
