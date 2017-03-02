@@ -11,8 +11,7 @@ font-size: smaller;
 {% endif %}
 {% if error %}
 	<p id='login-error'>{{error}}</p>
-{% endif %}
-
+{% endif %} 
   <form id='form' action="{{root}}/login/" method="post" title='Please enter login information'>
     <input type="hidden" name="came_from" value="{{came_from}}">
     <table>
@@ -52,29 +51,36 @@ font-size: smaller;
 	}
 </style>
 <script>
+
 function button_click() {
 	$('div#iframe').show();
 	$('#req2').hide();
 }
+
 function init_dialog() {
   $( "#form" ).dialog({
 		  classes: {
 		    "ui-dialog": "highlight"
 		  },
-		  position: { my: 'top', at: 'top+100' },
+		  position: { my: 'top', at: 'top+100' }		  
 	});
 	
 	$('#request').button().click(button_click);
+	 
+	
 }
 $(document).ready(init_dialog);
 
 </script>
-
-<p id='req'><span id="req2">Don't have an account? <button id='request'>Request one.</button></span><br/>
+ 
+<p id='req'><span id="req2">Don't have an account?
+    <!-- <button id='request'>Request one.</button></span><br/> -->
+    <a href="https://docs.google.com/forms/d/e/1FAIpQLSd62UrGvItpQJ2zm9IJMq41zOzx8giEBLMnWZw8UN9Lp4S6yQ/viewform">Request one.</a><br/>
 Or, look for a public demo server in the <a href="https://demo.co-design.science/">server list</a>.
 </p>
 
+<!--
 <div id='iframe' style='display: None'>
 <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSd62UrGvItpQJ2zm9IJMq41zOzx8giEBLMnWZw8UN9Lp4S6yQ/viewform?embedded=true" width="100%" height="500" frameborder="0" marginheight="0" marginwidth="0">Loading...</iframe>
 </div>
-
+-->
