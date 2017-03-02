@@ -98,7 +98,7 @@ class AppLogin():
 
 
     def login(self, request): 
-        came_from = request.params['came_from']
+        came_from = request.params.get('came_from', '/')
         message = ''
         error = ''
         if 'form.submitted' in request.params:

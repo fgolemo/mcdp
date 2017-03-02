@@ -5,25 +5,25 @@ import time
 import urlparse
 from wsgiref.simple_server import make_server
 
+from contracts import contract
+from contracts.utils import indent
 import pyramid
 from pyramid.authentication import AuthTktAuthenticationPolicy
 from pyramid.authorization import ACLAuthorizationPolicy
-from pyramid.config import Configurator  
+from pyramid.config import Configurator
 from pyramid.httpexceptions import HTTPFound
 from pyramid.renderers import JSONP
-from pyramid.response import Response  
+from pyramid.response import Response
 from pyramid.security import Allow, Authenticated
 from pyramid.security import Everyone
+from quickapp import QuickAppBase
 
 from compmake.utils.duration_hum import duration_compact
-from contracts import contract
-from contracts.utils import indent, raise_desc
 from mcdp import logger
 from mcdp.exceptions import DPSemanticError, DPSyntaxError
 from mcdp_docs.pipeline import render_complete
-from mcdp_library import Librarian, MCDPLibrary
 from mcdp_library.utils import dir_from_package_name
-from quickapp import QuickAppBase
+from mcdp_web.sessions import Session
 
 from .confi import describe_mcdpweb_params, parse_mcdpweb_params_from_dict
 from .editor_fancy import AppEditorFancyGeneric
@@ -36,6 +36,11 @@ from .solver2.app_solver2 import AppSolver2
 from .status import AppStatus
 from .utils0 import add_std_vars
 from .visualization.app_visualization import AppVisualization
+
+
+from mcdp_library import MCDPLibrary
+from mcdp.utils.natsort import natural_sorted
+
 
 
 __all__ = [
@@ -64,10 +69,8 @@ class WebApp(AppVisualization, AppStatus,
 
         self.dirname = dirname
 
-        self._load_libraries()
-
-        logger.info('Found %d libraries in %r.' %
-                        (len(self.libraries), self.dirname))
+#         logger.info('Found %d libraries in %r.' %
+#                         (len(self.libraries), self.dirname))
 
         AppVisualization.__init__(self)
         AppQR.__init__(self)
@@ -91,33 +94,33 @@ class WebApp(AppVisualization, AppStatus,
         self.add_model_view('dp_tree', 'DP tree representation')
         self.add_model_view('images', 'Other image representations')
         self.add_model_view('solver', 'Graphical solver [experimental]')
-        
+        self.sessions = {}
+
     def add_model_view(self, name, desc):
         self.views[name] = dict(desc=desc, order=len(self.views))
 
+    def get_session(self, request):
+        token = request.session.get_csrf_token()
+        if not token in self.sessions:
+            print('creating new session for token %r' % token)
+            self.sessions[token] = Session(request, dirname=self.dirname)
+        session = self.sessions[token]
+        session.set_last_request(request)
+        return session
+    
     def _get_views(self):
         return sorted(self.views, key=lambda _:self.views[_]['order'])
 
     def get_current_library_name(self, request):
-        library_name = str(request.matchdict['library'])  # unicod
-        return library_name
-
+        return self.get_session(request).get_current_library_name()
+    
     def get_library(self, request):
-        library_name = self.get_current_library_name(request)
-        if not library_name in self.libraries:
-            msg = 'Could not find library %r.' % library_name
-            raise_desc(ValueError, msg, available=self.libraries)
-        return self.libraries[library_name]['library']
+        return self.get_session(request).get_library()
 
     def list_of_models(self, request):
         l = self.get_library(request)
         return l.get_models()
     
-    @contract(returns='list(str)')
-    def list_libraries(self):
-        """ Returns the list of libraries """
-        return sorted(self.libraries)
-
     @add_std_vars
     def view_index(self, request):  # @UnusedVariable
         return {}
@@ -128,30 +131,13 @@ class WebApp(AppVisualization, AppStatus,
     
     @add_std_vars
     def view_list_libraries(self, request):  # @UnusedVariable
-        libraries = self.list_libraries()
+        libraries = self.get_session(request).list_libraries()
         return {'libraries': sorted(libraries)}
 
-    def _refresh_library(self, _request):
+    def refresh_library(self, request):
         # nuclear option
-        self._load_libraries()
+        self.get_session(request).refresh_libraries()
 
-        for l in [_['library'] for _ in self.libraries.values()]:
-            l.delete_cache()
-
-        from mcdp_report.gdc import get_images
-        assert hasattr(get_images, 'cache')  # in case it changes later
-        get_images.cache = {}
-
-    def _load_libraries(self):
-        """ Loads libraries in the "self.dirname" dir. """
-        self.librarian = Librarian()
-        self.librarian.find_libraries(self.dirname)
-        self.libraries = self.librarian.get_libraries()
-        for _short, data in self.libraries.items():
-            l = data['library']
-            path = data['path']
-            cache_dir = os.path.join(path, '_cached/mcdpweb_cache')
-            l.use_cache_dir(cache_dir)
 
     @add_std_vars
     def view_refresh_library(self, request):
@@ -244,29 +230,9 @@ class WebApp(AppVisualization, AppStatus,
             n += '\n' + indent(s, '| ')
             self.exceptions.append(n)
             from mcdp_web.utils.image_error_catch_imp import response_image
-            return response_image(request, s)
-# 
-#     @add_std_vars
-#     def view_docs(self, request):  # XXX check this
-#         docname = str(request.matchdict['document'])  # unicode
-#         # from pkg_resources import resource_filename  # @UnresolvedImport
-#         res = self.render_markdown_doc(docname)
-#         return res
-# 
-#     @add_std_vars
-#     def render_markdown_doc(self, docname):
-#         package = dir_from_package_name('mcdp_data')
-#         docs = os.path.join(package, 'docs')
-#         f = os.path.join(docs, '%s.md' % docname)
-#         import codecs
-#         data = codecs.open(f, encoding='utf-8').read()  # XXX
-#         data_str = data.encode('utf-8')
-#         html = render_markdown(data_str)
-#         html_u = unicode(html, 'utf-8')
-#         return {'contents': html_u}
+            return response_image(request, s) 
 
     # This is where we keep all the URLS
-    
     def make_relative(self, request, url):
         if not url.startswith('/'):
             msg = 'Expected url to start with /: %r' % url
@@ -349,14 +315,13 @@ class WebApp(AppVisualization, AppStatus,
         else:
             current_value = None
 
-
         if 'library' in request.matchdict:
             current_library = self.get_current_library_name(request)
             library = self.get_library(request)
         else:
             current_library = None
             library = None
-         
+
         d = {}
 
         d['current_thing'] = current_thing
@@ -370,7 +335,7 @@ class WebApp(AppVisualization, AppStatus,
 
         if library is not None:
             documents = library._list_with_extension(MCDPLibrary.ext_doc_md)
-    
+
             d['documents'] = []
             for id_doc in documents:
                 url = make_relative('/libraries/%s/%s.html' % (current_library, id_doc))
@@ -451,7 +416,8 @@ class WebApp(AppVisualization, AppStatus,
                 desc = dict(name=name, url=url, current=is_current)
                 d['views'].append(desc)
         # endif library not None
-        libraries = self.list_libraries()
+        session = self.get_session(request)
+        libraries = session.list_libraries()
 
         # just the list of names
         d['libraries'] = []
@@ -465,7 +431,7 @@ class WebApp(AppVisualization, AppStatus,
             libname2desc[l] =desc
             d['libraries'].append(desc)
 
-        indexed = self.get_libraries_indexed_by_dir()
+        indexed = session.get_libraries_indexed_by_dir()
         indexed = [(sup, [libname2desc[_] for _ in l]) 
                    for sup, l in indexed]
         
@@ -476,23 +442,6 @@ class WebApp(AppVisualization, AppStatus,
         
         return d
     
-    
-    def get_libraries_indexed_by_dir(self):
-        """
-            returns a list of tuples (dirname, list(libname))
-        """
-        from collections import defaultdict
-        path2libraries = defaultdict(lambda: [])
-        for libname, data in self.libraries.items():
-            path = data['path']
-            sup = os.path.basename(os.path.dirname(path))
-            path2libraries[sup].append(libname)
-                     
-        res = []
-        for sup in natural_sorted(path2libraries):
-            r = (sup, natural_sorted(path2libraries[sup]))
-            res.append(r)
-        return res 
     
     def _has_library_doc(self, request, document):
         l = self.get_library(request)
@@ -579,8 +528,12 @@ class WebApp(AppVisualization, AppStatus,
             Root.__acl__.append((Allow, Authenticated, 'access'))
             logger.info('Allowing authenticated to access')
         
+        from pyramid.session import SignedCookieSessionFactory
+        self.my_session_factory = SignedCookieSessionFactory('itsaseekreet')
+
         config = Configurator(root_factory=Root)
-        
+        config.set_session_factory(self.my_session_factory)
+
         # config.include('pyramid_debugtoolbar')
 
         authn_policy = AuthTktAuthenticationPolicy('seekrit', hashalg='sha512')
@@ -651,14 +604,12 @@ class WebApp(AppVisualization, AppStatus,
         config.add_view(serve_robots, route_name='robots')
 
         config.add_notfound_view(self.view_not_found, renderer='404.jinja2')
-#  
         config.scan()
-        
 
         app = config.make_wsgi_app()
         return app
     
-    
+
     
 
 class MCDPWeb(QuickAppBase):
@@ -682,7 +633,7 @@ Use Chrome, Firefox, or Opera - Internet Explorer is not supported.
 
         if options.delete_cache:
             logger.info('Deleting cache...')
-            wa._refresh_library(None)
+            #wa._refresh_library(None)
         logger.info(msg)
         wa.serve(port=options.port)
 
@@ -705,5 +656,3 @@ def app_factory(global_config, **settings):  # @UnusedVariable
 
 mcdp_web_main = MCDPWeb.get_sys_main()
 
-def natural_sorted(seq):
-    return sorted(seq, key=lambda s: s.lower())
