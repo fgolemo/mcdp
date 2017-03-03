@@ -83,7 +83,7 @@ class Librarian():
             entry = self.libraries[short]
             if entry['path'] != data['path']:
                 msg = 'I already know library "%s".\n' % short
-                msg += 'Current entry path:  %s\n' % path
+                msg += 'Current entry path:  %s\n' % data['path']
                 msg += 'Previous entry path: %s\n' % entry['path']
                 raise_desc(ValueError, msg)
             else:
@@ -95,6 +95,8 @@ class Librarian():
     def _load_entry(self, dirname):
         if dirname == '.':
             dirname = os.path.realpath(dirname)
+            
+        dirname = os.path.realpath(dirname)
         library_name = os.path.splitext(os.path.basename(dirname))[0]
         library_name = library_name.replace('.', '_')
 
