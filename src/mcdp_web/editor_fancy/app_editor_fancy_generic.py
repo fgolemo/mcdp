@@ -5,32 +5,34 @@ import json
 import os
 
 from bs4 import BeautifulSoup
+from contracts import contract
+from contracts.utils import check_isinstance, raise_desc
 from pyramid.httpexceptions import HTTPFound  # @UnresolvedImport
 from pyramid.renderers import render_to_response  # @UnresolvedImport
 
-from contracts import contract
-from contracts.utils import check_isinstance, raise_desc
 from mcdp import logger
 from mcdp.exceptions import DPInternalError, DPSemanticError, DPSyntaxError
-from mcdp_utils_misc.string_utils import get_sha1
-from mcdp_utils_misc.timing import timeit_wall
-from mcdp_lang.parse_interface import (parse_ndp_eval, parse_ndp_refine, 
-    parse_template_eval, parse_template_refine, parse_constant_eval, 
-    parse_constant_refine, parse_poset_eval, parse_poset_refine)
+from mcdp_lang.parse_interface import (parse_ndp_eval, parse_ndp_refine,
+                                       parse_template_eval, parse_template_refine, parse_constant_eval,
+                                       parse_constant_refine, parse_poset_eval, parse_poset_refine)
 from mcdp_lang.suggestions import get_suggestions, apply_suggestions
 from mcdp_lang.syntax import Syntax
 from mcdp_library import MCDPLibrary
 from mcdp_report.html import ast_to_html, ATTR_WHERE_CHAR, ATTR_WHERE_CHAR_END
+from mcdp_utils_misc.string_utils import get_sha1
+from mcdp_utils_misc.timing import timeit_wall
+from mcdp_web.resource_tree import ResourceThingViewEditor, get_from_context,\
+    ResourceThings, ResourceThing
 from mcdp_web.utils import (ajax_error_catch,
                             format_exception_for_ajax_response, response_image)
 from mcdp_web.utils.response import response_data
-from mcdp_web.utils0 import add_other_fields
+from mcdp_web.utils0 import add_std_vars_context
 from mocdp.comp.interfaces import NamedDP
 
 from .image import (get_png_data_model,
-    ndp_template_enclosed, get_png_data_unavailable, get_png_data_poset,
-    get_png_data_syntax_model)
-from .warnings_unconnected import generate_unconnected_warnings 
+                    ndp_template_enclosed, get_png_data_unavailable, get_png_data_poset,
+                    get_png_data_syntax_model)
+from .warnings_unconnected import generate_unconnected_warnings
 
 
 Spec = namedtuple('Spec', 
@@ -109,6 +111,10 @@ class AppEditorFancyGeneric():
         self.last_processed2 = defaultdict(lambda: dict())
 
     def config(self, config):
+        config.add_view(self.view_edit_form_fancy, 
+                        context=ResourceThingViewEditor, 
+                        renderer='editor_fancy/edit_form_fancy_generic.jinja2')
+
         self.config_(config, spec_templates)
         self.config_(config, spec_values)
         self.config_(config, spec_posets)
@@ -119,13 +125,8 @@ class AppEditorFancyGeneric():
         """
             what = templates, values, posets
         """
-        route = spec.url_part + '_edit_form_fancy'
         url = self.get_glmv_url2('{library}', spec.url_part, '{%s}' % spec.url_variable,
-                                 'edit_fancy', request=None)
-        renderer = 'editor_fancy/edit_form_fancy_generic.jinja2'
-        view = lambda req: self.view_edit_form_fancy_generic(req, spec=spec)
-        config.add_route(route, url)
-        config.add_view(view, route_name=route, renderer=renderer)
+                                 'edit_fancy', request=None) 
 
         parse = lambda req: self.ajax_parse_generic(req, spec)
         route = spec.url_part + '_ajax_parse'
@@ -165,11 +166,14 @@ class AppEditorFancyGeneric():
 
         return ajax_error_catch(go)
 
-    def view_edit_form_fancy_generic(self, request, spec):
-        widget_name = self.get_widget_name(request, spec)
-
+    @add_std_vars_context
+    def view_edit_form_fancy(self, context, request):
+        specname = get_from_context(ResourceThings, context).specname
+        widget_name =  get_from_context(ResourceThing, context).name
+        spec = specs[specname]
+        
         filename = '%s.%s' % (widget_name, spec.extension)
-        l = self.get_library(request)
+        l = self.get_library(request, context)
         f = l._get_file_data(filename)
         source_code = f['data']
         realpath = f['realpath']
@@ -183,13 +187,10 @@ class AppEditorFancyGeneric():
             'realpath': realpath,
             spec.url_variable: widget_name,
             'rows': nrows,
-            'navigation': self.get_navigation_links(request),
             'ajax_parse': spec.url_part + '_ajax_parse',
             'error': None,
             'url_part': spec.url_part,
         }
-
-        add_other_fields(self, res, request)
         return res
     
     def get_text_from_request2(self, request):

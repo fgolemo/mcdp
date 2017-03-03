@@ -8,15 +8,17 @@
 </head>
 <body>
 
-
-<p> Libraries: </p>
-
-  <ul>
-    {% for l in libraries %}
-    <li><a href="{{root}}/libraries/{{l}}/" target="_blank">Library <tt>{{l}}</tt></a></li>
+<div class="library_list">
+    {% for sup, sup_libraries in navigation['libraries_indexed'] %}
+        <div class='sup'>{{sup}}</div>
+        {% for li in sup_libraries %}
+        <!-- <option name='{{li['name']}}' value="{{li['url']}}" {% if li['current'] %} selected = 1 {% endif %}> -->
+            <!-- note the span has no effect inside option -->
+            <div class='library'><a href="{{li['url']}}"><code>📖<span>{{li['name']}}</span></code></a></div>
+        <!-- </option> -->
+        {% endfor %}
     {% endfor %}
-  </ul>
-
+    </div>
   {% include 'footer.jinja2' %}
 </body>
 </html>

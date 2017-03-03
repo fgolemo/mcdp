@@ -5,6 +5,13 @@ from contextlib import contextmanager
 import json
 
 from contracts.utils import raise_desc, raise_wrapped
+from reprep import Report
+from reprep.constants import MIME_PNG
+from reprep.plot_utils.axes import x_axis_extra_space, y_axis_extra_space
+
+from mcdp import logger
+from mcdp.exceptions import DPSyntaxError, mcdp_dev_warning, DPSemanticError, \
+    DPInternalError
 from mcdp_cli.solve_meat import solve_meat_solve_rtof, solve_meat_solve_ftor
 from mcdp_dp.dp_transformations import get_dp_bounds
 from mcdp_dp.primitive import NotSolvableNeedsApprox
@@ -13,16 +20,12 @@ from mcdp_lang.parse_interface import parse_constant
 from mcdp_posets import express_value_in_isomorphic_space, LowerSets,  NotLeq, UpperSets
 from mcdp_report.gg_ndp import format_unit
 from mcdp_report.plotters.get_plotters_imp import get_best_plotter
+from mcdp_web.resource_tree import ResourceThingViewSolver, get_from_context,\
+    ResourceThing
 from mcdp_web.utils import ajax_error_catch, memoize_simple, response_data
 from mcdp_web.utils.image_error_catch_imp import response_image
-from mcdp_web.utils0 import add_std_vars
-from mcdp import logger
-from mcdp.exceptions import DPSyntaxError, mcdp_dev_warning, DPSemanticError, \
-    DPInternalError
+from mcdp_web.utils0 import add_std_vars_context
 import numpy as np
-from reprep import Report
-from reprep.constants import MIME_PNG
-from reprep.plot_utils.axes import x_axis_extra_space, y_axis_extra_space
 
 
 # Alternate chars used for Base64 instead of + / which give problems with urls
@@ -49,12 +52,10 @@ class AppSolver2():
         self.solutions = {}
 
     def config(self, config):
+        config.add_view(self.view_solver2_base, context=ResourceThingViewSolver, renderer='solver2/solver2_base.jinja2')
         
         base = '/libraries/{library}/models/{model_name}/views/solver2/'
 
-        config.add_route('solver2_base', base)
-        config.add_view(self.view_solver2_base, route_name='solver2_base',
-                        renderer='solver2/solver2_base.jinja2')
 
         config.add_route('solver2_submit', base + 'submit')
         config.add_view(self.view_solver2_submit, route_name='solver2_submit',
@@ -73,15 +74,17 @@ class AppSolver2():
 
     @memoize_simple
     def _get_ndp_dp(self, library_name, model_name):
-        library = self.libraries[library_name]['library']
+        library = self._xxx_session.libraries[library_name]['library']
         ndp = library.load_ndp(model_name)
         dp = ndp.get_dp()
         return ndp, dp
 
-    @add_std_vars
-    def view_solver2_base(self, request):
-        model_name = self.get_model_name(request)
-        library = self.get_current_library_name(request)
+    @add_std_vars_context
+    def view_solver2_base(self, context, request):
+        model_name = get_from_context(ResourceThing, context).name
+        library = self.get_current_library_name(request, context)
+        
+        self._xxx_session = self.get_session(request) 
         ndp, dp = self._get_ndp_dp(library, model_name)
 
         F = dp.get_fun_space()
@@ -93,18 +96,13 @@ class AppSolver2():
         I_description = str(I)
         
         u = lambda s: unicode(s, 'utf-8')
-        res =  {
-            'navigation': self.get_navigation_links(request),
+        res =  { 
             'F_description': u(F_description),
             'R_description': u(R_description),
             'F_names': ", ".join(ndp.get_fnames()),
             'R_names': ", ".join(ndp.get_rnames()),
             'I_description': u(I_description),
-        }
-#         # XXX: not sure what's going on
-#         res['root'] =  self.get_root_relative_to_here(request)
-# 
-#         print('solver2 base: %s' % list(res.keys()))
+        } 
         return res
 
     def view_solver2_submit(self, request):

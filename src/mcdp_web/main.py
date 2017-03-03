@@ -14,15 +14,17 @@ from pyramid.config import Configurator
 from pyramid.httpexceptions import HTTPFound
 from pyramid.renderers import JSONP
 from pyramid.response import Response
-from pyramid.security import Allow, Authenticated
-from pyramid.security import Everyone
 from quickapp import QuickAppBase
 
 from compmake.utils.duration_hum import duration_compact
 from mcdp import logger
 from mcdp.exceptions import DPSemanticError, DPSyntaxError
 from mcdp_docs.pipeline import render_complete
+from mcdp_library import MCDPLibrary
 from mcdp_library.utils import dir_from_package_name
+from mcdp_utils_misc.natsort import natural_sorted
+from mcdp_web.resource_tree import MCDPResourceRoot, ResourceLibraries,\
+    ResourceLibrary, get_from_context
 from mcdp_web.sessions import Session
 
 from .confi import describe_mcdpweb_params, parse_mcdpweb_params_from_dict
@@ -36,11 +38,7 @@ from .solver2.app_solver2 import AppSolver2
 from .status import AppStatus
 from .utils0 import add_std_vars
 from .visualization.app_visualization import AppVisualization
-
-
-from mcdp_library import MCDPLibrary
-from mcdp_utils_misc.natsort import natural_sorted
-
+from mcdp_web.utils0 import add_std_vars_context
 
 
 __all__ = [
@@ -54,9 +52,10 @@ class WebApp(AppVisualization, AppStatus,
              AppQR, AppSolver, AppInteractive,
              AppSolver2, AppEditorFancyGeneric, WebAppImages,
              AppLogin):
-   
+    singleton = None
     def __init__(self, options):
         self.options = options
+        WebApp.singleton = self
         
         dirname = options.libraries
         if dirname is None:
@@ -68,10 +67,7 @@ class WebApp(AppVisualization, AppStatus,
             dirname = libraries
 
         self.dirname = dirname
-
-#         logger.info('Found %d libraries in %r.' %
-#                         (len(self.libraries), self.dirname))
-
+ 
         AppVisualization.__init__(self)
         AppQR.__init__(self)
         AppSolver.__init__(self)
@@ -111,28 +107,42 @@ class WebApp(AppVisualization, AppStatus,
     def _get_views(self):
         return sorted(self.views, key=lambda _:self.views[_]['order'])
 
-    def get_current_library_name(self, request):
-        return self.get_session(request).get_current_library_name()
+    def get_current_library_name(self, request, context=None):
+        if context is None:
+            return self.get_session(request).get_current_library_name()
+        else:
+            rlibrary = get_from_context(ResourceLibrary, context)
+            return rlibrary.name
     
-    def get_library(self, request):
-        return self.get_session(request).get_library()
+    def get_library(self, request, context=None):
+        session = self.get_session(request)
+        if context is None:
+            return session.get_library()
+        else:
+            rlibrary = get_from_context(ResourceLibrary, context)
+            if rlibrary is not None:
+                current_library = rlibrary.name
+                library = session.libraries[current_library]['library']
+            else:
+                current_library = None
+                library = None
+            return library
 
     def list_of_models(self, request):
         l = self.get_library(request)
         return l.get_models()
     
-    @add_std_vars
-    def view_index(self, request):  # @UnusedVariable
+    @add_std_vars_context
+    def view_root(self, context, request):  # @UnusedVariable
         return {}
 
-    @add_std_vars
-    def view_list(self, request):  # @UnusedVariable
+    @add_std_vars_context
+    def view_library(self, context, request):  # @UnusedVariable
         return {}
     
-    @add_std_vars
-    def view_list_libraries(self, request):  # @UnusedVariable
-        libraries = self.get_session(request).list_libraries()
-        return {'libraries': sorted(libraries)}
+    @add_std_vars_context
+    def view_libraries(self, context, request):  # @UnusedVariable
+        return {} 
 
     def refresh_library(self, request):
         # nuclear option
@@ -171,7 +181,6 @@ class WebApp(AppVisualization, AppStatus,
             exceptions.append(u)
         return {'exceptions': exceptions}
 
-    #@add_std_vars # note it takes 3 arguments
     def view_exception(self, exc, request):
         request.response.status = 500  # Internal Server Error
 
@@ -191,12 +200,12 @@ class WebApp(AppVisualization, AppStatus,
         n += '\n' + indent(ss, '| ')
         self.exceptions.append(n)
 
-        if 'library' in request.matchdict:
+        if request.matchdict is not None and  'library' in request.matchdict:
             library = self.get_current_library_name(request)
             url_refresh = self.make_relative(request, '/libraries/%s/refresh_library' % library)
         else:
             url_refresh = None
-
+        
         u = unicode(s, 'utf-8')
         logger.error(u)
         res = {'exception': u, 'url_refresh': url_refresh}
@@ -443,10 +452,6 @@ class WebApp(AppVisualization, AppStatus,
         return d
     
     
-    def _has_library_doc(self, request, document):
-        l = self.get_library(request)
-        filename = '%s.%s' % (document, MCDPLibrary.ext_doc_md)
-        return l.file_exists(filename)
 
     @contract(returns=str)
     def _render_library_doc(self, request, document):
@@ -509,34 +514,18 @@ class WebApp(AppVisualization, AppStatus,
         
     def get_app(self): 
         self.time_start = time.time()
-        
-        options = self.options
-        class Root(object):
-            __acl__ = [
-                #(Allow, Everyone, 'view'),
-                (Allow, Authenticated, 'view'), 
-                (Allow, Authenticated, 'edit'),
-            ]
-            
-            def __init__(self, request):  # @UnusedVariable
-                pass
-            
-        if options.allow_anonymous:
-            Root.__acl__.append((Allow, Everyone, 'access'))
-            logger.info('Allowing everyone to access')
-        else:
-            Root.__acl__.append((Allow, Authenticated, 'access'))
-            logger.info('Allowing authenticated to access')
-        
         from pyramid.session import SignedCookieSessionFactory
-        self.my_session_factory = SignedCookieSessionFactory('itsaseekreet')
+        
+        secret = 'itsasecreet' # XXX
+        
+        self.my_session_factory = SignedCookieSessionFactory(secret+'sign')
 
-        config = Configurator(root_factory=Root)
+        config = Configurator(root_factory=MCDPResourceRoot)
         config.set_session_factory(self.my_session_factory)
 
         # config.include('pyramid_debugtoolbar')
 
-        authn_policy = AuthTktAuthenticationPolicy('seekrit', hashalg='sha512')
+        authn_policy = AuthTktAuthenticationPolicy(secret+'authn', hashalg='sha512')
         authz_policy = ACLAuthorizationPolicy()
         config.set_authentication_policy(authn_policy)
         config.set_authorization_policy(authz_policy)
@@ -557,17 +546,10 @@ class WebApp(AppVisualization, AppStatus,
         AppLogin.config(self, config)
         AppSolver2.config(self, config)
 
-        
-        config.add_route('index', '/')
-        config.add_view(self.view_index, route_name='index', renderer='index.jinja2')
 
-        config.add_route('list_libraries', '/libraries/')
-        config.add_view(self.view_list_libraries, route_name='list_libraries', 
-                        renderer='list_libraries.jinja2')
-
-        config.add_route('library_index', '/libraries/{library}/')
-        config.add_view(self.view_list, route_name='library_index', 
-                        renderer='library_index.jinja2')
+        config.add_view(self.view_root, context=MCDPResourceRoot, renderer='index.jinja2')
+        config.add_view(self.view_libraries, context=ResourceLibraries, renderer='list_libraries.jinja2')
+        config.add_view(self.view_library, context=ResourceLibrary, renderer='library_index.jinja2')
 
         config.add_route('library_doc', '/libraries/{library}/{document}.html')
         config.add_view(self.view_library_doc, route_name='library_doc',
@@ -575,9 +557,9 @@ class WebApp(AppVisualization, AppStatus,
 
         config.add_route('library_asset', '/libraries/{library}/{asset}.{ext}')
         config.add_view(self.view_library_asset, route_name='library_asset')
-
-        config.add_route('empty', '/empty')
-        config.add_view(self.view_index, route_name='empty', renderer='empty.jinja2')
+# 
+#         config.add_route('empty', '/empty')
+#         config.add_view(self.view_index, route_name='empty', renderer='empty.jinja2')
 
         config.add_route('refresh_library', '/libraries/{library}/refresh_library')
         config.add_view(self.view_refresh_library, route_name='refresh_library')

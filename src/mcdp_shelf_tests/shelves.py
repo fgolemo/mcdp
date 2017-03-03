@@ -90,7 +90,7 @@ def shelves02():
     assert_equal(andrea_subscription.get_desc_long(), 'long desc')
     assert_equal(andrea_subscription.get_authors(), ['andrea'])
     assert_equal(andrea_subscription.get_dependencies(), ['u_andrea_public'])
-             
+
     
 if __name__ == '__main__':
 
