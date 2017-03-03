@@ -107,12 +107,15 @@ class Session():
         library_name = str(self.request.matchdict['library'])  # unicod
         return library_name
 
-    def get_library(self):
-        library_name = self.get_current_library_name()
+    def get_library(self, library_name=None):
+        if library_name is None:
+            library_name = self.get_current_library_name()
         if not library_name in self.libraries:
             msg = 'Could not find library %r.' % library_name
             raise_desc(ValueError, msg, available=self.libraries)
         return self.libraries[library_name]['library']
+
+
 
     def refresh_libraries(self):
         for l in [_['library'] for _ in self.libraries.values()]:

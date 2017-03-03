@@ -21,8 +21,9 @@ from mcdp_library import MCDPLibrary
 from mcdp_report.html import ast_to_html, ATTR_WHERE_CHAR, ATTR_WHERE_CHAR_END
 from mcdp_utils_misc.string_utils import get_sha1
 from mcdp_utils_misc.timing import timeit_wall
-from mcdp_web.resource_tree import ResourceThingViewEditor, get_from_context,\
-    ResourceThings, ResourceThing
+from mcdp_web.resource_tree import ResourceThingViewEditor, ResourceThingViewEditorParse,\
+    context_get_spec, context_get_library_name, context_get_library,\
+    context_get_widget_name, ResourceThingViewEditorSave
 from mcdp_web.utils import (ajax_error_catch,
                             format_exception_for_ajax_response, response_image)
 from mcdp_web.utils.response import response_data
@@ -105,7 +106,6 @@ spec_posets =specs['posets']= Spec(url_part='posets',
 class AppEditorFancyGeneric():
 
     def __init__(self):
-
         # library_name x spec ->  dict(text : ndp)
         # self.last_processed2[library_name x spec][text] = ndp
         self.last_processed2 = defaultdict(lambda: dict())
@@ -114,6 +114,13 @@ class AppEditorFancyGeneric():
         config.add_view(self.view_edit_form_fancy, 
                         context=ResourceThingViewEditor, 
                         renderer='editor_fancy/edit_form_fancy_generic.jinja2')
+
+        config.add_view(self.ajax_parse, 
+                        context=ResourceThingViewEditorParse, 
+                        renderer='json')
+        config.add_view(self.save, 
+                        context=ResourceThingViewEditorSave, 
+                        renderer='json')
 
         self.config_(config, spec_templates)
         self.config_(config, spec_values)
@@ -126,25 +133,14 @@ class AppEditorFancyGeneric():
             what = templates, values, posets
         """
         url = self.get_glmv_url2('{library}', spec.url_part, '{%s}' % spec.url_variable,
-                                 'edit_fancy', request=None) 
-
-        parse = lambda req: self.ajax_parse_generic(req, spec)
-        route = spec.url_part + '_ajax_parse'
-        url2 = url + 'ajax_parse'
-        config.add_route(route, url2)
-        config.add_view(parse, route_name=route, renderer='json')
+                                 'edit_fancy', request=None)  
 
         graph = lambda req: self.graph_generic(req, spec)
         route = spec.url_part + '_graph'
         url2 = url + 'graph.{text_hash}.{data_format}'
         config.add_route(route, url2)
+        
         config.add_view(graph, route_name=route)
-
-        save = lambda req: self.editor_fancy_save_generic(req, spec)
-        route = spec.url_part + '_save'
-        url2 = url + 'save'
-        config.add_route(route, url2)
-        config.add_view(save, route_name=route, renderer='json')
 
         new = lambda req: self.view_new_model_generic(req, spec)
         route = spec.url_part + '_new'
@@ -156,11 +152,13 @@ class AppEditorFancyGeneric():
         widget_name = str(request.matchdict[spec.url_variable])  # unicode
         return widget_name
 
-    def editor_fancy_save_generic(self, request, spec):
-        widget_name = self.get_widget_name(request, spec)
-        string = self.get_text_from_request2(request)
+    def save(self, context, request):
+        widget_name = context_get_widget_name(context)
+        spec = context_get_spec(context)
+        string = get_text_from_request2(request)
+        
         def go():
-            l = self.get_library(request)
+            l = context_get_library(context, request)
             spec.write(l, widget_name, string)
             return {'ok': True, 'saved_string': string}
 
@@ -168,12 +166,12 @@ class AppEditorFancyGeneric():
 
     @add_std_vars_context
     def view_edit_form_fancy(self, context, request):
-        specname = get_from_context(ResourceThings, context).specname
-        widget_name =  get_from_context(ResourceThing, context).name
-        spec = specs[specname]
+        widget_name = context_get_widget_name(context)
+        spec = context_get_spec(context)
+        l = context_get_library(context, request)
         
         filename = '%s.%s' % (widget_name, spec.extension)
-        l = self.get_library(request, context)
+        
         f = l._get_file_data(filename)
         source_code = f['data']
         realpath = f['realpath']
@@ -193,31 +191,19 @@ class AppEditorFancyGeneric():
         }
         return res
     
-    def get_text_from_request2(self, request):
-        """ Gets the 'text' field, taking care of weird
-            unicode characters from the browser. 
+
+    def ajax_parse(self, context, request):
+        spec = context_get_spec(context)
+        library_name = context_get_library_name(context)
+        library = context_get_library(context, request)
+        widget_name = context_get_widget_name(context)
         
-            Returns a string encoded in utf-8.
-        """
-        string = request.json_body['text']
-        # \xa0 is actually non-breaking space in Latin1 (ISO 8859-1), also chr(160).
-        # You should replace it with a space.
-        string = string.replace(u'\xa0', u' ')
-
-        check_isinstance(string, unicode)
-        string = string.encode('utf-8') 
-        return string
-
-    def ajax_parse_generic(self, request, spec):
-        widget_name = self.get_widget_name(request, spec)
-        string = self.get_text_from_request2(request)
+        string = get_text_from_request2(request)
         text = request.json_body['text'].encode('utf8')
         req = {'text': request.json_body['text']}
-        library_name = self.get_current_library_name(request)
         text_hash = get_sha1(text)
         key = (library_name, spec.url_part, widget_name, text_hash)
 
-        library = self.get_library(request)
         cache = self.last_processed2
 
         make_relative = lambda s: self.make_relative(request, s)
@@ -497,3 +483,17 @@ def format_syntax_error2(parse_expr, string, e):
      
     return res
     
+def get_text_from_request2(request):
+    """ Gets the 'text' field, taking care of weird
+        unicode characters from the browser. 
+    
+        Returns a string encoded in utf-8.
+    """
+    string = request.json_body['text']
+    # \xa0 is actually non-breaking space in Latin1 (ISO 8859-1), also chr(160).
+    # You should replace it with a space.
+    string = string.replace(u'\xa0', u' ')
+
+    check_isinstance(string, unicode)
+    string = string.encode('utf-8') 
+    return string

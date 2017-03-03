@@ -33,17 +33,19 @@ from .interactive.app_interactive import AppInteractive
 from .qr.app_qr import AppQR
 from .resource_tree import MCDPResourceRoot, ResourceLibraries,\
     ResourceLibrary, get_from_context
+from .resource_tree import ResourceShelves,\
+    ResourceShelvesShelfUnsubscribe, ResourceShelvesShelfSubscribe,\
+    ResourceShelvesShelf, ResourceExceptionsFormatted, ResourceExceptionsJSON
 from .security import AppLogin
 from .sessions import Session
 from .solver.app_solver import AppSolver
 from .solver2.app_solver2 import AppSolver2
 from .status import AppStatus
-from .utils0 import add_std_vars
 from .utils0 import add_std_vars_context
 from .visualization.app_visualization import AppVisualization
-from mcdp_web.resource_tree import ResourceShelves,\
-    ResourceShelvesShelfUnsubscribe, ResourceShelvesShelfSubscribe,\
-    ResourceShelvesShelf
+from mcdp_web.resource_tree import ResourceLibraryRefresh, ResourceRefresh,\
+    ResourceExit, ResourceLibraryDocRender, context_get_library,\
+    ResourceLibraryAsset
 
 
 __all__ = [
@@ -210,21 +212,19 @@ class WebApp(AppVisualization, AppStatus,
 
     def refresh_library(self, request):
         # nuclear option
-        self.get_session(request).refresh_libraries()
+        session = self.get_session(request)
+        session.refresh_libraries()
 
-
-    @add_std_vars
-    def view_refresh_library(self, request):
+    def view_refresh_library(self, context, request):  # @UnusedVariable
         """ Refreshes the current library (if external files have changed) 
             then reloads the current url. """
 #         self._refresh_library(request) 
         # Note this currently is equivalent to global refresh
         return self.view_refresh(request);
 
-    @add_std_vars
-    def view_refresh(self, request):
+    def view_refresh(self, context, request):  # @UnusedVariable
         """ Refreshes all """
-        self._refresh_library(request)
+        self.refresh_library(request)
         raise HTTPFound(request.referrer)
 
     def view_not_found(self, request):
@@ -237,8 +237,8 @@ class WebApp(AppVisualization, AppStatus,
         res['root'] =  self.get_root_relative_to_here(request)
         return res
 
-    @add_std_vars
-    def view_exceptions_occurred(self, request):  # @UnusedVariable
+    @add_std_vars_context
+    def view_exceptions_occurred(self, context, request):  # @UnusedVariable
         exceptions = []
         for e in self.exceptions:
             u = unicode(e, 'utf-8')
@@ -521,11 +521,27 @@ class WebApp(AppVisualization, AppStatus,
         return d
     
     
+    @add_std_vars_context
+    def view_library_doc(self, context, request):
+        """ '/libraries/{library}/{document}.html' """
+        # f['data'] not utf-8
+        # reopen as utf-8
+        document = context.name
+        html = self._render_library_doc(context, request, document)
+        # we work with utf-8 strings
+        assert isinstance(html, str)
+        # but we need to convert to unicode later
+        html = unicode(html, 'utf-8')
+        res = {}
+        res['contents'] = html
+        res['title'] = document
+        res['print'] = bool(request.params.get('print', False))
+        return res
 
     @contract(returns=str)
-    def _render_library_doc(self, request, document):
+    def _render_library_doc(self, context, request, document):
         import codecs
-        l = self.get_library(request)
+        l = context_get_library(context, request)
 
         strict = int(request.params.get('strict', '0'))
 
@@ -539,35 +555,18 @@ class WebApp(AppVisualization, AppStatus,
         html = render_complete(library=l, s=data_str, realpath=realpath, raise_errors=raise_errors)
         return html
 
-    @add_std_vars
-    def view_library_doc(self, request):
-        """ '/libraries/{library}/{document}.html' """
-        # f['data'] not utf-8
-        # reopen as utf-8
-        document = str(request.matchdict['document'])
-        html = self._render_library_doc(request, document)
-        # we work with utf-8 strings
-        assert isinstance(html, str)
-        # but we need to convert to unicode later
-        html = unicode(html, 'utf-8')
-        res = {}
-        res['contents'] = html
-        res['title'] = document
-        res['print'] = bool(request.params.get('print', False))
-        return res
-
-    def view_library_asset(self, request):
-        l = self.get_library(request)
-        asset = str(request.matchdict['asset'])
-        ext = str(request.matchdict['ext'])
+    def view_library_asset(self, context, request):
+        library = context_get_library(context, request)
+        asset = os.path.splitext(context.name)[0]
+        ext = os.path.splitext(context.name)[1][1:]
         filename = '%s.%s' % (asset, ext)
-        f = l._get_file_data(filename)
+        f = library._get_file_data(filename)
         data = f['data']
         content_type = get_mime_for_format(ext)
         from mcdp_web.utils.response import response_data
         return response_data(request, data, content_type)
 
-    def exit(self, request):  # @UnusedVariable
+    def exit(self, context, request):  # @UnusedVariable
         sys.exit(0)
         setattr(self.server, '_BaseServer__shutdown_request', True)
         howlong = duration_compact(self.get_uptime_s())
@@ -624,31 +623,30 @@ class WebApp(AppVisualization, AppStatus,
         config.add_view(self.view_shelves_subscribe, context=ResourceShelvesShelfSubscribe)
         config.add_view(self.view_shelves_unsubscribe, context=ResourceShelvesShelfUnsubscribe)
         
-        config.add_route('library_doc', '/libraries/{library}/{document}.html')
-        config.add_view(self.view_library_doc, route_name='library_doc',
+        config.add_view(self.view_library_doc, 
+                        context=ResourceLibraryDocRender,
                         renderer='library_doc.jinja2')
 
-        config.add_route('library_asset', '/libraries/{library}/{asset}.{ext}')
-        config.add_view(self.view_library_asset, route_name='library_asset')
-# 
-#         config.add_route('empty', '/empty')
-#         config.add_view(self.view_index, route_name='empty', renderer='empty.jinja2')
+        config.add_view(self.view_library_asset, 
+                        context=ResourceLibraryAsset)
 
-        config.add_route('refresh_library', '/libraries/{library}/refresh_library')
-        config.add_view(self.view_refresh_library, route_name='refresh_library')
-        config.add_route('refresh', '/refresh')
-        config.add_view(self.view_refresh, route_name='refresh')
+        config.add_view(self.view_refresh_library, 
+                        context=ResourceLibraryRefresh)
+        config.add_view(self.view_refresh, 
+                        context=ResourceRefresh)
+        config.add_view(self.view_exception, 
+                        context=Exception, 
+                        renderer='exception.jinja2')
 
-        config.add_view(self.view_exception, context=Exception, renderer='exception.jinja2')
-
-        config.add_route('exit', '/exit')
-        config.add_view(self.exit, route_name='exit', renderer='json',
+        config.add_view(self.exit, context=ResourceExit, renderer='json',
                         permission=pyramid.security.NO_PERMISSION_REQUIRED)
 
-        config.add_route('exceptions', '/exceptions')
-        config.add_view(self.view_exceptions_occurred, route_name='exceptions', renderer='json')
-        config.add_route('exceptions_formatted', '/exceptions_formatted')
-        config.add_view(self.view_exceptions_occurred, route_name='exceptions_formatted', renderer='exceptions_formatted.jinja2')
+        config.add_view(self.view_exceptions_occurred, 
+                        context=ResourceExceptionsJSON, 
+                        renderer='json')
+        config.add_view(self.view_exceptions_occurred, 
+                        context=ResourceExceptionsFormatted, 
+                        renderer='exceptions_formatted.jinja2')
 
         # mainly used for wget
         config.add_route('robots', '/robots.txt')

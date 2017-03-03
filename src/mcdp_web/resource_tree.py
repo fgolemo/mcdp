@@ -1,4 +1,5 @@
 from pyramid.security import Allow, Authenticated, Everyone
+import os
 
 
 class Resource(object):
@@ -44,10 +45,16 @@ class MCDPResourceRoot(Resource):
         subs =  {
             'libraries': ResourceLibraries('libraries'),
             'shelves': ResourceShelves('shelves'),
+            'exceptions': ResourceExceptionsJSON('exceptions'),
+            'exceptions_formatted': ResourceExceptionsFormatted('exceptions_formatted'),
+            'refresh': ResourceRefresh('refresh'),
+            'exit': ResourceExit('exit'),
         }    
         return subs.get(key, None)
             
-    
+class ResourceExit(Resource):
+    pass
+        
 class ResourceShelves(Resource):
     def getitem(self, key):
         return ResourceShelvesShelf(key)
@@ -67,6 +74,11 @@ class ResourceShelvesShelfSubscribe(Resource):
 class ResourceShelvesShelfUnsubscribe(Resource):
     pass
 
+
+class ResourceExceptionsFormatted(Resource): pass 
+class ResourceExceptionsJSON(Resource): pass
+
+class ResourceRefresh(Resource): pass 
     
 class ResourceLibraries(Resource): 
     
@@ -81,8 +93,22 @@ class ResourceShelf(Resource):
 class ResourceLibrary(Resource): 
     
     def getitem(self, key):
+        if key == 'refresh_library':
+            return ResourceLibraryRefresh('refresh_library')
+        if key.endswith('.html'):
+            docname = os.path.splitext(key)[0]
+            return ResourceLibraryDocRender(docname)
+        if '.' in key:
+            return ResourceLibraryAsset(key)
         return ResourceThings(key)
 
+class ResourceLibraryDocRender(Resource):
+    pass
+class ResourceLibraryAsset(Resource):
+    pass
+
+class ResourceLibraryRefresh(Resource):
+    pass
     
 class ResourceThings(Resource):
     def __init__(self, specname):
@@ -90,7 +116,6 @@ class ResourceThings(Resource):
         
     def getitem(self, key):
         return ResourceThing(key)
-    
     
     def __repr__(self):
         return '%s(specname=%s)' % (type(self).__name__, self.specname)
@@ -100,30 +125,28 @@ class ResourceThing(Resource):
     
     def getitem(self, key):
         subs =  {
-            'views': ResourceThingViews,
+            'views': ResourceThingViews('views'),
         }
-        if key in subs:
-            return subs[key](key)
+        return subs.get(key, None)
 
 class ResourceThingViews(Resource):
     def getitem(self, key):
         subs =  {
-            'syntax': ResourceThingViewSyntax,
-            'edit_fancy': ResourceThingViewEditor,
+            'syntax': ResourceThingViewSyntax('syntax'),
+            'edit_fancy': ResourceThingViewEditor('edit_fancy'),
             
         }
         if self.__parent__.__parent__.specname == 'models':
             subs2 = {
-                'dp_graph': ResourceThingViewDPGraph,
-                'dp_tree': ResourceThingViewDPTree,
-                'ndp_graph': ResourceThingViewNDPGraph,
-                'ndp_repr': ResourceThingViewNDPRepr,
-                'solver2': ResourceThingViewSolver,
+                'dp_graph': ResourceThingViewDPGraph('dp_graph'),
+                'dp_tree': ResourceThingViewDPTree('dp_tree'),
+                'ndp_graph': ResourceThingViewNDPGraph('ndp_graph'),
+                'ndp_repr': ResourceThingViewNDPRepr('ndp_repr'),
+                'solver2': ResourceThingViewSolver('solver2'),
             }
             subs.update(**subs2)
             
-        if key in subs:
-            return subs[key](key)
+        return subs.get(key, None)
     
 class ResourceThingView(Resource):
     pass
@@ -138,16 +161,16 @@ class ResourceThingViewNDPRepr(ResourceThingView): pass
 class ResourceThingViewSolver(ResourceThingView): pass
 
 class ResourceThingViewEditor(ResourceThingView):
-    def getkey(self, key): 
+    def getitem(self, key): 
         subs =  {
-            'parse': ResourceThingViewEditorParse,
+            'ajax_parse': ResourceThingViewEditorParse('ajax_parse'),
+            'save': ResourceThingViewEditorSave('save'),
         }
-        if key in subs:
-            return subs[key](key)
+        return subs.get(key, None)
  
 
-class ResourceThingViewEditorParse(Resource): 
-    pass
+class ResourceThingViewEditorParse(Resource): pass
+class ResourceThingViewEditorSave(Resource): pass
 
 
 def get_all_contexts(context):
@@ -165,3 +188,25 @@ def get_from_context(rclass, context):
 
 def is_in_context(rclass, context):
     return get_from_context(rclass, context) is not None
+
+def context_get_library_name(context):
+    library_name = get_from_context(ResourceLibrary, context).name
+    return library_name
+
+def context_get_library(context, request):
+    from mcdp_web.main import WebApp
+    app = WebApp.singleton
+    session = app.get_session(request)
+    library_name = context_get_library_name(context)
+    library = session.get_library(library_name)
+    return library
+
+def context_get_spec(context):
+    from mcdp_web.editor_fancy.app_editor_fancy_generic import specs
+    specname = get_from_context(ResourceThings, context).specname
+    spec = specs[specname]
+    return spec
+
+        
+def context_get_widget_name(context):
+    return get_from_context(ResourceThing, context).name
