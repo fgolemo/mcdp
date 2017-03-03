@@ -4,7 +4,7 @@
   #outer a {text-decoration: none;}
   /*#home, */
   /*#menu { display: inline-block;}*/
-  #root { font-size: 50%; }
+  /*#root { font-size: 50%; }*/
    .ui-button, .ui-widget {
       /*height: 25pt !important;
       border: solid 1px red !important;*/
@@ -17,6 +17,9 @@
 <li id='root'>&#9776;
 <ul>
     <li><a class='l1' href='{{root}}/'>⌂ Front page</a></li> <!-- root -->
+    <li><a class='l1' href='{{root}}/shelves/'>🏛 List of shelves</a></li>
+    <li><a class='l1' href='{{root}}/libraries/'>📖 List of libraries</a></li>  
+  {% if navigation['current_library'] %}
   <li class="l1" id='menu_new'><span><span class='unicode-icons'>✎</span>Create new&hellip;</span>
     <ul>
       <li><a id='new_model'><span class='unicode-icons'>&#10213;</span> MCDP&hellip;</a></li>
@@ -25,6 +28,7 @@
       <li><a id='new_value'><span class='unicode-icons'>&#x2723;</span>value&hellip;</a></li>
     </ul>
   </li>
+  {% endif %}
   <!-- <li class="l1">Other
   <ul> -->
   <!--<li>

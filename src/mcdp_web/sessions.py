@@ -1,28 +1,100 @@
+from collections import OrderedDict
+import os
+
 from contracts import contract
 from contracts.utils import raise_desc
+
+from mcdp.logs import logger
 from mcdp_library.libraries import Librarian
-import os
+from mcdp_shelf.access import PRIVILEGE_DISCOVER, PRIVILEGE_READ
+from mcdp_shelf.shelves import Shelf
 from mcdp_utils_misc.natsort import natural_sorted
+
+
+_ = Shelf
 
 class Session():
     
-    def __init__(self, request, dirname):
+    @contract(shelves_all='dict(str:$Shelf)')
+    def __init__(self, request, shelves_all):
+        ''' dirnames: list of directories where to find shelves '''
+        self.shelves_all = shelves_all
         self.request = request
-        self._load_libraries(dirname)
         
+        self.librarian = Librarian()
+        self.authenticated_userid = request.authenticated_userid
+        self.recompute_available()
+
     def set_last_request(self, request):
         self.request = request
+        if self.authenticated_userid != request.authenticated_userid:
+            logger.debug('login/logout detected')
+            self.authenticated_userid = request.authenticated_userid
+            self.recompute_available()
+            
+    def get_user(self):
+        from mcdp_web.main import WebApp
+        userdb = WebApp.singleton.user_db  # @UndefinedVariable
+        username = self.request.authenticated_userid 
+        if username is not None:
+            username = username.encode('utf8')
+        user = userdb[username]
+        return user
+    
+    def save_user(self):
+        from mcdp_web.main import WebApp
+        userdb = WebApp.singleton.user_db  # @UndefinedVariable
+        user = self.get_user()
+        userdb.save_user(user.username)
+        
+    def recompute_available(self):
+        # all the ones we can discover
+        self.shelves_available = OrderedDict()
+        
+        # the ones that are actually in use
+        self.shelves_used = OrderedDict()
+        user = self.get_user()
+        for sname, shelf in self.shelves_all.items():
+            if shelf.get_acl().allowed2(PRIVILEGE_DISCOVER, user):
+                self.shelves_available[sname] = shelf
+            else:
+                print('hiding shelf %r from %r' % (sname, user))
+                print shelf.get_acl()
+        
+        print('shelves all: %s' % list(self.shelves_all))
+        print('shelves available: %s' % list(self.shelves_available))
 
-    def _load_libraries(self, dirname):
-        """ Loads libraries in the "self.dirname" dir. """
+        for sname in user.get_subscriptions():
+            if sname in self.shelves_available:
+                shelf = self.shelves_available[sname]
+                acl = shelf.get_acl()
+                if acl.allowed2(PRIVILEGE_READ, user):
+                    self.shelves_used[sname] = self.shelves_available[sname]
+                else:
+                    msg = 'User %r does not have %r for %r' % (user.username, PRIVILEGE_READ, sname)
+                    msg += '\n%s' % acl
+                    logger.error(msg)
+            else:
+                msg = 'Could not find shelf %r to which user %r is subscribed to.' % (sname, user.username)
+                msg += '\n Available: %s' % list(self.shelves_available)
+                logger.error(msg)
+
+        print('shelves used: %s' % list(self.shelves_used))
+    
         self.librarian = Librarian()
-        self.librarian.find_libraries(dirname)
+        
+        for sname, shelf in self.shelves_used.items():
+            for libname, libpath in shelf.get_libraries_path().items():
+                self.librarian.add_lib_by_path(libpath)
+                
         self.libraries = self.librarian.get_libraries()
         for _short, data in self.libraries.items():
             l = data['library']
             path = data['path']
             cache_dir = os.path.join(path, '_cached/mcdpweb_cache')
             l.use_cache_dir(cache_dir)
+            
+        print('libraries: %s' % self.list_libraries())
     
     @contract(returns='list(str)')
     def list_libraries(self):
@@ -31,6 +103,7 @@ class Session():
 
     @contract(returns=str)
     def get_current_library_name(self):
+        #raise ValueError('deprecated')
         library_name = str(self.request.matchdict['library'])  # unicod
         return library_name
 
@@ -65,5 +138,13 @@ class Session():
             r = (sup, natural_sorted(path2libraries[sup]))
             res.append(r)
         return res 
+    
+    def get_shelves_used(self):
+        ''' Returns an ordered dict of shelves '''
+        return self.shelves_used
+    
+    def get_shelves_available(self):
+        ''' Returns an ordered dict of shelves '''
+        return self.shelves_available
     
     

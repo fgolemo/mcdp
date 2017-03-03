@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>List of shelves</title>
+    {% include 'head.jinja2' %}
+</head>
+<body>
+{% include 'menu.jinja2' %}
+{% include 'user.jinja2' %}
+
+<p>MCDP libraries are organized in <q>shelves</q></p>
+<p>These are all the <em>shelves</em> available. If you wish to use the libraries
+in a particular shelf, you need to activate it here first.</p>
+<table class="shelves_list">
+    {% for sname, shelf in navigation['shelves_available'].items() %}
+        <tr>
+        <td><a href="{{root}}/shelves/{{sname}}/">🏛 <code>{{sname}}<code></a></td>
+        <td>
+        {{ shelf.get_libraries_path() | length}} libraries
+        </td>
+        <td>{{shelf.get_desc_short()}}</td>
+        <td>
+        {% if sname in navigation['shelves_used'] %}
+            <span class='active'>active</span>
+        {% else %}
+            <span class='inactive'>inactive</span>
+        {% endif %}
+        </td>
+
+        <td>
+        {% if can_subscribe(sname) %}
+        {% if sname in navigation['shelves_used'] %}
+
+        <form action="{{sname}}/unsubscribe" method="post">
+            <input type="submit" class='inactive' value="deactivate"/>
+        </form>
+        {% else %}
+        <form action="{{sname}}/subscribe" method="post">
+            <input type="submit" class='active' value="activate"/>
+        </form>
+        {% endif %}
+        {% endif %}
+        </td>
+        </tr>
+{% endfor %}
+</table>
+<style>{% include 'shelves_index.css' %}</style>
+{% include 'footer.jinja2' %}
+</body>
+</html>

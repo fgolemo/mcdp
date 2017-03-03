@@ -7,6 +7,7 @@ from mcdp_utils_misc.fileutils import read_file_encoded_as_utf8
 from collections import namedtuple
 from mcdp_utils_misc.string_repr import indent_plus_invisibles
 from mcdp.logs import logger
+from mcdp_library.libraries import find_libraries
 
 shelf_extension = 'mcdpshelf'
 shelf_desc_file = 'mcdpshelf.yaml'
@@ -54,6 +55,7 @@ class Shelf():
 
 def shelf_from_directory(dirname):
     ''' Dirname should end in shelf_extension '''
+    
     if not dirname.endswith(shelf_extension):
         msg = 'Wrong name for shelf: %r' % dirname
         raise ValueError(msg)
@@ -66,29 +68,31 @@ def shelf_from_directory(dirname):
     u = read_file_encoded_as_utf8(fn)
     try:
         y = yaml.load(u)
+
+        default_acl = [
+            ['Allow', 'Everyone', 'discover'],
+            # we don't want to allow anonymous to desubscribe
+            #['Allow', 'Everyone', 'subscribe'],
+            ['Allow', 'Everyone', 'read'],
+            ['Allow', 'Everyone', 'write'],
+            ['Allow', 'Everyone', 'admin'],
+        ]
+        
+        acl = acl_from_yaml(y.pop('acl', default_acl))
+        dependencies = y.pop('dependencies', [])
+        desc_short = y.pop('desc_short', None)
+        desc_long = y.pop('desc_long', None)
+        authors = y.pop('authors', [])
+        if y:
+            msg = 'Unknown fields %s.' % list(y)
+            raise ValueError(msg)
     except:
-        msg = 'Cannot parse:\n%s' % indent_plus_invisibles(u)
+        msg = 'Cannot parse %s:\n%s' % (fn, indent_plus_invisibles(u))
         logger.error(msg)
         raise
     
-    default_acl = [
-        ['Allow', 'Everyone', 'discover'],
-        ['Allow', 'Everyone', 'subscribe'],
-        ['Allow', 'Everyone', 'read'],
-        ['Allow', 'Everyone', 'write'],
-        ['Allow', 'Everyone', 'admin'],
-    ]
-    
-    acl = acl_from_yaml(y.pop('acl', default_acl))
-    dependencies = y.pop('dependencies', [])
-    desc_short = y.pop('desc_short', None)
-    desc_long = y.pop('desc_long', None)
-    authors = y.pop('authors', [])
-    if y:
-        msg = 'Unknown fields %s.' % list(y)
-        raise ValueError(msg)
-    
-    libraries = {}
+    libraries = find_libraries(dirname)
+    print libraries
     shelf = Shelf(acl=acl, dependencies=dependencies, desc_short=desc_short, 
                   desc_long=desc_long, libraries=libraries, authors=authors)
     return shelf

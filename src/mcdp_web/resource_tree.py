@@ -42,13 +42,31 @@ class MCDPResourceRoot(Resource):
     
     def getitem(self, key):
         subs =  {
-            'libraries': ResourceLibraries('libraries')
-        }
-        if key in subs:
-            r = subs[key]
-            r.__parent__ = self
-            return r
+            'libraries': ResourceLibraries('libraries'),
+            'shelves': ResourceShelves('shelves'),
+        }    
+        return subs.get(key, None)
+            
     
+class ResourceShelves(Resource):
+    def getitem(self, key):
+        return ResourceShelvesShelf(key)
+
+    
+class ResourceShelvesShelf(Resource):
+    def getitem(self, key):
+        subs =  {
+            'subscribe': ResourceShelvesShelfSubscribe(self.name),
+            'unsubscribe': ResourceShelvesShelfUnsubscribe(self.name),
+        }    
+        return subs.get(key, None)
+
+class ResourceShelvesShelfSubscribe(Resource):
+    pass
+
+class ResourceShelvesShelfUnsubscribe(Resource):
+    pass
+
     
 class ResourceLibraries(Resource): 
     
@@ -111,13 +129,26 @@ class ResourceThingView(Resource):
     pass
     
 class ResourceThingViewSyntax(ResourceThingView): pass
-class ResourceThingViewEditor(ResourceThingView): pass
+
 class ResourceThingViewDPGraph(ResourceThingView): pass
 class ResourceThingViewDPTree(ResourceThingView): pass
 class ResourceThingViewNDPGraph(ResourceThingView): pass
 class ResourceThingViewNDPRepr(ResourceThingView): pass
 
 class ResourceThingViewSolver(ResourceThingView): pass
+
+class ResourceThingViewEditor(ResourceThingView):
+    def getkey(self, key): 
+        subs =  {
+            'parse': ResourceThingViewEditorParse,
+        }
+        if key in subs:
+            return subs[key](key)
+ 
+
+class ResourceThingViewEditorParse(Resource): 
+    pass
+
 
 def get_all_contexts(context):
     if hasattr(context, '__parent__'):

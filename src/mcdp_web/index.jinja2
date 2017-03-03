@@ -3,26 +3,8 @@
 <head>
     <title>PyMCDP Interactive Environment</title>
     {% include 'head.jinja2' %}
-    <style type='text/css'>
-    	body { font-family: Georgia; }
-        /* logo */
-        #diagram { width: 10em; margin: 2em; }
-        body { padding-left: 6em; }
-
-        h3 { margin: 10px; }
-
-        #buttons { visibility: hidden; }
-        #buttons button  {
-            /*font-size: 80%;*/
-            padding: 10px;
-            margin-left: 2em;
-            margin-bottom: 4em;
-        } /* button */
-
-        #buttons .ui-button { padding: 3px !important; }
-
-		img.icon { vertical-align: -0.4ex; height: 2.5ex; margin-right: 4pt}
-    </style>
+    <style type='text/css'>{% include 'index.css' %}</style>
+    <script>{% include 'index.js' %}</script>
 </head>
 <body>
 {% include 'user.jinja2' %}
@@ -77,49 +59,20 @@
 </div>
 
 
-<style>
-.library_list {
-    /*column-count: 3;*/
-    column-width: 14em;
-}
-.library_list .sup {
-     display: block;
-    /*padding-left: 2em; */
-    font-style: italic;
-}
-.library_list .library span {
-    padding-left: 1em;
-}
-</style>
 
-<script>
-	function click_show_available() {
-		$('#available').show();
-		$('button#show-available').hide();
-	}
-	function init_index() { 
-		$('button#show-available').button().click(click_show_available);
-	}
-	$(document).ready(init_index);
-</script>
 
-<p><button id='show-available'>Show available libraries</button></p>
+
+<!--<p><button id='show-available'>Show available libraries</button></p>-->
+<ul>
+<li><a class='button' href='{{root}}/libraries/'>Currently available libraries</a></li>
+<li><a class='button' href='{{root}}/shelves/'>Activate/deactivate shelves</a></li>
+</ul>
 
 <div id='available' style='display:none'>
 	<h3>Available libraries</h3>
-	
-	<div class="library_list">
-	{% for sup, sup_libraries in navigation['libraries_indexed'] %}
-	    <div class='sup'>{{sup}}</div>
-	    {% for li in sup_libraries %}
-	    <!-- <option name='{{li['name']}}' value="{{li['url']}}" {% if li['current'] %} selected = 1 {% endif %}> -->
-	        <!-- note the span has no effect inside option -->
-	        <div class='library'><a href="{{li['url']}}"><code>📖<span>{{li['name']}}</span></code></a></div>
-	    <!-- </option> -->
-	    {% endfor %}
-	{% endfor %}
-	</div>
-	
+
+	{% include 'list_libraries_by_shelf.jinja2' %}
+
 	<div id='buttons'>
 		<!--<p><a id='create_library'>Create a new library</a></p>-->
 		<p><a id='refresh' href='{{root}}/refresh'>Refresh list of libraries</a></p>

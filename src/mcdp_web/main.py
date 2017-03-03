@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from collections import OrderedDict
 import os
 import sys
 import time
@@ -16,29 +17,33 @@ from pyramid.renderers import JSONP
 from pyramid.response import Response
 from quickapp import QuickAppBase
 
-from compmake.utils.duration_hum import duration_compact
 from mcdp import logger
 from mcdp.exceptions import DPSemanticError, DPSyntaxError
 from mcdp_docs.pipeline import render_complete
 from mcdp_library import MCDPLibrary
 from mcdp_library.utils import dir_from_package_name
-from mcdp_utils_misc.natsort import natural_sorted
-from mcdp_web.resource_tree import MCDPResourceRoot, ResourceLibraries,\
-    ResourceLibrary, get_from_context
-from mcdp_web.sessions import Session
+from mcdp_shelf.shelves import find_shelves
+from mcdp_user_db.userdb import UserDB
+from mcdp_utils_misc import duration_compact, natural_sorted
 
 from .confi import describe_mcdpweb_params, parse_mcdpweb_params_from_dict
 from .editor_fancy import AppEditorFancyGeneric
 from .images.images import WebAppImages, get_mime_for_format
 from .interactive.app_interactive import AppInteractive
 from .qr.app_qr import AppQR
+from .resource_tree import MCDPResourceRoot, ResourceLibraries,\
+    ResourceLibrary, get_from_context
 from .security import AppLogin
+from .sessions import Session
 from .solver.app_solver import AppSolver
 from .solver2.app_solver2 import AppSolver2
 from .status import AppStatus
 from .utils0 import add_std_vars
+from .utils0 import add_std_vars_context
 from .visualization.app_visualization import AppVisualization
-from mcdp_web.utils0 import add_std_vars_context
+from mcdp_web.resource_tree import ResourceShelves,\
+    ResourceShelvesShelfUnsubscribe, ResourceShelvesShelfSubscribe,\
+    ResourceShelvesShelf
 
 
 __all__ = [
@@ -60,11 +65,12 @@ class WebApp(AppVisualization, AppStatus,
         dirname = options.libraries
         if dirname is None:
             package = dir_from_package_name('mcdp_data')
-            libraries = os.path.join(package, 'libraries')
+            default_libraries = os.path.join(package, 'libraries')
             msg = ('Option "-d" not passed, so I will open the default libraries '
                    'shipped with PyMCDP. These might not be writable depending on your setup.')
             logger.info(msg)
-            dirname = libraries
+            dirname = default_libraries
+
 
         self.dirname = dirname
  
@@ -90,7 +96,27 @@ class WebApp(AppVisualization, AppStatus,
         self.add_model_view('dp_tree', 'DP tree representation')
         self.add_model_view('images', 'Other image representations')
         self.add_model_view('solver', 'Graphical solver [experimental]')
-        self.sessions = {}
+        
+        # csfr_token -> Session
+        self.sessions = OrderedDict()
+        
+        # str -> Shelf
+        self.all_shelves = OrderedDict()
+        
+        dir_shelves = find_shelves(self.dirname)
+        self.all_shelves.update(dir_shelves)
+        
+        if self.options.users is None:
+            self.options.users = 'tmp-user-db'
+            os.makedirs(self.options.users)
+
+        if self.options.users is not None:
+            self.user_db = UserDB(self.options.users)            
+            user_shelves = find_shelves(self.options.users)
+            self.all_shelves.update(user_shelves)
+        
+        for sname, shelf in self.all_shelves.items():
+            print('init: Shelf %s' % sname)
 
     def add_model_view(self, name, desc):
         self.views[name] = dict(desc=desc, order=len(self.views))
@@ -99,7 +125,7 @@ class WebApp(AppVisualization, AppStatus,
         token = request.session.get_csrf_token()
         if not token in self.sessions:
             print('creating new session for token %r' % token)
-            self.sessions[token] = Session(request, dirname=self.dirname)
+            self.sessions[token] = Session(request, shelves_all=self.all_shelves)
         session = self.sessions[token]
         session.set_last_request(request)
         return session
@@ -133,16 +159,54 @@ class WebApp(AppVisualization, AppStatus,
         return l.get_models()
     
     @add_std_vars_context
-    def view_root(self, context, request):  # @UnusedVariable
+    def view_dummy(self, context, request):  # @UnusedVariable
+        return {}
+ 
+    @add_std_vars_context
+    def view_shelves_index(self, context, request):# @UnusedVariable
         return {}
 
     @add_std_vars_context
-    def view_library(self, context, request):  # @UnusedVariable
-        return {}
+    def view_shelf(self, context, request):# @UnusedVariable
+        sname = context.name
+        session = self.get_session(request)
+        shelf = session.shelves_available[sname]
+        desc_long_md = shelf.get_desc_long()
+        if desc_long_md is None:
+            desc_long = ''
+        else:
+            library = MCDPLibrary()
+            desc_long = render_complete(library, desc_long_md, raise_errors=True, realpath=sname, do_math=False)
+        res = {
+            'shelf': shelf, 
+            'sname': sname, 
+            'desc_long': unicode(desc_long, 'utf8'),
+        }
+        return res
     
-    @add_std_vars_context
-    def view_libraries(self, context, request):  # @UnusedVariable
-        return {} 
+    @add_std_vars_context 
+    def view_shelves_subscribe(self, context, request):  # @UndefinedVariable
+        sname = context.name
+        session = self.get_session(request)
+        print('subscribe %r' % sname)
+        user = session.get_user()
+        if not sname in user.subscriptions:
+            user.subscriptions.append(sname)
+            session.save_user()
+            session.recompute_available()
+        raise HTTPFound(request.referrer)
+    
+    @add_std_vars_context 
+    def view_shelves_unsubscribe(self, context, request):  # @UndefinedVariable
+        sname = context.name
+        session = self.get_session(request)
+        print('unsubscribe %r' % sname)
+        user = session.get_user()
+        if sname in user.subscriptions:
+            user.subscriptions.remove(sname)
+            session.save_user()
+            session.recompute_available()
+        raise HTTPFound(request.referrer)
 
     def refresh_library(self, request):
         # nuclear option
@@ -200,16 +264,21 @@ class WebApp(AppVisualization, AppStatus,
         n += '\n' + indent(ss, '| ')
         self.exceptions.append(n)
 
-        if request.matchdict is not None and  'library' in request.matchdict:
-            library = self.get_current_library_name(request)
-            url_refresh = self.make_relative(request, '/libraries/%s/refresh_library' % library)
-        else:
-            url_refresh = None
-        
+#         session = self.get_session(request)
+#         
+#         if request.matchdict is not None and  'library' in request.matchdict:
+#             library = self.get_current_library_name(request)
+#             url_refresh = self.make_relative(request, '/libraries/%s/refresh_library' % library)
+#         else:
+#             url_refresh = None
+#         
         u = unicode(s, 'utf-8')
         logger.error(u)
-        res = {'exception': u, 'url_refresh': url_refresh}
-        res['root'] =  self.get_root_relative_to_here(request)
+        res = {
+            'exception': u,
+            # 'url_refresh': url_refresh,
+            'root': self.get_root_relative_to_here(request)
+        }  
         return res
     
     def png_error_catch2(self, request, func):
@@ -547,10 +616,14 @@ class WebApp(AppVisualization, AppStatus,
         AppSolver2.config(self, config)
 
 
-        config.add_view(self.view_root, context=MCDPResourceRoot, renderer='index.jinja2')
-        config.add_view(self.view_libraries, context=ResourceLibraries, renderer='list_libraries.jinja2')
-        config.add_view(self.view_library, context=ResourceLibrary, renderer='library_index.jinja2')
-
+        config.add_view(self.view_dummy, context=MCDPResourceRoot, renderer='index.jinja2')
+        config.add_view(self.view_dummy, context=ResourceLibraries, renderer='list_libraries.jinja2')
+        config.add_view(self.view_dummy, context=ResourceLibrary, renderer='library_index.jinja2')
+        config.add_view(self.view_shelves_index, context=ResourceShelves, renderer='shelves_index.jinja2')
+        config.add_view(self.view_shelf, context=ResourceShelvesShelf, renderer='shelf.jinja2')
+        config.add_view(self.view_shelves_subscribe, context=ResourceShelvesShelfSubscribe)
+        config.add_view(self.view_shelves_unsubscribe, context=ResourceShelvesShelfUnsubscribe)
+        
         config.add_route('library_doc', '/libraries/{library}/{document}.html')
         config.add_view(self.view_library_doc, route_name='library_doc',
                         renderer='library_doc.jinja2')

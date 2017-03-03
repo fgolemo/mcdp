@@ -1,25 +1,20 @@
-uuid: c585584c-ff55-11e6-bc64-92361f002671
+dependencies: []
 
-# available-from:
-# - mcdp:python:mcdp
-
-requires:
-- mcdp:python:mcdp/other.mcdpshelf
-- mcdp:python:mcdp/other.mcdpshelf
-
-access:
-- [everyone, read]
-- [everyone, write]
-
-name:
-
-short: This shelf holds the libraries used for unit-tests.
-
-long: |
-    This is a longer description of this library.
+desc_short: This shelf holds the libraries used for unit-tests.
+desc_long: |
+    This is a longer description of this shelf.
 
     It can be formatted, using:
 
     <pre class='mcdp'>
         mcdp {}
     </pre>
+
+acl: [
+    [Allow, Everyone, discover],
+    [Allow, Authenticated, subscribe],
+    [Allow, Everyone, read],
+    [Allow, "groups:admin", admin],
+    [Allow, "groups:admin", read],
+    [Allow, "groups:admin", write]
+]

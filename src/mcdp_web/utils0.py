@@ -6,6 +6,9 @@ from mcdp import logger
 import mcdp
 from mcdp_web.get_navigation_links_imp import get_navigation_links_context
 from mcdp_library.library import MCDPLibrary
+from mcdp_shelf.access import PRIVILEGE_SUBSCRIBE
+
+from pyramid.httpexceptions import HTTPException
 
 def add_other_fields(self, res, request, context=None):
     if context is None:
@@ -33,17 +36,27 @@ def add_other_fields(self, res, request, context=None):
     res['time_start'] = self.time_start
     res['authenticated_userid'] = request.authenticated_userid
     
+    session = self.get_session(request)
+    
     if request.authenticated_userid is not None:
-        u0 = request.authenticated_userid
-        from mcdp_web.security import USERS
-        if not u0 in USERS:
-            res['user'] = None
+        username = request.authenticated_userid
+        print('authenticated_userid',username)
+        user_db = self.user_db
+        if username in user_db:
+            res['user'] = user_db[username].dict_for_page()
+            groups = user_db[username].get_groups()
         else:
-            u = USERS[u0]._asdict()
-            del u['password']
-            res['user'] = u
+            res['user'] = None
+            groups = []
     else:
+        username = None
         res['user'] = None
+        groups = []
+    
+                
+    res['can_subscribe'] = lambda sname: session.shelves_available[sname].get_acl().allowed(PRIVILEGE_SUBSCRIBE, username, groups)
+    
+    
     
 def add_std_vars(f):
     def f0(self, request):
@@ -63,6 +76,8 @@ def add_std_vars_context(f):
     def f0(self, context, request):
         try:
             res = f(self, context, request)
+        except HTTPException:
+            raise
         except Exception as e:
             msg = 'While running %s:' % (f.__name__)
             msg += '\n' + indent(traceback.format_exc(e), ' >')

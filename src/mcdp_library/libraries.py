@@ -55,18 +55,7 @@ class Librarian():
                 libraries = [dirname]
         
         for path in libraries:
-            short, data = self._load_entry(path)
-            if short in self.libraries:
-                entry = self.libraries[short]
-                if entry['path'] != data['path']:
-                    msg = 'I already know library "%s".\n' % short
-                    msg += 'Current entry path:  %s\n' % path
-                    msg += 'Previous entry path: %s\n' % entry['path']
-                    raise_desc(ValueError, msg)
-                else:
-                    msg = 'Reached library "%s" twice (path = %s).' % (short, path)
-                    logger.debug(msg)
-            self.libraries[short] = data
+            self.add_lib_by_path(path)
             
         # get all the images
         allimages = {} # base.ext -> same struct as l.file_to_contents
@@ -88,6 +77,20 @@ class Librarian():
                 if not basename in l.file_to_contents:
                     l.file_to_contents[basename] = d
 
+    def add_lib_by_path(self, path):
+        short, data = self._load_entry(path)
+        if short in self.libraries:
+            entry = self.libraries[short]
+            if entry['path'] != data['path']:
+                msg = 'I already know library "%s".\n' % short
+                msg += 'Current entry path:  %s\n' % path
+                msg += 'Previous entry path: %s\n' % entry['path']
+                raise_desc(ValueError, msg)
+            else:
+                msg = 'Reached library "%s" twice (path = %s).' % (short, path)
+                logger.debug(msg)
+        self.libraries[short] = data
+        
     @contract(dirname=str, returns='tuple(str, dict)')
     def _load_entry(self, dirname):
         if dirname == '.':
@@ -132,6 +135,25 @@ class Librarian():
         _short, data = self._load_entry(dirname)
         data['library'].library_name = _short
         return data['library']
+
+@contract(returns='dict(str:str)')
+def find_libraries(d0):
+    '''
+        Finds <name>.mcdplib.
+        returns dict ID -> path
+    '''
+    dirs = locate_files(d0, "*.mcdplib",
+                                 followlinks=False,
+                                 include_directories=True,
+                                 include_files=False)
+    res = {}
+    for dirname in dirs:
+        if dirname == '.':
+            dirname = os.path.realpath(dirname)
+        library_name = os.path.splitext(os.path.basename(dirname))[0]
+        library_name = library_name.replace('.', '_')
+        res[library_name] = dirname
+    return res
 
 def is_python_module_name(x):
     from pkgutil import iter_modules

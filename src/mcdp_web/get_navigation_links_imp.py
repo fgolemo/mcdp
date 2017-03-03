@@ -1,7 +1,6 @@
 from mcdp_library.library import MCDPLibrary
 from mcdp_utils_misc.natsort import natural_sorted
-from mcdp_web.resource_tree import ResourceThing, ResourceThings,\
-    ResourceThingView, ResourceLibrary, get_from_context
+from mcdp_web.resource_tree import ResourceThing, ResourceThings, ResourceThingView, ResourceLibrary, get_from_context
 
 
 def get_navigation_links_context(app, context, request):
@@ -36,9 +35,15 @@ def get_navigation_links_context(app, context, request):
     rview = get_from_context(ResourceThingView, context)
     current_view = rview.name if rview is not None else None
  
-
     d = {}
 
+    d['shelves_available'] = session.get_shelves_available()
+    d['shelves_used'] = session.get_shelves_used()
+    d['shelves_unused'] = {}
+    for x in d['shelves_available']:
+        if not x in  d['shelves_used']:
+            d['shelves_unused'][x] = d['shelves_available'][x] 
+    
     d['current_thing'] = current_thing
     d['current_library'] = current_library
     d['current_template'] = current_template
@@ -154,5 +159,6 @@ def get_navigation_links_context(app, context, request):
     #   for l in libraries
     #      l['name'], l['url']
     d['libraries_indexed'] = indexed
+    
     
     return d

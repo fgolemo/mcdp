@@ -1,0 +1,13 @@
+
+desc_short: FDM examples
+desc_long: 
+
+acl: [
+    [Allow, Everyone, discover],
+    [Allow, "groups:FDM", read],
+    [Allow, "groups:FDM", write],
+    [Allow, "groups:admin", discover],
+    [Allow, "groups:admin", admin],
+    [Allow, "groups:admin", read],
+    [Allow, "groups:admin", write]
+]

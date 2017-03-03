@@ -1,0 +1,16 @@
+<ul>
+    {% for sname, shelf in navigation['shelves_used'].items() %}
+        <li>
+        <a href='{{root}}/shelves/{{sname}}/'>🏛 <code>{{sname}}</code></a>
+            {% if  shelf.get_libraries_path() %}
+            <ul>
+            {% for libname in shelf.get_libraries_path() %}
+                <li><a href="{{root}}/libraries/{{libname}}/"><code>📖 <span>{{libname}}</span></code></a> </li>
+            {% endfor %}
+            </ul>
+            {% else %}
+            <p>(No libraries)</p>
+            {% endif %}
+        </li>
+    {% endfor %}
+</ul>

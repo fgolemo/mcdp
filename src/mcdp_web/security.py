@@ -1,64 +1,9 @@
-from collections import namedtuple
-import os
-import urllib, hashlib    
-
 import pyramid
 from pyramid.httpexceptions import HTTPFound
 from pyramid.security import remember, forget
-import yaml
 
 from mcdp import logger
 
-
-USERS = {}
-
-GROUPS = {'editor': ['group:editors']}
-
-UserInfo = namedtuple('UserInfo', 
-                      ['username', 
-                       'name',
-                       'password',
-                       'email',
-                       'gravatar64',
-                       'gravatar32',
-                       ])
-
-def load_users(userdir):
-    if not os.path.exists(userdir):
-        msg = 'Directory %s does not exist' % userdir
-        Exception(msg)
-    for user in os.listdir(userdir):
-        if user.startswith('.'):
-            continue
-        info = os.path.join(userdir, user, 'user.yaml')
-        if not os.path.exists(info):
-            msg = 'Info file %s does not exist.'  % info
-            raise Exception(msg)
-        data = open(info).read()
-        s = yaml.load(data)
-        
-        res = {}
-        res['username'] = user
-        res['name'] = s['name']
-        res['password'] = s['password']
-        res['email'] = s['email']
-#         default = "https://www.example.com/default.jpg"
-        
-        res['gravatar64'] = gravatar(s['email'], size=64)
-        res['gravatar32'] = gravatar(s['email'], size=32)
-        struct = UserInfo(**res)
-        USERS[user] = struct
-        
-    
-def gravatar(email, size, default=None):
-    digest = hashlib.md5(email.lower()).hexdigest()
-    gravatar_url = "https://www.gravatar.com/avatar/" + digest + "?"
-    p = {}
-    p['s'] = str(size)
-    if default:
-        p['d'] = default
-    gravatar_url += urllib.urlencode(p)
-    return gravatar_url
 
 URL_LOGIN = '/login/'
 
@@ -73,10 +18,7 @@ class AppLogin():
                          permission=pyramid.security.NO_PERMISSION_REQUIRED)
 
         config.add_forbidden_view(self.view_forbidden, renderer='forbidden.jinja2')
-        
-        if self.options.users is not None:
-            load_users(self.options.users)
-        
+
     def view_forbidden(self, request):
         logger.error(request.url)
         logger.error(request.referrer)
@@ -104,12 +46,11 @@ class AppLogin():
         if 'form.submitted' in request.params:
             login = request.params['login']
             password = request.params['password']
-            if not login in USERS:
+            
+            if not self.user_db.exists(login):
                 error = 'Could not find user name "%s".' % login
             else:
-                password_expected = USERS[login].password
-                #if check_password(password, hashed):
-                if password == password_expected:
+                if self.user_db.authenticate(login, password):
                     headers = remember(request, login)
                     logger.info('successfully authenticated user %s' % login)
                     return HTTPFound(location=came_from, headers=headers)
@@ -146,11 +87,4 @@ class AppLogin():
 #     expected_hash = hashed_pw.encode('utf8')
 #     return bcrypt.checkpw(pw.encode('utf8'), expected_hash)
 
-
-
-
-def groupfinder(userid, request):  # @UnusedVariable
-    if userid in USERS:
-        return GROUPS.get(userid, [])
-    
     

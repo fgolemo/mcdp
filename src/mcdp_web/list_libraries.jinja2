@@ -4,21 +4,27 @@
     <title>List of libraries</title>
 
     {% include 'head.jinja2' %}
-
+    <style>
+    #around {
+        column-width: 18em;
+    }
+    </style>
 </head>
 <body>
+{% include 'menu.jinja2' %}
+{% include 'user.jinja2' %}
 
-<div class="library_list">
-    {% for sup, sup_libraries in navigation['libraries_indexed'] %}
-        <div class='sup'>{{sup}}</div>
-        {% for li in sup_libraries %}
-        <!-- <option name='{{li['name']}}' value="{{li['url']}}" {% if li['current'] %} selected = 1 {% endif %}> -->
-            <!-- note the span has no effect inside option -->
-            <div class='library'><a href="{{li['url']}}"><code>📖<span>{{li['name']}}</span></code></a></div>
-        <!-- </option> -->
-        {% endfor %}
-    {% endfor %}
-    </div>
-  {% include 'footer.jinja2' %}
+<p>This is the list of libraries available, organized by shelf.
+    See <a href="{{root}}/shelves/">here</a> to disable some of the shelves.
+    {% if navigation['shelves_unused'] %}
+    You also have an additional {{navigation['shelves_unused']|length}} shelves to activate.
+    {% endif %}
+</p>
+
+<div id='around'>
+  {% include 'list_libraries_by_shelf.jinja2' %}
+ </div>
+
+{% include 'footer.jinja2' %}
 </body>
 </html>
