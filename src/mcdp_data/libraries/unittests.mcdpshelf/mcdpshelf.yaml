@@ -1,16 +1,25 @@
+uuid: c585584c-ff55-11e6-bc64-92361f002671
+
+# available-from:
+# - mcdp:python:mcdp
+
+requires:
+- mcdp:python:mcdp/other.mcdpshelf
+- mcdp:python:mcdp/other.mcdpshelf
+
 access:
-	read: everyone
-	write: everyone
+- [everyone, read]
+- [everyone, write]
 
-desc:
-	name: Unit tests
-	short_md: This shelf holds the libraries used for unit-tests.
-	long_md: |
-		This is a longer description of this library.
-		
-		It can be formatted, using:
-	
-		<pre class='mcdp'>
-			mcdp {}
-		</pre>
+name:
 
+short: This shelf holds the libraries used for unit-tests.
+
+long: |
+    This is a longer description of this library.
+
+    It can be formatted, using:
+
+    <pre class='mcdp'>
+        mcdp {}
+    </pre>

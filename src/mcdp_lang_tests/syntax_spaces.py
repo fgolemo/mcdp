@@ -16,6 +16,7 @@ from mcdp_report.out_mcdpl import extract_ws
 from mcdp import MCDPConstants
 from mocdp.comp.context import Context
 from mcdp.exceptions import DPSemanticError
+from mcdp.utils.string_repr import make_chars_visible
 
 
 @comptest
@@ -121,23 +122,6 @@ def assert_equal_string(s2, s2_expected, original=None):
         msg += '\n\n'+indent(make_chars_visible(s2_expected), l2) 
         raise ValueError(msg)
     
-    
-def indent_plus_invisibles(x, c='  |'):
-    return indent(make_chars_visible(x),c)
-    
-def make_chars_visible(x):
-    """ Replaces whitespaces ' ' and '\t' with '␣' and '⇥' """
-    x = x.replace(' ', '␣')
-    if MCDPConstants.tabsize == 4:
-        tab = '├──┤'
-    else:
-        tab = '⇥'
-        
-    x = x.replace('\t', tab)
-#     nl = '␤\n'
-    nl = '⏎\n'
-    x = x.replace('\n', nl)
-    return x
 
 @comptest
 def check_spaces7():

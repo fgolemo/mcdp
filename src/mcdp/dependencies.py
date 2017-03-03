@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """ Checks that all important dependencies are installed """
 from .logs import logger
 

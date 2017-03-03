@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import getpass
 from .utils.memoize_simple_imp import memoize_simple
 import warnings
