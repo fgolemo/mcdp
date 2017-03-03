@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 import cgi
 
-from mcdp_web.utils0 import add_std_vars
+from mcdp_web.resource_tree import ResourceLibraryInteractiveValue, ResourceLibraryInteractiveValueParse, context_get_library
+from mcdp_web.utils0 import add_std_vars_context
 
 
 class AppInteractive():
@@ -17,20 +18,17 @@ class AppInteractive():
         pass
 
     def config(self, config):
-        base = '/libraries/{library}/interactive/'
-
-        config.add_route('mcdp_value', base + 'mcdp_value/')
-        config.add_view(self.view_mcdp_value, route_name='mcdp_value', 
+        config.add_view(self.view_mcdp_value, context=ResourceLibraryInteractiveValue, 
                         renderer='interactive/interactive_mcdp_value.jinja2')
-        config.add_route('mcdp_value_parse', base + 'mcdp_value/parse')
-        config.add_view(self.view_mcdp_value_parse, route_name='mcdp_value_parse',
+        config.add_view(self.view_mcdp_value_parse, 
+                        context=ResourceLibraryInteractiveValueParse,
                         renderer='json')
 
-    @add_std_vars
-    def view_mcdp_value(self, request):  # @UnusedVariable
+    @add_std_vars_context
+    def view_mcdp_value(self, context, request):  # @UnusedVariable
         return {}
 
-    def view_mcdp_value_parse(self, request):
+    def view_mcdp_value_parse(self, context, request):
         from mcdp_web.solver.app_solver import ajax_error_catch
 
         string = request.json_body['string']
@@ -38,11 +36,11 @@ class AppInteractive():
         string = string.encode('utf-8')
 
         def go():
-            return self.parse(request, string)
+            return self.parse(context, request, string)
         return ajax_error_catch(go)
 
-    def parse(self, request, string):
-        l = self.get_library(request)
+    def parse(self, context, request, string):
+        l = context_get_library(context, request)
         result = l.parse_constant(string)
 
         space = result.unit

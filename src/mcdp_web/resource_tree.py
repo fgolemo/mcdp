@@ -95,6 +95,9 @@ class ResourceLibrary(Resource):
     def getitem(self, key):
         if key == 'refresh_library':
             return ResourceLibraryRefresh('refresh_library')
+        if key == 'interactive':
+            return ResourceLibraryInteractive('interactive')
+        
         if key.endswith('.html'):
             docname = os.path.splitext(key)[0]
             return ResourceLibraryDocRender(docname)
@@ -102,9 +105,21 @@ class ResourceLibrary(Resource):
             return ResourceLibraryAsset(key)
         return ResourceThings(key)
 
-class ResourceLibraryDocRender(Resource):
-    pass
-class ResourceLibraryAsset(Resource):
+class ResourceLibraryDocRender(Resource): pass
+class ResourceLibraryAsset(Resource): pass
+
+class ResourceLibraryInteractive(Resource): 
+    def getitem(self, key):
+        if key == 'mcdp_value':
+            return ResourceLibraryInteractiveValue('mcdp_value')
+
+class ResourceLibraryInteractiveValue(Resource): 
+    def getitem(self, key):
+        if key == 'parse':
+            return ResourceLibraryInteractiveValueParse('parse')
+
+
+class ResourceLibraryInteractiveValueParse(Resource): 
     pass
 
 class ResourceLibraryRefresh(Resource):
@@ -143,6 +158,7 @@ class ResourceThingViews(Resource):
                 'ndp_graph': ResourceThingViewNDPGraph('ndp_graph'),
                 'ndp_repr': ResourceThingViewNDPRepr('ndp_repr'),
                 'solver2': ResourceThingViewSolver('solver2'),
+                'solver': ResourceThingViewSolver0('solver'),
             }
             subs.update(**subs2)
             
@@ -159,6 +175,7 @@ class ResourceThingViewNDPGraph(ResourceThingView): pass
 class ResourceThingViewNDPRepr(ResourceThingView): pass
 
 class ResourceThingViewSolver(ResourceThingView): pass
+class ResourceThingViewSolver0(ResourceThingView): pass
 
 class ResourceThingViewEditor(ResourceThingView):
     def getitem(self, key): 

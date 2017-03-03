@@ -3,9 +3,11 @@ import itertools
 
 from pyramid.httpexceptions import HTTPSeeOther  # @UnresolvedImport
 
+from mcdp_web.resource_tree import context_get_library_name,\
+    context_get_widget_name, ResourceThingViewSolver0
 from mcdp_web.solver.app_solver_state import SolverState, get_decisions_for_axes
 from mcdp_web.utils.ajax_errors import ajax_error_catch
-from mcdp_web.utils0 import add_std_vars
+from mcdp_web.utils0 import add_std_vars, add_std_vars_context
 
 
 class AppSolver():
@@ -48,9 +50,9 @@ class AppSolver():
 
         base = '/libraries/{library}/models/{model_name}/views/solver/{fun_axes}/{res_axes}/'
 
-        config.add_route('solver', base)
         config.add_view(self.view_solver,
-                        route_name='solver', renderer='solver/solver.jinja2')
+                        context=ResourceThingViewSolver0, 
+                        renderer='solver/solver.jinja2')
 
         config.add_route('solver_addpoint', base + 'addpoint')
         config.add_view(self.ajax_solver_addpoint,
@@ -78,10 +80,10 @@ class AppSolver():
                 'res_axes': res_axes,
                 'library': library}
 
-    @add_std_vars
-    def view_solver_base(self, request):
-        model_name = self.get_model_name(request)
-        library = self.get_current_library_name(request)
+    @add_std_vars_context
+    def view_solver_base(self, context, request):
+        model_name = context_get_widget_name(context)
+        library = context_get_library_name(context)
 
         solver_state = self.get_solver_state(request)
         ndp = solver_state.ndp
@@ -173,10 +175,8 @@ class AppSolver():
         def go():
             self.reset(request)
             return self.return_new_data(request)
-        return ajax_error_catch(go)
-
-
-
+        return ajax_error_catch(go) 
+    
 def create_alternative_urls(params, ndp):
     library = params['library']
     model_name = params['model_name']
