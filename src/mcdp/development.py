@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 import getpass
-from .utils.memoize_simple_imp import memoize_simple
-import warnings
-from contracts.enabling import all_disabled
 
+from contracts import all_disabled
+
+from mcdp_utils_misc import memoize_simple
+
+
+# import warnings
 @memoize_simple
 def get_user():
     return getpass.getuser()
@@ -24,4 +27,5 @@ def mcdp_dev_warning(s):  # @UnusedVariable
     if get_user() in  ['andrea']:
         #warnings.warn(s)
         pass
+
 

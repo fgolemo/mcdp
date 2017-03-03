@@ -7,7 +7,7 @@ from contracts.utils import indent
 from system_cmd import CmdException
 from system_cmd import system_cmd_result
 
-from mcdp.utils.fileutils import get_mcdp_tmp_dir
+from mcdp_utils_misc.fileutils import get_mcdp_tmp_dir
 
 
 def unescape_entities(s):

@@ -16,7 +16,7 @@ from mcdp_report.out_mcdpl import extract_ws
 from mcdp import MCDPConstants
 from mocdp.comp.context import Context
 from mcdp.exceptions import DPSemanticError
-from mcdp.utils.string_repr import make_chars_visible
+from mcdp_utils_misc.string_repr import make_chars_visible
 
 
 @comptest

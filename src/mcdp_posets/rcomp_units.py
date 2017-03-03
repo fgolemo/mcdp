@@ -10,7 +10,7 @@ from contracts import contract
 from contracts.utils import check_isinstance, raise_wrapped, raise_desc
 from mcdp.exceptions import DPSyntaxError, \
     DPSemanticError
-from mcdp.utils.memoize_simple_imp import memoize_simple
+from mcdp_utils_misc.memoize_simple_imp import memoize_simple
 
 from .any import Any, BottomCompletion, TopCompletion
 from .poset import is_top, is_bottom

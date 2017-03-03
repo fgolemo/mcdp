@@ -22,7 +22,7 @@ from mocdp.comp.context import CResource, get_name_for_fun_node
 from mocdp.comp.interfaces import NotConnected
 from mocdp.comp.wrap import SimpleWrap, dpwrap
 from mcdp.exceptions import mcdp_dev_warning
-from mcdp.utils.memoize_simple_imp import memoize_simple
+from mcdp_utils_misc.memoize_simple_imp import memoize_simple
 import networkx as nx
 from reprep import Report
 from mcdp.constants import MCDPConstants

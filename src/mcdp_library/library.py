@@ -18,7 +18,7 @@ from mocdp.comp.interfaces import NamedDP
 from mocdp.comp.template_for_nameddp import TemplateForNamedDP
 
 from .utils import locate_files, memo_disk_cache2
-from mcdp.utils.fileutils import get_mcdp_tmp_dir
+from mcdp_utils_misc.fileutils import get_mcdp_tmp_dir
 
 
 __all__ = [

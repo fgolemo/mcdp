@@ -8,7 +8,7 @@ from mcdp_posets import get_types_universe
 from mocdp.comp.composite import CompositeNamedDP
 from mocdp.comp.context import CResource, Connection
 from mcdp.development import do_extra_checks
-from mcdp.utils.memoize_simple_imp import memoize_simple
+from mcdp_utils_misc.memoize_simple_imp import memoize_simple
 
 from .actions import ActionAddNDP, ActionConnect
 from .context_utils import get_compatible_unconnected_functions

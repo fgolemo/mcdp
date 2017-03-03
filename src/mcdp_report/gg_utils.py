@@ -9,13 +9,13 @@ from contracts import contract
 from contracts.utils import check_isinstance, raise_desc, indent
 from mcdp import logger, MCDPConstants
 from mcdp.exceptions import mcdp_dev_warning, DPSemanticError
-from mcdp.utils.string_utils import get_md5
-from mcdp.utils.timing import timeit_wall
+from mcdp_utils_misc.string_utils import get_md5
+from mcdp_utils_misc.timing import timeit_wall
 from mcdp_utils_xml import bs
 import networkx as nx  # @UnresolvedImport
 from reprep.constants import MIME_PDF, MIME_PLAIN, MIME_PNG, MIME_SVG
 from system_cmd import CmdException, system_cmd_result
-from mcdp.utils.fileutils import tmpfile
+from mcdp_utils_misc.fileutils import tmpfile
 
 
 def graphviz_run(filename_dot, output, prog='dot'):

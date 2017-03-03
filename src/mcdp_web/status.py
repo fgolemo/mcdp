@@ -9,7 +9,7 @@ import pyramid
 
 from compmake.utils import duration_compact
 import mcdp
-from mcdp.utils.memoize_simple_imp import memoize_simple
+from mcdp_utils_misc.memoize_simple_imp import memoize_simple
 from system_cmd import system_cmd_result
 
 

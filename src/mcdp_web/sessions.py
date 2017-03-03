@@ -2,7 +2,7 @@ from contracts import contract
 from contracts.utils import raise_desc
 from mcdp_library.libraries import Librarian
 import os
-from mcdp.utils.natsort import natural_sorted
+from mcdp_utils_misc.natsort import natural_sorted
 
 class Session():
     

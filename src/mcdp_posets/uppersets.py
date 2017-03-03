@@ -5,7 +5,7 @@ import random
 from contracts import contract
 from contracts.utils import raise_desc, check_isinstance
 from mcdp.development import do_extra_checks, mcdp_dev_warning
-from mcdp.utils.memoize_simple_imp import memoize_simple
+from mcdp_utils_misc.memoize_simple_imp import memoize_simple
 
 from .find_poset_minima.baseline_n2 import poset_maxima, poset_minima
 from .poset import NotLeq, Poset

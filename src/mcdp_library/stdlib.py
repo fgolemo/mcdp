@@ -3,7 +3,7 @@ import os
 
 from contracts.utils import raise_desc
 from mcdp import logger, MCDPConstants
-from mcdp.utils.memoize_simple_imp import memoize_simple
+from mcdp_utils_misc.memoize_simple_imp import memoize_simple
 from mcdp_library import Librarian
 from mcdp_library.utils import dir_from_package_name
 

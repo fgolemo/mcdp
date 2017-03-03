@@ -3,9 +3,9 @@ from mcdp_library.utils.locate_files_imp import locate_files
 import os
 import yaml
 from mcdp_shelf.access import acl_from_yaml
-from mcdp.utils.fileutils import read_file_encoded_as_utf8
+from mcdp_utils_misc.fileutils import read_file_encoded_as_utf8
 from collections import namedtuple
-from mcdp.utils.string_repr import indent_plus_invisibles
+from mcdp_utils_misc.string_repr import indent_plus_invisibles
 from mcdp.logs import logger
 
 shelf_extension = 'mcdpshelf'

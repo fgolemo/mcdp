@@ -39,7 +39,7 @@ from .visualization.app_visualization import AppVisualization
 
 
 from mcdp_library import MCDPLibrary
-from mcdp.utils.natsort import natural_sorted
+from mcdp_utils_misc.natsort import natural_sorted
 
 
 

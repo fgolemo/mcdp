@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from mcdp_report import my_gvgen
 from mcdp_report.gg_utils import gg_figure
-from mcdp.utils.memoize_simple_imp import memoize_simple
+from mcdp_utils_misc.memoize_simple_imp import memoize_simple
 from reprep import Report
 
 from .find_dep import FindDependencies

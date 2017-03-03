@@ -12,8 +12,8 @@ from contracts import contract
 from contracts.utils import check_isinstance, raise_desc
 from mcdp import logger
 from mcdp.exceptions import DPInternalError, DPSemanticError, DPSyntaxError
-from mcdp.utils.string_utils import get_sha1
-from mcdp.utils.timing import timeit_wall
+from mcdp_utils_misc.string_utils import get_sha1
+from mcdp_utils_misc.timing import timeit_wall
 from mcdp_lang.parse_interface import (parse_ndp_eval, parse_ndp_refine, 
     parse_template_eval, parse_template_refine, parse_constant_eval, 
     parse_constant_refine, parse_poset_eval, parse_poset_refine)
