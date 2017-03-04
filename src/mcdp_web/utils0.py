@@ -62,11 +62,17 @@ def add_other_fields(self, res, request, context=None):
     def can_admin(sname):
         return shelf_privilege(sname, PRIVILEGE_ADMIN)
     
+        
     res['shelf_can_read'] = can_read
     res['shelf_can_write'] = can_write           
     res['shelf_can_subscribe'] = can_subscribe
     res['shelf_can_admin'] = can_admin           
     
+    def get_user(username):
+        user = session.get_user(username)
+        return user.dict_for_page()
+    
+    res['get_user'] = get_user
     
     
 def add_std_vars(f):

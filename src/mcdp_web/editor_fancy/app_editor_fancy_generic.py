@@ -12,22 +12,19 @@ from mcdp import logger
 from mcdp.exceptions import DPInternalError, DPSemanticError, DPSyntaxError
 from mcdp_lang.suggestions import get_suggestions, apply_suggestions
 from mcdp_report.html import ast_to_html
-from mcdp_utils_misc.string_utils import get_sha1
-from mcdp_utils_misc.timing import timeit_wall
-from mcdp_web.editor_fancy.html_mark_imp import html_mark,\
-    html_mark_syntax_error
-from mcdp_web.editor_fancy.specs_def import spec_templates,\
-    spec_values, spec_posets, spec_models, specs
+from mcdp_utils_misc import get_sha1, timeit_wall
 from mcdp_web.resource_tree import ResourceThingViewEditor, ResourceThingViewEditorParse,\
     context_get_spec, context_get_library_name, context_get_library,\
     context_get_widget_name, ResourceThingViewEditorSave,\
-    ResourceThingViewEditorGraph
+    ResourceThingViewEditorGraph, ResourceThingsNew
 from mcdp_web.utils import (ajax_error_catch,
                             format_exception_for_ajax_response, response_image)
 from mcdp_web.utils.response import response_data
 from mcdp_web.utils0 import add_std_vars_context
 from mocdp.comp.interfaces import NamedDP
 
+from .html_mark_imp import html_mark, html_mark_syntax_error
+from .specs_def import specs
 from .warnings_unconnected import generate_unconnected_warnings
 
 
@@ -45,27 +42,7 @@ class AppEditorFancyGeneric():
         config.add_view(self.ajax_parse, context=ResourceThingViewEditorParse, renderer='json')
         config.add_view(self.save, context=ResourceThingViewEditorSave, renderer='json')
         config.add_view(self.graph_generic, context=ResourceThingViewEditorGraph)
-
-        self.config_(config, spec_templates)
-        self.config_(config, spec_values)
-        self.config_(config, spec_posets)
-        self.config_(config, spec_models)
-
-
-    def config_(self, config, spec):
-        """
-            what = templates, values, posets
-        """ 
-
-        new = lambda req: self.view_new_model_generic(req, spec)
-        route = spec.url_part + '_new'
-        url2 = '/libraries/{library}/' + spec.url_part + '/new/{%s}' % spec.url_variable
-        config.add_route(route, url2)
-        config.add_view(new, route_name=route)
-
-    def get_widget_name(self, request, spec):
-        widget_name = str(request.matchdict[spec.url_variable])  # unicode
-        return widget_name
+        config.add_view(self.view_new_model_generic, context=ResourceThingsNew) 
 
     def save(self, context, request):
         widget_name = context_get_widget_name(context)
@@ -162,16 +139,20 @@ class AppEditorFancyGeneric():
         return self.png_error_catch2(request, go)
 
 
-    def view_new_model_generic(self, request, spec):
-        widget_name = self.get_widget_name(request, spec)
+    def view_new_model_generic(self, context, request):
+        spec = context_get_spec(context)
+        widget_name = context.name
+        session = self.get_session(request)
+
+        library = context_get_library(context, request)
+        library_name = context_get_library_name(context)
+        
         logger.info('Creating new %r' % widget_name)
-        library = self.get_current_library_name(request)
 
         basename = '%s.%s' % (widget_name, spec.extension)
-        l = self.get_library(request)
         url_edit = '../%s/views/edit_fancy/' % widget_name
 
-        if l.file_exists(basename):
+        if library.file_exists(basename):
             error = 'File %r already exists.' % basename
             template = 'editor_fancy/error_model_exists_generic.jinja2'
             res = {'error': error, 'url_edit': url_edit,
@@ -180,7 +161,7 @@ class AppEditorFancyGeneric():
             return render_to_response(template, res, request=request)
 
         else:
-            path = self.libraries[library]['path']
+            path = session.librarian.libraries[library_name]['path']
             source = spec.minimal_source_code
             filename = os.path.join(path, 'created', basename)
 
@@ -192,7 +173,7 @@ class AppEditorFancyGeneric():
             with open(filename, 'w') as f:
                 f.write(source)
 
-            l._update_file_from_editor(filename)
+            library._update_file_from_editor(filename)
 
             raise HTTPFound(url_edit)
 

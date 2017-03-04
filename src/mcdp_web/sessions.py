@@ -32,10 +32,12 @@ class Session():
             self.authenticated_userid = request.authenticated_userid
             self.recompute_available()
             
-    def get_user(self):
+    def get_user(self, username=None):
+        
         from mcdp_web.main import WebApp
         userdb = WebApp.singleton.user_db  # @UndefinedVariable
-        username = self.request.authenticated_userid 
+        if username is None:
+            username = self.request.authenticated_userid 
         if username is not None:
             username = username.encode('utf8')
         user = userdb[username]
@@ -122,9 +124,7 @@ class Session():
         if not library_name in self.libraries:
             msg = 'Could not find library %r.' % library_name
             raise_desc(ValueError, msg, available=self.libraries)
-        return self.libraries[library_name]['library']
-
-
+        return self.libraries[library_name]['library'] 
 
     def refresh_libraries(self):
         for l in [_['library'] for _ in self.libraries.values()]:
@@ -138,17 +138,10 @@ class Session():
         """
             returns a list of tuples (dirname, list(libname))
         """
-        from collections import defaultdict
-        path2libraries = defaultdict(lambda: [])
-        for libname, data in self.libraries.items():
-            path = data['path']
-            sup = os.path.basename(os.path.dirname(path))
-            path2libraries[sup].append(libname)
-                     
         res = []
-        for sup in natural_sorted(path2libraries):
-            r = (sup, natural_sorted(path2libraries[sup]))
-            res.append(r)
+        for sname, shelf in self.shelves_used.items():
+            libnames = natural_sorted(shelf.get_libraries_path())
+            res.append((sname, libnames))
         return res 
     
     def get_shelves_used(self):

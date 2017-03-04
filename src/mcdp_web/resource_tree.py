@@ -12,6 +12,7 @@ root
             interactive
                 mcdp_value
             <specname>
+                new/<thingname>
                 <thingname>
                     <views>
                         solver
@@ -205,12 +206,20 @@ class ResourceThings(Resource):
         self.specname = specname
         
     def getitem(self, key):
+        if key == 'new': return ResourceThingsNewBase()
         return ResourceThing(key)
     
     def __repr__(self):
         return '%s(specname=%s)' % (type(self).__name__, self.specname)
 
     
+class ResourceThingsNewBase(Resource):
+    def getitem(self, key):
+        return ResourceThingsNew(key)
+    
+class ResourceThingsNew(Resource):
+    pass
+
 class ResourceThing(Resource): 
     
     def getitem(self, key):

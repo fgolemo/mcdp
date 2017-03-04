@@ -1,5 +1,4 @@
 from contracts import contract
-from collections import OrderedDict
 
 
 
@@ -26,6 +25,7 @@ class UserInfo():
     
     def dict_for_page(self):
         res = {
+            'username': self.username,
             'name': self.name,
             'email': self.email,
             'website': self.website,
@@ -50,7 +50,6 @@ class UserInfo():
 # - u_andrea_subscription
 # - u_maxxon_motors
 
-
 @contract(s=dict)    
 def userinfo_from_yaml(s,username):
     res = {}
@@ -72,6 +71,7 @@ def yaml_from_userinfo(user):
     res['website'] = user.website
     res['affiliation'] = user.affiliation
     res['subscriptions'] = user.subscriptions
+    res['groups'] = user.groups
     return res
 
 def gravatar(email, size, default=None):

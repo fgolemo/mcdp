@@ -6,7 +6,7 @@ from mcdp.logs import logger
 from contracts.utils import indent
 from pyramid.security import Allow, Authenticated, Everyone, Deny
 
-
+USER_ANONYMOUS = 'anonymous'
 PRIVILEGE_DISCOVER = 'discover'
 PRIVILEGE_SUBSCRIBE = 'subscribe'
 PRIVILEGE_READ = 'read'
@@ -22,6 +22,7 @@ ACLRule = namedtuple('ACLRule', 'allow_or_deny to_whom privilege')
 class ACL():
     def __init__(self, rules):
         self.rules = rules
+        
         
     def as_pyramid_acl(self):
         res = []
@@ -39,7 +40,7 @@ class ACL():
     def allowed(self, privilege, username, groups):
         principals = []
         principals.append('Everyone')
-        if username is not None:
+        if username is not None and username != USER_ANONYMOUS:
             principals.append('Authenticated')
             principals.append(username)
         if groups:

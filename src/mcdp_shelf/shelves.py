@@ -1,13 +1,15 @@
-from contracts import contract
-from mcdp_library.utils.locate_files_imp import locate_files
-import os
-import yaml
-from mcdp_shelf.access import acl_from_yaml
-from mcdp_utils_misc.fileutils import read_file_encoded_as_utf8
 from collections import namedtuple
-from mcdp_utils_misc.string_repr import indent_plus_invisibles
+import os
+
+from contracts import contract
+import yaml
+
 from mcdp.logs import logger
 from mcdp_library.libraries import find_libraries
+from mcdp_library.utils.locate_files_imp import locate_files
+from mcdp_shelf.access import acl_from_yaml
+from mcdp_utils_misc import indent_plus_invisibles, read_file_encoded_as_utf8
+
 
 shelf_extension = 'mcdpshelf'
 shelf_desc_file = 'mcdpshelf.yaml'
@@ -91,8 +93,7 @@ def shelf_from_directory(dirname):
         logger.error(msg)
         raise
     
-    libraries = find_libraries(dirname)
-    print libraries
+    libraries = find_libraries(dirname) 
     shelf = Shelf(acl=acl, dependencies=dependencies, desc_short=desc_short, 
                   desc_long=desc_long, libraries=libraries, authors=authors)
     return shelf

@@ -1,12 +1,10 @@
 
 desc_short: Examples to be developed
 desc_long:
- 
+
 acl: [
     [Allow, Everyone, discover],
     [Allow, Authenticated, subscribe],
     [Allow, Everyone, read],
-    [Allow, "groups:admin", admin],
-    [Allow, "groups:admin", read],
-    [Allow, "groups:admin", write]
+    [Allow, "groups:admin", all],
 ]

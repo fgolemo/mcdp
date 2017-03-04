@@ -1,7 +1,9 @@
 from mcdp_library.library import MCDPLibrary
 from mcdp_utils_misc.natsort import natural_sorted
-from mcdp_web.resource_tree import ResourceThing, ResourceThings, ResourceThingView, ResourceLibrary, get_from_context
+from mcdp_web.resource_tree import ResourceThing, ResourceThings, ResourceThingView, ResourceLibrary, get_from_context,\
+    ResourceShelf
 from mcdp.logs import logger
+from mcdp_shelf.access import PRIVILEGE_WRITE
 
 
 def get_navigation_links_context(app, context, request):
@@ -10,6 +12,17 @@ def get_navigation_links_context(app, context, request):
     
     current_thing = None
     
+    rshelf = get_from_context(ResourceShelf, context)
+    if rshelf is not None:
+        shelfname = rshelf.name
+        shelf = session.get_shelf(shelfname)
+        user = session.get_user()
+        shelf_write_permission = shelf.get_acl().allowed2(PRIVILEGE_WRITE, user)
+    else:
+        shelfname = None
+        shelf = None
+        shelf_write_permission = False
+        
     rlibrary = get_from_context(ResourceLibrary, context)
     if rlibrary is not None:
         current_library = rlibrary.name
@@ -21,7 +34,6 @@ def get_navigation_links_context(app, context, request):
             logger.error(msg)
             current_library = None
             library = None
-#             raise Exception(msg)
     else:
         current_library = None
         library = None
@@ -46,6 +58,9 @@ def get_navigation_links_context(app, context, request):
  
     d = {}
 
+    d['shelfname'] = shelfname
+    d['shelf'] = shelf
+    d['shelf_write_permission'] = shelf_write_permission
     d['shelves_available'] = session.get_shelves_available()
     d['shelves_used'] = session.get_shelves_used()
     d['shelves_unused'] = {}

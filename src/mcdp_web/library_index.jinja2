@@ -3,7 +3,8 @@
 <head>
     <title>Library {{navigation['current_library']}}</title>
     {% include 'head.jinja2' %}
-
+    <style>{% include 'library_index.css' %}</style>
+    <script>{% include 'library_index.js' %}</script>
 </head>
 <body>
 {% include 'refresh_shortcut.jinja2' %}
@@ -17,135 +18,12 @@
 {% else %}
 
 <!--<p>Click &#9776; in the upper left and select "new" to add a new model.</p>-->
-<style>
 
-body { margin: 0; }
-#library-contents thead tr {
-}
-
-#library-contents  tr#things td {
-	font-weight: bold;
-	min-width: 12vw;
-	/*border-bottom: solid 2px grey;*/
-	/*padding-left: 1em;*/
-	/*padding-right: 1em;*/
-	margin-left: 1em;
-	margin-right: 1em;
-}
-p.none-available {
-	text-align:center;
-	font-style: italic;
-	color: grey;
-}
-#library-contents tbody td {
-    border-left: solid 1px grey;
-}
-
-#library-contents tbody td:first-child {
-    border-left: 0;
-}
-#library-contents thead td {
-        text-align: center;
-}
-#library-contents td:nth-child(even) {
-
-
-    /*background-color: #eeeeee;*/
-}
-#library-contents td:nth-child(odd) {
-
-    /*background-color: #eee;*/
-}
-#library-contents tbody tr:first-child td {
-	padding-top: 0.5em;
-}
-#library-contents tbody td {
-	font-size: smaller;
-}
-#library-contents tbody td:first-child { /* ndps */
-	column-count: 3;
-    /*column-width: 15em;*/
-
-}
-#library-contents tbody td:first-child /*ndps*/ code {
-	/*max-width: 10em;*/
-}
-#library-contents tbody td a:hover {
-	background-color: white !important;
-}
-#library-contents tbody td .url {
-	display: inline-block;
-	overflow: hidden;
-	vertical-align: bottom;
-	max-width: 12em;
-margin-right: 1.5em;
-    text-overflow: ellipsis;
-}
-#library-contents  tbody a:hover { font-weight: bold; }
-#library-contents  tbody p.entry  {
-	/*border: solid 1px red;*/
-	margin-top: 0;
-	margin-bottom: 0;
-	padding-top: 2px;
-	padding-bottom: 2px;
-	padding-left: 3px;
-}
-#library-contents  tbody p.entry .url_edit {
-    /*display: inline-block;*/
-    padding-right: 0.5em;
-    /*padding-left: 0.5em;*/
-	/*visibility: hidden;*/
-	/*position: relative;
-	z-index: 10000;*/
-    color: white;
-}
-#library-contents  tbody p.entry:hover .url_edit {
-    color: blue;
-	/*background-color: red;*/
-	/*visibility: visible;*/
-}
-
-#library-contents  tbody td a:hover {
-	/*background-color: white;*/
-	/*text-decoration: none;*/
-}
-
-#library-contents  tbody p.entry:hover .url {
-	overflow: visible;
-	/*background-color: yellow	;*/
-}
-#outside {
-	display: block;
-	width: 100%;
-	/*text-align: center;*/
-}
-#outside {
-	display:inline-block;
-}
-#ttitle {
-	font-weight: bold;
-	padding-bottom: 1em;
-	text-align: center;
-}
-p.new {
-	text-align: center;
-	/*margin-top: 1em;*/
-}
-#library-contents  td.plus button {
-    display: inline-block;
-}
-#library-contents  td.plus {
-    vertical-align: bottom;
-    text-align: center;
-}
-#library-contents {font-family: sans-serif;}
-#library-contents td {vertical-align: top;}
-</style>
 <div id='outside'>
 <table align='center' id='library-contents'>
 <thead>
 <tr><td id='ttitle' colspan="5">
-		Library <code>{{navigation['current_library']}}</code>
+		📖 Library <code>{{navigation['current_library']}}</code>
 </td></tr>
 <tr id="things">
 	<td>MCDPs</td>
@@ -169,7 +47,8 @@ p.new {
 
 	{% for d in navigation[what] %}
 		<p class='entry'>
-		{% if 'url_edit' in d %}<a class='url_edit' href="{{d['url_edit']}}">✎</a>{% endif %}<code><a class="url" href="{{d['url']}}">{{d['id']}}</a></code>
+		{% if 'url_edit' in d and shelf_write_permission%}
+            <a class='url_edit' href="{{d['url_edit']}}">✎</a>{% endif %}<code><a class="url" href="{{d['url']}}">{{d['id']}}</a></code>
 		</p>
 	{% endfor %}
 
@@ -184,7 +63,7 @@ p.new {
     <td class='plus'>
     {% if what != 'documents' %}
 	<!-- <p class="new" style='text-align: center'> -->
-	<button id="table_new_{{what}}">+</button>
+	{% if shelf_write_permission %}<button id="table_new_{{what}}">+</button>{% endif %}
 	<!-- </p> -->
 	{% endif %}
     </td>
@@ -196,91 +75,19 @@ p.new {
 
 </table>
 
-{% if  navigation['models'] %}
+{% if not shelf_write_permission %}
+<p> This library is read-only for this user. </p>
+{%endif%}
+
+{% if navigation['models'] %}
 <p id='show_previews_container'><button id='show_previews'>Show MCDP previews</button></p>
 {% endif %}
 
 
-</div><!--
-
-{% if navigation['documents'] %}
-<p> Documents available as part of the <code>{{navigation['current_library']}}</code>
-	current library:</p>
-<ul>
-	{% for d in navigation['documents'] %}
-	<li><a href="{{d['url']}}">{{d['name']}}</a></li>
-	{% endfor %}
-</ul>
-{% endif %} -->
+</div>
 
 
-<style type='text/css'>
-    #show_previews_container {
-        margin-left: 2em;
-    }
-	div.compact {
-/*		display: block;
-		float: left;
-*/		width: 20em;
-display: inline-block;
-		/* height: 13em; */ /* old resolution */
 
-	}
-	a.modellink {
-		background-color: inherit;
-	}
-	div.compact {
-		margin-top: 0.4em;
-		margin-left: 0.4em;
-		margin-right: 0.4em;
-		text-align: center;
-		border-radius: 8px;
-		padding-top: 0.5em;
-	}
-
-	div.compact span { margin-bottom: 1em; }
-	div.compact {
-		border: solid 1px white;
-	}
-	div.compact:hover {
-		border: solid 1px black;
-		box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-	}
-	div.compact span {display: block; text-align: center; }
-	div.compact img { max-width: 20em; max-height: 10em; }
-</style>
-
-
-<script type='text/javascript'>
-
-	function click_show_previews() {
-		$('#previews').show();
-		console.log(all_images);
-		for (var i in all_images) {
-			x = all_images[i];
-			target = x[1];
-			src = x[0];
-
-			tmpimg='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==';
-
-			$(target).prop('src',tmpimg);
-			$(target).prop('src', src);
-		}
-	}
-
-	$(document).ready(function() {
-		$( "button#show_previews" ).button();
-		$( "button#show_previews" ).click(click_show_previews);
-
-	    $('#table_new_models').click(new_model);
-	    $('#table_new_posets').click(new_poset);
-	    $('#table_new_templates').click(new_template);
-	    $('#table_new_values').click(new_value);
-        console.log('inited 1');
-	});
-
-	var all_images = [];
-</script>
 <div id='previews' style='display: none;'>
 {% for m in navigation['models'] %}
 
@@ -319,12 +126,6 @@ display: inline-block;
 {%endif%}
 
  </div>
-
- <script>
- 	$(document).ready(function() {
- 		$('#allcontents').css('visibility', 'visible');
- 	});
-</script>
 
 {% include 'footer.jinja2' %}
 </body>

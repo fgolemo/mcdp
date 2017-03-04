@@ -3,48 +3,106 @@
 <head>
     <title>List of shelves</title>
     {% include 'head.jinja2' %}
+    <style>{% include 'shelves_index.css' %}</style>
+    <script>{% include 'shelves_index.js' %}</script>
+
 </head>
 <body>
 {% include 'menu.jinja2' %}
 {% include 'user.jinja2' %}
+{% from 'user_name_and_picture.jinja2' import user_name_and_picture with context %}
 
-<p>MCDP libraries are organized in <q>shelves</q></p>
-<p>These are all the <em>shelves</em> available. If you wish to use the libraries
-in a particular shelf, you need to activate it here first.</p>
-<table class="shelves_list">
-    {% for sname, shelf in navigation['shelves_available'].items() %}
+<p>MCDP libraries are organized in <em>shelves</em>.
+    These are all the <em>shelves</em> available to you. If you wish to use the libraries
+    in a particular shelf, you need to activate it here first.</p>
+
+<table class="shelves_list" cellspacing="0" cellpadding="0">
+    <thead>
         <tr>
-        <td><a href="{{root}}/shelves/{{sname}}/">🏛 <code>{{sname}}<code></a></td>
-        <td>
-        {{ shelf.get_libraries_path() | length}} libraries
-        </td>
-        <td>{{shelf.get_desc_short()}}</td>
-        <td>
-        {% if sname in navigation['shelves_used'] %}
-            <span class='active'>active</span>
-        {% else %}
-            <span class='inactive'>inactive</span>
-        {% endif %}
-        </td>
-
-        <td>
-        {% if shelf_can_subscribe(sname) %}
-        {% if sname in navigation['shelves_used'] %}
-
-        <form action="{{sname}}/unsubscribe" method="post">
-            <input type="submit" class='inactive' value="deactivate"/>
-        </form>
-        {% else %}
-        <form action="{{sname}}/subscribe" method="post">
-            <input type="submit" class='active' value="activate"/>
-        </form>
-        {% endif %}
-        {% endif %}
-        </td>
+            <th>Shelf name</th>
+            <th>description</th>
+            <th colspan=2>status</th>
         </tr>
+    </thead>
+    {% for sname, shelf in navigation['shelves_available'].items() %}
+        {% set shelf_used = sname in navigation['shelves_used'] %}
+        <tr class={% if shelf_used %}"used"{%else%}"unused"{%endif%}>
+        <td>🏛 <code>{{sname}}<code> <br/></td>
+        <!-- <td>
+        {{ shelf.get_libraries_path() | length}} libraries
+        </td> -->
+        <td>{{shelf.get_desc_short()}}</td>
+
+
+
+        {% if shelf_can_subscribe(sname) %}
+            <td>
+            {% if sname in navigation['shelves_used'] %}
+                <span class='active'>active</span>
+            {% else %}
+                <span class='inactive'>inactive</span>
+            {% endif %}
+            </td>
+
+            <td>
+            {% if sname in navigation['shelves_used'] %}
+
+            <form action="{{sname}}/unsubscribe" method="post">
+                <input type="submit" class='inactive' value="deactivate"/>
+            </form>
+            {% else %}
+            <form action="{{sname}}/subscribe" method="post">
+                <input type="submit" class='active' value="activate"/>
+            </form>
+            {% endif %}
+            </td>
+        {% else %}
+            <td colspan=2>unavailable to you</td>
+
+        {% endif %}
+
+
+        {% if shelf_can_read(sname) %}
+        <td>
+            <a class"button" id="button-{{sname}}" href="#">details&hellip;</a>
+        </td>
+        {% else %}
+        <td></td>
+        {% endif %}
+
+        </tr>
+
+        {% if shelf_can_read(sname) %}
+        <tr style='display:none' id="contents-{{sname}}">
+            <td colspan=6>
+
+                {% if shelf.get_authors() %}
+                <table><tr>
+                    <td>Authors:</td>
+                    {% for author in shelf.get_authors()%}
+                    <td>{{ user_name_and_picture(author) }}</td>
+                    {% endfor %}
+                </tr></table>
+
+                {% endif %}
+
+                <p>This shelf contains {{ shelf.get_libraries_path() | length}} libraries:
+
+                    <span class='library-list'>
+                    {% for libname in shelf.get_libraries_path() %}
+                        <a href="{{root}}/libraries/{{libname}}/">📖 <code>{{libname}}</code></a>
+                    {% endfor %}
+                    </span>
+
+                </p>
+             </td>
+        </tr>
+        {% endif %}
+
+        <script>setup("{{sname}}");</script>
 {% endfor %}
 </table>
-<style>{% include 'shelves_index.css' %}</style>
+
 {% include 'footer.jinja2' %}
 </body>
 </html>

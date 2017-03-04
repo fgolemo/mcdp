@@ -188,7 +188,7 @@ class WebApp(AppVisualization, AppStatus,
         return res
     
     @add_std_vars_context 
-    def view_shelves_subscribe(self, context, request):  # @UndefinedVariable
+    def view_shelves_subscribe(self, context, request):  
         sname = context.name
         session = self.get_session(request)
         print('subscribe %r' % sname)
@@ -200,7 +200,7 @@ class WebApp(AppVisualization, AppStatus,
         raise HTTPFound(request.referrer)
     
     @add_std_vars_context 
-    def view_shelves_unsubscribe(self, context, request):  # @UndefinedVariable
+    def view_shelves_unsubscribe(self, context, request):  
         sname = context.name
         session = self.get_session(request)
         print('unsubscribe %r' % sname)
