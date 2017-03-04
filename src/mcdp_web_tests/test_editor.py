@@ -1,10 +1,10 @@
 import os
 
 from contracts.utils import check_isinstance, raise_desc
+
 from mcdp_library_tests.tests import get_test_library
 from mcdp_tests.generation import for_all_source_all
-from mcdp_web.editor_fancy.app_editor_fancy_generic import \
-    process_parse_request, specs
+from mcdp_web.editor_fancy.app_editor_fancy_generic import process_parse_request, specs
 from mcdp_web.visualization.app_visualization import generate_view_syntax
 
 
@@ -35,7 +35,7 @@ def check_editor_response(filename, source, libname):  # @UnusedVariable
     key = ()
     cache = {}
     make_relative = lambda x: x
-    res = process_parse_request(library, libname, string, spec, key, cache, make_relative)
+    res = process_parse_request(library, string, spec, key, cache, make_relative)
     
     if res['ok']:
         

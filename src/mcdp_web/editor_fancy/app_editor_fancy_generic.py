@@ -5,8 +5,8 @@ import json
 import os
 
 from contracts.utils import check_isinstance
-from pyramid.httpexceptions import HTTPFound  # @UnresolvedImport
-from pyramid.renderers import render_to_response  # @UnresolvedImport
+from pyramid.httpexceptions import HTTPFound
+from pyramid.renderers import render_to_response
 
 from mcdp import logger
 from mcdp.exceptions import DPInternalError, DPSemanticError, DPSyntaxError
@@ -19,8 +19,7 @@ from mcdp_web.resource_tree import ResourceThingViewEditor, ResourceThingViewEdi
     context_get_widget_name, ResourceThingViewEditorSave,\
     ResourceThingViewEditorGraph, ResourceThingsNew
 from mcdp_web.utils import (ajax_error_catch,
-                            format_exception_for_ajax_response, response_image)
-from mcdp_web.utils.response import response_data
+                            format_exception_for_ajax_response, response_image, response_data)
 from mcdp_web.utils0 import add_std_vars_context
 from mocdp.comp.interfaces import NamedDP
 

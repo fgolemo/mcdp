@@ -1,22 +1,21 @@
-
 function click_show_previews() {
-	$('#previews').show();
-	console.log(all_images);
-	for (var i in all_images) {
-		x = all_images[i];
-		target = x[1];
-		src = x[0];
+    $('#previews').show();
+    console.log(all_images);
+    for (var i in all_images) {
+        x = all_images[i];
+        target = x[1];
+        src = x[0];
 
-		tmpimg='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==';
+        tmpimg = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==';
 
-		$(target).prop('src',tmpimg);
-		$(target).prop('src', src);
-	}
+        $(target).prop('src', tmpimg);
+        $(target).prop('src', src);
+    }
 }
 
 $(document).ready(function() {
-	$( "button#show_previews" ).button();
-	$( "button#show_previews" ).click(click_show_previews);
+    $("button#show_previews").button();
+    $("button#show_previews").click(click_show_previews);
 
     $('#table_new_models').click(new_model);
     $('#table_new_posets').click(new_poset);

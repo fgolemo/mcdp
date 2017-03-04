@@ -6,10 +6,12 @@
     color: darkred;
 }
 
-span.library-list a:not(:last-child)::after { content: ', ' }
-tr.used {
-
+span.library-list a:not(:last-child)::after {
+    content: ', '
 }
+
+tr.used {}
+
 tr.unused {
     background-color: lightgrey;
 }
@@ -17,6 +19,7 @@ tr.unused {
 .shelves_list {
     width: 100%;
 }
+
 .shelves_list th {
     text-align: center;
 }

@@ -1,6 +1,3 @@
-from pyramid.security import Allow, Authenticated, Everyone
-import os
-
 '''
 
 root
@@ -26,8 +23,13 @@ root
     exit
 '''
 
-from mcdp_shelf.access import PRIVILEGE_ACCESS
+import os
+
 from contracts.utils import indent
+from pyramid.security import Allow, Authenticated, Everyone
+
+from mcdp_shelf.access import PRIVILEGE_ACCESS
+
 
 class Resource(object):
     
@@ -364,6 +366,5 @@ def context_get_spec(context):
     spec = specs[specname]
     return spec
 
-        
 def context_get_widget_name(context):
     return get_from_context(ResourceThing, context).name
