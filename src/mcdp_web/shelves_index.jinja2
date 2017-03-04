@@ -28,7 +28,7 @@ in a particular shelf, you need to activate it here first.</p>
         </td>
 
         <td>
-        {% if can_subscribe(sname) %}
+        {% if shelf_can_subscribe(sname) %}
         {% if sname in navigation['shelves_used'] %}
 
         <form action="{{sname}}/unsubscribe" method="post">

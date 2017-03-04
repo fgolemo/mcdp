@@ -4,12 +4,6 @@ desc_short: This shelf holds the libraries used for unit-tests.
 desc_long: |
     This is a longer description of this shelf.
 
-    It can be formatted, using:
-
-    <pre class='mcdp'>
-        mcdp {}
-    </pre>
-
 acl: [
     [Allow, Everyone, discover],
     [Allow, Authenticated, subscribe],

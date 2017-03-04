@@ -83,9 +83,14 @@ class Session():
     
         self.librarian = Librarian()
         
+        self.libname2shelfname = {}
+        for sname, shelf in self.shelves_all.items():
+            for libname in shelf.get_libraries_path():
+                self.libname2shelfname[libname] = sname
+                
         for sname, shelf in self.shelves_used.items():
             for libname, libpath in shelf.get_libraries_path().items():
-                self.librarian.add_lib_by_path(libpath)
+                self.librarian.add_lib_by_path(libpath)                
                 
         self.libraries = self.librarian.get_libraries()
         for _short, data in self.libraries.items():
@@ -94,7 +99,11 @@ class Session():
             cache_dir = os.path.join(path, '_cached/mcdpweb_cache')
             l.use_cache_dir(cache_dir)
             
-        print('libraries: %s' % self.list_libraries())
+    def get_shelf_for_libname(self, libname):
+        return self.libname2shelfname[libname]
+    
+    def get_shelf(self, shelfname):
+        return self.shelves_all[shelfname]
     
     @contract(returns='list(str)')
     def list_libraries(self):

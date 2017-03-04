@@ -1,6 +1,7 @@
 from mcdp_library.library import MCDPLibrary
 from mcdp_utils_misc.natsort import natural_sorted
 from mcdp_web.resource_tree import ResourceThing, ResourceThings, ResourceThingView, ResourceLibrary, get_from_context
+from mcdp.logs import logger
 
 
 def get_navigation_links_context(app, context, request):
@@ -12,7 +13,15 @@ def get_navigation_links_context(app, context, request):
     rlibrary = get_from_context(ResourceLibrary, context)
     if rlibrary is not None:
         current_library = rlibrary.name
-        library = session.libraries[current_library]['library']
+        if current_library in session.libraries:
+            library = session.libraries[current_library]['library']
+        else:
+            msg = 'The library %r is not available. Maybe a permission issue?' % current_library
+            msg += '\n context: %s' % context.show_ancestors()
+            logger.error(msg)
+            current_library = None
+            library = None
+#             raise Exception(msg)
     else:
         current_library = None
         library = None

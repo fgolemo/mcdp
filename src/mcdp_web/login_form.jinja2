@@ -11,9 +11,17 @@ font-size: smaller;
 {% endif %}
 {% if error %}
 	<p id='login-error'>{{error}}</p>
-{% endif %} 
+{% endif %}
+<!--
+Came from: {{came_from}}
+Came from 2: {{root}}/{{came_from}}
+
+Root: {{root}}
+ -->
+
+
   <form id='form' action="{{root}}/login/" method="post" title='Please enter login information'>
-    <input type="hidden" name="came_from" value="{{came_from}}">
+    <input type="hidden" name="came_from" value="{{root}}/{{came_from}}">
     <table>
     <tr>
       <td>
@@ -38,13 +46,13 @@ font-size: smaller;
     </tr>
     </table>
   </form>
-  
+
 <style>
 	td#last {
 		text-align: center;
 		padding-top:10pt;
 	}
-	
+
 	p#req {
 		text-align:center;
 		margin-top: 40vh;
@@ -62,17 +70,17 @@ function init_dialog() {
 		  classes: {
 		    "ui-dialog": "highlight"
 		  },
-		  position: { my: 'top', at: 'top+100' }		  
+		  position: { my: 'top', at: 'top+100' }
 	});
-	
+
 	$('#request').button().click(button_click);
-	 
-	
+
+
 }
 $(document).ready(init_dialog);
 
 </script>
- 
+
 <p id='req'><span id="req2">Don't have an account?
     <!-- <button id='request'>Request one.</button></span><br/> -->
     <a href="https://docs.google.com/forms/d/e/1FAIpQLSd62UrGvItpQJ2zm9IJMq41zOzx8giEBLMnWZw8UN9Lp4S6yQ/viewform">Request one.</a><br/>

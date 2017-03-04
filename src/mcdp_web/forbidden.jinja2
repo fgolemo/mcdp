@@ -5,11 +5,19 @@
     {% include 'head.jinja2' %}
 </head>
 <body>
-<!--{% include 'user.jinja2' %}--> 
+<!--{% include 'user.jinja2' %}-->
 
-<div>
-{% include 'login_form.jinja2' %}
-</div>
+
+
+{% if user %}
+    <p>{{user['name']}} does not have enough privileges to see this resource.</p>
+    <p><a href="{{root}}/{{url_logout}}">Try to log out</a> and log in as a different user.</p>
+
+{% else %}
+    <div>
+    {% include 'login_form.jinja2' %}
+    </div>
+{% endif %}
 
 <!--<div class='extra' style='color:white'>
 <p>Could not access: <code>{{came_from}}</code></p>
@@ -17,5 +25,8 @@
 <p>{{request_exception_result}}</p>
 </div>
 -->
+
+<pre>{{context_detail}}</pre>
+
 </body>
 </html>

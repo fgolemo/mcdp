@@ -1,10 +1,36 @@
 from pyramid.security import Allow, Authenticated, Everyone
 import os
 
+'''
+
+root
+    login
+    logout
+    libraries
+        <libname> [read]
+            refresh_library
+            interactive
+                mcdp_value
+            <specname>
+                <thingname>
+                    <views>
+                        solver
+                        edit_fancy [write]
+                            ajax_parse
+                            save
+    shelves
+    exceptions
+    exceptions_formatted
+    refresh
+    exit
+'''
+
+from mcdp_shelf.access import PRIVILEGE_ACCESS
+from contracts.utils import indent
 
 class Resource(object):
     
-    def __init__(self, name):
+    def __init__(self, name=None):
         if isinstance(name,unicode):
             name = name.encode('utf-8')
         self.name = name
@@ -13,47 +39,85 @@ class Resource(object):
         return None
     
     def __repr__(self):
-        return '%s(%s)' % (type(self).__name__, self.name)
+        if self.name is None:
+            return '%s()' % type(self).__name__
+        else:
+            return '%s(%s)' % (type(self).__name__, self.name)
     
     def __getitem__(self, key):
         r = self.getitem(key)
         if r is None:
             print('asked for %r - not found' % key)
             raise KeyError(key)
-        r.__parent__ = self
+        
+        if not hasattr(r, '__parent__'):
+            r.__parent__ = self
+        
         print('asked for %r - returning %r ' % (key, r))
         return r
+    
+    def show_ancestors(self):
+        cs = get_all_contexts(self)
+        s = '/'.join(str(_) for _ in cs)
+        return s
+    
+    def get_request(self):
+        ''' Looks up .request in the root '''
+        cs = get_all_contexts(self)
+        return cs[0].request
+
+    def get_session(self):
+        from mcdp_web.main import WebApp
+        app = WebApp.singleton
+        request = self.get_request()
+        session = app.get_session(request)
+        return session
+    
+
+def context_display_in_detail(context):
+    ''' Returns a string that displays in detail the context tree and acls. '''
+    s = ''
+    cs = get_all_contexts(context)
+    for c in cs:
+        s += '%s' % c
+        if hasattr(c, '__acl__'):
+            s += '\n' + indent('\n'.join(str(_) for _ in c.__acl__), ' | ')
+        s += '\n'
+    return s
+    
 
 class MCDPResourceRoot(Resource):
-    
-    __acl__ = [
-        (Allow, Authenticated, 'view'), 
-        (Allow, Authenticated, 'edit'),
-    ]
-    
+
     def __init__(self, request):  # @UnusedVariable
+        self.name = 'root'
+        self.request = request
         from mcdp_web.main import WebApp
         options = WebApp.singleton.options    # @UndefinedVariable
+        self.__acl__ = []
         if options.allow_anonymous:
-            MCDPResourceRoot.__acl__.append((Allow, Everyone, 'access'))
+            self.__acl__.append((Allow, Everyone, PRIVILEGE_ACCESS))
             #logger.info('Allowing everyone to access')
         else:
-            MCDPResourceRoot.__acl__.append((Allow, Authenticated, 'access'))
+            self.__acl__.append((Allow, Authenticated, PRIVILEGE_ACCESS))
             #logger.info('Allowing authenticated to access')
     
     def getitem(self, key):
         subs =  {
-            'libraries': ResourceLibraries('libraries'),
-            'shelves': ResourceShelves('shelves'),
-            'exceptions': ResourceExceptionsJSON('exceptions'),
-            'exceptions_formatted': ResourceExceptionsFormatted('exceptions_formatted'),
-            'refresh': ResourceRefresh('refresh'),
-            'exit': ResourceExit('exit'),
+            'libraries': ResourceLibraries(),
+            'shelves': ResourceShelves(),
+            'exceptions': ResourceExceptionsJSON(),
+            'exceptions_formatted': ResourceExceptionsFormatted(),
+            'refresh': ResourceRefresh(),
+            'exit': ResourceExit(),
+            'login': ResourceLogin(),
+            'logout': ResourceLogout(),
+            'robots.txt': ResourceRobots(),
         }    
         return subs.get(key, None)
             
-class ResourceExit(Resource):
-    pass
+class ResourceExit(Resource): pass
+class ResourceLogin(Resource): pass
+class ResourceLogout(Resource): pass
         
 class ResourceShelves(Resource):
     def getitem(self, key):
@@ -68,24 +132,37 @@ class ResourceShelvesShelf(Resource):
         }    
         return subs.get(key, None)
 
-class ResourceShelvesShelfSubscribe(Resource):
-    pass
-
-class ResourceShelvesShelfUnsubscribe(Resource):
-    pass
-
-
+class ResourceShelvesShelfSubscribe(Resource): pass
+class ResourceShelvesShelfUnsubscribe(Resource): pass
 class ResourceExceptionsFormatted(Resource): pass 
 class ResourceExceptionsJSON(Resource): pass
-
 class ResourceRefresh(Resource): pass 
     
 class ResourceLibraries(Resource): 
     
-    def getitem(self, key):
-        return ResourceLibrary(key)
+    def getitem(self, libname):
+        
+        session = self.get_session()
+        shelfname = session.get_shelf_for_libname(libname)
+    
+        r1 = ResourceShelf(shelfname)
+        r1.__parent__ = self
+        r2 = ResourceLibrary(libname)
+        r2.__parent__ = r1
+        
+        print 'returning', r2.show_ancestors()
+        return r2
 
 class ResourceShelf(Resource): 
+    
+    def __init__(self, name):
+        Resource.__init__(self, name)
+        
+    @property
+    def __acl__(self):
+        session = self.get_session()
+        shelf = session.get_shelf(self.name)
+        return shelf.get_acl().as_pyramid_acl()
         
     def getitem(self, key):
         return ResourceLibrary(key)
@@ -94,9 +171,9 @@ class ResourceLibrary(Resource):
     
     def getitem(self, key):
         if key == 'refresh_library':
-            return ResourceLibraryRefresh('refresh_library')
+            return ResourceLibraryRefresh()
         if key == 'interactive':
-            return ResourceLibraryInteractive('interactive')
+            return ResourceLibraryInteractive()
         
         if key.endswith('.html'):
             docname = os.path.splitext(key)[0]
@@ -111,19 +188,17 @@ class ResourceLibraryAsset(Resource): pass
 class ResourceLibraryInteractive(Resource): 
     def getitem(self, key):
         if key == 'mcdp_value':
-            return ResourceLibraryInteractiveValue('mcdp_value')
+            return ResourceLibraryInteractiveValue()
 
 class ResourceLibraryInteractiveValue(Resource): 
     def getitem(self, key):
         if key == 'parse':
-            return ResourceLibraryInteractiveValueParse('parse')
+            return ResourceLibraryInteractiveValueParse()
 
 
-class ResourceLibraryInteractiveValueParse(Resource): 
-    pass
+class ResourceLibraryInteractiveValueParse(Resource): pass
 
-class ResourceLibraryRefresh(Resource):
-    pass
+class ResourceLibraryRefresh(Resource): pass
     
 class ResourceThings(Resource):
     def __init__(self, specname):
@@ -147,28 +222,25 @@ class ResourceThing(Resource):
 class ResourceThingViews(Resource):
     def getitem(self, key):
         subs =  {
-            'syntax': ResourceThingViewSyntax('syntax'),
-            'edit_fancy': ResourceThingViewEditor('edit_fancy'),
+            'syntax': ResourceThingViewSyntax(),
+            'edit_fancy': ResourceThingViewEditor(),
             
         }
         if self.__parent__.__parent__.specname == 'models':
             subs2 = {
-                'dp_graph': ResourceThingViewDPGraph('dp_graph'),
-                'dp_tree': ResourceThingViewDPTree('dp_tree'),
-                'ndp_graph': ResourceThingViewNDPGraph('ndp_graph'),
-                'ndp_repr': ResourceThingViewNDPRepr('ndp_repr'),
-                'solver2': ResourceThingViewSolver('solver2'),
-                'solver': ResourceThingViewSolver0('solver'),
+                'dp_graph': ResourceThingViewDPGraph(),
+                'dp_tree': ResourceThingViewDPTree(),
+                'ndp_graph': ResourceThingViewNDPGraph(),
+                'ndp_repr': ResourceThingViewNDPRepr(),
+                'solver2': ResourceThingViewSolver(),
+                'solver': ResourceThingViewSolver0(),
             }
             subs.update(**subs2)
             
         return subs.get(key, None)
     
-class ResourceThingView(Resource):
-    pass
-    
+class ResourceThingView(Resource): pass
 class ResourceThingViewSyntax(ResourceThingView): pass
-
 class ResourceThingViewDPGraph(ResourceThingView): pass
 class ResourceThingViewDPTree(ResourceThingView): pass
 class ResourceThingViewNDPGraph(ResourceThingView): pass
@@ -180,15 +252,28 @@ class ResourceThingViewSolver0(ResourceThingView): pass
 class ResourceThingViewEditor(ResourceThingView):
     def getitem(self, key): 
         subs =  {
-            'ajax_parse': ResourceThingViewEditorParse('ajax_parse'),
-            'save': ResourceThingViewEditorSave('save'),
+            'ajax_parse': ResourceThingViewEditorParse(),
+            'save': ResourceThingViewEditorSave(),
         }
-        return subs.get(key, None)
- 
+        if key in subs:
+            return subs[key]
+        
+        if key.startswith('graph.'):
+            _, text_hash, data_format = key.split('.')
+            return ResourceThingViewEditorGraph(text_hash.encode('utf8'), data_format.encode('utf8'))
+
 
 class ResourceThingViewEditorParse(Resource): pass
 class ResourceThingViewEditorSave(Resource): pass
 
+class ResourceThingViewEditorGraph(Resource): 
+    def __init__(self, text_hash, data_format):
+        self.text_hash = text_hash
+        self.data_format = data_format
+        self.name = 'graph.%s.%s' % (text_hash, data_format)
+         
+
+class ResourceRobots(Resource): pass
 
 def get_all_contexts(context):
     if hasattr(context, '__parent__'):

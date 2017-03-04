@@ -1,107 +1,35 @@
 # -*- coding: utf-8 -*-
 import cgi
-from collections import defaultdict, namedtuple
+from collections import defaultdict
 import json
 import os
 
-from bs4 import BeautifulSoup
-from contracts import contract
-from contracts.utils import check_isinstance, raise_desc
+from contracts.utils import check_isinstance
 from pyramid.httpexceptions import HTTPFound  # @UnresolvedImport
 from pyramid.renderers import render_to_response  # @UnresolvedImport
 
 from mcdp import logger
 from mcdp.exceptions import DPInternalError, DPSemanticError, DPSyntaxError
-from mcdp_lang.parse_interface import (parse_ndp_eval, parse_ndp_refine,
-                                       parse_template_eval, parse_template_refine, parse_constant_eval,
-                                       parse_constant_refine, parse_poset_eval, parse_poset_refine)
 from mcdp_lang.suggestions import get_suggestions, apply_suggestions
-from mcdp_lang.syntax import Syntax
-from mcdp_library import MCDPLibrary
-from mcdp_report.html import ast_to_html, ATTR_WHERE_CHAR, ATTR_WHERE_CHAR_END
+from mcdp_report.html import ast_to_html
 from mcdp_utils_misc.string_utils import get_sha1
 from mcdp_utils_misc.timing import timeit_wall
+from mcdp_web.editor_fancy.html_mark_imp import html_mark,\
+    html_mark_syntax_error
+from mcdp_web.editor_fancy.specs_def import spec_templates,\
+    spec_values, spec_posets, spec_models, specs
 from mcdp_web.resource_tree import ResourceThingViewEditor, ResourceThingViewEditorParse,\
     context_get_spec, context_get_library_name, context_get_library,\
-    context_get_widget_name, ResourceThingViewEditorSave
+    context_get_widget_name, ResourceThingViewEditorSave,\
+    ResourceThingViewEditorGraph
 from mcdp_web.utils import (ajax_error_catch,
                             format_exception_for_ajax_response, response_image)
 from mcdp_web.utils.response import response_data
 from mcdp_web.utils0 import add_std_vars_context
 from mocdp.comp.interfaces import NamedDP
 
-from .image import (get_png_data_model,
-                    ndp_template_enclosed, get_png_data_unavailable, get_png_data_poset,
-                    get_png_data_syntax_model)
 from .warnings_unconnected import generate_unconnected_warnings
 
-
-Spec = namedtuple('Spec', 
-                  ' url_part '
-                  ' url_variable'
-                  ' extension '
-                  ' parse ' # function that returns the object.
-                            # It is a composition of the following:
-                  ' parse_expr ' #  expr = parse_wrap(string, expr)
-                  ' parse_refine ' # expr2 = parse_refine(expr, context)
-                  ' parse_eval '   # ndp = parse_eval(expr2, context
-                  ' load ' # load(name, context)
-                  ' get_png_data'
-                  ' get_png_data_syntax'
-                  ' write minimal_source_code')
-specs = {}
-
-spec_models = specs['models'] = Spec(url_part='models', 
-                                     url_variable='model_name',
-                      extension=MCDPLibrary.ext_ndps,
-                      parse=MCDPLibrary.parse_ndp,
-                      parse_expr=Syntax.ndpt_dp_rvalue,
-                      parse_refine=parse_ndp_refine,
-                      parse_eval=parse_ndp_eval,
-                      load=MCDPLibrary.load_ndp,
-                      get_png_data=get_png_data_model,
-                      get_png_data_syntax=get_png_data_syntax_model,
-                      write=MCDPLibrary.write_to_model,
-                      minimal_source_code="mcdp {\n    \n}")
-
-spec_templates = specs['templates']= Spec(url_part='templates', 
-                                          url_variable='template_name',
-                      extension=MCDPLibrary.ext_templates,
-                      parse=MCDPLibrary.parse_template,
-                      parse_expr=Syntax.template,
-                      parse_refine=parse_template_refine,
-                      parse_eval=parse_template_eval,
-                      load=MCDPLibrary.load_template,
-                      get_png_data=ndp_template_enclosed,
-                      get_png_data_syntax=ndp_template_enclosed,
-                      write=MCDPLibrary.write_to_template,
-                      minimal_source_code="template []\n\nmcdp {\n    \n}")
-
-spec_values = specs['values'] = Spec(url_part='values', 
-                                     url_variable='value_name',
-                   extension=MCDPLibrary.ext_values,
-                   parse=MCDPLibrary.parse_constant,
-                   parse_expr=Syntax.rvalue,
-                   parse_refine=parse_constant_refine,
-                   parse_eval=parse_constant_eval,
-                   load=MCDPLibrary.load_constant,
-                   get_png_data=get_png_data_unavailable,
-                   get_png_data_syntax=get_png_data_unavailable,
-                   write=MCDPLibrary.write_to_constant,
-                   minimal_source_code="0 g")
-
-spec_posets =specs['posets']= Spec(url_part='posets', 
-                                   url_variable='poset_name',
-                   extension=MCDPLibrary.ext_posets,
-                   parse=MCDPLibrary.parse_poset,
-                   parse_expr=Syntax.space,
-                   parse_refine=parse_poset_refine,
-                   parse_eval=parse_poset_eval,
-                   load=MCDPLibrary.load_poset,
-                   get_png_data=get_png_data_poset,
-                   get_png_data_syntax=get_png_data_poset,
-                   write=MCDPLibrary.write_to_poset,
-                   minimal_source_code="poset {\n    \n}")
 
 class AppEditorFancyGeneric():
 
@@ -114,13 +42,9 @@ class AppEditorFancyGeneric():
         config.add_view(self.view_edit_form_fancy, 
                         context=ResourceThingViewEditor, 
                         renderer='editor_fancy/edit_form_fancy_generic.jinja2')
-
-        config.add_view(self.ajax_parse, 
-                        context=ResourceThingViewEditorParse, 
-                        renderer='json')
-        config.add_view(self.save, 
-                        context=ResourceThingViewEditorSave, 
-                        renderer='json')
+        config.add_view(self.ajax_parse, context=ResourceThingViewEditorParse, renderer='json')
+        config.add_view(self.save, context=ResourceThingViewEditorSave, renderer='json')
+        config.add_view(self.graph_generic, context=ResourceThingViewEditorGraph)
 
         self.config_(config, spec_templates)
         self.config_(config, spec_values)
@@ -131,16 +55,7 @@ class AppEditorFancyGeneric():
     def config_(self, config, spec):
         """
             what = templates, values, posets
-        """
-        url = self.get_glmv_url2('{library}', spec.url_part, '{%s}' % spec.url_variable,
-                                 'edit_fancy', request=None)  
-
-        graph = lambda req: self.graph_generic(req, spec)
-        route = spec.url_part + '_graph'
-        url2 = url + 'graph.{text_hash}.{data_format}'
-        config.add_route(route, url2)
-        
-        config.add_view(graph, route_name=route)
+        """ 
 
         new = lambda req: self.view_new_model_generic(req, spec)
         route = spec.url_part + '_new'
@@ -211,28 +126,28 @@ class AppEditorFancyGeneric():
             with timeit_wall('process_parse_request'):
                 res = process_parse_request(library, library_name, string, spec, key, cache, make_relative)
             res['request'] = req
-            
             return res
 
         return ajax_error_catch(go)
 
-    def graph_generic(self, request, spec):
+    def graph_generic(self, context, request):
+        spec = context_get_spec(context)
+        data_format = context.data_format
+        text_hash = context.text_hash
+        widget_name = context_get_widget_name(context)
+        library_name = context_get_library_name(context)
+        library = context_get_library(context, request)
+        
         def go():
+            
             with timeit_wall('graph_generic', 1.0):
-                data_format = str(request.matchdict['data_format'])  # unicode
-                text_hash = str(request.matchdict['text_hash'])
-                library = self.get_library(request)
-                widget_name = self.get_widget_name(request, spec)
-                library_name = self.get_current_library_name(request)
-                
                 key = (library_name, spec.url_part, widget_name, text_hash)
     
                 if not key in self.last_processed2:
                     logger.error('Cannot find key %s' % str(key))
                     logger.error('keys: %s' % list(self.last_processed2))
-                    l = self.get_library(request)
-                    context = l._generate_context_with_hooks()
-                    thing = spec.load(l, widget_name, context=context)
+                    context = library._generate_context_with_hooks()
+                    thing = spec.load(library, widget_name, context=context)
                 else:
                     thing = self.last_processed2[key]
                     if thing is None:
@@ -281,71 +196,6 @@ class AppEditorFancyGeneric():
 
             raise HTTPFound(url_edit)
 
-
-@contract(html=bytes, returns=bytes)
-def html_mark(html, where, add_class, tooltip=None):
-    """ Takes a utf-8 encoded string and returns another html string. 
-    
-        The tooltip functionality is disabled for now.
-    """
-    check_isinstance(html, bytes)
-    
-    html = '<www><pre>' + html + '</pre></www>'
-    soup = BeautifulSoup(html, 'lxml', from_encoding='utf-8')
-
-    elements = soup.find_all("span")
-    
-    found = [] 
-    
-    for e in elements:
-        if e.has_attr(ATTR_WHERE_CHAR):
-            character = int(e[ATTR_WHERE_CHAR])
-            character_end = int(e[ATTR_WHERE_CHAR_END])
-            #print (where.character, character, character_end, where.character_end)
-            # inside = where.character <= character <= character_end <= where.character_end
-            inside = character <= where.character <= where.character_end <= character_end
-            if inside:
-                found.append(e)
-                
-    if not found:
-        msg = 'Cannot find any html element for this location:\n\n%s' % where
-        msg += '\nwhere start: %s end: %s' % (where.character, where.character_end)
-        msg += '\nwhere.string = %r' % where.string
-        msg += '\n' + html.__repr__()
-        raise_desc(DPInternalError, msg)
-        
-    # find the smallest one
-    def e_size(e):
-        character = int(e[ATTR_WHERE_CHAR])
-        character_end = int(e[ATTR_WHERE_CHAR_END])
-        l = character_end - character
-        return l
-    
-    ordered = sorted(found, key=e_size)
-        
-    e2 = ordered[0]    
-    e2['class'] = e2.get('class', []) + [add_class]
-    
-    if tooltip is not None:
-        script = 'show_tooltip(this, %r);' % tooltip
-        tooltip_u =  unicode(tooltip, 'utf-8') 
-        e2['onmouseover'] = script
-        e2['title'] = tooltip_u 
-        
-    pre = soup.body.www
-    s = str(pre)
-    s = s.replace('<www><pre>', '')
-    s = s.replace('</pre></www>', '')
-    assert isinstance(s, str)
-    return s
-    
-def html_mark_syntax_error(string, e):
-    where = e.where
-    character = where.character
-    first = string[:character]
-    rest = string[character:]
-    s = "" + first + '<span style="color:red">'+rest + '</span>'
-    return s 
 
 def process_parse_request(library, library_name, string, spec, key, cache, make_relative):
     """ returns a dict to be used as the request,

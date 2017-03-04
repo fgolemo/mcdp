@@ -22,9 +22,13 @@ from mcdp.exceptions import DPSemanticError, DPSyntaxError
 from mcdp_docs.pipeline import render_complete
 from mcdp_library import MCDPLibrary
 from mcdp_library.utils import dir_from_package_name
+from mcdp_shelf.access import PRIVILEGE_ACCESS, PRIVILEGE_READ
 from mcdp_shelf.shelves import find_shelves
 from mcdp_user_db.userdb import UserDB
 from mcdp_utils_misc import duration_compact, natural_sorted
+from mcdp_web.resource_tree import ResourceLibraryRefresh, ResourceRefresh,\
+    ResourceExit, ResourceLibraryDocRender, context_get_library,\
+    ResourceLibraryAsset, ResourceRobots
 
 from .confi import describe_mcdpweb_params, parse_mcdpweb_params_from_dict
 from .editor_fancy import AppEditorFancyGeneric
@@ -43,9 +47,6 @@ from .solver2.app_solver2 import AppSolver2
 from .status import AppStatus
 from .utils0 import add_std_vars_context
 from .visualization.app_visualization import AppVisualization
-from mcdp_web.resource_tree import ResourceLibraryRefresh, ResourceRefresh,\
-    ResourceExit, ResourceLibraryDocRender, context_get_library,\
-    ResourceLibraryAsset
 
 
 __all__ = [
@@ -597,7 +598,7 @@ class WebApp(AppVisualization, AppStatus,
         authz_policy = ACLAuthorizationPolicy()
         config.set_authentication_policy(authn_policy)
         config.set_authorization_policy(authz_policy)
-        config.set_default_permission('access')
+        config.set_default_permission(PRIVILEGE_ACCESS)
 
         config.add_renderer('jsonp', JSONP(param_name='callback'))
 
@@ -614,55 +615,34 @@ class WebApp(AppVisualization, AppStatus,
         AppLogin.config(self, config)
         AppSolver2.config(self, config)
 
-
         config.add_view(self.view_dummy, context=MCDPResourceRoot, renderer='index.jinja2')
         config.add_view(self.view_dummy, context=ResourceLibraries, renderer='list_libraries.jinja2')
-        config.add_view(self.view_dummy, context=ResourceLibrary, renderer='library_index.jinja2')
+        config.add_view(self.view_dummy, context=ResourceLibrary, renderer='library_index.jinja2', permission=PRIVILEGE_READ)
         config.add_view(self.view_shelves_index, context=ResourceShelves, renderer='shelves_index.jinja2')
         config.add_view(self.view_shelf, context=ResourceShelvesShelf, renderer='shelf.jinja2')
         config.add_view(self.view_shelves_subscribe, context=ResourceShelvesShelfSubscribe)
         config.add_view(self.view_shelves_unsubscribe, context=ResourceShelvesShelfUnsubscribe)
+        config.add_view(self.view_library_doc, context=ResourceLibraryDocRender, renderer='library_doc.jinja2', permission=PRIVILEGE_READ)
+        config.add_view(self.view_library_asset, context=ResourceLibraryAsset, permission=PRIVILEGE_READ)
+        config.add_view(self.view_refresh_library, context=ResourceLibraryRefresh, permission=PRIVILEGE_READ)
+        config.add_view(self.view_refresh, context=ResourceRefresh, permission=PRIVILEGE_READ)
         
-        config.add_view(self.view_library_doc, 
-                        context=ResourceLibraryDocRender,
-                        renderer='library_doc.jinja2')
-
-        config.add_view(self.view_library_asset, 
-                        context=ResourceLibraryAsset)
-
-        config.add_view(self.view_refresh_library, 
-                        context=ResourceLibraryRefresh)
-        config.add_view(self.view_refresh, 
-                        context=ResourceRefresh)
-        config.add_view(self.view_exception, 
-                        context=Exception, 
-                        renderer='exception.jinja2')
-
+        config.add_view(self.view_exception, context=Exception, renderer='exception.jinja2')
         config.add_view(self.exit, context=ResourceExit, renderer='json',
                         permission=pyramid.security.NO_PERMISSION_REQUIRED)
 
-        config.add_view(self.view_exceptions_occurred, 
-                        context=ResourceExceptionsJSON, 
-                        renderer='json')
-        config.add_view(self.view_exceptions_occurred, 
-                        context=ResourceExceptionsFormatted, 
-                        renderer='exceptions_formatted.jinja2')
-
-        # mainly used for wget
-        config.add_route('robots', '/robots.txt')
-        def serve_robots(request):  # @UnusedVariable
-            body = "User-agent: *\nDisallow:"
-            return Response(content_type='text/plain', body=body)
-
-        config.add_view(serve_robots, route_name='robots')
-
+        config.add_view(self.view_exceptions_occurred, context=ResourceExceptionsJSON, renderer='json')
+        config.add_view(self.view_exceptions_occurred, context=ResourceExceptionsFormatted, renderer='exceptions_formatted.jinja2')
+        config.add_view(serve_robots, context=ResourceRobots)
         config.add_notfound_view(self.view_not_found, renderer='404.jinja2')
         config.scan()
 
         app = config.make_wsgi_app()
         return app
     
-
+def serve_robots(request):  # @UnusedVariable
+    body = "User-agent: *\nDisallow:"
+    return Response(content_type='text/plain', body=body)
     
 
 class MCDPWeb(QuickAppBase):

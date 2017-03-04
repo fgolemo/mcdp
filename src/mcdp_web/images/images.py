@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from mcdp_figures import MakeFiguresNDP
+from mcdp_utils_misc import get_mime_for_format
 from mcdp_web.utils.response import response_data
 from mcdp_web.utils0 import add_std_vars
 
@@ -76,21 +77,7 @@ class WebAppImages():
             data = mf.get_figure('ndp_graph_templatized', data_format)
             mime = get_mime_for_format(data_format)
             return response_data(request=request, data=data, content_type=mime)
-        return self.png_error_catch2(request, go)                        
+        return self.png_error_catch2(request, go)
 
-def get_mime_for_format(data_format):
-    table = get_mime_table()
-    return table[data_format]
-
-def get_mime_table():
-    d = {
-         'pdf': 'image/pdf',
-         'png': 'image/png',
-         'jpg': 'image/jpg',
-         'dot': 'text/plain',
-         'txt': 'text/plain',
-         'svg': 'image/svg+xml',
-    }
-    return d
 
 

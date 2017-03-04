@@ -3,12 +3,13 @@ import os
 
 from contracts import contract
 from contracts.utils import raise_desc, check_isinstance
+
 from mcdp import MCDPConstants, logger
 from mcdp.exceptions import DPSemanticError
+from mcdp_library.utils import dir_from_package_name
 
 from .library import MCDPLibrary
 from .utils import locate_files
-from mcdp_library.utils.dir_from_package_nam import dir_from_package_name
 
 
 __all__ = [

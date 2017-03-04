@@ -1,14 +1,18 @@
+# -*- coding: utf-8 -*-
 import traceback
 
-from compmake.utils.duration_hum import duration_compact
 from contracts.utils import check_isinstance, indent
+from pyramid.httpexceptions import HTTPException
+
+from compmake.utils.duration_hum import duration_compact
 from mcdp import logger
 import mcdp
-from mcdp_web.get_navigation_links_imp import get_navigation_links_context
 from mcdp_library.library import MCDPLibrary
-from mcdp_shelf.access import PRIVILEGE_SUBSCRIBE
+from mcdp_shelf.access import PRIVILEGE_SUBSCRIBE, PRIVILEGE_READ,\
+    PRIVILEGE_WRITE, PRIVILEGE_ADMIN
+from mcdp_web.get_navigation_links_imp import get_navigation_links_context
+from mcdp_web.resource_tree import context_display_in_detail, Resource
 
-from pyramid.httpexceptions import HTTPException
 
 def add_other_fields(self, res, request, context=None):
     if context is None:
@@ -38,23 +42,30 @@ def add_other_fields(self, res, request, context=None):
     
     session = self.get_session(request)
     
-    if request.authenticated_userid is not None:
-        username = request.authenticated_userid
-        print('authenticated_userid',username)
-        user_db = self.user_db
-        if username in user_db:
-            res['user'] = user_db[username].dict_for_page()
-            groups = user_db[username].get_groups()
-        else:
-            res['user'] = None
-            groups = []
-    else:
-        username = None
-        res['user'] = None
-        groups = []
+    user = self.user_db[request.authenticated_userid]
     
-                
-    res['can_subscribe'] = lambda sname: session.shelves_available[sname].get_acl().allowed(PRIVILEGE_SUBSCRIBE, username, groups)
+    if request.authenticated_userid is not None:
+        res['user'] = user.dict_for_page()
+    else:
+        res['user'] = None
+    
+    def shelf_privilege(sname, privilege):
+        acl = session.shelves_available[sname].get_acl()
+        return acl.allowed2(privilege, user)
+         
+    def can_subscribe(sname):
+        return shelf_privilege(sname, PRIVILEGE_SUBSCRIBE)
+    def can_read(sname):
+        return shelf_privilege(sname, PRIVILEGE_READ)
+    def can_write(sname):
+        return shelf_privilege(sname, PRIVILEGE_WRITE)
+    def can_admin(sname):
+        return shelf_privilege(sname, PRIVILEGE_ADMIN)
+    
+    res['shelf_can_read'] = can_read
+    res['shelf_can_write'] = can_write           
+    res['shelf_can_subscribe'] = can_subscribe
+    res['shelf_can_admin'] = can_admin           
     
     
     
@@ -72,6 +83,7 @@ def add_std_vars(f):
         return res
     return f0
 
+
 def add_std_vars_context(f):
     def f0(self, context, request):
         try:
@@ -84,6 +96,12 @@ def add_std_vars_context(f):
             logger.error(msg)
             raise
         check_isinstance(res, dict)
-        add_other_fields(self, res, request, context=context)
+        try:
+            add_other_fields(self, res, request, context=context)
+        except:
+            logger.error('Error after executing view %s' % f)
+            if isinstance(context, Resource):
+                logger.debug(context_display_in_detail(context))
+            raise
         return res
     return f0

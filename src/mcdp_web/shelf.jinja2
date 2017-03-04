@@ -24,7 +24,7 @@
 </p>
 
  <p>
-{% if can_subscribe(sname) %}
+{% if shelf_can_subscribe(sname) %}
 {% if sname in navigation['shelves_used'] %}
 <form action="{{root}}/shelves/{{sname}}/unsubscribe" method="post">
     <input type="submit" value="unsubscribe"/>
@@ -36,7 +36,7 @@
 {% endif %}
 {% endif %}
 </p>
-        
+
 
 
 {% include 'footer.jinja2' %}
