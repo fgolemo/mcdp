@@ -101,7 +101,7 @@ class AppEditorFancyGeneric():
         make_relative = lambda s: self.make_relative(request, s)
         def go():
             with timeit_wall('process_parse_request'):
-                res = process_parse_request(library, library_name, string, spec, key, cache, make_relative)
+                res = process_parse_request(library, string, spec, key, cache, make_relative)
             res['request'] = req
             return res
 
@@ -178,7 +178,7 @@ class AppEditorFancyGeneric():
             raise HTTPFound(url_edit)
 
 
-def process_parse_request(library, library_name, string, spec, key, cache, make_relative):
+def process_parse_request(library, string, spec, key, cache, make_relative):
     """ returns a dict to be used as the request,
         or raises an exception """
     from mcdp_report.html import sanitize

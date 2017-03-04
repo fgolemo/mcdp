@@ -6,7 +6,7 @@ import yaml
 
 from mcdp.logs import logger
 from mcdp_library.libraries import find_libraries
-from mcdp_library.utils.locate_files_imp import locate_files
+from mcdp_utils_misc.locate_files_imp import locate_files
 from mcdp_shelf.access import acl_from_yaml
 from mcdp_utils_misc import indent_plus_invisibles, read_file_encoded_as_utf8
 

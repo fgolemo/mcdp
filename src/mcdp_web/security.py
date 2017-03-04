@@ -78,8 +78,7 @@ class AppLogin():
          
         if came_from.startswith('/'):
             came_from = self.make_relative(request, came_from)
-            
-        
+
         res = dict(
             name='Login',
             message=message,
@@ -92,7 +91,7 @@ class AppLogin():
         res['root'] =  self.get_root_relative_to_here(request)
         return res
 
-    def logout(self, context, request):
+    def logout(self, request):
         headers = forget(request)
         came_from = request.referrer
         return HTTPFound(location=came_from, headers=headers)

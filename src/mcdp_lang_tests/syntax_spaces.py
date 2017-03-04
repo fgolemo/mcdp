@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
+from contracts.utils import indent
 from nose.tools import assert_equal, assert_raises
 
 from comptests.registrar import comptest, run_module_tests, comptest_fails
-from contracts.utils import indent
+from mcdp.exceptions import DPSemanticError
 from mcdp_lang import parse_ndp
 from mcdp_lang.dealing_with_special_letters import greek_letters, subscripts
 from mcdp_lang.eval_space_imp import eval_space
@@ -13,10 +14,8 @@ from mcdp_lang.syntax import Syntax
 from mcdp_lang_tests.utils import parse_wrap_check, TestFailed
 from mcdp_lang_tests.utils2 import eval_rvalue_as_constant
 from mcdp_report.out_mcdpl import extract_ws
-from mcdp import MCDPConstants
+from mcdp_utils_misc import make_chars_visible
 from mocdp.comp.context import Context
-from mcdp.exceptions import DPSemanticError
-from mcdp_utils_misc.string_repr import make_chars_visible
 
 
 @comptest

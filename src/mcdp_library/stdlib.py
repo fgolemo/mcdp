@@ -5,7 +5,7 @@ from contracts.utils import raise_desc
 from mcdp import logger, MCDPConstants
 from mcdp_utils_misc.memoize_simple_imp import memoize_simple
 from mcdp_library import Librarian
-from mcdp_library.utils import dir_from_package_name
+from mcdp_utils_misc.dir_from_package_nam import dir_from_package_name
 
 
 TestLibrary = namedtuple('TestLibrary', 'bigpath librarian short path ')

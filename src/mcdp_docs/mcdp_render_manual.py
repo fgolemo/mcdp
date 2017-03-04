@@ -15,11 +15,11 @@ from mcdp_docs.manual_constants import MCDPManualConstants
 from mcdp_docs.minimal_doc import get_minimal_document
 from mcdp_library import MCDPLibrary
 from mcdp_library.stdlib import get_test_librarian
-from mcdp_library.utils import locate_files
 from quickapp import QuickApp
 from reprep.utils import natsorted
 
 from .manual_join_imp import manual_join
+from mcdp_utils_misc.locate_files_imp import locate_files
 
 
 def get_manual_contents(srcdir):

@@ -21,11 +21,11 @@ from mcdp import logger
 from mcdp.exceptions import DPSemanticError, DPSyntaxError
 from mcdp_docs.pipeline import render_complete
 from mcdp_library import MCDPLibrary
-from mcdp_library.utils import dir_from_package_name
 from mcdp_shelf.access import PRIVILEGE_ACCESS, PRIVILEGE_READ
 from mcdp_shelf.shelves import find_shelves
 from mcdp_user_db.userdb import UserDB
 from mcdp_utils_misc import duration_compact, natural_sorted
+from mcdp_utils_misc.dir_from_package_nam import dir_from_package_name
 from mcdp_web.resource_tree import ResourceLibraryRefresh, ResourceRefresh,\
     ResourceExit, ResourceLibraryDocRender, context_get_library,\
     ResourceLibraryAsset, ResourceRobots

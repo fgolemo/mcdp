@@ -29,7 +29,7 @@ access: {}
 
 @comptest
 def shelves01():
-    d = create_hierarchy(setup_shelve_01)
+    _d=create_hierarchy(setup_shelve_01)
     
 setup_permissions = { 
     'u_andrea_public.mcdpshelf': {
