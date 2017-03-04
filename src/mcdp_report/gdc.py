@@ -4,15 +4,11 @@ import os
 from tempfile import mkdtemp
 
 from contracts.utils import check_isinstance
-from system_cmd.meat import system_cmd_result
-from system_cmd.structures import CmdException
+from system_cmd import CmdException, system_cmd_result
 
 from mcdp import MCDPConstants
 from mcdp.exceptions import mcdp_dev_warning
-from mcdp_library.utils import dir_from_package_name
-from mcdp_library.utils import locate_files
-from mcdp_utils_misc.fileutils import get_mcdp_tmp_dir
-from mcdp_utils_misc.memoize_simple_imp import memoize_simple
+from mcdp_utils_misc import dir_from_package_name, get_mcdp_tmp_dir, locate_files, memoize_simple
 
 from .utils import safe_makedirs
 

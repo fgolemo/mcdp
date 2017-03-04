@@ -42,6 +42,8 @@ class SolverState():
             raise ValueError("Not valid: %s" % f)
 
         for k, v in f.items():
+            
+            k = k.encode('utf8') # XXX do before
             i = fnames.index(k)
             F = self.ndp.get_ftype(k)
             fv[i] = permissive_parse(F, v)

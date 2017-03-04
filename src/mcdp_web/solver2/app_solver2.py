@@ -20,8 +20,11 @@ from mcdp_lang.parse_interface import parse_constant
 from mcdp_posets import express_value_in_isomorphic_space, LowerSets,  NotLeq, UpperSets
 from mcdp_report.gg_ndp import format_unit
 from mcdp_report.plotters.get_plotters_imp import get_best_plotter
-from mcdp_web.resource_tree import ResourceThingViewSolver, get_from_context,\
-    ResourceThing
+from mcdp_web.resource_tree import ResourceThingViewSolver,\
+    ResourceThingViewSolver_submit,\
+    ResourceThingViewSolver_display_png, ResourceThingViewSolver_display1u,\
+    ResourceThingViewSolver_display1u_png, context_get_widget_name,\
+    context_get_library_name, context_get_library
 from mcdp_web.utils import ajax_error_catch, memoize_simple, response_data
 from mcdp_web.utils.image_error_catch_imp import response_image
 from mcdp_web.utils0 import add_std_vars_context
@@ -49,29 +52,31 @@ class AppSolver2():
     """
 
     def __init__(self):
-        self.solutions = {}
+        self.solutions = {} 
 
     def config(self, config):
-        config.add_view(self.view_solver2_base, context=ResourceThingViewSolver, renderer='solver2/solver2_base.jinja2')
-        
-        base = '/libraries/{library}/models/{model_name}/views/solver2/'
+        config.add_view(self.view_solver2_base, 
+                        context=ResourceThingViewSolver, 
+                        renderer='solver2/solver2_base.jinja2')
 
-
-        config.add_route('solver2_submit', base + 'submit')
-        config.add_view(self.view_solver2_submit, route_name='solver2_submit',
+        config.add_view(self.view_solver2_submit, 
+                        context=ResourceThingViewSolver_submit,
                         renderer='json')
-
-        config.add_route('solver2_display', base + 'display.png')
-        config.add_view(self.view_solver2_display, route_name='solver2_display')
-
-        config.add_route('view_solver2_display1u_ui', base + 'display1u')
+        
+        config.add_view(self.view_solver2_display,
+                        context=ResourceThingViewSolver_display_png)
+        
         config.add_view(self.view_solver2_display1u_ui,
-                        route_name='view_solver2_display1u_ui',
+                        context=ResourceThingViewSolver_display1u,
                         renderer='solver2/solver2_display1u_ui.jinja2')
+        
+        config.add_view(self.view_solver2_display1u, 
+                        context=ResourceThingViewSolver_display1u_png)
 
-        config.add_route('view_solver2_display1d', base + 'display1u.png')
-        config.add_view(self.view_solver2_display1u, route_name='view_solver2_display1d')
-
+    def get_ndp_dp(self, session, library_name, model_name):
+        self._xxx_session = session
+        return self._get_ndp_dp(self, library_name, model_name)
+    
     @memoize_simple
     def _get_ndp_dp(self, library_name, model_name):
         library = self._xxx_session.libraries[library_name]['library']
@@ -81,11 +86,12 @@ class AppSolver2():
 
     @add_std_vars_context
     def view_solver2_base(self, context, request):
-        model_name = get_from_context(ResourceThing, context).name
-        library = self.get_current_library_name(request, context)
+        model_name = context_get_widget_name(context)
+        library_name = context_get_library_name(context, request)
         
-        self._xxx_session = self.get_session(request) 
-        ndp, dp = self._get_ndp_dp(library, model_name)
+        # you don't want to memoize
+        session = self.get_session(request) 
+        ndp, dp = self.get_ndp_dp(session, library_name, model_name)
 
         F = dp.get_fun_space()
         R = dp.get_res_space()
@@ -105,7 +111,7 @@ class AppSolver2():
         } 
         return res
 
-    def view_solver2_submit(self, request):
+    def view_solver2_submit(self, context, request):  # @UnusedVariable
         def go():
             state = request.json_body['ui_state']
             area_F = state['area_F'].encode('utf-8')
@@ -130,14 +136,14 @@ class AppSolver2():
                             do_approximations=do_approximations,
                             nu=nu, nl=nl)
         
-                data, res = self.process_ftor(request, area_F, do_approximations, nl, nu)
+                data, res = self.process_ftor(context, request, area_F, do_approximations, nl, nu)
             elif is_rtof:
                 key = dict(type=QUERY_TYPE_RTOF, 
                             string=area_R, 
                             do_approximations=do_approximations,
                             nu=nu, nl=nl)
 
-                data, res = self.process_rtof(request, area_R, do_approximations, nl, nu)
+                data, res = self.process_rtof(context, request, area_R, do_approximations, nl, nu)
             else:
                 raise_desc(DPInternalError, 'Inconsistent state', state=state)
         
@@ -156,16 +162,18 @@ class AppSolver2():
         quiet = (DPSyntaxError, DPSemanticError, NeedsApprox)
         return ajax_error_catch(go, quiet=quiet)
     
-    def process_rtof(self, request, string, do_approximations, nl, nu):
-        l = self.get_library(request)
-        parsed = l.parse_constant(string)
+    def process_rtof(self, context, request, string, do_approximations, nl, nu):
+        library = context_get_library(context, request)
+        model_name = context_get_widget_name(context)
+        library_name = context_get_library_name(context, request)
+        
+        parsed = library.parse_constant(string)
 
         space = parsed.unit
         value = parsed.value
 
-        model_name = self.get_model_name(request)
-        library = self.get_current_library_name(request)
-        ndp, dp = self._get_ndp_dp(library, model_name)
+        session = self.get_session(request) 
+        ndp, dp = self.get_ndp_dp(session, library_name, model_name)
 
         R = dp.get_res_space()
         LF = LowerSets(dp.get_fun_space())
@@ -217,16 +225,18 @@ class AppSolver2():
          
         return data, res
 
-    def process_ftor(self, request, string, do_approximations, nl, nu):
-        l = self.get_library(request)
-        parsed = l.parse_constant(string)
+    def process_ftor(self, context, request, string, do_approximations, nl, nu):
+        library = context_get_library(context, request)
+        model_name = context_get_widget_name(context)
+        library_name = context_get_library_name(context, request)
+
+        parsed = library.parse_constant(string)
 
         space = parsed.unit
         value = parsed.value
 
-        model_name = self.get_model_name(request)
-        library = self.get_current_library_name(request)
-        ndp, dp = self._get_ndp_dp(library, model_name)
+        session = self.get_session(request) 
+        ndp, dp = self.get_ndp_dp(session, library_name, model_name)
 
         F = dp.get_fun_space()
         UR = UpperSets(dp.get_res_space())
@@ -279,7 +289,8 @@ class AppSolver2():
         res['output_trace'] = str(trace) 
         return data, res
 
-    def view_solver2_display(self, request):
+    def view_solver2_display(self, context, request):
+
         def go():
             h = request.params['hash'].encode('utf-8')
             if not h in self.solutions:
@@ -339,12 +350,11 @@ class AppSolver2():
         return self.png_error_catch2(request, go)
 
 
-    def view_solver2_display1u_ui(self, request):
-        res = {}
-        res['navigation'] = self.get_navigation_links(request)
+    def view_solver2_display1u_ui(self, context, request):  # @UnusedVariable
+        res = {} 
         return res
 
-    def view_solver2_display1u(self, request):
+    def view_solver2_display1u(self, context, request):
         """
             Parameters that we need:
             
@@ -357,13 +367,16 @@ class AppSolver2():
                 
                 <fname> = constant
         """
+        #library = context_get_library(context, request)
+        model_name = context_get_widget_name(context)
+        library_name = context_get_library_name(context, request)
+
         def go():
             xaxis = str(request.params['xaxis'])
             yaxis = str(request.params['yaxis'])
-
-            model_name = self.get_model_name(request)
-            library = self.get_current_library_name(request)
-            ndp, dp = self._get_ndp_dp(library, model_name)
+ 
+            session = self.get_session(request) 
+            ndp, dp = self.get_ndp_dp(session, library_name, model_name)
 
             fnames = ndp.get_fnames()
             rnames = ndp.get_rnames()

@@ -5,7 +5,7 @@ from .logs import logger
 __all__ = []
 
 
-def suggest_package(name):
+def suggest_package(name): # pragma: no cover
     msg = """You could try installing the package using:
     
     sudo apt-get install %s
@@ -16,7 +16,7 @@ try:
     import decent_logs  # @UnusedImport
     import decent_params  # @UnusedImport
     import quickapp  # @UnusedImport
-except ImportError as e:
+except ImportError as e:  # pragma: no cover
     logger.error(e)
     suggest_package('python-numpy')
     raise Exception('Numpy not available')
@@ -24,14 +24,14 @@ except ImportError as e:
 try:
     import numpy
     numpy.seterr('raise')
-except ImportError as e:
+except ImportError as e: # pragma: no cover
     logger.error(e)
     suggest_package('python-numpy')
     raise Exception('Numpy not available')
 
 try:
     from PIL import Image  # @UnusedImport @NoMove
-except ImportError as e:
+except ImportError as e:  # pragma: no cover
     logger.error(e)
     suggest_package('python-pil')
     msg = 'PIL not available'
@@ -41,7 +41,7 @@ except ImportError as e:
 
 try:
     import matplotlib  # @UnusedImport @NoMove
-except ImportError as e:
+except ImportError as e: # pragma: no cover
     logger.error(e)
     suggest_package('python-matplotlib')
     msg = 'Matplotlib not available'
@@ -50,7 +50,7 @@ except ImportError as e:
 
 try:
     import yaml  # @UnusedImport @NoMove
-except ImportError as e:
+except ImportError as e: # pragma: no cover
     logger.error(e)
     suggest_package('python-yaml')
     msg = 'YAML package not available'

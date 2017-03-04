@@ -74,20 +74,6 @@ def add_other_fields(self, res, request, context=None):
     
     res['get_user'] = get_user
     
-    
-def add_std_vars(f):
-    def f0(self, request):
-        try:
-            res = f(self, request)
-        except Exception as e:
-            msg = 'While running %s:' % (f.__name__)
-            msg += '\n' + indent(traceback.format_exc(e), ' >')
-            logger.error(msg)
-            raise
-        check_isinstance(res, dict)
-        add_other_fields(self, res, request)
-        return res
-    return f0
 
 
 def add_std_vars_context(f):

@@ -15,20 +15,16 @@ from pyramid.config import Configurator
 from pyramid.httpexceptions import HTTPFound
 from pyramid.renderers import JSONP
 from pyramid.response import Response
+from pyramid.security import NO_PERMISSION_REQUIRED
 from quickapp import QuickAppBase
 
 from mcdp import logger
 from mcdp.exceptions import DPSemanticError, DPSyntaxError
-from mcdp_docs.pipeline import render_complete
+from mcdp_docs import render_complete
 from mcdp_library import MCDPLibrary
-from mcdp_shelf.access import PRIVILEGE_ACCESS, PRIVILEGE_READ
-from mcdp_shelf.shelves import find_shelves
-from mcdp_user_db.userdb import UserDB
-from mcdp_utils_misc import duration_compact, natural_sorted
-from mcdp_utils_misc.dir_from_package_nam import dir_from_package_name
-from mcdp_web.resource_tree import ResourceLibraryRefresh, ResourceRefresh,\
-    ResourceExit, ResourceLibraryDocRender, context_get_library,\
-    ResourceLibraryAsset, ResourceRobots
+from mcdp_shelf import PRIVILEGE_ACCESS, PRIVILEGE_READ, find_shelves
+from mcdp_user_db import UserDB
+from mcdp_utils_misc import duration_compact, dir_from_package_name
 
 from .confi import describe_mcdpweb_params, parse_mcdpweb_params_from_dict
 from .editor_fancy import AppEditorFancyGeneric
@@ -36,8 +32,9 @@ from .images.images import WebAppImages, get_mime_for_format
 from .interactive.app_interactive import AppInteractive
 from .qr.app_qr import AppQR
 from .resource_tree import MCDPResourceRoot, ResourceLibraries,\
-    ResourceLibrary, get_from_context
-from .resource_tree import ResourceShelves,\
+    ResourceLibrary, get_from_context,  ResourceLibraryRefresh, ResourceRefresh,\
+    ResourceExit, ResourceLibraryDocRender, context_get_library,\
+    ResourceLibraryAsset, ResourceRobots, ResourceShelves,\
     ResourceShelvesShelfUnsubscribe, ResourceShelvesShelfSubscribe,\
     ResourceShelvesShelf, ResourceExceptionsFormatted, ResourceExceptionsJSON
 from .security import AppLogin
@@ -45,8 +42,10 @@ from .sessions import Session
 from .solver.app_solver import AppSolver
 from .solver2.app_solver2 import AppSolver2
 from .status import AppStatus
+from .utils.image_error_catch_imp import response_image
 from .utils0 import add_std_vars_context
 from .visualization.app_visualization import AppVisualization
+from mcdp_shelf.access import PRIVILEGE_SUBSCRIBE
 
 
 __all__ = [
@@ -127,7 +126,7 @@ class WebApp(AppVisualization, AppStatus,
     def get_session(self, request):
         token = request.session.get_csrf_token()
         if not token in self.sessions:
-            print('creating new session for token %r' % token)
+            # print('creating new session for token %r' % token)
             self.sessions[token] = Session(request, shelves_all=self.all_shelves)
         session = self.sessions[token]
         session.set_last_request(request)
@@ -191,7 +190,7 @@ class WebApp(AppVisualization, AppStatus,
     def view_shelves_subscribe(self, context, request):  
         sname = context.name
         session = self.get_session(request)
-        print('subscribe %r' % sname)
+        #print('subscribe %r' % sname)
         user = session.get_user()
         if not sname in user.subscriptions:
             user.subscriptions.append(sname)
@@ -203,7 +202,7 @@ class WebApp(AppVisualization, AppStatus,
     def view_shelves_unsubscribe(self, context, request):  
         sname = context.name
         session = self.get_session(request)
-        print('unsubscribe %r' % sname)
+        #print('unsubscribe %r' % sname)
         user = session.get_user()
         if sname in user.subscriptions:
             user.subscriptions.remove(sname)
@@ -264,15 +263,7 @@ class WebApp(AppVisualization, AppStatus,
         ss = traceback.format_exc(exc)
         n += '\n' + indent(ss, '| ')
         self.exceptions.append(n)
-
-#         session = self.get_session(request)
-#         
-#         if request.matchdict is not None and  'library' in request.matchdict:
-#             library = self.get_current_library_name(request)
-#             url_refresh = self.make_relative(request, '/libraries/%s/refresh_library' % library)
-#         else:
-#             url_refresh = None
-#         
+ 
         u = unicode(s, 'utf-8')
         logger.error(u)
         res = {
@@ -308,7 +299,7 @@ class WebApp(AppVisualization, AppStatus,
             n+= '\n referrer: %s' % referrer
             n += '\n' + indent(s, '| ')
             self.exceptions.append(n)
-            from mcdp_web.utils.image_error_catch_imp import response_image
+            
             return response_image(request, s) 
 
     # This is where we keep all the URLS
@@ -318,10 +309,7 @@ class WebApp(AppVisualization, AppStatus,
             raise ValueError(msg)
         root = self.get_root_relative_to_here(request)
         comb = root + url
-        
-        # note: fails for trailing /
-#         comb2 = os.path.normpath(comb)
-#         print('comb %s -> %s' %(comb, comb2))
+         
         return comb
     
     def get_lmv_url2(self, library, model, view, request):
@@ -355,172 +343,7 @@ class WebApp(AppVisualization, AppStatus,
             path = urlparse.urlparse(request.url).path
             r = os.path.relpath('/', path)
             return r
-        
-    def get_model_name(self, request):
-        model_name = str(request.matchdict['model_name'])  # unicod
-        return model_name
 
-    def get_current_view(self, request):
-        url = request.url
-        for x in self._get_views():
-            if '/' + x + '/' in url:
-                return x
-            
-        assert False, request.url
-
-    def get_navigation_links(self, request):
-        """ Pass this as "navigation" to the page. """
-        current_thing = None
-
-        if 'model_name' in request.matchdict:
-            current_thing = current_model = self.get_model_name(request)
-            current_view = self.get_current_view(request)
-        else:
-            current_model = None
-            current_view = None
-
-        if 'template_name' in request.matchdict:
-            current_thing = current_template = str(request.matchdict['template_name'])
-        else:
-            current_template = None
-
-        if 'poset_name' in request.matchdict:
-            current_thing = current_poset = str(request.matchdict['poset_name'])
-        else:
-            current_poset = None
-
-        if 'value_name' in request.matchdict:
-            current_thing = current_value = str(request.matchdict['value_name'])
-        else:
-            current_value = None
-
-        if 'library' in request.matchdict:
-            current_library = self.get_current_library_name(request)
-            library = self.get_library(request)
-        else:
-            current_library = None
-            library = None
-
-        d = {}
-
-        d['current_thing'] = current_thing
-        d['current_library'] = current_library
-        d['current_template'] = current_template
-        d['current_poset'] = current_poset
-        d['current_model'] = current_model
-        d['current_view'] = current_view
-
-        make_relative = lambda _: self.make_relative(request, _)
-
-        if library is not None:
-            documents = library._list_with_extension(MCDPLibrary.ext_doc_md)
-
-            d['documents'] = []
-            for id_doc in documents:
-                url = make_relative('/libraries/%s/%s.html' % (current_library, id_doc))
-                desc = dict(id=id_doc,id_document=id_doc, name=id_doc, url=url, current=False)
-                d['documents'].append(desc)
-    
-            d['models'] = []
-            
-            VIEW_EDITOR = 'edit_fancy'
-            
-            models = self.list_of_models(request)
-            for m in natural_sorted(models):
-                is_current = m == current_model
-    
-                url = self.get_lmv_url2(library=current_library,
-                                       model=m,
-                                       view='syntax', request=request)
-                url_edit =  self.get_lmv_url2(library=current_library,
-                                       model=m,
-                                       view=VIEW_EDITOR, request=request)
-                name = "Model %s" % m
-                desc = dict(id=m, id_ndp=m, name=name, url=url, url_edit=url_edit, current=is_current)
-                d['models'].append(desc)
-    
-    
-            templates = library.list_templates()
-            d['templates'] = []
-            for t in natural_sorted(templates):
-                is_current = (t == current_template)
-    
-                url = self.get_lib_template_view_url2(library=current_library,
-                                                     template=t,
-                                                     view='syntax', request=request) 
-                url_edit = self.get_lib_template_view_url2(library=current_library,
-                                                     template=t,
-                                                     view=VIEW_EDITOR,request= request)  
-    
-                name = "Template: %s" % t
-                desc = dict(id=t, name=name, url=url, current=is_current, url_edit=url_edit)
-                d['templates'].append(desc)
-    
-            posets = library.list_posets()
-            d['posets'] = []
-            for p in natural_sorted(posets):
-                is_current = (p == current_poset)
-                url = self.get_lpv_url2(library=current_library,
-                                       poset=p,
-                                       view='syntax', request=request)
-                url_edit = self.get_lpv_url2(library=current_library,
-                                       poset=p,
-                                       view=VIEW_EDITOR,request= request)
-                name = "Poset: %s" % p
-                desc = dict(id=p, name=name, url=url, current=is_current, url_edit=url_edit)
-                d['posets'].append(desc)
-    
-            values = library.list_values()
-            d['values'] = []
-            for v in natural_sorted(values):
-                is_current = (v == current_value)
-                url = '/libraries/%s/values/%s/views/syntax/' % (current_library, v)
-                url_edit = '/libraries/%s/values/%s/views/%s/' % (current_library, v, VIEW_EDITOR)
-                name = "Value: %s" % v
-                desc = dict(id=v,name=name, url=url, current=is_current, url_edit=url_edit)
-                d['values'].append(desc)
-    
-    
-            d['views'] = []
-            views = self._get_views()
-            for v in views:
-                view = self.views[v]
-                is_current = v == current_view
-    
-                url = self.get_lmv_url2(library=current_library,
-                                       model=current_model,
-                                       view=v, request=request)
-    
-                name = "View: %s" % view['desc']
-                desc = dict(name=name, url=url, current=is_current)
-                d['views'].append(desc)
-        # endif library not None
-        session = self.get_session(request)
-        libraries = session.list_libraries()
-
-        # just the list of names
-        d['libraries'] = []
-        libname2desc = {}
-        for l in natural_sorted(libraries):
-            is_current = l == current_library
-            url = make_relative('/libraries/%s/' % l)
-            #name = "Library: %s" % l
-            name = l
-            desc = dict(id=l,name=name, url=url, current=is_current)
-            libname2desc[l] =desc
-            d['libraries'].append(desc)
-
-        indexed = session.get_libraries_indexed_by_dir()
-        indexed = [(sup, [libname2desc[_] for _ in l]) 
-                   for sup, l in indexed]
-        
-        # for sup, libraries in libraries_indexed
-        #   for l in libraries
-        #      l['name'], l['url']
-        d['libraries_indexed'] = indexed
-        
-        return d
-    
     
     @add_std_vars_context
     def view_library_doc(self, context, request):
@@ -619,21 +442,20 @@ class WebApp(AppVisualization, AppStatus,
         config.add_view(self.view_dummy, context=ResourceLibraries, renderer='list_libraries.jinja2')
         config.add_view(self.view_dummy, context=ResourceLibrary, renderer='library_index.jinja2', permission=PRIVILEGE_READ)
         config.add_view(self.view_shelves_index, context=ResourceShelves, renderer='shelves_index.jinja2')
-        config.add_view(self.view_shelf, context=ResourceShelvesShelf, renderer='shelf.jinja2')
-        config.add_view(self.view_shelves_subscribe, context=ResourceShelvesShelfSubscribe)
-        config.add_view(self.view_shelves_unsubscribe, context=ResourceShelvesShelfUnsubscribe)
+        config.add_view(self.view_shelf, context=ResourceShelvesShelf, renderer='shelf.jinja2', permission=PRIVILEGE_READ)
+        config.add_view(self.view_shelves_subscribe, context=ResourceShelvesShelfSubscribe, permission=PRIVILEGE_SUBSCRIBE)
+        config.add_view(self.view_shelves_unsubscribe, context=ResourceShelvesShelfUnsubscribe, permission=PRIVILEGE_SUBSCRIBE)
         config.add_view(self.view_library_doc, context=ResourceLibraryDocRender, renderer='library_doc.jinja2', permission=PRIVILEGE_READ)
         config.add_view(self.view_library_asset, context=ResourceLibraryAsset, permission=PRIVILEGE_READ)
         config.add_view(self.view_refresh_library, context=ResourceLibraryRefresh, permission=PRIVILEGE_READ)
         config.add_view(self.view_refresh, context=ResourceRefresh, permission=PRIVILEGE_READ)
         
         config.add_view(self.view_exception, context=Exception, renderer='exception.jinja2')
-        config.add_view(self.exit, context=ResourceExit, renderer='json',
-                        permission=pyramid.security.NO_PERMISSION_REQUIRED)
+        config.add_view(self.exit, context=ResourceExit, renderer='json', permission=NO_PERMISSION_REQUIRED)
 
-        config.add_view(self.view_exceptions_occurred, context=ResourceExceptionsJSON, renderer='json')
-        config.add_view(self.view_exceptions_occurred, context=ResourceExceptionsFormatted, renderer='exceptions_formatted.jinja2')
-        config.add_view(serve_robots, context=ResourceRobots)
+        config.add_view(self.view_exceptions_occurred, context=ResourceExceptionsJSON, renderer='json', permission=NO_PERMISSION_REQUIRED)
+        config.add_view(self.view_exceptions_occurred, context=ResourceExceptionsFormatted, renderer='exceptions_formatted.jinja2', permission=NO_PERMISSION_REQUIRED)
+        config.add_view(serve_robots, context=ResourceRobots, permission=NO_PERMISSION_REQUIRED)
         config.add_notfound_view(self.view_not_found, renderer='404.jinja2')
         config.scan()
 

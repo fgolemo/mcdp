@@ -4,6 +4,7 @@ from string import Template
 
 from contracts import contract
 from contracts.utils import raise_desc
+
 from mcdp import logger
 from mcdp.exceptions import DPInternalError, DPSyntaxError
 from mcdp_lang_utils import Where, location
@@ -18,7 +19,6 @@ from .make_console_pre import mark_console_pres
 from .make_figures import make_figure_from_figureid_attr
 from .manual_constants import MCDPManualConstants
 from .prerender_math import escape_for_mathjax_back, escape_for_mathjax
-
 
 
 __all__ = [
@@ -312,18 +312,3 @@ def protect_my_envs(s):
     return s, subs
 
  
-def replace_inside_delims(l, delim, inside, outside):
-    D = 'DELIM'
-    l = l.replace(delim, D)
-    tokens = l.split(D)
-    tokens2 = []
-    for j, f in enumerate(tokens):
-        if j % 2 == 0: # outside the quotes
-            f = outside(f)
-        else:
-            f = inside(f)
-        tokens2.append(f)
-    l2 = D.join(tokens2)
-    # now re-replace the doubleticks
-    l2 = l2.replace(D, delim)
-    return l2

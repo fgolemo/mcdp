@@ -1,0 +1,46 @@
+#outer {
+    display: inline-block;
+}
+
+#outer li {
+    padding: 5px;
+}
+
+#outer a {
+    text-decoration: none;
+}
+
+
+/*#home, */
+
+
+/*#menu { display: inline-block;}*/
+
+
+/*#root { font-size: 50%; }*/
+
+.ui-button, .ui-widget {
+    /*height: 25pt !important;
+  border: solid 1px red !important;*/
+}
+
+
+/* This makes the link fill all of the menu item
+otherwise it is hard to click */
+
+li a {
+    display: block;
+    width: 90%;
+}
+
+.ui-widget {
+    font-size: 70%;
+}
+
+#menu li li li {
+    width: 14em;
+}
+
+li#root {
+    width: 1em;
+}

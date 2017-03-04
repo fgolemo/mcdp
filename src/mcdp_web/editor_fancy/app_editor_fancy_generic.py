@@ -12,6 +12,7 @@ from mcdp import logger
 from mcdp.exceptions import DPInternalError, DPSemanticError, DPSyntaxError
 from mcdp_lang.suggestions import get_suggestions, apply_suggestions
 from mcdp_report.html import ast_to_html
+from mcdp_shelf.access import PRIVILEGE_WRITE
 from mcdp_utils_misc import get_sha1, timeit_wall
 from mcdp_web.resource_tree import ResourceThingViewEditor, ResourceThingViewEditorParse,\
     context_get_spec, context_get_library_name, context_get_library,\
@@ -42,7 +43,7 @@ class AppEditorFancyGeneric():
         config.add_view(self.ajax_parse, context=ResourceThingViewEditorParse, renderer='json')
         config.add_view(self.save, context=ResourceThingViewEditorSave, renderer='json')
         config.add_view(self.graph_generic, context=ResourceThingViewEditorGraph)
-        config.add_view(self.view_new_model_generic, context=ResourceThingsNew) 
+        config.add_view(self.view_new_model_generic, context=ResourceThingsNew, permission=PRIVILEGE_WRITE) 
 
     def save(self, context, request):
         widget_name = context_get_widget_name(context)

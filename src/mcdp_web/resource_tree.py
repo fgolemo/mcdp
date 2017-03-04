@@ -217,8 +217,7 @@ class ResourceThingsNewBase(Resource):
     def getitem(self, key):
         return ResourceThingsNew(key)
     
-class ResourceThingsNew(Resource):
-    pass
+class ResourceThingsNew(Resource): pass
 
 class ResourceThing(Resource): 
     
@@ -242,21 +241,63 @@ class ResourceThingViews(Resource):
                 'ndp_graph': ResourceThingViewNDPGraph(),
                 'ndp_repr': ResourceThingViewNDPRepr(),
                 'solver2': ResourceThingViewSolver(),
+                'images': ResourceThingViewImages(),
                 'solver': ResourceThingViewSolver0(),
             }
             subs.update(**subs2)
             
         return subs.get(key, None)
     
+class ResourceThingViewImages(Resource):
+    def getitem(self, key):
+        which, data_format = key.split('.')
+        return ResourceThingViewImagesOne(which.encode('utf8'), data_format.encode('utf8'))
+     
 class ResourceThingView(Resource): pass
 class ResourceThingViewSyntax(ResourceThingView): pass
 class ResourceThingViewDPGraph(ResourceThingView): pass
 class ResourceThingViewDPTree(ResourceThingView): pass
 class ResourceThingViewNDPGraph(ResourceThingView): pass
 class ResourceThingViewNDPRepr(ResourceThingView): pass
+class ResourceThingViewSolver(ResourceThingView): 
+    def getitem(self, key):
+        subs =  {
+            'submit': ResourceThingViewSolver_submit(),
+            'display.png': ResourceThingViewSolver_display_png(),
+            'display1u': ResourceThingViewSolver_display1u(),
+            'display1u.png': ResourceThingViewSolver_display1u_png(),
+        }
+        return subs.get(key, None)
 
-class ResourceThingViewSolver(ResourceThingView): pass
-class ResourceThingViewSolver0(ResourceThingView): pass
+class ResourceThingViewSolver_submit(Resource): pass
+class ResourceThingViewSolver_display_png(Resource): pass
+class ResourceThingViewSolver_display1u(Resource): pass
+class ResourceThingViewSolver_display1u_png(Resource): pass
+
+class ResourceThingViewSolver0(ResourceThingView): 
+    def getitem(self, key):
+        return ResourceThingViewSolver0Axis( key) 
+    
+class ResourceThingViewSolver0Axis(ResourceThingView): 
+    def getitem(self, key):
+        return ResourceThingViewSolver0AxisAxis(self.name, key) 
+    
+class ResourceThingViewSolver0AxisAxis(ResourceThingView): 
+    def __init__(self, fun_axes, res_axes):
+        self.fun_axes = fun_axes
+        self.res_axes = res_axes
+        self.name = '%s-%s' % (fun_axes, res_axes)
+    def getitem(self, key):
+        subs = {
+            'addpoint': ResourceThingViewSolver0AxisAxis_addpoint(),
+            'getdatasets': ResourceThingViewSolver0AxisAxis_getdatasets(),
+            'reset': ResourceThingViewSolver0AxisAxis_reset(),
+        }
+        return subs.get(key, None)
+        
+class ResourceThingViewSolver0AxisAxis_addpoint(Resource): pass
+class ResourceThingViewSolver0AxisAxis_getdatasets(Resource): pass
+class ResourceThingViewSolver0AxisAxis_reset(Resource): pass
 
 class ResourceThingViewEditor(ResourceThingView):
     def getitem(self, key): 
@@ -281,7 +322,12 @@ class ResourceThingViewEditorGraph(Resource):
         self.data_format = data_format
         self.name = 'graph.%s.%s' % (text_hash, data_format)
          
-
+class ResourceThingViewImagesOne(Resource):
+    def __init__(self, which, data_format):
+        self.which = which
+        self.data_format = data_format
+        self.name = '%s.%s' % (which, data_format)
+        
 class ResourceRobots(Resource): pass
 
 def get_all_contexts(context):

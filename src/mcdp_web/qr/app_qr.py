@@ -5,7 +5,7 @@ import time
 import traceback
 
 from mcdp_web.utils import response_data
-from mcdp_web.utils0 import add_std_vars
+from mcdp_web.utils0 import add_std_vars_context
 
 
 class AppQR():
@@ -34,7 +34,7 @@ class AppQR():
         config.add_view(self.view_qr_import,
                         route_name='qr_import', renderer='json')
 
-    @add_std_vars
+    @add_std_vars_context
     def view_qr_reader(self, request):  # @UnusedVariable
         return {}
 
@@ -164,7 +164,7 @@ class AppQR():
             s += self.format_one(name, record)
         return s
         
-    @add_std_vars
+    @add_std_vars_context
     def view_qr_import(self, request):
         hexified = request.matchdict['hex']
         qrstring = binascii.unhexlify(hexified)

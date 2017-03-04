@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
 import re
 
-from mcdp import MCDPConstants
-from mcdp import logger
+from mcdp import MCDPConstants, logger
 from mcdp.exceptions import DPSyntaxError
-from mcdp_lang_utils import Where
-from mcdp_lang_utils import location
 from mcdp_docs.latex.latex_preprocess import extract_maths
 from mcdp_docs.mark.markdown_transform import censor_markdown_code_blocks
+from mcdp_lang_utils import Where, location
 
 
 # from mcdp_docs.latex.latex_preprocess import extract_maths
@@ -21,7 +19,7 @@ def do_preliminary_checks_and_fixes(s):
     s = check_most_of_it_xml(s) 
     return s
 
-def check_no_forbidden(s):
+def check_no_forbidden(s): # pragma: no cover
     if '\t' in s:
         i = s.index('\t')
         msg = "Tabs bring despair (e.g. Markdown does not recognize them.)"
