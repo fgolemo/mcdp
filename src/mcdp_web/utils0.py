@@ -4,14 +4,15 @@ import traceback
 from contracts.utils import check_isinstance, indent
 from pyramid.httpexceptions import HTTPException
 
-from compmake.utils.duration_hum import duration_compact
 from mcdp import logger
-import mcdp
-from mcdp_library.library import MCDPLibrary
-from mcdp_shelf.access import PRIVILEGE_SUBSCRIBE, PRIVILEGE_READ,\
+import mcdp 
+from mcdp_library import MCDPLibrary
+from mcdp_shelf import PRIVILEGE_SUBSCRIBE, PRIVILEGE_READ,\
     PRIVILEGE_WRITE, PRIVILEGE_ADMIN
-from mcdp_web.get_navigation_links_imp import get_navigation_links_context
-from mcdp_web.resource_tree import context_display_in_detail, Resource
+from mcdp_utils_misc import duration_compact
+
+from .get_navigation_links_imp import get_navigation_links_context
+from .resource_tree import context_display_in_detail, Resource
 
 
 def add_other_fields(self, res, request, context=None):
@@ -61,13 +62,15 @@ def add_other_fields(self, res, request, context=None):
         return shelf_privilege(sname, PRIVILEGE_WRITE)
     def can_admin(sname):
         return shelf_privilege(sname, PRIVILEGE_ADMIN)
-    
-        
+  
     res['shelf_can_read'] = can_read
     res['shelf_can_write'] = can_write           
     res['shelf_can_subscribe'] = can_subscribe
     res['shelf_can_admin'] = can_admin           
     
+    res['icon_library'] = u'📖'  
+    res['icon_shelf'] = u'🏛'
+
     def get_user(username):
         user = session.get_user(username)
         return user.dict_for_page()

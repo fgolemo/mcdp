@@ -35,6 +35,7 @@ class ACL():
         
         
     def allowed2(self, privilege, user):
+        print('user: %r' % user)
         return self.allowed(privilege, user.username, user.groups)
     
     def allowed(self, privilege, username, groups):

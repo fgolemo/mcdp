@@ -23,8 +23,8 @@
 <table align='center' id='library-contents'>
 <thead>
 <tr><td id='ttitle' colspan="5">
-    🏛 Bundle <a href="{{root}}/shelves/{{navigation.shelfname}}/">{{navigation.shelfname}}</a> /
-    📖 Library <code>{{navigation.current_library}}</code>
+    {{icon_shelf}} <a href="{{root}}/shelves/{{navigation.shelfname}}/">{{navigation.shelfname}}</a> /
+    {{icon_library}} <code>{{navigation.current_library}}</code>
 </td></tr>
 <tr id="things">
 	<td>MCDPs</td>
@@ -76,14 +76,15 @@
 
 </table>
 
+<div id='extra_commands'>
 {% if not shelf_can_write(navigation.shelf_name) %}
 <p> This library is read-only for this user. </p>
 {%endif%}
 
 {% if navigation['models'] %}
-<p id='show_previews_container'><button id='show_previews'>Show MCDP previews</button></p>
+<p><button id='show_previews'>Show MCDP previews</button></p>
 {% endif %}
-
+</div>
 
 </div>
 

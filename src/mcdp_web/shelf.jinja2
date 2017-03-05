@@ -6,13 +6,16 @@
 </head>
 <body>
 {% include 'user.jinja2' %}
+{% include 'menu.jinja2' %}
 
-<p><a href="{{root}}/shelves/">🔙 Complete list</a></p>
+<a href="{{root}}/shelves/">🔙 Complete list</a>
+
+{% from 'add_library_button.jinja2' import add_library_button with context %}
 
 <table>
     <tr>
         <td>
-             🏛 <code>{{sname}}</code>
+             {{icon_shelf}} <code>{{sname}}</code>
         </td>
 
         <td>{{shelf.get_desc_short()}}</td>
@@ -49,7 +52,7 @@
 
     <span class='library-list'>
     {% for libname in shelf.get_libraries_path() %}
-        <a href="{{root}}/shelves/{{sname}}/libraries/{{libname}}/">📖 <code>{{libname}}</code></a>
+        <a href="{{root}}/shelves/{{sname}}/libraries/{{libname}}/">{{icon_library}} <code>{{libname}}</code></a>
     {% endfor %}
     </span>
 
@@ -60,7 +63,7 @@
 {% endif %}
 
 
-{% include 'create_library_button.jinja2' %}
+{{add_library_button(sname)}}
 
 {% include 'footer.jinja2' %}
 </body>

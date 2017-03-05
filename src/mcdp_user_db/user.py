@@ -23,6 +23,8 @@ class UserInfo():
     def get_subscriptions(self):
         return self.subscriptions
     
+    def __repr__(self):
+        return 'UserInfo(%s)' % self.dict_for_page()
     def dict_for_page(self):
         res = {
             'username': self.username,

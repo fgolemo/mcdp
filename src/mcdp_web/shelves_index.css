@@ -23,3 +23,7 @@ tr.unused {
 .shelves_list th {
     text-align: center;
 }
+
+td.permissions {
+    text-align:center;
+}

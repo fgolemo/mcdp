@@ -23,6 +23,7 @@
     <thead>
         <tr>
             <th>Shelf name</th>
+            <th>Permissions</th>
             <th>description</th>
             <th colspan=2>status</th>
         </tr>
@@ -31,9 +32,20 @@
         {% set shelf_used = sname in navigation['shelves_used'] %}
         <tr class={% if shelf_used %}"used"{%else%}"unused"{%endif%}>
         <td><a href="{{root}}/shelves/{{sname}}/">🏛 <code>{{sname}}<code></a></td>
-        <!-- <td>
-        {{ shelf.get_libraries_path() | length}} libraries
-        </td> -->
+         <td class="permissions">
+
+             <span title="admin">{% if shelf_can_admin(sname) %}🔐{%endif%}</span>
+             <span title="read">{% if shelf_can_read(sname) %}👀{%endif%}</span>
+             <span title="write">{% if shelf_can_write(sname) %}✐{%endif%}</span>
+
+             <!-- {% if shelf_can_read(sname) %}
+                 {% if shelf_can_write(sname) %}
+                 read/write
+                 {% else %}
+                 read only
+                 {% endif %}
+             {% endif %} -->
+         </td>
         <td>{{shelf.get_desc_short()}}</td>
 
         {% if shelf_can_subscribe(sname) %}
@@ -107,7 +119,7 @@
 {% include 'footer.jinja2' %}
 
 
-<!-- 
+<!--
 <script>
     $(document).ready(function() {
         $("body").show();
