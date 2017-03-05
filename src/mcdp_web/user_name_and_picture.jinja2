@@ -1,13 +1,20 @@
 {% macro user_name_and_picture(username) %}
     {% set a_user = get_user(username) %}
 
-    <img id='gravatar' src='{{a_user['gravatar32']}}'/>
+    <img id='gravatar' src='{{a_user.gravatar32}}'/>
 
     <!-- XXX: this doesn't work -->
-    {% if user and user['username'] == username %}
-    you
+
+    {% if user and user.username == username %}
+    {% set name = 'you' %}
     {%else%}
-    {{a_user['name']}}
-    {%endif%} 
+    {% set name = a_user.name %}
+    {%endif%}
+
+    {% if a_user.website %}
+    <a href="{{a_user.website}}">{{name}}</a>
+    {% else %}
+    {{name}}
+    {% endif %}
 
 {% endmacro %}

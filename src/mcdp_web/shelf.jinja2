@@ -1,62 +1,39 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Bundle {{sname}}</title>
+    <title>Shelf {{sname}}</title>
     {% include 'head.jinja2' %}
 </head>
 <body>
 {% include 'user.jinja2' %}
-{% include 'menu.jinja2' %}
-
-<a href="{{root}}/shelves/">🔙 Complete list</a>
+{% include 'model_views_navigation.jinja2' %}
 
 {% from 'add_library_button.jinja2' import add_library_button with context %}
-
-<table>
-    <tr>
-        <td>
-             {{icon_shelf|safe}} <code>{{sname}}</code>
-        </td>
-
-        <td>{{shelf.get_desc_short()}}</td>
-
-        <td>
-            {% if sname in navigation['shelves_used'] %}
-                active
-            {% else %}
-                inactive
-            {% endif %}
-        </td>
-
-        <td>
-            {% if shelf_can_subscribe(sname) %}
-                {% if sname in navigation['shelves_used'] %}
-                    <form action="{{root}}/shelves/{{sname}}/unsubscribe" method="post">
-                        <input type="submit" value="deactivate"/>
-                    </form>
-                {% else %}
-                    <form action="{{root}}/shelves/{{sname}}/subscribe" method="post">
-                        <input type="submit" value="activate"/>
-                    </form>
-                {% endif %}
-            {% endif %}
-        </td>
-    </tr>
+{% from 'list_libraries_for_shelf.jinja2' import list_libraries_for_shelf with context %}
+{% from 'user_name_and_picture.jinja2' import user_name_and_picture with context %}
+{% from 'shelf_row.jinja2' import shelf_row with context %}
+<table class="shelves_list" cellspacing="0" cellpadding="0">
+     {{shelf_row(navigation.shelf_name, navigation.shelf)}}
 </table>
+
+{% if navigation.shelf.get_authors() %}
+<table><tr>
+    <td>Authors:</td>
+    {% for author in navigation.shelf.get_authors()%}
+    <td>{{ user_name_and_picture(author) }}</td>
+    {% endfor %}
+</tr></table>
+{% endif %}
 
 
 <p>{{desc_long|safe}}</p>
 
 {% if shelf.get_libraries_path() %}
-<p>This bundle contains {{ shelf.get_libraries_path() | length}} libraries:
 
-    <span class='library-list'>
-    {% for libname in shelf.get_libraries_path() %}
-        <a href="{{root}}/shelves/{{sname}}/libraries/{{libname}}/">{{icon_library|safe}} <code>{{libname}}</code></a>
-    {% endfor %}
-    </span>
+    <div style='column-width: 15em'>
+        {{list_libraries_for_shelf(sname, shelf)}}
+    </div>
 
-</p>
 {% else %}
 <p>This bundle contains no libraries yet.</p>
 

@@ -57,13 +57,19 @@ def add_other_fields(self, res, request, context):
     def can_admin(sname):
         return shelf_privilege(sname, PRIVILEGE_ADMIN)
   
+  
     res['shelf_can_read'] = can_read
     res['shelf_can_write'] = can_write           
     res['shelf_can_subscribe'] = can_subscribe
     res['shelf_can_admin'] = can_admin           
     
+    res['library_url'] = lambda library_name: e.root + '/shelves/' + e.shelf_name + '/libraries/' + library_name 
+    res['shelf_url'] = lambda shelf_name: e.root + '/shelves/' + shelf_name 
+    
     res['icon_library'] = '&#x1F4D6;'  
+    res['icon_library_css'] = r'\1F4D6'
     res['icon_shelf'] = '&#x1F3DB;'
+    res['icon_shelf_css'] = r'\1F3DB'
 
     res['icon_models'] = '&#10213;'
     res['icon_templates'] = '&#x2661;'

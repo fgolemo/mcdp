@@ -9,3 +9,5 @@ acl: [
     [Allow, "group:FDM", write],
     [Allow, "group:admin", all],
 ]
+
+authors: [andrea, john, gregory, adam]

@@ -23,8 +23,8 @@
 <table align='center' id='library-contents'>
 <thead>
 <tr><td id='ttitle' colspan="5">
-    {{icon_shelf|safe}} <a href="{{root}}/shelves/{{navigation.shelfname}}/">{{navigation.shelfname}}</a> /
-    {{icon_library|safe}} <code>{{navigation.current_library}}</code>
+    {{icon_shelf|safe}}&nbsp;<a href="{{root}}/shelves/{{navigation.shelfname}}/">{{navigation.shelfname}}</a> /
+    {{icon_library|safe}}&nbsp;<code>{{navigation.current_library}}</code>
 </td></tr>
 <tr id="things">
 	<td>MCDPs</td>
@@ -52,7 +52,7 @@
             <a class='url_edit' href="{{d['url_edit']}}">✎</a>
             <a class='url_edit' href="{{d['url_delete']}}">♻</a>
           {% endif %}
-            {{icon_spec(what)|safe}} <code><a class="url" href="{{d['url']}}">{{d['id']}}</a></code>
+            <code><a class="url" href="{{d['url']}}">{{icon_spec(what)|safe}}&nbsp;{{d['id']}}</a></code>
 		</p>
 	{% endfor %}
 
@@ -66,9 +66,8 @@
     {% if what != 'documents' or navigation[what] %}
     <td class='plus'>
     {% if what != 'documents' %}
-	<!-- <p class="new" style='text-align: center'> -->
-	{% if shelf_can_write(navigation.shelf_name) %}<button id="table_new_{{what}}">+</button>{% endif %}
-	<!-- </p> -->
+	{% if shelf_can_write(navigation.shelf_name) %}
+        <button id="table_new_{{what}}">+</button>{% endif %}
 	{% endif %}
     </td>
     {% endif %}
@@ -81,11 +80,11 @@
 
 <div id='extra_commands'>
 {% if not shelf_can_write(navigation.shelf_name) %}
-<p> This library is read-only for this user. </p>
+    <p> This library is read-only for this user. </p>
 {%endif%}
 
 {% if navigation['models'] %}
-<p><button id='show_previews'>Show MCDP previews</button></p>
+    <p><button id='show_previews'>Show MCDP previews</button></p>
 {% endif %}
 </div>
 

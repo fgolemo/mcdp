@@ -226,10 +226,11 @@ class WebApp(AppVisualization, AppStatus,
         # Note this currently is equivalent to global refresh
         return self.view_refresh(request);
 
-    def view_refresh(self, context, request):  # @UnusedVariable
+    @cr2e
+    def view_refresh(self, e): 
         """ Refreshes all """
-        self.refresh_library(request) 
-        raise HTTPFound(request.referrer)
+        self.refresh_library(e.request) 
+        raise HTTPFound(e.request.referrer)
 
     @cr2e
     def view_not_found(self, e):
@@ -332,8 +333,7 @@ class WebApp(AppVisualization, AppStatus,
             r = os.path.relpath('/', path)
             return r
 
-    
-        
+
     @add_std_vars_context
     @cr2e
     def view_library_doc(self, e):
@@ -438,17 +438,17 @@ class WebApp(AppVisualization, AppStatus,
         config.add_view(self.view_library_doc, context=ResourceLibraryDocRender, renderer='library_doc.jinja2', permission=PRIVILEGE_READ)
         config.add_view(self.view_library_asset, context=ResourceLibraryAsset, permission=PRIVILEGE_READ)
         config.add_view(self.view_refresh_library, context=ResourceLibraryRefresh, permission=PRIVILEGE_READ)
-        config.add_view(self.view_refresh, context=ResourceRefresh, permission=PRIVILEGE_READ)
+        config.add_view(self.view_refresh, context=ResourceRefresh)
         
         config.add_view(self.view_exception, context=Exception, renderer='exception.jinja2')
         config.add_view(self.exit, context=ResourceExit, renderer='json', permission=NO_PERMISSION_REQUIRED)
 
         config.add_view(self.view_exceptions_occurred, context=ResourceExceptionsJSON, renderer='json', permission=NO_PERMISSION_REQUIRED)
         config.add_view(self.view_exceptions_occurred, context=ResourceExceptionsFormatted, renderer='exceptions_formatted.jinja2', permission=NO_PERMISSION_REQUIRED)
-        config.add_view(serve_robots, context=ResourceRobots, permission=NO_PERMISSION_REQUIRED)
-        config.add_notfound_view(self.view_not_found, renderer='404.jinja2')
         config.add_view(self.view_dummy, context=ResourceShelfInactive, renderer='shelf_inactive.jinja2')
         config.add_view(self.view_thing_delete, context=ResourceThingDelete)
+        config.add_view(serve_robots, context=ResourceRobots, permission=NO_PERMISSION_REQUIRED)
+        config.add_notfound_view(self.view_not_found, renderer='404.jinja2')
         config.scan()
 
         app = config.make_wsgi_app()

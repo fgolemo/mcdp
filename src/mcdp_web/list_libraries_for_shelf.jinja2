@@ -1,0 +1,24 @@
+{% macro list_libraries_for_shelf(S, the_shelf) %}
+<style>
+
+ul.libraries_list {
+    margin-top: 0em;
+
+    list-style: none;
+    padding-left: 1em;
+}
+
+ul.libraries_list > li > *:first-child:before {
+    content: '{{icon_library_css|safe}}';
+    margin-right: 0.5em;
+}
+</style>
+
+<ul class='libraries_list'>
+    {% for libname in the_shelf.get_libraries_path() %}
+        <li><a href="{{root}}/shelves/{{S}}/libraries/{{libname}}/">
+                <code><span>{{libname}}</span></code></a>
+        </li>
+    {% endfor %}
+</ul>
+{% endmacro %}

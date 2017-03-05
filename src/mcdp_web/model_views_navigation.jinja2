@@ -26,6 +26,7 @@
 		margin-top: 2em;
 	}
 
+	#back_to_shelf, #select_shelf { width: 18em;}
 </style>
 
 
@@ -34,23 +35,56 @@
 	<td>
 		{% include 'menu.jinja2' %}
 	</td>
-	<td>
+	<td style=''>
 
-	{% if not navigation['current_thing'] %}
+		{% if navigation.shelf_name %}
+		<a id='shelves_list' style='visibility: hidden'
+		href="{{root}}/shelves/">🔙</a>
+		<script type='text/javascript'>
+		$(document).ready(function() {
+			$("#shelves_list").button();
+			$("#shelves_list").css('visibility', 'visible');
+		});
+		</script>
+		{% endif %}
+
+		{% if navigation.library_name %}
+		<a id='back_to_shelf' style='visibility: hidden'
+		href="{{root}}/shelves/{{navigation.shelf_name}}/">
+			<!-- <span class='unicode-icons'>⟲</span> -->
+			 <span class="shelf_name">
+				{{icon_shelf|safe}} {{navigation.shelf_name}}
+			 </span>
+		</a>
+		<script type='text/javascript'>
+		$(document).ready(function() {
+			$("#back_to_shelf").button();
+			$("#back_to_shelf").css('visibility', 'visible');
+		});
+		</script>
+		{% endif %}
+
+	{% if navigation.shelf_name and not navigation.library_name %}
+	<select id='select_shelf' class='hot_select'>
+		<option value="#"  selected = 1>{{icon_shelf|safe}}&nbsp;{{navigation.shelf_name}}</option>
+
+		{% for shelf_name in navigation.shelves_used%}
+			<option name='{{shelf_name}}' value="{{root}}/shelves/{{shelf_name}}/">
+				{{icon_shelf|safe}}&nbsp;{{shelf_name}}
+			</option>
+		{% endfor %}
+
+	  </select>
+	{% endif %}
+
+
+	<!-- {% if navigation.library_name and not navigation['current_thing'] %}
 	  <select id='select_library' class='hot_select'>
-	  	<option value="#"  selected = 1>📖&nbsp; Other libraries&hellip;</option>
-
-		<!-- {% for li in navigation['libraries'] %}
-	    <option value="{{li['url']}}" {% if li['current'] %} selected = 1 {% endif %}>
-	    	{{li['name']}}
-	    </option>
-	    {% endfor %} -->
+	  	<option value="#"  selected = 1>{{icon_library|safe}}&nbsp;{{navigation.library_name}}</option>
 
 		{% for sup, sup_libraries in navigation['libraries_indexed'] %}
 		    {% for li in sup_libraries %}
 		    <option name='{{li['name']}}' value="{{li['url']}}">
-		    	<!-- note the span has no effect inside option -->
-				<!--{% if li['current'] %} selected = 1 {% endif %}-->
 		    	📖&nbsp; {{sup}} / {{li['name']}}
 		    </option>
 		    {% endfor %}
@@ -58,17 +92,33 @@
 		{% endfor %}
 
 	  </select>
-	 {% else %}
+	 {% endif %} -->
+
+	 {% if navigation.library_name and not navigation['current_thing'] %}
+ 	  <select id='select_library' class='hot_select'>
+ 	  	<option value="#"  selected = 1>{{icon_library|safe}}&nbsp;{{navigation.library_name}}</option>
+
+ 		{% for library_name in navigation.shelf.get_libraries_path() %}
+ 		    <option name='library_name'
+				value="{{root}}/shelves/{{navigation.shelf_name}}/libraries/{{library_name}}/">
+ 		    	{{icon_library|safe}}&nbsp; {{library_name}}
+ 		    </option>
+ 		{% endfor %}
+
+ 	  </select>
+ 	 {% endif %}
+
+	 {% if navigation.library_name and navigation['current_thing'] %}
 	 	<a id='back_to_library' style='visibility: hidden'
-		href="{{root}}/libraries/{{navigation['current_library']}}/">
-	 		<span class='unicode-icons'>⟲</span> Library
+		href="{{root}}/shelves/{{navigation.shelf_name}}/libraries/{{navigation.library_name}}/">
+	 		<!-- <span class='unicode-icons'>⟲</span> -->
 	 		 <span class="library_name">
-	 		 	{{navigation['current_library']}}
+	 		 	{{icon_library|safe}} {{navigation.library_name}}
 	 		 </span>
 	 	</a>
 	 	<script type='text/javascript'>
 	 	$(document).ready(function() {
-	    	$("#back_to_library").button();
+			$("#back_to_library").button();
 	    	$("#back_to_library").css('visibility', 'visible');
 		});
 		</script>
@@ -82,6 +132,7 @@
 	  </td>
 	  <td>
 
+		  {% if navigation.current_library %}
 	  <select id='select_model' class='hot_select'>
 	  	{% if not navigation['current_model'] and not navigation['current_template']
 	  		and not navigation['current_poset'] %}
@@ -90,21 +141,25 @@
 
 	  	{% endif %}
 
-	    {% for mi in navigation['models'] + navigation['templates'] + navigation['posets'] + navigation['values'] %}
-	    <option value="{{mi['url']}}" {% if mi['current'] %} selected = 1 {% endif %}>
-			{% if mi in navigation['models']    %}{{icon_models|safe}}&nbsp;{% endif %}
-	    	{% if mi in navigation['templates'] %}{{icon_templates|safe}};&nbsp;{% endif %} <!-- ⢶ -->
-	    	{% if mi in navigation['posets']    %}{{icon_posets|safe}}&nbsp;{% endif %} <!-- ♡ -->
-	    	{% if mi in navigation['values']    %}{{icon_values|safe}}&nbsp;{% endif %} <!-- ✣ -->
-	    	{{mi['name']}}
-	    </option>
-	    {% endfor %}
+
+		    {% for mi in navigation['models'] + navigation['templates'] + navigation['posets'] + navigation['values'] %}
+		    <option value="{{mi['url']}}" {% if mi['current'] %} selected = 1 {% endif %}>
+				{% if mi in navigation['models']    %}{{icon_models|safe}}&nbsp;{% endif %}
+		    	{% if mi in navigation['templates'] %}{{icon_templates|safe}};&nbsp;{% endif %} <!-- ⢶ -->
+		    	{% if mi in navigation['posets']    %}{{icon_posets|safe}}&nbsp;{% endif %} <!-- ♡ -->
+		    	{% if mi in navigation['values']    %}{{icon_values|safe}}&nbsp;{% endif %} <!-- ✣ -->
+		    	{{mi['name']}}
+		    </option>
+		    {% endfor %}
+
 	  </select>
 
 	    <!-- Also add the same but with hidden links -->
 		{% for mi in navigation['models'] %}
 	        <a style='display:none' href="{{mi['url']}}"></a>
 	    {% endfor %}
+
+		{%endif%}
 	  </td>
 
 	  <td>
