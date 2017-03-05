@@ -5,9 +5,9 @@ desc_long: |
     This is a longer description of this shelf.
 
 acl: [
-    [Allow, "groups:admin", all],
+    [Allow, "group:admin", all],
 
     [Allow, Everyone, discover],
     [Allow, Authenticated, subscribe],
-    [Allow, Everyone, read], 
+    [Allow, Everyone, read],
 ]

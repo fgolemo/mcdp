@@ -19,6 +19,7 @@ from mcdp_web.resource_tree import ResourceThingViewSyntax, get_from_context,\
 from mcdp_web.utils0 import add_other_fields, add_std_vars_context
 from mcdp_web.visualization.add_html_links_imp import add_html_links
 from mocdp.comp.context import Context
+from mcdp_web.environment import Environment
 
 
 
@@ -40,46 +41,29 @@ class AppVisualization():
             
         # these are images view for which the only change is the jinja2 template
         # image views
-        config.add_view(self.view_model_info, context=ResourceThingViewDPGraph, renderer='visualization/model_dp_graph.jinja2')
-        config.add_view(self.view_model_info, context=ResourceThingViewDPTree, renderer='visualization/model_dp_tree.jinja2')
-        config.add_view(self.view_model_info, context=ResourceThingViewNDPGraph, renderer='visualization/model_ndp_graph.jinja2')
+        config.add_view(self.view_dummy, context=ResourceThingViewDPGraph, renderer='visualization/model_dp_graph.jinja2')
+        config.add_view(self.view_dummy, context=ResourceThingViewDPTree, renderer='visualization/model_dp_tree.jinja2')
+        config.add_view(self.view_dummy, context=ResourceThingViewNDPGraph, renderer='visualization/model_ndp_graph.jinja2')
         config.add_view(self.view_model_ndp_repr, context=ResourceThingViewNDPRepr, renderer='visualization/model_generic_text_content.jinja2')
 
     @add_std_vars_context
-    def view_model_info(self, context, request):  # @UnusedVariable
-        return {}
-        
-    @add_std_vars_context
     def view_model_ndp_repr(self, context, request):
-        model_name = get_from_context(ResourceThing, context).name
-
-        ndp = self.get_library(request, context).load_ndp(model_name)
+        e = Environment(context, request)
+        ndp = e.library.load_ndp(e.thing_name)
         ndp_string = ndp.__repr__()
         ndp_string = ndp_string.decode("utf8")
-
         return {
-            'model_name': model_name,
             'content': ndp_string,
         }
 
     @add_std_vars_context
     def view_syntax(self, context, request):
-        rthings = get_from_context(ResourceThings, context)
-        specname = rthings.specname
-        spec = specs[specname]
-        
-        name = get_from_context(ResourceThing, context).name
-        
-        library = self.get_library(request, context)
-        
+        e = Environment(context, request)
         make_relative = lambda _: self.make_relative(request, _)
-        library_name = self.get_current_library_name(request, context)
-
-        res = generate_view_syntax(library_name, library, name,  spec, make_relative)
+        res = generate_view_syntax(e.library_name, e.library, e.thing_name, e.spec, make_relative)
         add_other_fields(self, res, request, context)
-        
-        url_edit0 = ("/libraries/%s/%s/%s/views/edit_fancy/" %  
-                    (library_name, spec.url_part, name))
+        url_edit0 = ("/shelves/%s/libraries/%s/%s/%s/views/edit_fancy/" %  
+                    (e.shelf_name, e.library_name, e.spec.url_part, e.thing_name))
         res['url_edit'] = make_relative(url_edit0)
         return res
     

@@ -29,6 +29,7 @@ from mcdp_web.utils import ajax_error_catch, memoize_simple, response_data
 from mcdp_web.utils.image_error_catch_imp import response_image
 from mcdp_web.utils0 import add_std_vars_context
 import numpy as np
+from mcdp_web.environment import Environment
 
 
 # Alternate chars used for Base64 instead of + / which give problems with urls
@@ -75,7 +76,7 @@ class AppSolver2():
 
     def get_ndp_dp(self, session, library_name, model_name):
         self._xxx_session = session
-        return self._get_ndp_dp(self, library_name, model_name)
+        return self._get_ndp_dp(library_name, model_name)
     
     @memoize_simple
     def _get_ndp_dp(self, library_name, model_name):
@@ -86,12 +87,10 @@ class AppSolver2():
 
     @add_std_vars_context
     def view_solver2_base(self, context, request):
-        model_name = context_get_widget_name(context)
-        library_name = context_get_library_name(context, request)
+        e = Environment(context, request)
         
         # you don't want to memoize
-        session = self.get_session(request) 
-        ndp, dp = self.get_ndp_dp(session, library_name, model_name)
+        ndp, dp = self.get_ndp_dp(e.session, e.library_name, e.thing_name)
 
         F = dp.get_fun_space()
         R = dp.get_res_space()
@@ -163,17 +162,15 @@ class AppSolver2():
         return ajax_error_catch(go, quiet=quiet)
     
     def process_rtof(self, context, request, string, do_approximations, nl, nu):
-        library = context_get_library(context, request)
-        model_name = context_get_widget_name(context)
-        library_name = context_get_library_name(context, request)
+        e = Environment(context, request)
         
-        parsed = library.parse_constant(string)
+        parsed = e.library.parse_constant(string)
 
         space = parsed.unit
         value = parsed.value
 
-        session = self.get_session(request) 
-        ndp, dp = self.get_ndp_dp(session, library_name, model_name)
+        
+        ndp, dp = self.get_ndp_dp(e.session, e.library_name, e.thing_name)
 
         R = dp.get_res_space()
         LF = LowerSets(dp.get_fun_space())
@@ -226,17 +223,14 @@ class AppSolver2():
         return data, res
 
     def process_ftor(self, context, request, string, do_approximations, nl, nu):
-        library = context_get_library(context, request)
-        model_name = context_get_widget_name(context)
-        library_name = context_get_library_name(context, request)
-
-        parsed = library.parse_constant(string)
+        e = Environment(context, request)
+        parsed = e.library.parse_constant(string)
 
         space = parsed.unit
         value = parsed.value
 
-        session = self.get_session(request) 
-        ndp, dp = self.get_ndp_dp(session, library_name, model_name)
+         
+        ndp, dp = self.get_ndp_dp(e.session, e.library_name, e.model_name)
 
         F = dp.get_fun_space()
         UR = UpperSets(dp.get_res_space())
@@ -368,15 +362,13 @@ class AppSolver2():
                 <fname> = constant
         """
         #library = context_get_library(context, request)
-        model_name = context_get_widget_name(context)
-        library_name = context_get_library_name(context, request)
+        e = Environment(context, request)
 
         def go():
             xaxis = str(request.params['xaxis'])
             yaxis = str(request.params['yaxis'])
  
-            session = self.get_session(request) 
-            ndp, dp = self.get_ndp_dp(session, library_name, model_name)
+            ndp, dp = self.get_ndp_dp(e.session, e.library_name, e.model_name)
 
             fnames = ndp.get_fnames()
             rnames = ndp.get_rnames()

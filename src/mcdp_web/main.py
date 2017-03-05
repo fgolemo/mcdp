@@ -15,6 +15,7 @@ from pyramid.httpexceptions import HTTPFound
 from pyramid.renderers import JSONP, render_to_response
 from pyramid.response import Response
 from pyramid.security import NO_PERMISSION_REQUIRED
+from pyramid.session import SignedCookieSessionFactory
 from quickapp import QuickAppBase
 
 from mcdp import logger
@@ -28,26 +29,27 @@ from mcdp_utils_misc import duration_compact, dir_from_package_name
 
 from .confi import describe_mcdpweb_params, parse_mcdpweb_params_from_dict
 from .editor_fancy import AppEditorFancyGeneric
+from .environment import Environment
 from .images.images import WebAppImages, get_mime_for_format
 from .interactive.app_interactive import AppInteractive
 from .qr.app_qr import AppQR
 from .resource_tree import MCDPResourceRoot, ResourceLibraries,\
     ResourceLibrary, get_from_context,  ResourceLibraryRefresh, ResourceRefresh,\
-    ResourceExit, ResourceLibraryDocRender, context_get_library,\
+    ResourceExit, ResourceLibraryDocRender,\
     ResourceLibraryAsset, ResourceRobots, ResourceShelves,\
     ResourceShelvesShelfUnsubscribe, ResourceShelvesShelfSubscribe,\
-    ResourceExceptionsFormatted, ResourceExceptionsJSON
-from .security import AppLogin
+    ResourceExceptionsFormatted, ResourceExceptionsJSON, ResourceShelf, ResourceLibrariesNewLibname,\
+    context_get_shelf_name, context_get_shelf, Resource,\
+    context_display_in_detail, ResourceShelfInactive, ResourceThingDelete
+from .security import AppLogin, groupfinder
 from .sessions import Session
 from .solver.app_solver import AppSolver
 from .solver2.app_solver2 import AppSolver2
 from .status import AppStatus
 from .utils.image_error_catch_imp import response_image
-from .utils0 import add_std_vars_context
+from .utils.response import response_data
+from .utils0 import add_other_fields, add_std_vars_context
 from .visualization.app_visualization import AppVisualization
-from mcdp_web.resource_tree import ResourceShelf, ResourceLibrariesNewLibname,\
-    context_get_shelf_name, context_get_shelf
-from mcdp_web.utils0 import add_other_fields
 
 
 __all__ = [
@@ -136,13 +138,13 @@ class WebApp(AppVisualization, AppStatus,
     
     def _get_views(self):
         return sorted(self.views, key=lambda _:self.views[_]['order'])
-
-    def get_current_library_name(self, request, context=None):
-        if context is None:
-            return self.get_session(request).get_current_library_name()
-        else:
-            rlibrary = get_from_context(ResourceLibrary, context)
-            return rlibrary.name
+# 
+#     def get_current_library_name(self, request, context=None):
+#         if context is None:
+#             return self.get_session(request).get_current_library_name()
+#         else:
+#             rlibrary = get_from_context(ResourceLibrary, context)
+#             return rlibrary.name
     
     def get_library(self, request, context=None):
         session = self.get_session(request)
@@ -235,14 +237,14 @@ class WebApp(AppVisualization, AppStatus,
             raise HTTPFound(url_edit) 
          
     def view_shelves_unsubscribe(self, context, request):  
+        e = Environment(context, request)
         sname = context.name
-        session = self.get_session(request)
+        
         #print('unsubscribe %r' % sname)
-        user = session.get_user()
-        if sname in user.subscriptions:
-            user.subscriptions.remove(sname)
-            session.save_user()
-            session.recompute_available()
+        if sname in e.user.subscriptions:
+            e.user.subscriptions.remove(sname)
+            e.session.save_user()
+            e.session.recompute_available()
         raise HTTPFound(request.referrer)
 
     def refresh_library(self, request):
@@ -259,16 +261,20 @@ class WebApp(AppVisualization, AppStatus,
 
     def view_refresh(self, context, request):  # @UnusedVariable
         """ Refreshes all """
-        self.refresh_library(request)
+        self.refresh_library(request) 
         raise HTTPFound(request.referrer)
 
-    def view_not_found(self, request):
+    def view_not_found(self, context, request):
         request.response.status = 404
         url = request.url
         referrer = request.referrer
+        print('context: %s' % context)
         self.exceptions.append('Path not found.\n url: %s\n ref: %s' % (url, referrer))
-        res = {'url': url, 'referrer': referrer}
-        
+        res = {
+            'url': url,
+             'referrer': referrer,
+#              'context': context_display_in_detail(context),
+        }
         res['root'] =  self.get_root_relative_to_here(request)
         return res
 
@@ -283,6 +289,9 @@ class WebApp(AppVisualization, AppStatus,
     def view_exception(self, exc, request):
         request.response.status = 500  # Internal Server Error
 
+        if isinstance(request.context, Resource):
+            logger.debug(context_display_in_detail(request.context))
+            
         import traceback
         compact = (DPSemanticError, DPSyntaxError)
         if isinstance(exc, compact):
@@ -354,30 +363,6 @@ class WebApp(AppVisualization, AppStatus,
         url = url.format(shelf_name=shelf_name, library_name=library_name)
         return url
 
-    def get_lmv_url2(self, library, model, view, request):
-        url0 = '/libraries/%s/models/%s/views/%s/' % (library, model, view)
-        return self.make_relative(request, url0)
-    
-    def get_lvv_url2(self, library, value, view, request):
-        url0 = '/libraries/%s/values/%s/views/%s/' % (library, value, view)
-        return self.make_relative(request, url0)
-
-    def get_ltv_url2(self, library, template, view, request):
-        url0='/libraries/%s/templates/%s/views/%s/' % (library, template, view)
-        return self.make_relative(request, url0)
-
-    def get_lpv_url2(self, library, poset, view, request):
-        url0 = '/libraries/%s/posets/%s/views/%s/' % (library, poset, view)
-        return self.make_relative(request, url0)
-
-    def get_glmv_url2(self, library, url_part, model, view, request):
-        url0 = '/libraries/%s/%s/%s/views/%s/' % (library, url_part, model, view)
-        return self.make_relative(request, url0)
-    
-    def get_lib_template_view_url2(self, library, template, view, request):
-        url0 = '/libraries/%s/templates/%s/views/%s/' % (library, template, view)
-        return self.make_relative(request, url0)
-
     def get_root_relative_to_here(self, request):
         if request is None:
             return ''
@@ -387,6 +372,7 @@ class WebApp(AppVisualization, AppStatus,
             return r
 
     
+        
     @add_std_vars_context
     def view_library_doc(self, context, request):
         """ '/libraries/{library}/{document}.html' """
@@ -407,29 +393,28 @@ class WebApp(AppVisualization, AppStatus,
     @contract(returns=str)
     def _render_library_doc(self, context, request, document):
         import codecs
-        l = context_get_library(context, request)
+        e = Environment(context, request)
 
         strict = int(request.params.get('strict', '0'))
 
         filename = '%s.%s' % (document, MCDPLibrary.ext_doc_md)
-        f = l._get_file_data(filename)
+        f = e.library._get_file_data(filename)
         realpath = f['realpath']
         # read unicode
         data_unicode = codecs.open(realpath, encoding='utf-8').read()
         data_str = data_unicode.encode('utf-8')
         raise_errors = bool(strict)
-        html = render_complete(library=l, s=data_str, realpath=realpath, raise_errors=raise_errors)
+        html = render_complete(library=e.library, s=data_str, realpath=realpath, raise_errors=raise_errors)
         return html
 
     def view_library_asset(self, context, request):
-        library = context_get_library(context, request)
+        e = Environment(context, request)
         asset = os.path.splitext(context.name)[0]
         ext = os.path.splitext(context.name)[1][1:]
         filename = '%s.%s' % (asset, ext)
-        f = library._get_file_data(filename)
+        f = e.library._get_file_data(filename)
         data = f['data']
         content_type = get_mime_for_format(ext)
-        from mcdp_web.utils.response import response_data
         return response_data(request, data, content_type)
 
     def exit(self, context, request):  # @UnusedVariable
@@ -448,8 +433,7 @@ class WebApp(AppVisualization, AppStatus,
         
     def get_app(self): 
         self.time_start = time.time()
-        from pyramid.session import SignedCookieSessionFactory
-        
+
         secret = 'itsasecreet' # XXX
         
         self.my_session_factory = SignedCookieSessionFactory(secret+'sign')
@@ -459,7 +443,7 @@ class WebApp(AppVisualization, AppStatus,
 
         # config.include('pyramid_debugtoolbar')
 
-        authn_policy = AuthTktAuthenticationPolicy(secret+'authn', hashalg='sha512')
+        authn_policy = AuthTktAuthenticationPolicy(secret+'authn', hashalg='sha512', callback=groupfinder )
         authz_policy = ACLAuthorizationPolicy()
         config.set_authentication_policy(authn_policy)
         config.set_authorization_policy(authz_policy)
@@ -500,10 +484,29 @@ class WebApp(AppVisualization, AppStatus,
         config.add_view(self.view_exceptions_occurred, context=ResourceExceptionsFormatted, renderer='exceptions_formatted.jinja2', permission=NO_PERMISSION_REQUIRED)
         config.add_view(serve_robots, context=ResourceRobots, permission=NO_PERMISSION_REQUIRED)
         config.add_notfound_view(self.view_not_found, renderer='404.jinja2')
+        config.add_view(self.view_shelf_inactive, context=ResourceShelfInactive, renderer='shelf_inactive.jinja2')
+        config.add_view(self.view_thing_delete, context=ResourceThingDelete)
         config.scan()
 
         app = config.make_wsgi_app()
         return app
+    
+    @add_std_vars_context
+    def view_shelf_inactive(self, context, request):
+        return {}
+    
+    @add_std_vars_context
+    def view_thing_delete(self, context, request):
+        e = Environment(context, request)
+        name = e.thing_name
+        basename = "%s.%s" % (name, e.spec.extension)
+        logger.error('Deleting %s' % basename)
+        filename = e.library.delete_file(basename)
+        e.session.notify_deleted_file(e.shelf_name, e.library_name, filename)
+        raise HTTPFound(request.referrer)
+
+
+    
     
 def serve_robots(request):  # @UnusedVariable
     body = "User-agent: *\nDisallow:"

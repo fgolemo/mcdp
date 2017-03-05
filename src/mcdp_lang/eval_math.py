@@ -313,10 +313,10 @@ def get_mult_op(context, r, c):
         R = c.unit
         unit, value = c.unit, c.value
         dp = MultValueDP(F, R, unit=unit, value=value)
-    elif isinstance(rtype, RcompUnits) and isinstance(c.unit, Nat):
+    elif isinstance(rtype, RcompUnits) and isinstance(c.unit, (Nat, Rcomp)):
         F = rtype
         R = F
-        unit, value = R_dimensionless, c.cast_to(R_dimensionless)
+        unit, value = R_dimensionless, c.cast_value(R_dimensionless)
         dp = MultValueDP(F=F, R=F, unit=unit, value=value)
     elif isinstance(rtype, Rcomp) and isinstance(c.unit, Rcomp):
         msg = 'Multiplication not implemented with Rcomp().'

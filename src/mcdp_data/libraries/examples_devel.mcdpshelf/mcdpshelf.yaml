@@ -6,5 +6,5 @@ acl: [
     [Allow, Everyone, discover],
     [Allow, Authenticated, subscribe],
     [Allow, Everyone, read],
-    [Allow, "groups:admin", all],
+    [Allow, "group:admin", all],
 ]

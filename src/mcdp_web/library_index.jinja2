@@ -49,7 +49,10 @@
 	{% for d in navigation[what] %}
 		<p class='entry'>
 		{% if 'url_edit' in d and shelf_can_write(navigation.shelf_name)%}
-            <a class='url_edit' href="{{d['url_edit']}}">✎</a>{% endif %}<code><a class="url" href="{{d['url']}}">{{d['id']}}</a></code>
+            <a class='url_edit' href="{{d['url_edit']}}">✎</a>
+            <a class='url_edit' href="{{d['url_delete']}}">♻</a>
+          {% endif %}
+            <code><a class="url" href="{{d['url']}}">{{d['id']}}</a></code>
 		</p>
 	{% endfor %}
 

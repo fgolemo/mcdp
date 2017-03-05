@@ -71,12 +71,7 @@ margin-right: 1.5em;
 	padding-left: 3px;
 }
 #library-contents  tbody p.entry .url_edit {
-    /*display: inline-block;*/
     padding-right: 0.5em;
-    /*padding-left: 0.5em;*/
-	/*visibility: hidden;*/
-	/*position: relative;
-	z-index: 10000;*/
     color: white;
 }
 #library-contents  tbody p.entry:hover .url_edit {

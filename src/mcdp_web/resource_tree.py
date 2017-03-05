@@ -182,12 +182,27 @@ class ResourceShelf(Resource):
         subs =  {
             'subscribe': ResourceShelvesShelfSubscribe(self.name),
             'unsubscribe': ResourceShelvesShelfUnsubscribe(self.name),
-            
-            'libraries': ResourceLibraries(),
         }    
-        return subs.get(key, None)
+        if key in subs: return subs[key]
     
-        return ResourceLibrary(key)
+        if key == 'libraries':
+            session = self.get_session()
+            if not self.name in session.shelves_used:
+                print('cannot access libraries if not subscribed')
+                return ResourceShelfInactive(self.name)
+            
+            return ResourceLibraries()
+    
+class ResourceShelfInactive(Resource):
+    def getitem(self, key):  # @UnusedVariable
+        return self
+    
+#         return ResourceLibrariesInaccessibleLibrary(key)
+# 
+# class ResourceLibrariesInaccessibleLibrary(Resource):
+#     def getitem(self, key):
+#         return self
+#        return ResourceLibrary(key)
         
 class ResourceLibrary(Resource): 
     
@@ -244,9 +259,13 @@ class ResourceThing(Resource):
     
     def getitem(self, key):
         subs =  {
-            'views': ResourceThingViews('views'),
+            'views': ResourceThingViews(),
+            ':delete': ResourceThingDelete(),
         }
         return subs.get(key, None)
+
+class ResourceThingDelete(Resource):
+    pass
 
 class ResourceThingViews(Resource):
     def getitem(self, key):

@@ -6,6 +6,7 @@ import traceback
 
 from mcdp_web.utils import response_data
 from mcdp_web.utils0 import add_std_vars_context
+from mcdp_web.environment import Environment
 
 
 class AppQR():
@@ -165,13 +166,14 @@ class AppQR():
         return s
         
     @add_std_vars_context
-    def view_qr_import(self, request):
+    def view_qr_import(self, context, request):
+        e = Environment(context, request)
         hexified = request.matchdict['hex']
         qrstring = binascii.unhexlify(hexified)
         resources = self.retrieved[qrstring]['resources']
         self.retrieved[qrstring]['imported'] = True
-        library = self.get_current_library_name(request)
-        path = self.libraries[library]['path']
+        
+        path = self.libraries[e.library_name]['path']
 
         where = os.path.join(path, 'imported')
         if not os.path.exists(where):

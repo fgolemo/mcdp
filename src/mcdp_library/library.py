@@ -8,19 +8,16 @@ import sys
 from contracts import contract
 from contracts.utils import (check_isinstance, format_obs, raise_desc,
                              raise_wrapped)
+
 from mcdp import logger, MCDPConstants
 from mcdp.exceptions import DPSemanticError, MCDPExceptionWithWhere
 from mcdp_dp import PrimitiveDP
 from mcdp_lang import parse_ndp, parse_poset
 from mcdp_posets import Poset
+from mcdp_utils_misc import get_mcdp_tmp_dir, memo_disk_cache2, locate_files
 from mocdp.comp.context import Context, ValueWithUnits
 from mocdp.comp.interfaces import NamedDP
 from mocdp.comp.template_for_nameddp import TemplateForNamedDP
-
-
-from mcdp_utils_misc.fileutils import get_mcdp_tmp_dir
-from mcdp_utils_misc.memos_selection import memo_disk_cache2
-from mcdp_utils_misc.locate_files_imp import locate_files
 
 
 __all__ = [
@@ -428,6 +425,17 @@ class MCDPLibrary():
     @contract(f=str)
     def _update_file_from_editor(self, f):
         return self._update_file(f, from_search_dir='mcdp-web')
+    
+    def delete_file(self, basename):
+        ''' Deletes a file '''
+        if not basename in self.file_to_contents:
+            msg = 'Filename %r does not exist in this library.' % basename
+            raise ValueError(msg)
+        realpath = self.file_to_contents[basename]['realpath']
+        if not os.path.exists(realpath):
+            msg = 'Filename %r -> %r already deleted.' % (basename, realpath)
+            logger.warning(msg)
+        os.unlink(realpath)
     
     @contract(f=str)
     def _update_file(self, f, from_search_dir=None):

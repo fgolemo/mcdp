@@ -46,7 +46,7 @@ class ACL():
             principals.append(username)
         if groups:
             for g in groups:
-                principals.append('groups:%s'%g)
+                principals.append('group:%s'%g)
         
         return self.allowed_(privilege, principals)
     

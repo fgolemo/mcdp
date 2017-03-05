@@ -54,10 +54,7 @@
     Max <span id='scale_y_label'>Y</span>: <input id='scale_y' type="text" value="10"/>
 </p>
 
-<!-- // todo make ajax -->
-<!-- <form style='display:inline' method="POST" action="/solver_reset/{{model_name}}"> -->
 <input id="reset_points" type="submit" value="Reset points"/>
-<!-- </form> -->
 
  {% for fn in fun_names_other %}
  <p>{{fn}}: <input class='manual' id='{{fn}}' type="text" value="0"/> </p>

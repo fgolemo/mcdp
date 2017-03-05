@@ -4,15 +4,15 @@
 -->
 <html lang="en">
 <head>
-    <title>Rendering for {{model_name}}</title>
+    <title>Rendering for {{navigation.thing_name}}</title>
     {% include 'head.jinja2' %}
-    
+
 </head>
 <body>
 	{% include 'model_views_navigation.jinja2' %}
 	<style type='text/css'>
 	#content { font-family: monospace; }
 	</style>
-	<pre id='content'><code>{{content}}</pre></code> 
+	<pre id='content'><code>{{content}}</pre></code>
 </body>
 </html>

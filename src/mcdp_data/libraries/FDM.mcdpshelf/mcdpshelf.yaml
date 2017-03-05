@@ -4,8 +4,8 @@ desc_long:
 
 acl: [
     [Allow, Everyone, discover],
-    [Allow, "groups:FDM", subscribe],
-    [Allow, "groups:FDM", read],
-    [Allow, "groups:FDM", write],
-    [Allow, "groups:admin", all],
+    [Allow, "group:FDM", subscribe],
+    [Allow, "group:FDM", read],
+    [Allow, "group:FDM", write],
+    [Allow, "group:admin", all],
 ]

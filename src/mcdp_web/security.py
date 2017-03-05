@@ -95,6 +95,13 @@ class AppLogin():
         headers = forget(request)
         came_from = request.referrer
         return HTTPFound(location=came_from, headers=headers)
+
+def groupfinder(userid, request):
+    from mcdp_web.main import WebApp
+    app = WebApp.singleton
+    
+    user = app.user_db[userid]
+    return ['group:%s' % _ for _ in user.groups]  
 # 
 # def hash_password(pw):
 #     pwhash = bcrypt.hashpw(pw.encode('utf8'), bcrypt.gensalt())

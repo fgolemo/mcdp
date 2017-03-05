@@ -52,6 +52,10 @@ class Session():
         self.get_shelf(shelf_name).update_libraries()
         self.recompute_available()
         
+    def notify_deleted_file(self, shelf_name, library_name, filename):  # @UnusedVariable
+        self.get_shelf(shelf_name).update_libraries()
+        self.recompute_available()
+        
     def recompute_available(self):
         # all the ones we can discover
         self.shelves_available = OrderedDict()
@@ -114,16 +118,16 @@ class Session():
     def list_libraries(self):
         """ Returns the list of libraries """
         return sorted(self.libraries)
+# 
+#     @contract(returns=str)
+#     def get_current_library_name(self):
+#         #raise ValueError('deprecated')
+#         library_name = str(self.request.matchdict['library'])  # unicod
+#         return library_name
 
-    @contract(returns=str)
-    def get_current_library_name(self):
-        #raise ValueError('deprecated')
-        library_name = str(self.request.matchdict['library'])  # unicod
-        return library_name
-
-    def get_library(self, library_name=None):
-        if library_name is None:
-            library_name = self.get_current_library_name()
+    def get_library(self, library_name):
+#         if library_name is None:
+#             library_name = self.get_current_library_name()
         if not library_name in self.libraries:
             msg = 'Could not find library %r.' % library_name
             raise_desc(ValueError, msg, available=self.libraries)
