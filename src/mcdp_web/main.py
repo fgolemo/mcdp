@@ -215,6 +215,7 @@ class WebApp(AppVisualization, AppStatus,
                 'library_name': library_name,
                 'url_edit': url_edit,
             }
+            
             add_other_fields(self, res, request, context=context)
             return render_to_response(template, res, request=request)
         else:
@@ -224,6 +225,10 @@ class WebApp(AppVisualization, AppStatus,
                 logger.error('Directory %s already exists.' % dirname)
             else:
                 os.makedirs(dirname)
+                one = os.path.join(dirname, '.gitignore')
+                with open(one, 'w') as f:
+                    f.write("")
+                    
                 logger.info('Created library %r in %r' % (library_name, dirname))
             session = self.get_session(request)
             session.notify_created_library(shelf_name, library_name)
