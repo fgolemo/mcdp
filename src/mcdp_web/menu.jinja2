@@ -1,7 +1,5 @@
-<script type="text/javascript">
-    url_base = "{{root}}/libraries/{{navigation['current_library']}}/";
-    {% include 'menu.js' %}
-</script>
+
+<script>{% include 'menu.js' %}</script>
 <style type='text/css'>{%include 'menu.css' %}</style>
 
 <div id='outer_outer' style=''>
@@ -10,9 +8,12 @@
         <li id='root'>&#9776;
             <ul>
                 <li><a class='l1' href='{{root}}/'>⌂ Front page</a></li>
-                <li><a class='l1' href='{{root}}/shelves/'>🏛 List of shelves</a></li>
-                <li><a class='l1' href='{{root}}/libraries/'>📖 List of libraries</a></li>
-                {% if navigation['current_library'] and shelf_can_write(navigation.shelf_name) %}
+                <li><a class='l1' href='{{root}}/shelves/'>{{icon_shelf|safe}} List of shelves</a></li>
+                <li><a class='l1' href='{{root}}/libraries/'>{{icon_library|safe}} List of libraries</a></li>
+                {% if navigation.library_name and shelf_can_write(navigation.shelf_name) %}
+                    <script type="text/javascript">
+                        url_base = "{{library_url(navigation.library_name)}}";
+                    </script>
                     <li class="l1" id='menu_new'><span><span class='unicode-icons'>✎</span>Create new&hellip;</span>
                     <ul>
                       <li><a id='new_model'><span class='unicode-icons'>&#10213;</span> MCDP&hellip;</a></li>
@@ -25,10 +26,12 @@
                 <li>
                 <a href="{{root}}/refresh"><span class='unicode-icons'>↻</span>Refresh caches</a>
                 </li>
+                {% if navigation.library_name %}
                 <li>
-                <a href="{{root}}/libraries/{{navigation['current_library']}}/interactive/mcdp_value/">
-                	<span class='unicode-icons'>📟</span>Calculator</a>
+                    <a href="{{library_url(navigation.library_name)}}/interactive/mcdp_value/">
+                    	<span class='unicode-icons'>📟</span>Calculator</a>
                 </li>
+                {% endif %}
                 <li>
                 	<a href="{{request.url}}" target="_blank">
                         <span class='unicode-icons'>📓</span>open a copy <br/>of this page</a>

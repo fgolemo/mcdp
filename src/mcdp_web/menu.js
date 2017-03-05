@@ -1,4 +1,4 @@
-// url_base = "{{root}}/libraries/{{navigation['current_library']}}/";
+
 function new_model() {
     url = url_base + 'models/new/';
     prompt_user('model', url, "Create new MCDP");

@@ -63,7 +63,16 @@ def add_other_fields(self, res, request, context):
     res['shelf_can_subscribe'] = can_subscribe
     res['shelf_can_admin'] = can_admin           
     
-    res['library_url'] = lambda library_name: e.root + '/shelves/' + e.shelf_name + '/libraries/' + library_name 
+    def library_url(library_name):
+        if library_name is None:
+            msg = 'library_name = None'
+            raise ValueError(msg)
+        if e.shelf_name is None:
+            msg = 'shelf_name is not set'
+            raise ValueError(msg)
+        return e.root + '/shelves/' + e.shelf_name + '/libraries/' + library_name
+        
+    res['library_url'] = library_url
     res['shelf_url'] = lambda shelf_name: e.root + '/shelves/' + shelf_name 
     
     res['icon_library'] = '&#x1F4D6;'  

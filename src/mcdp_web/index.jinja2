@@ -11,12 +11,8 @@
 {% include 'prompt.jinja2' %}
 
 <script type='text/javascript'>
-    function create_library() {
-        url_base = '{{root}}/libraries/new/';
-        prompt_user("library", url_base, prompt="Create new library");
-    }
+
     $(document).ready(function() {
-        $("#create_library").button().click(create_library);
         $("#refresh").button();
         $("#buttons").css('visibility', 'visible');
        // $("#create_library").disable();
@@ -74,7 +70,7 @@
 	{% include 'list_libraries_by_shelf.jinja2' %}
 
 	<div id='buttons'>
-		<!--<p><a id='create_library'>Create a new library</a></p>-->
+
 		<p><a id='refresh' href='{{root}}/refresh'>Refresh list of libraries</a></p>
 	</div>
 </div>
