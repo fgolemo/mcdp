@@ -62,8 +62,8 @@ def add_other_fields(self, res, request, context):
     res['shelf_can_subscribe'] = can_subscribe
     res['shelf_can_admin'] = can_admin           
     
-    res['icon_library'] = u'📖'  
-    res['icon_shelf'] = u'🏛'
+    res['icon_library'] = '&#x1F4D6;'  
+    res['icon_shelf'] = '&#x1F3DB;'
 
     res['icon_models'] = '&#10213;'
     res['icon_templates'] = '&#x2661;'
