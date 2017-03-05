@@ -74,6 +74,7 @@ def add_other_fields(self, res, request, context):
         
     res['library_url'] = library_url
     res['shelf_url'] = lambda shelf_name: e.root + '/shelves/' + shelf_name 
+    res['static'] = e.root + '/static'
     
     res['icon_library'] = '&#x1F4D6;'  
     res['icon_library_css'] = r'\1F4D6'

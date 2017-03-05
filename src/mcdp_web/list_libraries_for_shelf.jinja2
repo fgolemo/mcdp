@@ -16,7 +16,7 @@ ul.libraries_list > li > *:first-child:before {
 
 <ul class='libraries_list'>
     {% for libname in the_shelf.get_libraries_path() %}
-        <li><a href="{{root}}/shelves/{{S}}/libraries/{{libname}}/">
+        <li><a href="{{shelf_url(S)}}/libraries/{{libname}}/">
                 <code><span>{{libname}}</span></code></a>
         </li>
     {% endfor %}

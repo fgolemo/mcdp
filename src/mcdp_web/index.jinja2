@@ -22,7 +22,7 @@
 
 <table><tr>
 <td>
-<img id='diagram' src='{{root}}/static/diagram_blank.png'/>
+<img id='diagram' src='{{static}}/diagram_blank.png'/>
 </td>
 <td><br/>
     <h2>PyMCDP <br/>
@@ -40,7 +40,7 @@
 
 <ul>
 <li><a href="http://co-design.science/papers/">Papers and presentations</a></li>
-<li><a href="{{root}}/static/manual.pdf"><img src='{{root}}/static/pdf.png' class='icon'/>Language tutorial and reference</a></li>
+<li><a href="{{static}}/manual.pdf"><img src='{{static}}/pdf.png' class='icon'/>Language tutorial and reference</a></li>
 </ul>
 <div style='display:none'>
 
@@ -60,27 +60,10 @@
 
 <!--<p><button id='show-available'>Show available libraries</button></p>-->
 <ul>
-<li><a class='button' href='{{root}}/libraries/'>Currently available libraries</a></li>
 <li><a class='button' href='{{root}}/shelves/'>Activate/deactivate shelves</a></li>
+<li><a class='button' href='{{root}}/libraries/'>Currently available libraries</a></li>
 </ul>
-
-<div id='available' style='display:none'>
-	<h3>Available libraries</h3>
-
-	{% include 'list_libraries_by_shelf.jinja2' %}
-
-	<div id='buttons'>
-
-		<p><a id='refresh' href='{{root}}/refresh'>Refresh list of libraries</a></p>
-	</div>
-</div>
-<!--
-<p>
-	Some interesting starting points:
-		<a href="{{root}}/libraries/droneD_complete_v2/">the drone example</a>,
-	 	<a href="{{root}}/libraries/plugs/">the plugs domain</a>.
-</p>
- -->
+ 
 
 
 </div>

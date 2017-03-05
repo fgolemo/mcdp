@@ -69,7 +69,7 @@
 		<option value="#"  selected = 1>{{icon_shelf|safe}}&nbsp;{{navigation.shelf_name}}</option>
 
 		{% for shelf_name in navigation.shelves_used%}
-			<option name='{{shelf_name}}' value="{{root}}/shelves/{{shelf_name}}/">
+			<option name='{{shelf_name}}' value="{{shelf_url(shelf_name)}}">
 				{{icon_shelf|safe}}&nbsp;{{shelf_name}}
 			</option>
 		{% endfor %}

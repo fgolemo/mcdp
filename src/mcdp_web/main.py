@@ -141,13 +141,10 @@ class WebApp(AppVisualization, AppStatus,
         return sorted(self.views, key=lambda _:self.views[_]['order'])
        
     @add_std_vars_context
-    def view_dummy(self, context, request):  # @UnusedVariable
-        return {}
+    @cr2e
+    def view_dummy(self, e):  # @UnusedVariable
+        return {'static':'iao'}
  
-    @add_std_vars_context
-    def view_shelves_index(self, context, request):# @UnusedVariable
-        return {}
-
     @add_std_vars_context
     @cr2e
     def view_shelf(self, e):
@@ -247,7 +244,8 @@ class WebApp(AppVisualization, AppStatus,
         return res
 
     @add_std_vars_context
-    def view_exceptions_occurred(self, context, request):  # @UnusedVariable
+    @cr2e
+    def view_exceptions_occurred(self, e):  # @UnusedVariable
         exceptions = []
         for e in self.exceptions:
             u = unicode(e, 'utf-8')
@@ -278,10 +276,12 @@ class WebApp(AppVisualization, AppStatus,
  
         u = unicode(s, 'utf-8')
         logger.error(u)
+        root = self.get_root_relative_to_here(request)
         res = {
             'exception': u,
             # 'url_refresh': url_refresh,
-            'root': self.get_root_relative_to_here(request)
+            'root': root,
+            'static': root + '/static'
         }  
         return res
     
@@ -430,7 +430,7 @@ class WebApp(AppVisualization, AppStatus,
         config.add_view(self.view_dummy, context=MCDPResourceRoot, renderer='index.jinja2')
         config.add_view(self.view_dummy, context=ResourceLibraries, renderer='list_libraries.jinja2')
         config.add_view(self.view_dummy, context=ResourceLibrary, renderer='library_index.jinja2', permission=PRIVILEGE_READ)
-        config.add_view(self.view_shelves_index, context=ResourceShelves, renderer='shelves_index.jinja2')
+        config.add_view(self.view_dummy, context=ResourceShelves, renderer='shelves_index.jinja2')
         config.add_view(self.view_shelf_library_new, context=ResourceLibrariesNewLibname)
         config.add_view(self.view_shelf, context=ResourceShelf, renderer='shelf.jinja2', permission=PRIVILEGE_READ)
         config.add_view(self.view_shelves_subscribe, context=ResourceShelvesShelfSubscribe, permission=PRIVILEGE_SUBSCRIBE)

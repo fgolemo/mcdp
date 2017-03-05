@@ -23,7 +23,7 @@
 <table align='center' id='library-contents'>
 <thead>
 <tr><td id='ttitle' colspan="5">
-    {{icon_shelf|safe}}&nbsp;<a href="{{root}}/shelves/{{navigation.shelfname}}/">{{navigation.shelfname}}</a> /
+    {{icon_shelf|safe}}&nbsp;<a href="{{shelf_url(navigation.shelf_name)}}/">{{navigation.shelf_name}}</a> /
     {{icon_library|safe}}&nbsp;<code>{{navigation.current_library}}</code>
 </td></tr>
 <tr id="things">
@@ -101,7 +101,7 @@
 		<code>{{ m['id'] }}</code>
 	</span>
 
-	<img id='{{ m["id_ndp"] }}-image' src='{{root}}/static/white_small.png'/>
+	<img id='{{ m["id_ndp"] }}-image' src='{{static}}/white_small.png'/>
 
 	<script type='text/javascript'>
 		tmp_img="{{library_url(navigation.library_name)}}/models/{{m['id_ndp']}}/views/images/ndp_graph_templatized.png";

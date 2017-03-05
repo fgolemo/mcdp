@@ -13,19 +13,19 @@ ul.shelves_list > li > *:first-child:before {
 
 </style>
 <ul class='shelves_list'>
-    {% for sname, shelf in navigation['shelves_used'].items() %}
+    {% for shelf_name, shelf in navigation['shelves_used'].items() %}
         <li>
 
-        <a href='{{root}}/shelves/{{sname}}/'><code>{{sname}}</code></a>
+        <a href='{{shelf_url(shelf_name)}}'><code>{{shelf_name}}</code></a>
 
             {% if shelf.get_libraries_path() %}
-                {{list_libraries_for_shelf(sname, shelf)}}
+                {{list_libraries_for_shelf(shelf_name, shelf)}}
             {% else %}
             <p>(No libraries)</p>
             {% endif %}
 
-            {% if shelf_can_write(sname) %}
-            <p>{{add_library_button(sname)}}</p>
+            {% if shelf_can_write(shelf_name) %}
+            <p>{{add_library_button(shelf_name)}}</p>
             {%endif%}
 
         </li>

@@ -1,9 +1,9 @@
 var saved_text = {{source_code_json | safe}};
-var white_background = '{{root}}/static/white.png';
+var white_background = '{{static}}/white.png';
 var title_s = "{{navigation['current_thing']}}";
 var title_u = "*{{navigation['current_thing']}}";
-var icon_s = '{{root}}/static/favicon_editor_{{url_part}}_saved.png';
-var icon_u = '{{root}}/static/favicon_editor_{{url_part}}_unsaved.png';
+var icon_s = '{{static}}/favicon_editor_{{url_part}}_saved.png';
+var icon_u = '{{static}}/favicon_editor_{{url_part}}_unsaved.png';
 var format = "{{format}}";
 
 var last_text_sent_to_server = null;
