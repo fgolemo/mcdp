@@ -12,7 +12,7 @@ from pyramid.authentication import AuthTktAuthenticationPolicy
 from pyramid.authorization import ACLAuthorizationPolicy
 from pyramid.config import Configurator
 from pyramid.httpexceptions import HTTPFound
-from pyramid.renderers import JSONP
+from pyramid.renderers import JSONP, render_to_response
 from pyramid.response import Response
 from pyramid.security import NO_PERMISSION_REQUIRED
 from quickapp import QuickAppBase
@@ -45,7 +45,9 @@ from .status import AppStatus
 from .utils.image_error_catch_imp import response_image
 from .utils0 import add_std_vars_context
 from .visualization.app_visualization import AppVisualization
-from mcdp_web.resource_tree import ResourceShelf
+from mcdp_web.resource_tree import ResourceShelf, ResourceLibrariesNewLibname,\
+    context_get_shelf_name, context_get_shelf
+from mcdp_web.utils0 import add_other_fields
 
 
 __all__ = [
@@ -198,7 +200,35 @@ class WebApp(AppVisualization, AppStatus,
             session.recompute_available()
         raise HTTPFound(request.referrer)
     
-    @add_std_vars_context 
+    def view_shelf_library_new(self, context, request):
+        library_name = context.name
+        # todo: check well formed
+        shelf = context_get_shelf(context, request)
+        shelf_name = context_get_shelf_name(context)
+        url_edit = self.get_url_library(context, request, library_name)
+
+        if library_name in shelf.libraries:
+            error = 'The library %r already exists.' % library_name
+            template = 'error_library_exists.jinja2'
+            res = {
+                'error': error,
+                'library_name': library_name,
+                'url_edit': url_edit,
+            }
+            add_other_fields(self, res, request, context=context)
+            return render_to_response(template, res, request=request)
+        else:
+            # does not exist
+            dirname = os.path.join(shelf.write_to, library_name + '.mcdplib')
+            if os.path.exists(dirname):
+                logger.error('Directory %s already exists.' % dirname)
+            else:
+                os.makedirs(dirname)
+                logger.info('Created library %r in %r' % (library_name, dirname))
+            session = self.get_session(request)
+            session.notify_created_library(shelf_name, library_name)
+            raise HTTPFound(url_edit) 
+         
     def view_shelves_unsubscribe(self, context, request):  
         sname = context.name
         session = self.get_session(request)
@@ -312,6 +342,13 @@ class WebApp(AppVisualization, AppStatus,
          
         return comb
     
+    def get_url_library(self, context, request, library_name):
+        root = self.get_root_relative_to_here(request)
+        shelf_name = context_get_shelf_name(context)
+        url = root + '/shelves/{shelf_name}/libraries/{library_name}/'
+        url = url.format(shelf_name=shelf_name, library_name=library_name)
+        return url
+
     def get_lmv_url2(self, library, model, view, request):
         url0 = '/libraries/%s/models/%s/views/%s/' % (library, model, view)
         return self.make_relative(request, url0)
@@ -442,6 +479,7 @@ class WebApp(AppVisualization, AppStatus,
         config.add_view(self.view_dummy, context=ResourceLibraries, renderer='list_libraries.jinja2')
         config.add_view(self.view_dummy, context=ResourceLibrary, renderer='library_index.jinja2', permission=PRIVILEGE_READ)
         config.add_view(self.view_shelves_index, context=ResourceShelves, renderer='shelves_index.jinja2')
+        config.add_view(self.view_shelf_library_new, context=ResourceLibrariesNewLibname)
         config.add_view(self.view_shelf, context=ResourceShelf, renderer='shelf.jinja2', permission=PRIVILEGE_READ)
         config.add_view(self.view_shelves_subscribe, context=ResourceShelvesShelfSubscribe, permission=PRIVILEGE_SUBSCRIBE)
         config.add_view(self.view_shelves_unsubscribe, context=ResourceShelvesShelfUnsubscribe, permission=PRIVILEGE_SUBSCRIBE)

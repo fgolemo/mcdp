@@ -4,14 +4,15 @@
 </script>
 <style type='text/css'>{%include 'menu.css' %}</style>
 
-<div id='outer' style='visibility: hidden'>
+<div id='outer_outer' style='height: 3em'>
+<div id='outer' style='display: none'>
     <ul id="menu" style='visibility: hidden'>
         <li id='root'>&#9776;
             <ul>
                 <li><a class='l1' href='{{root}}/'>⌂ Front page</a></li>
                 <li><a class='l1' href='{{root}}/shelves/'>🏛 List of shelves</a></li>
                 <li><a class='l1' href='{{root}}/libraries/'>📖 List of libraries</a></li>
-                {% if navigation['current_library'] and navigation['shelf_write_permissions'] %}
+                {% if navigation['current_library'] and shelf_can_write(navigation.shelf_name) %}
                     <li class="l1" id='menu_new'><span><span class='unicode-icons'>✎</span>Create new&hellip;</span>
                     <ul>
                       <li><a id='new_model'><span class='unicode-icons'>&#10213;</span> MCDP&hellip;</a></li>
@@ -36,4 +37,5 @@
         </li>
     </ul>
 
+</div>
 </div>

@@ -1,4 +1,3 @@
-from collections import namedtuple
 import os
 
 from contracts import contract
@@ -6,15 +5,13 @@ import yaml
 
 from mcdp.logs import logger
 from mcdp_library.libraries import find_libraries
-from mcdp_utils_misc.locate_files_imp import locate_files
-from mcdp_shelf.access import acl_from_yaml
-from mcdp_utils_misc import indent_plus_invisibles, read_file_encoded_as_utf8
+from .access import acl_from_yaml
+from mcdp_utils_misc import indent_plus_invisibles, read_file_encoded_as_utf8, locate_files
 
 
 shelf_extension = 'mcdpshelf'
 shelf_desc_file = 'mcdpshelf.yaml'
 
-Person = namedtuple('Person', 'name affiliation email username_mcdp')
 
 class Shelf(): 
     ''' 
@@ -25,15 +22,19 @@ class Shelf():
         - a short description (one line, pure text)
         - a long description (markdown)
         - a list of authors
+        
+        - a default directory for creating a new library
     '''
     @contract(dependencies='list(str)', authors='list(str)')
-    def __init__(self, acl, dependencies, desc_short, desc_long, libraries, authors):
+    def __init__(self, acl, dependencies, desc_short, desc_long, libraries, authors, dirname, write_to):
         self.acl = acl
         self.dependencies = dependencies
         self.desc_short = desc_short
         self.desc_long = desc_long
         self.libraries = libraries
-        self.authors=authors
+        self.authors = authors
+        self.dirname = dirname
+        self.write_to = write_to
         
     def get_dependencies(self):
         return self.dependencies
@@ -54,6 +55,9 @@ class Shelf():
 
     def get_acl(self):
         return self.acl
+    
+    def update_libraries(self):
+        self.libraries = find_libraries(self.dirname) 
 
 def shelf_from_directory(dirname):
     ''' Dirname should end in shelf_extension '''
@@ -93,9 +97,11 @@ def shelf_from_directory(dirname):
         logger.error(msg)
         raise
     
-    libraries = find_libraries(dirname) 
+    
     shelf = Shelf(acl=acl, dependencies=dependencies, desc_short=desc_short, 
-                  desc_long=desc_long, libraries=libraries, authors=authors)
+                  desc_long=desc_long, libraries={}, authors=authors,
+                  dirname=dirname, write_to=dirname)
+    shelf.update_libraries()
     return shelf
     
 @contract(returns='dict(str:$Shelf)')

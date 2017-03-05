@@ -1,43 +1,66 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Shelf {{sname}}</title>
+    <title>Bundle {{sname}}</title>
     {% include 'head.jinja2' %}
 </head>
 <body>
 {% include 'user.jinja2' %}
 
 <p><a href="{{root}}/shelves/">🔙 Complete list</a></p>
-<p>🏛 <code>{{sname}}</code></p>
 
-<p>{{ shelf.get_libraries_path() | length}} libraries</p>
-<p>{{shelf.get_desc_short()}}</p>
+<table>
+    <tr>
+        <td>
+             🏛 <code>{{sname}}</code>
+        </td>
+
+        <td>{{shelf.get_desc_short()}}</td>
+
+        <td>
+            {% if sname in navigation['shelves_used'] %}
+                active
+            {% else %}
+                inactive
+            {% endif %}
+        </td>
+
+        <td>
+            {% if shelf_can_subscribe(sname) %}
+                {% if sname in navigation['shelves_used'] %}
+                    <form action="{{root}}/shelves/{{sname}}/unsubscribe" method="post">
+                        <input type="submit" value="deactivate"/>
+                    </form>
+                {% else %}
+                    <form action="{{root}}/shelves/{{sname}}/subscribe" method="post">
+                        <input type="submit" value="activate"/>
+                    </form>
+                {% endif %}
+            {% endif %}
+        </td>
+    </tr>
+</table>
+
 
 <p>{{desc_long|safe}}</p>
 
-<p>
-{% if sname in navigation['shelves_used'] %}
-    subscribed
-{% else %}
-    not subscribed
-{% endif %}
+{% if shelf.get_libraries_path() %}
+<p>This bundle contains {{ shelf.get_libraries_path() | length}} libraries:
+
+    <span class='library-list'>
+    {% for libname in shelf.get_libraries_path() %}
+        <a href="{{root}}/shelves/{{sname}}/libraries/{{libname}}/">📖 <code>{{libname}}</code></a>
+    {% endfor %}
+    </span>
+
 </p>
-
- <p>
-{% if shelf_can_subscribe(sname) %}
-{% if sname in navigation['shelves_used'] %}
-<form action="{{root}}/shelves/{{sname}}/unsubscribe" method="post">
-    <input type="submit" value="unsubscribe"/>
-</form>
 {% else %}
-<form action="{{root}}/shelves/{{sname}}/subscribe" method="post">
-    <input type="submit" value="subscribe"/>
-</form>
+<p>This bundle contains no libraries yet.</p>
+
 {% endif %}
-{% endif %}
-</p>
 
 
+{% include 'create_library_button.jinja2' %}
 
 {% include 'footer.jinja2' %}
 </body>

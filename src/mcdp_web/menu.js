@@ -34,5 +34,5 @@ $(document).ready(function() {
     $('#new_poset').click(new_poset);
     $('#new_template').click(new_template);
     $('#new_value').click(new_value);
-    $("#outer").css('visibility', 'visible');
+    $("#outer").show();
 });

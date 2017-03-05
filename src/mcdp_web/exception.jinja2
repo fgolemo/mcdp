@@ -20,7 +20,7 @@
 <pre><code id='exception'>{{exception}}</code></pre>
 
 
-{% if url_refresh %}
+{% if url_refresh is defined%}
 <p> If the problem is that something is not found
 because of stale caches, <a href='{{url_refresh}}'>try to refresh the library</a>.
 {% endif %}

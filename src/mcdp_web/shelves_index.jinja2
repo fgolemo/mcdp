@@ -8,6 +8,9 @@
 
 </head>
 <body>
+    <!-- /*<style> body { display: none; } </style>*/ -->
+
+
 {% include 'menu.jinja2' %}
 {% include 'user.jinja2' %}
 {% from 'user_name_and_picture.jinja2' import user_name_and_picture with context %}
@@ -27,13 +30,11 @@
     {% for sname, shelf in navigation['shelves_available'].items() %}
         {% set shelf_used = sname in navigation['shelves_used'] %}
         <tr class={% if shelf_used %}"used"{%else%}"unused"{%endif%}>
-        <td>🏛 <code>{{sname}}<code> <br/></td>
+        <td><a href="{{root}}/shelves/{{sname}}/">🏛 <code>{{sname}}<code></a></td>
         <!-- <td>
         {{ shelf.get_libraries_path() | length}} libraries
         </td> -->
         <td>{{shelf.get_desc_short()}}</td>
-
-
 
         {% if shelf_can_subscribe(sname) %}
             <td>
@@ -90,7 +91,7 @@
 
                     <span class='library-list'>
                     {% for libname in shelf.get_libraries_path() %}
-                        <a href="{{root}}/libraries/{{libname}}/">📖 <code>{{libname}}</code></a>
+                        <a href="{{root}}/shelves/{{sname}}/libraries/{{libname}}/">📖 <code>{{libname}}</code></a>
                     {% endfor %}
                     </span>
 
@@ -104,5 +105,14 @@
 </table>
 
 {% include 'footer.jinja2' %}
+
+
+<!-- 
+<script>
+    $(document).ready(function() {
+        $("body").show();
+    });
+</script> -->
+
 </body>
 </html>

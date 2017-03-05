@@ -1,0 +1,23 @@
+{% include 'prompt.jinja2' %}
+<script>
+function click_new_library(event) {
+    target = event.target;
+    shelf_name = $(target).attr('shelf-name');
+    console.log(shelf_name);
+    url_base = "{{root}}/shelves/{{navigation.shelf_name}}/libraries/:new/";
+    prompt_user("library", url_base, prompt="Create new item");
+}
+$(document).ready(function() {
+    $("button#create_library").button().click(click_new_library);
+});
+</script>
+
+<p>
+{% if shelf_can_write(navigation.shelf_name) %}
+    <button id="create_library" shelf-name="{{navigation.shelf_name}}">
+        create library
+    </button>
+{% else %}
+    This bundle is read only.
+{% endif %}
+</p>

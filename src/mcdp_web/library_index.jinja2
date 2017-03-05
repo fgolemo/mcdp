@@ -23,7 +23,8 @@
 <table align='center' id='library-contents'>
 <thead>
 <tr><td id='ttitle' colspan="5">
-		📖 Library <code>{{navigation['current_library']}}</code>
+    🏛 Bundle <a href="{{root}}/shelves/{{navigation.shelfname}}/">{{navigation.shelfname}}</a> /
+    📖 Library <code>{{navigation.current_library}}</code>
 </td></tr>
 <tr id="things">
 	<td>MCDPs</td>
@@ -47,7 +48,7 @@
 
 	{% for d in navigation[what] %}
 		<p class='entry'>
-		{% if 'url_edit' in d and shelf_write_permission%}
+		{% if 'url_edit' in d and shelf_can_write(navigation.shelf_name)%}
             <a class='url_edit' href="{{d['url_edit']}}">✎</a>{% endif %}<code><a class="url" href="{{d['url']}}">{{d['id']}}</a></code>
 		</p>
 	{% endfor %}
@@ -63,7 +64,7 @@
     <td class='plus'>
     {% if what != 'documents' %}
 	<!-- <p class="new" style='text-align: center'> -->
-	{% if shelf_write_permission %}<button id="table_new_{{what}}">+</button>{% endif %}
+	{% if shelf_can_write(navigation.shelf_name) %}<button id="table_new_{{what}}">+</button>{% endif %}
 	<!-- </p> -->
 	{% endif %}
     </td>
@@ -75,7 +76,7 @@
 
 </table>
 
-{% if not shelf_write_permission %}
+{% if not shelf_can_write(navigation.shelf_name) %}
 <p> This library is read-only for this user. </p>
 {%endif%}
 

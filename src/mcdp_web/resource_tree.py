@@ -3,19 +3,26 @@
 root
     login
     logout
-    libraries
-        <libname> [read]
-            refresh_library
-            interactive
-                mcdp_value
-            <specname>
-                new/<thingname>
-                <thingname>
-                    <views>
-                        solver
-                        edit_fancy [write]
-                            ajax_parse
-                            save
+    shelves
+        <shelfname>
+            subscribe
+            unsubscribe
+            libraries
+                :new [write]
+                    <libname>
+                
+                <libname> [read]
+                    refresh_library
+                    interactive
+                        mcdp_value
+                    <specname>
+                        new/<thingname>
+                        <thingname>
+                            <views>
+                                solver
+                                edit_fancy [write]
+                                    ajax_parse
+                                    save
     shelves
     exceptions
     exceptions_formatted
@@ -132,11 +139,23 @@ class ResourceShelvesShelfUnsubscribe(Resource): pass
 class ResourceExceptionsFormatted(Resource): pass 
 class ResourceExceptionsJSON(Resource): pass
 class ResourceRefresh(Resource): pass 
+
+class ResourceLibrariesNew(Resource):
+    def getitem(self, key):
+        return ResourceLibrariesNewLibname(key)
     
+class ResourceLibrariesNewLibname(Resource):
+    pass 
+        
 class ResourceLibraries(Resource): 
     
-    def getitem(self, libname):
+    def getitem(self, key):
+        subs =  {
+            ':new': ResourceLibrariesNew(),
+        }    
+        if key in subs: return subs[key]
         
+        libname = key
         session = self.get_session()
         shelfname = session.get_shelf_for_libname(libname)
     
@@ -145,7 +164,7 @@ class ResourceLibraries(Resource):
         r2 = ResourceLibrary(libname)
         r2.__parent__ = r1
         
-        print 'returning', r2.show_ancestors()
+        
         return r2
 
 class ResourceShelf(Resource): 
@@ -163,6 +182,8 @@ class ResourceShelf(Resource):
         subs =  {
             'subscribe': ResourceShelvesShelfSubscribe(self.name),
             'unsubscribe': ResourceShelvesShelfUnsubscribe(self.name),
+            
+            'libraries': ResourceLibraries(),
         }    
         return subs.get(key, None)
     
@@ -345,6 +366,16 @@ def get_from_context(rclass, context):
 
 def is_in_context(rclass, context):
     return get_from_context(rclass, context) is not None
+
+def context_get_shelf_name(context):
+    return get_from_context(ResourceShelf, context).name
+    
+def context_get_shelf(context, request):
+    shelf_name = context_get_shelf_name(context)
+    from mcdp_web.main import WebApp
+    app = WebApp.singleton
+    session = app.get_session(request)
+    return session.get_shelf(shelf_name)
 
 def context_get_library_name(context):
     library_name = get_from_context(ResourceLibrary, context).name

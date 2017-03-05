@@ -74,8 +74,6 @@ def add_other_fields(self, res, request, context=None):
     
     res['get_user'] = get_user
     
-
-
 def add_std_vars_context(f):
     def f0(self, context, request):
         try:

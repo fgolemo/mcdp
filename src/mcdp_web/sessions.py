@@ -5,10 +5,9 @@ from contracts import contract
 from contracts.utils import raise_desc
 
 from mcdp.logs import logger
-from mcdp_library.libraries import Librarian
-from mcdp_shelf.access import PRIVILEGE_DISCOVER, PRIVILEGE_READ
-from mcdp_shelf.shelves import Shelf
-from mcdp_utils_misc.natsort import natural_sorted
+from mcdp_library import Librarian
+from mcdp_shelf import PRIVILEGE_DISCOVER, PRIVILEGE_READ, Shelf
+from mcdp_utils_misc import natural_sorted
 
 
 _ = Shelf
@@ -33,7 +32,6 @@ class Session():
             self.recompute_available()
             
     def get_user(self, username=None):
-        
         from mcdp_web.main import WebApp
         userdb = WebApp.singleton.user_db  # @UndefinedVariable
         if username is None:
@@ -48,6 +46,11 @@ class Session():
         userdb = WebApp.singleton.user_db  # @UndefinedVariable
         user = self.get_user()
         userdb.save_user(user.username)
+        
+    def notify_created_library(self, shelf_name, library_name):  # @UnusedVariable
+        ''' Called when we just created the library. '''
+        self.get_shelf(shelf_name).update_libraries()
+        self.recompute_available()
         
     def recompute_available(self):
         # all the ones we can discover

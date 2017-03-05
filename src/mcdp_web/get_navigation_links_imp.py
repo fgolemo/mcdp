@@ -59,6 +59,7 @@ def get_navigation_links_context(app, context, request):
     d = {}
 
     d['shelfname'] = shelfname
+    d['shelf_name'] = shelfname
     d['shelf'] = shelf
     d['shelf_write_permission'] = shelf_write_permission
     d['shelves_available'] = session.get_shelves_available()
