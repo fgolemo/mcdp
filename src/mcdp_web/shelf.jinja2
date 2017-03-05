@@ -15,7 +15,7 @@
 <table>
     <tr>
         <td>
-             {{icon_shelf}} <code>{{sname}}</code>
+             {{icon_shelf|safe}} <code>{{sname}}</code>
         </td>
 
         <td>{{shelf.get_desc_short()}}</td>
@@ -52,7 +52,7 @@
 
     <span class='library-list'>
     {% for libname in shelf.get_libraries_path() %}
-        <a href="{{root}}/shelves/{{sname}}/libraries/{{libname}}/">{{icon_library}} <code>{{libname}}</code></a>
+        <a href="{{root}}/shelves/{{sname}}/libraries/{{libname}}/">{{icon_library|safe}} <code>{{libname}}</code></a>
     {% endfor %}
     </span>
 

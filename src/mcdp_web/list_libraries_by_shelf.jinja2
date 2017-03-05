@@ -11,12 +11,12 @@ ul.libraries_by_shelf  ul {
 }
 
 ul.libraries_by_shelf > li > *:first-child:before {
-    content: '{{icon_shelf}}';
+    content: '{{icon_shelf|safe}}';
     margin-right: 0.5em;
 }
 
 ul.libraries_by_shelf  ul > li > *:first-child:before {
-    content: '{{icon_library}}';
+    content: '{{icon_library|safe}}';
     margin-right: 0.5em;
 }
 
