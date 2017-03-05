@@ -16,16 +16,16 @@
 		display: none;
 	}
 	.hot_select { visibility: hidden;}
-	
+
 	table#maintable {
 		position: fixed;
 		z-index: 100;
 		top: 0; left: 0;
 	}
 	#aftertable {
-		margin-top: 2em; 
+		margin-top: 2em;
 	}
-	
+
 </style>
 
 
@@ -92,10 +92,10 @@
 
 	    {% for mi in navigation['models'] + navigation['templates'] + navigation['posets'] + navigation['values'] %}
 	    <option value="{{mi['url']}}" {% if mi['current'] %} selected = 1 {% endif %}>
-	    	{% if mi in navigation['models']    %}&#10213;&nbsp;{% endif %}
-	    	{% if mi in navigation['templates'] %}&#x2661;&nbsp;{% endif %} <!-- ⢶ -->
-	    	{% if mi in navigation['posets']    %}&#x28B6;&nbsp;{% endif %} <!-- ♡ -->
-	    	{% if mi in navigation['values']    %}&#x2723;&nbsp;{% endif %} <!-- ✣ -->
+			{% if mi in navigation['models']    %}{{icon_models|safe}}&nbsp;{% endif %}
+	    	{% if mi in navigation['templates'] %}{{icon_templates|safe}};&nbsp;{% endif %} <!-- ⢶ -->
+	    	{% if mi in navigation['posets']    %}{{icon_posets|safe}}&nbsp;{% endif %} <!-- ♡ -->
+	    	{% if mi in navigation['values']    %}{{icon_values|safe}}&nbsp;{% endif %} <!-- ✣ -->
 	    	{{mi['name']}}
 	    </option>
 	    {% endfor %}

@@ -20,16 +20,15 @@ from mcdp_lang.parse_interface import parse_constant
 from mcdp_posets import express_value_in_isomorphic_space, LowerSets,  NotLeq, UpperSets
 from mcdp_report.gg_ndp import format_unit
 from mcdp_report.plotters.get_plotters_imp import get_best_plotter
+from mcdp_web.environment import cr2e
 from mcdp_web.resource_tree import ResourceThingViewSolver,\
     ResourceThingViewSolver_submit,\
     ResourceThingViewSolver_display_png, ResourceThingViewSolver_display1u,\
-    ResourceThingViewSolver_display1u_png, context_get_widget_name,\
-    context_get_library_name, context_get_library
+    ResourceThingViewSolver_display1u_png
 from mcdp_web.utils import ajax_error_catch, memoize_simple, response_data
 from mcdp_web.utils.image_error_catch_imp import response_image
 from mcdp_web.utils0 import add_std_vars_context
 import numpy as np
-from mcdp_web.environment import Environment
 
 
 # Alternate chars used for Base64 instead of + / which give problems with urls
@@ -86,9 +85,8 @@ class AppSolver2():
         return ndp, dp
 
     @add_std_vars_context
-    def view_solver2_base(self, context, request):
-        e = Environment(context, request)
-        
+    @cr2e
+    def view_solver2_base(self, e):
         # you don't want to memoize
         ndp, dp = self.get_ndp_dp(e.session, e.library_name, e.thing_name)
 
@@ -110,9 +108,10 @@ class AppSolver2():
         } 
         return res
 
-    def view_solver2_submit(self, context, request):  # @UnusedVariable
+    @cr2e
+    def view_solver2_submit(self, e):
         def go():
-            state = request.json_body['ui_state']
+            state = e.request.json_body['ui_state']
             area_F = state['area_F'].encode('utf-8')
             area_R = state['area_R'].encode('utf-8')
             is_ftor = state['ftor_checkbox']
@@ -135,14 +134,14 @@ class AppSolver2():
                             do_approximations=do_approximations,
                             nu=nu, nl=nl)
         
-                data, res = self.process_ftor(context, request, area_F, do_approximations, nl, nu)
+                data, res = self.process_ftor(e, area_F, do_approximations, nl, nu)
             elif is_rtof:
                 key = dict(type=QUERY_TYPE_RTOF, 
                             string=area_R, 
                             do_approximations=do_approximations,
                             nu=nu, nl=nl)
 
-                data, res = self.process_rtof(context, request, area_R, do_approximations, nl, nu)
+                data, res = self.process_rtof(e, area_R, do_approximations, nl, nu)
             else:
                 raise_desc(DPInternalError, 'Inconsistent state', state=state)
         
@@ -161,9 +160,7 @@ class AppSolver2():
         quiet = (DPSyntaxError, DPSemanticError, NeedsApprox)
         return ajax_error_catch(go, quiet=quiet)
     
-    def process_rtof(self, context, request, string, do_approximations, nl, nu):
-        e = Environment(context, request)
-        
+    def process_rtof(self, e, string, do_approximations, nl, nu):
         parsed = e.library.parse_constant(string)
 
         space = parsed.unit
@@ -222,8 +219,7 @@ class AppSolver2():
          
         return data, res
 
-    def process_ftor(self, context, request, string, do_approximations, nl, nu):
-        e = Environment(context, request)
+    def process_ftor(self, e, string, do_approximations, nl, nu):
         parsed = e.library.parse_constant(string)
 
         space = parsed.unit
@@ -283,10 +279,11 @@ class AppSolver2():
         res['output_trace'] = str(trace) 
         return data, res
 
-    def view_solver2_display(self, context, request):
+    @cr2e
+    def view_solver2_display(self, e):
 
         def go():
-            h = request.params['hash'].encode('utf-8')
+            h =e. request.params['hash'].encode('utf-8')
             if not h in self.solutions:
                 try:
                     h2 = base64.b64decode(h, altchars=altchars)
@@ -321,7 +318,7 @@ class AppSolver2():
                                      params=dict(markers='b.', color_shadow='blue'))
         
                     png = output['png']
-                    return response_data(request, png, MIME_PNG)
+                    return response_data(e.request, png, MIME_PNG)
                 else:
                     result = data['result'] 
                     dp = data['dp']
@@ -336,19 +333,20 @@ class AppSolver2():
                                      params=dict(markers='r.', color_shadow='darkred'))
         
                     png = output['png']
-                    return response_data(request, png, MIME_PNG)
+                    return response_data(e.request, png, MIME_PNG)
             else:
                 msg = 'Cannot display this.'
-                return response_image(request, msg, color=(125,125,125))
+                return response_image(e.request, msg, color=(125,125,125))
         
-        return self.png_error_catch2(request, go)
+        return self.png_error_catch2(e.request, go)
 
 
-    def view_solver2_display1u_ui(self, context, request):  # @UnusedVariable
-        res = {} 
-        return res
+    @cr2e
+    def view_solver2_display1u_ui(self, e):  # @UnusedVariable
+        return {}
 
-    def view_solver2_display1u(self, context, request):
+    @cr2e
+    def view_solver2_display1u(self, e):
         """
             Parameters that we need:
             
@@ -361,12 +359,11 @@ class AppSolver2():
                 
                 <fname> = constant
         """
-        #library = context_get_library(context, request)
-        e = Environment(context, request)
+         
 
         def go():
-            xaxis = str(request.params['xaxis'])
-            yaxis = str(request.params['yaxis'])
+            xaxis = str(e.request.params['xaxis'])
+            yaxis = str(e.request.params['yaxis'])
  
             ndp, dp = self.get_ndp_dp(e.session, e.library_name, e.model_name)
 
@@ -381,10 +378,10 @@ class AppSolver2():
                 msg = 'Could not find resource %r.' % yaxis
                 raise_desc(ValueError, msg, rnames=rnames)
 
-            fsamples = get_samples(request, ndp)
+            fsamples = get_samples(e.request, ndp)
 
-            nl = int(request.params.get('nl', 1))
-            nu = int(request.params.get('nu', 1))
+            nl = int(e.request.params.get('nl', 1))
+            nu = int(e.request.params.get('nu', 1))
             
             dpl, dpu = get_dp_bounds(dp, nl, nu)
             
@@ -437,10 +434,10 @@ class AppSolver2():
             png_node = r.resolve_url('png')
             png_data = png_node.get_raw_data()
 
-            return response_data(request=request, data=png_data,
+            return response_data(request=e.request, data=png_data,
                                  content_type='image/png')
 
-        return self.png_error_catch2(request, go)
+        return self.png_error_catch2(e.request, go)
 
 @contextmanager
 def save_plot(output):

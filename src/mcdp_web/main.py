@@ -26,6 +26,7 @@ from mcdp_shelf import PRIVILEGE_ACCESS, PRIVILEGE_READ, find_shelves
 from mcdp_shelf.access import PRIVILEGE_SUBSCRIBE
 from mcdp_user_db import UserDB
 from mcdp_utils_misc import duration_compact, dir_from_package_name
+from mcdp_web.environment import cr2e
 
 from .confi import describe_mcdpweb_params, parse_mcdpweb_params_from_dict
 from .editor_fancy import AppEditorFancyGeneric
@@ -34,12 +35,12 @@ from .images.images import WebAppImages, get_mime_for_format
 from .interactive.app_interactive import AppInteractive
 from .qr.app_qr import AppQR
 from .resource_tree import MCDPResourceRoot, ResourceLibraries,\
-    ResourceLibrary, get_from_context,  ResourceLibraryRefresh, ResourceRefresh,\
+    ResourceLibrary,  ResourceLibraryRefresh, ResourceRefresh,\
     ResourceExit, ResourceLibraryDocRender,\
     ResourceLibraryAsset, ResourceRobots, ResourceShelves,\
     ResourceShelvesShelfUnsubscribe, ResourceShelvesShelfSubscribe,\
     ResourceExceptionsFormatted, ResourceExceptionsJSON, ResourceShelf, ResourceLibrariesNewLibname,\
-    context_get_shelf_name, context_get_shelf, Resource,\
+    Resource,\
     context_display_in_detail, ResourceShelfInactive, ResourceThingDelete
 from .security import AppLogin, groupfinder
 from .sessions import Session
@@ -121,7 +122,7 @@ class WebApp(AppVisualization, AppStatus,
             user_shelves = find_shelves(self.options.users)
             self.all_shelves.update(user_shelves)
         
-        for sname, shelf in self.all_shelves.items():
+        for sname in self.all_shelves:
             print('init: Shelf %s' % sname)
 
     def add_model_view(self, name, desc):
@@ -138,32 +139,7 @@ class WebApp(AppVisualization, AppStatus,
     
     def _get_views(self):
         return sorted(self.views, key=lambda _:self.views[_]['order'])
-# 
-#     def get_current_library_name(self, request, context=None):
-#         if context is None:
-#             return self.get_session(request).get_current_library_name()
-#         else:
-#             rlibrary = get_from_context(ResourceLibrary, context)
-#             return rlibrary.name
-    
-    def get_library(self, request, context=None):
-        session = self.get_session(request)
-        if context is None:
-            return session.get_library()
-        else:
-            rlibrary = get_from_context(ResourceLibrary, context)
-            if rlibrary is not None:
-                current_library = rlibrary.name
-                library = session.libraries[current_library]['library']
-            else:
-                current_library = None
-                library = None
-            return library
-
-    def list_of_models(self, request):
-        l = self.get_library(request)
-        return l.get_models()
-    
+       
     @add_std_vars_context
     def view_dummy(self, context, request):  # @UnusedVariable
         return {}
@@ -173,56 +149,48 @@ class WebApp(AppVisualization, AppStatus,
         return {}
 
     @add_std_vars_context
-    def view_shelf(self, context, request):# @UnusedVariable
-        sname = context.name
-        session = self.get_session(request)
-        shelf = session.shelves_available[sname]
-        desc_long_md = shelf.get_desc_long()
+    @cr2e
+    def view_shelf(self, e):
+        desc_long_md = e.shelf.get_desc_long()
         if desc_long_md is None:
             desc_long = ''
         else:
             library = MCDPLibrary()
-            desc_long = render_complete(library, desc_long_md, raise_errors=True, realpath=sname, do_math=False)
+            desc_long = render_complete(library, desc_long_md, raise_errors=True, realpath=e.shelf_name, do_math=False)
         res = {
-            'shelf': shelf, 
-            'sname': sname, 
+            'shelf': e.shelf, 
+            'sname': e.shelf_name, 
             'desc_long': unicode(desc_long, 'utf8'),
         }
         return res
     
     @add_std_vars_context 
-    def view_shelves_subscribe(self, context, request):  
-        sname = context.name
-        session = self.get_session(request)
-        #print('subscribe %r' % sname)
-        user = session.get_user()
-        if not sname in user.subscriptions:
-            user.subscriptions.append(sname)
-            session.save_user()
-            session.recompute_available()
-        raise HTTPFound(request.referrer)
+    @cr2e
+    def view_shelves_subscribe(self, e):  
+        if not e.shelf_name in e.user.subscriptions:
+            e.user.subscriptions.append(e.shelf_name)
+            e.session.save_user()
+            e.session.recompute_available()
+        raise HTTPFound(e.request.referrer)
     
-    def view_shelf_library_new(self, context, request):
-        library_name = context.name
-        # todo: check well formed
-        shelf = context_get_shelf(context, request)
-        shelf_name = context_get_shelf_name(context)
-        url_edit = self.get_url_library(context, request, library_name)
+    @cr2e
+    def view_shelf_library_new(self, e):
+        new_library_name = e.context.name
+        url_edit = get_url_library(e, e.shelf_name, new_library_name)
 
-        if library_name in shelf.libraries:
-            error = 'The library %r already exists.' % library_name
+        if new_library_name in e.shelf.libraries:
+            error = 'The library %r already exists.' %new_library_name
             template = 'error_library_exists.jinja2'
             res = {
                 'error': error,
-                'library_name': library_name,
+                'library_name': new_library_name,
                 'url_edit': url_edit,
             }
-            
-            add_other_fields(self, res, request, context=context)
-            return render_to_response(template, res, request=request)
+            add_other_fields(self, res, e.request, context=e.context)
+            return render_to_response(template, res, request=e.request)
         else:
             # does not exist
-            dirname = os.path.join(shelf.write_to, library_name + '.mcdplib')
+            dirname = os.path.join(e.shelf.write_to, new_library_name + '.mcdplib')
             if os.path.exists(dirname):
                 logger.error('Directory %s already exists.' % dirname)
             else:
@@ -231,21 +199,20 @@ class WebApp(AppVisualization, AppStatus,
                 with open(one, 'w') as f:
                     f.write("")
                     
-                logger.info('Created library %r in %r' % (library_name, dirname))
-            session = self.get_session(request)
-            session.notify_created_library(shelf_name, library_name)
+                logger.info('Created library %r in %r' % (new_library_name, dirname))
+            
+            e.session.notify_created_library(e.shelf_name,new_library_name)
             raise HTTPFound(url_edit) 
          
-    def view_shelves_unsubscribe(self, context, request):  
-        e = Environment(context, request)
-        sname = context.name
-        
+    @cr2e
+    def view_shelves_unsubscribe(self, e):
+        sname = e.context.name
         #print('unsubscribe %r' % sname)
         if sname in e.user.subscriptions:
             e.user.subscriptions.remove(sname)
             e.session.save_user()
             e.session.recompute_available()
-        raise HTTPFound(request.referrer)
+        raise HTTPFound(e.request.referrer)
 
     def refresh_library(self, request):
         # nuclear option
@@ -264,18 +231,18 @@ class WebApp(AppVisualization, AppStatus,
         self.refresh_library(request) 
         raise HTTPFound(request.referrer)
 
-    def view_not_found(self, context, request):
-        request.response.status = 404
-        url = request.url
-        referrer = request.referrer
-        print('context: %s' % context)
+    @cr2e
+    def view_not_found(self, e):
+        e.request.response.status = 404
+        url = e.request.url
+        referrer = e.request.referrer
+        print('context: %s' % e.context)
         self.exceptions.append('Path not found.\n url: %s\n ref: %s' % (url, referrer))
         res = {
             'url': url,
              'referrer': referrer,
-#              'context': context_display_in_detail(context),
         }
-        res['root'] =  self.get_root_relative_to_here(request)
+        res['root'] = e.root
         return res
 
     @add_std_vars_context
@@ -356,12 +323,6 @@ class WebApp(AppVisualization, AppStatus,
          
         return comb
     
-    def get_url_library(self, context, request, library_name):
-        root = self.get_root_relative_to_here(request)
-        shelf_name = context_get_shelf_name(context)
-        url = root + '/shelves/{shelf_name}/libraries/{library_name}/'
-        url = url.format(shelf_name=shelf_name, library_name=library_name)
-        return url
 
     def get_root_relative_to_here(self, request):
         if request is None:
@@ -374,12 +335,13 @@ class WebApp(AppVisualization, AppStatus,
     
         
     @add_std_vars_context
-    def view_library_doc(self, context, request):
+    @cr2e
+    def view_library_doc(self, e):
         """ '/libraries/{library}/{document}.html' """
         # f['data'] not utf-8
         # reopen as utf-8
-        document = context.name
-        html = self._render_library_doc(context, request, document)
+        document = e.context.name
+        html = self._render_library_doc(e.context, e.request, document)
         # we work with utf-8 strings
         assert isinstance(html, str)
         # but we need to convert to unicode later
@@ -387,7 +349,7 @@ class WebApp(AppVisualization, AppStatus,
         res = {}
         res['contents'] = html
         res['title'] = document
-        res['print'] = bool(request.params.get('print', False))
+        res['print'] = bool(e.request.params.get('print', False))
         return res
 
     @contract(returns=str)
@@ -407,17 +369,18 @@ class WebApp(AppVisualization, AppStatus,
         html = render_complete(library=e.library, s=data_str, realpath=realpath, raise_errors=raise_errors)
         return html
 
-    def view_library_asset(self, context, request):
-        e = Environment(context, request)
-        asset = os.path.splitext(context.name)[0]
-        ext = os.path.splitext(context.name)[1][1:]
+    @cr2e
+    def view_library_asset(self, e):
+        asset = os.path.splitext(e.context.name)[0]
+        ext = os.path.splitext(e.context.name)[1][1:]
         filename = '%s.%s' % (asset, ext)
         f = e.library._get_file_data(filename)
         data = f['data']
         content_type = get_mime_for_format(ext)
-        return response_data(request, data, content_type)
+        return response_data(e.request, data, content_type)
 
-    def exit(self, context, request):  # @UnusedVariable
+    @cr2e
+    def exit(self, e):  # @UnusedVariable
         sys.exit(0)
         setattr(self.server, '_BaseServer__shutdown_request', True)
         howlong = duration_compact(self.get_uptime_s())
@@ -484,34 +447,33 @@ class WebApp(AppVisualization, AppStatus,
         config.add_view(self.view_exceptions_occurred, context=ResourceExceptionsFormatted, renderer='exceptions_formatted.jinja2', permission=NO_PERMISSION_REQUIRED)
         config.add_view(serve_robots, context=ResourceRobots, permission=NO_PERMISSION_REQUIRED)
         config.add_notfound_view(self.view_not_found, renderer='404.jinja2')
-        config.add_view(self.view_shelf_inactive, context=ResourceShelfInactive, renderer='shelf_inactive.jinja2')
+        config.add_view(self.view_dummy, context=ResourceShelfInactive, renderer='shelf_inactive.jinja2')
         config.add_view(self.view_thing_delete, context=ResourceThingDelete)
         config.scan()
 
         app = config.make_wsgi_app()
         return app
+     
     
     @add_std_vars_context
-    def view_shelf_inactive(self, context, request):
-        return {}
-    
-    @add_std_vars_context
-    def view_thing_delete(self, context, request):
-        e = Environment(context, request)
+    @cr2e
+    def view_thing_delete(self, e):
         name = e.thing_name
         basename = "%s.%s" % (name, e.spec.extension)
         logger.error('Deleting %s' % basename)
         filename = e.library.delete_file(basename)
         e.session.notify_deleted_file(e.shelf_name, e.library_name, filename)
-        raise HTTPFound(request.referrer)
-
-
+        raise HTTPFound(e.request.referrer)
     
     
 def serve_robots(request):  # @UnusedVariable
     body = "User-agent: *\nDisallow:"
     return Response(content_type='text/plain', body=body)
-    
+
+def get_url_library(e, shelf_name, library_name):
+    url = e.root + '/shelves/{shelf_name}/libraries/{library_name}/'
+    url = url.format(shelf_name=shelf_name, library_name=library_name)
+    return url
 
 class MCDPWeb(QuickAppBase):
     """ Runs the MCDP web interface. """

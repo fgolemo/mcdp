@@ -2,12 +2,12 @@ from collections import OrderedDict
 import os
 
 from contracts import contract
-from contracts.utils import raise_desc
 
 from mcdp.logs import logger
 from mcdp_library import Librarian
 from mcdp_shelf import PRIVILEGE_DISCOVER, PRIVILEGE_READ, Shelf
 from mcdp_utils_misc import natural_sorted
+from contracts.utils import raise_desc
 
 
 _ = Shelf
@@ -117,17 +117,9 @@ class Session():
     @contract(returns='list(str)')
     def list_libraries(self):
         """ Returns the list of libraries """
-        return sorted(self.libraries)
-# 
-#     @contract(returns=str)
-#     def get_current_library_name(self):
-#         #raise ValueError('deprecated')
-#         library_name = str(self.request.matchdict['library'])  # unicod
-#         return library_name
+        return sorted(self.libraries) 
 
-    def get_library(self, library_name):
-#         if library_name is None:
-#             library_name = self.get_current_library_name()
+    def get_library(self, library_name): 
         if not library_name in self.libraries:
             msg = 'Could not find library %r.' % library_name
             raise_desc(ValueError, msg, available=self.libraries)
@@ -141,7 +133,7 @@ class Session():
         assert hasattr(get_images, 'cache')  # in case it changes later
         get_images.cache = {}
         
-    def get_libraries_indexed_by_dir(self):
+    def get_libraries_indexed_by_shelf(self):
         """
             returns a list of tuples (dirname, list(libname))
         """

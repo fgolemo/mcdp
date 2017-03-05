@@ -3,11 +3,12 @@ import itertools
 
 from pyramid.httpexceptions import HTTPSeeOther  # @UnresolvedImport
 
-from mcdp_web.resource_tree import context_get_library_name,\
-    context_get_widget_name, ResourceThingViewSolver0AxisAxis,\
+from mcdp_web.environment import cr2e
+from mcdp_web.resource_tree import\
+    ResourceThingViewSolver0AxisAxis,\
     ResourceThingViewSolver0, ResourceThingViewSolver0AxisAxis_addpoint,\
     ResourceThingViewSolver0AxisAxis_getdatasets,\
-    ResourceThingViewSolver0AxisAxis_reset, context_get_library,\
+    ResourceThingViewSolver0AxisAxis_reset,\
     get_from_context
 from mcdp_web.utils.ajax_errors import ajax_error_catch
 from mcdp_web.utils0 import add_std_vars_context
@@ -33,18 +34,15 @@ class AppSolver():
     def __init__(self):
         self.solver_states = {}
  
+    @cr2e
+    def get_solver_state(self, e):
+        if not e.thing_name in self.solver_states:
+            self.reset(e)
+        return self.solver_states[e.thing_name]
 
-    def get_solver_state(self, context, request):
-        model_name = context_get_widget_name(context)
-        if not model_name in self.solver_states:
-            self.reset(context, request)
-        return self.solver_states[model_name]
-
-    def reset(self, context, request):
-        model_name = context_get_widget_name(context)
-        library = context_get_library(context, request)
-        self.ndp = library.load_ndp(model_name)
-        self.solver_states[model_name] = SolverState(self.ndp)
+    def reset(self, e):
+        self.ndp = e.library.load_ndp(e.thing_name)
+        self.solver_states[e.thing_name] = SolverState(self.ndp)
 
     def config(self, config): 
         config.add_view(self.view_solver_base, context=ResourceThingViewSolver0,
@@ -65,30 +63,25 @@ class AppSolver():
                         context=ResourceThingViewSolver0AxisAxis_reset, 
                         renderer='json')
  
-
-    def parse_params(self, context, request):  # @UnusedVariable
-        model_name = context_get_widget_name(context)
-        library_name = context_get_library_name(context)
-
-        aa = get_from_context(ResourceThingViewSolver0AxisAxis, context)
+    @cr2e
+    def parse_params(self, e): 
+        aa = get_from_context(ResourceThingViewSolver0AxisAxis, e.context)
         fun_axes = map(int, aa.fun_axes.split(','))
         res_axes = map(int, aa.res_axes.split(','))
-        return {'model_name': model_name,
+        return {'model_name': e.thing_name,
                 'fun_axes': fun_axes,
                 'res_axes': res_axes,
-                'library': library_name}
+                'library': e.library_name}
 
     @add_std_vars_context
-    def view_solver_base(self, context, request): 
-        model_name = context_get_widget_name(context)
-        library_name = context_get_library_name(context)
-
-        solver_state = self.get_solver_state(context, request)
+    @cr2e
+    def view_solver_base(self, e): 
+        solver_state = self.get_solver_state(e)
         ndp = solver_state.ndp
         nf = len(ndp.get_fnames())
         nr = len(ndp.get_rnames())
 
-        base = '/libraries/%s/models/%s/views/solver/' % (library_name, model_name)
+        base = '/shelves/%s/libraries/%s/models/%s/views/solver/' % (e.shelf_name, e.library_name, e.model_name)
         if nf >= 2 and nr >= 2:
             url = base + '0,1/0,1/'
             raise HTTPSeeOther(url)
@@ -111,10 +104,10 @@ class AppSolver():
                     }
 
     @add_std_vars_context
-    def view_solver(self, context, request):  # @UnusedVariable
-        print('View solver')
-        params = self.parse_params(context, request)
-        solver_state = self.get_solver_state(context, request)
+    @cr2e
+    def view_solver(self, e):  # @UnusedVariable
+        params = self.parse_params(e)
+        solver_state = self.get_solver_state(e)
 
         ndp = solver_state.ndp
         fnames = ndp.get_fnames()
@@ -137,14 +130,14 @@ class AppSolver():
                 'fun_names_other': fun_names_other,
                 'res_alternatives': res_alternatives,
                 'fun_alternatives': fun_alternatives,
-                'current_url': request.path,
+                'current_url': e.request.path,
                 'params': params,
                 }
         return res
 
-    def return_new_data(self, context, request):
-        solver_state = self.get_solver_state(context, request)
-        params = self.parse_params(context, request)
+    def return_new_data(self, e):
+        solver_state = self.get_solver_state(e)
+        params = self.parse_params(e)
         
         fun_axes = params['fun_axes']
         res_axes = params['res_axes']
@@ -154,25 +147,26 @@ class AppSolver():
         data = solver_state.get_data_for_js(fun_axes, res_axes)
         res.update(**data)
         return res
-
-    def ajax_solver_getdatasets(self, context, request):
+    @cr2e
+    def ajax_solver_getdatasets(self, e):
         def go():
-            return self.return_new_data(context, request)
+            return self.return_new_data(e)
         return ajax_error_catch(go)
 
-    def ajax_solver_addpoint(self, context, request):        
+    @cr2e
+    def ajax_solver_addpoint(self, e):        
         def go():
-            solver_state = self.get_solver_state(context, request)
-            f = request.json_body['f']
+            solver_state = self.get_solver_state(e)
+            f = e.request.json_body['f']
     
             solver_state.new_point(f)
-            return self.return_new_data(context, request)    
+            return self.return_new_data(e)    
         return ajax_error_catch(go)
-
-    def ajax_solver_reset(self, context, request):
+    @cr2e
+    def ajax_solver_reset(self, e):
         def go():
-            self.reset(context, request)
-            return self.return_new_data(context, request)
+            self.reset(e)
+            return self.return_new_data(e)
         return ajax_error_catch(go) 
     
 def create_alternative_urls(params, ndp):

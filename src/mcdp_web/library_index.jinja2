@@ -52,7 +52,7 @@
             <a class='url_edit' href="{{d['url_edit']}}">✎</a>
             <a class='url_edit' href="{{d['url_delete']}}">♻</a>
           {% endif %}
-            <code><a class="url" href="{{d['url']}}">{{d['id']}}</a></code>
+            {{icon_spec(what)|safe}} <code><a class="url" href="{{d['url']}}">{{d['id']}}</a></code>
 		</p>
 	{% endfor %}
 

@@ -96,7 +96,7 @@ class AppLogin():
         came_from = request.referrer
         return HTTPFound(location=came_from, headers=headers)
 
-def groupfinder(userid, request):
+def groupfinder(userid, request):  # @UnusedVariable
     from mcdp_web.main import WebApp
     app = WebApp.singleton
     

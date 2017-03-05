@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 import cgi
 
-from mcdp_web.resource_tree import ResourceLibraryInteractiveValue, ResourceLibraryInteractiveValueParse, context_get_library
+from mcdp_web.resource_tree import ResourceLibraryInteractiveValue, ResourceLibraryInteractiveValueParse
 from mcdp_web.utils0 import add_std_vars_context
+from mcdp_web.environment import cr2e
 
 
 class AppInteractive():
@@ -27,21 +28,20 @@ class AppInteractive():
     @add_std_vars_context
     def view_mcdp_value(self, context, request):  # @UnusedVariable
         return {}
-
-    def view_mcdp_value_parse(self, context, request):
+    @cr2e
+    def view_mcdp_value_parse(self, e):
         from mcdp_web.solver.app_solver import ajax_error_catch
 
-        string = request.json_body['string']
+        string = e.request.json_body['string']
         assert isinstance(string, unicode)
         string = string.encode('utf-8')
 
         def go():
-            return self.parse(context, request, string)
+            return self.parse(e, string)
         return ajax_error_catch(go)
 
-    def parse(self, context, request, string):
-        l = context_get_library(context, request)
-        result = l.parse_constant(string)
+    def parse(self, e, string): 
+        result = e.library.parse_constant(string)
 
         space = result.unit
         value = result.value

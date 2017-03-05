@@ -14,9 +14,9 @@ from mcdp_lang.suggestions import get_suggestions, apply_suggestions
 from mcdp_report.html import ast_to_html
 from mcdp_shelf.access import PRIVILEGE_WRITE
 from mcdp_utils_misc import get_sha1, timeit_wall
+from mcdp_web.environment import cr2e
 from mcdp_web.resource_tree import ResourceThingViewEditor, ResourceThingViewEditorParse,\
-    context_get_spec, context_get_library_name, context_get_library,\
-    context_get_widget_name, ResourceThingViewEditorSave,\
+    ResourceThingViewEditorSave,\
     ResourceThingViewEditorGraph, ResourceThingsNew
 from mcdp_web.utils import (ajax_error_catch,
                             format_exception_for_ajax_response, response_image, response_data)
@@ -43,138 +43,118 @@ class AppEditorFancyGeneric():
         config.add_view(self.save, context=ResourceThingViewEditorSave, renderer='json')
         config.add_view(self.graph_generic, context=ResourceThingViewEditorGraph)
         config.add_view(self.view_new_model_generic, context=ResourceThingsNew, permission=PRIVILEGE_WRITE) 
-
-    def save(self, context, request):
-        widget_name = context_get_widget_name(context)
-        spec = context_get_spec(context)
-        string = get_text_from_request2(request)
+    
+    @cr2e
+    def save(self, e):
+        string = get_text_from_request2(e.request)
         
         def go():
-            l = context_get_library(context, request)
-            spec.write(l, widget_name, string)
+            e.spec.write(e.library, e.thing_name, string)
             return {'ok': True, 'saved_string': string}
-
-        return ajax_error_catch(go)
-
-    @add_std_vars_context
-    def view_edit_form_fancy(self, context, request):
-        widget_name = context_get_widget_name(context)
-        spec = context_get_spec(context)
-        l = context_get_library(context, request)
-        
-        filename = '%s.%s' % (widget_name, spec.extension)
-        
-        f = l._get_file_data(filename)
-        source_code = f['data']
-        realpath = f['realpath']
-        nrows = int(len(source_code.split('\n')) + 6)
-        nrows = min(nrows, 25)
-
-        source_code = cgi.escape(source_code)
-        res = {
-            'source_code': unicode(source_code, 'utf-8'),
-            'source_code_json': unicode(json.dumps(source_code), 'utf-8'),
-            'realpath': realpath,
-            spec.url_variable: widget_name,
-            'rows': nrows,
-            'ajax_parse': spec.url_part + '_ajax_parse',
-            'error': None,
-            'url_part': spec.url_part,
-        }
-        return res
     
-
-    def ajax_parse(self, context, request):
-        spec = context_get_spec(context)
-        library_name = context_get_library_name(context)
-        library = context_get_library(context, request)
-        widget_name = context_get_widget_name(context)
-        
-        string = get_text_from_request2(request)
-        text = request.json_body['text'].encode('utf8')
-        req = {'text': request.json_body['text']}
+        return ajax_error_catch(go)
+    @cr2e
+    def ajax_parse(self, e):
+        string = get_text_from_request2(e.request)
+        text = e.request.json_body['text'].encode('utf8')
+        req = {'text': e.request.json_body['text']}
         text_hash = get_sha1(text)
-        key = (library_name, spec.url_part, widget_name, text_hash)
+        key = (e.library_name, e.spec.url_part, e.thing_name, text_hash)
 
         cache = self.last_processed2
 
-        make_relative = lambda s: self.make_relative(request, s)
+        make_relative = lambda s: self.make_relative(e.request, s)
         def go():
             with timeit_wall('process_parse_request'):
-                res = process_parse_request(library, string, spec, key, cache, make_relative)
+                res = process_parse_request(e.library, string, e.spec, key, cache, make_relative)
             res['request'] = req
             return res
 
         return ajax_error_catch(go)
 
-    def graph_generic(self, context, request):
-        spec = context_get_spec(context)
-        data_format = context.data_format
-        text_hash = context.text_hash
-        widget_name = context_get_widget_name(context)
-        library_name = context_get_library_name(context)
-        library = context_get_library(context, request)
+
+    @add_std_vars_context
+    @cr2e
+    def view_edit_form_fancy(self, e):
+        filename = '%s.%s' % (e.thing_name, e.spec.extension)
+        
+        f = e.library._get_file_data(filename)
+        source_code = f['data']
+        realpath = f['realpath']
+        nrows = int(len(source_code.split('\n')) + 6)
+        nrows = min(nrows, 25)
+    
+        source_code = cgi.escape(source_code)
+        res = {
+            'source_code': unicode(source_code, 'utf-8'),
+            'source_code_json': unicode(json.dumps(source_code), 'utf-8'),
+            'realpath': realpath,
+            e.spec.url_variable: e.thing_name,
+            'rows': nrows,
+            'ajax_parse': e.spec.url_part + '_ajax_parse',
+            'error': None,
+            'url_part': e.spec.url_part,
+        }
+        return res
+
+    @cr2e
+    def graph_generic(self, e):
+        data_format =e.context.data_format
+        text_hash = e.context.text_hash
         
         def go():
             
             with timeit_wall('graph_generic', 1.0):
-                key = (library_name, spec.url_part, widget_name, text_hash)
+                key = (e.library_name, e.spec.url_part, e.thing_name, text_hash)
     
                 if not key in self.last_processed2:
                     logger.error('Cannot find key %s' % str(key))
                     logger.error('keys: %s' % list(self.last_processed2))
-                    context = library._generate_context_with_hooks()
-                    thing = spec.load(library, widget_name, context=context)
+                    context = e.library._generate_context_with_hooks()
+                    thing = e.spec.load(e.library, e.thing_name, context=context)
                 else:
                     thing = self.last_processed2[key]
                     if thing is None:
-                        return response_image(request, 'Could not parse.')
+                        return response_image(e.request, 'Could not parse.')
     
                 with timeit_wall('graph_generic - get_png_data', 1.0):
-                    data = spec.get_png_data(library, widget_name, thing, 
+                    data = e.spec.get_png_data(e.library, e.thing_name, thing, 
                                              data_format=data_format)
                 from mcdp_web.images.images import get_mime_for_format
                 mime = get_mime_for_format(data_format)
-                return response_data(request, data, mime)
-        return self.png_error_catch2(request, go)
+                return response_data(e.request, data, mime)
+        return self.png_error_catch2(e.request, go)
 
-
-    def view_new_model_generic(self, context, request):
-        spec = context_get_spec(context)
-        widget_name = context.name
-        session = self.get_session(request)
-
-        library = context_get_library(context, request)
-        library_name = context_get_library_name(context)
-        
-        logger.info('Creating new %r' % widget_name)
-
-        basename = '%s.%s' % (widget_name, spec.extension)
-        url_edit = '../%s/views/edit_fancy/' % widget_name
-
-        if library.file_exists(basename):
+    @cr2e
+    def view_new_model_generic(self, e):
+        new_thing_name = e.context.name
+        logger.info('Creating new %r' % new_thing_name)
+    
+        basename = '%s.%s' % (new_thing_name, e.spec.extension)
+        url_edit = '../%s/views/edit_fancy/' % new_thing_name
+    
+        if e.library.file_exists(basename):
             error = 'File %r already exists.' % basename
             template = 'editor_fancy/error_model_exists_generic.jinja2'
             res = {'error': error, 'url_edit': url_edit,
-                      'widget_name': widget_name}
-            res['root'] = self.get_root_relative_to_here(request)
-            return render_to_response(template, res, request=request)
-
+                      'widget_name': new_thing_name, 'root': e.root}
+            return render_to_response(template, res, request=e.request)
+    
         else:
-            path = session.librarian.libraries[library_name]['path']
-            source = spec.minimal_source_code
+            path =e.session.librarian.libraries[e.library_name]['path']
+            source = e.spec.minimal_source_code
             filename = os.path.join(path, 'created', basename)
-
+    
             d = os.path.dirname(filename)
             if not os.path.exists(d):
                 os.makedirs(d)
-
+    
             logger.info('Writing to file %r.' % filename)
             with open(filename, 'w') as f:
                 f.write(source)
-
-            library._update_file_from_editor(filename)
-
+    
+            e.library._update_file_from_editor(filename)
+    
             raise HTTPFound(url_edit)
 
 

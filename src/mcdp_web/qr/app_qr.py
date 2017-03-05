@@ -6,7 +6,7 @@ import traceback
 
 from mcdp_web.utils import response_data
 from mcdp_web.utils0 import add_std_vars_context
-from mcdp_web.environment import Environment
+from mcdp_web.environment import  cr2e
 
 
 class AppQR():
@@ -166,9 +166,9 @@ class AppQR():
         return s
         
     @add_std_vars_context
-    def view_qr_import(self, context, request):
-        e = Environment(context, request)
-        hexified = request.matchdict['hex']
+    @cr2e
+    def view_qr_import(self, e):
+        hexified = e.request.matchdict['hex']
         qrstring = binascii.unhexlify(hexified)
         resources = self.retrieved[qrstring]['resources']
         self.retrieved[qrstring]['imported'] = True
@@ -201,15 +201,13 @@ class AppQR():
             with open(filename, 'wb') as f:
                 f.write(r.content)
             
-        self._refresh_library(request)
+        self._refresh_library(e.request)
         
         res = {}
         res['message_error'] = ''
         res['message'] = 'Assets imported.'
         res['output'] = self.format_all()
-        return res
-        
-#         raise HTTPFound('/libraries/%s/list' % library)
+        return res 
 
     def serve_scraped(self, request):
         hexified = request.matchdict['hex']

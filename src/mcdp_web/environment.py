@@ -1,5 +1,14 @@
 from mcdp_web.resource_tree import get_from_context, ResourceLibrary,\
-    ResourceShelf, ResourceThings, ResourceThing
+    ResourceShelf, ResourceThings, ResourceThing, ResourceThingView
+
+
+def cr2e(f):
+    def f2(self, context, request):
+        e = Environment(context, request)
+        res = f(self, e)
+        return res
+    f2.__name__ = 'cr2e_%s' % f.__name__
+    return f2
 
 class Environment():
     def __init__(self, context, request):
@@ -40,5 +49,11 @@ class Environment():
             self.thing_name = None
         else:
             self.thing_name = rthing.name
-
+            
+        rview = get_from_context(ResourceThingView, context)
+        self.view_name = rview.name if rview is not None else None
+ 
         self.user = self.session.get_user()
+        
+        self.root = app.get_root_relative_to_here(request)
+        

@@ -18,7 +18,7 @@ from .resource_tree import context_display_in_detail, Resource
 
 def add_other_fields(self, res, request, context):
     e = Environment(context, request)
-    res['navigation'] = get_navigation_links_context(self, context, request)   
+    res['navigation'] = get_navigation_links_context(e)   
     res['navigation'].update(e.__dict__)         
     res['version'] = lambda: mcdp.__version__  # @UndefinedVariable
     res['root'] = self.get_root_relative_to_here(request)
@@ -65,6 +65,15 @@ def add_other_fields(self, res, request, context):
     res['icon_library'] = u'📖'  
     res['icon_shelf'] = u'🏛'
 
+    res['icon_models'] = '&#10213;'
+    res['icon_templates'] = '&#x2661;'
+    res['icon_posets'] = '&#x28B6;'
+    res['icon_values'] = '&#x2723;'
+
+    def icon_spec(spec_name):
+        return res['icon_%s' % spec_name]
+    res['icon_spec'] = icon_spec
+    
     def get_user(username):
         user = session.get_user(username)
         return user.dict_for_page()

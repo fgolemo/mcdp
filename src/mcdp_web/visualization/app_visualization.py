@@ -13,14 +13,12 @@ from mcdp_report.html import ast_to_html
 from mcdp_utils_xml import to_html_stripping_fragment, bs
 from mcdp_utils_xml.add_class_and_style import add_style
 from mcdp_web.editor_fancy.app_editor_fancy_generic import specs
-from mcdp_web.resource_tree import ResourceThingViewSyntax, get_from_context,\
-    ResourceThings, ResourceThing, ResourceThingViewNDPGraph,\
+from mcdp_web.environment import cr2e
+from mcdp_web.resource_tree import ResourceThingViewSyntax,   ResourceThingViewNDPGraph,\
     ResourceThingViewDPTree, ResourceThingViewDPGraph, ResourceThingViewNDPRepr
 from mcdp_web.utils0 import add_other_fields, add_std_vars_context
 from mcdp_web.visualization.add_html_links_imp import add_html_links
 from mocdp.comp.context import Context
-from mcdp_web.environment import Environment
-
 
 
 class AppVisualization():
@@ -47,8 +45,8 @@ class AppVisualization():
         config.add_view(self.view_model_ndp_repr, context=ResourceThingViewNDPRepr, renderer='visualization/model_generic_text_content.jinja2')
 
     @add_std_vars_context
-    def view_model_ndp_repr(self, context, request):
-        e = Environment(context, request)
+    @cr2e
+    def view_model_ndp_repr(self, e):
         ndp = e.library.load_ndp(e.thing_name)
         ndp_string = ndp.__repr__()
         ndp_string = ndp_string.decode("utf8")
@@ -57,11 +55,11 @@ class AppVisualization():
         }
 
     @add_std_vars_context
-    def view_syntax(self, context, request):
-        e = Environment(context, request)
-        make_relative = lambda _: self.make_relative(request, _)
+    @cr2e
+    def view_syntax(self, e):
+        make_relative = lambda _: self.make_relative(e.request, _)
         res = generate_view_syntax(e.library_name, e.library, e.thing_name, e.spec, make_relative)
-        add_other_fields(self, res, request, context)
+        add_other_fields(self, res, e.request, e.context)
         url_edit0 = ("/shelves/%s/libraries/%s/%s/%s/views/edit_fancy/" %  
                     (e.shelf_name, e.library_name, e.spec.url_part, e.thing_name))
         res['url_edit'] = make_relative(url_edit0)

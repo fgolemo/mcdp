@@ -168,9 +168,6 @@ class ResourceLibraries(Resource):
         return r2
 
 class ResourceShelf(Resource): 
-    
-    def __init__(self, name):
-        Resource.__init__(self, name)
         
     @property
     def __acl__(self):
@@ -239,7 +236,8 @@ class ResourceLibraryRefresh(Resource): pass
     
 class ResourceThings(Resource):
     def __init__(self, specname):
-        self.specname = specname
+        Resource.__init__(self, specname)
+        self.specname = self.name
         
     def getitem(self, key):
         if key == 'new': return ResourceThingsNewBase()
@@ -386,33 +384,33 @@ def get_from_context(rclass, context):
 def is_in_context(rclass, context):
     return get_from_context(rclass, context) is not None
 
-def context_get_shelf_name(context):
-    return get_from_context(ResourceShelf, context).name
-    
-def context_get_shelf(context, request):
-    shelf_name = context_get_shelf_name(context)
-    from mcdp_web.main import WebApp
-    app = WebApp.singleton
-    session = app.get_session(request)
-    return session.get_shelf(shelf_name)
+# def context_get_shelf_name(context):
+#     return get_from_context(ResourceShelf, context).name
+#     
+# def context_get_shelf(context, request):
+#     shelf_name = context_get_shelf_name(context)
+#     from mcdp_web.main import WebApp
+#     app = WebApp.singleton
+#     session = app.get_session(request)
+#     return session.get_shelf(shelf_name)
+# 
+# def context_get_library_name(context):
+#     library_name = get_from_context(ResourceLibrary, context).name
+#     return library_name
 
-def context_get_library_name(context):
-    library_name = get_from_context(ResourceLibrary, context).name
-    return library_name
+# def context_get_library(context, request):
+#     from mcdp_web.main import WebApp
+#     app = WebApp.singleton
+#     session = app.get_session(request)
+#     library_name = context_get_library_name(context)
+#     library = session.get_library(library_name)
+#     return library
+# 
+# def context_get_spec(context):
+#     from mcdp_web.editor_fancy.app_editor_fancy_generic import specs
+#     specname = get_from_context(ResourceThings, context).specname
+#     spec = specs[specname]
+#     return spec
 
-def context_get_library(context, request):
-    from mcdp_web.main import WebApp
-    app = WebApp.singleton
-    session = app.get_session(request)
-    library_name = context_get_library_name(context)
-    library = session.get_library(library_name)
-    return library
-
-def context_get_spec(context):
-    from mcdp_web.editor_fancy.app_editor_fancy_generic import specs
-    specname = get_from_context(ResourceThings, context).specname
-    spec = specs[specname]
-    return spec
-
-def context_get_widget_name(context):
-    return get_from_context(ResourceThing, context).name
+# def context_get_widget_name(context):
+#     return get_from_context(ResourceThing, context).name
