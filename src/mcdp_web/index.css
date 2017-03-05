@@ -1,31 +1,58 @@
-body { font-family: Georgia; }
+body {
+    font-family: Georgia;
+}
+
+
 /* logo */
-#diagram { width: 10em; margin: 2em; }
-body { padding-left: 6em; }
 
-h3 { margin: 10px; }
+#diagram {
+    width: 10em;
+    margin: 2em;
+}
 
-#buttons { visibility: hidden; }
-#buttons button  {
+body {
+    padding-left: 6em;
+}
+
+h3 {
+    margin: 10px;
+}
+
+#buttons {
+    visibility: hidden;
+}
+
+#buttons button {
     /*font-size: 80%;*/
     padding: 10px;
     margin-left: 2em;
     margin-bottom: 4em;
-} /* button */
+}
 
-#buttons .ui-button { padding: 3px !important; }
 
-img.icon { vertical-align: -0.4ex; height: 2.5ex; margin-right: 4pt}
+/* button */
+
+#buttons .ui-button {
+    padding: 3px !important;
+}
+
+img.icon {
+    vertical-align: -0.4ex;
+    height: 2.5ex;
+    margin-right: 4pt
+}
 
 .library_list {
     /*column-count: 3;*/
     column-width: 14em;
 }
+
 .library_list .sup {
-     display: block;
+    display: block;
     /*padding-left: 2em; */
     font-style: italic;
 }
+
 .library_list .library span {
     padding-left: 1em;
 }

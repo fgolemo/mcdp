@@ -8,7 +8,6 @@ from wsgiref.simple_server import make_server
 
 from contracts import contract
 from contracts.utils import indent
-import pyramid
 from pyramid.authentication import AuthTktAuthenticationPolicy
 from pyramid.authorization import ACLAuthorizationPolicy
 from pyramid.config import Configurator
@@ -23,6 +22,7 @@ from mcdp.exceptions import DPSemanticError, DPSyntaxError
 from mcdp_docs import render_complete
 from mcdp_library import MCDPLibrary
 from mcdp_shelf import PRIVILEGE_ACCESS, PRIVILEGE_READ, find_shelves
+from mcdp_shelf.access import PRIVILEGE_SUBSCRIBE
 from mcdp_user_db import UserDB
 from mcdp_utils_misc import duration_compact, dir_from_package_name
 
@@ -36,7 +36,7 @@ from .resource_tree import MCDPResourceRoot, ResourceLibraries,\
     ResourceExit, ResourceLibraryDocRender, context_get_library,\
     ResourceLibraryAsset, ResourceRobots, ResourceShelves,\
     ResourceShelvesShelfUnsubscribe, ResourceShelvesShelfSubscribe,\
-    ResourceShelvesShelf, ResourceExceptionsFormatted, ResourceExceptionsJSON
+    ResourceExceptionsFormatted, ResourceExceptionsJSON
 from .security import AppLogin
 from .sessions import Session
 from .solver.app_solver import AppSolver
@@ -45,7 +45,7 @@ from .status import AppStatus
 from .utils.image_error_catch_imp import response_image
 from .utils0 import add_std_vars_context
 from .visualization.app_visualization import AppVisualization
-from mcdp_shelf.access import PRIVILEGE_SUBSCRIBE
+from mcdp_web.resource_tree import ResourceShelf
 
 
 __all__ = [
@@ -442,7 +442,7 @@ class WebApp(AppVisualization, AppStatus,
         config.add_view(self.view_dummy, context=ResourceLibraries, renderer='list_libraries.jinja2')
         config.add_view(self.view_dummy, context=ResourceLibrary, renderer='library_index.jinja2', permission=PRIVILEGE_READ)
         config.add_view(self.view_shelves_index, context=ResourceShelves, renderer='shelves_index.jinja2')
-        config.add_view(self.view_shelf, context=ResourceShelvesShelf, renderer='shelf.jinja2', permission=PRIVILEGE_READ)
+        config.add_view(self.view_shelf, context=ResourceShelf, renderer='shelf.jinja2', permission=PRIVILEGE_READ)
         config.add_view(self.view_shelves_subscribe, context=ResourceShelvesShelfSubscribe, permission=PRIVILEGE_SUBSCRIBE)
         config.add_view(self.view_shelves_unsubscribe, context=ResourceShelvesShelfUnsubscribe, permission=PRIVILEGE_SUBSCRIBE)
         config.add_view(self.view_library_doc, context=ResourceLibraryDocRender, renderer='library_doc.jinja2', permission=PRIVILEGE_READ)

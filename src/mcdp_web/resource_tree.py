@@ -124,16 +124,8 @@ class ResourceLogout(Resource): pass
         
 class ResourceShelves(Resource):
     def getitem(self, key):
-        return ResourceShelvesShelf(key)
+        return ResourceShelf(key)
 
-    
-class ResourceShelvesShelf(Resource):
-    def getitem(self, key):
-        subs =  {
-            'subscribe': ResourceShelvesShelfSubscribe(self.name),
-            'unsubscribe': ResourceShelvesShelfUnsubscribe(self.name),
-        }    
-        return subs.get(key, None)
 
 class ResourceShelvesShelfSubscribe(Resource): pass
 class ResourceShelvesShelfUnsubscribe(Resource): pass
@@ -168,6 +160,12 @@ class ResourceShelf(Resource):
         return shelf.get_acl().as_pyramid_acl()
         
     def getitem(self, key):
+        subs =  {
+            'subscribe': ResourceShelvesShelfSubscribe(self.name),
+            'unsubscribe': ResourceShelvesShelfUnsubscribe(self.name),
+        }    
+        return subs.get(key, None)
+    
         return ResourceLibrary(key)
         
 class ResourceLibrary(Resource): 
