@@ -50,7 +50,7 @@
 
 		{% if navigation.library_name %}
 		<a id='back_to_shelf' style='visibility: hidden'
-		href="{{root}}/shelves/{{navigation.shelf_name}}/">
+		href="{{shelf_url(navigation.shelf_name)}}/">
 			<!-- <span class='unicode-icons'>⟲</span> -->
 			 <span class="shelf_name">
 				{{icon_shelf|safe}} {{navigation.shelf_name}}
@@ -100,7 +100,7 @@
 
  		{% for library_name in navigation.shelf.get_libraries_path() %}
  		    <option name='library_name'
-				value="{{root}}/shelves/{{navigation.shelf_name}}/libraries/{{library_name}}/">
+				value="{{shelf_url(navigation.shelf_name)}}/libraries/{{library_name}}/">
  		    	{{icon_library|safe}}&nbsp; {{library_name}}
  		    </option>
  		{% endfor %}
@@ -110,7 +110,7 @@
 
 	 {% if navigation.library_name and navigation['current_thing'] %}
 	 	<a id='back_to_library' style='visibility: hidden'
-		href="{{root}}/shelves/{{navigation.shelf_name}}/libraries/{{navigation.library_name}}/">
+		href="{{shelf_url(navigation.shelf_name)}}/libraries/{{navigation.library_name}}/">
 	 		<!-- <span class='unicode-icons'>⟲</span> -->
 	 		 <span class="library_name">
 	 		 	{{icon_library|safe}} {{navigation.library_name}}
