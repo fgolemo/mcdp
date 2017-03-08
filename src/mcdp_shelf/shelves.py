@@ -7,10 +7,8 @@ from mcdp.logs import logger
 from mcdp_library.libraries import find_libraries
 from .access import acl_from_yaml
 from mcdp_utils_misc import indent_plus_invisibles, read_file_encoded_as_utf8, locate_files
+from mcdp.constants import MCDPConstants
 
-
-shelf_extension = 'mcdpshelf'
-shelf_desc_file = 'mcdpshelf.yaml'
 
 
 class Shelf(): 
@@ -62,11 +60,11 @@ class Shelf():
 def shelf_from_directory(dirname):
     ''' Dirname should end in shelf_extension '''
     
-    if not dirname.endswith(shelf_extension):
+    if not dirname.endswith(MCDPConstants.shelf_extension):
         msg = 'Wrong name for shelf: %r' % dirname
         raise ValueError(msg)
     
-    fn = os.path.join(dirname, shelf_desc_file)
+    fn = os.path.join(dirname, MCDPConstants.shelf_desc_file)
     if not os.path.exists(fn):
         msg = 'File %r does not exist.' % fn
         raise ValueError(msg) 
@@ -107,7 +105,7 @@ def shelf_from_directory(dirname):
 @contract(returns='dict(str:$Shelf)')
 def find_shelves(dirname):
     ''' Find shelves underneath the directory. '''
-    ds = locate_files(dirname, "*.%s" % shelf_extension ,
+    ds = locate_files(dirname, "*.%s" % MCDPConstants.shelf_extension ,
                            followlinks=True,
                            include_directories=True,
                            include_files=False)

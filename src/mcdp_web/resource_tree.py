@@ -3,29 +3,33 @@
 root
     login
     logout
-    shelves
-        <shelfname>
-            subscribe
-            unsubscribe
-            libraries
-                :new [write]
-                    <libname>
-                
-                <libname> [read]
-                    refresh_library
-                    interactive
-                        mcdp_value
-                    <specname>
-                        new/<thingname>
-                        <thingname>
-                            <views>
-                                solver
-                                edit_fancy [write]
-                                    ajax_parse
-                                    save
+    repos
+        <reponame>
+            bundles
+                <shelfname>
+                    subscribe
+                    unsubscribe
+                    libraries
+                        :new [write]
+                            <libname>
+                        
+                        <libname> [read]
+                            refresh_library
+                            interactive
+                                mcdp_value
+                            <specname>
+                                new/<thingname>
+                                <thingname>
+                                    <views>
+                                        solver
+                                        edit_fancy [write]
+                                            ajax_parse
+                                            save
     shelves
     exceptions
     exceptions_formatted
+    status
+        status.json
     refresh
     exit
 '''

@@ -11,6 +11,7 @@ from mcdp.logs import logger
 from mcdp_docs.manual_constants import MCDPManualConstants
 from mcdp_docs.read_bibtex import get_bibliography
 from mcdp_utils_xml.add_class_and_style import add_class
+from mcdp_docs.macros import replace_macros
 
 def get_manual_css_frag():
     """ Returns fragment of doc with CSS, either inline or linked,
@@ -33,7 +34,6 @@ def get_manual_css_frag():
             
 @contract(files_contents='list( tuple( tuple(str,str), str) )', returns='str')
 def manual_join(files_contents, bibfile, stylesheet):
-    from mcdp_docs.pipeline import replace_macros
     from mcdp_utils_xml import bs
     
     fn = MCDPManualConstants.main_template
@@ -118,8 +118,6 @@ def manual_join(files_contents, bibfile, stylesheet):
     warn_for_duplicated_ids(d)
     logger.info('converting to string')
     res = str(d) # do not use to_html_stripping_fragment - this is a complete doc
-    logger.info('replacing macros')
-    res = replace_macros(res)
     logger.info('done - %d bytes' % len(res))
     return res
 

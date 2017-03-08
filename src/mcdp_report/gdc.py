@@ -165,11 +165,12 @@ class GraphDrawingContext():
         imagepaths.extend(self.images_paths)
         
         libraries = os.path.join(dir_from_package_name('mcdp_data'), 'libraries')
-        imagepaths.append(os.path.join(libraries, 'FDM.mcdpshelf', 'fdm.mcdplib'))
-        imagepaths.append(os.path.join(libraries, 'FDM.mcdpshelf', 'mechanisms.mcdplib'))
+        imagepaths.append(os.path.join(libraries, 'FDM.' + MCDPConstants.shelf_extension, 
+                                       'fdm.' + MCDPConstants.library_extension))
+        imagepaths.append(os.path.join(libraries, 'FDM.' +  MCDPConstants.shelf_extension, 
+                                       'mechanisms.' + MCDPConstants.library_extension))
         
 #         print 'library (%s)' % self.library.search_dirs
-#         extra_hint = os.path.join('/Volumes/1604-mcdp/data/env_mcdp/src/mcdp/src/mcdp_data/libraries/FDM.mcdpshelf/mechanisms.mcdplib'
         
         #print('options: %s in %r' % (options, "\n ".join(imagepaths)))
         best = choose_best_icon(options, imagepaths)

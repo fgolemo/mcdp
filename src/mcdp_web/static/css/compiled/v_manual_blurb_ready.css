@@ -941,15 +941,17 @@ code.rvalue span.RcompUnit {
 }
 p,
 div.latex_env,
-div.minipage {
-  line-height: 1.15;
+div.minipage,
+li,
+table {
+  line-height: 1.18;
 }
 p {
   margin-bottom: 3pt;
   margin-top: 3pt;
 }
 figcaption {
-  line-height: 1.15;
+  line-height: 1.18;
 }
 blockquote {
   margin-left: 3em;
@@ -1639,7 +1641,7 @@ cite {
   display: block;
   font-style: normal;
   font-size: smaller;
-  line-height: 1.38;
+  line-height: 1.416;
 }
 cite + cite {
   padding-bottom: 0.5em;

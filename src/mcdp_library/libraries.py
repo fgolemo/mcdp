@@ -44,11 +44,11 @@ class Librarian():
             package = dir_from_package_name(dirname)
             logger.info('%s -> %s' % (dirname, package))
             dirname = package
-
-        if dirname.endswith('.mcdplib'):
+            
+        if dirname.endswith('.' + MCDPConstants.library_extension):
             libraries = [dirname]
         else:
-            libraries = locate_files(dirname, "*.mcdplib",
+            libraries = locate_files(dirname, "*." + MCDPConstants.library_extension,
                                  followlinks=False,
                                  include_directories=True,
                                  include_files=False)
@@ -146,7 +146,7 @@ def find_libraries(d0):
         Finds <name>.mcdplib.
         returns dict ID -> path
     '''
-    dirs = locate_files(d0, "*.mcdplib",
+    dirs = locate_files(d0, "*." + MCDPConstants.library_extension,
                                  followlinks=False,
                                  include_directories=True,
                                  include_files=False)

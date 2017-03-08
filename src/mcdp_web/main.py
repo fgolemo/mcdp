@@ -19,6 +19,7 @@ from pyramid.session import SignedCookieSessionFactory
 from quickapp import QuickAppBase
 
 from mcdp import logger
+from mcdp.constants import MCDPConstants
 from mcdp.exceptions import DPSemanticError, DPSyntaxError
 from mcdp_docs import render_complete
 from mcdp_library import MCDPLibrary
@@ -187,7 +188,7 @@ class WebApp(AppVisualization, AppStatus,
             return render_to_response(template, res, request=e.request)
         else:
             # does not exist
-            dirname = os.path.join(e.shelf.write_to, new_library_name + '.mcdplib')
+            dirname = os.path.join(e.shelf.write_to, new_library_name + '.' + MCDPConstants.library_extension)
             if os.path.exists(dirname):
                 logger.error('Directory %s already exists.' % dirname)
             else:

@@ -60,7 +60,7 @@ def load_tests_modules():
 def jobs_comptests(context):
     load_tests_modules()
 
-    c2 = context.child('mcdplib')
+    c2 = context.child('libraries')
     from mcdp_library_tests import define_tests_for_mcdplibs
     define_tests_for_mcdplibs(c2)
 

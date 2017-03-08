@@ -3,20 +3,21 @@ from comptests.registrar import comptest, run_module_tests
 from mcdp_library_tests.create_mockups import create_hierarchy
 from mcdp_shelf.shelves import find_shelves
 from nose.tools import assert_equal
+from mcdp.constants import MCDPConstants
 
 
 setup_shelve_01 = {
-    'shelf1.mcdpshelf': {
-        'mcdpshelf.yaml': '''\
+    'shelf1.' + MCDPConstants.shelf_extension: {
+        MCDPConstants.shelf_desc_file: '''\
 name: shelf 1
 access: {}
 ''',
-        'l1.mcdplib': {
+        'l1.' +  MCDPConstants.library_extension: {
             'm1.mcdp': 'mcdp { }',
         }
     },
-    'shelf2.mcdpshelf': {
-        'mcdpshelf.yaml': '''\
+    'shelf2.'+ MCDPConstants.shelf_extension: {
+        MCDPConstants.shelf_desc_file: '''\
 name: shelf 2
 access: {}
     
@@ -32,8 +33,8 @@ def shelves01():
     _d=create_hierarchy(setup_shelve_01)
     
 setup_permissions = { 
-    'u_andrea_public.mcdpshelf': {
-        'mcdpshelf.yaml':'''\
+    'u_andrea_public.' + MCDPConstants.shelf_extension: {
+        MCDPConstants.shelf_desc_file:'''\
             acl: [
                 [Allow, Everyone, discover],
                 [Allow, Everyone, read],
@@ -41,8 +42,8 @@ setup_permissions = {
             ]
         '''
     },
-    'u_andrea_subscription.mcdpshelf':{
-        'mcdpshelf.yaml': '''\
+    'u_andrea_subscription.' + MCDPConstants.shelf_extension: {
+        MCDPConstants.shelf_desc_file: '''\
             desc_short: Andrea's subscribers
             desc_long: 'long desc'
             dependencies: [u_andrea_public]
@@ -58,8 +59,8 @@ setup_permissions = {
             ]
             authors: [andrea]
         '''},
-    'u_andrea_private.mcdpshelf': {
-        'mcdpshelf.yaml': '''\
+    'u_andrea_private.' + MCDPConstants.shelf_extension: {
+        MCDPConstants.shelf_desc_file: '''\
             acl: [
                 [Allow, andrea, discover],
                 [Allow, andrea, read],

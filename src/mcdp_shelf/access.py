@@ -7,6 +7,10 @@ from contracts.utils import indent
 from pyramid.security import Allow, Authenticated, Everyone, Deny
 
 USER_ANONYMOUS = 'anonymous'
+# todo: change this to system.Authenticated
+# todo: change this to system.Everyone
+USER_AUTHENTICATED = 'Authenticated'
+USER_EVERYONE = 'Everyone'
 PRIVILEGE_DISCOVER = 'discover'
 PRIVILEGE_SUBSCRIBE = 'subscribe'
 PRIVILEGE_READ = 'read'
@@ -28,7 +32,7 @@ class ACL():
         res = []
         for r in self.rules:
             a = {'Allow': Allow, 'Deny': Deny}[r.allow_or_deny]
-            b = {'Everyone': Everyone, 'Authenticated': Authenticated}.get(r.to_whom, r.to_whom)
+            b = {USER_EVERYONE: Everyone, USER_AUTHENTICATED: Authenticated}.get(r.to_whom, r.to_whom)
             c = r.privilege    
             res.append((a,b,c))
         return res

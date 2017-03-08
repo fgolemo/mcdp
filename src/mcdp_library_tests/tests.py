@@ -90,7 +90,7 @@ def enumerate_test_libraries():
 
 @memoize_simple
 def get_test_library(libname):
-    assert isinstance(libname, str) and not 'mcdplib' in libname
+    assert isinstance(libname, str) and not MCDPConstants.library_extension in libname
     librarian = get_test_librarian()
     library = librarian.load_library(libname)
     
