@@ -5,18 +5,21 @@ import tempfile
 
 from contracts.enabling import all_disabled
 from contracts.utils import raise_desc, raise_wrapped
-from mcdp_utils_misc.timing import timeit
+
+from mcdp import logger
+from mcdp.constants import MCDPConstants
+from mcdp.exceptions import DPSemanticError, DPNotImplementedError
 from mcdp_library import MCDPLibrary
 from mcdp_library.stdlib import get_test_librarian
 from mcdp_tests import get_test_index
 from mcdp_tests.generation import for_all_source_mcdp,\
     for_all_source_mcdp_template, for_all_source_mcdp_poset,\
     for_all_source_mcdp_value, for_all_source_all
-from mcdp import logger
 from mcdp_utils_misc.fileutils import get_mcdp_tmp_dir
+# XXX: move sooner
+from mcdp_utils_misc.memoize_simple_imp import memoize_simple
+from mcdp_utils_misc.timing import timeit
 from mocdp.comp.context import Context
-from mcdp.exceptions import DPSemanticError, DPNotImplementedError
-from mcdp_utils_misc.memoize_simple_imp import memoize_simple  # XXX: move sooner
 
 
 __all__ = [
