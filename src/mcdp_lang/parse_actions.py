@@ -8,7 +8,7 @@ from nose.tools import assert_equal
 
 from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped, check_isinstance
-from mcdp.utils.timing import timeit
+from mcdp_utils_misc.timing import timeit
 from mcdp_lang_utils import Where, line_and_col, location
 from mcdp import logger, MCDPConstants
 from mcdp.exceptions import (DPInternalError, DPSemanticError, DPSyntaxError,

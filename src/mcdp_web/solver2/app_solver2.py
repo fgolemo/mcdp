@@ -5,6 +5,13 @@ from contextlib import contextmanager
 import json
 
 from contracts.utils import raise_desc, raise_wrapped
+from reprep import Report
+from reprep.constants import MIME_PNG
+from reprep.plot_utils.axes import x_axis_extra_space, y_axis_extra_space
+
+from mcdp import logger
+from mcdp.exceptions import DPSyntaxError, mcdp_dev_warning, DPSemanticError, \
+    DPInternalError
 from mcdp_cli.solve_meat import solve_meat_solve_rtof, solve_meat_solve_ftor
 from mcdp_dp.dp_transformations import get_dp_bounds
 from mcdp_dp.primitive import NotSolvableNeedsApprox
@@ -13,16 +20,15 @@ from mcdp_lang.parse_interface import parse_constant
 from mcdp_posets import express_value_in_isomorphic_space, LowerSets,  NotLeq, UpperSets
 from mcdp_report.gg_ndp import format_unit
 from mcdp_report.plotters.get_plotters_imp import get_best_plotter
+from mcdp_web.environment import cr2e
+from mcdp_web.resource_tree import ResourceThingViewSolver,\
+    ResourceThingViewSolver_submit,\
+    ResourceThingViewSolver_display_png, ResourceThingViewSolver_display1u,\
+    ResourceThingViewSolver_display1u_png
 from mcdp_web.utils import ajax_error_catch, memoize_simple, response_data
 from mcdp_web.utils.image_error_catch_imp import response_image
-from mcdp_web.utils0 import add_std_vars
-from mcdp import logger
-from mcdp.exceptions import DPSyntaxError, mcdp_dev_warning, DPSemanticError, \
-    DPInternalError
+from mcdp_web.utils0 import add_std_vars_context
 import numpy as np
-from reprep import Report
-from reprep.constants import MIME_PNG
-from reprep.plot_utils.axes import x_axis_extra_space, y_axis_extra_space
 
 
 # Alternate chars used for Base64 instead of + / which give problems with urls
@@ -46,43 +52,43 @@ class AppSolver2():
     """
 
     def __init__(self):
-        self.solutions = {}
+        self.solutions = {} 
 
     def config(self, config):
-        
-        base = '/libraries/{library}/models/{model_name}/views/solver2/'
-
-        config.add_route('solver2_base', base)
-        config.add_view(self.view_solver2_base, route_name='solver2_base',
+        config.add_view(self.view_solver2_base, 
+                        context=ResourceThingViewSolver, 
                         renderer='solver2/solver2_base.jinja2')
 
-        config.add_route('solver2_submit', base + 'submit')
-        config.add_view(self.view_solver2_submit, route_name='solver2_submit',
+        config.add_view(self.view_solver2_submit, 
+                        context=ResourceThingViewSolver_submit,
                         renderer='json')
-
-        config.add_route('solver2_display', base + 'display.png')
-        config.add_view(self.view_solver2_display, route_name='solver2_display')
-
-        config.add_route('view_solver2_display1u_ui', base + 'display1u')
+        
+        config.add_view(self.view_solver2_display,
+                        context=ResourceThingViewSolver_display_png)
+        
         config.add_view(self.view_solver2_display1u_ui,
-                        route_name='view_solver2_display1u_ui',
+                        context=ResourceThingViewSolver_display1u,
                         renderer='solver2/solver2_display1u_ui.jinja2')
+        
+        config.add_view(self.view_solver2_display1u, 
+                        context=ResourceThingViewSolver_display1u_png)
 
-        config.add_route('view_solver2_display1d', base + 'display1u.png')
-        config.add_view(self.view_solver2_display1u, route_name='view_solver2_display1d')
-
+    def get_ndp_dp(self, session, library_name, model_name):
+        self._xxx_session = session
+        return self._get_ndp_dp(library_name, model_name)
+    
     @memoize_simple
     def _get_ndp_dp(self, library_name, model_name):
-        library = self.libraries[library_name]['library']
+        library = self._xxx_session.libraries[library_name]['library']
         ndp = library.load_ndp(model_name)
         dp = ndp.get_dp()
         return ndp, dp
 
-    @add_std_vars
-    def view_solver2_base(self, request):
-        model_name = self.get_model_name(request)
-        library = self.get_current_library_name(request)
-        ndp, dp = self._get_ndp_dp(library, model_name)
+    @add_std_vars_context
+    @cr2e
+    def view_solver2_base(self, e):
+        # you don't want to memoize
+        ndp, dp = self.get_ndp_dp(e.session, e.library_name, e.thing_name)
 
         F = dp.get_fun_space()
         R = dp.get_res_space()
@@ -93,23 +99,19 @@ class AppSolver2():
         I_description = str(I)
         
         u = lambda s: unicode(s, 'utf-8')
-        res =  {
-            'navigation': self.get_navigation_links(request),
+        res =  { 
             'F_description': u(F_description),
             'R_description': u(R_description),
             'F_names': ", ".join(ndp.get_fnames()),
             'R_names': ", ".join(ndp.get_rnames()),
             'I_description': u(I_description),
-        }
-#         # XXX: not sure what's going on
-#         res['root'] =  self.get_root_relative_to_here(request)
-# 
-#         print('solver2 base: %s' % list(res.keys()))
+        } 
         return res
 
-    def view_solver2_submit(self, request):
+    @cr2e
+    def view_solver2_submit(self, e):
         def go():
-            state = request.json_body['ui_state']
+            state = e.request.json_body['ui_state']
             area_F = state['area_F'].encode('utf-8')
             area_R = state['area_R'].encode('utf-8')
             is_ftor = state['ftor_checkbox']
@@ -132,14 +134,14 @@ class AppSolver2():
                             do_approximations=do_approximations,
                             nu=nu, nl=nl)
         
-                data, res = self.process_ftor(request, area_F, do_approximations, nl, nu)
+                data, res = self.process_ftor(e, area_F, do_approximations, nl, nu)
             elif is_rtof:
                 key = dict(type=QUERY_TYPE_RTOF, 
                             string=area_R, 
                             do_approximations=do_approximations,
                             nu=nu, nl=nl)
 
-                data, res = self.process_rtof(request, area_R, do_approximations, nl, nu)
+                data, res = self.process_rtof(e, area_R, do_approximations, nl, nu)
             else:
                 raise_desc(DPInternalError, 'Inconsistent state', state=state)
         
@@ -158,16 +160,14 @@ class AppSolver2():
         quiet = (DPSyntaxError, DPSemanticError, NeedsApprox)
         return ajax_error_catch(go, quiet=quiet)
     
-    def process_rtof(self, request, string, do_approximations, nl, nu):
-        l = self.get_library(request)
-        parsed = l.parse_constant(string)
+    def process_rtof(self, e, string, do_approximations, nl, nu):
+        parsed = e.library.parse_constant(string)
 
         space = parsed.unit
         value = parsed.value
 
-        model_name = self.get_model_name(request)
-        library = self.get_current_library_name(request)
-        ndp, dp = self._get_ndp_dp(library, model_name)
+        
+        ndp, dp = self.get_ndp_dp(e.session, e.library_name, e.thing_name)
 
         R = dp.get_res_space()
         LF = LowerSets(dp.get_fun_space())
@@ -219,16 +219,14 @@ class AppSolver2():
          
         return data, res
 
-    def process_ftor(self, request, string, do_approximations, nl, nu):
-        l = self.get_library(request)
-        parsed = l.parse_constant(string)
+    def process_ftor(self, e, string, do_approximations, nl, nu):
+        parsed = e.library.parse_constant(string)
 
         space = parsed.unit
         value = parsed.value
 
-        model_name = self.get_model_name(request)
-        library = self.get_current_library_name(request)
-        ndp, dp = self._get_ndp_dp(library, model_name)
+         
+        ndp, dp = self.get_ndp_dp(e.session, e.library_name, e.model_name)
 
         F = dp.get_fun_space()
         UR = UpperSets(dp.get_res_space())
@@ -281,9 +279,11 @@ class AppSolver2():
         res['output_trace'] = str(trace) 
         return data, res
 
-    def view_solver2_display(self, request):
+    @cr2e
+    def view_solver2_display(self, e):
+
         def go():
-            h = request.params['hash'].encode('utf-8')
+            h =e. request.params['hash'].encode('utf-8')
             if not h in self.solutions:
                 try:
                     h2 = base64.b64decode(h, altchars=altchars)
@@ -318,7 +318,7 @@ class AppSolver2():
                                      params=dict(markers='b.', color_shadow='blue'))
         
                     png = output['png']
-                    return response_data(request, png, MIME_PNG)
+                    return response_data(e.request, png, MIME_PNG)
                 else:
                     result = data['result'] 
                     dp = data['dp']
@@ -333,20 +333,20 @@ class AppSolver2():
                                      params=dict(markers='r.', color_shadow='darkred'))
         
                     png = output['png']
-                    return response_data(request, png, MIME_PNG)
+                    return response_data(e.request, png, MIME_PNG)
             else:
                 msg = 'Cannot display this.'
-                return response_image(request, msg, color=(125,125,125))
+                return response_image(e.request, msg, color=(125,125,125))
         
-        return self.png_error_catch2(request, go)
+        return self.png_error_catch2(e.request, go)
 
 
-    def view_solver2_display1u_ui(self, request):
-        res = {}
-        res['navigation'] = self.get_navigation_links(request)
-        return res
+    @cr2e
+    def view_solver2_display1u_ui(self, e):  # @UnusedVariable
+        return {}
 
-    def view_solver2_display1u(self, request):
+    @cr2e
+    def view_solver2_display1u(self, e):
         """
             Parameters that we need:
             
@@ -359,13 +359,13 @@ class AppSolver2():
                 
                 <fname> = constant
         """
-        def go():
-            xaxis = str(request.params['xaxis'])
-            yaxis = str(request.params['yaxis'])
+         
 
-            model_name = self.get_model_name(request)
-            library = self.get_current_library_name(request)
-            ndp, dp = self._get_ndp_dp(library, model_name)
+        def go():
+            xaxis = str(e.request.params['xaxis'])
+            yaxis = str(e.request.params['yaxis'])
+ 
+            ndp, dp = self.get_ndp_dp(e.session, e.library_name, e.model_name)
 
             fnames = ndp.get_fnames()
             rnames = ndp.get_rnames()
@@ -378,10 +378,10 @@ class AppSolver2():
                 msg = 'Could not find resource %r.' % yaxis
                 raise_desc(ValueError, msg, rnames=rnames)
 
-            fsamples = get_samples(request, ndp)
+            fsamples = get_samples(e.request, ndp)
 
-            nl = int(request.params.get('nl', 1))
-            nu = int(request.params.get('nu', 1))
+            nl = int(e.request.params.get('nl', 1))
+            nu = int(e.request.params.get('nu', 1))
             
             dpl, dpu = get_dp_bounds(dp, nl, nu)
             
@@ -434,10 +434,10 @@ class AppSolver2():
             png_node = r.resolve_url('png')
             png_data = png_node.get_raw_data()
 
-            return response_data(request=request, data=png_data,
+            return response_data(request=e.request, data=png_data,
                                  content_type='image/png')
 
-        return self.png_error_catch2(request, go)
+        return self.png_error_catch2(e.request, go)
 
 @contextmanager
 def save_plot(output):

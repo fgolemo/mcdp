@@ -1,4 +1,11 @@
 var saved_text = {{source_code_json | safe}};
+var white_background = '{{static}}/white.png';
+var title_s = "{{navigation['current_thing']}}";
+var title_u = "*{{navigation['current_thing']}}";
+var icon_s = '{{static}}/favicon_editor_{{url_part}}_saved.png';
+var icon_u = '{{static}}/favicon_editor_{{url_part}}_unsaved.png';
+var format = "{{format}}";
+
 var last_text_sent_to_server = null;
 var last_rendered_text = null;
 var timeoutID = null;
@@ -7,7 +14,6 @@ var string_with_suggestions = null;
 var display_timeout = 2000;
 var saved = true;
 var bg_color_parsing =  '#fee';
-var white_background = '{{root}}/static/white.png';
 var red_dot = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg=='
 
 function nodefault(event) {
@@ -94,11 +100,6 @@ function current_text() {
 
 function update_save_button_color() {
     text = current_text();
-
-    title_s = "{{navigation['current_thing']}}";
-    title_u = "*{{navigation['current_thing']}}";
-    icon_s = '{{root}}/static/favicon_editor_{{url_part}}_saved.png';
-    icon_u = '{{root}}/static/favicon_editor_{{url_part}}_unsaved.png';
 
     if (text == saved_text) {
         $('button#save').css('color', '');
@@ -384,7 +385,7 @@ function image_set_temporary() {
 
 function image_set_text(text) {
     hash = hex_sha1(text);
-    url = "graph."+hash+".{{format}}";
+    url = "graph."+hash+"." + format;
     $("a#graph img").prop("src", url);
 }
 
@@ -393,8 +394,6 @@ function click_apply_suggestions() {
         try_to_parse(string_with_suggestions);
     }
 }
-
-
 
 function confirmExit() {
     if (!saved) {

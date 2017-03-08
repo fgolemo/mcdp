@@ -5,7 +5,7 @@ import itertools
 from contracts import contract
 from contracts.utils import indent, raise_desc
 from mcdp.development import do_extra_checks
-from mcdp.utils.memoize_simple_imp import memoize_simple
+from mcdp_utils_misc.memoize_simple_imp import memoize_simple
 
 from .poset import NotLeq, Poset
 from .space_product import SpaceProduct

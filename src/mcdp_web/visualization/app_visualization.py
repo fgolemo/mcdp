@@ -2,22 +2,23 @@
 
 from collections import namedtuple
 
-from bs4.element import Declaration, ProcessingInstruction, Doctype, Comment,\
-    Tag
-
+from bs4.element import Declaration, ProcessingInstruction, Doctype, Comment, Tag
 from contracts.utils import check_isinstance, indent
-from mcdp.exceptions import DPSyntaxError, DPSemanticError,\
-    DPNotImplementedError, DPInternalError
+
+from mcdp.exceptions import DPSyntaxError, DPSemanticError, DPNotImplementedError, DPInternalError
 from mcdp_lang.namedtuple_tricks import recursive_print
 from mcdp_lang.parts import CDPLanguage
 from mcdp_lang.utils_lists import unwrap_list
 from mcdp_report.html import ast_to_html
 from mcdp_utils_xml import to_html_stripping_fragment, bs
+from mcdp_utils_xml.add_class_and_style import add_style
 from mcdp_web.editor_fancy.app_editor_fancy_generic import specs
-from mcdp_web.utils0 import add_std_vars, add_other_fields
+from mcdp_web.environment import cr2e
+from mcdp_web.resource_tree import ResourceThingViewSyntax,   ResourceThingViewNDPGraph,\
+    ResourceThingViewDPTree, ResourceThingViewDPGraph, ResourceThingViewNDPRepr
+from mcdp_web.utils0 import add_other_fields, add_std_vars_context
 from mcdp_web.visualization.add_html_links_imp import add_html_links
 from mocdp.comp.context import Context
-from mcdp_utils_xml.add_class_and_style import add_style
 
 
 class AppVisualization():
@@ -26,125 +27,42 @@ class AppVisualization():
         pass
 
     def config(self, config):
-        
-        renderer = 'visualization/syntax.jinja2'
-        generate_view = self.generate_view
-#         generate_graph = self.generate_graph
-        
         for s in specs:
             url = ('/libraries/{library}/%s/{%s}/views/syntax/' % 
-                   (specs[s].url_part, specs[s].url_variable))
-            route = 'visualization_%s_syntax' % s
-            
-            config.add_route(route, url)    
-            
-            class G():
-                def __init__(self, spec):
-                    self.spec = spec
-
-                def __call__(self, request):
-                    return generate_view(request, self.spec)
-
-            # scoping bug!                    
-            #view = lambda request: self.generate_view(request, specs[s])
-            config.add_view(G(specs[s]), route_name=route, renderer=renderer)
+                   (specs[s].url_part, specs[s].url_variable)) 
             
             graph_route = 'visualization_%s_graph' % s
             graph_url = url + 'graph.{data_format}'
             config.add_route(graph_route, graph_url)    
-
-# 
-#             class H():
-#                 def __init__(self, spec):
-#                     self.spec = spec
-# 
-#                 def __call__(self, request):
-#                     return generate_graph(request, self.spec)
-# 
-#             
-#             config.add_view(H(specs[s]), route_name=graph_route, renderer=renderer)
-
-
+ 
+        config.add_view(self.view_syntax, context=ResourceThingViewSyntax, renderer='visualization/syntax.jinja2')
+            
         # these are images view for which the only change is the jinja2 template
-        image_views = [
-            'dp_graph', 
-            'dp_tree', 
-            'ndp_graph',
-        ]
-        for image_view in image_views:
-            route = 'model_%s' % image_view
-            url = self.get_lmv_url2('{library}', '{model_name}', image_view, None)
-            renderer = 'visualization/model_%s.jinja2' % image_view
-            config.add_route(route, url)
-            config.add_view(self.view_model_info, route_name=route, renderer=renderer)
- 
+        # image views
+        config.add_view(self.view_dummy, context=ResourceThingViewDPGraph, renderer='visualization/model_dp_graph.jinja2')
+        config.add_view(self.view_dummy, context=ResourceThingViewDPTree, renderer='visualization/model_dp_tree.jinja2')
+        config.add_view(self.view_dummy, context=ResourceThingViewNDPGraph, renderer='visualization/model_ndp_graph.jinja2')
+        config.add_view(self.view_model_ndp_repr, context=ResourceThingViewNDPRepr, renderer='visualization/model_generic_text_content.jinja2')
 
-        config.add_route('model_ndp_repr',
-                         self.get_lmv_url2('{library}', '{model_name}', 'ndp_repr', None))
-        config.add_view(self.view_model_ndp_repr, route_name='model_ndp_repr',
-                        renderer='visualization/model_generic_text_content.jinja2')
-
-
-    @add_std_vars
-    def view_model_info(self, request):
-        return {
-            'model_name': self.get_model_name(request),
-            'views': self._get_views(),
-            'navigation': self.get_navigation_links(request),
-        }
- 
-    @add_std_vars
-    def view_model_ndp_repr(self, request):
-        model_name = str(request.matchdict['model_name'])  # unicode
-
-        ndp = self.get_library(request).load_ndp(model_name)
+    @add_std_vars_context
+    @cr2e
+    def view_model_ndp_repr(self, e):
+        ndp = e.library.load_ndp(e.thing_name)
         ndp_string = ndp.__repr__()
         ndp_string = ndp_string.decode("utf8")
-
         return {
-            'model_name': model_name,
             'content': ndp_string,
-            'navigation': self.get_navigation_links(request),
         }
- 
-  
-#     def generate_graph(self, request, spec):
-#         def go():
-#             with timeit_wall('generate_graph', 1.0):
-#                 library = self.get_library(request)
-#                 widget_name = self.get_widget_name(request, spec)
-#                 l = self.get_library(request)
-#                 data_format = str(request.matchdict['data_format'])  # unicode
-# 
-#                 context = l._generate_context_with_hooks()
-#                 thing = spec.load(l, widget_name, context=context)
-#     
-#                 with timeit_wall('graph_generic - get_png_data', 1.0):
-#                     data = spec.get_png_data_syntax(library, widget_name, thing, 
-#                                              data_format=data_format)
-#                     
-#                 from mcdp_web.images.images import get_mime_for_format
-#                 mime = get_mime_for_format(data_format)
-#                 return response_data(request, data, mime)
-#         return self.png_error_catch2(request, go)
-    
-    def generate_view(self, request, spec):
-        name = str(request.matchdict[spec.url_variable])  # unicode
-        library = self.get_library(request)
-        make_relative = lambda _: self.make_relative(request, _)
-        library_name = self.get_current_library_name(request)
 
-        res = generate_view_syntax(library_name, library, name,  spec, make_relative)
-        add_other_fields(self, res, request)
-        
-        navigation = self.get_navigation_links(request)
-        
-        res['navigation'] = navigation
-        
-        url_edit0 = ("/libraries/%s/%s/%s/views/edit_fancy/" %  
-                    (navigation['current_library'], spec.url_part, name))
+    @add_std_vars_context
+    @cr2e
+    def view_syntax(self, e):
+        make_relative = lambda _: self.make_relative(e.request, _)
+        res = generate_view_syntax(e.library_name, e.library, e.thing_name, e.spec, make_relative)
+        add_other_fields(self, res, e.request, e.context)
+        url_edit0 = ("/shelves/%s/libraries/%s/%s/%s/views/edit_fancy/" %  
+                    (e.shelf_name, e.library_name, e.spec.url_part, e.thing_name))
         res['url_edit'] = make_relative(url_edit0)
-        
         return res
     
     

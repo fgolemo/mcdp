@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 from bs4.element import NavigableString, Tag
 
-from mcdp_utils_xml import bs, to_html_stripping_fragment
-
 
 
 def mark_console_pres(soup):    
@@ -78,4 +76,3 @@ def mark_console_pres(soup):
             is_last_line = j == len(lines) - 1
             if not is_last_line:
                 code.append(NavigableString('\n'))
- 

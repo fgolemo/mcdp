@@ -6,7 +6,6 @@ from comptests.registrar import comptest, comptest_fails
 from contracts import contract
 from mcdp_lang import parse_constant, parse_poset
 from mcdp_library import Librarian, MCDPLibrary
-from mcdp_library.utils import dir_from_package_name
 from mcdp_opt.compare_different_resources import less_resources2
 from mcdp_opt.optimization import Optimization
 from mcdp_posets import Nat, Poset, PosetProduct, UpperSet
@@ -19,6 +18,7 @@ from mocdp.comp.composite_templatize import cndp_templatize_children
 from mcdp.exceptions import mcdp_dev_warning
 from reprep import Report
 from mcdp.constants import MCDPConstants
+from mcdp_utils_misc.dir_from_package_nam import dir_from_package_name
 
 
 def get_test_library2(libnames):

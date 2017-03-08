@@ -4,7 +4,7 @@ import os
 from contracts import contract
 from mcdp import MCDPConstants
 
-from .safe_pickling import safe_pickle_dump, safe_pickle_load
+from mcdp_utils_misc.safe_pickling import safe_pickle_dump, safe_pickle_load
 
 
 __all__ = ['memo_disk_cache2']

@@ -1,0 +1,23 @@
+{% macro add_library_button(shelf_name) %}
+
+    <script>
+        function click_new_library(event) {
+            target = event.target;
+            shelf_name = $(target).attr('shelf-name');
+            console.log(shelf_name);
+            url_base = "{{shelf_url(navigation.shelf_name)}}/libraries/:new/";
+            prompt_user("library", url_base, prompt="Create new item");
+        }
+        $(document).ready(function() {
+            $("button#create_library").button().click(click_new_library);
+        });
+    </script>
+
+        {% if shelf_can_write(shelf_name) %}
+
+            <button id="create_library" shelf-name="{{navigation.shelf_name}}">
+                + library
+            </button>
+
+        {% endif %}
+{% endmacro %}

@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 from bs4.element import NavigableString, Tag
-
 from contracts.utils import raise_desc
-from mcdp import logger
-from mcdp_utils_xml import bs, to_html_stripping_fragment,  describe_tag
 
+from mcdp import logger
+from mcdp_utils_xml import describe_tag
 
 
 def make_figure_from_figureid_attr(soup):
@@ -104,4 +103,3 @@ def make_figure_from_figureid_attr(soup):
         add_class(fig, 'generated-figure')
         outside.append(fig)
         parent.insert(i, outside)
-         

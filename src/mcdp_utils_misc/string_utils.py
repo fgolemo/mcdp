@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 
 def get_md5(contents):
     import hashlib

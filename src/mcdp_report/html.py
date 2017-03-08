@@ -352,7 +352,7 @@ def iterate_notwhere(x):
 
     
 def get_css_filename(basename):
-    from mcdp_library.utils.dir_from_package_nam import dir_from_package_name
+    from mcdp_utils_misc.dir_from_package_nam import dir_from_package_name
     package = dir_from_package_name('mcdp_web')
     fn = os.path.join(package, 'static', 'css', basename + '.css')
     if not os.path.exists(fn):

@@ -1,3 +1,14 @@
+function $1(expr) {
+    res = $(expr);
+    n = res.size();
+    if(n == 0) {
+        throw('Expected at least 1 result for '+expr);
+    }
+    if(n > 1) {
+        throw('Expected 1 result for '+expr+', got ' + n + '.');
+    }
+    return res;
+}
 
 var g_what = null;
 var g_url_base = null;
@@ -53,9 +64,9 @@ function init_dialog() {
         close: dialog_close
     }
 
-    dialog = $( "#dialog-form" ).dialog(options);
+    dialog = $1( "#dialog-form" ).dialog(options);
 
-    $('#dialog-form #name').keyup(function(e) {
+    $1('#dialog-form #name').keyup(function(e) {
         if (e.keyCode == 13) // enter
             dialog_create();
     });
@@ -65,18 +76,22 @@ $(document).ready(init_dialog);
 
 function dialog_create() {
     var valid = true;
-    $("#name").removeClass( "ui-state-error" );
+     $1("#name").removeClass( "ui-state-error" );
+     $1( "#name" ).css('color', 'green');
     use = $( "#name" ).val();
-    console.log(use);
+    console.log('use: "'+use+'"');
     valid = valid && valid_identifier(use);
     if(valid) {
+        console.log("valid");
         dialog.dialog( "close" );
         url = g_url_base + use;
         //console.log("valid identifier, opening " + url);
+        console.log("url: "+ url);
         create_window(url);
         return true;
     } else {
-        $("#form_error").text("Invalid identifier “"+use+"”.");
+        console.log("invalid");
+        $1("#form_error").text("Invalid identifier “"+use+"”.");
         return false;
     }
 }

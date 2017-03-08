@@ -1,116 +1,44 @@
-<style type='text/css'>
-#outer {display: inline-block;}
-  #outer li {padding: 5px; }
-  #outer a {text-decoration: none;}
-  /*#home, */
-  /*#menu { display: inline-block;}*/
-  #root { font-size: 50%; }
-   .ui-button, .ui-widget {
-      /*height: 25pt !important;
-      border: solid 1px red !important;*/
-  }
-</style>
-<!-- <a id='home' style='visibility: hidden' href="/">⌂</a> -->
-<div id='outer'>
-<ul id="menu" style='visibility: hidden'>
 
-<li id='root'>&#9776;
-<ul>
-    <li><a class='l1' href='{{root}}/'>⌂ Front page</a></li> <!-- root -->
-  <li class="l1" id='menu_new'><span><span class='unicode-icons'>✎</span>Create new&hellip;</span>
-    <ul>
-      <li><a id='new_model'><span class='unicode-icons'>&#10213;</span> MCDP&hellip;</a></li>
-      <li><a id='new_template'><span class='unicode-icons'>&#x2661;</span>template&hellip;</a></li>
-      <li><a id='new_poset'><span class='unicode-icons'>&#x28B6;</span>poset&hellip;</a></li>
-      <li><a id='new_value'><span class='unicode-icons'>&#x2723;</span>value&hellip;</a></li>
+<script>{% include 'menu.js' %}</script>
+<style type='text/css'>{%include 'menu.css' %}</style>
+
+<div id='outer_outer' style=''>
+<div id='outer' style='display: none'>
+    <ul id="menu" style='visibility: hidden'>
+        <li id='root'>&#9776;
+            <ul>
+                <li><a class='l1' href='{{root}}/'>⌂ Front page</a></li>
+                <li><a class='l1' href='{{root}}/shelves/'>{{icon_shelf|safe}} List of shelves</a></li>
+                <li><a class='l1' href='{{root}}/libraries/'>{{icon_library|safe}} List of libraries</a></li>
+                {% if navigation.library_name and shelf_can_write(navigation.shelf_name) %}
+                    <script type="text/javascript">
+                        url_base = "{{library_url(navigation.library_name)}}";
+                    </script>
+                    <li class="l1" id='menu_new'><span><span class='unicode-icons'>✎</span>Create new&hellip;</span>
+                    <ul>
+                      <li><a id='new_model'><span class='unicode-icons'>&#10213;</span> MCDP&hellip;</a></li>
+                      <li><a id='new_template'><span class='unicode-icons'>&#x2661;</span>template&hellip;</a></li>
+                      <li><a id='new_poset'><span class='unicode-icons'>&#x28B6;</span>poset&hellip;</a></li>
+                      <li><a id='new_value'><span class='unicode-icons'>&#x2723;</span>value&hellip;</a></li>
+                    </ul>
+                    </li>
+                {% endif %}
+                <li>
+                <a href="{{root}}/refresh"><span class='unicode-icons'>↻</span>Refresh caches</a>
+                </li>
+                {% if navigation.library_name %}
+                <li>
+                    <a href="{{library_url(navigation.library_name)}}/interactive/mcdp_value/">
+                    	<span class='unicode-icons'>📟</span>Calculator</a>
+                </li>
+                {% endif %}
+                <li>
+                	<a href="{{request.url}}" target="_blank">
+                        <span class='unicode-icons'>📓</span>open a copy <br/>of this page</a>
+                </li>
+            </ul>
+        </li>
     </ul>
-  </li>
-  <!-- <li class="l1">Other
-  <ul> -->
-  <!--<li>
-    <a href="{{root}}/libraries/{{navigation['current_library']}}/qr_reader/">Import using QR</a>
-  </li>-->
-  <li>
-    <a href="{{root}}/libraries/{{navigation['current_library']}}/refresh_library"><span class='unicode-icons'>↻</span>Refresh caches</a>
-  </li>
-  <li>
-   <a href="{{root}}/libraries/{{navigation['current_library']}}/interactive/mcdp_value/">
-   	<span class='unicode-icons'>📟</span>Calculator</a>
-   </li>
-  <li>
-    	<a href="{{request.url}}" target="_blank">
-            <span class='unicode-icons'>📓</span>open a copy <br/>of this page</a>
-   </li>
-  <!-- </ul> -->
-  <!-- </li> -->
-</ul>
-</li>
-</ul>
 
 </div>
-
-<script type='text/javascript'>
-$(document).ready(function() {
-  options = { position: { my: "left top", at: "right top" } };
-  $('#menu').menu(options);
-  $('#menu').css('visibility', 'visible');
-  $("#home").css('visibility', 'visible');
-})
-</script>
-
-<style type='text/css'>
-/* This makes the link fill all of the menu item
-  otherwise it is hard to click */
-li a { display: block; width: 90%; }
-
-
-.ui-widget {
-    font-size:70%;
-}
-#menu li li li {
-	width: 14em;
-}
-
-li#root {width: 1em;}
-
-</style>
-
-
-<script type="text/javascript">
-
-
-
-function new_model() {
-    url = url_base + 'models/new/';
-    prompt_user('model', url, "Create new MCDP");
-}
-
-function new_template() {
-    url = url_base + 'templates/new/';
-    prompt_user('template', url, "Create new template");
-}
-
-function new_value() {
-    url = url_base + 'values/new/';
-    prompt_user('value', url, "Create new value");
-}
-
-function new_poset() {
-    url = url_base + 'posets/new/';
-    prompt_user('poset', url, "Create new poset");
-}
-
-$(document).ready(function() {
-
-  url_base = "{{root}}/libraries/{{navigation['current_library']}}/";
-
-  $('#new_model').click(new_model);
-  $('#new_poset').click(new_poset);
-  $('#new_template').click(new_template);
-  $('#new_value').click(new_value);
-  $("#outer").show();
-});
-
-$("#outer").hide();
-
-</script>
+</div>

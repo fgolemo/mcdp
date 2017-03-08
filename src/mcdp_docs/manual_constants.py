@@ -38,6 +38,8 @@ class MCDPManualConstants:
         'pdf_to_png_dpi': MCDPConstants.pdf_to_png_dpi,
     })
     
+    macros['MCDPConstants'] = MCDPConstants.__dict__  # @UndefinedVariable
+    
 #     InfoBegin
 # InfoKey: dc:description
 # InfoValue: This is a description

@@ -4,19 +4,27 @@
     <title>List of libraries</title>
 
     {% include 'head.jinja2' %}
-
+    <style>
+    #around {
+        column-width: 18em;
+    }
+    </style>
 </head>
 <body>
+{% include 'menu.jinja2' %}
+{% include 'user.jinja2' %}
 
+<p>This is the list of libraries available, organized by shelf.
+    See <a href="{{root}}/shelves/">here</a> to disable some of the shelves.
+    {% if navigation['shelves_unused'] %}
+    You also have an additional {{navigation['shelves_unused']|length}} shelves to activate.
+    {% endif %}
+</p>
 
-<p> Libraries: </p>
+<div id='around'>
+  {% include 'list_libraries_by_shelf.jinja2' %}
+ </div>
 
-  <ul>
-    {% for l in libraries %}
-    <li><a href="{{root}}/libraries/{{l}}/" target="_blank">Library <tt>{{l}}</tt></a></li>
-    {% endfor %}
-  </ul>
-
-  {% include 'footer.jinja2' %}
+{% include 'footer.jinja2' %}
 </body>
 </html>

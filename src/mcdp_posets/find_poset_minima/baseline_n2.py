@@ -3,7 +3,7 @@
 from contracts import contract
 from mcdp_posets.poset import Poset
 from .utils import time_poset_minima_func
-from mcdp.utils.timing import timeit
+from mcdp_utils_misc.timing import timeit
 
 __all__ = [
     'poset_minima',

@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 import itertools
-from string import Template
 
 from contracts import contract
 from contracts.utils import raise_desc
+
 from mcdp import logger
-from mcdp.exceptions import DPInternalError, DPSyntaxError
-from mcdp_lang_utils import Where, location
+from mcdp.exceptions import DPInternalError
 from mcdp_library import MCDPLibrary
 from mcdp_report.gg_utils import embed_images_from_library2
 from mcdp_utils_xml import to_html_stripping_fragment, bs, describe_tag
@@ -14,11 +13,10 @@ from mcdp_utils_xml import to_html_stripping_fragment, bs, describe_tag
 from .check_missing_links import check_if_any_href_is_invalid, fix_subfig_references
 from .elements_abbrevs import other_abbrevs
 from .lessc import run_lessc
+from .macros import replace_macros
 from .make_console_pre import mark_console_pres
 from .make_figures import make_figure_from_figureid_attr
-from .manual_constants import MCDPManualConstants
 from .prerender_math import escape_for_mathjax_back, escape_for_mathjax
-
 
 
 __all__ = [
@@ -27,7 +25,7 @@ __all__ = [
 
 @contract(returns='str', s=str, library=MCDPLibrary, raise_errors=bool)
 def render_complete(library, s, raise_errors, realpath, generate_pdf=False,
-                    check_refs=False):
+                    check_refs=False, do_math=True):
     """
         Transforms markdown into html and then renders the mcdp snippets inside.
         
@@ -121,7 +119,9 @@ def render_complete(library, s, raise_errors, realpath, generate_pdf=False,
     # mathjax must be after markdown because of code blocks using "$"
     
     s = to_html_stripping_fragment(soup)
-    s = prerender_mathjax(s)
+    
+    if do_math:
+        s = prerender_mathjax(s)
 
     soup = bs(s)
     escape_for_mathjax_back(soup)
@@ -163,7 +163,9 @@ def render_complete(library, s, raise_errors, realpath, generate_pdf=False,
     run_lessc(soup)
     fix_validation_problems(soup)
     
-    return to_html_stripping_fragment(soup)
+    s = to_html_stripping_fragment(soup)
+    s = replace_macros(s)    
+    return s
 
 def get_document_properties(soup):
     """ Reads a document's <meta> tags into a dict """
@@ -195,37 +197,6 @@ def get_library_from_document(soup, default_library):
         return library
         
     return default_library
-
-
-def replace_macros(s):    
-    macros = MCDPManualConstants.macros
-    class MyTemplate(Template):
-        delimiter = '@@'
-        def _invalid(self, mo):
-            i = mo.start('invalid')
-            lines = self.template[:i].splitlines(True)
-            if not lines:
-                colno = 1
-                lineno = 1
-            else:
-                colno = i - len(''.join(lines[:-1]))
-                lineno = len(lines)
-                
-            char = location(lineno-1, colno-1, s)
-            w = Where(s, char)
-            raise DPSyntaxError('Invalid placeholder', where=w)
-
-    t = MyTemplate(s)
-    try:
-        s2 = t.substitute(macros)
-    except KeyError as e:
-        key = str(e).replace("'","")
-        search_for = MyTemplate.delimiter + key
-        char = s.index(search_for)
-        w = Where(s, char)
-        msg = 'Key %r not found - maybe use braces?' % key
-        raise DPSyntaxError(msg, where=w)
-    return s2 
 
 def fix_validation_problems(soup):
     """ Fixes things that make the document not validate. """
@@ -310,18 +281,3 @@ def protect_my_envs(s):
     return s, subs
 
  
-def replace_inside_delims(l, delim, inside, outside):
-    D = 'DELIM'
-    l = l.replace(delim, D)
-    tokens = l.split(D)
-    tokens2 = []
-    for j, f in enumerate(tokens):
-        if j % 2 == 0: # outside the quotes
-            f = outside(f)
-        else:
-            f = inside(f)
-        tokens2.append(f)
-    l2 = D.join(tokens2)
-    # now re-replace the doubleticks
-    l2 = l2.replace(D, delim)
-    return l2

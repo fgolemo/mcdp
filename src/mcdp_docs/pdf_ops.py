@@ -3,7 +3,7 @@ import os
 import shutil
 from tempfile import mkdtemp
 
-from mcdp.utils.fileutils import get_mcdp_tmp_dir
+from mcdp_utils_misc.fileutils import get_mcdp_tmp_dir
 from mcdp_report.html import ast_to_html
 from system_cmd import CmdException, system_cmd_result
 

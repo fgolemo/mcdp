@@ -4,20 +4,21 @@ import os
 import tempfile
 import time
 
+from contracts import contract
+from contracts.utils import check_isinstance
+from quickapp import QuickApp
+from reprep.utils import natsorted
+
 from compmake.context import Context
 from compmake.jobs.actions import mark_to_remake
 from compmake.jobs.storage import get_job_cache
 from compmake.structures import Promise
-from contracts import contract
-from contracts.utils import check_isinstance
 from mcdp import logger
 from mcdp_docs.manual_constants import MCDPManualConstants
 from mcdp_docs.minimal_doc import get_minimal_document
 from mcdp_library import MCDPLibrary
 from mcdp_library.stdlib import get_test_librarian
-from mcdp_library.utils import locate_files
-from quickapp import QuickApp
-from reprep.utils import natsorted
+from mcdp_utils_misc import locate_files
 
 from .manual_join_imp import manual_join
 
@@ -124,7 +125,8 @@ def erase_job_if_files_updated(compmake_context, promise, filenames):
     filenames = list(filenames)
     for _ in filenames:
         if not os.path.exists(_):
-            raise ValueError(_)
+            msg = 'File does not exist: %s' % _
+            raise ValueError(msg)
     last_update = max(os.path.getmtime(_) for _ in filenames)
     db = compmake_context.get_compmake_db()
     job_id = promise.job_id
@@ -157,6 +159,7 @@ def generate_metadata():
 def write(s, out):
     dn = os.path.dirname(out)
     if not os.path.exists(dn):
+        print('creating directory %r for %r' % (dn, out))
         os.makedirs(dn)
     with open(out, 'w') as f:
         f.write(s)

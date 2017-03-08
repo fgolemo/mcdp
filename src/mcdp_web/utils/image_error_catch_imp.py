@@ -43,14 +43,14 @@ def create_image_with_string(s, size, color, fontsize=10):
     options = [
         '/usr/local/texlive/2015/texmf-dist/fonts/truetype/public/gnu-freefont/FreeMono.ttf',
         '/usr/share/fonts/truetype/freefont/FreeMono.ttf']
+    font = None
     for f in options:
         if os.path.exists(f):
+            font = ImageFont.truetype(f, fontsize)
             break
     else:
         logger.info('Could not find any font in %r' % options)
-    
      
-    font = ImageFont.truetype(f, fontsize)
     draw.text((0, 0), s, color, font=font)
     data = get_png(img)
     return data

@@ -58,7 +58,7 @@
   <pre class='output_error' id='output_error'></pre>
   <pre class='output_success' id='output_result'></pre>
 
-  <img id='output_img' src="{{root}}/static/white.png" style='width: 20em; height: 20em'/>
+  <img id='output_img' src="{{static}}/white.png" style='width: 20em; height: 20em'/>
 
   <p>{{space_description}}</p>
 
@@ -152,7 +152,7 @@ function ajax_success(data) {
     	console.log(error);
 
     	$('#output_error').html(error);
-      $('#output_img').attr("src",'{{root}}/static/error.png');
+      $('#output_img').attr("src",'{{static}}/error.png');
 	}
 }
 
@@ -173,7 +173,7 @@ function evaluate() {
     nu = $('#slider-un').slider('value');
     //console.log("nl,nu: " + nl + "," + nu);
 
-    $('#output_img').attr("src",'{{root}}/static/evaluating.gif');
+    $('#output_img').attr("src",'{{static}}/evaluating.gif');
 
     payload = {'string': string, 'nl': nl, 'nu': nu};
     jQuery.ajax({

@@ -31,11 +31,11 @@ def censor_markdown_code_blocks(s):
 def replace_markdown_line_by_line(s, line_transform=None, code_transform=None, inside_tag=None):
 
     identity = lambda x: x
-    if line_transform is None:  
+    if line_transform is None: # pragma: no cover
         inside_tag = identity
-    if inside_tag is None: 
+    if inside_tag is None:  # pragma: no cover
         inside_tag = identity
-    if code_transform is None: 
+    if code_transform is None:  # pragma: no cover
         code_transform = identity
         
     def eat_code_fence(line_in, line_out):
@@ -63,7 +63,7 @@ def replace_markdown_line_by_line(s, line_transform=None, code_transform=None, i
         while l and v(l[0]):
             tagname += l[0]
             l = l[1:]
-        if not tagname:
+        if not tagname: # pragma: no cover
             msg = 'Cannot get tagname from line %r' % line_in[0]
             msg += '\n in:%s out= %s' % (line_in, line_out)
             raise ValueError(msg)

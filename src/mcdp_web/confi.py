@@ -1,5 +1,5 @@
 from contracts import contract
-from decent_params.decent_params_imp import DecentParams
+from decent_params import DecentParams
 
 
 def describe_mcdpweb_params(dp):

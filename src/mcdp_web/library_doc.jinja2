@@ -55,7 +55,7 @@
 {% include 'refresh_shortcut.jinja2' %}
 
 {% if not print %}
-<a class='make_button' href="{{root}}/libraries/{{navigation['current_library']}}/list">
+<a class='make_button' href="{{library_url(navigation.library_name)}}/list">
 	Library
 	 		 <span class="library_name">
 	 		 	{{navigation['current_library']}}

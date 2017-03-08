@@ -1,23 +1,23 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
-from mcdp_lang_utils import format_where
-
 from contracts.utils import raise_desc, raise_wrapped, check_isinstance, indent
+
+from mcdp import MCDPConstants
+from mcdp.exceptions import DPInternalError, DPSemanticError,\
+    DPNotImplementedError
 from mcdp_dp import (MinusValueNatDP, MinusValueRcompDP, MinusValueDP,
                      MultValueDP, MultValueNatDP, PlusValueRcompDP, PlusValueDP,
                      PlusValueNatDP, ProductNDP, SumNNatDP, ProductNNatDP,
                      SumNRcompDP, SumNDP, SumNIntDP, ProductNRcompDP)
 from mcdp_lang.misc_math import ConstantsNotCompatibleForAddition
+from mcdp_lang_utils import format_where
 from mcdp_maps.SumN_xxx_Map import sum_dimensionality_works
 from mcdp_posets import (Int, Nat, RbicompUnits, RcompUnits,
                          express_value_in_isomorphic_space, get_types_universe, mult_table, Rcomp)
 from mcdp_posets import is_top
 from mcdp_posets.rcomp_units import (RbicompUnits_subtract, RbicompUnits_reflect,
                                      R_dimensionless)
-from mcdp import MCDPConstants
 from mocdp.comp.context import CResource, ValueWithUnits
-from mcdp.exceptions import DPInternalError, DPSemanticError,\
-    DPNotImplementedError
 
 from .eval_constant_imp import NotConstant
 from .eval_resources_imp import eval_rvalue
@@ -313,10 +313,10 @@ def get_mult_op(context, r, c):
         R = c.unit
         unit, value = c.unit, c.value
         dp = MultValueDP(F, R, unit=unit, value=value)
-    elif isinstance(rtype, RcompUnits) and isinstance(c.unit, Nat):
+    elif isinstance(rtype, RcompUnits) and isinstance(c.unit, (Nat, Rcomp)):
         F = rtype
         R = F
-        unit, value = R_dimensionless, c.cast_to(R_dimensionless)
+        unit, value = R_dimensionless, c.cast_value(R_dimensionless)
         dp = MultValueDP(F=F, R=F, unit=unit, value=value)
     elif isinstance(rtype, Rcomp) and isinstance(c.unit, Rcomp):
         msg = 'Multiplication not implemented with Rcomp().'

@@ -1,6 +1,3 @@
-
-
-
 mcdp {
     provides capacity [J]
     provides missions [dimensionless]

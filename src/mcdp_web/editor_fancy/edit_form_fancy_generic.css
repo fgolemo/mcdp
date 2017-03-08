@@ -12,10 +12,12 @@ tr, td {
     font-weight: bold;
     font-size: 70%;
 }
+
+
 /**[contenteditable="true"]{display: inline-block;}*/
 
 #syntax_error, .unparsable {
-	color: red;
+    color: red;
 }
 
 #language_warnings {
@@ -29,6 +31,7 @@ tr, td {
     border-radius: 5px;
     background-color: #ffffdd;
 }
+
 #syntax_error {
     margin-left: 10px;
     box-shadow: 1px 1px 4px lightgrey;
@@ -37,23 +40,21 @@ tr, td {
     background-color: #ffdddd;
 }
 
-
 #error_notice {
-	color: red;
+    color: red;
 }
 
-/* div#around_editor pre code#editor */
-#around_editor > pre  {
+ 
+
+#around_editor>pre {
     min-height: 20em;
-    line-width: 120%; /* to compensate for variations in fonts */
+    line-width: 120%;
+    /* to compensate for variations in fonts */
 }
+
 #editor {
-	font-size: 75%;
-	min-width: 40em;
-    /*font-family: "Andale Mono", Courier, monospace;*/
-    /*font-family:  "Anka/Coder Narrow", Courier, monospace;*/
-
-
+    font-size: 75%;
+    min-width: 40em;
 }
 
 #around_editor {
@@ -73,13 +74,13 @@ tr, td {
     outline: 0px solid transparent;
 }
 
-	table td { vertical-align: top; }
-  	html, body { height: 100%; border: solid 0px red; padding: 0; margin: 0; }
+table td {
+    vertical-align: top;
+}
 
-/* .ui-button-text {font-size: 12px !important; padding :0px;} */
-
-
-/*// #editor.endswithspace::after {
-//     content: '∎';
-//     color: grey;
-// }*/
+html, body {
+    height: 100%;
+    border: solid 0px red;
+    padding: 0;
+    margin: 0;
+}

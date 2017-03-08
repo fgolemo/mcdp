@@ -14,7 +14,7 @@ def format_exception_for_ajax_response(e, quiet=()):
     s = e.__repr__().decode('ascii', 'ignore')
     from mcdp import logger
     try:
-        logger.error(s)
+        logger.error('format_exception_for_ajax_response: ' + s)
     except UnicodeEncodeError:
         pass
     res = {}

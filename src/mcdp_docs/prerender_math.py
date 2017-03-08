@@ -1,16 +1,14 @@
 import os
-import re
 import shutil
 from tempfile import mkdtemp
 
 from contracts import contract
 from contracts.utils import raise_wrapped, indent
-from mcdp_library.utils import dir_from_package_name
-from mcdp_utils_xml import bs, to_html_stripping_fragment
-from mcdp.utils.fileutils import get_mcdp_tmp_dir
-from mcdp import logger
-from mcdp.utils.memoize_simple_imp import memoize_simple
 from system_cmd import CmdException, system_cmd_result
+
+from mcdp import logger
+from mcdp_utils_misc import dir_from_package_name, get_mcdp_tmp_dir, memoize_simple
+from mcdp_utils_xml import bs, to_html_stripping_fragment
 
 
 __all__ = [
@@ -64,7 +62,7 @@ def prerender_mathjax(s):
 
     try:
         s = prerender_mathjax_(s)
-    except PrerenderError:
+    except PrerenderError: # pragma: no cover
         if 'CIRCLECI' in os.environ:
             msg = 'Ignoring PrerenderError because of CircleCI.'
             logger.error(msg)
@@ -79,29 +77,29 @@ def prerender_mathjax(s):
 
 #     s = fix_vertical_align(s)
     return s
-
-def fix_vertical_align(s, scale=0.8):
-    """ For all vertical-align: (.*?)ex in svg, multiplies by scale """
-    frag = bs(s)
-    for element in frag.select('svg'):
-        if element.has_attr('style'):
-            s = element.attrs['style']
-            def f(m):
-                x0 = float(m.group(1))
-                x1 = x0/scale
-                return 'vertical-align: %.4fex' % x1
-            s2 = re.sub(r'vertical-align: (.*?)ex', f, s)
-            print('%s -> %s' % (s, s2))
-            element['style'] = s2
-
-    return to_html_stripping_fragment(frag)
+# 
+# def fix_vertical_align(s, scale=0.8):
+#     """ For all vertical-align: (.*?)ex in svg, multiplies by scale """
+#     frag = bs(s)
+#     for element in frag.select('svg'):
+#         if element.has_attr('style'):
+#             s = element.attrs['style']
+#             def f(m):
+#                 x0 = float(m.group(1))
+#                 x1 = x0/scale
+#                 return 'vertical-align: %.4fex' % x1
+#             s2 = re.sub(r'vertical-align: (.*?)ex', f, s)
+#             print('%s -> %s' % (s, s2))
+#             element['style'] = s2
+# 
+#     return to_html_stripping_fragment(frag)
 
 
 @memoize_simple
 def get_mathjax_preamble():
     package = dir_from_package_name('mcdp_docs')
     fn = os.path.join(package, 'symbols.tex')
-    if not os.path.exists(fn):
+    if not os.path.exists(fn): # pragma: no cover
         raise ValueError(fn)
     tex = open(fn).read()
     f = '$$'+tex+'$$'
@@ -129,7 +127,7 @@ def get_nodejs_bin():
                 display_stdout=False,
                 display_stderr=False,
                 raise_on_error=True)
-        return tries[0]
+        return tries[0]# pragma: no cover
     except CmdException as e:
         try:
             cmd= [tries[1], '--version']
@@ -139,7 +137,7 @@ def get_nodejs_bin():
                     display_stderr=False,
                     raise_on_error=True)
             return tries[1]
-        except CmdException as e:
+        except CmdException as e: # pragma: no cover
             msg = 'Node.js executable "node" or "nodejs" not found.'
             msg += '\nOn Ubuntu, it can be installed using:'
             msg += '\n\n\tsudo apt-get install -y nodejs'
@@ -179,7 +177,7 @@ def prerender_mathjax_(html):
                     display_stderr=False,
                     raise_on_error=False)
 
-            if res.ret:
+            if res.ret:# pragma: no cover
                 if 'Error: Cannot find module' in res.stderr:
                     msg = 'You have to install the MathJax and/or jsdom libraries.'
                     msg += '\nOn Ubuntu, you can install them using:'
@@ -205,7 +203,7 @@ def prerender_mathjax_(html):
             data = to_html_stripping_fragment(bs(data))
 
             return data
-        except CmdException as e:
+        except CmdException as e: # pragma: no cover
             raise e
     finally:
         shutil.rmtree(d)

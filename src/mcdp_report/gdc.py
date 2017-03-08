@@ -4,14 +4,11 @@ import os
 from tempfile import mkdtemp
 
 from contracts.utils import check_isinstance
-from mcdp_library.utils.dir_from_package_nam import dir_from_package_name
-from mcdp_library.utils.locate_files_imp import locate_files
-from mcdp.utils.fileutils import get_mcdp_tmp_dir
+from system_cmd import CmdException, system_cmd_result
+
 from mcdp import MCDPConstants
 from mcdp.exceptions import mcdp_dev_warning
-from mcdp.utils.memoize_simple_imp import memoize_simple
-from system_cmd.meat import system_cmd_result
-from system_cmd.structures import CmdException
+from mcdp_utils_misc import dir_from_package_name, get_mcdp_tmp_dir, locate_files, memoize_simple
 
 from .utils import safe_makedirs
 
@@ -168,16 +165,17 @@ class GraphDrawingContext():
         imagepaths.extend(self.images_paths)
         
         libraries = os.path.join(dir_from_package_name('mcdp_data'), 'libraries')
-        imagepaths.append(os.path.join(libraries, 'FDM.mcdpshelf', 'fdm.mcdplib'))
-        imagepaths.append(os.path.join(libraries, 'FDM.mcdpshelf', 'mechanisms.mcdplib'))
+        imagepaths.append(os.path.join(libraries, 'FDM.' + MCDPConstants.shelf_extension, 
+                                       'fdm.' + MCDPConstants.library_extension))
+        imagepaths.append(os.path.join(libraries, 'FDM.' +  MCDPConstants.shelf_extension, 
+                                       'mechanisms.' + MCDPConstants.library_extension))
         
 #         print 'library (%s)' % self.library.search_dirs
-#         extra_hint = os.path.join('/Volumes/1604-mcdp/data/env_mcdp/src/mcdp/src/mcdp_data/libraries/FDM.mcdpshelf/mechanisms.mcdplib'
         
         #print('options: %s in %r' % (options, "\n ".join(imagepaths)))
         best = choose_best_icon(options, imagepaths)
         #print('best: %s' % best)
-        resized = resize_icon(best, tmppath, 150)
+        resized = resize_icon(best, 150)
         return resized
 
     def decorate_arrow_function(self, l1):
@@ -274,9 +272,10 @@ def choose_best_icon(iconoptions, imagepaths):
     return None
 
 
-def resize_icon(filename, tmppath, size):
+def resize_icon(filename, size):
     check_isinstance(filename, str)
-    check_isinstance(tmppath, str)
+    
+    tmppath = get_mcdp_tmp_dir()
     res = os.path.join(tmppath, 'resized', str(size))
 
     safe_makedirs(res)
@@ -287,9 +286,8 @@ def resize_icon(filename, tmppath, size):
                '-resize', '%s' % size, 
                # remove alpha - otherwise lulu complains
                '-background', 'white',
-            '-alpha','remove',
-            '-alpha','off', 
-               
+                '-alpha','remove',
+                '-alpha','off', 
                resized]
         try:
 

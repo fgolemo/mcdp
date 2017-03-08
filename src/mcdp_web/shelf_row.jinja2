@@ -1,0 +1,76 @@
+{% macro shelf_row(shelf_name, shelf) %}
+
+{% set shelf_used = shelf_name in navigation.shelves_used %}
+<tr class={% if shelf_used %}"used"{%else%}"unused"{%endif%}>
+<td><a href="{{shelf_url(shelf_name)}}">{{icon_shelf|safe}} <code>{{shelf_name}}<code></a></td>
+ <td class="permissions">
+     <span title="admin">{% if shelf_can_admin(shelf_name) %}🔐{%endif%}</span>
+     <span title="read">{% if shelf_can_read(shelf_name) %}👀{%endif%}</span>
+     <span title="write">{% if shelf_can_write(shelf_name) %}✐{%endif%}</span>
+ </td>
+<td>{{shelf.get_desc_short()}}</td>
+
+{% if shelf_can_subscribe(shelf_name) %}
+    <td>
+    {% if shelf_name in navigation.shelves_used %}
+        <span class='active'>active</span>
+    {% else %}
+        <span class='inactive'>inactive</span>
+    {% endif %}
+    </td>
+
+    <td>
+    {% if shelf_name in navigation.shelves_used %}
+
+    <form action="{{shelf_url(shelf_name)}}/unsubscribe" method="post">
+        <input type="submit" class='inactive' value="deactivate"/>
+    </form>
+    {% else %}
+    <form action="{{shelf_url(shelf_name)}}/subscribe" method="post">
+        <input type="submit" class='active' value="activate"/>
+    </form>
+    {% endif %}
+    </td>
+{% else %}
+    <td colspan=2>unavailable to you</td>
+
+{% endif %}
+
+
+{% if shelf_can_read(shelf_name) %}
+<td>
+    <a class"button" id="button-{{shelf_name}}" href="#">details&hellip;</a>
+</td>
+{% else %}
+<td></td>
+{% endif %}
+
+</tr>
+<style>
+.active {
+    color: darkgreen;
+}
+
+.inactive {
+    color: darkred;
+}
+
+tr.used {}
+
+tr.unused {
+    background-color: lightgrey;
+}
+
+.shelves_list {
+    width: 100%;
+}
+
+.shelves_list th {
+    text-align: center;
+}
+
+td.permissions {
+    text-align:center;
+}
+</style>
+{% endmacro %}

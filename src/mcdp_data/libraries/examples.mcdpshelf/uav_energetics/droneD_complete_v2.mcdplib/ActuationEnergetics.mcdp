@@ -10,28 +10,28 @@ mcdp {
     battery = instance `batteries_v1.Battery_LCO
     actuation = instance `Actuation
 
-    total_power = power required by actuation + extra_power
-    capacity provided by battery >= endurance * total_power
+    total_power = power required by actuation + provided extra_power
+    capacity provided by battery ≽ provided endurance · total_power
 
     total_mass = (
-      mass required by battery +
-      actuator_mass required by actuation
-      + extra_payload)
+    mass required by battery +
+    actuator_mass required by actuation
+    + provided extra_payload)
 
-    gravity = 9.81 m/s^2
-    weight = total_mass * gravity
+    gravity = 9.81 m/s²
+    weight = total_mass · gravity
 
-    lift provided by actuation >= weight
-    velocity provided by actuation >= velocity
+    lift provided by actuation ≽ weight
+    velocity provided by actuation ≽ provided velocity
 
-    labor_cost = (10 $) * (maintenance required by battery)
+    labor_cost = (10 $) · (maintenance required by battery)
 
-    total_cost >= (
+    required total_cost ≽ (
     cost required by actuation +
     cost required by battery +
     labor_cost)
 
-    battery.missions >= num_missions
+    missions provided by battery ≽ provided num_missions
 
     requires total_mass
 }

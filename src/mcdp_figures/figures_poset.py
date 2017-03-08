@@ -6,6 +6,7 @@ from mcdp_report.gdc import choose_best_icon
 
 from .figure_interface import MakeFigures
 from .formatters import GGFormatter
+from mcdp_utils_misc.fileutils import get_mcdp_tmp_dir
 
 
 __all__ = [
@@ -61,9 +62,8 @@ class PosetHasse(GGFormatter):
             iconoptions = [e]
             icon = choose_best_icon(iconoptions, images_paths)
             if icon is not None:
-                tmppath = '.'
                 from mcdp_report.gdc import resize_icon
-                resized = resize_icon(icon, tmppath, 100)
+                resized = resize_icon(icon, 100)
 
                 label = ("<TABLE CELLBORDER='0' BORDER='0'><TR><TD>%s</TD></TR>"
                 "<TR><TD><IMG SRC='%s' SCALE='TRUE'/></TD></TR></TABLE>")

@@ -4,7 +4,7 @@ from contracts.utils import raise_desc
 
 
 @contract(s=bytes, returns=bytes)
-def render_markdown(s):
+def render_markdown(s): # pragma: no cover
     """ Returns an HTML string encoded in UTF-8"""
     if isinstance(s, unicode):
         msg = 'I expect utf-8 encoded bytes.'

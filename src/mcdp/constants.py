@@ -133,3 +133,8 @@ class MCDPConstants():
     log_duplicates = False
 
         
+    
+    shelf_extension = 'mcdpshelf'
+    shelf_desc_file = 'mcdpshelf.yaml'
+    library_extension = 'mcdplib'
+    
