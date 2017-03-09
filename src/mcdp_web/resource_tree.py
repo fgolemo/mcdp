@@ -3,6 +3,7 @@
 root
     login
     logout
+    changes
     repos
         <reponame>
             bundles
@@ -117,8 +118,10 @@ class MCDPResourceRoot(Resource):
     
     def getitem(self, key):
         subs =  {
-            'libraries': ResourceLibraries(),
-            'shelves': ResourceShelves(),
+            'repos': ResourceRepos(),
+#             'libraries': ResourceLibraries(),
+            'changes': ResourceChanges(),
+#             'shelves': ResourceShelves(),
             'exceptions': ResourceExceptionsJSON(),
             'exceptions_formatted': ResourceExceptionsFormatted(),
             'refresh': ResourceRefresh(),
@@ -132,6 +135,7 @@ class MCDPResourceRoot(Resource):
 class ResourceExit(Resource): pass
 class ResourceLogin(Resource): pass
 class ResourceLogout(Resource): pass
+class ResourceChanges(Resource): pass
         
 class ResourceShelves(Resource):
     def getitem(self, key):
@@ -204,7 +208,15 @@ class ResourceShelfInactive(Resource):
 #     def getitem(self, key):
 #         return self
 #        return ResourceLibrary(key)
+class ResourceRepos(Resource):
+    def getitem(self, key):
+        return ResourceRepo(key)
         
+class ResourceRepo(Resource):
+    def getitem(self, key):
+        if key == 'shelves':
+            return ResourceShelves()
+    
 class ResourceLibrary(Resource): 
     
     def getitem(self, key):

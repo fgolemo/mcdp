@@ -15,7 +15,10 @@ class UserInfo():
         self.subscriptions = subscriptions
         
     def get_gravatar(self, size):
-        return gravatar(self.email, size)
+        if self.email is not None:
+            return gravatar(self.email, size)
+        else:
+            return gravatar('invalid@invalid.com', size)
     
     def get_groups(self):
         return self.groups
@@ -34,9 +37,14 @@ class UserInfo():
             'affiliation': self.affiliation,
             'groups': self.groups,
             'subscriptions': self.subscriptions,
-            'gravatar64': gravatar(self.email, 64),
-            'gravatar32': gravatar(self.email, 32),
         }
+        if self.email is None:
+            res['gravatar64'] = self.get_gravatar(64)
+            res['gravatar32'] = self.get_gravatar(32)
+        else:
+            res['gravatar64'] = self.get_gravatar(64)
+            res['gravatar32'] = self.get_gravatar(32)
+            
         return res
     
 # name: Andrea Censi

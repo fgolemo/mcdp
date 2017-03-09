@@ -37,9 +37,21 @@
 	</td>
 	<td style=''>
 
+		{% if navigation.repo_name %}
+		<a id='repos_list' style='visibility: hidden'
+		href="{{root}}/repos/">repos</a>
+		<script type='text/javascript'>
+		$(document).ready(function() {
+			$("#repos_list").button();
+			$("#repos_list").css('visibility', 'visible');
+		});
+		</script>
+		{% endif %}
+
 		{% if navigation.shelf_name %}
 		<a id='shelves_list' style='visibility: hidden'
-		href="{{root}}/shelves/">🔙</a>
+		href="{{root}}/repos/{{navigation.repo_name}}/shelves/">
+			{{icon_repo|safe}} {{navigation.repo_name}}</a>
 		<script type='text/javascript'>
 		$(document).ready(function() {
 			$("#shelves_list").button();
@@ -100,7 +112,7 @@
 
  		{% for library_name in navigation.shelf.get_libraries_path() %}
  		    <option name='library_name'
-				value="{{shelf_url(navigation.shelf_name)}}/libraries/{{library_name}}/">
+				value="{{library_url(library_name)}}/">
  		    	{{icon_library|safe}}&nbsp; {{library_name}}
  		    </option>
  		{% endfor %}
@@ -110,7 +122,7 @@
 
 	 {% if navigation.library_name and navigation['current_thing'] %}
 	 	<a id='back_to_library' style='visibility: hidden'
-		href="{{shelf_url(navigation.shelf_name)}}/libraries/{{navigation.library_name}}/">
+		href="{{library_url(navigation.library_name)}}/">
 	 		<!-- <span class='unicode-icons'>⟲</span> -->
 	 		 <span class="library_name">
 	 		 	{{icon_library|safe}} {{navigation.library_name}}

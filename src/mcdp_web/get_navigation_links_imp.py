@@ -28,8 +28,12 @@ def get_navigation_links_context(e):
         current_poset = None
         current_value = None
     d = {}
+    
+    d['repo_name'] = e.repo_name
+    d['repo'] = e.repo
+    d['repos'] = e.app.repos
 
-    d['shelfname'] = d['shelf_name'] = e.shelf_name
+    d['shelf_name'] = e.shelf_name
     d['shelf'] = e.shelf
     d['shelf_write_permission'] = shelf_write_permission
     d['shelves_available'] = e.session.get_shelves_available()
@@ -53,7 +57,8 @@ def get_navigation_links_context(e):
         VIEW_DELETE = ':delete'
         VIEW_SYNTAX = 'views/syntax/'
         
-        library_url = e.app.make_relative(e.request, '/shelves/{shelf_name}/libraries/{library_name}/'.format(**d))
+        p = '/repos/{repo_name}/shelves/{shelf_name}/libraries/{library_name}/'
+        library_url = e.app.make_relative(e.request, p.format(**d))
 
         documents = e.library._list_with_extension(MCDPConstants.ext_doc_md)
 
@@ -147,7 +152,9 @@ def get_navigation_links_context(e):
     libname2desc = {}
     for l in natural_sorted(libraries):
         is_current = l == e.library_name
-        url = make_relative('/libraries/%s/' % l)
+        p = '/repos/{repo_name}/shelves/{shelf_name}/libraries/%s/' % l
+        url = e.app.make_relative(e.request, p.format(**d))
+
         #name = "Library: %s" % l
         name = l
         desc = dict(id=l,name=name, url=url, current=is_current)

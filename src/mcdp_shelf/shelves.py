@@ -3,15 +3,15 @@ import os
 from contracts import contract
 import yaml
 
+from mcdp import MCDPConstants
 from mcdp.logs import logger
 from mcdp_library.libraries import find_libraries
-from .access import acl_from_yaml
 from mcdp_utils_misc import indent_plus_invisibles, read_file_encoded_as_utf8, locate_files
-from mcdp.constants import MCDPConstants
+
+from .access import acl_from_yaml
 
 
-
-class Shelf(): 
+class Shelf():
     ''' 
         A shelf has:
         - a set of libraries
@@ -20,7 +20,7 @@ class Shelf():
         - a short description (one line, pure text)
         - a long description (markdown)
         - a list of authors
-        
+
         - a default directory for creating a new library
     '''
     @contract(dependencies='list(str)', authors='list(str)')
@@ -33,7 +33,7 @@ class Shelf():
         self.authors = authors
         self.dirname = dirname
         self.write_to = write_to
-        
+
     def get_dependencies(self):
         return self.dependencies
 
@@ -42,10 +42,10 @@ class Shelf():
 
     def get_desc_short(self):
         return self.desc_short
-        
+
     def get_desc_long(self):
         return self.desc_long
-    
+
     @contract(returns='dict(str:str)')
     def get_libraries_path(self):
         ''' Returns a dict of library name -> dirname '''
@@ -53,22 +53,23 @@ class Shelf():
 
     def get_acl(self):
         return self.acl
-    
+
     def update_libraries(self):
-        self.libraries = find_libraries(self.dirname) 
+        self.libraries = find_libraries(self.dirname)
+
 
 def shelf_from_directory(dirname):
     ''' Dirname should end in shelf_extension '''
-    
+
     if not dirname.endswith(MCDPConstants.shelf_extension):
         msg = 'Wrong name for shelf: %r' % dirname
         raise ValueError(msg)
-    
+
     fn = os.path.join(dirname, MCDPConstants.shelf_desc_file)
     if not os.path.exists(fn):
         msg = 'File %r does not exist.' % fn
-        raise ValueError(msg) 
-    
+        raise ValueError(msg)
+
     u = read_file_encoded_as_utf8(fn)
     try:
         y = yaml.load(u)
@@ -81,7 +82,7 @@ def shelf_from_directory(dirname):
             ['Allow', 'Everyone', 'write'],
             ['Allow', 'Everyone', 'admin'],
         ]
-        
+
         acl = acl_from_yaml(y.pop('acl', default_acl))
         dependencies = y.pop('dependencies', [])
         desc_short = y.pop('desc_short', None)
@@ -94,25 +95,23 @@ def shelf_from_directory(dirname):
         msg = 'Cannot parse %s:\n%s' % (fn, indent_plus_invisibles(u))
         logger.error(msg)
         raise
-    
-    
-    shelf = Shelf(acl=acl, dependencies=dependencies, desc_short=desc_short, 
+
+    shelf = Shelf(acl=acl, dependencies=dependencies, desc_short=desc_short,
                   desc_long=desc_long, libraries={}, authors=authors,
                   dirname=dirname, write_to=dirname)
     shelf.update_libraries()
     return shelf
-    
+
+
 @contract(returns='dict(str:$Shelf)')
 def find_shelves(dirname):
     ''' Find shelves underneath the directory. '''
-    ds = locate_files(dirname, "*.%s" % MCDPConstants.shelf_extension ,
-                           followlinks=True,
-                           include_directories=True,
-                           include_files=False)
+    ds = locate_files(dirname, "*.%s" % MCDPConstants.shelf_extension,
+                      followlinks=True,
+                      include_directories=True,
+                      include_files=False)
     res = {}
     for d in ds:
         name = os.path.splitext(os.path.basename(d))[0]
         res[name] = shelf_from_directory(d)
     return res
-
-        

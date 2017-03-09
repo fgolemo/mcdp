@@ -23,11 +23,14 @@ from mcdp.constants import MCDPConstants
 from mcdp.exceptions import DPSemanticError, DPSyntaxError
 from mcdp_docs import render_complete
 from mcdp_library import MCDPLibrary
+from mcdp_repo.repo_interface import MCDPGitRepo, MCDPythonRepo
 from mcdp_shelf import PRIVILEGE_ACCESS, PRIVILEGE_READ, find_shelves
-from mcdp_shelf.access import PRIVILEGE_SUBSCRIBE
+from mcdp_shelf import PRIVILEGE_SUBSCRIBE
 from mcdp_user_db import UserDB
+from mcdp_user_db.user import UserInfo
 from mcdp_utils_misc import duration_compact, dir_from_package_name
 from mcdp_web.environment import cr2e
+from mcdp_web.resource_tree import ResourceChanges
 
 from .confi import describe_mcdpweb_params, parse_mcdpweb_params_from_dict
 from .editor_fancy import AppEditorFancyGeneric
@@ -52,6 +55,7 @@ from .utils.image_error_catch_imp import response_image
 from .utils.response import response_data
 from .utils0 import add_other_fields, add_std_vars_context
 from .visualization.app_visualization import AppVisualization
+import datetime
 
 
 __all__ = [
@@ -117,9 +121,21 @@ class WebApp(AppVisualization, AppStatus,
             self.options.users = 'tmp-user-db'
             os.makedirs(self.options.users)
 
+        self.repos = {}
+        if os.path.exists('.git'):
+            print('Using current db')
+            self.repos['local'] = MCDPGitRepo(where='.')
+            print('loaded')
+        else:
+            
+            self.repos['local'] = MCDPythonRepo('mcdp_data')
+
         if self.options.users is not None:
             self.user_db = UserDB(self.options.users)            
-            user_shelves = find_shelves(self.options.users)
+            self.repos['db'] = MCDPGitRepo(where=self.options.users)
+
+        for id_repo, repo in self.repos.items():
+            user_shelves = repo.get_shelves()
             self.all_shelves.update(user_shelves)
         
         for sname in self.all_shelves:
@@ -143,7 +159,7 @@ class WebApp(AppVisualization, AppStatus,
     @add_std_vars_context
     @cr2e
     def view_dummy(self, e):  # @UnusedVariable
-        return {'static':'iao'}
+        return {}
  
     @add_std_vars_context
     @cr2e
@@ -176,7 +192,7 @@ class WebApp(AppVisualization, AppStatus,
         url_edit = get_url_library(e, e.shelf_name, new_library_name)
 
         if new_library_name in e.shelf.libraries:
-            error = 'The library %r already exists.' %new_library_name
+            error = 'The library "%s" already exists.' %new_library_name
             template = 'error_library_exists.jinja2'
             res = {
                 'error': error,
@@ -234,13 +250,15 @@ class WebApp(AppVisualization, AppStatus,
         e.request.response.status = 404
         url = e.request.url
         referrer = e.request.referrer
-        print('context: %s' % e.context)
+        #print('context: %s' % e.context)
         self.exceptions.append('Path not found.\n url: %s\n ref: %s' % (url, referrer))
         res = {
             'url': url,
              'referrer': referrer,
+             'root': e.root,
+             'static': 'static-not-given',
         }
-        res['root'] = e.root
+
         return res
 
     @add_std_vars_context
@@ -431,6 +449,8 @@ class WebApp(AppVisualization, AppStatus,
         config.add_view(self.view_dummy, context=ResourceLibraries, renderer='list_libraries.jinja2')
         config.add_view(self.view_dummy, context=ResourceLibrary, renderer='library_index.jinja2', permission=PRIVILEGE_READ)
         config.add_view(self.view_dummy, context=ResourceShelves, renderer='shelves_index.jinja2')
+        config.add_view(self.view_changes, context=ResourceChanges, renderer='changes.jinja2')
+        
         config.add_view(self.view_shelf_library_new, context=ResourceLibrariesNewLibname)
         config.add_view(self.view_shelf, context=ResourceShelf, renderer='shelf.jinja2', permission=PRIVILEGE_READ)
         config.add_view(self.view_shelves_subscribe, context=ResourceShelvesShelfSubscribe, permission=PRIVILEGE_SUBSCRIBE)
@@ -454,6 +474,33 @@ class WebApp(AppVisualization, AppStatus,
         app = config.make_wsgi_app()
         return app
      
+    @add_std_vars_context
+    @cr2e
+    def view_changes(self, e):
+        res = {}
+        res['changes'] = []
+        for id_repo, repo in self.repos.items():   
+            for change in repo.get_changes():
+                print('change: %s' % change)
+                change['repo_name'] = id_repo
+                a = change['author']
+                if a in e.session.app.user_db:
+                    u = e.session.app.user_db[a]
+                else:
+                    print('Cannot find user %r' % a )
+                    u = UserInfo(username=a, name=None, 
+                                 password=None, email=None, website=None, affiliation=None, groups=[], subscriptions=[])
+                change['user'] = u
+                change['url'] = '/repos/%s/shelves/%s/libraries/%s/%s/%s/views/syntax/' % (change['repo_name'],
+                                                                                           change['shelf_name'], 
+                                            change['library_name'], change['spec_name'], change['thing_name'])
+                
+                change['date_human'] =  datetime.datetime.fromtimestamp(change['date']).strftime('%b %d, %H:%M')
+                res['changes'].append(change)
+                
+        return res
+    
+
     
     @add_std_vars_context
     @cr2e
@@ -471,8 +518,8 @@ def serve_robots(request):  # @UnusedVariable
     return Response(content_type='text/plain', body=body)
 
 def get_url_library(e, shelf_name, library_name):
-    url = e.root + '/shelves/{shelf_name}/libraries/{library_name}/'
-    url = url.format(shelf_name=shelf_name, library_name=library_name)
+    url = e.root + '/repos/{repo_name}/shelves/{shelf_name}/libraries/{library_name}'
+    url = url.format(shelf_name=shelf_name, repo_name=e.repo_name, library_name=library_name)
     return url
 
 class MCDPWeb(QuickAppBase):

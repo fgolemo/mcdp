@@ -1,12 +1,18 @@
-from contracts import contract
-from mcdp_user_db.user import UserInfo
-from mcdp.constants import MCDPConstants
 from abc import ABCMeta, abstractmethod
-from mcdp_utils_misc.dir_from_package_nam import dir_from_package_name
-from mcdp_shelf.shelves import find_shelves
-from mcdp_utils_misc.fileutils import create_tmpdir
 import os
+
+from contracts import contract
+from git import RemoteProgress
+from git import Repo
+
+from mcdp.constants import MCDPConstants
 from mcdp.logs import logger
+from mcdp_shelf.shelves import find_shelves
+from mcdp_user_db.user import UserInfo
+from mcdp_utils_misc.dir_from_package_nam import dir_from_package_name
+from mcdp_utils_misc.fileutils import create_tmpdir
+
+
 
 class RepoException(Exception):
     pass
@@ -14,14 +20,7 @@ class RepoException(Exception):
 
 class RepoInvalidURL(RepoException):
     pass
-
-class RepoChangeEvent():
-    def when(self):
-        pass
-    def who(self):
-        pass
-    def what(self):
-        pass
+ 
 
 
 class MCDPRepo():
@@ -39,7 +38,7 @@ class MCDPRepo():
         ''' Returns a dictionary of Bundles present in this repo. '''
         
     @abstractmethod
-    def get_events(self, skip=0, max_events=None):
+    def get_changes(self):
         ''' Returns a list of Repo Change Events '''
         
     @abstractmethod
@@ -141,28 +140,109 @@ def repo_from_url_pip(url):
 def repo_from_url_python(url):
     return MCDPythonRepo(url)
 
-from git import Repo
+
+
+class MyProgressPrinter(RemoteProgress):
+    def update(self, op_code, cur_count, max_count=None, message=''):
+        print(op_code, cur_count, max_count, cur_count / (max_count or 100.0), message or "NO MESSAGE")
+        pass
+# end
+
 
 class MCDPGitRepo(MCDPRepo):
-    def __init__(self, url, where=None, branch=None):
+    def __init__(self, url=None, where=None):
         '''
             where: local directory
         '''
         if where is None:
             where = create_tmpdir(prefix='git_repo')
+            create = True
             logger.debug('Created tmpdir %s' % where)
         else:
             if not os.path.exists(where):
                 logger.debug('Created dir %s' % where)
                 os.makedirs(where)
+                create = True
+            else:
+                create = False
+        self.where = where
+        if create:
+            self.repo = Repo.init(self.where)
+            origin = self.repo.create_remote('origin', url=url)
+            assert origin.exists()
+            for _fetch_info in self.repo.remotes.origin.fetch(progress=MyProgressPrinter()):
+                pass
+            self.repo.create_head('master', origin.refs['master'])
+            self.repo.heads.master.checkout()
+        else:
+            self.repo = Repo(self.where)
+
+            for _fetch_info in self.repo.remotes.origin.fetch(progress=MyProgressPrinter()):
+                pass
         
         # we have create the working dir
         assert os.path.exists(where)
-        
-        self.where = where
-        self.repo = Repo(self.where)
+                 
+#             print("Updated %s to %s" % (fetch_info.ref, fetch_info.commit))
+        self.shelves = find_shelves(where)
+        self.changes = []
+        for commit in self.repo.iter_commits(max_count=20):
+            self._note_commit(commit)
+            
+#             print('author: %s' % commit.author)
+#             print('authored_date: %s' % commit.authored_date)
+#             print('committed_date: %s' % commit.committed_date)
+#             print('committer: %s' % commit.committer)
+#             print('message: %s' % commit.message)
+
+            
         self.url = url
-        
+    
+    def _note_commit(self, commit):
+        if not commit.parents:
+            return
+        for diff in commit.parents[0].diff(commit):
+#                     print diff.change_type, diff.a_path, diff.b_path
+#                     print type(diff)
+            filename = diff.b_path
+            components = filename.split('/')
+            res = {}
+            if diff.change_type == 'R100':continue
+            res['change_type'] = diff.change_type
+            res['filename'] = diff.b_path
+            
+            if os.path.basename(filename) in ['mcdpshelf.yaml', 'user.yaml', '.gitignore']:
+                continue
+            if 'mcdpweb_cache' in filename:
+                continue
+            
+            for c in components:
+                if MCDPConstants.shelf_extension in c:
+                    res['shelf_name'] = os.path.splitext(c)[0]
+                if MCDPConstants.library_extension in c:
+                    res['library_name'] = os.path.splitext(c)[0]
+                from mcdp_web.editor_fancy.specs_def import specs
+                for spec_name, spec in specs.items():
+                    ext = spec.extension
+                    if c.endswith('.'+ext):
+                        res['spec_name'] = spec_name
+                        res['thing_name'] = os.path.splitext(c)[0]
+            author = commit.author.email.split('@')[0]
+            
+            res['author'] = author
+            res['date'] = commit.authored_date
+            
+            for k,v in res.items():
+                if isinstance(v, unicode):
+                    res[k] = v.encode('utf8')   
+            
+            if not 'thing_name' in res or not 'shelf_name' in res or not 'library_name' in res:
+                print('skipping %s' % res)
+            else:
+                self.changes.append(res)
+            
+    def get_changes(self):
+        return self.changes
         
     def available(self):
         pass
@@ -183,8 +263,27 @@ class MCDPGitRepo(MCDPRepo):
         ''' Checks out a local copy for remote repos. '''
     
     def commit(self, user_info):
-        return
-    
+        hostname = 'hostname' # XXX
+        email = '%s@%s' % (user_info.username, hostname)
+        
+        from git import Actor
+        author = Actor(user_info.username, email)
+
+        repo = self.repo
+        if repo.untracked_files: 
+            repo.index.add(repo.untracked_files)
+        
+        modified_files = repo.index.diff(None)
+        print 'modified_files', modified_files
+        for m in modified_files:
+            print m
+            repo.index.add([m.b_path])
+            
+        message = ''
+        commit = repo.index.commit(message, author=author)
+        print('committed: %s' % commit)
+        self._note_commit(commit)
+        
     def push(self):
         return
     
@@ -261,6 +360,8 @@ class MCDPythonRepo(MCDPRepo):
     def pull(self):
         return
     
+    def get_changes(self):
+        return []
     
     
     

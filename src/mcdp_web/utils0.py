@@ -70,12 +70,14 @@ def add_other_fields(self, res, request, context):
         if e.shelf_name is None:
             msg = 'shelf_name is not set'
             raise ValueError(msg)
-        return e.root + '/shelves/' + e.shelf_name + '/libraries/' + library_name
+        return e.root + '/repos/' + e.repo_name + '/shelves/' + e.shelf_name + '/libraries/' + library_name
         
     res['library_url'] = library_url
-    res['shelf_url'] = lambda shelf_name: e.root + '/shelves/' + shelf_name 
+    res['shelf_url'] = lambda shelf_name: e.root  + '/repos/' + e.repo_name + '/shelves/' + shelf_name 
     res['static'] = e.root + '/static'
     
+    res['icon_repo'] = '&#9730;'
+    res['icon_repo_css'] = r'\9730;'
     res['icon_library'] = '&#x1F4D6;'  
     res['icon_library_css'] = r'\1F4D6'
     res['icon_shelf'] = '&#x1F3DB;'

@@ -12,7 +12,7 @@
                 <li><a class='l1' href='{{root}}/libraries/'>{{icon_library|safe}} List of libraries</a></li>
                 {% if navigation.library_name and shelf_can_write(navigation.shelf_name) %}
                     <script type="text/javascript">
-                        url_base = "{{library_url(navigation.library_name)}}";
+                        url_base = "{{library_url(navigation.library_name)}}/";
                     </script>
                     <li class="l1" id='menu_new'><span><span class='unicode-icons'>✎</span>Create new&hellip;</span>
                     <ul>

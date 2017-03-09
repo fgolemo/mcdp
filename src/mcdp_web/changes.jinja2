@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Recent changes</title>
+    {% include 'head.jinja2' %}
+    <style>{% include 'library_index.css' %}</style>
+    <script>{% include 'library_index.js' %}</script>
+</head>
+<body>
+  {% include 'prompt.jinja2' %}
+
+<ul>
+{% for change in changes %}
+    <li> {{change.date_human}}:
+          {% if change.user.name %}
+          {{change.user.name}}
+          {% else %}
+          Unknown user {{change.user.username}}
+          {% endif %}
+          {% if change.change_type == 'A' %}
+          added
+          {% elif change.change_type == 'M' %}
+          modified
+          {% elif change.change_type == 'D' %}
+          deleted
+          {% elif change.change_type == 'R' %}
+          renamed
+          {% else %}
+          [{{change.change_type}}]
+          {% endif %}
+        <a href="{{change.url}}">{{icon_spec(change.spec_name)|safe}}&nbsp;{{change.thing_name}}</a>
+        in library <a href="/repos/{{change.repo_name}}/shelves/{{change.repo_name}}/libraries/{{change.library_name}}/">
+            {{icon_library|safe}}&nbsp;{{change.library_name}}</a>.
+    <!-- {{change.repo_name}}/{{change.library_name}}/{{change.spec_name}}/{{change.thing_name}} -->
+</a><!--{{change|safe}} -->
+
+    </li>
+{% endfor %}
+</ul>
+
+{% include 'footer.jinja2' %}
+</body>
+</html>

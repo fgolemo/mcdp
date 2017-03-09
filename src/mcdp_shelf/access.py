@@ -2,9 +2,11 @@
 from collections import namedtuple
 
 from contracts import contract
-from mcdp.logs import logger
 from contracts.utils import indent
 from pyramid.security import Allow, Authenticated, Everyone, Deny
+
+from mcdp.logs import logger
+
 
 USER_ANONYMOUS = 'anonymous'
 # todo: change this to system.Authenticated

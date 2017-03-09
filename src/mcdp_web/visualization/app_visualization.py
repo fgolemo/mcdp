@@ -27,14 +27,14 @@ class AppVisualization():
         pass
 
     def config(self, config):
-        for s in specs:
-            url = ('/libraries/{library}/%s/{%s}/views/syntax/' % 
-                   (specs[s].url_part, specs[s].url_variable)) 
-            
-            graph_route = 'visualization_%s_graph' % s
-            graph_url = url + 'graph.{data_format}'
-            config.add_route(graph_route, graph_url)    
- 
+#         for s in specs:
+#             url = ('/libraries/{library}/%s/{%s}/views/syntax/' % 
+#                    (specs[s].url_part, specs[s].url_variable)) 
+#             
+#             graph_route = 'visualization_%s_graph' % s
+#             graph_url = url + 'graph.{data_format}'
+#             config.add_route(graph_route, graph_url)    
+#  
         config.add_view(self.view_syntax, context=ResourceThingViewSyntax, renderer='visualization/syntax.jinja2')
             
         # these are images view for which the only change is the jinja2 template
@@ -60,8 +60,8 @@ class AppVisualization():
         make_relative = lambda _: self.make_relative(e.request, _)
         res = generate_view_syntax(e.library_name, e.library, e.thing_name, e.spec, make_relative)
         add_other_fields(self, res, e.request, e.context)
-        url_edit0 = ("/shelves/%s/libraries/%s/%s/%s/views/edit_fancy/" %  
-                    (e.shelf_name, e.library_name, e.spec.url_part, e.thing_name))
+        url_edit0 = ("/repos/%s/shelves/%s/libraries/%s/%s/%s/views/edit_fancy/" %  
+                    (e.repo_name, e.shelf_name, e.library_name, e.spec.url_part, e.thing_name))
         res['url_edit'] = make_relative(url_edit0)
         return res
     

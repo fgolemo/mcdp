@@ -1,5 +1,5 @@
-from mcdp_web.resource_tree import get_from_context, ResourceLibrary,\
-    ResourceShelf, ResourceThings, ResourceThing, ResourceThingView
+from .resource_tree import get_from_context, ResourceLibrary, ResourceShelf, ResourceThings, ResourceThing, ResourceThingView
+from mcdp_web.resource_tree import ResourceRepos, ResourceRepo
 
 
 def cr2e(f):
@@ -19,6 +19,14 @@ class Environment():
         app = WebApp.singleton
         self.app = app
         self.session = app.get_session(request)
+        rrepo = get_from_context(ResourceRepo, context)
+        if rrepo is None:
+            self.repo_name = None
+            self.repo = None
+        else:
+            self.repo_name = rrepo.name
+            self.repo = app.repos[self.repo_name]
+            
         rlibrary = get_from_context(ResourceLibrary, context)
         if rlibrary is None:
             self.library_name = None

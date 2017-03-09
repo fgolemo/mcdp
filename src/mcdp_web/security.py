@@ -89,6 +89,7 @@ class AppLogin():
         if login is not None:
             res['login'] = login
         res['root'] =  self.get_root_relative_to_here(request)
+        res['static'] = res['root'] + '/static'
         return res
 
     def logout(self, request):

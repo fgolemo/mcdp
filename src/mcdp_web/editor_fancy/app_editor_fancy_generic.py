@@ -50,6 +50,8 @@ class AppEditorFancyGeneric():
         
         def go():
             e.spec.write(e.library, e.thing_name, string)
+            print('committing repo on save %s' % e.repo)
+            e.repo.commit(e.user)
             return {'ok': True, 'saved_string': string}
     
         return ajax_error_catch(go)
@@ -141,7 +143,7 @@ class AppEditorFancyGeneric():
             return render_to_response(template, res, request=e.request)
     
         else:
-            path =e.session.librarian.libraries[e.library_name]['path']
+            path = e.session.librarian.libraries[e.library_name]['path']
             source = e.spec.minimal_source_code
             filename = os.path.join(path, 'created', basename)
     
@@ -154,6 +156,8 @@ class AppEditorFancyGeneric():
                 f.write(source)
     
             e.library._update_file_from_editor(filename)
+            print('committing %s' % e.repo)
+            e.repo.commit(e.user)
     
             raise HTTPFound(url_edit)
 

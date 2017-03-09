@@ -60,10 +60,14 @@
 
 <!--<p><button id='show-available'>Show available libraries</button></p>-->
 <ul>
-<li><a class='button' href='{{root}}/shelves/'>Activate/deactivate shelves</a></li>
-<li><a class='button' href='{{root}}/libraries/'>Currently available libraries</a></li>
+<!-- <li><a class='button' href='{{root}}/shelves/'>Activate/deactivate shelves</a></li> -->
+<li>
+{% for repo_name in navigation.repos %}
+<a href="{{root}}/repos/{{repo_name}}/shelves/">{{repo_name}}</a>
+    <!-- <a class='button' href='{{root}}/repos/'>Currently available repositories</a></li> -->
+{% endfor %}
 </ul>
- 
+
 
 
 </div>

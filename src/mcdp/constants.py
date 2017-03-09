@@ -148,7 +148,7 @@ class MCDPConstants():
     library_extension = 'mcdplib'
     
     all_extensions = (ext_ndps, ext_posets, ext_values, ext_templates, ext_primitivedps,
-                      ext_explanation1, ext_explanation2, ext_doc_md) + MCDPConstants.exts_images
+                      ext_explanation1, ext_explanation2, ext_doc_md) + exts_images
 
     repo_prefix = 'mcdpr:'
     
