@@ -49,9 +49,16 @@ class Resource(object):
         if isinstance(name,unicode):
             name = name.encode('utf-8')
         self.name = name
+        self.subs = None
         
     def getitem(self, key):  # @UnusedVariable
         return None
+    
+    def __iter__(self):
+        if self.subs is not None:
+            return sorted(self.subs).__iter__()
+        print('iter not implemented for %s' % type(self).__name__)
+        return [].__iter__()
     
     def __repr__(self):
         if self.name is None:
@@ -115,13 +122,10 @@ class MCDPResourceRoot(Resource):
         else:
             self.__acl__.append((Allow, Authenticated, PRIVILEGE_ACCESS))
             #logger.info('Allowing authenticated to access')
-    
-    def getitem(self, key):
-        subs =  {
+        self.subs =  {
+            'tree': ResourceTree(),
             'repos': ResourceRepos(),
-#             'libraries': ResourceLibraries(),
             'changes': ResourceChanges(),
-#             'shelves': ResourceShelves(),
             'exceptions': ResourceExceptionsJSON(),
             'exceptions_formatted': ResourceExceptionsFormatted(),
             'refresh': ResourceRefresh(),
@@ -130,8 +134,14 @@ class MCDPResourceRoot(Resource):
             'logout': ResourceLogout(),
             'robots.txt': ResourceRobots(),
         }    
-        return subs.get(key, None)
-            
+        
+    def getitem(self, key):
+        return self.subs.get(key, None)
+    
+    def __iter__(self):
+        return self.subs.__iter__()
+
+class ResourceTree(Resource): pass            
 class ResourceExit(Resource): pass
 class ResourceLogin(Resource): pass
 class ResourceLogout(Resource): pass
@@ -158,22 +168,23 @@ class ResourceLibrariesNewLibname(Resource):
 class ResourceLibraries(Resource): 
     
     def getitem(self, key):
-        subs =  {
+        subs = {
             ':new': ResourceLibrariesNew(),
         }    
         if key in subs: return subs[key]
         
         libname = key
-        session = self.get_session()
-        shelfname = session.get_shelf_for_libname(libname)
-    
-        r1 = ResourceShelf(shelfname)
-        r1.__parent__ = self
-        r2 = ResourceLibrary(libname)
-        r2.__parent__ = r1
+#         session = self.get_session()
+#         shelfname = session.get_shelf_for_libname(libname)
+#     
+#         r1 = ResourceShelf(shelfname)
+#         r1.__parent__ = self
+#         r2 = ResourceLibrary(libname)
+#         r2.__parent__ = r1
+#         return r2
+#     
+        return ResourceLibrary(libname)
         
-        
-        return r2
 
 class ResourceShelf(Resource): 
         

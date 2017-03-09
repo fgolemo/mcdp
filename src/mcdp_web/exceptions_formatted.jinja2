@@ -3,7 +3,7 @@
 <head>
     <title>List of exceptions</title>
     {% include 'head.jinja2' %}
-    
+
 </head>
 <body>
 
@@ -17,7 +17,7 @@
 </style>
 
 {% if exceptions | length == 0 %}
-	<p>No exceptions were generated. </p>	
+	<p>No exceptions were generated. </p>
 {% else %}
 	<p>These are the exceptions obtained so far (most recent first):</p>
 {% endif %}
@@ -26,7 +26,7 @@
 <pre class='exception'>{{e}}</pre>
 {% endfor %}
 
-{% if url_refresh %}
+{% if url_refresh is defined %}
 <p> If the problem is that something is not found
 because of stale caches, <a href='{{url_refresh}}'>try to refresh the library</a>.
 {% endif %}

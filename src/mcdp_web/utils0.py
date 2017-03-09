@@ -57,23 +57,26 @@ def add_other_fields(self, res, request, context):
     def can_admin(sname):
         return shelf_privilege(sname, PRIVILEGE_ADMIN)
   
-  
+    def shelf_subscribed(_):
+        return _ in e.user.subscriptions
+    
     res['shelf_can_read'] = can_read
     res['shelf_can_write'] = can_write           
     res['shelf_can_subscribe'] = can_subscribe
-    res['shelf_can_admin'] = can_admin           
+    res['shelf_can_admin'] = can_admin
+    res['shelf_subscribed'] = shelf_subscribed           
     
-    def library_url(library_name):
-        if library_name is None:
+    def library_url(_):
+        if _ is None:
             msg = 'library_name = None'
             raise ValueError(msg)
         if e.shelf_name is None:
             msg = 'shelf_name is not set'
             raise ValueError(msg)
-        return e.root + '/repos/' + e.repo_name + '/shelves/' + e.shelf_name + '/libraries/' + library_name
+        return e.root + '/repos/' + e.repo_name + '/shelves/' + e.shelf_name + '/libraries/' + _
         
     res['library_url'] = library_url
-    res['shelf_url'] = lambda shelf_name: e.root  + '/repos/' + e.repo_name + '/shelves/' + shelf_name 
+    res['shelf_url'] = lambda _: e.root  + '/repos/' + e.repo_name + '/shelves/' + _ 
     res['static'] = e.root + '/static'
     
     res['icon_repo'] = '&#9730;'

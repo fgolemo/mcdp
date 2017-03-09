@@ -38,7 +38,7 @@ class AppLogin():
         res['login_form'] = self.make_relative(request, URL_LOGIN)
         res['url_logout'] = self.make_relative(request, URL_LOGOUT)
         res['root'] =  self.get_root_relative_to_here(request)
-        
+        res['static'] = {}
         if context is not None:
             res['context_detail'] =  context_display_in_detail(context)
             logger.error(res['context_detail'])

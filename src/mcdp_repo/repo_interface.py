@@ -5,13 +5,11 @@ from contracts import contract
 from git import RemoteProgress
 from git import Repo
 
-from mcdp.constants import MCDPConstants
+from mcdp import MCDPConstants
 from mcdp.logs import logger
-from mcdp_shelf.shelves import find_shelves
-from mcdp_user_db.user import UserInfo
-from mcdp_utils_misc.dir_from_package_nam import dir_from_package_name
-from mcdp_utils_misc.fileutils import create_tmpdir
-
+from mcdp_shelf import find_shelves
+from mcdp_user_db import UserInfo
+from mcdp_utils_misc import create_tmpdir, dir_from_package_name
 
 
 class RepoException(Exception):
@@ -246,6 +244,7 @@ class MCDPGitRepo(MCDPRepo):
             if not 'thing_name' in res or not 'shelf_name' in res or not 'library_name' in res:
                 print('skipping %s' % res)
             else:
+                print('change: %s' % res)
                 self.changes.append(res)
             
     def get_changes(self):
@@ -286,6 +285,9 @@ class MCDPGitRepo(MCDPRepo):
             
         message = ''
         commit = repo.index.commit(message, author=author)
+        
+        repo.remotes.origin.push()
+        
         self._note_commit(commit)
         
     def push(self):

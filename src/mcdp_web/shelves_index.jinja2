@@ -8,7 +8,6 @@
 
 </head>
 <body>
-    <!-- /*<style> body { display: none; } </style>*/ -->
 
 {% include 'model_views_navigation.jinja2' %}
 
@@ -30,7 +29,6 @@
         </tr>
     </thead>
     {% for shelf_name, shelf in navigation.shelves_available.items() %}
-
         {{shelf_row(shelf_name, shelf)}}
         {% if shelf_can_read(shelf_name) %}
         <tr style='display:none' id="contents-{{shelf_name}}">
@@ -52,7 +50,6 @@
              </td>
         </tr>
         {% endif %}
-
         <script>setup("{{shelf_name}}");</script>
 {% endfor %}
 </table>

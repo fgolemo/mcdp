@@ -2,7 +2,15 @@
 
 {% set shelf_used = shelf_name in navigation.shelves_used %}
 <tr class={% if shelf_used %}"used"{%else%}"unused"{%endif%}>
-<td><a href="{{shelf_url(shelf_name)}}">{{icon_shelf|safe}} <code>{{shelf_name}}<code></a></td>
+<td>
+
+{%if shelf_subscribed(shelf_name)%}
+<a href="{{shelf_url(shelf_name)}}">{{icon_shelf|safe}} <code>{{shelf_name}}<code></a>
+    {% else %}
+    {{icon_shelf|safe}} <code>{{shelf_name}}
+{% endif %}
+
+    </td>
  <td class="permissions">
      <span title="admin">{% if shelf_can_admin(shelf_name) %}🔐{%endif%}</span>
      <span title="read">{% if shelf_can_read(shelf_name) %}👀{%endif%}</span>
@@ -32,8 +40,11 @@
     {% endif %}
     </td>
 {% else %}
-    <td colspan=2>unavailable to you</td>
-
+<td colspan=2>
+{% if not shelf_subscribed(shelf_name) %}
+    unavailable to you
+{% endif %}
+</td>
 {% endif %}
 
 

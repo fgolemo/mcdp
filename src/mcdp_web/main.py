@@ -31,7 +31,7 @@ from mcdp_user_db import UserDB
 from mcdp_user_db.user import UserInfo
 from mcdp_utils_misc import duration_compact, dir_from_package_name
 from mcdp_web.environment import cr2e
-from mcdp_web.resource_tree import ResourceChanges
+from mcdp_web.resource_tree import ResourceChanges, ResourceTree
 
 from .confi import describe_mcdpweb_params, parse_mcdpweb_params_from_dict
 from .editor_fancy import AppEditorFancyGeneric
@@ -168,6 +168,23 @@ class WebApp(AppVisualization, AppStatus,
             'changes': self._get_changes(e),
         }
  
+    @add_std_vars_context
+    @cr2e
+    def view_tree(self, e):
+        root = MCDPResourceRoot(e.request)
+        
+        def get_pages(node, prefix):
+            print node, prefix
+            for child in node:
+                yield "/".join(prefix + (child,))
+                for _ in get_pages(node[child], prefix + (child,)):
+                    yield _
+                    
+        
+        pages = list( get_pages(node=root, prefix=()))
+        print pages
+        return {'pages': pages}
+        
     @add_std_vars_context
     @cr2e
     def view_shelf(self, e):
@@ -457,6 +474,7 @@ class WebApp(AppVisualization, AppStatus,
         config.add_view(self.view_dummy, context=ResourceLibrary, renderer='library_index.jinja2', permission=PRIVILEGE_READ)
         config.add_view(self.view_dummy, context=ResourceShelves, renderer='shelves_index.jinja2')
         config.add_view(self.view_changes, context=ResourceChanges, renderer='changes.jinja2')
+        config.add_view(self.view_tree, context=ResourceTree, renderer='tree.jinja2')
         
         config.add_view(self.view_shelf_library_new, context=ResourceLibrariesNewLibname)
         config.add_view(self.view_shelf, context=ResourceShelf, renderer='shelf.jinja2', permission=PRIVILEGE_READ)
@@ -485,7 +503,7 @@ class WebApp(AppVisualization, AppStatus,
         changes = []
         for id_repo, repo in self.repos.items():   
             for change in repo.get_changes():
-                #print('change: %s' % change)
+                
                 change['repo_name'] = id_repo
                 a = change['author']
                 if a in e.session.app.user_db:
@@ -495,10 +513,10 @@ class WebApp(AppVisualization, AppStatus,
                     u = UserInfo(username=a, name=None, 
                                  password=None, email=None, website=None, affiliation=None, groups=[], subscriptions=[])
                 change['user'] = u
-                change['url'] = '/repos/%s/shelves/%s/libraries/%s/%s/%s/views/syntax/' % (change['repo_name'],
-                                                                                           change['shelf_name'], 
-                                            change['library_name'], change['spec_name'], change['thing_name'])
-                
+                p = '/repos/{repo_name}/shelves/{shelf_name}/libraries/{library_name}/{spec_name}/views/syntax/'
+                change['url'] = p.format(**change)
+
+                print('change: %s url = %s' % (change, change['url']))
                 change['date_human'] =  datetime.datetime.fromtimestamp(change['date']).strftime('%b %d, %H:%M')
                 changes.append(change)
                 

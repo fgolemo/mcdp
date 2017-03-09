@@ -46,6 +46,7 @@ def load_tests_modules():
         import mcdp_figures_tests
         import mcdp_docs_tests
         import mcdp_report_ndp_tests
+        import mcdp_repo_tests
 
         from mocdp.comp.flattening import tests  # @Reimport
         import mcdp_comp_tests

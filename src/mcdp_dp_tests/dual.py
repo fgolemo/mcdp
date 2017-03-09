@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 import warnings
 
-from comptests.registrar import comptest
 from contracts.utils import raise_wrapped
+
+from comptests.registrar import comptest
 from mcdp import logger, MCDPConstants
 from mcdp_dp import NotSolvableNeedsApprox
 from mcdp_dp.dp_transformations import get_dp_bounds
