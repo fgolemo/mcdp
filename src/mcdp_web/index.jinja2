@@ -82,7 +82,17 @@
 <li><a href="/docs/TODO/">TODO</a></li>
 </ul>
 -->
+<h3>Last changes</h3>
+<div class='changes'>
+{%  from 'list_changes.jinja2' import list_changes with context %}
+{{list_changes(changes)}}
+</div>
 
+<style>
+.changes {
+    font-size: smaller;
+}
+</style>
 {% include 'footer.jinja2' %}
 </body>
 </html>

@@ -198,6 +198,13 @@ class MCDPGitRepo(MCDPRepo):
             
         self.url = url
     
+    def get_author(self, git_author):
+        name = git_author.name
+        if name == 'Andrea Censi':
+            return 'andrea'
+        username = git_author.email.split('@')[0]
+        return username
+    
     def _note_commit(self, commit):
         if not commit.parents:
             return
@@ -227,7 +234,7 @@ class MCDPGitRepo(MCDPRepo):
                     if c.endswith('.'+ext):
                         res['spec_name'] = spec_name
                         res['thing_name'] = os.path.splitext(c)[0]
-            author = commit.author.email.split('@')[0]
+            author = self.get_author(commit.author)
             
             res['author'] = author
             res['date'] = commit.authored_date
@@ -274,14 +281,11 @@ class MCDPGitRepo(MCDPRepo):
             repo.index.add(repo.untracked_files)
         
         modified_files = repo.index.diff(None)
-        print 'modified_files', modified_files
         for m in modified_files:
-            print m
             repo.index.add([m.b_path])
             
         message = ''
         commit = repo.index.commit(message, author=author)
-        print('committed: %s' % commit)
         self._note_commit(commit)
         
     def push(self):

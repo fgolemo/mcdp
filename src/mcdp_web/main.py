@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from collections import OrderedDict
+import datetime
 import os
 import sys
 import time
@@ -55,7 +56,6 @@ from .utils.image_error_catch_imp import response_image
 from .utils.response import response_data
 from .utils0 import add_other_fields, add_std_vars_context
 from .visualization.app_visualization import AppVisualization
-import datetime
 
 
 __all__ = [
@@ -160,6 +160,13 @@ class WebApp(AppVisualization, AppStatus,
     @cr2e
     def view_dummy(self, e):  # @UnusedVariable
         return {}
+    
+    @add_std_vars_context
+    @cr2e
+    def view_index(self, e):
+        return {
+            'changes': self._get_changes(e),
+        }
  
     @add_std_vars_context
     @cr2e
@@ -445,7 +452,7 @@ class WebApp(AppVisualization, AppStatus,
         AppLogin.config(self, config)
         AppSolver2.config(self, config)
 
-        config.add_view(self.view_dummy, context=MCDPResourceRoot, renderer='index.jinja2')
+        config.add_view(self.view_index, context=MCDPResourceRoot, renderer='index.jinja2')
         config.add_view(self.view_dummy, context=ResourceLibraries, renderer='list_libraries.jinja2')
         config.add_view(self.view_dummy, context=ResourceLibrary, renderer='library_index.jinja2', permission=PRIVILEGE_READ)
         config.add_view(self.view_dummy, context=ResourceShelves, renderer='shelves_index.jinja2')
@@ -473,21 +480,18 @@ class WebApp(AppVisualization, AppStatus,
 
         app = config.make_wsgi_app()
         return app
-     
-    @add_std_vars_context
-    @cr2e
-    def view_changes(self, e):
-        res = {}
-        res['changes'] = []
+    
+    def _get_changes(self, e):
+        changes = []
         for id_repo, repo in self.repos.items():   
             for change in repo.get_changes():
-                print('change: %s' % change)
+                #print('change: %s' % change)
                 change['repo_name'] = id_repo
                 a = change['author']
                 if a in e.session.app.user_db:
                     u = e.session.app.user_db[a]
                 else:
-                    print('Cannot find user %r' % a )
+                    logger.debug('Cannot find user %r' % a )
                     u = UserInfo(username=a, name=None, 
                                  password=None, email=None, website=None, affiliation=None, groups=[], subscriptions=[])
                 change['user'] = u
@@ -496,9 +500,16 @@ class WebApp(AppVisualization, AppStatus,
                                             change['library_name'], change['spec_name'], change['thing_name'])
                 
                 change['date_human'] =  datetime.datetime.fromtimestamp(change['date']).strftime('%b %d, %H:%M')
-                res['changes'].append(change)
+                changes.append(change)
                 
-        return res
+        return changes
+        
+    @add_std_vars_context
+    @cr2e
+    def view_changes(self, e):
+        return {
+            'changes': self._get_changes(e),
+        } 
     
 
     
