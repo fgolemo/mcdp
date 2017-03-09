@@ -48,22 +48,23 @@ def get_navigation_links_context(e):
     make_relative = lambda _: e.app.make_relative(e.request, _)
 
     if e.library is not None:
-        documents = e.library._list_with_extension(MCDPLibrary.ext_doc_md)
-
-        d['documents'] = []
-        for id_doc in documents:
-            url = make_relative('/libraries/%s/%s.html' % (e.library_name, id_doc))
-            desc = dict(id=id_doc,id_document=id_doc, name=id_doc, url=url, current=False)
-            d['documents'].append(desc)
-
-        d['models'] = []
         
         VIEW_EDITOR = 'views/edit_fancy/'
         VIEW_DELETE = ':delete'
         VIEW_SYNTAX = 'views/syntax/'
         
         library_url = e.app.make_relative(e.request, '/shelves/{shelf_name}/libraries/{library_name}/'.format(**d))
+
+        documents = e.library._list_with_extension(MCDPLibrary.ext_doc_md)
+
+        d['documents'] = []
+        for id_doc in documents:
+            url = library_url + '%s.html' %  id_doc
+            desc = dict(id=id_doc,id_document=id_doc, name=id_doc, url=url, current=False)
+            d['documents'].append(desc)
+
         
+        d['models'] = []
         models = e.library.list_ndps()
         for _ in natural_sorted(models):
             is_current = _ == current_model
@@ -74,7 +75,8 @@ def get_navigation_links_context(e):
             url_delete = url0 + VIEW_DELETE  
              
             name = "Model %s" % _
-            desc = dict(id=_, id_ndp=_, name=name, url=url, url_edit=url_edit, url_delete=url_delete, current=is_current)
+            desc = dict(id=_, id_ndp=_, name=name, url=url, url_edit=url_edit, 
+                        url_delete=url_delete, current=is_current)
             d['models'].append(desc) 
        
         templates = e.library.list_templates()
@@ -141,6 +143,7 @@ def get_navigation_links_context(e):
 
     # just the list of names
     d['libraries'] = []
+    
     libname2desc = {}
     for l in natural_sorted(libraries):
         is_current = l == e.library_name
@@ -154,6 +157,8 @@ def get_navigation_links_context(e):
     indexed = e.session.get_libraries_indexed_by_shelf()
     indexed = [(sup, [libname2desc[_] for _ in l]) 
                for sup, l in indexed]
+    
+    
     d['libraries_indexed'] = indexed 
     
     return d

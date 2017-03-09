@@ -2,12 +2,12 @@ from collections import OrderedDict
 import os
 
 from contracts import contract
+from contracts.utils import raise_desc
 
 from mcdp.logs import logger
 from mcdp_library import Librarian
 from mcdp_shelf import PRIVILEGE_DISCOVER, PRIVILEGE_READ, Shelf
 from mcdp_utils_misc import natural_sorted
-from contracts.utils import raise_desc
 
 
 _ = Shelf
@@ -15,8 +15,9 @@ _ = Shelf
 class Session():
     
     @contract(shelves_all='dict(str:$Shelf)')
-    def __init__(self, request, shelves_all):
+    def __init__(self, app, request, shelves_all):
         ''' dirnames: list of directories where to find shelves '''
+        self.app = app
         self.shelves_all = shelves_all
         self.request = request
         
@@ -30,10 +31,17 @@ class Session():
             logger.debug('login/logout detected')
             self.authenticated_userid = request.authenticated_userid
             self.recompute_available()
-            
-    def get_user(self, username=None):
+    
+    def _get_app(self):
         from mcdp_web.main import WebApp
-        userdb = WebApp.singleton.user_db  # @UndefinedVariable
+        return WebApp.singleton
+    
+    def get_user(self, username=None):
+        ''' Returns a UserInfo struct. It is the user 'anonymous' if no login was given.
+        
+            self.request.authenticated_userid == None == get_user().username == 'anonymous'
+        '''
+        userdb = self.app.user_db  # @UndefinedVariable
         if username is None:
             username = self.request.authenticated_userid 
         if username is not None:
@@ -42,8 +50,8 @@ class Session():
         return user
     
     def save_user(self):
-        from mcdp_web.main import WebApp
-        userdb = WebApp.singleton.user_db  # @UndefinedVariable
+        
+        userdb = self.app.user_db  # @UndefinedVariable
         user = self.get_user()
         userdb.save_user(user.username)
         
@@ -67,11 +75,11 @@ class Session():
             if shelf.get_acl().allowed2(PRIVILEGE_DISCOVER, user):
                 self.shelves_available[sname] = shelf
             else:
-                print('hiding shelf %r from %r' % (sname, user))
+                #print('hiding shelf %r from %r' % (sname, user))
                 print shelf.get_acl()
         
-        print('shelves all: %s' % list(self.shelves_all))
-        print('shelves available: %s' % list(self.shelves_available))
+        #print('shelves all: %s' % list(self.shelves_all))
+        #print('shelves available: %s' % list(self.shelves_available))
 
         for sname in user.get_subscriptions():
             if sname in self.shelves_available:
@@ -88,7 +96,7 @@ class Session():
                 msg += '\n Available: %s' % list(self.shelves_available)
                 logger.error(msg)
 
-        print('shelves used: %s' % list(self.shelves_used))
+        #print('shelves used: %s' % list(self.shelves_used))
     
         self.librarian = Librarian()
         

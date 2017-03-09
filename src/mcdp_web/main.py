@@ -79,7 +79,6 @@ class WebApp(AppVisualization, AppStatus,
             logger.info(msg)
             dirname = default_libraries
 
-
         self.dirname = dirname
  
         AppVisualization.__init__(self)
@@ -133,7 +132,7 @@ class WebApp(AppVisualization, AppStatus,
         token = request.session.get_csrf_token()
         if not token in self.sessions:
             # print('creating new session for token %r' % token)
-            self.sessions[token] = Session(request, shelves_all=self.all_shelves)
+            self.sessions[token] = Session(app=self, request=request, shelves_all=self.all_shelves)
         session = self.sessions[token]
         session.set_last_request(request)
         return session
