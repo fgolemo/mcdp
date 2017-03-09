@@ -19,7 +19,6 @@ from mcdp_lang.parse_interface import (parse_template_refine, parse_poset_refine
                                        parse_ndp_refine)
 from mcdp_lang.suggestions import get_suggestions, apply_suggestions, get_suggested_identifier
 from mcdp_lang.syntax import Syntax
-from mcdp_library import MCDPLibrary
 from mcdp_report.html import ast_to_html
 from mcdp_utils_xml.add_class_and_style import add_class
 from mcdp_utils_xml.images import create_img_png_base64, create_a_to_data
@@ -120,7 +119,7 @@ def load_fragments(library, soup, realpath):
             id_ndp = tag['id'].encode('utf-8')
             source_code = get_source_code(tag)
 
-            basename = '%s.%s' % (id_ndp, MCDPLibrary.ext_ndps)
+            basename = '%s.%s' % (id_ndp, MCDPConstants.ext_ndps)
             res = dict(data=source_code, realpath=realpath)
 
             if basename in library.file_to_contents:
@@ -138,7 +137,7 @@ def load_fragments(library, soup, realpath):
             id_ndp = tag['id'].encode('utf-8')
             source_code = get_source_code(tag)
 
-            basename = '%s.%s' % (id_ndp, MCDPLibrary.ext_posets)
+            basename = '%s.%s' % (id_ndp, MCDPConstants.ext_posets)
             res = dict(data=source_code, realpath=realpath)
 
             if basename in library.file_to_contents:
@@ -156,7 +155,7 @@ def load_fragments(library, soup, realpath):
             id_ndp = tag['id'].encode('utf-8')
             source_code = get_source_code(tag)
 
-            basename = '%s.%s' % (id_ndp, MCDPLibrary.ext_templates)
+            basename = '%s.%s' % (id_ndp, MCDPConstants.ext_templates)
             res = dict(data=source_code, realpath=realpath)
 
             if basename in library.file_to_contents:

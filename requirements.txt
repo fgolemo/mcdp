@@ -25,3 +25,4 @@ decentlogs
 -e git+https://github.com/AndreaCensi/comptests.git@mcdp#egg=comptests
 #numpy
 #matplotlib
+gitpython

@@ -10,6 +10,7 @@ from mcdp_library import MCDPLibrary
 from .image import (get_png_data_model,
                     ndp_template_enclosed, get_png_data_unavailable, get_png_data_poset,
                     get_png_data_syntax_model)
+from mcdp.constants import MCDPConstants
 
 
 Spec = namedtuple('Spec', 
@@ -29,7 +30,7 @@ specs = {}
 
 spec_models = specs['models'] = Spec(url_part='models', 
                                      url_variable='model_name',
-                      extension=MCDPLibrary.ext_ndps,
+                      extension=MCDPConstants.ext_ndps,
                       parse=MCDPLibrary.parse_ndp,
                       parse_expr=Syntax.ndpt_dp_rvalue,
                       parse_refine=parse_ndp_refine,
@@ -42,7 +43,7 @@ spec_models = specs['models'] = Spec(url_part='models',
 
 spec_templates = specs['templates']= Spec(url_part='templates', 
                                           url_variable='template_name',
-                      extension=MCDPLibrary.ext_templates,
+                      extension=MCDPConstants.ext_templates,
                       parse=MCDPLibrary.parse_template,
                       parse_expr=Syntax.template,
                       parse_refine=parse_template_refine,
@@ -55,7 +56,7 @@ spec_templates = specs['templates']= Spec(url_part='templates',
 
 spec_values = specs['values'] = Spec(url_part='values', 
                                      url_variable='value_name',
-                   extension=MCDPLibrary.ext_values,
+                   extension=MCDPConstants.ext_values,
                    parse=MCDPLibrary.parse_constant,
                    parse_expr=Syntax.rvalue,
                    parse_refine=parse_constant_refine,
@@ -68,7 +69,7 @@ spec_values = specs['values'] = Spec(url_part='values',
 
 spec_posets =specs['posets']= Spec(url_part='posets', 
                                    url_variable='poset_name',
-                   extension=MCDPLibrary.ext_posets,
+                   extension=MCDPConstants.ext_posets,
                    parse=MCDPLibrary.parse_poset,
                    parse_expr=Syntax.space,
                    parse_refine=parse_poset_refine,

@@ -77,7 +77,7 @@ class Render(QuickAppBase):
                 docname0 = os.path.split(docname)[-1]
                 logger.info("Using %r rather than %r" % (docname0, docname))
                 docname = docname0
-            suffix =  '.' + MCDPLibrary.ext_doc_md
+            suffix =  '.' + MCDPConstants.ext_doc_md
             if docname.endswith(suffix):
                 docname = docname.replace(suffix, '')
             basename = docname + suffix

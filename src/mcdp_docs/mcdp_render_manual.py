@@ -16,11 +16,11 @@ from compmake.structures import Promise
 from mcdp import logger
 from mcdp_docs.manual_constants import MCDPManualConstants
 from mcdp_docs.minimal_doc import get_minimal_document
-from mcdp_library import MCDPLibrary
 from mcdp_library.stdlib import get_test_librarian
 from mcdp_utils_misc import locate_files
 
 from .manual_join_imp import manual_join
+from mcdp.constants import MCDPConstants
 
 
 def get_manual_contents(srcdir):
@@ -177,7 +177,7 @@ def render_book(libname, docname, generate_pdf, main_file, out_part_basename):
     library.use_cache_dir(d)
 
     l = library.load_library(libname)
-    basename = docname + '.' + MCDPLibrary.ext_doc_md
+    basename = docname + '.' + MCDPConstants.ext_doc_md
     f = l._get_file_data(basename)
     data = f['data']
     realpath = f['realpath']

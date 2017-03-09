@@ -39,19 +39,11 @@ class MCDPLibrary():
     """
 
     # These are all the extensions that we care about
-    ext_ndps = 'mcdp'
-    ext_posets = 'mcdp_poset'
-    ext_values = 'mcdp_value'
-    ext_templates = 'mcdp_template'
-    ext_primitivedps = 'mcdp_primitivedp'
-    ext_explanation1 = 'expl1.md'  # before the model
-    ext_explanation2 = 'expl2.md'  # after the model
-    ext_doc_md = 'md'  # library document
-
+    
     # all the files we look for
-    all_extensions = (ext_ndps, ext_posets, ext_values, ext_templates, ext_primitivedps,
-                      ext_explanation1, ext_explanation2, ext_doc_md) + MCDPConstants.exts_images
-
+    all_extensions = MCDPConstants.all_extensions
+    
+    
     def __init__(self, cache_dir=None, file_to_contents=None, search_dirs=None,
                  load_library_hooks=None):
         """ 
@@ -131,27 +123,27 @@ class MCDPLibrary():
 
     @contract(returns=NamedDP)
     def load_ndp(self, id_ndp, context=None):
-        return self._load_generic(id_ndp, MCDPLibrary.ext_ndps,
+        return self._load_generic(id_ndp, MCDPConstants.ext_ndps,
                                   MCDPLibrary.parse_ndp, context)
 
     @contract(returns=Poset)
     def load_poset(self, id_poset, context=None):
-        return self._load_generic(id_poset, MCDPLibrary.ext_posets,
+        return self._load_generic(id_poset, MCDPConstants.ext_posets,
                                   MCDPLibrary.parse_poset, context)
 
     @contract(returns=ValueWithUnits)
     def load_constant(self, id_poset, context=None):
-        return self._load_generic(id_poset, MCDPLibrary.ext_values,
+        return self._load_generic(id_poset, MCDPConstants.ext_values,
                                   MCDPLibrary.parse_constant, context)
 
     @contract(returns=PrimitiveDP)
     def load_primitivedp(self, id_primitivedp, context=None):
-        return self._load_generic(id_primitivedp, MCDPLibrary.ext_primitivedps,
+        return self._load_generic(id_primitivedp, MCDPConstants.ext_primitivedps,
                                   MCDPLibrary.parse_primitivedp, context)
 
     @contract(returns=TemplateForNamedDP)
     def load_template(self, id_ndp, context=None):
-        return self._load_generic(id_ndp, MCDPLibrary.ext_templates,
+        return self._load_generic(id_ndp, MCDPConstants.ext_templates,
                                   MCDPLibrary.parse_template, context)
 
 
@@ -322,28 +314,28 @@ class MCDPLibrary():
     @contract(returns='set(str)')
     def list_ndps(self):
         """ Returns all models defined in this library with .mcdp files. """
-        return self._list_with_extension(MCDPLibrary.ext_ndps)
+        return self._list_with_extension(MCDPConstants.ext_ndps)
 
     get_models = list_ndps
 
     @contract(returns='set(str)')
     def list_posets(self):
         """ Returns all models defined in this library with .mcdp files. """
-        return self._list_with_extension(MCDPLibrary.ext_posets)
+        return self._list_with_extension(MCDPConstants.ext_posets)
 
     @contract(returns='set(str)')
     def list_primitivedps(self):
         """ Returns all models defined in this library with .mcdp files. """
-        return self._list_with_extension(MCDPLibrary.ext_primitivedps)
+        return self._list_with_extension(MCDPConstants.ext_primitivedps)
 
     @contract(returns='set(str)')
     def list_templates(self):
         """ Returns all models defined in this library with .mcdp files. """
-        return self._list_with_extension(MCDPLibrary.ext_templates)
+        return self._list_with_extension(MCDPConstants.ext_templates)
 
     @contract(returns='set(str)')
     def list_values(self):
-        return self._list_with_extension(MCDPLibrary.ext_values)
+        return self._list_with_extension(MCDPConstants.ext_values)
 
     @contract(ext=str)
     def _list_with_extension(self, ext):
@@ -489,23 +481,23 @@ class MCDPLibrary():
         self.file_to_contents[basename] = res
 
     def write_to_model(self, name, data):
-        basename = '%s.%s' % (name, MCDPLibrary.ext_ndps)
+        basename = '%s.%s' % (name, MCDPConstants.ext_ndps)
         self._write_generic(basename, data)
 
     def write_to_template(self, name, data):
-        basename = '%s.%s' % (name, MCDPLibrary.ext_templates)
+        basename = '%s.%s' % (name, MCDPConstants.ext_templates)
         self._write_generic(basename, data)
 
     def write_to_constant(self, name, data):
-        basename = '%s.%s' % (name, MCDPLibrary.ext_values)
+        basename = '%s.%s' % (name, MCDPConstants.ext_values)
         self._write_generic(basename, data)
 
     def write_to_primitivedp(self, name, data):
-        basename = '%s.%s' % (name, MCDPLibrary.ext_primitivedps)
+        basename = '%s.%s' % (name, MCDPConstants.ext_primitivedps)
         self._write_generic(basename, data)
 
     def write_to_poset(self, name, data):
-        basename = '%s.%s' % (name, MCDPLibrary.ext_posets)
+        basename = '%s.%s' % (name, MCDPConstants.ext_posets)
         self._write_generic(basename, data)
 
     def set_read_only(self, read_only=True):

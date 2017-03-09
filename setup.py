@@ -67,6 +67,8 @@ setup(name=name,
         'bcrypt',
         'waitress',
         'lxml',
+        'junit_xml',
+        'gitpython',
       ],
       # This avoids creating the egg file, which is a zip file, which makes our data
       # inaccessible by dir_from_package_name()

@@ -359,7 +359,7 @@ class WebApp(AppVisualization, AppStatus,
 
         strict = int(request.params.get('strict', '0'))
 
-        filename = '%s.%s' % (document, MCDPLibrary.ext_doc_md)
+        filename = '%s.%s' % (document, MCDPConstants.ext_doc_md)
         f = e.library._get_file_data(filename)
         realpath = f['realpath']
         # read unicode

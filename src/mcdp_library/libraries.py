@@ -6,11 +6,9 @@ from contracts.utils import raise_desc, check_isinstance
 
 from mcdp import MCDPConstants, logger
 from mcdp.exceptions import DPSemanticError
-
+from mcdp_utils_misc import dir_from_package_name, locate_files
 
 from .library import MCDPLibrary
-from mcdp_utils_misc.dir_from_package_nam import dir_from_package_name
-from mcdp_utils_misc.locate_files_imp import locate_files
 
 
 __all__ = [

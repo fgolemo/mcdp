@@ -17,7 +17,7 @@ fn = '../primitivedps.py'
 
 # for func in r.findall(contents):
 for func0 in all_primitivedps_tests:
-    ext = MCDPLibrary.ext_primitivedps
+    ext = MCDPConstants.ext_primitivedps
     func = func0.__name__
     fn = '%s.%s' % (func, ext)
     contents = """

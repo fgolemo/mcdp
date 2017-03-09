@@ -133,8 +133,22 @@ class MCDPConstants():
     log_duplicates = False
 
         
+    ext_ndps = 'mcdp'
+    ext_posets = 'mcdp_poset'
+    ext_values = 'mcdp_value'
+    ext_templates = 'mcdp_template'
+    ext_primitivedps = 'mcdp_primitivedp'
+    ext_doc_md = 'md'  # library document
+    
+    ext_explanation1 = 'expl1.md'  # before the model
+    ext_explanation2 = 'expl2.md'  # after the model
     
     shelf_extension = 'mcdpshelf'
     shelf_desc_file = 'mcdpshelf.yaml'
     library_extension = 'mcdplib'
+    
+    all_extensions = (ext_ndps, ext_posets, ext_values, ext_templates, ext_primitivedps,
+                      ext_explanation1, ext_explanation2, ext_doc_md) + MCDPConstants.exts_images
+
+    repo_prefix = 'mcdpr:'
     

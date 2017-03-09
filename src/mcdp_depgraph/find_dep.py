@@ -2,14 +2,15 @@
 from contracts import contract
 from contracts.utils import raise_desc
 
+from mcdp.constants import MCDPConstants
+from mcdp.exceptions import DPSemanticError
 from mcdp_lang.namedtuple_tricks import (
     isnamedtupleinstance, isnamedtuplewhere)
 from mcdp_lang.parse_actions import parse_wrap
 from mcdp_lang.parts import CDPLanguage
 from mcdp_lang.syntax import Syntax
-from mcdp_library import Librarian, MCDPLibrary
-from mcdp.exceptions import DPSemanticError
-from mcdp_utils_misc.memoize_simple_imp import memoize_simple
+from mcdp_library import Librarian
+from mcdp_utils_misc import memoize_simple
 import networkx as nx
 
 
@@ -75,9 +76,9 @@ class EntryPoset(Entry):
 
 
 types = [
-    (EntryPoset, MCDPLibrary.ext_posets),
-    (EntryTemplate, MCDPLibrary.ext_templates),
-    (EntryNDP, MCDPLibrary.ext_ndps),
+    (EntryPoset, MCDPConstants.ext_posets),
+    (EntryTemplate, MCDPConstants.ext_templates),
+    (EntryNDP, MCDPConstants.ext_ndps),
 ]
 
 class FindDependencies():
@@ -151,13 +152,13 @@ class FindDependencies():
         assert isinstance(s, Entry), s
         if isinstance(s, EntryNDP):
             parse_expr = Syntax.ndpt_dp_rvalue
-            ext = MCDPLibrary.ext_ndps
+            ext = MCDPConstants.ext_ndps
         elif isinstance(s, EntryTemplate):
             parse_expr = Syntax.template
-            ext = MCDPLibrary.ext_templates
+            ext = MCDPConstants.ext_templates
         elif isinstance(s, EntryPoset):
             parse_expr = Syntax.space
-            ext = MCDPLibrary.ext_posets
+            ext = MCDPConstants.ext_posets
         else:
             raise NotImplementedError(s.__repr__())
 

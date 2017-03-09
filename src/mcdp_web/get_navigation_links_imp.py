@@ -1,5 +1,5 @@
+from mcdp.constants import MCDPConstants
 from mcdp.logs import logger
-from mcdp_library import MCDPLibrary
 from mcdp_shelf import PRIVILEGE_WRITE
 from mcdp_utils_misc import natural_sorted
 
@@ -55,7 +55,7 @@ def get_navigation_links_context(e):
         
         library_url = e.app.make_relative(e.request, '/shelves/{shelf_name}/libraries/{library_name}/'.format(**d))
 
-        documents = e.library._list_with_extension(MCDPLibrary.ext_doc_md)
+        documents = e.library._list_with_extension(MCDPConstants.ext_doc_md)
 
         d['documents'] = []
         for id_doc in documents:

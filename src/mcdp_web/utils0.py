@@ -4,9 +4,9 @@ import traceback
 from contracts.utils import check_isinstance, indent
 from pyramid.httpexceptions import HTTPException
 
+from mcdp import MCDPConstants
 from mcdp import logger
 import mcdp
-from mcdp_library import MCDPLibrary
 from mcdp_shelf import PRIVILEGE_SUBSCRIBE, PRIVILEGE_READ,\
     PRIVILEGE_WRITE, PRIVILEGE_ADMIN
 from mcdp_utils_misc import duration_compact
@@ -24,7 +24,7 @@ def add_other_fields(self, res, request, context):
     res['root'] = self.get_root_relative_to_here(request)
     
     def _has_library_doc(document):
-        filename = '%s.%s' % (document, MCDPLibrary.ext_doc_md)
+        filename = '%s.%s' % (document, MCDPConstants.ext_doc_md)
         return e.library.file_exists(filename)
     
     # template functions

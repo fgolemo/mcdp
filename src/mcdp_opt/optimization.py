@@ -4,28 +4,25 @@ import os
 import shutil
 
 from contracts import contract
-from mcdp_dp.dp_limit import Limit
+from reprep import Report
+
+from mcdp import MCDPConstants
+from mcdp.exceptions import mcdp_dev_warning
+from mcdp_dp import Limit
 from mcdp_library import MCDPLibrary
 from mcdp_opt.cachedp import CacheDP
 from mcdp_opt.compare_different_resources import less_resources2
 from mcdp_opt.context_utils import create_context0
 from mcdp_opt.report_utils import get_optim_state_report
-from mcdp_posets import Nat
-from mcdp_posets import NotBounded, Poset, get_types_universe
-from mcdp_posets import PosetProduct
-from mcdp_posets import UpperSet, upperset_project
-from mcdp_posets import express_value_in_isomorphic_space
+from mcdp_posets import Nat, NotBounded, Poset, get_types_universe, PosetProduct, UpperSet, upperset_project, express_value_in_isomorphic_space
 from mcdp_report import my_gvgen
 from mcdp_report.gg_utils import gg_figure
+from mcdp_utils_misc import memoize_simple
 from mocdp.comp.composite import CompositeNamedDP
 from mocdp.comp.context import CResource, get_name_for_fun_node
 from mocdp.comp.interfaces import NotConnected
 from mocdp.comp.wrap import SimpleWrap, dpwrap
-from mcdp.exceptions import mcdp_dev_warning
-from mcdp_utils_misc.memoize_simple_imp import memoize_simple
 import networkx as nx
-from reprep import Report
-from mcdp.constants import MCDPConstants
 
 
 _ = UpperSet, CResource, Poset
