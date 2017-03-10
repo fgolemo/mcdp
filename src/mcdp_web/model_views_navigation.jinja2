@@ -4,8 +4,9 @@
 
 <style type='text/css'>
 
-	#select_view { width: 18em; }
-	#select_model { width: 18em; }
+	/*#select_view { width: 18em; }
+	#select_model { width: 18em; }*/
+	/*#back_to_shelf, #select_shelf { width: 18em;}*/
 
 	#back_to_library, #select_view, #select_model-button {
 		/*height: 1.5em !important;*/
@@ -26,7 +27,7 @@
 		margin-top: 2em;
 	}
 
-	#back_to_shelf, #select_shelf { width: 18em;}
+
 </style>
 
 
@@ -49,7 +50,7 @@
 		{% endif %}
 
 		{% if navigation.shelf_name %}
-		<a id='shelves_list' style='visibility: hidden'
+		/ <a id='shelves_list' style='visibility: hidden'
 		href="{{root}}/repos/{{navigation.repo_name}}/shelves/">
 			{{icon_repo|safe}} {{navigation.repo_name}}</a>
 		<script type='text/javascript'>
@@ -61,7 +62,7 @@
 		{% endif %}
 
 		{% if navigation.library_name %}
-		<a id='back_to_shelf' style='visibility: hidden'
+		/ <a id='back_to_shelf' style='visibility: hidden'
 		href="{{shelf_url(navigation.shelf_name)}}/">
 			<!-- <span class='unicode-icons'>⟲</span> -->
 			 <span class="shelf_name">
@@ -90,23 +91,8 @@
 	{% endif %}
 
 
-	<!-- {% if navigation.library_name and not navigation['current_thing'] %}
-	  <select id='select_library' class='hot_select'>
-	  	<option value="#"  selected = 1>{{icon_library|safe}}&nbsp;{{navigation.library_name}}</option>
 
-		{% for sup, sup_libraries in navigation['libraries_indexed'] %}
-		    {% for li in sup_libraries %}
-		    <option name='{{li['name']}}' value="{{li['url']}}">
-		    	📖&nbsp; {{sup}} / {{li['name']}}
-		    </option>
-		    {% endfor %}
-
-		{% endfor %}
-
-	  </select>
-	 {% endif %} -->
-
-	 {% if navigation.library_name and not navigation['current_thing'] %}
+	 {% if navigation.library_name and not navigation.thing_name %}
  	  <select id='select_library' class='hot_select'>
  	  	<option value="#"  selected = 1>{{icon_library|safe}}&nbsp;{{navigation.library_name}}</option>
 
@@ -120,8 +106,8 @@
  	  </select>
  	 {% endif %}
 
-	 {% if navigation.library_name and navigation['current_thing'] %}
-	 	<a id='back_to_library' style='visibility: hidden'
+	 {% if navigation.library_name and navigation.thing_name %}
+	 	/ <a id='back_to_library' style='visibility: hidden'
 		href="{{library_url(navigation.library_name)}}/">
 	 		<!-- <span class='unicode-icons'>⟲</span> -->
 	 		 <span class="library_name">
@@ -145,7 +131,7 @@
 	  <td>
 
 		  {% if navigation.current_library %}
-	  <select id='select_model' class='hot_select'>
+	  / <select id='select_model' class='hot_select'>
 	  	{% if not navigation['current_model'] and not navigation['current_template']
 	  		and not navigation['current_poset'] %}
 

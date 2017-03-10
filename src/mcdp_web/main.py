@@ -19,23 +19,22 @@ from pyramid.security import NO_PERMISSION_REQUIRED
 from pyramid.session import SignedCookieSessionFactory
 from quickapp import QuickAppBase
 
+from mcdp import MCDPConstants
 from mcdp import logger
-from mcdp.constants import MCDPConstants
 from mcdp.exceptions import DPSemanticError, DPSyntaxError
 from mcdp_docs import render_complete
 from mcdp_library import MCDPLibrary
-from mcdp_repo.repo_interface import MCDPGitRepo, MCDPythonRepo
+from mcdp_repo import MCDPGitRepo, MCDPythonRepo
 from mcdp_shelf import PRIVILEGE_ACCESS, PRIVILEGE_READ, find_shelves
 from mcdp_shelf import PRIVILEGE_SUBSCRIBE
 from mcdp_user_db import UserDB
-from mcdp_user_db.user import UserInfo
+from mcdp_user_db import UserInfo
 from mcdp_utils_misc import duration_compact, dir_from_package_name
-from mcdp_web.environment import cr2e
-from mcdp_web.resource_tree import ResourceChanges, ResourceTree
 
 from .confi import describe_mcdpweb_params, parse_mcdpweb_params_from_dict
 from .editor_fancy import AppEditorFancyGeneric
 from .environment import Environment
+from .environment import cr2e
 from .images.images import WebAppImages, get_mime_for_format
 from .interactive.app_interactive import AppInteractive
 from .qr.app_qr import AppQR
@@ -46,7 +45,7 @@ from .resource_tree import MCDPResourceRoot, ResourceLibraries,\
     ResourceShelvesShelfUnsubscribe, ResourceShelvesShelfSubscribe,\
     ResourceExceptionsFormatted, ResourceExceptionsJSON, ResourceShelf, ResourceLibrariesNewLibname,\
     Resource,\
-    context_display_in_detail, ResourceShelfInactive, ResourceThingDelete
+context_display_in_detail, ResourceShelfInactive, ResourceThingDelete, ResourceChanges, ResourceTree, ResourceThing
 from .security import AppLogin, groupfinder
 from .sessions import Session
 from .solver.app_solver import AppSolver
@@ -134,7 +133,7 @@ class WebApp(AppVisualization, AppStatus,
             self.user_db = UserDB(self.options.users)            
             self.repos['db'] = MCDPGitRepo(where=self.options.users)
 
-        for id_repo, repo in self.repos.items():
+        for _id_repo, repo in self.repos.items():
             user_shelves = repo.get_shelves()
             self.all_shelves.update(user_shelves)
         
@@ -174,15 +173,14 @@ class WebApp(AppVisualization, AppStatus,
         root = MCDPResourceRoot(e.request)
         
         def get_pages(node, prefix):
-            print node, prefix
+            
             for child in node:
                 yield "/".join(prefix + (child,))
                 for _ in get_pages(node[child], prefix + (child,)):
                     yield _
                     
-        
-        pages = list( get_pages(node=root, prefix=()))
-        print pages
+        pages = list(get_pages(node=root, prefix=()))
+        pages = [(_, len(_.split('/'))) for _ in pages]
         return {'pages': pages}
         
     @add_std_vars_context
@@ -280,7 +278,7 @@ class WebApp(AppVisualization, AppStatus,
             'url': url,
              'referrer': referrer,
              'root': e.root,
-             'static': 'static-not-given',
+             'static': e.root + '/static',
         }
 
         return res
@@ -492,12 +490,21 @@ class WebApp(AppVisualization, AppStatus,
         config.add_view(self.view_exceptions_occurred, context=ResourceExceptionsFormatted, renderer='exceptions_formatted.jinja2', permission=NO_PERMISSION_REQUIRED)
         config.add_view(self.view_dummy, context=ResourceShelfInactive, renderer='shelf_inactive.jinja2')
         config.add_view(self.view_thing_delete, context=ResourceThingDelete)
+        config.add_view(self.view_thing, context=ResourceThing)
         config.add_view(serve_robots, context=ResourceRobots, permission=NO_PERMISSION_REQUIRED)
         config.add_notfound_view(self.view_not_found, renderer='404.jinja2')
         config.scan()
 
         app = config.make_wsgi_app()
         return app
+    
+    @cr2e
+    def view_thing(self, e):
+        url = e.request.url
+        if not url.endswith('/'):
+            url += '/'
+        url2 = url + 'views/syntax/'
+        raise HTTPFound(url2)
     
     def _get_changes(self, e):
         changes = []

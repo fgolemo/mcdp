@@ -1,18 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Library {{navigation['current_library']}}</title>
+    <title>Resource tree</title>
     {% include 'head.jinja2' %}
     <style>{% include 'library_index.css' %}</style>
     <script>{% include 'library_index.js' %}</script>
 </head>
 <body>
-
-<ul>
-    {% for page in pages %}
-    <li> <a href="{{page}}">{{page}}</a></li>
+<style>
+p.one {
+    margin: 0;
+}
+</style>
+    {% for page, level in pages %}
+    <p class='one' style='padding-left: {{level}}em'> <a href="{{page}}">{{page}}</a></p>
     {% endfor %}
-</ul>
+
 {% include 'footer.jinja2' %}
 </body>
 </html>

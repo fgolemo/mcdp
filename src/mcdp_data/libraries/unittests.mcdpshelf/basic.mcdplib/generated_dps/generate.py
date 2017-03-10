@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import re
-from mcdp_library.library import MCDPLibrary
-
+from mcdp_library import MCDPLibrary
+from mcdp import MCDPConstants
 from mcdp_dp_tests.primitivedps import all_primitivedps_tests
 
 fn = '../primitivedps.py'

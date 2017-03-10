@@ -74,6 +74,13 @@ def add_other_fields(self, res, request, context):
             msg = 'shelf_name is not set'
             raise ValueError(msg)
         return e.root + '/repos/' + e.repo_name + '/shelves/' + e.shelf_name + '/libraries/' + _
+    
+    def thing_url(t):
+        url = '/repos/{repo_name}/shelves/{shelf_name}/libraries/{library_name}/{spec_name}/%s' % t
+        url = e.root + url.format(**e.__dict__)
+        return url
+    
+    res['thing_url'] = thing_url
         
     res['library_url'] = library_url
     res['shelf_url'] = lambda _: e.root  + '/repos/' + e.repo_name + '/shelves/' + _ 

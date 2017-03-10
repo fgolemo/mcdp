@@ -1,9 +1,15 @@
+from pyramid.httpexceptions import HTTPFound
+
+from .resource_tree import ResourceRepo
 from .resource_tree import get_from_context, ResourceLibrary, ResourceShelf, ResourceThings, ResourceThing, ResourceThingView
-from mcdp_web.resource_tree import ResourceRepos, ResourceRepo
 
 
 def cr2e(f):
     def f2(self, context, request):
+        url = request.url
+        if not url.endswith('/'):
+            url2 = url + '/'
+            raise HTTPFound(url2)
         e = Environment(context, request)
         res = f(self, e)
         return res

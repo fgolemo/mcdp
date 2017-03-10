@@ -43,21 +43,27 @@ from pyramid.security import Allow, Authenticated, Everyone
 from mcdp_shelf.access import PRIVILEGE_ACCESS
 
 
+
 class Resource(object):
     
     def __init__(self, name=None):
         if isinstance(name,unicode):
             name = name.encode('utf-8')
         self.name = name
-        self.subs = None
+        
+    def get_subs(self):
+        print('iter not implemented for %s' % type(self).__name__)
+        return None
         
     def getitem(self, key):  # @UnusedVariable
-        return None
+        subs = self.get_subs()
+        return subs.get(key, None)
+     
     
     def __iter__(self):
-        if self.subs is not None:
-            return sorted(self.subs).__iter__()
-        print('iter not implemented for %s' % type(self).__name__)
+        subs = self.get_subs()
+        if subs is not None:
+            return sorted(subs).__iter__()
         return [].__iter__()
     
     def __repr__(self):
@@ -122,7 +128,9 @@ class MCDPResourceRoot(Resource):
         else:
             self.__acl__.append((Allow, Authenticated, PRIVILEGE_ACCESS))
             #logger.info('Allowing authenticated to access')
-        self.subs =  {
+            
+    def get_subs(self):
+        return {
             'tree': ResourceTree(),
             'repos': ResourceRepos(),
             'changes': ResourceChanges(),
@@ -135,12 +143,7 @@ class MCDPResourceRoot(Resource):
             'robots.txt': ResourceRobots(),
         }    
         
-    def getitem(self, key):
-        return self.subs.get(key, None)
     
-    def __iter__(self):
-        return self.subs.__iter__()
-
 class ResourceTree(Resource): pass            
 class ResourceExit(Resource): pass
 class ResourceLogin(Resource): pass
@@ -150,7 +153,15 @@ class ResourceChanges(Resource): pass
 class ResourceShelves(Resource):
     def getitem(self, key):
         return ResourceShelf(key)
-
+    
+    def __iter__(self):
+        session = self.get_session()
+        repos = session.repos
+        repo_name = self.__parent__.name
+        repo = repos[repo_name]
+        shelves = repo.get_shelves()
+        return list(shelves).__iter__()
+    
 
 class ResourceShelvesShelfSubscribe(Resource): pass
 class ResourceShelvesShelfUnsubscribe(Resource): pass
@@ -173,17 +184,13 @@ class ResourceLibraries(Resource):
         }    
         if key in subs: return subs[key]
         
-        libname = key
-#         session = self.get_session()
-#         shelfname = session.get_shelf_for_libname(libname)
-#     
-#         r1 = ResourceShelf(shelfname)
-#         r1.__parent__ = self
-#         r2 = ResourceLibrary(libname)
-#         r2.__parent__ = r1
-#         return r2
-#     
+        libname = key 
         return ResourceLibrary(libname)
+    
+    def __iter__(self):
+        shelf = context_get_shelf(self)
+        libraries = sorted(shelf.get_libraries_path())
+        return libraries.__iter__()
         
 
 class ResourceShelf(Resource): 
@@ -193,6 +200,9 @@ class ResourceShelf(Resource):
         session = self.get_session()
         shelf = session.get_shelf(self.name)
         return shelf.get_acl().as_pyramid_acl()
+        
+    def __iter__(self):
+        return ['libraries'].__iter__()
         
     def getitem(self, key):
         subs =  {
@@ -212,23 +222,29 @@ class ResourceShelf(Resource):
 class ResourceShelfInactive(Resource):
     def getitem(self, key):  # @UnusedVariable
         return self
-    
-#         return ResourceLibrariesInaccessibleLibrary(key)
-# 
-# class ResourceLibrariesInaccessibleLibrary(Resource):
-#     def getitem(self, key):
-#         return self
-#        return ResourceLibrary(key)
+  
+
 class ResourceRepos(Resource):
     def getitem(self, key):
         return ResourceRepo(key)
         
+    def __iter__(self):
+        session = self.get_session()
+        repos = list(session.repos)
+        return list(repos).__iter__()
+    
+    
 class ResourceRepo(Resource):
-    def getitem(self, key):
-        if key == 'shelves':
-            return ResourceShelves()
+    def get_subs(self):
+        return {'shelves':ResourceShelves()}
     
 class ResourceLibrary(Resource): 
+    
+    def __iter__(self):
+        from mcdp_web.editor_fancy.specs_def import specs
+        options = list(specs)
+        options.append('interactive')
+        return options.__iter__()
     
     def getitem(self, key):
         if key == 'refresh_library':
@@ -266,6 +282,13 @@ class ResourceThings(Resource):
         Resource.__init__(self, specname)
         self.specname = self.name
         
+    def __iter__(self):
+        library = context_get_library(self)
+        print library
+        spec = context_get_spec(self)
+        x = library._list_with_extension(spec.extension)
+        return x.__iter__()
+        
     def getitem(self, key):
         if key == 'new': return ResourceThingsNewBase()
         return ResourceThing(key)
@@ -282,6 +305,9 @@ class ResourceThingsNew(Resource): pass
 
 class ResourceThing(Resource): 
     
+    def __iter__(self):
+        return ['views'].__iter__()
+    
     def getitem(self, key):
         subs =  {
             'views': ResourceThingViews(),
@@ -293,11 +319,17 @@ class ResourceThingDelete(Resource):
     pass
 
 class ResourceThingViews(Resource):
+    
+    def __iter__(self):
+        options = ['syntax', 'edit_fancy']
+        if self.__parent__.__parent__.specname == 'models':
+            options.extend(['dp_graph', 'dp_tree', 'ndp_graph', 'ndp_repr', 'solver2', 'images', 'solver'])
+        return options.__iter__()
+    
     def getitem(self, key):
         subs =  {
             'syntax': ResourceThingViewSyntax(),
             'edit_fancy': ResourceThingViewEditor(),
-            
         }
         if self.__parent__.__parent__.specname == 'models':
             subs2 = {
@@ -411,8 +443,31 @@ def get_from_context(rclass, context):
 def is_in_context(rclass, context):
     return get_from_context(rclass, context) is not None
 
-# def context_get_shelf_name(context):
-#     return get_from_context(ResourceShelf, context).name
+def context_get_shelf_name(context):
+    return get_from_context(ResourceShelf, context).name
+
+def context_get_repo_name(context):
+    return get_from_context(ResourceRepo, context).name
+
+def context_get_repo(context):
+    session = context.get_session()
+    repo_name = context_get_repo_name(context)
+    repo = session.repos[repo_name]
+    return repo
+
+def context_get_shelf(context):
+    repo = context_get_repo(context)
+    shelf_name = context_get_shelf_name(context)
+    shelf = repo.get_shelves()[shelf_name]
+    return shelf
+
+def context_get_library(context):
+#     shelf = context_get_shelf(context)
+    library_name = context_get_library_name(context)
+#     library = shelf.get_libraries_path()[library_name]
+    session = context.get_session()
+    library = session.get_library(library_name)
+    return library
 #     
 # def context_get_shelf(context, request):
 #     shelf_name = context_get_shelf_name(context)
@@ -421,9 +476,9 @@ def is_in_context(rclass, context):
 #     session = app.get_session(request)
 #     return session.get_shelf(shelf_name)
 # 
-# def context_get_library_name(context):
-#     library_name = get_from_context(ResourceLibrary, context).name
-#     return library_name
+def context_get_library_name(context):
+    library_name = get_from_context(ResourceLibrary, context).name
+    return library_name
 
 # def context_get_library(context, request):
 #     from mcdp_web.main import WebApp
@@ -432,12 +487,12 @@ def is_in_context(rclass, context):
 #     library_name = context_get_library_name(context)
 #     library = session.get_library(library_name)
 #     return library
-# 
-# def context_get_spec(context):
-#     from mcdp_web.editor_fancy.app_editor_fancy_generic import specs
-#     specname = get_from_context(ResourceThings, context).specname
-#     spec = specs[specname]
-#     return spec
+ 
+def context_get_spec(context):
+    from mcdp_web.editor_fancy.app_editor_fancy_generic import specs
+    specname = get_from_context(ResourceThings, context).specname
+    spec = specs[specname]
+    return spec
 
 # def context_get_widget_name(context):
 #     return get_from_context(ResourceThing, context).name

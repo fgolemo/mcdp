@@ -20,6 +20,7 @@ class Session():
         self.app = app
         self.shelves_all = shelves_all
         self.request = request
+        self.repos = app.repos
         
         self.librarian = Librarian()
         self.authenticated_userid = request.authenticated_userid

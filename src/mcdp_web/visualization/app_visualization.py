@@ -10,15 +10,16 @@ from mcdp_lang.namedtuple_tricks import recursive_print
 from mcdp_lang.parts import CDPLanguage
 from mcdp_lang.utils_lists import unwrap_list
 from mcdp_report.html import ast_to_html
+from mcdp_utils_xml import add_style
 from mcdp_utils_xml import to_html_stripping_fragment, bs
-from mcdp_utils_xml.add_class_and_style import add_style
 from mcdp_web.editor_fancy.app_editor_fancy_generic import specs
 from mcdp_web.environment import cr2e
 from mcdp_web.resource_tree import ResourceThingViewSyntax,   ResourceThingViewNDPGraph,\
     ResourceThingViewDPTree, ResourceThingViewDPGraph, ResourceThingViewNDPRepr
 from mcdp_web.utils0 import add_other_fields, add_std_vars_context
-from mcdp_web.visualization.add_html_links_imp import add_html_links
 from mocdp.comp.context import Context
+
+from .add_html_links_imp import add_html_links
 
 
 class AppVisualization():
@@ -26,19 +27,10 @@ class AppVisualization():
     def __init__(self):
         pass
 
-    def config(self, config):
-#         for s in specs:
-#             url = ('/libraries/{library}/%s/{%s}/views/syntax/' % 
-#                    (specs[s].url_part, specs[s].url_variable)) 
-#             
-#             graph_route = 'visualization_%s_graph' % s
-#             graph_url = url + 'graph.{data_format}'
-#             config.add_route(graph_route, graph_url)    
-#  
+    def config(self, config): 
         config.add_view(self.view_syntax, context=ResourceThingViewSyntax, renderer='visualization/syntax.jinja2')
             
         # these are images view for which the only change is the jinja2 template
-        # image views
         config.add_view(self.view_dummy, context=ResourceThingViewDPGraph, renderer='visualization/model_dp_graph.jinja2')
         config.add_view(self.view_dummy, context=ResourceThingViewDPTree, renderer='visualization/model_dp_tree.jinja2')
         config.add_view(self.view_dummy, context=ResourceThingViewNDPGraph, renderer='visualization/model_ndp_graph.jinja2')
