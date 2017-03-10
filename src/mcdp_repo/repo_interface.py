@@ -2,14 +2,17 @@ from abc import ABCMeta, abstractmethod
 import os
 
 from contracts import contract
+from contracts.utils import raise_desc
 from git import RemoteProgress
 from git import Repo
+from git.remote import Remote
 
 from mcdp import MCDPConstants
 from mcdp.logs import logger
 from mcdp_shelf import find_shelves
 from mcdp_user_db import UserInfo
 from mcdp_utils_misc import create_tmpdir, dir_from_package_name
+from git.util import Actor
 
 
 class RepoException(Exception):
@@ -174,8 +177,11 @@ class MCDPGitRepo(MCDPRepo):
             self.repo.heads.master.checkout()
         else:
             self.repo = Repo(self.where)
-
-            for _fetch_info in self.repo.remotes.origin.fetch(progress=MyProgressPrinter()):
+            origin = Remote(self.repo, 'origin')
+            if not origin.exists():
+                msg = 'The repo already exists but there is no "origin" remote.'
+                raise_desc(ValueError, msg, remotes=list(self.repo.remotes))
+            for _fetch_info in origin.fetch(progress=MyProgressPrinter()):
                 pass
         
         # we have create the working dir
@@ -184,7 +190,7 @@ class MCDPGitRepo(MCDPRepo):
 #             print("Updated %s to %s" % (fetch_info.ref, fetch_info.commit))
         self.shelves = find_shelves(where)
         self.changes = []
-        for commit in self.repo.iter_commits(max_count=20):
+        for commit in self.repo.iter_commits(max_count=10):
             self._note_commit(commit)
             
 #             print('author: %s' % commit.author)
@@ -268,26 +274,10 @@ class MCDPGitRepo(MCDPRepo):
     def checkout(self, where):
         ''' Checks out a local copy for remote repos. '''
     
-    def commit(self, user_info):
-        hostname = 'hostname' # XXX
-        email = '%s@%s' % (user_info.username, hostname)
-        
-        from git import Actor
-        author = Actor(user_info.username, email)
-
-        repo = self.repo
-        if repo.untracked_files: 
-            repo.index.add(repo.untracked_files)
-        
-        modified_files = repo.index.diff(None)
-        for m in modified_files:
-            repo.index.add([m.b_path])
-            
-        message = ''
-        commit = repo.index.commit(message, author=author)
-        
-        repo.remotes.origin.push()
-        
+    def commit(self, user_info, message=''):
+        author = user_info.as_git_actor()
+        commit = repo_commit_all_changes(self.repo, message, author)
+        self.repo.remotes.origin.push()
         self._note_commit(commit)
         
     def push(self):
@@ -295,7 +285,22 @@ class MCDPGitRepo(MCDPRepo):
     
     def pull(self):
         return
+
+def repo_commit_all_changes(repo, message=None, author=None):
+    if author is None:
+        author = Actor("me","me")
+    if message is None:
+        message = ""
+    if repo.untracked_files: 
+        repo.index.add(repo.untracked_files)
+    
+    modified_files = repo.index.diff(None)
+    for m in modified_files:
+        repo.index.add([m.b_path])
         
+    commit = repo.index.commit(message, author=author)
+    return commit
+    
 class MCDPPipRepo(MCDPRepo):
     def __init__(self, url):
         self.url = url

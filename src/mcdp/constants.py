@@ -145,6 +145,9 @@ class MCDPConstants():
     
     shelf_extension = 'mcdpshelf'
     shelf_desc_file = 'mcdpshelf.yaml'
+    
+    user_extension = 'mcdp_user'
+    user_desc_file = 'user.yaml'
     library_extension = 'mcdplib'
     
     all_extensions = (ext_ndps, ext_posets, ext_values, ext_templates, ext_primitivedps,

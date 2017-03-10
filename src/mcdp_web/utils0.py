@@ -2,7 +2,7 @@
 import traceback
 
 from contracts.utils import check_isinstance, indent
-from pyramid.httpexceptions import HTTPException
+from pyramid.httpexceptions import HTTPException, HTTPFound
 
 from mcdp import MCDPConstants
 from mcdp import logger
@@ -111,6 +111,11 @@ def add_other_fields(self, res, request, context):
     
 def add_std_vars_context(f):
     def f0(self, context, request):
+        url = request.url
+        if not url.endswith('/'):
+            url2 = url + '/'
+            raise HTTPFound(url2)
+        
         try:
             res = f(self, context, request)
         except HTTPException:

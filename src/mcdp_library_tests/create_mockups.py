@@ -14,20 +14,23 @@ def create_hierarchy(files0):
         }
     
     """
-    flattened = mockup_flatten(files0)
+    
     mcdp_tmp_dir = get_mcdp_tmp_dir()
     prefix = 'mcdp_library_tests_create_hierarchy'
     d = tempfile.mkdtemp(dir=mcdp_tmp_dir, prefix=prefix)
-    
+    write_hierarchy(d, files0)
+    return d
+
+def write_hierarchy(where, files0):
+    flattened = mockup_flatten(files0)
     for filename, contents in flattened.items():
-        fn = os.path.join(d, filename)
+        fn = os.path.join(where, filename)
         dn = os.path.dirname(fn)
         if not os.path.exists(dn):
             os.makedirs(dn)
         with open(fn, 'w') as f:
             f.write(contents)
-    return d
-
+    
 
 def mockup_flatten(d): 
     '''

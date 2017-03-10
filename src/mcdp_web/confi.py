@@ -3,6 +3,7 @@ from decent_params import DecentParams
 
 
 def describe_mcdpweb_params(dp):
+    dp.add_int('load_mcdp_data', default=0)
     dp.add_int('allow_anonymous', default=1)
     dp.add_bool('allow_user_login', default=True)
     dp.add_bool('allow_user_signups', default=False)

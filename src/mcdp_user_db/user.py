@@ -1,4 +1,5 @@
 from contracts import contract
+from git.util import Actor
 
 
 
@@ -46,6 +47,12 @@ class UserInfo():
             res['gravatar32'] = self.get_gravatar(32)
             
         return res
+    
+    def as_git_actor(self):
+        hostname = 'hostname' # XXX
+        email = '%s@%s' % (self.username, hostname)
+        author = Actor(self.username, email)
+        return author
     
 # name: Andrea Censi
 # email: acensi@ethz.ch

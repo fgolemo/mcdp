@@ -9,6 +9,7 @@ from wsgiref.simple_server import make_server
 
 from contracts import contract
 from contracts.utils import indent
+import git.cmd  # @UnusedImport
 from pyramid.authentication import AuthTktAuthenticationPolicy
 from pyramid.authorization import ACLAuthorizationPolicy
 from pyramid.config import Configurator
@@ -45,7 +46,7 @@ from .resource_tree import MCDPResourceRoot, ResourceLibraries,\
     ResourceShelvesShelfUnsubscribe, ResourceShelvesShelfSubscribe,\
     ResourceExceptionsFormatted, ResourceExceptionsJSON, ResourceShelf, ResourceLibrariesNewLibname,\
     Resource,\
-context_display_in_detail, ResourceShelfInactive, ResourceThingDelete, ResourceChanges, ResourceTree, ResourceThing
+    context_display_in_detail, ResourceShelfInactive, ResourceThingDelete, ResourceChanges, ResourceTree, ResourceThing
 from .security import AppLogin, groupfinder
 from .sessions import Session
 from .solver.app_solver import AppSolver
@@ -62,6 +63,8 @@ __all__ = [
     'app_factory',
 ]
 
+
+git.cmd.log.disabled = True
 
 
 class WebApp(AppVisualization, AppStatus,
@@ -112,29 +115,32 @@ class WebApp(AppVisualization, AppStatus,
         
         # str -> Shelf
         self.all_shelves = OrderedDict()
-        
-        dir_shelves = find_shelves(self.dirname)
-        self.all_shelves.update(dir_shelves)
+#         
+#         dir_shelves = find_shelves(self.dirname)
+#         self.all_shelves.update(dir_shelves)
         
         if self.options.users is None:
             self.options.users = 'tmp-user-db'
             os.makedirs(self.options.users)
 
         self.repos = {}
-        if os.path.exists('.git'):
-            print('Using current db')
-            self.repos['local'] = MCDPGitRepo(where='.')
-            print('loaded')
+        if self.options.load_mcdp_data:
+            if os.path.exists('.git'):
+                logger.info('Loading mcdp_data repo as MCDPGitRepo')
+                self.repos['local'] = MCDPGitRepo(where='.')
+            else:
+                logger.info('Loading mcdp_data repo as MCDPythonRepo')
+                self.repos['local'] = MCDPythonRepo('mcdp_data')
         else:
+            logger.info('Not loading mcdp_data')
             
-            self.repos['local'] = MCDPythonRepo('mcdp_data')
-
         if self.options.users is not None:
             self.user_db = UserDB(self.options.users)            
             self.repos['db'] = MCDPGitRepo(where=self.options.users)
 
-        for _id_repo, repo in self.repos.items():
+        for id_repo, repo in self.repos.items():
             user_shelves = repo.get_shelves()
+            logger.info('%s: %s' % (id_repo, sorted(user_shelves)))
             self.all_shelves.update(user_shelves)
         
         for sname in self.all_shelves:
@@ -295,8 +301,9 @@ class WebApp(AppVisualization, AppStatus,
     def view_exception(self, exc, request):
         request.response.status = 500  # Internal Server Error
 
-        if isinstance(request.context, Resource):
-            logger.debug(context_display_in_detail(request.context))
+        if hasattr(request, 'context'):
+            if isinstance(request.context, Resource):
+                logger.debug(context_display_in_detail(request.context))
             
         import traceback
         compact = (DPSemanticError, DPSyntaxError)

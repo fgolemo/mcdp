@@ -2,14 +2,27 @@ import os
 import yaml
 from mcdp_user_db.user import userinfo_from_yaml, yaml_from_userinfo
 from mcdp.logs import logger
+from mcdp_utils_misc import locate_files
+from mcdp import MCDPConstants
+from contracts.utils import raise_desc
+
+
+__all__ = ['UserDB']
 
 class UserDB():
 
     def __init__(self, userdir):
+        
         self.users = {}
         us = load_users(userdir)
         self.userdir = userdir
         self.users.update(us)
+        
+        from mcdp_shelf.access import USER_ANONYMOUS
+        if not USER_ANONYMOUS in self.users:
+            msg = 'Need account for the anonymous user "%s".' % USER_ANONYMOUS
+            raise_desc(ValueError, msg, found=self.users)
+            
         
     def __contains__(self, key):
         return key in self.users
@@ -27,7 +40,7 @@ class UserDB():
         return password == user.password
     
     def save_user(self, username):
-        filename = os.path.join(self.userdir, username, USER_FILE)
+        filename = os.path.join(self.userdir, username,  MCDPConstants.user_desc_file)
         user = self.users[username]
         y = yaml_from_userinfo(user)
         s = yaml.dump(y)
@@ -36,8 +49,6 @@ class UserDB():
             f.write(s)
             
         
-USER_FILE = 'user.yaml'
-
 def load_users(userdir):
     ''' Returns a dictionary of username -> User profile '''
     users = {}
@@ -46,16 +57,19 @@ def load_users(userdir):
         msg = 'Directory %s does not exist' % userdir
         Exception(msg)
         
-    for user in os.listdir(userdir):
-        if user.startswith('.'):
-            continue
-        info = os.path.join(userdir, user, 'user.yaml')
+    l = locate_files(userdir, pattern='*.%s' % MCDPConstants.user_extension, followlinks=True,
+                 include_directories=True,
+                 include_files=False)
+    print('users: %s' % l)
+    for userd in l:
+        username = os.path.splitext(os.path.basename(userd))[0]
+        info = os.path.join(userdir, userd, MCDPConstants.user_desc_file)
         if not os.path.exists(info):
             msg = 'Info file %s does not exist.'  % info
             raise Exception(msg)
         data = open(info).read()
         s = yaml.load(data)
         
-        users[user] = userinfo_from_yaml(s, user)
+        users[username] = userinfo_from_yaml(s, username)
     return users
         

@@ -57,8 +57,9 @@ class Resource(object):
         
     def getitem(self, key):  # @UnusedVariable
         subs = self.get_subs()
-        return subs.get(key, None)
-     
+        if subs is None:
+            return None
+        return subs.get(key, None)     
     
     def __iter__(self):
         subs = self.get_subs()

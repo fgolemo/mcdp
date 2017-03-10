@@ -13,7 +13,7 @@ p.one {
 }
 </style>
     {% for page, level in pages %}
-    <p class='one' style='padding-left: {{level}}em'> <a href="{{page}}">{{page}}</a></p>
+    <p class='one' style='padding-left: {{level}}em'> <a href="{{root}}/{{page}}">{{page}}</a></p>
     {% endfor %}
 
 {% include 'footer.jinja2' %}

@@ -1,15 +1,8 @@
-from pyramid.httpexceptions import HTTPFound
-
-from .resource_tree import ResourceRepo
-from .resource_tree import get_from_context, ResourceLibrary, ResourceShelf, ResourceThings, ResourceThing, ResourceThingView
+from .resource_tree import ResourceRepo, get_from_context, ResourceLibrary, ResourceShelf, ResourceThings, ResourceThing, ResourceThingView
 
 
 def cr2e(f):
     def f2(self, context, request):
-        url = request.url
-        if not url.endswith('/'):
-            url2 = url + '/'
-            raise HTTPFound(url2)
         e = Environment(context, request)
         res = f(self, e)
         return res
@@ -32,23 +25,23 @@ class Environment():
         else:
             self.repo_name = rrepo.name
             self.repo = app.repos[self.repo_name]
-            
+
         rlibrary = get_from_context(ResourceLibrary, context)
         if rlibrary is None:
             self.library_name = None
             self.library = None
-        else:            
+        else:
             self.library_name = rlibrary.name 
             self.library = self.session.get_library(self.library_name)
-        
+
         rshelf = get_from_context(ResourceShelf, context)
         if rshelf is None:
             self.shelf_name = None
             self.shelf = None
-        else:            
+        else:
             self.shelf_name = rshelf.name 
             self.shelf = self.session.get_shelf(self.shelf_name)
-            
+
         from mcdp_web.editor_fancy.app_editor_fancy_generic import specs
         rspec = get_from_context(ResourceThings, context)
         if rspec is None:
@@ -57,7 +50,7 @@ class Environment():
         else:
             self.spec_name = rspec.specname
             self.spec = specs[self.spec_name]
-    
+
         rthing = get_from_context(ResourceThing, context)
         if rthing is None:
             self.thing_name = None
