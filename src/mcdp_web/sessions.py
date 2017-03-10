@@ -8,6 +8,7 @@ from mcdp.logs import logger
 from mcdp_library import Librarian
 from mcdp_shelf import PRIVILEGE_DISCOVER, PRIVILEGE_READ, Shelf
 from mcdp_utils_misc import natural_sorted
+from mcdp_user_db.user import UserInfo
 
 
 _ = Shelf
@@ -41,12 +42,18 @@ class Session():
         ''' Returns a UserInfo struct. It is the user 'anonymous' if no login was given.
         
             self.request.authenticated_userid == None == get_user().username == 'anonymous'
+            
+            
         '''
         userdb = self.app.user_db  # @UndefinedVariable
         if username is None:
             username = self.request.authenticated_userid 
         if username is not None:
             username = username.encode('utf8')
+        if not username in userdb:
+            user = UserInfo(username, name=username, password=None, email=None, website=None, affiliation=None, 
+                            groups=[], subscriptions=[])
+            return user
         user = userdb[username]
         return user
     

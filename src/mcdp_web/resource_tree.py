@@ -52,7 +52,7 @@ class Resource(object):
         self.name = name
         
     def get_subs(self):
-        print('iter not implemented for %s' % type(self).__name__)
+        #print('iter not implemented for %s' % type(self).__name__)
         return None
         
     def getitem(self, key):  # @UnusedVariable
@@ -76,13 +76,13 @@ class Resource(object):
     def __getitem__(self, key):
         r = self.getitem(key)
         if r is None:
-            print('asked for %r - not found' % key)
+            #print('asked for %r - not found' % key)
             raise KeyError(key)
         
         if not hasattr(r, '__parent__'):
             r.__parent__ = self
         
-        print('asked for %r - returning %r ' % (key, r))
+        #print('asked for %r - returning %r ' % (key, r))
         return r
     
     def show_ancestors(self):

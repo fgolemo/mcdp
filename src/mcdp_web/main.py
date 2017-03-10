@@ -56,6 +56,7 @@ from .utils.image_error_catch_imp import response_image
 from .utils.response import response_data
 from .utils0 import add_other_fields, add_std_vars_context
 from .visualization.app_visualization import AppVisualization
+from mcdp_web.resource_tree import ResourceRepos, ResourceRepo
 
 
 __all__ = [
@@ -115,37 +116,33 @@ class WebApp(AppVisualization, AppStatus,
         
         # str -> Shelf
         self.all_shelves = OrderedDict()
-#         
-#         dir_shelves = find_shelves(self.dirname)
-#         self.all_shelves.update(dir_shelves)
         
         if self.options.users is None:
             self.options.users = 'tmp-user-db'
             os.makedirs(self.options.users)
 
         self.repos = {}
+        REPO_BUNDLED = 'bundled'
+        REPO_USERS = 'global'
         if self.options.load_mcdp_data:
             if os.path.exists('.git'):
                 logger.info('Loading mcdp_data repo as MCDPGitRepo')
-                self.repos['local'] = MCDPGitRepo(where='.')
+                self.repos[REPO_BUNDLED] = MCDPGitRepo(where='.')
             else:
                 logger.info('Loading mcdp_data repo as MCDPythonRepo')
-                self.repos['local'] = MCDPythonRepo('mcdp_data')
+                self.repos[REPO_BUNDLED] = MCDPythonRepo('mcdp_data')
         else:
             logger.info('Not loading mcdp_data')
             
         if self.options.users is not None:
             self.user_db = UserDB(self.options.users)            
-            self.repos['db'] = MCDPGitRepo(where=self.options.users)
+            self.repos[REPO_USERS] = MCDPGitRepo(where=self.options.users)
 
         for id_repo, repo in self.repos.items():
             user_shelves = repo.get_shelves()
             logger.info('%s: %s' % (id_repo, sorted(user_shelves)))
             self.all_shelves.update(user_shelves)
         
-        for sname in self.all_shelves:
-            print('init: Shelf %s' % sname)
-
     def add_model_view(self, name, desc):
         self.views[name] = dict(desc=desc, order=len(self.views))
 
@@ -271,7 +268,11 @@ class WebApp(AppVisualization, AppStatus,
     def view_refresh(self, e): 
         """ Refreshes all """
         self.refresh_library(e.request) 
-        raise HTTPFound(e.request.referrer)
+        if e.request.referrer is None:
+            redirect = self.get_root_relative_to_here(e.request)
+        else:
+            redirect = e.request.referrer
+        raise HTTPFound(redirect)
 
     @cr2e
     def view_not_found(self, e):
@@ -476,8 +477,11 @@ class WebApp(AppVisualization, AppStatus,
 
         config.add_view(self.view_index, context=MCDPResourceRoot, renderer='index.jinja2')
         config.add_view(self.view_dummy, context=ResourceLibraries, renderer='list_libraries.jinja2')
+        config.add_view(self.view_dummy, context=ResourceRepos, renderer='repos.jinja2')
+        
         config.add_view(self.view_dummy, context=ResourceLibrary, renderer='library_index.jinja2', permission=PRIVILEGE_READ)
-        config.add_view(self.view_dummy, context=ResourceShelves, renderer='shelves_index.jinja2')
+        config.add_view(self.view_dummy, context=ResourceRepo, renderer='shelves_index.jinja2')
+        config.add_view(self.view_dummy, context=ResourceShelves, renderer='shelves_index.jinja2') # same as above
         config.add_view(self.view_changes, context=ResourceChanges, renderer='changes.jinja2')
         config.add_view(self.view_tree, context=ResourceTree, renderer='tree.jinja2')
         
@@ -530,7 +534,7 @@ class WebApp(AppVisualization, AppStatus,
                 p = '/repos/{repo_name}/shelves/{shelf_name}/libraries/{library_name}/{spec_name}/views/syntax/'
                 change['url'] = p.format(**change)
 
-                print('change: %s url = %s' % (change, change['url']))
+                #print('change: %s url = %s' % (change, change['url']))
                 change['date_human'] =  datetime.datetime.fromtimestamp(change['date']).strftime('%b %d, %H:%M')
                 changes.append(change)
                 

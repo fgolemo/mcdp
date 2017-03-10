@@ -1,13 +1,18 @@
-import unittest
-from mcdp_web.main import WebApp
-from mcdp_web.confi import parse_mcdpweb_params_from_dict
 import os
-from mcdp_utils_misc.fileutils import tmpdir
-from git import Repo, repo
+import unittest
+import urlparse
+
+from git import Repo
+
 from mcdp.constants import MCDPConstants
 from mcdp_library_tests.create_mockups import write_hierarchy
 from mcdp_repo.repo_interface import repo_commit_all_changes
-from mcdp_user_db.userdb import UserDB
+from mcdp_user_db import UserDB
+from mcdp_utils_misc import tmpdir
+# from mcdp_utils_xml import bs
+from mcdp_web.confi import parse_mcdpweb_params_from_dict
+from mcdp_web.main import WebApp
+
 
 def create_empty_repo(d, bname):
     repo0 = Repo.init(d)
@@ -68,6 +73,30 @@ class FunctionalTests(unittest.TestCase):
             app = wa.get_app()
             self.testapp = TestApp(app)
 
-    def test_root(self):
-        res = self.testapp.get('/', status=200)
-        self.assertTrue(b'Pyramid' in res.body)
+    def test_tree(self):
+        url_start = '/tree/'
+        res = self.testapp.get(url_start, status=200)
+#         if '302' in res.status:
+#             res = res.follow()
+        html = res.body
+        frag = res.html
+        tocheck = []
+        url_base =url_start
+        print('url_base: %s' % url_base)
+        for a in frag.select('a[href]'):
+            href = a['href']
+            if 'exit' in href:
+                continue
+            url = urlparse.urljoin(url_base, href)
+            tocheck.append(url)
+            
+        for url in tocheck: 
+            print('getting url %s' % url)
+            r = self.testapp.get(url)
+            r = r.maybe_follow()
+            print('%s %s' % (r.status, url))
+            
+        
+        
+        
+        

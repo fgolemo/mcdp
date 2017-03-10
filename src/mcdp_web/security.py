@@ -95,6 +95,8 @@ class AppLogin():
     def logout(self, request):
         headers = forget(request)
         came_from = request.referrer
+        if came_from is None:
+            came_from = self.get_root_relative_to_here(request)
         return HTTPFound(location=came_from, headers=headers)
 
 def groupfinder(userid, request):  # @UnusedVariable
