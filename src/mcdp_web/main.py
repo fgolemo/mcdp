@@ -4,6 +4,7 @@ import datetime
 import os
 import sys
 import time
+import traceback
 import urlparse
 from wsgiref.simple_server import make_server
 
@@ -27,8 +28,9 @@ from mcdp_docs import render_complete
 from mcdp_library import MCDPLibrary
 from mcdp_repo import MCDPGitRepo, MCDPythonRepo
 from mcdp_shelf import PRIVILEGE_ACCESS, PRIVILEGE_READ, PRIVILEGE_SUBSCRIBE
-from mcdp_user_db import UserDB,  UserInfo
-from mcdp_utils_misc import create_tmpdir,  duration_compact, dir_from_package_name
+from mcdp_shelf import PRIVILEGE_DISCOVER
+from mcdp_user_db import UserDB, UserInfo
+from mcdp_utils_misc import create_tmpdir, duration_compact, dir_from_package_name
 
 from .confi import describe_mcdpweb_params, parse_mcdpweb_params_from_dict
 from .editor_fancy import AppEditorFancyGeneric
@@ -44,8 +46,7 @@ from .resource_tree import MCDPResourceRoot, ResourceLibraries,\
     ResourceShelvesShelfUnsubscribe, ResourceShelvesShelfSubscribe,\
     ResourceExceptionsFormatted, ResourceExceptionsJSON, ResourceShelf, ResourceLibrariesNewLibname,\
     Resource,\
-    context_display_in_detail, ResourceShelfInactive, ResourceThingDelete, ResourceChanges, ResourceTree, ResourceThing
-from .resource_tree import ResourceRepos, ResourceRepo
+    context_display_in_detail, ResourceShelfInactive, ResourceThingDelete, ResourceChanges, ResourceTree, ResourceThing, ResourceRepos, ResourceRepo, ResourceThings, ResourceLibraryInteractive
 from .security import AppLogin, groupfinder
 from .sessions import Session
 from .solver.app_solver import AppSolver
@@ -55,9 +56,6 @@ from .utils.image_error_catch_imp import response_image
 from .utils.response import response_data
 from .utils0 import add_other_fields, add_std_vars_context
 from .visualization.app_visualization import AppVisualization
-from mcdp_shelf.access import PRIVILEGE_DISCOVER
-import traceback
-from mcdp_web.resource_tree import ResourceThings, ResourceLibraryInteractive
 
 
 __all__ = [

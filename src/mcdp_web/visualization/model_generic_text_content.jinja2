@@ -13,6 +13,12 @@
 	<style type='text/css'>
 	#content { font-family: monospace; }
 	</style>
+    {% if content is defined %}
 	<pre id='content'><code>{{content}}</pre></code>
+    {% endif %}
+    {% if error is defined %}
+	<pre id='error'><code>{{error}}</pre></code>
+    {% endif %}
+
 </body>
 </html>

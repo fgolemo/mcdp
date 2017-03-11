@@ -53,12 +53,18 @@ class AppVisualization():
     @add_std_vars_context
     @cr2e
     def view_model_ndp_repr(self, e):
-        ndp = e.library.load_ndp(e.thing_name)
-        ndp_string = ndp.__repr__()
-        ndp_string = ndp_string.decode("utf8")
-        return {
-            'content': ndp_string,
-        }
+        res = {}
+        
+        try:
+            ndp = e.library.load_ndp(e.thing_name)
+            ndp_string = ndp.__repr__()
+            ndp_string = ndp_string.decode("utf8")
+            res['content'] = ndp_string
+            
+        except (DPSyntaxError, DPSemanticError, DPNotImplementedError) as exc:
+            self.note_exception(exc, request=e.request, context=e.context)
+            res['error'] = str(exc)
+        return res
 
     @add_std_vars_context
     @cr2e
