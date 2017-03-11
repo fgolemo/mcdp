@@ -70,10 +70,10 @@ def test_valid_repo_git():
         from git import Actor
         author = Actor("John", "john@mcdp")
         
-        for filename in  create_file_and_yield(setup_shelve_01, r0):
-            print('written %r' % filename)
-            print('untracked_files: %s' % repo0.untracked_files)
-            print('Dirty: %s' % repo0.is_dirty(untracked_files=True))
+        for filename in create_file_and_yield(setup_shelve_01, r0):
+#             print('written %r' % filename)
+#             print('untracked_files: %s' % repo0.untracked_files)
+#             print('Dirty: %s' % repo0.is_dirty(untracked_files=True))
             repo0.index.add(repo0.untracked_files)
             message = 'author: system'
             repo0.index.commit(message, author=author)

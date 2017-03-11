@@ -1,9 +1,11 @@
 import os
 
 from contracts import contract
+from contracts.utils import raise_wrapped, raise_desc
 import yaml
 
 from mcdp import MCDPConstants
+from mcdp.exceptions import FormatException
 from mcdp.logs import logger
 from mcdp_library.libraries import find_libraries
 from mcdp_utils_misc import indent_plus_invisibles, read_file_encoded_as_utf8, locate_files
@@ -60,7 +62,13 @@ class Shelf():
 
 def shelf_from_directory(dirname):
     ''' Dirname should end in shelf_extension '''
-
+    try:
+        return shelf_from_directory_(dirname)
+    except ValueError as e:
+        msg = 'While reading shelf from %s:' % dirname
+        raise_wrapped(FormatException, e, msg, compact=True)
+        
+def shelf_from_directory_(dirname):
     if not dirname.endswith(MCDPConstants.shelf_extension):
         msg = 'Wrong name for shelf: %r' % dirname
         raise ValueError(msg)
@@ -73,24 +81,15 @@ def shelf_from_directory(dirname):
     u = read_file_encoded_as_utf8(fn)
     try:
         y = yaml.load(u)
-
-        default_acl = [
-            ['Allow', 'Everyone', 'discover'],
-            # we don't want to allow anonymous to desubscribe
-            #['Allow', 'Everyone', 'subscribe'],
-            ['Allow', 'Everyone', 'read'],
-            ['Allow', 'Everyone', 'write'],
-            ['Allow', 'Everyone', 'admin'],
-        ]
-
-        acl = acl_from_yaml(y.pop('acl', default_acl))
+        acl = acl_from_yaml(y.pop('acl', MCDPConstants.default_acl))
         dependencies = y.pop('dependencies', [])
         desc_short = y.pop('desc_short', None)
         desc_long = y.pop('desc_long', None)
         authors = y.pop('authors', [])
+        expect_fields = ['acl','desc_short','desc_long','authors']
         if y:
-            msg = 'Unknown fields %s.' % list(y)
-            raise ValueError(msg)
+            msg = 'Unknown fields %s; expected %s' % (list(y), expect_fields)
+            raise_desc(FormatException, msg, filename=fn, contents=u)
     except:
         msg = 'Cannot parse %s:\n%s' % (fn, indent_plus_invisibles(u))
         logger.error(msg)

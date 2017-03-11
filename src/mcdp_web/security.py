@@ -5,6 +5,8 @@ from pyramid.security import remember, forget
 from mcdp import logger
 
 from .resource_tree import ResourceLogout, ResourceLogin, context_display_in_detail
+from mcdp_web.environment import cr2e
+from mcdp_web.utils0 import add_std_vars_context
 
 
 URL_LOGIN = '/login/'
@@ -53,31 +55,32 @@ class AppLogin():
             res['user'] = None
         return res
 
-
-    def login(self, context, request):  # @UnusedVariable
-        came_from = request.params.get('came_from', "..")
+    @add_std_vars_context
+    @cr2e
+    def login(self, e):  # @UnusedVariable
+        came_from = e.request.params.get('came_from', "..")
         message = ''
         error = ''
-        if 'form.submitted' in request.params:
-            login = request.params['login']
-            password = request.params['password']
+        if 'form.submitted' in e.request.params:
+            login = e.request.params['login']
+            password = e.request.params['password']
             
             if not self.user_db.exists(login):
                 error = 'Could not find user name "%s".' % login
             else:
                 if self.user_db.authenticate(login, password):
-                    headers = remember(request, login)
+                    headers = remember(e.request, login)
                     logger.info('successfully authenticated user %s' % login)
-                    return HTTPFound(location=came_from, headers=headers)
+                    raise HTTPFound(location=came_from, headers=headers)
                 else:
                     error = 'Password does not match.'
         else: 
             login = None
             
-        login_form = self.make_relative(request, URL_LOGIN)
+        login_form = self.make_relative(e.request, URL_LOGIN)
          
         if came_from.startswith('/'):
-            came_from = self.make_relative(request, came_from)
+            came_from = self.make_relative(e.request, came_from)
 
         res = dict(
             name='Login',
@@ -88,8 +91,8 @@ class AppLogin():
         )
         if login is not None:
             res['login'] = login
-        res['root'] =  self.get_root_relative_to_here(request)
-        res['static'] = res['root'] + '/static'
+#         res['root'] =  self.get_root_relative_to_here(e.request)
+#         res['static'] = res['root'] + '/static'
         return res
 
     def logout(self, request):
@@ -97,7 +100,7 @@ class AppLogin():
         came_from = request.referrer
         if came_from is None:
             came_from = self.get_root_relative_to_here(request)
-        return HTTPFound(location=came_from, headers=headers)
+        raise HTTPFound(location=came_from, headers=headers)
 
 def groupfinder(userid, request):  # @UnusedVariable
     from mcdp_web.main import WebApp

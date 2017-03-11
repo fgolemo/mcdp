@@ -2,7 +2,7 @@
 from collections import namedtuple
 
 from contracts import contract
-from contracts.utils import indent
+from contracts.utils import indent, raise_desc
 from pyramid.security import Allow, Authenticated, Everyone, Deny
 
 from mcdp.logs import logger
@@ -83,9 +83,9 @@ def acl_from_yaml(x):
 
         Authenticated
         Everyone
-        groups:<groupname>
-        groups:admin
-        groups:friends:andrea
+        group:<groupname>
+        group:admin
+        group:friends:andrea
         
         discover
         read
@@ -97,6 +97,10 @@ def acl_from_yaml(x):
     for y in x:
         allow_or_deny = y[0]
         to_whom = y[1]
+        if to_whom.startswith('groups:'):
+            msg = 'Invalid key "%s" - should be "group:...".' % to_whom
+            raise_desc(ValueError, msg, x=x)
+        
         privilege = y[2]
         if not privilege in PRIVILEGES:
             raise ValueError('Unknown privilege %r' % privilege)

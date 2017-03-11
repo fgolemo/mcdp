@@ -155,3 +155,12 @@ class MCDPConstants():
 
     repo_prefix = 'mcdpr:'
     
+    default_acl = [
+        ['Allow', 'Everyone', 'discover'],
+        # we don't want to allow anonymous to desubscribe
+        #['Allow', 'Everyone', 'subscribe'],
+        ['Allow', 'Everyone', 'read'],
+        ['Allow', 'Everyone', 'write'],
+        ['Allow', 'Everyone', 'admin'],
+    ]
+

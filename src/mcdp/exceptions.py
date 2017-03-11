@@ -39,6 +39,8 @@ class MCDPExceptionWithWhere(MCDPException):
         where = _get_where_with_filename(self, filename)
         return type(self)(self.error, where=where, stack=self.stack)
 
+class FormatException(MCDPExceptionWithWhere):
+    ''' Data format exception '''
 
 class DPInternalError(MCDPExceptionWithWhere):
     """ Internal consistency errors (not user) """

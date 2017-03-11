@@ -9,8 +9,8 @@ from mcdp.constants import MCDPConstants
 setup_shelve_01 = {
     'shelf1.' + MCDPConstants.shelf_extension: {
         MCDPConstants.shelf_desc_file: '''\
-name: shelf 1
-access: {}
+desc_short: shelf 1
+
 ''',
         'l1.' +  MCDPConstants.library_extension: {
             'm1.mcdp': 'mcdp { }',
@@ -18,8 +18,7 @@ access: {}
     },
     'shelf2.'+ MCDPConstants.shelf_extension: {
         MCDPConstants.shelf_desc_file: '''\
-name: shelf 2
-access: {}
+desc_short: shelf 2
     
 ''',
     }
@@ -49,13 +48,13 @@ setup_permissions = {
             dependencies: [u_andrea_public]
             acl: [
                 [Allow, Everyone, discover],
-                [Allow, "groups:subscribers:andrea", read],
+                [Allow, "group:subscribers:andrea", read],
                 [Allow, andrea, read],
                 [Allow, andrea, write],
-                [Allow, "groups:admin", discover],
-                [Allow, "groups:admin", admin],
-                [Allow, "groups:admin", read],
-                [Allow, "groups:admin", write]
+                [Allow, "group:admin", discover],
+                [Allow, "group:admin", admin],
+                [Allow, "group:admin", read],
+                [Allow, "group:admin", write]
             ]
             authors: [andrea]
         '''},

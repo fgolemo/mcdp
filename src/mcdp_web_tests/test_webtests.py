@@ -2,6 +2,7 @@ import os
 import unittest
 import urlparse
 
+from contracts.utils import raise_desc
 from git import Repo
 
 from mcdp.constants import MCDPConstants
@@ -9,9 +10,10 @@ from mcdp_library_tests.create_mockups import write_hierarchy
 from mcdp_repo.repo_interface import repo_commit_all_changes
 from mcdp_user_db import UserDB
 from mcdp_utils_misc import tmpdir
-# from mcdp_utils_xml import bs
 from mcdp_web.confi import parse_mcdpweb_params_from_dict
 from mcdp_web.main import WebApp
+from mcdp_web_tests.spider import Spider
+from comptests.registrar import run_module_tests, comptest
 
 
 def create_empty_repo(d, bname):
@@ -73,30 +75,33 @@ class FunctionalTests(unittest.TestCase):
             app = wa.get_app()
             self.testapp = TestApp(app)
 
-    def test_tree(self):
-        url_start = '/tree/'
-        res = self.testapp.get(url_start, status=200)
-#         if '302' in res.status:
-#             res = res.follow()
-        html = res.body
-        frag = res.html
-        tocheck = []
-        url_base =url_start
-        print('url_base: %s' % url_base)
-        for a in frag.select('a[href]'):
-            href = a['href']
-            if 'exit' in href:
-                continue
-            url = urlparse.urljoin(url_base, href)
-            tocheck.append(url)
-            
-        for url in tocheck: 
-            print('getting url %s' % url)
-            r = self.testapp.get(url)
-            r = r.maybe_follow()
-            print('%s %s' % (r.status, url))
-            
-        
-        
-        
-        
+    def get_maybe_follow(self, url0):
+        res = self.testapp.get(url0)
+        if '302' in res.status:
+            location = res.headers['location']
+            url0 = urlparse.urljoin(res.request.url, location)
+            res = res.follow()
+        return url0, res
+ 
+    def runTest(self):
+        spider = Spider(self.get_maybe_follow)
+        spider.visit('/tree')
+        spider.go()
+        spider.log_summary()
+        if spider.failed:
+            msg = 'Could not get some URLs'
+            raise_desc(Exception, msg, failed=list(spider.failed))
+
+@comptest
+def check_tree():
+    ft = FunctionalTests()
+    ft.setUp()
+    ft.runTest()
+
+
+if __name__ == '__main__':
+    run_module_tests()
+    
+    
+    
+    

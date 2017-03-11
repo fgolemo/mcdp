@@ -299,6 +299,14 @@ class WebApp(AppVisualization, AppStatus,
             exceptions.append(u)
         return {'exceptions': exceptions}
 
+    @cr2e
+    def view_exceptions_occurred_json(self, e):  # @UnusedVariable
+        exceptions = []
+        for e in self.exceptions:
+            u = unicode(e, 'utf-8')
+            exceptions.append(u)
+        return {'exceptions': exceptions}
+
     def view_exception(self, exc, request):
         request.response.status = 500  # Internal Server Error
 
@@ -497,7 +505,7 @@ class WebApp(AppVisualization, AppStatus,
         config.add_view(self.view_exception, context=Exception, renderer='exception.jinja2')
         config.add_view(self.exit, context=ResourceExit, renderer='json', permission=NO_PERMISSION_REQUIRED)
 
-        config.add_view(self.view_exceptions_occurred, context=ResourceExceptionsJSON, renderer='json', permission=NO_PERMISSION_REQUIRED)
+        config.add_view(self.view_exceptions_occurred_json, context=ResourceExceptionsJSON, renderer='json', permission=NO_PERMISSION_REQUIRED)
         config.add_view(self.view_exceptions_occurred, context=ResourceExceptionsFormatted, renderer='exceptions_formatted.jinja2', permission=NO_PERMISSION_REQUIRED)
         config.add_view(self.view_dummy, context=ResourceShelfInactive, renderer='shelf_inactive.jinja2')
         config.add_view(self.view_thing_delete, context=ResourceThingDelete)
