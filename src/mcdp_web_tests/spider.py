@@ -2,7 +2,6 @@ from collections import defaultdict
 import urlparse
 from webtest.app import AppError
 from mcdp.logs import logger
-from contracts.utils import raise_desc
 
 class Spider():
     def __init__(self, get_maybe_follow):
@@ -28,8 +27,7 @@ class Spider():
         
         if ':' in o.path: # skip actions
             self.skipped.add(url)
-            return
-
+            return 
         
         if o.netloc and o.netloc != u'localhost':
             #print('Skipping %s' % str(o))
@@ -65,6 +63,8 @@ class Spider():
             logger.error('failed %s' % url)
             for r in self.referrers[url]:
                 logger.error(' referred from %s' % r)
+            logger.error(unicode(self.failed[url]))
+
                 
                 
 def find_links(html, url_base):   

@@ -50,12 +50,14 @@ class Session():
             username = self.request.authenticated_userid 
         if username is not None:
             username = username.encode('utf8')
-        if not username in userdb:
-            user = UserInfo(username, name=username, password=None, email=None, website=None, affiliation=None, 
-                            groups=[], subscriptions=[])
-            return user
-        user = userdb[username]
-        return user
+            if username in userdb:
+                return userdb[username]
+            else:
+                return UserInfo(username, name=username, password=None, email=None, website=None, affiliation=None, 
+                                groups=[], subscriptions=[])
+        else:
+            # username is None:
+            return userdb['anonymous']
     
     def save_user(self):
         

@@ -40,7 +40,9 @@ import os
 from contracts.utils import indent
 from pyramid.security import Allow, Authenticated, Everyone
 
-from mcdp_shelf.access import PRIVILEGE_ACCESS
+from mcdp_shelf.access import PRIVILEGE_ACCESS, PRIVILEGE_READ
+from mcdp.constants import MCDPConstants
+from mcdp.logs import logger
 
 
 
@@ -157,11 +159,15 @@ class ResourceShelves(Resource):
     
     def __iter__(self):
         session = self.get_session()
+        user = session.get_user()
         repos = session.repos
         repo_name = self.__parent__.name
+    
         repo = repos[repo_name]
         shelves = repo.get_shelves()
-        return list(shelves).__iter__()
+        for id_shelf, shelf in shelves.items():
+            if shelf.get_acl().allowed2(PRIVILEGE_READ, user):
+                yield id_shelf
     
 
 class ResourceShelvesShelfSubscribe(Resource): pass
@@ -215,7 +221,9 @@ class ResourceShelf(Resource):
         if key == 'libraries':
             session = self.get_session()
             if not self.name in session.shelves_used:
-                print('cannot access libraries if not subscribed')
+                msg = 'Cannot access libraries if not subscribed to shelf "%s".' % self.name
+                msg += ' user: %s' % self.get_session().get_user()
+                logger.debug(msg)
                 return ResourceShelfInactive(self.name)
             
             return ResourceLibraries()

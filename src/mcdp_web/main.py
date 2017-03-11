@@ -28,7 +28,7 @@ from mcdp_library import MCDPLibrary
 from mcdp_repo import MCDPGitRepo, MCDPythonRepo
 from mcdp_shelf import PRIVILEGE_ACCESS, PRIVILEGE_READ, PRIVILEGE_SUBSCRIBE
 from mcdp_user_db import UserDB,  UserInfo
-from mcdp_utils_misc import duration_compact, dir_from_package_name
+from mcdp_utils_misc import create_tmpdir,  duration_compact, dir_from_package_name
 
 from .confi import describe_mcdpweb_params, parse_mcdpweb_params_from_dict
 from .editor_fancy import AppEditorFancyGeneric
@@ -55,7 +55,7 @@ from .utils.image_error_catch_imp import response_image
 from .utils.response import response_data
 from .utils0 import add_other_fields, add_std_vars_context
 from .visualization.app_visualization import AppVisualization
-from mcdp_utils_misc.fileutils import create_tmpdir
+from mcdp_shelf.access import PRIVILEGE_DISCOVER
 
 
 __all__ = [
@@ -493,7 +493,7 @@ class WebApp(AppVisualization, AppStatus,
         config.add_view(self.view_tree, context=ResourceTree, renderer='tree.jinja2')
         
         config.add_view(self.view_shelf_library_new, context=ResourceLibrariesNewLibname)
-        config.add_view(self.view_shelf, context=ResourceShelf, renderer='shelf.jinja2', permission=PRIVILEGE_READ)
+        config.add_view(self.view_shelf, context=ResourceShelf, renderer='shelf.jinja2', permission=PRIVILEGE_DISCOVER)
         config.add_view(self.view_shelves_subscribe, context=ResourceShelvesShelfSubscribe, permission=PRIVILEGE_SUBSCRIBE)
         config.add_view(self.view_shelves_unsubscribe, context=ResourceShelvesShelfUnsubscribe, permission=PRIVILEGE_SUBSCRIBE)
         config.add_view(self.view_library_doc, context=ResourceLibraryDocRender, renderer='library_doc.jinja2', permission=PRIVILEGE_READ)
@@ -539,7 +539,7 @@ class WebApp(AppVisualization, AppStatus,
                                  password=None, email=None, website=None, affiliation=None, groups=[], subscriptions=[])
                 change['user'] = u
                 p = '/repos/{repo_name}/shelves/{shelf_name}/libraries/{library_name}/{spec_name}/views/syntax/'
-                change['url'] = p.format(**change)
+                change['url'] = e.root + p.format(**change)
 
                 #print('change: %s url = %s' % (change, change['url']))
                 change['date_human'] =  datetime.datetime.fromtimestamp(change['date']).strftime('%b %d, %H:%M')

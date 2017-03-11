@@ -22,9 +22,9 @@
         <a href="{{change.url}}">{{icon_spec(change.spec_name)|safe}}&nbsp;{{change.thing_name}}</a>
         in
 
-        library <a href="/repos/{{change.repo_name}}/shelves/{{change.shelf_name}}/libraries/{{change.library_name}}/">
+        library <a href="{{root}}/repos/{{change.repo_name}}/shelves/{{change.shelf_name}}/libraries/{{change.library_name}}/">
             {{icon_library|safe}}&nbsp;{{change.library_name}}</a>
-            in shelf <a href="/repos/{{change.repo_name}}/shelves/{{change.shelf_name}}/">{{icon_shelf|safe}}&nbsp;{{change.shelf_name}}</a>.
+            in shelf <a href="{{root}}/repos/{{change.repo_name}}/shelves/{{change.shelf_name}}/">{{icon_shelf|safe}}&nbsp;{{change.shelf_name}}</a>.
     <!-- {{change.repo_name}}/{{change.library_name}}/{{change.spec_name}}/{{change.thing_name}} -->
 </a><!--{{change|safe}} -->
 

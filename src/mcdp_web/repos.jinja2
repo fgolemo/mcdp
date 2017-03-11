@@ -5,6 +5,8 @@
     {% include 'head.jinja2' %}
 </head>
 <body>
+{% include 'user.jinja2' %}
+{% include 'model_views_navigation.jinja2' %}
 
 <ul>
     {% for id_repo, repo in navigation.repos.items() %}

@@ -3,11 +3,12 @@
 <head>
     <title>Resource tree</title>
     {% include 'head.jinja2' %}
-    <style>{% include 'library_index.css' %}</style>
-    <script>{% include 'library_index.js' %}</script>
 </head>
 <body>
 <style>
+{% include 'user.jinja2' %}
+{% include 'model_views_navigation.jinja2' %}
+
 p.one {
     margin: 0;
 }
