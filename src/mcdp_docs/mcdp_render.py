@@ -5,13 +5,13 @@ import os
 from contracts.enabling import disable_all
 from contracts.utils import raise_desc
 from decent_params import UserError
-from mcdp.constants import MCDPConstants
-from mcdp_library import Librarian, MCDPLibrary
-from mcdp_report.html import get_css_filename
-from mcdp import logger, mcdp_dev_warning
 from quickapp import QuickAppBase
 from system_cmd import system_cmd_show
+
+from mcdp import MCDPConstants, logger, mcdp_dev_warning
 from mcdp_docs.minimal_doc import get_minimal_document
+from mcdp_library import Librarian
+from mcdp_report.html import get_css_filename
 
 
 class Render(QuickAppBase):

@@ -15,11 +15,13 @@ from mcdp_utils_xml import to_html_stripping_fragment, bs
 from mcdp_web.editor_fancy.app_editor_fancy_generic import specs
 from mcdp_web.environment import cr2e
 from mcdp_web.resource_tree import ResourceThingViewSyntax,   ResourceThingViewNDPGraph,\
-    ResourceThingViewDPTree, ResourceThingViewDPGraph, ResourceThingViewNDPRepr
+    ResourceThingViewDPTree, ResourceThingViewDPGraph, ResourceThingViewNDPRepr,\
+    ResourceThingViews
 from mcdp_web.utils0 import add_other_fields, add_std_vars_context
 from mocdp.comp.context import Context
 
 from .add_html_links_imp import add_html_links
+from pyramid.httpexceptions import HTTPFound
 
 
 class AppVisualization():
@@ -29,6 +31,7 @@ class AppVisualization():
 
     def config(self, config): 
         config.add_view(self.view_syntax, context=ResourceThingViewSyntax, renderer='visualization/syntax.jinja2')
+        config.add_view(self.redirect_things_to_syntax, context=ResourceThingViews)
             
         # these are images view for which the only change is the jinja2 template
         config.add_view(self.view_dummy, context=ResourceThingViewDPGraph, renderer='visualization/model_dp_graph.jinja2')
@@ -36,6 +39,17 @@ class AppVisualization():
         config.add_view(self.view_dummy, context=ResourceThingViewNDPGraph, renderer='visualization/model_ndp_graph.jinja2')
         config.add_view(self.view_model_ndp_repr, context=ResourceThingViewNDPRepr, renderer='visualization/model_generic_text_content.jinja2')
 
+    @cr2e
+    def redirect_things_to_syntax(self, e):
+#         libraries/basic/models/test2/views/
+#         libraries/basic/models/test2/views/syntax/
+        url =e.request.url
+        if not url.endswith('/'):
+            url += '/'
+        
+        url2 = url+'/syntax/'
+        raise HTTPFound(url2)
+        
     @add_std_vars_context
     @cr2e
     def view_model_ndp_repr(self, e):

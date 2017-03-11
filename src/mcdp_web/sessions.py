@@ -60,7 +60,6 @@ class Session():
             return userdb['anonymous']
     
     def save_user(self):
-        
         userdb = self.app.user_db  # @UndefinedVariable
         user = self.get_user()
         userdb.save_user(user.username)

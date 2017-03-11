@@ -158,7 +158,7 @@ class AppSolver2():
             return res
    
         quiet = (DPSyntaxError, DPSemanticError, NeedsApprox)
-        return ajax_error_catch(go, quiet=quiet)
+        return ajax_error_catch(go, quiet=quiet, environment=e)
     
     def process_rtof(self, e, string, do_approximations, nl, nu):
         parsed = e.library.parse_constant(string)

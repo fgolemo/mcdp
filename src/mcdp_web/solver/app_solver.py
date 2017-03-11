@@ -151,7 +151,7 @@ class AppSolver():
     def ajax_solver_getdatasets(self, e):
         def go():
             return self.return_new_data(e)
-        return ajax_error_catch(go)
+        return ajax_error_catch(go, environment=e)
 
     @cr2e
     def ajax_solver_addpoint(self, e):        
@@ -161,13 +161,14 @@ class AppSolver():
     
             solver_state.new_point(f)
             return self.return_new_data(e)    
-        return ajax_error_catch(go)
+        return ajax_error_catch(go, environment=e)
+    
     @cr2e
     def ajax_solver_reset(self, e):
         def go():
             self.reset(e)
             return self.return_new_data(e)
-        return ajax_error_catch(go) 
+        return ajax_error_catch(go, environment=e)
     
 def create_alternative_urls(params, ndp):
     library = params['library']

@@ -104,6 +104,11 @@
  		{% endfor %}
 
  	  </select>
+
+	  	    <!-- Also add the same but with hidden links -->
+	  		{% for li in navigation['libraries'] %}
+	  	        <a class='hidden libraries' style='display:none' href="{{li['url']}}"></a>
+	  	    {% endfor %}
  	 {% endif %}
 
 	 {% if navigation.library_name and navigation.thing_name %}
@@ -122,10 +127,6 @@
 		</script>
 	 {% endif %}
 
-	    <!-- Also add the same but with hidden links -->
-		{% for li in navigation['libraries'] %}
-	        <a style='display:none' href="{{li['url']}}"></a>
-	    {% endfor %}
 
 	  </td>
 	  <td>

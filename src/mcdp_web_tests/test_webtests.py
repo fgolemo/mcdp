@@ -1,4 +1,5 @@
 import os
+import shutil
 import unittest
 import urlparse
 
@@ -7,17 +8,18 @@ from git import Repo
 
 from comptests.registrar import run_module_tests, comptest
 from mcdp.constants import MCDPConstants
+from mcdp_docs.preliminary_checks import assert_not_contains
 from mcdp_library_tests.create_mockups import write_hierarchy
 from mcdp_repo.repo_interface import repo_commit_all_changes
 from mcdp_user_db import UserDB
+from mcdp_utils_misc import dir_from_package_name
 from mcdp_utils_misc import tmpdir
 from mcdp_web.confi import parse_mcdpweb_params_from_dict
 from mcdp_web.main import WebApp
 from mcdp_web_tests.spider import Spider
-from mcdp_utils_misc.dir_from_package_nam import dir_from_package_name
-import shutil
 
 
+# do not make relative to start using python
 def create_empty_repo(d, bname):
     repo0 = Repo.init(d)
     filename = os.path.join(d, 'readme.txt')
@@ -35,14 +37,16 @@ def create_empty_repo(d, bname):
     repo0.index.commit('msg')
     return repo0
 
+another_name_for_unittests_shelf = 'unittests2'
+
 def create_user_db_repo(where, bname):
     user_db_skeleton = {
         'anonymous.%s' % MCDPConstants.user_extension: {
             MCDPConstants.user_desc_file: '''
             name: Anonymous user
             subscriptions:
-            - unittests2
-            ''',
+            - %s
+            ''' % another_name_for_unittests_shelf,
         }
     }
     repo0 = create_empty_repo(where, bname)
@@ -65,7 +69,7 @@ class FunctionalTests(unittest.TestCase):
             mcdp_data = dir_from_package_name('mcdp_data')
             unittests = os.path.join(mcdp_data, 'libraries', 'unittests.' + MCDPConstants.shelf_extension )
             assert os.path.exists(unittests), unittests
-            dest = os.path.join(userdb_remote, 'unittests2.' + MCDPConstants.shelf_extension )
+            dest = os.path.join(userdb_remote, another_name_for_unittests_shelf + '.' + MCDPConstants.shelf_extension )
             shutil.copytree(unittests, dest)
             repo_commit_all_changes(repo0)
             
@@ -96,13 +100,47 @@ class FunctionalTests(unittest.TestCase):
         return url0, res
  
     def runTest(self):
-        spider = Spider(self.get_maybe_follow)
+        bugs = [
+#             '/repos/global/shelves/unittests2/libraries/basic/models/test2/views/edit_fancy/graph.png',
+            '/repos/global/shelves/%s/libraries/basic/models/sum2f_rcomp/views/solver' % another_name_for_unittests_shelf,
+        ]
+        for b in bugs:
+            self.testapp.get(b)
+        
+        def ignore(url, parsed):  # @UnusedVariable
+            if ':' in parsed.path:
+                return True
+            if 'exit' in parsed.path: # skip actions
+                return True
+            if parsed.netloc and parsed.netloc != u'localhost':
+                return True
+            
+            if 'solver' in parsed.path:
+                return True
+            
+            return False
+                
+                
+
+        spider = Spider(self.get_maybe_follow, ignore=ignore)
+        
+        
+        _, res = self.get_maybe_follow('/tree/')
+        assert_not_contains(res.body, 'None')
+        print('loading /repos')
+        _, res = self.get_maybe_follow('/repos/')
+        assert_not_contains(res.body, 'None')
+        
         spider.visit('/tree')
-        spider.go()
+        try:
+            spider.go(max_fails=20)
+        except KeyboardInterrupt:
+            pass
         spider.log_summary()
         if spider.failed:
-            msg = 'Could not get some URLs'
-            raise_desc(Exception, msg, failed=list(spider.failed))
+            msg = 'Could not get some URLs:\n'
+            msg += '\n'.join('- %s' % _ for _ in sorted(spider.failed))
+            raise_desc(Exception, msg)
 
 @comptest
 def check_tree():

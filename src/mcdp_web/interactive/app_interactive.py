@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 import cgi
 
-from mcdp_web.resource_tree import ResourceLibraryInteractiveValue, ResourceLibraryInteractiveValueParse
-from mcdp_web.utils0 import add_std_vars_context
 from mcdp_web.environment import cr2e
+from mcdp_web.resource_tree import ResourceLibraryInteractiveValue, ResourceLibraryInteractiveValueParse
+from mcdp_web.utils.ajax_errors import ajax_error_catch
+from mcdp_web.utils0 import add_std_vars_context
 
 
 class AppInteractive():
@@ -30,7 +31,7 @@ class AppInteractive():
         return {}
     @cr2e
     def view_mcdp_value_parse(self, e):
-        from mcdp_web.solver.app_solver import ajax_error_catch
+        
 
         string = e.request.json_body['string']
         assert isinstance(string, unicode)
@@ -38,7 +39,7 @@ class AppInteractive():
 
         def go():
             return self.parse(e, string)
-        return ajax_error_catch(go)
+        return ajax_error_catch(go, environment=e)
 
     def parse(self, e, string): 
         result = e.library.parse_constant(string)

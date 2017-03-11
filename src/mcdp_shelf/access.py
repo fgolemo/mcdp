@@ -5,7 +5,7 @@ from contracts import contract
 from contracts.utils import indent, raise_desc
 from pyramid.security import Allow, Authenticated, Everyone, Deny
 
-from mcdp.logs import logger
+from mcdp.logs import logger_access
 
 
 USER_ANONYMOUS = 'anonymous'
@@ -41,7 +41,6 @@ class ACL():
         
         
     def allowed2(self, privilege, user):
-        print('user: %r' % user)
         return self.allowed(privilege, user.username, user.groups)
     
     def allowed(self, privilege, username, groups):
@@ -71,7 +70,7 @@ class ACL():
         
         msg = 'Permission %r denied for %s' % (privilege, principals)
         msg += '\n' + indent('\n'.join(str(_) for _ in self.rules), '  ')
-        logger.debug(msg)
+        logger_access.debug(msg)
         return False 
 
     def __str__(self):

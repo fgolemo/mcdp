@@ -1,11 +1,18 @@
 from collections import defaultdict
 import urlparse
 from webtest.app import AppError
-from mcdp.logs import logger
+import logging
+
+
+logger = logging.getLogger('spider')
+logger.setLevel(logging.DEBUG)
 
 class Spider():
-    def __init__(self, get_maybe_follow):
+    def __init__(self, get_maybe_follow, ignore=None):
         self.get_maybe_follow = get_maybe_follow
+        if ignore is None:
+            ignore = lambda _url, _parsed: False
+        self.ignore = ignore
         self.queue = []
         self.skipped = set()
         self.failed = {} # url -> Exception
@@ -15,9 +22,14 @@ class Spider():
     def visit(self, url):
         self.queue.append(url)
                           
-    def go(self):
+    def go(self, max_fails=None):
         while self.queue:
             self.step()
+            if max_fails is not None:
+                if len(self.failed) >= max_fails:
+                    msg = 'Exiting because of max fails reached.'
+                    logger.debug(msg)
+                    break
             
     def step(self):
         url = self.queue.pop(0)
@@ -25,29 +37,25 @@ class Spider():
             return
         o = urlparse.urlparse(url)
         
-        if ':' in o.path or  'exit' in o.path: # skip actions
-            self.skipped.add(url)
-            return 
-        
-        if o.netloc and o.netloc != u'localhost':
-            #print('Skipping %s' % str(o))
+        if self.ignore(url, o):
             self.skipped.add(url)
             return
-
-        print('%s ... ' % url)
+        
+        logger.debug('requests %s ... ' % url)
         self.visited.add(url)
         try:
             url2, res = self.get_maybe_follow(url)
         except AppError as e:
+            logger.error('failed %s' % url) 
             self.failed[url] = e
             return
             
         self.visited.add(url2)
         if url2 != url:
-            print('%s -> %s' % (url, url2))
+            logger.debug('redirected %s -> %s' % (url, url2))
         if res.content_type == 'text/html':
             urls = list(find_links(res.html, url2))
-            print('%s %s: %d links' % (url2, res.status, len(urls)))
+            logger.debug('read %s %s: %d links' % (url2, res.status, len(urls)))
             for u in urls:
                 self.queue.append(u)
                 self.referrers[u].add(url2)
@@ -75,7 +83,9 @@ def find_links(html, url_base):
             yield link['href']
         for script in html.select('script[src]'):
             yield script['src']
+        for img in html.select('img[src]'):
+            yield img['src']
         for a in html.select('a[href]'):
             yield a['href']
     for url in find(): 
-        yield urlparse.urljoin(url_base, url)
+        yield urlparse.urljoin(url_base, url).encode('utf8')

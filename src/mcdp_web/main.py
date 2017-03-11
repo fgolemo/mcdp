@@ -8,7 +8,7 @@ import urlparse
 from wsgiref.simple_server import make_server
 
 from contracts import contract
-from contracts.utils import indent
+from contracts.utils import indent, check_isinstance
 import git.cmd  # @UnusedImport
 from pyramid.authentication import AuthTktAuthenticationPolicy
 from pyramid.authorization import ACLAuthorizationPolicy
@@ -56,6 +56,8 @@ from .utils.response import response_data
 from .utils0 import add_other_fields, add_std_vars_context
 from .visualization.app_visualization import AppVisualization
 from mcdp_shelf.access import PRIVILEGE_DISCOVER
+import traceback
+from mcdp_web.resource_tree import ResourceThings, ResourceLibraryInteractive
 
 
 __all__ = [
@@ -313,21 +315,13 @@ class WebApp(AppVisualization, AppStatus,
             if isinstance(request.context, Resource):
                 logger.debug(context_display_in_detail(request.context))
             
-        import traceback
         compact = (DPSemanticError, DPSyntaxError)
         if isinstance(exc, compact):
             s = exc.__str__()
         else:
             s = traceback.format_exc(exc)
 
-        url = request.url
-        referrer = request.referrer
-        n = 'Error during serving this URL:'
-        n += '\n url: %s' % url
-        n += '\n referrer: %s' % referrer
-        ss = traceback.format_exc(exc)
-        n += '\n' + indent(ss, '| ')
-        self.exceptions.append(n)
+        self.note_exception(exc, request=request)
  
         u = unicode(s, 'utf-8')
         logger.error(u)
@@ -339,6 +333,23 @@ class WebApp(AppVisualization, AppStatus,
             'static': root + '/static'
         }  
         return res
+ 
+    def note_exception(self, exc, request=None, context=None):
+        check_isinstance(exc, BaseException)
+        n = ''
+        if request is not None:   
+            url = request.url
+            referrer = request.referrer
+            n += 'Error during serving this URL:'
+            n += '\n url: %s' % url
+            n += '\n referrer: %s' % referrer
+
+        if context is not None:
+            n += '\n\n' + context_display_in_detail(context) + '\n'
+            
+        ss = traceback.format_exc(exc)
+        n += '\n' + indent(ss, '| ')
+        self.exceptions.append(n)
     
     def png_error_catch2(self, request, func):
         """ func is supposed to return an image response.
@@ -350,7 +361,6 @@ class WebApp(AppVisualization, AppStatus,
         try:
             return func()
         except Exception as e:
-            import traceback
             s = traceback.format_exc(e)
 
             try:
@@ -358,15 +368,7 @@ class WebApp(AppVisualization, AppStatus,
             except UnicodeEncodeError:
                 pass
 
-            s = str(s)
-            url = request.url
-            referrer = request.referrer
-            n = 'Error during rendering an image.'
-            n+= '\n url: %s' % url
-            n+= '\n referrer: %s' % referrer
-            n += '\n' + indent(s, '| ')
-            self.exceptions.append(n)
-            
+            self.note_exception(e, request=request)            
             return response_image(request, s) 
 
     # This is where we keep all the URLS
@@ -485,10 +487,14 @@ class WebApp(AppVisualization, AppStatus,
         config.add_view(self.view_index, context=MCDPResourceRoot, renderer='index.jinja2')
         config.add_view(self.view_dummy, context=ResourceLibraries, renderer='list_libraries.jinja2')
         config.add_view(self.view_dummy, context=ResourceRepos, renderer='repos.jinja2')
+        config.add_view(self.view_dummy, context=ResourceLibraryInteractive, renderer='empty.jinja2')
         
         config.add_view(self.view_dummy, context=ResourceLibrary, renderer='library_index.jinja2', permission=PRIVILEGE_READ)
+        config.add_view(self.view_dummy, context=ResourceThings, renderer='library_index.jinja2', permission=PRIVILEGE_READ)  # same as above
+        
         config.add_view(self.view_dummy, context=ResourceRepo, renderer='shelves_index.jinja2')
         config.add_view(self.view_dummy, context=ResourceShelves, renderer='shelves_index.jinja2') # same as above
+        
         config.add_view(self.view_changes, context=ResourceChanges, renderer='changes.jinja2')
         config.add_view(self.view_tree, context=ResourceTree, renderer='tree.jinja2')
         

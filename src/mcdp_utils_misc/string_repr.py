@@ -12,7 +12,6 @@ def make_chars_visible(x):
         tab = '├──┤'
     else:
         tab = '⇥'
-        
     x = x.replace('\t', tab)
 #     nl = '␤\n'
     nl = '⏎\n'

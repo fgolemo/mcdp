@@ -15,8 +15,8 @@ from mcdp_report.html import ast_to_html
 from mcdp_shelf.access import PRIVILEGE_WRITE
 from mcdp_utils_misc import get_sha1, timeit_wall
 from mcdp_web.environment import cr2e
-from mcdp_web.resource_tree import ResourceThingViewEditor, ResourceThingViewEditorParse,\
-    ResourceThingViewEditorSave,\
+from mcdp_web.images.images import get_mime_for_format
+from mcdp_web.resource_tree import ResourceThingViewEditor, ResourceThingViewEditorParse, ResourceThingViewEditorSave,\
     ResourceThingViewEditorGraph, ResourceThingsNew
 from mcdp_web.utils import (ajax_error_catch,
                             format_exception_for_ajax_response, response_image, response_data)
@@ -54,7 +54,7 @@ class AppEditorFancyGeneric():
             e.repo.commit(e.user)
             return {'ok': True, 'saved_string': string}
     
-        return ajax_error_catch(go)
+        return ajax_error_catch(go, environment=e)
     @cr2e
     def ajax_parse(self, e):
         string = get_text_from_request2(e.request)
@@ -72,7 +72,7 @@ class AppEditorFancyGeneric():
             res['request'] = req
             return res
 
-        return ajax_error_catch(go)
+        return ajax_error_catch(go, environment=e)
 
 
     @add_std_vars_context
@@ -101,7 +101,7 @@ class AppEditorFancyGeneric():
 
     @cr2e
     def graph_generic(self, e):
-        data_format =e.context.data_format
+        data_format = e.context.data_format
         text_hash = e.context.text_hash
         
         def go():
@@ -122,7 +122,6 @@ class AppEditorFancyGeneric():
                 with timeit_wall('graph_generic - get_png_data', 1.0):
                     data = e.spec.get_png_data(e.library, e.thing_name, thing, 
                                              data_format=data_format)
-                from mcdp_web.images.images import get_mime_for_format
                 mime = get_mime_for_format(data_format)
                 return response_data(e.request, data, mime)
         return self.png_error_catch2(e.request, go)

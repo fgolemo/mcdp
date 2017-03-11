@@ -35,16 +35,17 @@ root
     exit
 '''
 
+import logging
 import os
 
 from contracts.utils import indent
 from pyramid.security import Allow, Authenticated, Everyone
 
 from mcdp_shelf.access import PRIVILEGE_ACCESS, PRIVILEGE_READ
-from mcdp.constants import MCDPConstants
-from mcdp.logs import logger
 
 
+logger = logging.getLogger('resource_tree')
+logger.setLevel(logging.FATAL)
 
 class Resource(object):
     
@@ -78,13 +79,13 @@ class Resource(object):
     def __getitem__(self, key):
         r = self.getitem(key)
         if r is None:
-            #print('asked for %r - not found' % key)
+            logger.debug('asked for %r - not found' % key)
             raise KeyError(key)
         
         if not hasattr(r, '__parent__'):
             r.__parent__ = self
         
-        #print('asked for %r - returning %r ' % (key, r))
+        logger.debug('asked for %r - returning %r ' % (key, r))
         return r
     
     def show_ancestors(self):
@@ -298,7 +299,6 @@ class ResourceThings(Resource):
         
     def __iter__(self):
         library = context_get_library(self)
-        print library
         spec = context_get_spec(self)
         x = library._list_with_extension(spec.extension)
         return x.__iter__()
@@ -420,6 +420,7 @@ class ResourceThingViewEditor(ResourceThingView):
             return subs[key]
         
         if key.startswith('graph.'):
+            print('tmp key = %s' % key)
             _, text_hash, data_format = key.split('.')
             return ResourceThingViewEditorGraph(text_hash.encode('utf8'), data_format.encode('utf8'))
 

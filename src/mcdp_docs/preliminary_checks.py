@@ -19,6 +19,15 @@ def do_preliminary_checks_and_fixes(s):
     s = check_most_of_it_xml(s) 
     return s
 
+def assert_not_contains(s, what):
+    if not what in s:
+        return
+    i = s.index(what)
+    if i is not None:
+        msg = 'Found forbidden sequence "%s".' % what
+        where = Where(s, i, i+len(what))
+        raise DPSyntaxError(msg, where=where)
+
 def check_no_forbidden(s): # pragma: no cover
     if '\t' in s:
         i = s.index('\t')
