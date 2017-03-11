@@ -88,12 +88,16 @@ class Where(object):
 # mark = 'here or nearby'
 def format_where(w, context_before=3, mark=None, arrow=True, 
                  use_unicode=True, no_mark_arrow_if_longer_than=3):
+    
+    # hack for tabs 
+#     w = Where(w.string, w.col, w.col_end)
+#     if '\t' in w.string:
+#         w.string = w.string.replace('\t', '@') 
+
     s = ''
     if w.filename:
         s += 'In file %r:\n' % w.filename
     
-    if '\t' in w.string:
-        w.string = w.string.replace('\t', '@') 
     
     lines = w.string.split('\n')
     start = max(0, w.line - context_before)
@@ -107,6 +111,7 @@ def format_where(w, context_before=3, mark=None, arrow=True,
     for i in range(start, w.line + 1):
         # suppress empty lines
         if one_written or lines[i].strip():
+            lines[i] = lines[i].replace('\t', '@')
             s += ("%s%s\n" % (pattern % (i+1), lines[i]))
             one_written = True
         
