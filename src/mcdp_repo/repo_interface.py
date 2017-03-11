@@ -248,9 +248,10 @@ class MCDPGitRepo(MCDPRepo):
                     res[k] = v.encode('utf8')   
             
             if not 'thing_name' in res or not 'shelf_name' in res or not 'library_name' in res:
-                print('skipping %s' % res)
+                #print('skipping %s' % res)
+                pass
             else:
-                print('change: %s' % res)
+                #print('change: %s' % res)
                 self.changes.append(res)
             
     def get_changes(self):

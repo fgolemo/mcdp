@@ -235,6 +235,11 @@ class ResourceShelfInactive(Resource):
 
 class ResourceRepos(Resource):
     def getitem(self, key):
+        session = self.get_session()
+        repos = session.repos
+        if not key in repos:
+            #msg = 'Could not find repository "%s".' % key
+            raise KeyError(key)
         return ResourceRepo(key)
         
     def __iter__(self):

@@ -25,7 +25,7 @@ class Spider():
             return
         o = urlparse.urlparse(url)
         
-        if ':' in o.path: # skip actions
+        if ':' in o.path or  'exit' in o.path: # skip actions
             self.skipped.add(url)
             return 
         
@@ -46,7 +46,7 @@ class Spider():
         if url2 != url:
             print('%s -> %s' % (url, url2))
         if res.content_type == 'text/html':
-            urls = find_links(res.html, url2)
+            urls = list(find_links(res.html, url2))
             print('%s %s: %d links' % (url2, res.status, len(urls)))
             for u in urls:
                 self.queue.append(u)
@@ -57,9 +57,11 @@ class Spider():
         logger.info('Skipped: %d' % len(self.skipped))
         if self.failed:
             logger.error('Failed: %d' % len(self.failed))
-        for url in self.skipped:
+        for url in sorted(self.visited):
+            logger.info('visisted %s' % url)
+        for url in sorted(self.skipped):
             logger.debug('skipped %s' % url)
-        for url in self.failed:
+        for url in sorted(self.failed):
             logger.error('failed %s' % url)
             for r in self.referrers[url]:
                 logger.error(' referred from %s' % r)
@@ -68,16 +70,12 @@ class Spider():
                 
                 
 def find_links(html, url_base):   
-    urls = [] 
-    for a in html.select('link[href]'):
-        href = a['href'] 
-        url = urlparse.urljoin(url_base, href)
-        urls.append(url)
-        
-    for a in html.select('a[href]'):
-        href = a['href']
-        if 'exit' in href:
-            continue
-        url = urlparse.urljoin(url_base, href)
-        urls.append(url)
-    return urls
+    def find(): 
+        for link in html.select('link[href]'):
+            yield link['href']
+        for script in html.select('script[src]'):
+            yield script['src']
+        for a in html.select('a[href]'):
+            yield a['href']
+    for url in find(): 
+        yield urlparse.urljoin(url_base, url)

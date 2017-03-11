@@ -534,7 +534,7 @@ class WebApp(AppVisualization, AppStatus,
                 if a in e.session.app.user_db:
                     u = e.session.app.user_db[a]
                 else:
-                    logger.debug('Cannot find user %r' % a )
+                    #logger.debug('Cannot find user %r' % a )
                     u = UserInfo(username=a, name=None, 
                                  password=None, email=None, website=None, affiliation=None, groups=[], subscriptions=[])
                 change['user'] = u

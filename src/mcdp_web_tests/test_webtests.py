@@ -14,6 +14,8 @@ from mcdp_utils_misc import tmpdir
 from mcdp_web.confi import parse_mcdpweb_params_from_dict
 from mcdp_web.main import WebApp
 from mcdp_web_tests.spider import Spider
+from mcdp_utils_misc.dir_from_package_nam import dir_from_package_name
+import shutil
 
 
 def create_empty_repo(d, bname):
@@ -39,7 +41,7 @@ def create_user_db_repo(where, bname):
             MCDPConstants.user_desc_file: '''
             name: Anonymous user
             subscriptions:
-            - unittests
+            - unittests2
             ''',
         }
     }
@@ -48,7 +50,7 @@ def create_user_db_repo(where, bname):
     repo_commit_all_changes(repo0)
     # checks that it use well formed
     UserDB(where)
-
+    return repo0
 
 class FunctionalTests(unittest.TestCase):
     def setUp(self):
@@ -58,8 +60,16 @@ class FunctionalTests(unittest.TestCase):
             # create a db
             bname = 'master'
             userdb_remote = os.path.join(d, 'userdb_remote')
-            create_user_db_repo(userdb_remote, bname)
+            repo0 = create_user_db_repo(userdb_remote, bname)
            
+            mcdp_data = dir_from_package_name('mcdp_data')
+            unittests = os.path.join(mcdp_data, 'libraries', 'unittests.' + MCDPConstants.shelf_extension )
+            assert os.path.exists(unittests), unittests
+            dest = os.path.join(userdb_remote, 'unittests2.' + MCDPConstants.shelf_extension )
+            shutil.copytree(unittests, dest)
+            repo_commit_all_changes(repo0)
+            
+            
             userdb = os.path.join(d, 'userdb')
             repo = Repo.init(userdb)
             origin = repo.create_remote('origin', url=userdb_remote)
@@ -70,7 +80,7 @@ class FunctionalTests(unittest.TestCase):
             head.checkout()
             settings = {
                 'users': userdb,
-                'load_mcdp_data': '1',
+                'load_mcdp_data': '0',
             }
             options = parse_mcdpweb_params_from_dict(settings)
             wa = WebApp(options)
