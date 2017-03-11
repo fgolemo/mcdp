@@ -13,6 +13,7 @@ from mcdp_shelf import find_shelves
 from mcdp_user_db import UserInfo
 from mcdp_utils_misc import create_tmpdir, dir_from_package_name
 from git.util import Actor
+from mcdp_utils_misc.timing import timeit, timeit_wall
 
 
 class RepoException(Exception):
@@ -142,7 +143,6 @@ def repo_from_url_python(url):
     return MCDPythonRepo(url)
 
 
-
 class MyProgressPrinter(RemoteProgress):
     def update(self, op_code, cur_count, max_count=None, message=''):
         print(op_code, cur_count, max_count, cur_count / (max_count or 100.0), message or "NO MESSAGE")
@@ -181,17 +181,19 @@ class MCDPGitRepo(MCDPRepo):
             if not origin.exists():
                 msg = 'The repo already exists but there is no "origin" remote.'
                 raise_desc(ValueError, msg, remotes=list(self.repo.remotes))
-            for _fetch_info in origin.fetch(progress=MyProgressPrinter()):
-                pass
+                
+            with timeit_wall('Fetching commits'):
+                for _fetch_info in origin.fetch(progress=MyProgressPrinter()):
+                    pass
         
         # we have create the working dir
         assert os.path.exists(where)
                  
-#             print("Updated %s to %s" % (fetch_info.ref, fetch_info.commit))
         self.shelves = find_shelves(where)
         self.changes = []
-        for commit in self.repo.iter_commits(max_count=10):
-            self._note_commit(commit)
+        with timeit_wall('Loading commits'):
+            for commit in self.repo.iter_commits(max_count=10):
+                self._note_commit(commit)
             
 #             print('author: %s' % commit.author)
 #             print('authored_date: %s' % commit.authored_date)
@@ -213,7 +215,7 @@ class MCDPGitRepo(MCDPRepo):
         if not commit.parents:
             return
         for diff in commit.parents[0].diff(commit):
-#                     print diff.change_type, diff.a_path, diff.b_path
+#             print diff.change_type, diff.a_path, diff.b_path
 #                     print type(diff)
             filename = diff.b_path
             components = filename.split('/')
@@ -265,10 +267,7 @@ class MCDPGitRepo(MCDPRepo):
     
     def get_shelves(self):
         return self.shelves
-
-    def get_events(self, skip=0, max_events=None):
-        return []
-    
+ 
     def get_desc_short(self):
         return 'Python package %r' % self.package
     
@@ -276,9 +275,13 @@ class MCDPGitRepo(MCDPRepo):
         ''' Checks out a local copy for remote repos. '''
     
     def commit(self, user_info, message=''):
-        author = user_info.as_git_actor()
-        commit = repo_commit_all_changes(self.repo, message, author)
-        self.repo.remotes.origin.push()
+        with timeit_wall('commit'):
+            author = user_info.as_git_actor()
+            commit = repo_commit_all_changes(self.repo, message, author)
+        if False:
+            logger.debug('Not pushing')
+            with timeit_wall('push'):
+                self.repo.remotes.origin.push()
         self._note_commit(commit)
         
     def push(self):
@@ -315,8 +318,6 @@ class MCDPPipRepo(MCDPRepo):
     def get_shelves(self):
         return self.shelves
 
-    def get_events(self, skip=0, max_events=None):
-        return []
     
     def get_desc_short(self):
         return 'Python package %r' % self.package
@@ -354,9 +355,6 @@ class MCDPythonRepo(MCDPRepo):
     def get_shelves(self):
         return self.shelves
 
-    def get_events(self, skip=0, max_events=None):
-        return []
-    
     def get_desc_short(self):
         return 'Python package %r' % self.package
     

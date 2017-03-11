@@ -420,7 +420,6 @@ class ResourceThingViewEditor(ResourceThingView):
             return subs[key]
         
         if key.startswith('graph.'):
-            print('tmp key = %s' % key)
             _, text_hash, data_format = key.split('.')
             return ResourceThingViewEditorGraph(text_hash.encode('utf8'), data_format.encode('utf8'))
 

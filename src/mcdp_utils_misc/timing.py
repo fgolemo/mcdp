@@ -2,14 +2,17 @@
 from contextlib import contextmanager
 import time
 
+from mcdp.logs import logger_performance
+
 __all__ = [
     'timeit', 
     'timeit_wall',
 ]
 
 @contextmanager
-def timeit(desc, minimum=None):
-    from mcdp import logger
+def timeit(desc, minimum=None, logger=None):
+    logger = logger or logger_performance
+    logger.debug('timeit %s ...' % desc)
     t0 = time.clock()
     yield
     t1 = time.clock()
@@ -17,12 +20,12 @@ def timeit(desc, minimum=None):
     if minimum is not None:
         if delta < minimum:
             return
-    logger.debug('timeit %s: %.2f s (>= %s)' % (desc, delta, minimum))
-
+    logger.debug('timeit result: %.2f s (>= %s)' % (delta, minimum))
 
 @contextmanager
-def timeit_wall(desc, minimum=None):
-    from mcdp import logger
+def timeit_wall(desc, minimum=None, logger=None):
+    logger = logger or logger_performance
+    logger.debug('timeit %s ...' % desc)
     t0 = time.time()
     yield
     t1 = time.time()
@@ -30,5 +33,5 @@ def timeit_wall(desc, minimum=None):
     if minimum is not None:
         if delta < minimum:
             return
-    logger.debug('timeit(wall) %s: %.2f s (>= %s)' % (desc, delta, minimum))
+    logger.debug('timeit result: %.2f s (>= %s)' % (delta, minimum))
     

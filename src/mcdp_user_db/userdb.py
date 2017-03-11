@@ -60,7 +60,7 @@ def load_users(userdir):
     l = locate_files(userdir, pattern='*.%s' % MCDPConstants.user_extension, followlinks=True,
                  include_directories=True,
                  include_files=False)
-    print('users: %s' % l)
+    
     for userd in l:
         username = os.path.splitext(os.path.basename(userd))[0]
         info = os.path.join(userdir, userd, MCDPConstants.user_desc_file)
@@ -71,5 +71,6 @@ def load_users(userdir):
         s = yaml.load(data)
         
         users[username] = userinfo_from_yaml(s, username)
+    logger.info('loaded users: %s.' % ", ".join(sorted(users)))
     return users
         
