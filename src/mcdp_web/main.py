@@ -55,6 +55,7 @@ from .utils.image_error_catch_imp import response_image
 from .utils.response import response_data
 from .utils0 import add_other_fields, add_std_vars_context
 from .visualization.app_visualization import AppVisualization
+from mcdp_utils_misc.fileutils import create_tmpdir
 
 
 __all__ = [
@@ -116,7 +117,7 @@ class WebApp(AppVisualization, AppStatus,
         self.all_shelves = OrderedDict()
         
         if self.options.users is None:
-            self.options.users = 'tmp-user-db'
+            self.options.users = create_tmpdir('tmp-user-db')
             os.makedirs(self.options.users)
 
         self.repos = {}

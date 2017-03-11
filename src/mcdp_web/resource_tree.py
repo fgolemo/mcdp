@@ -207,8 +207,8 @@ class ResourceShelf(Resource):
         
     def getitem(self, key):
         subs =  {
-            'subscribe': ResourceShelvesShelfSubscribe(self.name),
-            'unsubscribe': ResourceShelvesShelfUnsubscribe(self.name),
+            ':subscribe': ResourceShelvesShelfSubscribe(self.name),
+            ':unsubscribe': ResourceShelvesShelfUnsubscribe(self.name),
         }    
         if key in subs: return subs[key]
     

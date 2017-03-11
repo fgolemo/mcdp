@@ -5,6 +5,7 @@ import urlparse
 from contracts.utils import raise_desc
 from git import Repo
 
+from comptests.registrar import run_module_tests, comptest
 from mcdp.constants import MCDPConstants
 from mcdp_library_tests.create_mockups import write_hierarchy
 from mcdp_repo.repo_interface import repo_commit_all_changes
@@ -13,7 +14,6 @@ from mcdp_utils_misc import tmpdir
 from mcdp_web.confi import parse_mcdpweb_params_from_dict
 from mcdp_web.main import WebApp
 from mcdp_web_tests.spider import Spider
-from comptests.registrar import run_module_tests, comptest
 
 
 def create_empty_repo(d, bname):
@@ -38,6 +38,8 @@ def create_user_db_repo(where, bname):
         'anonymous.%s' % MCDPConstants.user_extension: {
             MCDPConstants.user_desc_file: '''
             name: Anonymous user
+            subscriptions:
+            - unittests
             ''',
         }
     }
@@ -68,7 +70,7 @@ class FunctionalTests(unittest.TestCase):
             head.checkout()
             settings = {
                 'users': userdb,
-                'load_mcdp_data': '0',
+                'load_mcdp_data': '1',
             }
             options = parse_mcdpweb_params_from_dict(settings)
             wa = WebApp(options)

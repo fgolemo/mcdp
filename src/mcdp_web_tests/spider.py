@@ -25,6 +25,12 @@ class Spider():
         if url in self.visited:
             return
         o = urlparse.urlparse(url)
+        
+        if ':' in o.path: # skip actions
+            self.skipped.add(url)
+            return
+
+        
         if o.netloc and o.netloc != u'localhost':
             #print('Skipping %s' % str(o))
             self.skipped.add(url)

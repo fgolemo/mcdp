@@ -30,11 +30,11 @@
     <td>
     {% if shelf_name in navigation.shelves_used %}
 
-    <form action="{{shelf_url(shelf_name)}}/unsubscribe" method="post">
+    <form action="{{shelf_url(shelf_name)}}/:unsubscribe" method="post">
         <input type="submit" class='inactive' value="deactivate"/>
     </form>
     {% else %}
-    <form action="{{shelf_url(shelf_name)}}/subscribe" method="post">
+    <form action="{{shelf_url(shelf_name)}}/:subscribe" method="post">
         <input type="submit" class='active' value="activate"/>
     </form>
     {% endif %}
