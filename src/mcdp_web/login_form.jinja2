@@ -6,21 +6,18 @@ font-size: smaller;
 }
 </style>
 
-{% if message %}
+{% if message is defined%}
 	<p>{{message}}</p>
 {% endif %}
 {% if error %}
 	<p id='login-error'>{{error}}</p>
 
 {% endif %}
-<!--
-Came from: {{came_from}}
-Came from 2: {{root}}/{{came_from}}
 
-Root: {{root}}
- -->
+<!-- <pre>came_from = {{came_from}}</pre> -->
+
   <form id='form' action="{{root}}/login/" method="post" title='Please enter login information'>
-    <input type="hidden" name="came_from" value="{{root}}/{{came_from}}">
+    <input type="hidden" name="came_from" value="{{came_from}}">
     <table>
     <tr>
       <td>

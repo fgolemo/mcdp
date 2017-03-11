@@ -8,8 +8,19 @@
         <li id='root'>&#9776;
             <ul>
                 <li><a class='l1' href='{{root}}/'>⌂ Front page</a></li>
-                <li><a class='l1' href='{{root}}/shelves/'>{{icon_shelf|safe}} List of shelves</a></li>
-                <li><a class='l1' href='{{root}}/libraries/'>{{icon_library|safe}} List of libraries</a></li>
+                <li><a class='l1' href='{{root}}/repos/'>{{icon_repo|safe}} List of repositories</a></li>
+                {% if navigation.repo_name %}
+                <li><a class='l1' href='{{root}}/repos/{{navigation.repo_name}}/shelves/'>
+                    {{icon_shelf|safe}} List of shelves for repo {{navigation.repo_name}}
+                </a></li>
+                {% endif %}
+
+                {% if navigation.shelf_name %}
+                <li><a class='l1' href='{{root}}/repos/{{navigation.repo_name}}/shelves/{{navigation.shelf_name}}/libraries/'>
+                    {{icon_library|safe}} List of libraries for shelf {{navigation.shelf_name}}
+                </a></li>
+                {% endif %}
+
                 {% if navigation.library_name and shelf_can_write(navigation.shelf_name) %}
                     <script type="text/javascript">
                         url_base = "{{library_url(navigation.library_name)}}/";

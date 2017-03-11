@@ -11,7 +11,7 @@
 
 {% if user %}
     <p>{{user['name']}} does not have enough privileges to see this resource.</p>
-    <p><a href="{{root}}/{{url_logout}}">Try to log out</a> and log in as a different user.</p>
+    <p><a href="{{root}}/logout/">Try to log out</a> and log in as a different user.</p>
 
 {% else %}
     <div>
@@ -25,8 +25,9 @@
 <p>{{request_exception_result}}</p>
 </div>
 -->
-
+<div style='display:none'>
 <pre>{{context_detail}}</pre>
 <pre>{{user}}</pre>
+</div>
 </body>
 </html>

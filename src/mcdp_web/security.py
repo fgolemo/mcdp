@@ -5,8 +5,9 @@ from pyramid.security import remember, forget
 from mcdp import logger
 
 from .resource_tree import ResourceLogout, ResourceLogin, context_display_in_detail
-from mcdp_web.environment import cr2e
-from mcdp_web.utils0 import add_std_vars_context
+from .environment import cr2e
+from .utils0 import add_std_vars_context
+from mcdp_web.environment import Environment
 
 
 URL_LOGIN = '/login/'
@@ -25,6 +26,7 @@ class AppLogin():
     def view_forbidden(self, request):
         # if using as argument, context is the HTTPForbidden exception
         context = request.context
+        e = Environment(context, request)
         user = self.user_db[request.authenticated_userid]
         logger.error('forbidden url: %s' % request.url)
         logger.error('forbidden referrer: %s' %request.referrer)
@@ -35,12 +37,12 @@ class AppLogin():
         res['request_exception_message'] = request.exception.message
         res['request_exception_result'] = request.exception.result
         # path_qs The path of the request, without host but with query string
-        res['came_from'] = request.path_qs[1:]
+        res['came_from'] = request.path_qs
         res['referrer'] = request.referrer
         res['login_form'] = self.make_relative(request, URL_LOGIN)
         res['url_logout'] = self.make_relative(request, URL_LOGOUT)
-        res['root'] =  self.get_root_relative_to_here(request)
-        res['static'] = {}
+        res['root'] =   e.root
+        res['static'] = e.root + '/static'
         if context is not None:
             res['context_detail'] =  context_display_in_detail(context)
             logger.error(res['context_detail'])
@@ -58,7 +60,17 @@ class AppLogin():
     @add_std_vars_context
     @cr2e
     def login(self, e):  # @UnusedVariable
-        came_from = e.request.params.get('came_from', "..")
+        came_from = e.request.params.get('came_from', None)
+        if came_from is not None:
+            logger.info('came_from from params: %s' % came_from)
+        else:
+            came_from = e.request.referrer
+            if came_from is not None:
+                logger.info('came_from from referrer: %s' % came_from)
+            else:
+                msg = 'Cannot get referrer or "came_from" - using root'
+                logger.info(msg)
+                came_from = self.get_root_relative_to_here(e.request)
         message = ''
         error = ''
         if 'form.submitted' in e.request.params:
@@ -77,16 +89,17 @@ class AppLogin():
         else: 
             login = None
             
-        login_form = self.make_relative(e.request, URL_LOGIN)
-         
-        if came_from.startswith('/'):
-            came_from = self.make_relative(e.request, came_from)
+#         login_form = self.make_relative(e.request, URL_LOGIN)
+        
+#          
+#         if came_from.startswith('/'):
+#             came_from = self.make_relative(e.request, came_from)
 
         res = dict(
             name='Login',
             message=message,
             error=error,
-            login_form=login_form,
+            login_form= e.root + URL_LOGIN,
             came_from=came_from,
         )
         if login is not None:
