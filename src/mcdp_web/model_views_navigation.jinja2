@@ -131,10 +131,10 @@
 	  </td>
 	  <td>
 
-		  {% if navigation.current_library %}
+		  {% if navigation.library_name %}
 	  / <select id='select_model' class='hot_select'>
-	  	{% if not navigation['current_model'] and not navigation['current_template']
-	  		and not navigation['current_poset'] %}
+	  	{% if  navigation.spec_name != 'models' and  navigation.spec_name  != 'templates'
+	  		and navigation.spec_name != 'posets' %}
 
 	  		<option value="#"  selected = 1>🔎&nbsp; MCDPs/posets/&hellip; </option>
 
@@ -163,7 +163,7 @@
 
 	  <td>
 
-	  {% if navigation['current_model'] %}
+	  {% if navigation.spec_name == 'models' %}
 
 		  <select id='select_view' class='hot_select'>
 		    {% for vi in navigation['views'] %}

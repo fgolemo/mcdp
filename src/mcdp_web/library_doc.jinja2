@@ -60,7 +60,7 @@
 <a class='make_button' href="{{library_url(navigation.library_name)}}/">
 	Library
 	 		 <span class="library_name">
-	 		 	{{navigation['current_library']}}
+	 		 	{{navigation.library_name}}
 	 		 </span>
 </a>
 {% endif %}
@@ -69,7 +69,7 @@
 {{contents | safe }}
 {% else %}
 <div id='toc'>
-{% set toc = navigation['current_library'] + '-toc' %}
+{% set toc = navigation.library_name + '-toc' %}
 {% if has_library_doc(toc) %}
 {{ render_library_doc(toc) | safe }}
 {% endif %}

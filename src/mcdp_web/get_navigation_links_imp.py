@@ -1,9 +1,9 @@
+
 from mcdp.constants import MCDPConstants
 from mcdp.logs import logger
 from mcdp_shelf import PRIVILEGE_WRITE
 from mcdp_utils_misc import natural_sorted
-from mcdp_web.editor_fancy.specs_def import SPEC_VALUES, SPEC_POSETS,\
-    SPEC_TEMPLATES, SPEC_MODELS
+from mcdp_web.editor_fancy.specs_def import SPEC_VALUES, SPEC_POSETS, SPEC_TEMPLATES, SPEC_MODELS
 
 
 def get_navigation_links_context(e):
@@ -18,17 +18,7 @@ def get_navigation_links_context(e):
             msg = 'The library %r is not available. Maybe a permission issue?' % e.library_name
             msg += '\n context: %s' % e.context.show_ancestors()
             logger.error(msg) 
-        
-    if e.thing_name is not None:
-        current_model = e.thing_name if e.spec_name == SPEC_MODELS else None
-        current_template = e.thing_name if e.spec_name== SPEC_TEMPLATES else None
-        current_poset = e.thing_name if e.spec_name == SPEC_POSETS else None
-        current_value = e.thing_name if e.spec_name == SPEC_VALUES else None
-    else:
-        current_model = None
-        current_template = None
-        current_poset = None
-        current_value = None
+
     d = {}
     
     d['repo_name'] = e.repo_name
@@ -45,11 +35,8 @@ def get_navigation_links_context(e):
         if not x in  d['shelves_used']:
             d['shelves_unused'][x] = d['shelves_available'][x] 
     
-    d['current_library'] = d['library_name'] = e.library_name
-    d['current_thing'] = e.thing_name
-    d['current_template'] = current_template
-    d['current_poset'] = current_poset
-    d['current_model'] = current_model
+    d['library_name'] = e.library_name
+
     d['current_view'] = e.view_name 
 
     if e.library is not None:
@@ -73,7 +60,7 @@ def get_navigation_links_context(e):
         d[SPEC_MODELS] = []
         models = e.library.list_ndps()
         for _ in natural_sorted(models):
-            is_current = _ == current_model
+            is_current = (e.spec_name == SPEC_MODELS) and (e.thing_name == _)
 
             url0 =  library_url + SPEC_MODELS + '/' + _ + '/'
             url = url0 + VIEW_SYNTAX
@@ -88,7 +75,7 @@ def get_navigation_links_context(e):
         templates = e.library.list_templates()
         d[SPEC_TEMPLATES] = []
         for _ in natural_sorted(templates):
-            is_current = (_ == current_template)
+            is_current = (e.spec_name == SPEC_TEMPLATES) and (e.thing_name == _)
 
             url0 =  library_url + SPEC_TEMPLATES + '/' + _ + '/'
             url = url0 + VIEW_SYNTAX
@@ -103,7 +90,7 @@ def get_navigation_links_context(e):
         posets = e.library.list_posets()
         d[SPEC_POSETS] = []
         for _ in natural_sorted(posets):
-            is_current = (_ == current_poset)
+            is_current = (e.spec_name == SPEC_POSETS) and (e.thing_name == _)
             
             url0 =  library_url + SPEC_POSETS + '/' + _ + '/'
             url = url0 + VIEW_SYNTAX
@@ -117,7 +104,7 @@ def get_navigation_links_context(e):
         values =e.library.list_values()
         d[SPEC_VALUES] = []
         for _ in natural_sorted(values):
-            is_current = (_ == current_value)
+            is_current = (e.spec_name == SPEC_VALUES) and (e.thing_name == _)
             
             url0 =  library_url + SPEC_VALUES + '/' + _ + '/'
             url = url0 + VIEW_SYNTAX
@@ -132,13 +119,13 @@ def get_navigation_links_context(e):
 
         d['views'] = []
         
-        if current_model is not None:
+        if e.spec_name == SPEC_MODELS is not None:
             views = e.app._get_views()
             for v in views:
                 view = e.app.views[v] 
                 is_current = v == e.view_name
     
-                url = library_url + 'models/' + current_model + '/' + 'views/' + v + '/'
+                url = library_url + SPEC_MODELS + '/' + e.thing_name + '/' + 'views/' + v + '/'
                 name = "View: %s" % view['desc']
                 desc = dict(name=name, url=url, current=is_current)
                 d['views'].append(desc)

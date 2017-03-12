@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Library {{navigation['current_library']}}</title>
+    <title>Library {{navigation.library_name}}</title>
     {% include 'head.jinja2' %}
     <style>{% include 'library_index.css' %}</style>
     <script>{% include 'library_index.js' %}</script>
@@ -10,7 +10,7 @@
 {% include 'refresh_shortcut.jinja2' %}
 
 {% include 'model_views_navigation.jinja2' %}
-{% set index_doc = navigation['current_library'] + '-index' %}
+{% set index_doc = navigation.library_name + '-index' %}
 
 <div id='allcontents' style='visibility: hidden'>
 {% if has_library_doc(index_doc) %}
@@ -24,7 +24,7 @@
 <thead>
 <tr><td id='ttitle' colspan="5">
     {{icon_shelf|safe}}&nbsp;<a href="{{shelf_url(navigation.shelf_name)}}/">{{navigation.shelf_name}}</a> /
-    {{icon_library|safe}}&nbsp;<code>{{navigation.current_library}}</code>
+    {{icon_library|safe}}&nbsp;<code>{{navigation.library_name}}</code>
 </td></tr>
 <tr id="things">
 	<td>MCDPs</td>

@@ -77,7 +77,7 @@ class Spider():
             logger.error('failed %s' % url)
             for r in self.referrers[url]:
                 logger.error(' referred from %s' % r)
-            logger.error(unicode(self.failed[url]))
+            logger.error(self.failed[url])
 
                 
                 

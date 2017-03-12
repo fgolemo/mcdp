@@ -1,7 +1,7 @@
 var saved_text = {{source_code_json | safe}};
 var white_background = '{{static}}/white.png';
-var title_s = "{{navigation['current_thing']}}";
-var title_u = "*{{navigation['current_thing']}}";
+var title_s = "{{navigation.thing_name}}";
+var title_u = "*{{navigation.thing_name}}";
 var icon_s = '{{static}}/favicon_editor_{{url_part}}_saved.png';
 var icon_u = '{{static}}/favicon_editor_{{url_part}}_unsaved.png';
 var format = "{{format}}";
