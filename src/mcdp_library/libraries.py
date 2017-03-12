@@ -6,6 +6,7 @@ from contracts.utils import raise_desc, check_isinstance
 
 from mcdp import MCDPConstants, logger
 from mcdp.exceptions import DPSemanticError
+from mcdp_utils_misc.good_identifiers import assert_good_plain_identifier
 from mcdp_utils_misc import dir_from_package_name, locate_files
 
 from .library import MCDPLibrary
@@ -153,7 +154,8 @@ def find_libraries(d0):
         if dirname == '.':
             dirname = os.path.realpath(dirname)
         library_name = os.path.splitext(os.path.basename(dirname))[0]
-        library_name = library_name.replace('.', '_')
+        assert_good_plain_identifier(library_name, 'libraries')
+        #library_name = library_name.replace('.', '_')
         res[library_name] = dirname
     return res
 

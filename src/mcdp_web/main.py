@@ -404,7 +404,7 @@ class WebApp(AppVisualization, AppStatus,
         if not path.endswith('/'):
             last = path.rfind('/')
             path = path[:last]
-            logger.info('Correcting parsed %r in %r' % (parsed.path, path))
+#             logger.info('Correcting parsed %r in %r' % (parsed.path, path))
         
         if path == '':
             return '/'

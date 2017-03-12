@@ -18,6 +18,7 @@ from mcdp_utils_misc import get_mcdp_tmp_dir, memo_disk_cache2, locate_files
 from mocdp.comp.context import Context, ValueWithUnits
 from mocdp.comp.interfaces import NamedDP
 from mocdp.comp.template_for_nameddp import TemplateForNamedDP
+from mcdp_utils_misc.good_identifiers import assert_good_plain_identifier
 
 
 __all__ = [
@@ -339,12 +340,17 @@ class MCDPLibrary():
 
     @contract(ext=str)
     def _list_with_extension(self, ext):
+        ''' Lists all files with a certain extension. 
+        
+            The basename should be a plain identifier.
+        '''
         r = []
         for x in self.file_to_contents:
             assert isinstance(x, str), x.__repr__()
             p = '.' + ext
             if x.endswith(p):
                 fn = x.replace(p, '')
+                assert_good_plain_identifier(fn)
                 assert isinstance(fn, str), (x, p, fn)
                 r.append(fn)
         res = set(r)
