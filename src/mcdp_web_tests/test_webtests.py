@@ -100,9 +100,10 @@ class FunctionalTests(unittest.TestCase):
         return url0, res
  
     def runTest(self):
+        ushelf = '/repos/global/shelves/%s/' % another_name_for_unittests_shelf
         bugs = [
-#             '/repos/global/shelves/unittests2/libraries/basic/models/test2/views/edit_fancy/graph.png',
-            '/repos/global/shelves/%s/libraries/basic/models/sum2f_rcomp/views/solver' % another_name_for_unittests_shelf,
+            ushelf + '/libraries/basic/models/sum2f_rcomp/views/solver',
+            ushelf + '/libraries/pop/models/pop_example_3_7_newsyntax/views/ndp_repr/'
         ]
         for b in bugs:
             self.testapp.get(b)

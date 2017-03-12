@@ -63,7 +63,8 @@ class AppVisualization():
             
         except (DPSyntaxError, DPSemanticError, DPNotImplementedError) as exc:
             self.note_exception(exc, request=e.request, context=e.context)
-            res['error'] = str(exc)
+            s = str(exc)
+            res['error'] = s.decode('utf8')
         return res
 
     @add_std_vars_context

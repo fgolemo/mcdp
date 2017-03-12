@@ -511,7 +511,7 @@ def eval_PlusN_ops_multi(resources, context):
         dp = SumNRcompDP(len(resources))
     else:
         msg = 'Cannot find sum operator for combination of types.'
-        raise_desc(DPInternalError, msg, resources_types=resources_types)
+        raise_desc(DPNotImplementedError, msg, resources_types=resources_types)
 
     r = create_operation(context, dp, resources,
                          name_prefix='_sum', op_prefix='_term',
