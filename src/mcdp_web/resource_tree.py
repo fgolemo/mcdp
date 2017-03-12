@@ -193,6 +193,9 @@ class ResourceLibraries(Resource):
         if key in subs: return subs[key]
         
         libname = key 
+        shelf = context_get_shelf(self)
+        if not libname in shelf.get_libraries_path():
+            return ResourceLibraryNotFound(libname)
         return ResourceLibrary(libname)
     
     def __iter__(self):
@@ -253,6 +256,8 @@ class ResourceRepo(Resource):
     def get_subs(self):
         return {'shelves':ResourceShelves()}
     
+class ResourceLibraryNotFound(Resource):
+    pass
 class ResourceLibrary(Resource): 
     
     def __iter__(self):

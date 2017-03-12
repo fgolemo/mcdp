@@ -166,7 +166,8 @@ class Session():
     def get_library(self, library_name): 
         if not library_name in self.libraries:
             msg = 'Could not find library %r.' % library_name
-            raise_desc(ValueError, msg, available=sorted(self.libraries))
+            msg += '\n available: ' + ", ".join(sorted(self.libraries)) + '.'
+            raise_desc(ValueError, msg)
         return self.libraries[library_name]['library'] 
 
     def refresh_libraries(self):

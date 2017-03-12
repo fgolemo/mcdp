@@ -27,15 +27,14 @@ from mcdp.exceptions import DPSemanticError, DPSyntaxError
 from mcdp_docs import render_complete
 from mcdp_library import MCDPLibrary
 from mcdp_repo import MCDPGitRepo, MCDPythonRepo
-from mcdp_shelf import PRIVILEGE_ACCESS, PRIVILEGE_READ, PRIVILEGE_SUBSCRIBE
-from mcdp_shelf import PRIVILEGE_DISCOVER
+from mcdp_shelf import PRIVILEGE_ACCESS, PRIVILEGE_READ, PRIVILEGE_SUBSCRIBE, PRIVILEGE_DISCOVER
 from mcdp_user_db import UserDB, UserInfo
 from mcdp_utils_misc import create_tmpdir, duration_compact, dir_from_package_name
+from mcdp_web.utils0 import add_std_vars_context_no_redir
 
 from .confi import describe_mcdpweb_params, parse_mcdpweb_params_from_dict
 from .editor_fancy import AppEditorFancyGeneric
-from .environment import Environment
-from .environment import cr2e
+from .environment import Environment, cr2e
 from .images.images import WebAppImages, get_mime_for_format
 from .interactive.app_interactive import AppInteractive
 from .qr.app_qr import AppQR
@@ -45,8 +44,7 @@ from .resource_tree import MCDPResourceRoot, ResourceLibraries,\
     ResourceLibraryAsset, ResourceRobots, ResourceShelves,\
     ResourceShelvesShelfUnsubscribe, ResourceShelvesShelfSubscribe,\
     ResourceExceptionsFormatted, ResourceExceptionsJSON, ResourceShelf, ResourceLibrariesNewLibname,\
-    Resource,\
-    context_display_in_detail, ResourceShelfInactive, ResourceThingDelete, ResourceChanges, ResourceTree, ResourceThing, ResourceRepos, ResourceRepo, ResourceThings, ResourceLibraryInteractive
+    Resource, context_display_in_detail, ResourceShelfInactive, ResourceThingDelete, ResourceChanges, ResourceTree, ResourceThing, ResourceRepos, ResourceRepo, ResourceThings, ResourceLibraryInteractive
 from .security import AppLogin, groupfinder
 from .sessions import Session
 from .solver.app_solver import AppSolver
@@ -56,7 +54,6 @@ from .utils.image_error_catch_imp import response_image
 from .utils.response import response_data
 from .utils0 import add_other_fields, add_std_vars_context
 from .visualization.app_visualization import AppVisualization
-from mcdp_web.utils0 import add_std_vars_context_no_redir
 
 
 __all__ = [

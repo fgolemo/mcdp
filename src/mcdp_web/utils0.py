@@ -4,19 +4,17 @@ import traceback
 from contracts.utils import check_isinstance, indent
 from pyramid.httpexceptions import HTTPException, HTTPFound
 
-from mcdp import MCDPConstants
-from mcdp import logger
-import mcdp
-from mcdp_shelf import PRIVILEGE_SUBSCRIBE, PRIVILEGE_READ,\
-    PRIVILEGE_WRITE, PRIVILEGE_ADMIN
-from mcdp_utils_misc import duration_compact
+from mcdp import MCDPConstants,  logger
 
-from .environment import Environment
-from .get_navigation_links_imp import get_navigation_links_context
-from .resource_tree import context_display_in_detail, Resource
+from mcdp_shelf import PRIVILEGE_SUBSCRIBE, PRIVILEGE_READ, PRIVILEGE_WRITE, PRIVILEGE_ADMIN
+from mcdp_utils_misc import duration_compact
 
 
 def add_other_fields(self, res, request, context):
+    from .environment import Environment
+    from .get_navigation_links_imp import get_navigation_links_context
+
+
     e = Environment(context, request)
     res['navigation'] = get_navigation_links_context(e)   
     res['navigation'].update(e.__dict__)         
@@ -116,6 +114,8 @@ def add_std_vars_context_no_redir(f):
     return add_std_vars_context_(f,redir=False)
     
 def add_std_vars_context_(f, redir):
+    from .resource_tree import context_display_in_detail, Resource
+
     def f0(self, context, request):
         if redir:
             url = request.url
