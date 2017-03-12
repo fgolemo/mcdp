@@ -2,6 +2,7 @@ from collections import defaultdict
 import urlparse
 from webtest.app import AppError
 import logging
+import cgi
 
 
 logger = logging.getLogger('mcdp.spider')
@@ -46,8 +47,9 @@ class Spider():
         try:
             url2, res = self.get_maybe_follow(url)
         except AppError as e:
-            logger.error('failed %s' % url) 
-            self.failed[url] = e
+            logger.error('failed %s' % url)
+            import xml.sax.saxutils as saxutils
+            self.failed[url] = saxutils.unescape(str(e))
             return
             
         self.visited.add(url2)

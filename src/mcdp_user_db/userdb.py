@@ -53,9 +53,12 @@ def load_users(userdir):
     ''' Returns a dictionary of username -> User profile '''
     users = {}
     
-    if not os.path.exists(userdir):
+    exists = os.path.exists(userdir) 
+    if not exists:
         msg = 'Directory %s does not exist' % userdir
-        Exception(msg)
+        raise Exception(msg)
+        
+    assert exists
         
     l = locate_files(userdir, pattern='*.%s' % MCDPConstants.user_extension, followlinks=True,
                  include_directories=True,
@@ -71,6 +74,11 @@ def load_users(userdir):
         s = yaml.load(data)
         
         users[username] = userinfo_from_yaml(s, username)
-    logger.info('loaded users: %s.' % ", ".join(sorted(users)))
+    if not users:
+        msg = 'Could not load any user from %r' % userdir
+        raise Exception(msg)
+    else:
+        logger.info('loaded users: %s.' % ", ".join(sorted(users)))
+        
     return users
         

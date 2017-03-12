@@ -108,7 +108,8 @@ def generate_view_syntax(e, make_relative):
                                 postprocess=postprocess)
         
         def get_link_library(libname):
-            url0 =  "/repos/%s/shelves/%s/libraries/%s/" % (e.repo_name, e.shelf_name, libname)
+            rname, sname = e.session.get_repo_shelf_for_libname(libname)
+            url0 =  "/repos/%s/shelves/%s/libraries/%s/" % (rname, sname, libname)
             return make_relative(url0)
             
         def get_link(specname, libname, thingname):

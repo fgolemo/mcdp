@@ -110,6 +110,20 @@ class Session():
         self.librarian = Librarian()
         
         self.libname2shelfname = {}
+        self.shelfname2reponame = {}
+        for repo_name, repo in self.repos.items():
+            for shelf_name, shelf in repo.get_shelves().items():
+                if shelf_name in self.shelfname2reponame:
+                    o = self.shelfname2reponame[shelf_name]
+                    msg = ('Two repos with same shelf %r: %r and %r.' % 
+                           (shelf_name, repo_name, o))
+                    
+                    for r in [o, repo_name]:
+                        msg += '\n Shelves for %r: %s' % (r, ", ".join(list(self.repos[r].get_shelves())))
+                    
+                    raise ValueError(msg)
+                self.shelfname2reponame[shelf_name] = repo_name
+                
         for sname, shelf in self.shelves_all.items():
             for libname in shelf.get_libraries_path():
                 self.libname2shelfname[libname] = sname
@@ -125,7 +139,17 @@ class Session():
             cache_dir = os.path.join(path, '_cached/mcdpweb_cache')
             l.use_cache_dir(cache_dir)
             
+    def get_repo_shelf_for_libname(self, libname):
+        sname = self.get_shelf_for_libname(libname)
+        rname=  self.shelfname2reponame[sname]
+        return rname, sname
+    
     def get_shelf_for_libname(self, libname):
+        ''' Returns the name of the shelf for the given libname. '''
+        if not libname in self.libname2shelfname:
+            msg = 'Could not find library %r.' % libname
+            msg += '\n Available: %s' % sorted(self.libname2shelfname)
+            raise ValueError(msg)
         return self.libname2shelfname[libname]
     
     def get_shelf(self, shelfname):
@@ -139,7 +163,7 @@ class Session():
     def get_library(self, library_name): 
         if not library_name in self.libraries:
             msg = 'Could not find library %r.' % library_name
-            raise_desc(ValueError, msg, available=self.libraries)
+            raise_desc(ValueError, msg, available=sorted(self.libraries))
         return self.libraries[library_name]['library'] 
 
     def refresh_libraries(self):

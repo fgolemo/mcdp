@@ -127,10 +127,12 @@ class WebApp(AppVisualization, AppStatus,
         if self.options.load_mcdp_data:
             if os.path.exists('.git'):
                 logger.info('Loading mcdp_data repo as MCDPGitRepo')
-                self.repos[REPO_BUNDLED] = MCDPGitRepo(where='.')
+                b = MCDPGitRepo(where='.')
             else:
                 logger.info('Loading mcdp_data repo as MCDPythonRepo')
-                self.repos[REPO_BUNDLED] = MCDPythonRepo('mcdp_data')
+                b = MCDPythonRepo('mcdp_data')
+                    
+            self.repos[REPO_BUNDLED]  = b
         else:
             logger.info('Not loading mcdp_data')
             
@@ -138,10 +140,19 @@ class WebApp(AppVisualization, AppStatus,
             self.user_db = UserDB(self.options.users)            
             self.repos[REPO_USERS] = MCDPGitRepo(where=self.options.users)
 
+        shelf2repo = {}
         for id_repo, repo in self.repos.items():
-            user_shelves = repo.get_shelves()
-            logger.info('%s: %s' % (id_repo, sorted(user_shelves)))
-            self.all_shelves.update(user_shelves)
+            shelves = repo.get_shelves()
+            
+            logger.info('repo %s: %s' % (id_repo, sorted(shelves)))
+            
+            for shelf_name in shelves:
+                if shelf_name in shelf2repo:
+                    msg = 'Shelf %r in %r and %r' % (shelf_name, id_repo, shelf2repo[shelf_name])
+                    raise ValueError(msg)
+                shelf2repo[shelf_name] = id_repo
+
+            self.all_shelves.update(shelves)
         
     def add_model_view(self, name, desc):
         self.views[name] = dict(desc=desc, order=len(self.views))
@@ -270,6 +281,9 @@ class WebApp(AppVisualization, AppStatus,
         self.refresh_library(e) 
         if e.request.referrer is None:
             redirect = self.get_root_relative_to_here(e.request)
+            logger.info('REFRESH')
+            logger.info('context.url = %s' % e.request.url)
+            logger.info('redirect = %s' % redirect)
         else:
             redirect = e.request.referrer
         raise HTTPFound(redirect)
@@ -377,21 +391,25 @@ class WebApp(AppVisualization, AppStatus,
             raise ValueError(msg)
         root = self.get_root_relative_to_here(request)
         comb = root + url
-         
         return comb
     
 
     def get_root_relative_to_here(self, request):
         if request is None:
             raise ValueError()
-        url = request.url
-        if not url.endswith('/'):
-            last = url.rfind('/')
-            url = url[:last]
         
-        parsed = urlparse.urlparse(url) 
+        parsed = urlparse.urlparse(request.url) 
         path = parsed.path
+        
+        if not path.endswith('/'):
+            last = path.rfind('/')
+            path = path[:last]
+            logger.info('Correcting parsed %r in %r' % (parsed.path, path))
+        
+        if path == '':
+            return '/'
         r = os.path.relpath('/', path)
+#         logger.debug('os.path.relpath("/", %r) = %r' % (path, r))
         return r
 
 
@@ -548,7 +566,7 @@ class WebApp(AppVisualization, AppStatus,
                     u = UserInfo(username=a, name=None, 
                                  password=None, email=None, website=None, affiliation=None, groups=[], subscriptions=[])
                 change['user'] = u
-                p = '/repos/{repo_name}/shelves/{shelf_name}/libraries/{library_name}/{spec_name}/views/syntax/'
+                p = '/repos/{repo_name}/shelves/{shelf_name}/libraries/{library_name}/{spec_name}/{thing_name}/views/syntax/'
                 change['url'] = e.root + p.format(**change)
 
                 #print('change: %s url = %s' % (change, change['url']))

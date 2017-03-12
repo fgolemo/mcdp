@@ -7,7 +7,7 @@ from contracts.utils import raise_desc, indent
 from git import Repo
 
 from comptests.registrar import run_module_tests, comptest
-from mcdp.constants import MCDPConstants
+from mcdp import MCDPConstants
 from mcdp_docs.preliminary_checks import assert_not_contains
 from mcdp_library_tests.create_mockups import write_hierarchy
 from mcdp_repo.repo_interface import repo_commit_all_changes
@@ -15,7 +15,10 @@ from mcdp_user_db import UserDB
 from mcdp_utils_misc import dir_from_package_name, tmpdir
 from mcdp_web.confi import parse_mcdpweb_params_from_dict
 from mcdp_web.main import WebApp
-from mcdp_web_tests.spider import Spider# do not make relative to start using python
+# do not make relative to start using python
+from mcdp_web_tests.spider import Spider
+
+
 def create_empty_repo(d, bname):
     repo0 = Repo.init(d)
     filename = os.path.join(d, 'readme.txt')
@@ -33,7 +36,7 @@ def create_empty_repo(d, bname):
     repo0.index.commit('msg')
     return repo0
 
-another_name_for_unittests_shelf = 'unittests2'
+another_name_for_unittests_shelf = 'unittests'
 
 def create_user_db_repo(where, bname):
     user_db_skeleton = {
@@ -100,12 +103,15 @@ class FunctionalTests(unittest.TestCase):
         bugs = [
             ushelf + '/libraries/basic/models/sum2f_rcomp/views/solver',
             ushelf + '/libraries/pop/models/pop_example_3_7_newsyntax/views/ndp_repr/',
+            
+            # this refers to a library that is not in this shelf
+            ushelf + '/libraries/making/models/test1/views/syntax/',
         ]
         for b in bugs:
             self.testapp.get(b)
             
         # this should not redirect
-        url = '/repos/global/shelves/unittests2/libraries/documents/align.html'
+        url = '/repos/global/shelves/%s/libraries/documents/align.html'  % another_name_for_unittests_shelf
         res = self.testapp.get(url)
         if '302' in res.status:
             msg = 'Document redirect: %s -> %s' % (url, res.headers['location'])
@@ -153,7 +159,7 @@ class FunctionalTests(unittest.TestCase):
             msg = 'Could not get some URLs:\n'
             for f, e in spider.failed.items():
                 msg += '\n URL: ' + f
-                msg += '\n referrers: ' + ", ".join(spider.referrers[f]) 
+                msg += '\n referrers: \n' + "\n  - ".join(spider.referrers[f]) 
                 msg += '\n' + indent(str(e), '  > ')
 #                 msg += '\n'.join('- %s' % _ for _ in sorted(spider.failed))
             raise_desc(Exception, msg)
