@@ -138,7 +138,7 @@ class FunctionalTests(unittest.TestCase):
             msg = 'Could not get some URLs:\n'
             for f, e in spider.failed.items():
                 msg += '\n URL: ' + f
-                msg += '\n referrers: ' + ", ".join(self.referrers) 
+                msg += '\n referrers: ' + ", ".join(spider.referrers) 
                 msg += '\n' + indent(str(e), '  > ')
 #                 msg += '\n'.join('- %s' % _ for _ in sorted(spider.failed))
             raise_desc(Exception, msg)
