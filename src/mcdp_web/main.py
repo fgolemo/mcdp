@@ -56,6 +56,7 @@ from .utils.image_error_catch_imp import response_image
 from .utils.response import response_data
 from .utils0 import add_other_fields, add_std_vars_context
 from .visualization.app_visualization import AppVisualization
+from mcdp_web.utils0 import add_std_vars_context_no_redir
 
 
 __all__ = [
@@ -251,22 +252,22 @@ class WebApp(AppVisualization, AppStatus,
             e.session.recompute_available()
         raise HTTPFound(e.request.referrer)
 
-    def refresh_library(self, request):
+    def refresh_library(self, e):
         # nuclear option
-        session = self.get_session(request)
-        session.refresh_libraries()
+        e.session.refresh_libraries()
 
-    def view_refresh_library(self, context, request):  # @UnusedVariable
+    @cr2e
+    def view_refresh_library(self, e):  # @UnusedVariable
         """ Refreshes the current library (if external files have changed) 
             then reloads the current url. """
 #         self._refresh_library(request) 
         # Note this currently is equivalent to global refresh
-        return self.view_refresh(request);
+        return self.view_refresh(e.context, e.request);
 
     @cr2e
     def view_refresh(self, e): 
         """ Refreshes all """
-        self.refresh_library(e.request) 
+        self.refresh_library(e) 
         if e.request.referrer is None:
             redirect = self.get_root_relative_to_here(e.request)
         else:
@@ -279,7 +280,7 @@ class WebApp(AppVisualization, AppStatus,
         url = e.request.url
         referrer = e.request.referrer
         #print('context: %s' % e.context)
-        self.exceptions.append('Path not found.\n url: %s\n ref: %s' % (url, referrer))
+        self.exceptions.append('Path not found.\n url: %s\n referrer: %s' % (url, referrer))
         res = {
             'url': url,
              'referrer': referrer,
@@ -382,14 +383,19 @@ class WebApp(AppVisualization, AppStatus,
 
     def get_root_relative_to_here(self, request):
         if request is None:
-            return ''
-        else:
-            path = urlparse.urlparse(request.url).path
-            r = os.path.relpath('/', path)
-            return r
+            raise ValueError()
+        url = request.url
+        if not url.endswith('/'):
+            last = url.rfind('/')
+            url = url[:last]
+        
+        parsed = urlparse.urlparse(url) 
+        path = parsed.path
+        r = os.path.relpath('/', path)
+        return r
 
 
-    @add_std_vars_context
+    @add_std_vars_context_no_redir
     @cr2e
     def view_library_doc(self, e):
         """ '/libraries/{library}/{document}.html' """

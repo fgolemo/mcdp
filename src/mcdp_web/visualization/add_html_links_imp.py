@@ -4,10 +4,11 @@ from mcdp_utils_xml import bs
 from mcdp_utils_xml.parsing import to_html_stripping_fragment
 
 
-def add_html_links(frag, library_name, get_link):
+def add_html_links(frag, library_name, get_link, get_link_library):
     """ Adds links to models.
     
         get_link(specname, libname, thingname) -> url
+        get_link_library(libname) -> url
     
      """
     soup = bs(frag)
@@ -104,7 +105,7 @@ def add_html_links(frag, library_name, get_link):
         # Need to be last
         for tag in soup.select('span.LibraryName'):
             libname = get_name_from_tag(tag)
-            href = '/libraries/%s/' % libname
+            href = get_link_library(libname)
             add_link_to_ndpname(tag=tag, href=href)
 
     try:

@@ -4,6 +4,7 @@ from collections import namedtuple
 
 from bs4.element import Declaration, ProcessingInstruction, Doctype, Comment, Tag
 from contracts.utils import check_isinstance, indent
+from pyramid.httpexceptions import HTTPFound
 
 from mcdp.exceptions import DPSyntaxError, DPSemanticError, DPNotImplementedError, DPInternalError
 from mcdp_lang.namedtuple_tricks import recursive_print
@@ -21,7 +22,6 @@ from mcdp_web.utils0 import add_other_fields, add_std_vars_context
 from mocdp.comp.context import Context
 
 from .add_html_links_imp import add_html_links
-from pyramid.httpexceptions import HTTPFound
 
 
 class AppVisualization():
@@ -71,7 +71,7 @@ class AppVisualization():
     @cr2e
     def view_syntax(self, e):
         make_relative = lambda _: self.make_relative(e.request, _)
-        res = generate_view_syntax(e.library_name, e.library, e.thing_name, e.spec, make_relative)
+        res = generate_view_syntax(e,  make_relative)
         add_other_fields(self, res, e.request, e.context)
         url_edit0 = ("/repos/%s/shelves/%s/libraries/%s/%s/%s/views/edit_fancy/" %  
                     (e.repo_name, e.shelf_name, e.library_name, e.spec.url_part, e.thing_name))
@@ -79,13 +79,13 @@ class AppVisualization():
         return res
     
     
-def generate_view_syntax(library_name, library, name,  spec, make_relative):
-    ext = spec.extension
-    expr = spec.parse_expr
-    parse_refine = spec.parse_refine
+def generate_view_syntax(e, make_relative):
+    ext = e.spec.extension
+    expr = e.spec.parse_expr
+    parse_refine = e.spec.parse_refine
 
-    filename = '%s.%s' % (name, ext)
-    f = library._get_file_data(filename)
+    filename = '%s.%s' % (e.thing_name, ext)
+    f = e.library._get_file_data(filename)
     source_code = f['data']
     realpath = f['realpath']
         
@@ -107,35 +107,36 @@ def generate_view_syntax(library_name, library, name,  spec, make_relative):
                                 parse_expr=expr,
                                 postprocess=postprocess)
         
-        def get_link(specname, libname, thingname):
-            spec = specs[specname]
-            url0 =  ("/libraries/%s/%s/%s/views/syntax/" %  
-                        (libname, spec.url_part, thingname))
+        def get_link_library(libname):
+            url0 =  "/repos/%s/shelves/%s/libraries/%s/" % (e.repo_name, e.shelf_name, libname)
             return make_relative(url0)
             
-        highlight = add_html_links(highlight, library_name, get_link)
+        def get_link(specname, libname, thingname):
+            return get_link_library(libname) + '%s/%s/views/syntax/' % (specname, thingname)
+        
+        highlight = add_html_links(highlight, e.library_name, get_link, get_link_library)
         parses = True 
         error = ''
-    except (DPSyntaxError, DPNotImplementedError ) as e:
+    except (DPSyntaxError, DPNotImplementedError ) as exc:
         highlight = '<pre class="source_code_with_error">%s</pre>' % source_code
-        error = e.__str__()
+        error = exc.__str__()
         parses = False
      
     
     if parses:
-        context = library._generate_context_with_hooks()
+        context = e.library._generate_context_with_hooks()
         try:
-            thing = spec.load(library, name, context=context)
+            thing = e.spec.load(e.library, e.thing_name, context=context)
                 
-            svg_data = get_svg_for_visualization(library, library_name, spec, 
-                                                     name, thing, Tmp.refined, 
+            svg_data = get_svg_for_visualization(e, e.library, e.library_name, e.spec, 
+                                                     e.thing_name, thing, Tmp.refined, 
                                                      make_relative)
-        except (DPSemanticError, DPNotImplementedError) as e:
+        except (DPSemanticError, DPNotImplementedError) as exc:
             
             from mcdp_web.editor_fancy.app_editor_fancy_generic import html_mark
-            highlight = html_mark(highlight, e.where, "semantic_error")
+            highlight = html_mark(highlight, exc.where, "semantic_error")
 
-            error = e.error
+            error = exc.error
             svg_data = None
     else:
         svg_data = None
@@ -191,7 +192,7 @@ def add_html_links_to_svg(svg, link_for_dpname):
                 
         
 # with timeit_wall('graph_generic - get_png_data', 1.0):
-def get_svg_for_visualization(library, library_name, spec, name, thing, refined, make_relative):
+def get_svg_for_visualization(e, library, library_name, spec, name, thing, refined, make_relative):
 
     svg_data0 = spec.get_png_data_syntax(library, name, thing, data_format='svg')
     fragment = bs(svg_data0)
@@ -223,7 +224,7 @@ def get_svg_for_visualization(library, library_name, spec, name, thing, refined,
             a = table[identifier]
             libname = a.libname if a.libname is not None else library_name
 #                 href = self.get_lmv_url(libname, a.name, 'syntax')
-            href0 = '/libraries/%s/models/%s/views/syntax/' % (libname, a.name)
+            href0 = '/repos/%s/shelves/%s/libraries/%s/models/%s/views/syntax/' % (e.repo_name, e.shelf_name, libname, a.name)
             return make_relative(href0)
         else:
             return None

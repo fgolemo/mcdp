@@ -110,11 +110,18 @@ def add_other_fields(self, res, request, context):
     res['get_user'] = get_user
     
 def add_std_vars_context(f):
+    return add_std_vars_context_(f,redir=True)
+
+def add_std_vars_context_no_redir(f):
+    return add_std_vars_context_(f,redir=False)
+    
+def add_std_vars_context_(f, redir):
     def f0(self, context, request):
-        url = request.url
-        if not url.endswith('/'):
-            url2 = url + '/'
-            raise HTTPFound(url2)
+        if redir:
+            url = request.url
+            if not url.endswith('/'):
+                url2 = url + '/'
+                raise HTTPFound(url2)
         
         try:
             res = f(self, context, request)

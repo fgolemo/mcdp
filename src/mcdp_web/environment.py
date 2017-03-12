@@ -1,4 +1,5 @@
 from .resource_tree import ResourceRepo, get_from_context, ResourceLibrary, ResourceShelf, ResourceThings, ResourceThing, ResourceThingView
+from decorator import decorator
 
 
 def cr2e(f):

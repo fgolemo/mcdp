@@ -15,10 +15,7 @@ from mcdp_user_db import UserDB
 from mcdp_utils_misc import dir_from_package_name, tmpdir
 from mcdp_web.confi import parse_mcdpweb_params_from_dict
 from mcdp_web.main import WebApp
-from mcdp_web_tests.spider import Spider
-
-
-# do not make relative to start using python
+from mcdp_web_tests.spider import Spider# do not make relative to start using python
 def create_empty_repo(d, bname):
     repo0 = Repo.init(d)
     filename = os.path.join(d, 'readme.txt')
@@ -102,10 +99,27 @@ class FunctionalTests(unittest.TestCase):
         ushelf = '/repos/global/shelves/%s/' % another_name_for_unittests_shelf
         bugs = [
             ushelf + '/libraries/basic/models/sum2f_rcomp/views/solver',
-            ushelf + '/libraries/pop/models/pop_example_3_7_newsyntax/views/ndp_repr/'
+            ushelf + '/libraries/pop/models/pop_example_3_7_newsyntax/views/ndp_repr/',
         ]
         for b in bugs:
             self.testapp.get(b)
+            
+        # this should not redirect
+        url = '/repos/global/shelves/unittests2/libraries/documents/align.html'
+        res = self.testapp.get(url)
+        if '302' in res.status:
+            msg = 'Document redirect: %s -> %s' % (url, res.headers['location'])
+            msg += '\n' + indent(res.body, '> ')
+            raise Exception(msg)
+        
+        # another test
+        _, res = self.get_maybe_follow('/tree/')
+        assert_not_contains(res.body, 'None')
+        
+        # another test
+        _, res = self.get_maybe_follow('/repos/')
+        assert_not_contains(res.body, 'None')
+        
         
         def ignore(url, parsed):  # @UnusedVariable
             if ':' in parsed.path:
@@ -118,19 +132,20 @@ class FunctionalTests(unittest.TestCase):
             if 'solver' in parsed.path:
                 return True
             
+            exclude = ['png','pdf','dot','svg','txt']
+            for x in exclude:
+                if x in parsed.path: return True
+            
             return False
 
         spider = Spider(self.get_maybe_follow, ignore=ignore)
          
-        _, res = self.get_maybe_follow('/tree/')
-        assert_not_contains(res.body, 'None')
-        print('loading /repos')
-        _, res = self.get_maybe_follow('/repos/')
-        assert_not_contains(res.body, 'None')
+        spider.visit(ushelf + '/libraries/making/models/test1/views/syntax/')
+        
         
         spider.visit('/tree')
         try:
-            spider.go(max_fails=20)
+            spider.go(max_fails=1)
         except KeyboardInterrupt:
             pass
         spider.log_summary()
@@ -138,7 +153,7 @@ class FunctionalTests(unittest.TestCase):
             msg = 'Could not get some URLs:\n'
             for f, e in spider.failed.items():
                 msg += '\n URL: ' + f
-                msg += '\n referrers: ' + ", ".join(spider.referrers) 
+                msg += '\n referrers: ' + ", ".join(spider.referrers[f]) 
                 msg += '\n' + indent(str(e), '  > ')
 #                 msg += '\n'.join('- %s' % _ for _ in sorted(spider.failed))
             raise_desc(Exception, msg)
