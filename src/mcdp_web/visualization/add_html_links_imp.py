@@ -2,6 +2,10 @@ from bs4.element import NavigableString, Tag
 
 from mcdp_utils_xml import bs
 from mcdp_utils_xml.parsing import to_html_stripping_fragment
+from mcdp_web.sessions import NoSuchLibrary
+from mcdp_utils_xml.add_class_and_style import add_class
+from mcdp_web.editor_fancy.specs_def import SPEC_MODELS, SPEC_POSETS,\
+    SPEC_TEMPLATES
 
 
 def add_html_links(frag, library_name, get_link, get_link_library):
@@ -33,6 +37,9 @@ def add_html_links(frag, library_name, get_link, get_link_library):
         tag.append(new_tag)
         tag.append(NavigableString(final))
 
+    def mark_not_found(tag):
+        add_class(tag, 'library-not-found')
+        
     def sub_ndpname():
 
         for tag in soup.select('span.NDPName'):
@@ -40,8 +47,12 @@ def add_html_links(frag, library_name, get_link, get_link_library):
                 continue
 
             ndpname = get_name_from_tag(tag)
-            href = get_link('models', library_name, ndpname)
-            add_link_to_ndpname(tag=tag, href=href)
+            try:
+                href = get_link(SPEC_MODELS, library_name, ndpname)
+                add_link_to_ndpname(tag=tag, href=href)
+            except NoSuchLibrary:
+                mark_not_found(tag)
+
 
     def sub_ndpname_with_library():
         for tag in soup.select('span.NDPNameWithLibrary'):
@@ -50,9 +61,11 @@ def add_html_links(frag, library_name, get_link, get_link_library):
 
             ndpname = get_name_from_tag(tag_ndpname)
             libname = get_name_from_tag(tag_libraryname) 
-            href = get_link('models', libname, ndpname)
-
-            add_link_to_ndpname(tag=tag_ndpname, href=href)
+            try:
+                href = get_link(SPEC_MODELS, libname, ndpname)
+                add_link_to_ndpname(tag=tag_ndpname, href=href)
+            except NoSuchLibrary:
+                mark_not_found(tag)
 
 #             if False:
 #                 # TODO: add this as a feature
@@ -67,9 +80,11 @@ def add_html_links(frag, library_name, get_link, get_link_library):
                 continue
 
             templatename = get_name_from_tag(tag)
-            href = get_link('templates', library_name, templatename)
-
-            add_link_to_ndpname(tag=tag, href=href)
+            try:
+                href = get_link(SPEC_TEMPLATES, library_name, templatename)
+                add_link_to_ndpname(tag=tag, href=href)
+            except NoSuchLibrary:
+                mark_not_found(tag)
 
     def sub_template_name_with_library():
         for tag in soup.select('span.TemplateNameWithLibrary'):
@@ -78,8 +93,12 @@ def add_html_links(frag, library_name, get_link, get_link_library):
 
             templatename = get_name_from_tag(tag_templatename)
             libname = get_name_from_tag(tag_libraryname)
-            href = get_link('templates', libname, templatename)
-            add_link_to_ndpname(tag=tag_templatename, href=href)
+            try:
+                href = get_link(SPEC_TEMPLATES, libname, templatename)
+                add_link_to_ndpname(tag=tag_templatename, href=href)
+            except NoSuchLibrary:
+                mark_not_found(tag)
+
 
     def sub_poset_name():
         for tag in soup.select('span.PosetName'):
@@ -87,8 +106,11 @@ def add_html_links(frag, library_name, get_link, get_link_library):
                 continue
 
             posetname = get_name_from_tag(tag)
-            href = get_link('templates', library_name, posetname)
-            add_link_to_ndpname(tag=tag, href=href)
+            try:
+                href = get_link(SPEC_POSETS, library_name, posetname)
+                add_link_to_ndpname(tag=tag, href=href)
+            except NoSuchLibrary:
+                mark_not_found(tag)
 
     def sub_poset_name_with_library():
         for tag in soup.select('span.PosetNameWithLibrary'):
@@ -98,15 +120,21 @@ def add_html_links(frag, library_name, get_link, get_link_library):
             posetname = get_name_from_tag(tag_posetname)
             libname = get_name_from_tag(tag_libraryname)
             
-            href = get_link('templates', libname, posetname)
-            add_link_to_ndpname(tag=tag_posetname, href=href)
+            try:
+                href = get_link(SPEC_POSETS, libname, posetname)
+                add_link_to_ndpname(tag=tag_posetname, href=href)
+            except NoSuchLibrary:
+                mark_not_found(tag)
 
     def sub_libraryname():
         # Need to be last
         for tag in soup.select('span.LibraryName'):
             libname = get_name_from_tag(tag)
-            href = get_link_library(libname)
-            add_link_to_ndpname(tag=tag, href=href)
+            try:
+                href = get_link_library(libname)
+                add_link_to_ndpname(tag=tag, href=href)
+            except NoSuchLibrary:
+                mark_not_found(tag)
 
     try:
         sub_ndpname()

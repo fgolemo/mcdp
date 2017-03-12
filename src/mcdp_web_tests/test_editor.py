@@ -6,6 +6,8 @@ from mcdp_library_tests.tests import get_test_library
 from mcdp_tests.generation import for_all_source_all
 from mcdp_web.editor_fancy.app_editor_fancy_generic import process_parse_request, specs
 from mcdp_web.visualization.app_visualization import generate_view_syntax
+from mcdp_web.editor_fancy.specs_def import SPEC_POSETS, SPEC_VALUES,\
+    SPEC_TEMPLATES, SPEC_MODELS
 
 
 def filename2spec(filename): # TODO: move to specs
@@ -14,10 +16,10 @@ def filename2spec(filename): # TODO: move to specs
     _, dot_extension = os.path.splitext(filename)
     extension = dot_extension[1:]
     extension2spec= {
-        'mcdp': specs['models'],
-        'mcdp_template': specs['templates'],
-        'mcdp_value': specs['values'],
-        'mcdp_poset': specs['posets'],
+        'mcdp': specs[SPEC_MODELS],
+        'mcdp_template': specs[SPEC_TEMPLATES],
+        'mcdp_value': specs[SPEC_VALUES],
+        'mcdp_poset': specs[SPEC_POSETS],
     }
     spec = extension2spec[extension]
     return spec

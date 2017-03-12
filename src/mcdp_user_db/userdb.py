@@ -40,7 +40,10 @@ class UserDB():
         return password == user.password
     
     def save_user(self, username):
-        filename = os.path.join(self.userdir, username,  MCDPConstants.user_desc_file)
+        filename = os.path.join(self.userdir, username + '.' + MCDPConstants.user_extension,  MCDPConstants.user_desc_file)
+        if not os.path.exists(filename):
+            msg = 'Could not find user filename %r.' % filename
+            raise ValueError(msg)
         user = self.users[username]
         y = yaml_from_userinfo(user)
         s = yaml.dump(y)

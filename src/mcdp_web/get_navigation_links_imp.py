@@ -2,6 +2,8 @@ from mcdp.constants import MCDPConstants
 from mcdp.logs import logger
 from mcdp_shelf import PRIVILEGE_WRITE
 from mcdp_utils_misc import natural_sorted
+from mcdp_web.editor_fancy.specs_def import SPEC_VALUES, SPEC_POSETS,\
+    SPEC_TEMPLATES, SPEC_MODELS
 
 
 def get_navigation_links_context(e):
@@ -18,10 +20,10 @@ def get_navigation_links_context(e):
             logger.error(msg) 
         
     if e.thing_name is not None:
-        current_model = e.thing_name if e.spec_name == 'models' else None
-        current_template = e.thing_name if e.spec_name== 'templates' else None
-        current_poset = e.thing_name if e.spec_name == 'posets' else None
-        current_value = e.thing_name if e.spec_name == 'values' else None
+        current_model = e.thing_name if e.spec_name == SPEC_MODELS else None
+        current_template = e.thing_name if e.spec_name== SPEC_TEMPLATES else None
+        current_poset = e.thing_name if e.spec_name == SPEC_POSETS else None
+        current_value = e.thing_name if e.spec_name == SPEC_VALUES else None
     else:
         current_model = None
         current_template = None
@@ -48,8 +50,7 @@ def get_navigation_links_context(e):
     d['current_template'] = current_template
     d['current_poset'] = current_poset
     d['current_model'] = current_model
-    d['current_view'] = e.view_name
-    make_relative = lambda _: e.app.make_relative(e.request, _)
+    d['current_view'] = e.view_name 
 
     if e.library is not None:
         
@@ -69,12 +70,12 @@ def get_navigation_links_context(e):
             d['documents'].append(desc)
 
         
-        d['models'] = []
+        d[SPEC_MODELS] = []
         models = e.library.list_ndps()
         for _ in natural_sorted(models):
             is_current = _ == current_model
 
-            url0 =  library_url + 'models/' + _ + '/'
+            url0 =  library_url + SPEC_MODELS + '/' + _ + '/'
             url = url0 + VIEW_SYNTAX
             url_edit = url0 + VIEW_EDITOR  
             url_delete = url0 + VIEW_DELETE  
@@ -82,50 +83,50 @@ def get_navigation_links_context(e):
             name = "Model %s" % _
             desc = dict(id=_, id_ndp=_, name=name, url=url, url_edit=url_edit, 
                         url_delete=url_delete, current=is_current)
-            d['models'].append(desc) 
+            d[SPEC_MODELS].append(desc) 
        
         templates = e.library.list_templates()
-        d['templates'] = []
+        d[SPEC_TEMPLATES] = []
         for _ in natural_sorted(templates):
             is_current = (_ == current_template)
 
-            url0 =  library_url + 'templates/' + _ + '/'
+            url0 =  library_url + SPEC_TEMPLATES + '/' + _ + '/'
             url = url0 + VIEW_SYNTAX
             url_edit = url0 + VIEW_EDITOR  
             url_delete = url0 + VIEW_DELETE  
             
             name = "Template: %s" % _
             desc = dict(id=_, name=name, url=url, current=is_current, url_edit=url_edit, url_delete=url_delete)
-            d['templates'].append(desc)
+            d[SPEC_TEMPLATES].append(desc)
 
         
         posets = e.library.list_posets()
-        d['posets'] = []
+        d[SPEC_POSETS] = []
         for _ in natural_sorted(posets):
             is_current = (_ == current_poset)
             
-            url0 =  library_url + 'posets/' + _ + '/'
+            url0 =  library_url + SPEC_POSETS + '/' + _ + '/'
             url = url0 + VIEW_SYNTAX
             url_edit = url0 + VIEW_EDITOR  
             url_delete = url0 + VIEW_DELETE  
 
             name = "Poset: %s" % _
             desc = dict(id=_, name=name, url=url, current=is_current, url_edit=url_edit, url_delete=url_delete)
-            d['posets'].append(desc)
+            d[SPEC_POSETS].append(desc)
 
         values =e.library.list_values()
-        d['values'] = []
+        d[SPEC_VALUES] = []
         for _ in natural_sorted(values):
             is_current = (_ == current_value)
             
-            url0 =  library_url + 'values/' + _ + '/'
+            url0 =  library_url + SPEC_VALUES + '/' + _ + '/'
             url = url0 + VIEW_SYNTAX
             url_edit = url0 + VIEW_EDITOR  
             url_delete = url0 + VIEW_DELETE  
 
             name = "Value: %s" % _
             desc = dict(id=_, name=name, url=url, current=is_current, url_edit=url_edit, url_delete=url_delete)
-            d['values'].append(desc)
+            d[SPEC_VALUES].append(desc)
 
             
 

@@ -91,7 +91,7 @@ class AppEditorFancyGeneric():
             'source_code': unicode(source_code, 'utf-8'),
             'source_code_json': unicode(json.dumps(source_code), 'utf-8'),
             'realpath': realpath,
-            e.spec.url_variable: e.thing_name,
+#             e.spec.url_variable: e.thing_name,
             'rows': nrows,
             'ajax_parse': e.spec.url_part + '_ajax_parse',
             'error': None,

@@ -13,6 +13,9 @@ from mcdp_user_db.user import UserInfo
 
 _ = Shelf
 
+class NoSuchLibrary(Exception):
+    ''' Raised by get_repo_shelf_for_library '''
+
 class Session():
     
     @contract(shelves_all='dict(str:$Shelf)')
@@ -149,7 +152,7 @@ class Session():
         if not libname in self.libname2shelfname:
             msg = 'Could not find library %r.' % libname
             msg += '\n Available: %s' % sorted(self.libname2shelfname)
-            raise ValueError(msg)
+            raise NoSuchLibrary(msg)
         return self.libname2shelfname[libname]
     
     def get_shelf(self, shelfname):

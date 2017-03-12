@@ -13,15 +13,15 @@ from mcdp_lang.utils_lists import unwrap_list
 from mcdp_report.html import ast_to_html
 from mcdp_utils_xml import add_style
 from mcdp_utils_xml import to_html_stripping_fragment, bs
-from mcdp_web.editor_fancy.app_editor_fancy_generic import specs
 from mcdp_web.environment import cr2e
-from mcdp_web.resource_tree import ResourceThingViewSyntax,   ResourceThingViewNDPGraph,\
+from mcdp_web.resource_tree import ResourceThingViewSyntax, ResourceThingViewNDPGraph,\
     ResourceThingViewDPTree, ResourceThingViewDPGraph, ResourceThingViewNDPRepr,\
     ResourceThingViews
 from mcdp_web.utils0 import add_other_fields, add_std_vars_context
 from mocdp.comp.context import Context
 
 from .add_html_links_imp import add_html_links
+from mcdp_web.sessions import NoSuchLibrary
 
 
 class AppVisualization():
@@ -108,7 +108,10 @@ def generate_view_syntax(e, make_relative):
                                 postprocess=postprocess)
         
         def get_link_library(libname):
-            rname, sname = e.session.get_repo_shelf_for_libname(libname)
+            try:
+                rname, sname = e.session.get_repo_shelf_for_libname(libname)
+            except NoSuchLibrary:
+                raise
             url0 =  "/repos/%s/shelves/%s/libraries/%s/" % (rname, sname, libname)
             return make_relative(url0)
             

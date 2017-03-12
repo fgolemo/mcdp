@@ -49,7 +49,9 @@ class Spider():
         except AppError as e:
             logger.error('failed %s' % url)
             import xml.sax.saxutils as saxutils
-            self.failed[url] = saxutils.unescape(str(e))
+            s = unicode(e).encode('utf8')
+            self.failed[url] = saxutils.unescape(s)
+            
             return
             
         self.visited.add(url2)
