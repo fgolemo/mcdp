@@ -4,7 +4,7 @@ from webtest.app import AppError
 import logging
 
 
-logger = logging.getLogger('spider')
+logger = logging.getLogger('mcdp.spider')
 logger.setLevel(logging.DEBUG)
 
 class Spider():
@@ -32,7 +32,7 @@ class Spider():
                     break
             
     def step(self):
-        url = self.queue.pop(0)
+        url = self.queue.pop(-1)
         if url in self.visited:
             return
         o = urlparse.urlparse(url)
