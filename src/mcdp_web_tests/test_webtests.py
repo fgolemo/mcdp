@@ -3,7 +3,7 @@ import shutil
 import unittest
 import urlparse
 
-from contracts.utils import raise_desc
+from contracts.utils import raise_desc, indent
 from git import Repo
 
 from comptests.registrar import run_module_tests, comptest
@@ -120,12 +120,9 @@ class FunctionalTests(unittest.TestCase):
                 return True
             
             return False
-                
-                
 
         spider = Spider(self.get_maybe_follow, ignore=ignore)
-        
-        
+         
         _, res = self.get_maybe_follow('/tree/')
         assert_not_contains(res.body, 'None')
         print('loading /repos')
@@ -140,7 +137,10 @@ class FunctionalTests(unittest.TestCase):
         spider.log_summary()
         if spider.failed:
             msg = 'Could not get some URLs:\n'
-            msg += '\n'.join('- %s' % _ for _ in sorted(spider.failed))
+            for f, e in spider.failed.items():
+                msg += '\n' + f
+                msg += '\n' + indent(str(e), '  > ')
+#                 msg += '\n'.join('- %s' % _ for _ in sorted(spider.failed))
             raise_desc(Exception, msg)
 
 @comptest
