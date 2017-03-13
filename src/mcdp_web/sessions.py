@@ -9,6 +9,7 @@ from mcdp_library import Librarian
 from mcdp_shelf import PRIVILEGE_DISCOVER, PRIVILEGE_READ, Shelf
 from mcdp_utils_misc import natural_sorted
 from mcdp_user_db.user import UserInfo
+from mcdp_utils_misc.string_utils import format_list
 
 
 _ = Shelf
@@ -122,7 +123,7 @@ class Session():
                            (shelf_name, repo_name, o))
                     
                     for r in [o, repo_name]:
-                        msg += '\n Shelves for %r: %s' % (r, ", ".join(list(self.repos[r].get_shelves())))
+                        msg += '\n Shelves for %r: %s' % (r, format_list(sorted(self.repos[r].get_shelves())))
                     
                     raise ValueError(msg)
                 self.shelfname2reponame[shelf_name] = repo_name
@@ -166,7 +167,7 @@ class Session():
     def get_library(self, library_name): 
         if not library_name in self.libraries:
             msg = 'Could not find library %r.' % library_name
-            msg += '\n available: ' + ", ".join(sorted(self.libraries)) + '.'
+            msg += '\n available: ' + format_list(sorted(self.libraries)) + '.'
             raise_desc(ValueError, msg)
         return self.libraries[library_name]['library'] 
 

@@ -420,30 +420,30 @@ def _load_primitivedp(libname, model_name):
     with timeit(model_name, minimum=min_time_warn):
         return l.load_primitivedp(model_name, context)
 
-def _load_template(libname, model_name):
+def _load_template(libname, thing_name):
     context = Context()
     l = get_test_library(libname)
-    with timeit(model_name, minimum=min_time_warn):
-        return l.load_template(model_name, context)
+    with timeit(thing_name, minimum=min_time_warn):
+        return l.load_spec(SPEC_TEMPLATES, thing_name, context)
 
-def _load_value(libname, name):
+def _load_value(libname, thing_name):
     l = get_test_library(libname)
     context = Context()
-    with timeit(name, minimum=min_time_warn):
-        vu = l.load_constant(name, context)
+    with timeit(thing_name, minimum=min_time_warn):
+        vu = l.load_constant(thing_name, context)
     return vu
 
-def _load_poset(libname, model_name):
+def _load_poset(libname, thing_name):
     l = get_test_library(libname)
     context = Context()
-    with timeit(model_name, minimum=min_time_warn):
-        return l.load_poset(model_name, context)
+    with timeit(thing_name, minimum=min_time_warn):
+        return l.load_poset(thing_name, context)
 
-def _load_ndp(libname, model_name):
+def _load_ndp(libname, thing_name):
     l = get_test_library(libname)
     context = Context() 
-    with timeit(model_name, minimum=min_time_warn):
-        return l.load_ndp(model_name, context)
+    with timeit(thing_name, minimum=min_time_warn):
+        return l.load_ndp(thing_name, context)
     
 #
 # @contextmanager

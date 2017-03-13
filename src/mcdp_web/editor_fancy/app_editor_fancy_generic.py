@@ -49,7 +49,7 @@ class AppEditorFancyGeneric():
         string = get_text_from_request2(e.request)
         
         def go():
-            e.spec.write(e.library, e.thing_name, string)
+            e.library.write_spec(e.thing_name, string)
             print('committing repo on save %s' % e.repo)
             e.repo.commit(e.user)
             return {'ok': True, 'saved_string': string}

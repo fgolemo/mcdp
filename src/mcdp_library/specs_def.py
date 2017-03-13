@@ -2,12 +2,17 @@
 from collections import namedtuple
 
 from mcdp.constants import MCDPConstants
+from mcdp_dp.primitive import PrimitiveDP
 from mcdp_lang.parse_interface import (parse_ndp_eval, parse_ndp_refine,
                                        parse_template_eval, parse_template_refine, parse_constant_eval,
                                        parse_constant_refine, parse_poset_eval, parse_poset_refine,
                                        parse_primitivedp_refine, parse_primitivedp_eval)
 from mcdp_lang.syntax import Syntax
 from mcdp_library import MCDPLibrary
+from mcdp_posets.poset import Poset
+from mocdp.comp.context import ValueWithUnits
+from mocdp.comp.interfaces import NamedDP
+from mocdp.comp.template_for_nameddp import TemplateForNamedDP
 
 
 # XXX: to revise
@@ -31,6 +36,7 @@ def get_png_data_syntax_model(*args, **kwargs):
 
 
 Spec = namedtuple('Spec', 
+                  ' klass '
                   ' url_part ' 
                   ' extension '
                   ' parse ' # function that returns the object.
@@ -40,8 +46,9 @@ Spec = namedtuple('Spec',
                   ' parse_eval '   # ndp = parse_eval(expr2, context
                   ' load ' # load(name, context)
                   ' get_png_data'
-                  ' get_png_data_syntax'
-                  ' write minimal_source_code')
+                  ' get_png_data_syntax' 
+                  ' minimal_source_code'
+                  )
 specs = {}
 SPEC_MODELS = 'models'
 SPEC_TEMPLATES = 'templates'
@@ -50,6 +57,7 @@ SPEC_POSETS = 'posets'
 SPEC_PRIMITIVEDPS = 'primitivedps'
 
 spec_models = specs[SPEC_MODELS] = Spec(url_part=SPEC_MODELS,  
+                      klass=NamedDP,
                       extension=MCDPConstants.ext_ndps,
                       parse=MCDPLibrary.parse_ndp,
                       parse_expr=Syntax.ndpt_dp_rvalue,
@@ -58,10 +66,10 @@ spec_models = specs[SPEC_MODELS] = Spec(url_part=SPEC_MODELS,
                       load=MCDPLibrary.load_ndp,
                       get_png_data=get_png_data_model,
                       get_png_data_syntax=get_png_data_syntax_model,
-                      write=MCDPLibrary.write_to_model,
                       minimal_source_code="mcdp {\n    \n}")
 
 spec_templates = specs[SPEC_TEMPLATES]= Spec(url_part=SPEC_TEMPLATES,  
+                     klass=TemplateForNamedDP,
                       extension=MCDPConstants.ext_templates,
                       parse=MCDPLibrary.parse_template,
                       parse_expr=Syntax.template,
@@ -70,10 +78,10 @@ spec_templates = specs[SPEC_TEMPLATES]= Spec(url_part=SPEC_TEMPLATES,
                       load=MCDPLibrary.load_template,
                       get_png_data=ndp_template_enclosed,
                       get_png_data_syntax=ndp_template_enclosed,
-                      write=MCDPLibrary.write_to_template,
                       minimal_source_code="template []\n\nmcdp {\n    \n}")
 
-spec_values = specs[SPEC_VALUES] = Spec(url_part=SPEC_VALUES,  
+spec_values = specs[SPEC_VALUES] = Spec(url_part=SPEC_VALUES, 
+                        klass= ValueWithUnits,
                    extension=MCDPConstants.ext_values,
                    parse=MCDPLibrary.parse_constant,
                    parse_expr=Syntax.rvalue,
@@ -82,10 +90,10 @@ spec_values = specs[SPEC_VALUES] = Spec(url_part=SPEC_VALUES,
                    load=MCDPLibrary.load_constant,
                    get_png_data=get_png_data_unavailable,
                    get_png_data_syntax=get_png_data_unavailable,
-                   write=MCDPLibrary.write_to_constant,
                    minimal_source_code="0 g")
 
 spec_posets =specs[SPEC_POSETS]= Spec(url_part=SPEC_POSETS,  
+                                      klass=Poset,
                    extension=MCDPConstants.ext_posets,
                    parse=MCDPLibrary.parse_poset,
                    parse_expr=Syntax.space,
@@ -94,12 +102,12 @@ spec_posets =specs[SPEC_POSETS]= Spec(url_part=SPEC_POSETS,
                    load=MCDPLibrary.load_poset,
                    get_png_data=get_png_data_poset,
                    get_png_data_syntax=get_png_data_poset,
-                   write=MCDPLibrary.write_to_poset,
                    minimal_source_code="poset {\n    \n}")
  
 
 
 spec_primitivedps = specs[SPEC_PRIMITIVEDPS] = Spec(
+    klass=PrimitiveDP,
                     url_part=SPEC_PRIMITIVEDPS,  
                    extension=MCDPConstants.ext_primitivedps,
                    parse=MCDPLibrary.parse_primitivedp,
@@ -109,7 +117,5 @@ spec_primitivedps = specs[SPEC_PRIMITIVEDPS] = Spec(
                    load=MCDPLibrary.load_primitivedp,
                    get_png_data=get_png_data_unavailable,
                    get_png_data_syntax=get_png_data_unavailable,
-                   write=MCDPLibrary.write_to_primitivedp,
                    minimal_source_code="# no example available")
 
- 

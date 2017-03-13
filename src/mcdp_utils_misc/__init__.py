@@ -13,3 +13,4 @@ from .locate_files_imp import *
 from .memos_selection import *
 from .safe_pickling import *
 from .safe_write import *
+from .good_identifiers import *

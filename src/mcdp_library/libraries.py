@@ -10,6 +10,7 @@ from mcdp_utils_misc.good_identifiers import assert_good_plain_identifier
 from mcdp_utils_misc import dir_from_package_name, locate_files
 
 from .library import MCDPLibrary
+from mcdp_utils_misc.string_utils import format_list
 
 
 __all__ = [
@@ -114,8 +115,8 @@ class Librarian():
         check_isinstance(libname, str)
         """ hook to pass to MCDPLibrary instances to find their sisters. """
         if not libname in self.libraries:
-            s = ", ".join(sorted(self.libraries))
-            msg = 'Cannot find library %r. Available: %s.' % (libname, s)
+            msg = ('Cannot find library "%s". Available: %s.' % 
+                   (libname, format_list(sorted(self.libraries))))
             raise_desc(DPSemanticError, msg)
         l = self.libraries[libname]['library']
         return l

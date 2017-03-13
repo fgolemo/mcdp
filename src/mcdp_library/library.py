@@ -11,21 +11,18 @@ from contracts.utils import (check_isinstance, format_obs, raise_desc,
 
 from mcdp import logger, MCDPConstants
 from mcdp.exceptions import DPSemanticError, MCDPExceptionWithWhere
-from mcdp_dp import PrimitiveDP
 from mcdp_lang import parse_ndp, parse_poset
-from mcdp_posets import Poset
-from mcdp_utils_misc import get_mcdp_tmp_dir, memo_disk_cache2, locate_files
-from mocdp.comp.context import Context, ValueWithUnits
-from mocdp.comp.interfaces import NamedDP
-from mocdp.comp.template_for_nameddp import TemplateForNamedDP
-from mcdp_utils_misc.good_identifiers import assert_good_plain_identifier
-
+from mcdp_utils_misc import assert_good_plain_identifier, format_list, get_mcdp_tmp_dir, memo_disk_cache2, locate_files
+from mocdp.comp.context import Context
 
 
 __all__ = [
     'MCDPLibrary', 
 ]
 
+
+class LibraryIsReadOnly(Exception):
+    pass
 
 class MCDPLibrary():
     """
@@ -123,31 +120,32 @@ class MCDPLibrary():
             if os.path.exists(self.cache_dir):
                 shutil.rmtree(self.cache_dir)
 
-    @contract(returns=NamedDP)
     def load_ndp(self, id_ndp, context=None):
-        return self._load_generic(id_ndp, MCDPConstants.ext_ndps,
-                                  MCDPLibrary.parse_ndp, context)
+        from .specs_def import SPEC_MODELS
+        return self.load_spec(SPEC_MODELS, id_ndp, context)
 
-    @contract(returns=Poset)
     def load_poset(self, id_poset, context=None):
-        return self._load_generic(id_poset, MCDPConstants.ext_posets,
-                                  MCDPLibrary.parse_poset, context)
+        from .specs_def import SPEC_POSETS
+        return self.load_spec(SPEC_POSETS, id_poset, context)
 
-    @contract(returns=ValueWithUnits)
-    def load_constant(self, id_poset, context=None):
-        return self._load_generic(id_poset, MCDPConstants.ext_values,
-                                  MCDPLibrary.parse_constant, context)
-
-    @contract(returns=PrimitiveDP)
+    def load_constant(self, id_value, context=None):
+        from .specs_def import SPEC_VALUES
+        return self.load_spec(SPEC_VALUES, id_value, context)
+        
     def load_primitivedp(self, id_primitivedp, context=None):
-        return self._load_generic(id_primitivedp, MCDPConstants.ext_primitivedps,
-                                  MCDPLibrary.parse_primitivedp, context)
+        from .specs_def import SPEC_PRIMITIVEDPS
+        return self.load_spec(SPEC_PRIMITIVEDPS, id_primitivedp, context)
 
-    @contract(returns=TemplateForNamedDP)
-    def load_template(self, id_ndp, context=None):
-        return self._load_generic(id_ndp, MCDPConstants.ext_templates,
-                                  MCDPLibrary.parse_template, context)
+    def load_template(self, id_template, context=None):
+        from .specs_def import SPEC_TEMPLATES
+        return self.load_spec(SPEC_TEMPLATES, id_template, context)
 
+    def load_spec(self, spec_name, thing_name, context=None):
+        from mcdp_library.specs_def import specs
+        spec = specs[spec_name]
+        res = self._load_generic(thing_name, spec.extension, spec.parse, context)
+        check_isinstance(res, spec.klass)
+        return res
 
     @contract(name=str, extension=str)
     def _load_generic(self, name, extension, parsing_function, context):
@@ -311,33 +309,7 @@ class MCDPLibrary():
 
         msg = 'Could not load library %r.' % id_library
         msg += "\n---\n".join([str(_) for _ in errors])
-        raise_desc(DPSemanticError, msg)
-# 
-#     @contract(returns='set(str)')
-#     def list_ndps(self):
-#         """ Returns all models defined in this library with .mcdp files. """
-#         return self._list_with_extension(MCDPConstants.ext_ndps)
-# 
-#     get_models = list_ndps
-# 
-#     @contract(returns='set(str)')
-#     def list_posets(self):
-#         """ Returns all models defined in this library with .mcdp files. """
-#         return self._list_with_extension(MCDPConstants.ext_posets)
-# 
-#     @contract(returns='set(str)')
-#     def list_primitivedps(self):
-#         """ Returns all models defined in this library with .mcdp files. """
-#         return self._list_with_extension(MCDPConstants.ext_primitivedps)
-
-#     @contract(returns='set(str)')
-#     def list_templates(self):
-#         """ Returns all models defined in this library with .mcdp files. """
-#         return self._list_with_extension(MCDPConstants.ext_templates)
-
-#     @contract(returns='set(str)')
-#     def list_values(self):
-#         return self._list_with_extension(MCDPConstants.ext_values)
+        raise_desc(DPSemanticError, msg) 
 
     def list_spec(self, spec_name):
         ''' Lists files of the given spec. '''
@@ -345,7 +317,7 @@ class MCDPLibrary():
         if not spec_name in specs:
             msg = 'Invalid spec name "%s".' % spec_name
             raise ValueError(msg)
-        extension = specs[spec_name]
+        extension = specs[spec_name].extension
         return self._list_with_extension(extension)
     
     @contract(ext=str)
@@ -398,9 +370,8 @@ class MCDPLibrary():
                                key=lambda x: x.lower())
 
             if available:
-                available = ", ".join(available)
                 msg += (" Available files with %r extension: %s." %
-                        (ext, available))
+                        (ext, format_list(sorted(available))))
             else:
                 msg += " No files with extension %r found." % ext
                 
@@ -504,26 +475,12 @@ class MCDPLibrary():
 
         assert isinstance(basename, str), basename
 
-        self.file_to_contents[basename] = res
-
-    def write_to_model(self, name, data):
-        basename = '%s.%s' % (name, MCDPConstants.ext_ndps)
-        self._write_generic(basename, data)
-
-    def write_to_template(self, name, data):
-        basename = '%s.%s' % (name, MCDPConstants.ext_templates)
-        self._write_generic(basename, data)
-
-    def write_to_constant(self, name, data):
-        basename = '%s.%s' % (name, MCDPConstants.ext_values)
-        self._write_generic(basename, data)
-
-    def write_to_primitivedp(self, name, data):
-        basename = '%s.%s' % (name, MCDPConstants.ext_primitivedps)
-        self._write_generic(basename, data)
-
-    def write_to_poset(self, name, data):
-        basename = '%s.%s' % (name, MCDPConstants.ext_posets)
+        self.file_to_contents[basename] = res 
+        
+    def write_spec(self, spec_name, name, data):
+        from mcdp_library.specs_def import specs
+        spec = specs[spec_name]
+        basename = '%s.%s' % (name, spec.extensions)
         self._write_generic(basename, data)
 
     def set_read_only(self, read_only=True):
@@ -544,6 +501,4 @@ class MCDPLibrary():
         self._update_file_from_editor(realpath)
 
 
-class LibraryIsReadOnly(Exception):
-    pass
 

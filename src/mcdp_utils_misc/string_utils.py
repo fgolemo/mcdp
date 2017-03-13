@@ -13,3 +13,11 @@ def get_sha1(contents):
     m.update(contents)
     s = m.hexdigest()
     return s
+
+
+def format_list(l):
+    """ Returns a nicely formatted list. """
+    if not l:
+        return '(empty)'
+    else:
+        return ", ".join( '"%s"' % _.__str__() for _ in l)

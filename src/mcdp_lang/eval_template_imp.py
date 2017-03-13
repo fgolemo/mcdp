@@ -63,7 +63,8 @@ def eval_template_load(r, context):
         library = context.load_library(libname)
         
         context2 = context.child()
-        template = library.load_template(name, context2)
+        from mcdp_library.specs_def import SPEC_TEMPLATES
+        template = library.load_spec(SPEC_TEMPLATES, name, context2)
         
         msg = 'While loading template %r from library %r:' % (name, libname)
         warnings_copy_from_child_make_nested2(context, context2, r.where, msg)

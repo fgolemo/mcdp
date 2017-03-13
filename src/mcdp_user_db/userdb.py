@@ -5,6 +5,7 @@ from mcdp.logs import logger
 from mcdp_utils_misc import locate_files
 from mcdp import MCDPConstants
 from contracts.utils import raise_desc
+from mcdp_utils_misc.string_utils import format_list
 
 
 __all__ = ['UserDB']
@@ -81,7 +82,7 @@ def load_users(userdir):
         msg = 'Could not load any user from %r' % userdir
         raise Exception(msg)
     else:
-        logger.info('loaded users: %s.' % ", ".join(sorted(users)))
+        logger.info('loaded users: %s.' % format_list(sorted(users)))
         
     return users
         

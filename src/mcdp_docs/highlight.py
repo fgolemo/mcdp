@@ -27,6 +27,7 @@ from mocdp.comp.context import Context
 
 
 from mcdp_utils_xml import to_html_stripping_fragment, describe_tag, project_html
+from mcdp_library.specs_def import SPEC_TEMPLATES
 
 
 def html_interpret(library, soup, raise_errors=False,
@@ -598,7 +599,7 @@ def make_figures(library, soup, raise_error_dp, raise_error_others, realpath, ge
     for which in available_template:
         def callback(tag0):
             context = Context()
-            load = lambda x: library.load_template(x, context=context)
+            load = lambda x: library.load_spec(SPEC_TEMPLATES, x, context=context)
             parse = lambda x: library.parse_template(x, realpath=realpath, context=context)
             template = load_or_parse_from_tag(tag0, load, parse)
 
