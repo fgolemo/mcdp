@@ -417,7 +417,13 @@ class WebApp(AppVisualization, AppStatus,
         # f['data'] not utf-8
         # reopen as utf-8
         document = e.context.name
-        html = self._render_library_doc(e.context, e.request, document)
+        try:
+            html = self._render_library_doc(e.context, e.request, document)
+        except DPSyntaxError as e:
+            res = {}
+            res['error'] = e
+            res['title'] = document
+            return res
         # we work with utf-8 strings
         assert isinstance(html, str)
         # but we need to convert to unicode later

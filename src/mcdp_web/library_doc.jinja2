@@ -75,9 +75,13 @@
 {% endif %}
 </div>
 
-<div id='content'>
-{{contents | safe }}
-</div>
+{% if contents is defined %}
+    <div id='content'>
+    {{contents | safe }}
+    </div>
+{% else %}
+<pre>{{error}}</pre>
+{% endif %}
 
 {% endif %}
 </body>
