@@ -7,7 +7,6 @@ from contracts.utils import raise_desc, indent
 from git import Repo
 
 from comptests.registrar import run_module_tests, comptest
-
 from mcdp import MCDPConstants
 from mcdp_docs.preliminary_checks import assert_not_contains
 from mcdp_library_tests.create_mockups import write_hierarchy

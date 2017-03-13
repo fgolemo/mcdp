@@ -1,8 +1,11 @@
 from collections import defaultdict
 import logging
 import urlparse
+import xml.sax.saxutils as saxutils
 
 from webtest.app import AppError
+from mcdp_lang_utils.where import format_where, Where
+from contracts.utils import indent
 
 
 logger = logging.getLogger('mcdp.spider')
@@ -17,7 +20,7 @@ class Spider():
         self.queue = []
         self.skipped = set()
         self.failed = {} # url -> Exception
-        self.visited = set()
+        self.visited = {} # url -> Response
         self.referrers = defaultdict(lambda: set()) # url -> url referred to
         
     def visit(self, url):
@@ -43,20 +46,23 @@ class Spider():
             return
         
         logger.debug('requests %s ... ' % url)
-        self.visited.add(url)
+        
         try:
             url2, res = self.get_maybe_follow(url)
         except AppError as e:
             logger.error('failed %s' % url)
-            import xml.sax.saxutils as saxutils
             s = unicode(e).encode('utf8')
             self.failed[url] = saxutils.unescape(s)
             return
             
-        self.visited.add(url2)
         if url2 != url:
+            self.visited[url] = 'redirect to %s' % url2
             logger.debug('redirected %s -> %s' % (url, url2))
+            
+        self.visited[url2] = res
+        
         if res.content_type == 'text/html':
+            
             urls = list(find_links(res.html, url2))
             logger.debug('read %s %s: %d links' % (url2, res.status, len(urls)))
             for u in urls:
@@ -88,6 +94,13 @@ class Spider():
             logger.error('failed %s' % url)
             for r in self.referrers[url]:
                 logger.error(' referred from %s' % r)
+                for u0 in self.referrers[url]:
+                    res = self.visited[u0]
+                    i = res.body.index(url)
+                    where = Where(res.body, i, i+len(url))
+                    logger.error(indent(format_where(where),' >'))
+
+                    
             logger.error(self.failed[url])
 
                 
