@@ -234,7 +234,7 @@ class MCDPGitRepo(MCDPRepo):
                     res['shelf_name'] = os.path.splitext(c)[0]
                 if MCDPConstants.library_extension in c:
                     res['library_name'] = os.path.splitext(c)[0]
-                from mcdp_web.editor_fancy.specs_def import specs
+                from mcdp_library.specs_def import specs
                 for spec_name, spec in specs.items():
                     ext = spec.extension
                     if c.endswith('.'+ext):

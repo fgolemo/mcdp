@@ -21,6 +21,7 @@ from mocdp.comp.template_for_nameddp import TemplateForNamedDP
 from mcdp_utils_misc.good_identifiers import assert_good_plain_identifier
 
 
+
 __all__ = [
     'MCDPLibrary', 
 ]
@@ -343,19 +344,28 @@ class MCDPLibrary():
         ''' Lists all files with a certain extension. 
         
             The basename should be a plain identifier.
+            
+            Images are allowed to have '-' in them.
         '''
         r = []
+        
+        # extensions for models, etc.
+#         ext_serious = []
+#         for spec in specs.values():
+#             ext_serious.append(spec.extension)
+        
         for x in self.file_to_contents:
             assert isinstance(x, str), x.__repr__()
             p = '.' + ext
             if x.endswith(p):
                 fn = x.replace(p, '')
-                assert_good_plain_identifier(fn)
+                
+                if not ext in MCDPConstants.exts_images:
+                    assert_good_plain_identifier(fn)
                 assert isinstance(fn, str), (x, p, fn)
                 r.append(fn)
         res = set(r)
         return res
-
 
     def file_exists(self, basename):
         for fn in self.file_to_contents:

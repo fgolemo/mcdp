@@ -195,6 +195,8 @@ class ResourceLibraries(Resource):
         libname = key 
         shelf = context_get_shelf(self)
         if not libname in shelf.get_libraries_path():
+            logger.error('Could not find library "%s".' % libname)
+            print('Could not find library "%s".' % libname)
             return ResourceLibraryNotFound(libname)
         return ResourceLibrary(libname)
     
@@ -261,7 +263,7 @@ class ResourceLibraryNotFound(Resource):
 class ResourceLibrary(Resource): 
     
     def __iter__(self):
-        from mcdp_web.editor_fancy.specs_def import specs
+        from mcdp_library.specs_def import specs
         options = list(specs)
         options.append('interactive')
         return options.__iter__()

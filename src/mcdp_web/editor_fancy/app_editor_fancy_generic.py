@@ -24,7 +24,7 @@ from mcdp_web.utils0 import add_std_vars_context
 from mocdp.comp.interfaces import NamedDP
 
 from .html_mark_imp import html_mark, html_mark_syntax_error
-from .specs_def import specs
+from mcdp_library.specs_def import specs
 from .warnings_unconnected import generate_unconnected_warnings
 
 

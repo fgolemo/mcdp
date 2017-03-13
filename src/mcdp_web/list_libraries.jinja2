@@ -15,7 +15,7 @@
 {% include 'user.jinja2' %}
 
 <p>This is the list of libraries available, organized by shelf.
-    See <a href="{{root}}/repos/{{repo_name}}/shelves/">here</a> to disable some of the shelves.
+    See <a href="{{root}}/repos/{{navigation.repo_name}}/shelves/">here</a> to disable some of the shelves.
     {% if navigation.shelves_unused %}
     You also have an additional {{navigation.shelves_unused|length}} shelves to activate.
     {% endif %}

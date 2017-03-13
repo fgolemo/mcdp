@@ -4,7 +4,7 @@ from mcdp_utils_xml import bs
 from mcdp_utils_xml.parsing import to_html_stripping_fragment
 from mcdp_web.sessions import NoSuchLibrary
 from mcdp_utils_xml.add_class_and_style import add_class
-from mcdp_web.editor_fancy.specs_def import SPEC_MODELS, SPEC_POSETS,\
+from mcdp_library.specs_def import SPEC_MODELS, SPEC_POSETS,\
     SPEC_TEMPLATES
 
 

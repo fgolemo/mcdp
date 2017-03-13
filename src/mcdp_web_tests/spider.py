@@ -61,6 +61,9 @@ class Spider():
             urls = list(find_links(res.html, url2))
             logger.debug('read %s %s: %d links' % (url2, res.status, len(urls)))
             for u in urls:
+                if '../../../' in url:
+                    msg = 'URL is not normalized: %s ' % url
+                    raise ValueError(msg)
                 self.queue.append(u)
                 self.referrers[u].add(url2)
     

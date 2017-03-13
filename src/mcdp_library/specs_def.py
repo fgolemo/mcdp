@@ -7,15 +7,30 @@ from mcdp_lang.parse_interface import (parse_ndp_eval, parse_ndp_refine,
 from mcdp_lang.syntax import Syntax
 from mcdp_library import MCDPLibrary
 
-from .image import (get_png_data_model,
-                    ndp_template_enclosed, get_png_data_unavailable, get_png_data_poset,
-                    get_png_data_syntax_model)
+
+# XXX: to revise
+def get_png_data_model(*args, **kwargs):
+    from mcdp_web.editor_fancy.image import get_png_data_model
+    return get_png_data_model(*args, **kwargs)
+def ndp_template_enclosed(*args, **kwargs):
+    from mcdp_web.editor_fancy.image import ndp_template_enclosed
+    return ndp_template_enclosed(*args, **kwargs)
+def get_png_data_unavailable(*args, **kwargs):
+    from mcdp_web.editor_fancy.image import get_png_data_unavailable
+    return get_png_data_unavailable(*args, **kwargs)
+def get_png_data_poset(*args, **kwargs):
+    from mcdp_web.editor_fancy.image import get_png_data_poset
+    return get_png_data_poset(*args, **kwargs)
+def get_png_data_syntax_model(*args, **kwargs):
+    from mcdp_web.editor_fancy.image import get_png_data_syntax_model
+    return get_png_data_syntax_model(*args, **kwargs)
+
+
 from mcdp.constants import MCDPConstants
 
 
 Spec = namedtuple('Spec', 
-                  ' url_part '
-#                   ' url_variable'
+                  ' url_part ' 
                   ' extension '
                   ' parse ' # function that returns the object.
                             # It is a composition of the following:
@@ -33,8 +48,7 @@ SPEC_VALUES = 'values'
 SPEC_POSETS = 'posets'
 
 
-spec_models = specs[SPEC_MODELS] = Spec(url_part=SPEC_MODELS, 
-#                                      url_variable='model_name',
+spec_models = specs[SPEC_MODELS] = Spec(url_part=SPEC_MODELS,  
                       extension=MCDPConstants.ext_ndps,
                       parse=MCDPLibrary.parse_ndp,
                       parse_expr=Syntax.ndpt_dp_rvalue,
@@ -46,8 +60,7 @@ spec_models = specs[SPEC_MODELS] = Spec(url_part=SPEC_MODELS,
                       write=MCDPLibrary.write_to_model,
                       minimal_source_code="mcdp {\n    \n}")
 
-spec_templates = specs[SPEC_TEMPLATES]= Spec(url_part=SPEC_TEMPLATES, 
-#                                           url_variable='template_name',
+spec_templates = specs[SPEC_TEMPLATES]= Spec(url_part=SPEC_TEMPLATES,  
                       extension=MCDPConstants.ext_templates,
                       parse=MCDPLibrary.parse_template,
                       parse_expr=Syntax.template,
@@ -59,8 +72,7 @@ spec_templates = specs[SPEC_TEMPLATES]= Spec(url_part=SPEC_TEMPLATES,
                       write=MCDPLibrary.write_to_template,
                       minimal_source_code="template []\n\nmcdp {\n    \n}")
 
-spec_values = specs[SPEC_VALUES] = Spec(url_part=SPEC_VALUES, 
-#                                      url_variable='value_name',
+spec_values = specs[SPEC_VALUES] = Spec(url_part=SPEC_VALUES,  
                    extension=MCDPConstants.ext_values,
                    parse=MCDPLibrary.parse_constant,
                    parse_expr=Syntax.rvalue,
@@ -72,8 +84,7 @@ spec_values = specs[SPEC_VALUES] = Spec(url_part=SPEC_VALUES,
                    write=MCDPLibrary.write_to_constant,
                    minimal_source_code="0 g")
 
-spec_posets =specs[SPEC_POSETS]= Spec(url_part=SPEC_POSETS, 
-#                                    url_variable='poset_name',
+spec_posets =specs[SPEC_POSETS]= Spec(url_part=SPEC_POSETS,  
                    extension=MCDPConstants.ext_posets,
                    parse=MCDPLibrary.parse_poset,
                    parse_expr=Syntax.space,

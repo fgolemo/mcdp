@@ -4,8 +4,7 @@ import traceback
 from contracts.utils import check_isinstance, indent
 from pyramid.httpexceptions import HTTPException, HTTPFound
 
-from mcdp import MCDPConstants,  logger
-
+from mcdp import MCDPConstants,  logger, __version__
 from mcdp_shelf import PRIVILEGE_SUBSCRIBE, PRIVILEGE_READ, PRIVILEGE_WRITE, PRIVILEGE_ADMIN
 from mcdp_utils_misc import duration_compact
 
@@ -18,7 +17,7 @@ def add_other_fields(self, res, request, context):
     e = Environment(context, request)
     res['navigation'] = get_navigation_links_context(e)   
     res['navigation'].update(e.__dict__)         
-    res['version'] = lambda: mcdp.__version__  # @UndefinedVariable
+    res['version'] = lambda: __version__ 
     res['root'] = self.get_root_relative_to_here(request)
     
     def _has_library_doc(document):
