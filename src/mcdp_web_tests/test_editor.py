@@ -6,8 +6,6 @@ from mcdp_library_tests.tests import get_test_library
 from mcdp_tests.generation import for_all_source_all
 from mcdp_web.editor_fancy.app_editor_fancy_generic import process_parse_request, specs
 from mcdp_web.visualization.app_visualization import generate_view_syntax
-from mcdp_library.specs_def import SPEC_POSETS, SPEC_VALUES,\
-    SPEC_TEMPLATES, SPEC_MODELS
 
 
 def filename2spec(filename): # TODO: move to specs
@@ -15,12 +13,9 @@ def filename2spec(filename): # TODO: move to specs
     
     _, dot_extension = os.path.splitext(filename)
     extension = dot_extension[1:]
-    extension2spec= {
-        'mcdp': specs[SPEC_MODELS],
-        'mcdp_template': specs[SPEC_TEMPLATES],
-        'mcdp_value': specs[SPEC_VALUES],
-        'mcdp_poset': specs[SPEC_POSETS],
-    }
+    extension2spec = {}
+    for spec_name, spec in specs.items():
+        extension2spec[spec_name] = spec.extension
     spec = extension2spec[extension]
     return spec
 
@@ -58,7 +53,13 @@ def check_editor_response(filename, source, libname):  # @UnusedVariable
 def check_generate_view_syntax(filename, source, libname):  # @UnusedVariable
     library = get_test_library(libname)
     spec = filename2spec(filename)
-    
-    name, _ext = os.path.splitext(os.path.basename(filename))
+    thing_name, _ext = os.path.splitext(os.path.basename(filename))
     make_relative = lambda x: x
-    _res = generate_view_syntax(libname, library, name,  spec, make_relative)
+    class EnvironmentMockup():
+        def __init__(self):
+            self.library_name = libname
+            self.thing_name = thing_name
+            self.spec = spec
+            self.library = library
+    e = EnvironmentMockup()
+    _res = generate_view_syntax(e, make_relative)

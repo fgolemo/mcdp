@@ -329,11 +329,7 @@ class MCDPLibrary():
             Images are allowed to have '-' in them.
         '''
         r = []
-        
-        # extensions for models, etc.
-#         ext_serious = []
-#         for spec in specs.values():
-#             ext_serious.append(spec.extension)
+         
         
         for x in self.file_to_contents:
             assert isinstance(x, str), x.__repr__()
@@ -397,7 +393,7 @@ class MCDPLibrary():
     @contract(d=str)
     def _add_search_dir(self, d):
         """ Adds the directory to the search directory list. """
-        pattern = ['*.%s' % ext for ext in MCDPLibrary.all_extensions]
+        pattern = ['*.' + ext for ext in MCDPLibrary.all_extensions]
             
         files_mcdp = locate_files(directory=d, pattern=pattern,
                                   followlinks=True)
@@ -480,12 +476,12 @@ class MCDPLibrary():
     def write_spec(self, spec_name, name, data):
         from mcdp_library.specs_def import specs
         spec = specs[spec_name]
-        basename = '%s.%s' % (name, spec.extensions)
+        basename = name + '.' + spec.extension
         self._write_generic(basename, data)
 
     def set_read_only(self, read_only=True):
-        """ Sets the library to read-only. Any write operation will 
-            create an error. """
+        ''' Sets the library to read-only. Any write operation will 
+            create an error. '''
         self.read_only = read_only
         
     def _write_generic(self, basename, data):

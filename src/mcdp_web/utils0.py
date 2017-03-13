@@ -94,6 +94,8 @@ def add_other_fields(self, res, request, context):
     res['icon_templates'] = '&#x2661;'
     res['icon_posets'] = '&#x28B6;'
     res['icon_values'] = '&#x2723;'
+    res['icon_primitivedps'] = '&#x2712;'
+    
     res['icon_documents'] = '&#128196;'
 
     def icon_spec(spec_name):

@@ -39,15 +39,14 @@ class AppVisualization():
         config.add_view(self.view_dummy, context=ResourceThingViewNDPGraph, renderer='visualization/model_ndp_graph.jinja2')
         config.add_view(self.view_model_ndp_repr, context=ResourceThingViewNDPRepr, renderer='visualization/model_generic_text_content.jinja2')
 
+    @add_std_vars_context
     @cr2e
     def redirect_things_to_syntax(self, e):
-#         libraries/basic/models/test2/views/
+#         libraries/basic/models/test2/views/ ->
 #         libraries/basic/models/test2/views/syntax/
-        url =e.request.url
-        if not url.endswith('/'):
-            url += '/'
-        
-        url2 = url+'/syntax/'
+        url = e.request.url
+        assert url.endswith('/')
+        url2 = url+'syntax/'
         raise HTTPFound(url2)
         
     @add_std_vars_context
