@@ -546,7 +546,7 @@ class WebApp(AppVisualization, AppStatus,
         url = e.request.url
         if not url.endswith('/'):
             url += '/'
-        url2 = url + 'res/syntax/'
+        url2 = url + 'views/syntax/'
         raise HTTPFound(url2)
     
     def _get_changes(self, e):
