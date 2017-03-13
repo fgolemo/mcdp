@@ -6,8 +6,8 @@ import textwrap
 
 from bs4 import BeautifulSoup
 from bs4.element import NavigableString, Tag
-
 from contracts.utils import raise_desc, raise_wrapped, indent
+
 from mcdp import logger, MCDPConstants
 from mcdp.development import mcdp_dev_warning
 from mcdp.exceptions import DPSemanticError, DPSyntaxError, DPInternalError
@@ -19,15 +19,13 @@ from mcdp_lang.parse_interface import (parse_template_refine, parse_poset_refine
                                        parse_ndp_refine)
 from mcdp_lang.suggestions import get_suggestions, apply_suggestions, get_suggested_identifier
 from mcdp_lang.syntax import Syntax
+from mcdp_library.specs_def import SPEC_TEMPLATES
 from mcdp_report.html import ast_to_html
+from mcdp_utils_xml import to_html_stripping_fragment, describe_tag, project_html
 from mcdp_utils_xml.add_class_and_style import add_class
 from mcdp_utils_xml.images import create_img_png_base64, create_a_to_data
 from mcdp_utils_xml.note_errors_inline import note_error
 from mocdp.comp.context import Context
-
-
-from mcdp_utils_xml import to_html_stripping_fragment, describe_tag, project_html
-from mcdp_library.specs_def import SPEC_TEMPLATES
 
 
 def html_interpret(library, soup, raise_errors=False,
@@ -35,8 +33,9 @@ def html_interpret(library, soup, raise_errors=False,
     # clone library, so that we don't pollute it
     # with our private definitions
 
-    if not raise_errors:
-        logger.error('raise_errors is False: we add errors in the document')
+#     
+#     if not raise_errors:
+#         logger.error('raise_errors is False: we add errors in the document')
 
     library = library.clone()
     load_fragments(library, soup, realpath=realpath)

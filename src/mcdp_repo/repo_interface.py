@@ -13,7 +13,7 @@ from mcdp_shelf import find_shelves
 from mcdp_user_db import UserInfo
 from mcdp_utils_misc import create_tmpdir, dir_from_package_name
 from git.util import Actor
-from mcdp_utils_misc.timing import timeit, timeit_wall
+from mcdp_utils_misc.timing import  timeit_wall
 
 
 class RepoException(Exception):
@@ -253,6 +253,18 @@ class MCDPGitRepo(MCDPRepo):
                 #print('skipping %s' % res)
                 pass
             else:
+                # only show things that are current
+                if not res['shelf_name'] in self.shelves:
+                    exists = False
+                    continue
+                else:
+                    shelf = self.shelves[res['shelf_name']]
+                    if not res['library_name'] in shelf.get_libraries_path():
+                        exists = False
+                    else:
+                        exists = True
+                        
+                res['exists'] = exists
                 #print('change: %s' % res)
                 self.changes.append(res)
             

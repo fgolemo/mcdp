@@ -1,7 +1,7 @@
 import logging
 from logging import Logger, StreamHandler, Formatter
 
-FORMAT = "[%(filename)15s:%(lineno)-4s - %(funcName)-15s ] %(message)s"
+FORMAT = "%(name)15s|%(filename)15s:%(lineno)-4s - %(funcName)-15s| %(message)s"
 
 
 if Logger.root.handlers:  # @UndefinedVariable

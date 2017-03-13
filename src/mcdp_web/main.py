@@ -564,7 +564,11 @@ class WebApp(AppVisualization, AppStatus,
                                  password=None, email=None, website=None, affiliation=None, groups=[], subscriptions=[])
                 change['user'] = u
                 p = '/repos/{repo_name}/shelves/{shelf_name}/libraries/{library_name}/{spec_name}/{thing_name}/views/syntax/'
-                change['url'] = e.root + p.format(**change)
+                
+                if change['exists']:
+                    change['url'] = e.root + p.format(**change)
+                else:
+                    change['url'] = None
 
                 #print('change: %s url = %s' % (change, change['url']))
                 change['date_human'] =  datetime.datetime.fromtimestamp(change['date']).strftime('%b %d, %H:%M')

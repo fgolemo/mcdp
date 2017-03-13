@@ -15,10 +15,10 @@ from mcdp_user_db import UserDB
 from mcdp_utils_misc import dir_from_package_name, tmpdir
 from mcdp_web.confi import parse_mcdpweb_params_from_dict
 from mcdp_web.main import WebApp
-# do not make relative to start using python
 from mcdp_web_tests.spider import Spider
 
 
+# do not make relative to start using python
 def create_empty_repo(d, bname):
     repo0 = Repo.init(d)
     filename = os.path.join(d, 'readme.txt')

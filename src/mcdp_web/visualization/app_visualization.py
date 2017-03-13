@@ -11,8 +11,7 @@ from mcdp_lang.namedtuple_tricks import recursive_print
 from mcdp_lang.parts import CDPLanguage
 from mcdp_lang.utils_lists import unwrap_list
 from mcdp_report.html import ast_to_html
-from mcdp_utils_xml import add_style
-from mcdp_utils_xml import to_html_stripping_fragment, bs
+from mcdp_utils_xml import add_style, to_html_stripping_fragment, bs
 from mcdp_web.environment import cr2e
 from mcdp_web.resource_tree import ResourceThingViewSyntax, ResourceThingViewNDPGraph,\
     ResourceThingViewDPTree, ResourceThingViewDPGraph, ResourceThingViewNDPRepr,\
@@ -42,8 +41,10 @@ class AppVisualization():
     @add_std_vars_context
     @cr2e
     def redirect_things_to_syntax(self, e):
-#         libraries/basic/models/test2/views/ ->
-#         libraries/basic/models/test2/views/syntax/
+        ''' Redirect
+                libraries/basic/models/test2/views/ ->
+                libraries/basic/models/test2/views/syntax/
+        '''
         url = e.request.url
         assert url.endswith('/')
         url2 = url+'syntax/'
@@ -219,14 +220,12 @@ def get_svg_for_visualization(e, library, library_name, spec, name, thing, refin
         table = identifier2ndp(refined)
     else:
         table = {}
-        
-#         print table
+         
     def link_for_dp_name(identifier0):
         identifier = identifier0 # todo translate
         if identifier in table:
             a = table[identifier]
             libname = a.libname if a.libname is not None else library_name
-#                 href = self.get_lmv_url(libname, a.name, 'syntax')
             href0 = '/repos/%s/shelves/%s/libraries/%s/models/%s/views/syntax/' % (e.repo_name, e.shelf_name, libname, a.name)
             return make_relative(href0)
         else:
