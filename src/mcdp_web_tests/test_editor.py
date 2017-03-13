@@ -14,8 +14,8 @@ def filename2spec(filename): # TODO: move to specs
     _, dot_extension = os.path.splitext(filename)
     extension = dot_extension[1:]
     extension2spec = {}
-    for spec_name, spec in specs.items():
-        extension2spec[spec_name] = spec.extension
+    for _, spec in specs.items():
+        extension2spec[spec.extension] = spec
     spec = extension2spec[extension]
     return spec
 

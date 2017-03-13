@@ -7,6 +7,7 @@ from contracts.utils import raise_desc, indent
 from git import Repo
 
 from comptests.registrar import run_module_tests, comptest
+
 from mcdp import MCDPConstants
 from mcdp_docs.preliminary_checks import assert_not_contains
 from mcdp_library_tests.create_mockups import write_hierarchy
@@ -71,7 +72,6 @@ class FunctionalTests(unittest.TestCase):
             dest = os.path.join(userdb_remote, another_name_for_unittests_shelf + '.' + MCDPConstants.shelf_extension )
             shutil.copytree(unittests, dest)
             repo_commit_all_changes(repo0)
-            
             
             userdb = os.path.join(d, 'userdb')
             repo = Repo.init(userdb)
@@ -147,7 +147,6 @@ class FunctionalTests(unittest.TestCase):
         spider = Spider(self.get_maybe_follow, ignore=ignore)
          
         spider.visit(ushelf + '/libraries/making/models/test1/views/syntax/')
-        
         
         spider.visit('/tree')
         try:
