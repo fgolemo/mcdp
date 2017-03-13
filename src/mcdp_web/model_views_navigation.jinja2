@@ -63,7 +63,7 @@
 
 		{% if navigation.library_name %}
 		/ <a id='back_to_shelf' style='visibility: hidden'
-		href="{{shelf_url(navigation.shelf_name)}}/">
+		href="{{shelf_url(navigation.repo_name, navigation.shelf_name)}}/">
 			<!-- <span class='unicode-icons'>⟲</span> -->
 			 <span class="shelf_name">
 				{{icon_shelf|safe}} {{navigation.shelf_name}}
@@ -81,8 +81,8 @@
 	<select id='select_shelf' class='hot_select'>
 		<option value="#"  selected = 1>{{icon_shelf|safe}}&nbsp;{{navigation.shelf_name}}</option>
 
-		{% for shelf_name in navigation.shelves_used%}
-			<option name='{{shelf_name}}' value="{{shelf_url(shelf_name)}}">
+		{% for shelf_name in navigation.repos[navigation.repo_name].shelves %}
+			<option name='{{shelf_name}}' value="{{shelf_url(navigation.repo_name, shelf_name)}}">
 				{{icon_shelf|safe}}&nbsp;{{shelf_name}}
 			</option>
 		{% endfor %}

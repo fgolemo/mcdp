@@ -94,11 +94,13 @@ class Spider():
             logger.error('failed %s' % url)
             for r in self.referrers[url]:
                 logger.error(' referred from %s' % r)
-                for u0 in self.referrers[url]:
-                    res = self.visited[u0]
-                    i = res.body.index(url)
-                    where = Where(res.body, i, i+len(url))
-                    logger.error(indent(format_where(where),' >'))
+                u0 = list(self.referrers[url])[0]
+                logger.debug(indent(self.visited[u0].body, ' referrer page '))
+#                 for u0 in self.referrers[url]:
+#                     res = self.visited[u0]
+#                     i = res.body.index(url)
+#                     where = Where(res.body, i, i+len(url))
+#                     logger.error(indent(format_where(where),' >'))
 
                     
             logger.error(self.failed[url])

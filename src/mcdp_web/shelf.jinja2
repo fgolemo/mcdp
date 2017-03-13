@@ -13,7 +13,7 @@
 {% from 'user_name_and_picture.jinja2' import user_name_and_picture with context %}
 {% from 'shelf_row.jinja2' import shelf_row with context %}
 <table class="shelves_list" cellspacing="0" cellpadding="0">
-     {{shelf_row(navigation.shelf_name, navigation.shelf)}}
+     {{shelf_row(navigation.repo_name, navigation.shelf_name, navigation.shelf)}}
 </table>
 
 {% if navigation.shelf.get_authors() %}
@@ -31,7 +31,7 @@
 {% if shelf.get_libraries_path() %}
 
     <div style='column-width: 15em'>
-        {{list_libraries_for_shelf(sname, shelf)}}
+        {{list_libraries_for_shelf(navigation.repo_name, sname, shelf)}}
     </div>
 
 {% else %}
@@ -40,7 +40,7 @@
 {% endif %}
 
 
-{{add_library_button(sname)}}
+{{add_library_button(navigation.repo_name, sname)}}
 
 {% include 'footer.jinja2' %}
 </body>

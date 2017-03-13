@@ -144,6 +144,7 @@ class MCDPResourceRoot(Resource):
             'exit': ResourceExit(),
             'login': ResourceLogin(),
             'logout': ResourceLogout(),
+            'shelves': ResourceShelves(),
             'robots.txt': ResourceRobots(),
         }    
         
@@ -162,14 +163,18 @@ class ResourceShelves(Resource):
         session = self.get_session()
         user = session.get_user()
         repos = session.repos
+        
         repo_name = self.__parent__.name
-    
-        repo = repos[repo_name]
-        shelves = repo.get_shelves()
-        for id_shelf, shelf in shelves.items():
-            if shelf.get_acl().allowed2(PRIVILEGE_READ, user):
-                yield id_shelf
-    
+        
+        if repo_name == 'root':
+            return
+        else:
+            repo = repos[repo_name]
+            shelves = repo.get_shelves()
+            for id_shelf, shelf in shelves.items():
+                if shelf.get_acl().allowed2(PRIVILEGE_READ, user):
+                    yield id_shelf
+        
 
 class ResourceShelvesShelfSubscribe(Resource): pass
 class ResourceShelvesShelfUnsubscribe(Resource): pass

@@ -14,6 +14,7 @@
 {% from 'user_name_and_picture.jinja2' import user_name_and_picture with context %}
 {% from 'list_libraries_for_shelf.jinja2' import list_libraries_for_shelf with context %}
 {% from 'shelf_row.jinja2' import shelf_row with context %}
+{% from 'shelf_rows.jinja2' import shelf_rows with context %}
 
 <p>MCDP libraries are organized in <em>shelves</em>.
     These are all the <em>shelves</em> available to you. If you wish to use the libraries
@@ -28,36 +29,21 @@
             <th colspan=2>status</th>
         </tr>
     </thead>
-    {% for shelf_name, shelf in navigation.shelves_available.items() %}
-        {{shelf_row(shelf_name, shelf)}}
-        {% if shelf_can_read(shelf_name) %}
-        <tr style='display:none' id="contents-{{shelf_name}}">
-            <td colspan=6>
 
-                {% if shelf.get_authors() %}
-                <table><tr>
-                    <td>Authors:</td>
-                    {% for author in shelf.get_authors()%}
-                    <td>{{ user_name_and_picture(author) }}</td>
-                    {% endfor %}
-                </tr></table>
-                {% endif %}
-
-                <!-- <p>This shelf contains {{ shelf.get_libraries_path() | length}} libraries:</p> -->
-                <div style='column-width: 15em'>
-                    {{list_libraries_for_shelf(shelf_name, shelf)}}
-                </div>
-             </td>
-        </tr>
-        {% endif %}
-        <script>setup("{{shelf_name}}");</script>
-{% endfor %}
+    {% if navigation.repo_name %}
+            {{shelf_rows(navigation.repo_name, navigation.repos[navigation.repo_name])}}
+    {% else %}
+        {% for repo_name, repo in navigation.repos.items() %}
+            <tr><td colspan=5>{{icon_repo|safe}} repository {{repo_name}}</td></tr>
+            {{shelf_rows(repo_name, repo)}}
+        {% endfor %}
+    {% endif %}
 </table>
 
 {% include 'footer.jinja2' %}
 
 
-<!--
+<!--http://marketplace.eclipse.org/marketplace-client-intro?mpc_install=2894763
 <script>
     $(document).ready(function() {
         $("body").show();

@@ -7,8 +7,8 @@
 <body>
 
 <p>The shelf {{navigation.shelf_name}} is inactive, so you cannot access its contents.</p>
-
-<p><a href="{{shelf_url(navigation.shelf_name)}}/:subscribe/">Activate shelf</a></p>
+{% set shelf_url_ = shelf_url(navigation.repo_name, navigation.shelf_name) %}
+<p><a href="{{shelf_url_}}/:subscribe/">Activate shelf</a></p>
 
 
 </body>

@@ -1,4 +1,6 @@
 
+{% set can_write = navigation.shelf_name and shelf_can_write(navigation.repo_name, navigation.shelf_name) %}
+
 <script>{% include 'menu.js' %}</script>
 <style type='text/css'>{%include 'menu.css' %}</style>
 
@@ -21,7 +23,7 @@
                 </a></li>
                 {% endif %}
 
-                {% if navigation.library_name and shelf_can_write(navigation.shelf_name) %}
+                {% if navigation.library_name and can_write %}
                     <script type="text/javascript">
                         url_base = "{{library_url(navigation.library_name)}}/";
                     </script>

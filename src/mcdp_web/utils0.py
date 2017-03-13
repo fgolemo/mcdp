@@ -6,7 +6,7 @@ from pyramid.httpexceptions import HTTPException, HTTPFound
 
 from mcdp import MCDPConstants,  logger, __version__
 from mcdp_shelf import PRIVILEGE_SUBSCRIBE, PRIVILEGE_READ, PRIVILEGE_WRITE, PRIVILEGE_ADMIN
-from mcdp_utils_misc import duration_compact
+from mcdp_utils_misc import duration_compact,  format_list
 
 
 def add_other_fields(self, res, request, context):
@@ -41,20 +41,28 @@ def add_other_fields(self, res, request, context):
     else:
         res['user'] = None
     
-    def shelf_privilege(sname, privilege):
-        acl = session.shelves_available[sname].get_acl()
+    def shelf_privilege(repo_name, sname, privilege):
+        repo = session.repos[repo_name]
+        if not sname in repo.shelves:
+            msg = 'Cannot find shelf "%s" in repo "%s".' % (repo_name, sname)
+            msg += '\n get_all_available_plotters: ' + format_list(repo.shelves)
+            raise ValueError(msg) 
+        acl = repo.shelves[sname].get_acl()
         return acl.allowed2(privilege, user)
          
-    def can_subscribe(sname):
-        return shelf_privilege(sname, PRIVILEGE_SUBSCRIBE)
-    def can_read(sname):
-        return shelf_privilege(sname, PRIVILEGE_READ)
-    def can_write(sname):
-        return shelf_privilege(sname, PRIVILEGE_WRITE)
-    def can_admin(sname):
-        return shelf_privilege(sname, PRIVILEGE_ADMIN)
+    def can_subscribe(repo_name, sname):
+        return shelf_privilege(repo_name, sname, PRIVILEGE_SUBSCRIBE)
+    
+    def can_read(repo_name, sname):
+        return shelf_privilege(repo_name,sname, PRIVILEGE_READ)
+    
+    def can_write(repo_name, sname):
+        return shelf_privilege(repo_name, sname, PRIVILEGE_WRITE)
+    
+    def can_admin(repo_name, sname):
+        return shelf_privilege(repo_name, sname, PRIVILEGE_ADMIN)
   
-    def shelf_subscribed(_):
+    def shelf_subscribed(repo_name, _):  # @UnusedVariable
         return _ in e.user.subscriptions
     
     res['shelf_can_read'] = can_read
@@ -80,7 +88,9 @@ def add_other_fields(self, res, request, context):
     res['thing_url'] = thing_url
         
     res['library_url'] = library_url
-    res['shelf_url'] = lambda _: e.root  + '/repos/' + e.repo_name + '/shelves/' + _ 
+    def shelf_url(repo_name, shelf_name):
+        return e.root  + '/repos/' + repo_name + '/shelves/' + shelf_name
+    res['shelf_url'] = shelf_url  
     res['static'] = e.root + '/static'
     
     res['icon_repo'] = '&#9730;'

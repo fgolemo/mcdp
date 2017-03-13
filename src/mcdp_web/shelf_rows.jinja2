@@ -1,0 +1,28 @@
+{% macro shelf_rows(repo_name, repo) %}
+{% for shelf_name, shelf in repo.shelves.items() %}
+
+    {{shelf_row(repo_name, shelf_name, shelf)}}
+
+    {% if shelf_can_read(repo_name, shelf_name) %}
+    <tr style='display:none' id="contents-{{shelf_name}}">
+        <td colspan=6>
+
+            {% if shelf.get_authors() %}
+            <table><tr>
+                <td>Authors:</td>
+                {% for author in shelf.get_authors()%}
+                <td>{{ user_name_and_picture(author) }}</td>
+                {% endfor %}
+            </tr></table>
+            {% endif %}
+
+            <!-- <p>This shelf contains {{ shelf.get_libraries_path() | length}} libraries:</p> -->
+            <div style='column-width: 15em'>
+                {{list_libraries_for_shelf(repo_name, shelf_name, shelf)}}
+            </div>
+         </td>
+    </tr>
+    <script>setup("{{shelf_name}}");</script>
+    {% endif %}
+{% endfor %}
+{% endmacro %}

@@ -1,24 +1,24 @@
-{% macro shelf_row(shelf_name, shelf) %}
+{% macro shelf_row(repo_name, shelf_name, shelf) %}
 
 {% set shelf_used = shelf_name in navigation.shelves_used %}
 <tr class={% if shelf_used %}"used"{%else%}"unused"{%endif%}>
 <td>
 
-{%if shelf_subscribed(shelf_name)%}
-<a href="{{shelf_url(shelf_name)}}">{{icon_shelf|safe}} <code>{{shelf_name}}<code></a>
+{%if shelf_subscribed(repo_name, shelf_name)%}
+<a href="{{shelf_url(repo_name, shelf_name)}}">{{icon_shelf|safe}} <code>{{shelf_name}}<code></a>
     {% else %}
     {{icon_shelf|safe}} <code>{{shelf_name}}
 {% endif %}
 
     </td>
  <td class="permissions">
-     <span title="admin">{% if shelf_can_admin(shelf_name) %}🔐{%endif%}</span>
-     <span title="read">{% if shelf_can_read(shelf_name) %}👀{%endif%}</span>
-     <span title="write">{% if shelf_can_write(shelf_name) %}✐{%endif%}</span>
+     <span title="admin">{% if shelf_can_admin(repo_name, shelf_name) %}🔐{%endif%}</span>
+     <span title="read">{% if shelf_can_read(repo_name, shelf_name) %}👀{%endif%}</span>
+     <span title="write">{% if shelf_can_write(repo_name, shelf_name) %}✐{%endif%}</span>
  </td>
 <td>{{shelf.get_desc_short()}}</td>
 
-{% if shelf_can_subscribe(shelf_name) %}
+{% if shelf_can_subscribe(repo_name, shelf_name) %}
     <td>
     {% if shelf_name in navigation.shelves_used %}
         <span class='active'>active</span>
@@ -41,14 +41,14 @@
     </td>
 {% else %}
 <td colspan=2>
-{% if not shelf_subscribed(shelf_name) %}
+{% if not shelf_subscribed(repo_name, shelf_name) %}
     unavailable to you
 {% endif %}
 </td>
 {% endif %}
 
 
-{% if shelf_can_read(shelf_name) %}
+{% if shelf_can_read(repo_name, shelf_name) %}
 <td>
     <a class"button" id="button-{{shelf_name}}" href="#">details&hellip;</a>
 </td>

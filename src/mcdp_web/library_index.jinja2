@@ -7,6 +7,8 @@
     <script>{% include 'library_index.js' %}</script>
 </head>
 <body>
+    {% set can_write = shelf_can_write(navigation.repo_name, navigation.shelf_name) %}
+    {% set shelf_url_ = shelf_url(navigation.repo_name, navigation.shelf_name) %}
 {% include 'refresh_shortcut.jinja2' %}
 
 {% include 'model_views_navigation.jinja2' %}
@@ -23,7 +25,8 @@
 <table align='center' id='library-contents'>
 <thead>
 <tr><td id='ttitle' colspan="5">
-    {{icon_shelf|safe}}&nbsp;<a href="{{shelf_url(navigation.shelf_name)}}/">{{navigation.shelf_name}}</a> /
+
+    {{icon_shelf|safe}}&nbsp;<a href="{{shelf_url_}}/">{{navigation.shelf_name}}</a> /
     {{icon_library|safe}}&nbsp;<code>{{navigation.library_name}}</code>
 </td></tr>
 <tr id="things">
@@ -48,7 +51,7 @@
 
 	{% for d in navigation[what] %}
 		<p class='entry'>
-		{% if 'url_edit' in d and shelf_can_write(navigation.shelf_name)%}
+		{% if 'url_edit' in d and can_write %}
             <a class='url_edit' href="{{d['url_edit']}}">✎</a>
             <a class='url_edit' href="{{d['url_delete']}}">♻</a>
           {% endif %}
@@ -66,7 +69,7 @@
     {% if what != 'documents' or navigation[what] %}
     <td class='plus'>
     {% if what != 'documents' %}
-	{% if shelf_can_write(navigation.shelf_name) %}
+	{% if can_write %}
         <button id="table_new_{{what}}">+</button>{% endif %}
 	{% endif %}
     </td>
@@ -79,7 +82,7 @@
 </table>
 
 <div id='extra_commands'>
-{% if not shelf_can_write(navigation.shelf_name) %}
+{% if not can_write %}
     <p> This library is read-only for this user. </p>
 {%endif%}
 
