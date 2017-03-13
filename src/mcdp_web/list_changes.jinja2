@@ -20,20 +20,21 @@
           [{{change.change_type}}]
           {% endif %}
 
+          {% set shelf_url_ = root + '/repos/' + change.repo_name + '/shelves/' + change.shelf_name %}
+
           {% if change.exists %}
-            {% set shelf_url = root + '/repos/' + change.repo_name + '/shelves/' + change.shelf_name %}
 
             <a href="{{change.url}}">
                 {{icon_spec(change.spec_name)|safe}}&nbsp;{{change.thing_name}}
             </a>
-           in library <a href="{{shelf_url}}/libraries/{{change.library_name}}/">
+           in library <a href="{{shelf_url_}}/libraries/{{change.library_name}}/">
                       {{icon_library|safe}}&nbsp;{{change.library_name}}</a>
-                      in shelf <a href="{{shelf_url}}/">{{icon_shelf|safe}}&nbsp;{{change.shelf_name}}</a>.
+                      in shelf <a href="{{shelf_url_}}/">{{icon_shelf|safe}}&nbsp;{{change.shelf_name}}</a>.
           {% else %}
           {{icon_spec(change.spec_name)|safe}}&nbsp;{{change.thing_name}}
           in library
                      {{icon_library|safe}}&nbsp;{{change.library_name}}
-          in shelf <a href="{{shelf_url}}/">{{icon_shelf|safe}}&nbsp;{{change.shelf_name}} (unavailable).
+          in shelf <a href="{{shelf_url_}}/">{{icon_shelf|safe}}&nbsp;{{change.shelf_name}} (unavailable).
           {% endif %}
     </li>
 {% endfor %}

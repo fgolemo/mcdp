@@ -334,7 +334,7 @@ class WebApp(AppVisualization, AppStatus,
         self.note_exception(exc, request=request)
  
         u = unicode(s, 'utf-8')
-        logger.error(u)
+        logger.error(u.encode('utf8'))
         root = self.get_root_relative_to_here(request)
         res = {
             'exception': u,

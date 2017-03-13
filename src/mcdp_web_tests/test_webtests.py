@@ -124,8 +124,11 @@ class FunctionalTests(unittest.TestCase):
         # another test
         _, res = self.get_maybe_follow('/repos/')
         assert_not_contains(res.body, 'None')
-        
-        
+
+        _, res = self.get_maybe_follow('/')
+        assert_not_contains(res.body, 'function shelf')
+         
+
         def ignore(url, parsed):  # @UnusedVariable
             if ':' in parsed.path:
                 return True
