@@ -10,6 +10,7 @@ from mcdp.exceptions import MCDPExceptionWithWhere
 
 from .parse_actions import parse_wrap
 from .refinement import apply_refinement
+from contracts.utils import check_isinstance
 
 
 __all__ = [
@@ -45,6 +46,7 @@ parse_poset_refine = standard_refine
 parse_constant_refine = standard_refine
 parse_dp_refine = standard_refine
 parse_template_refine = standard_refine
+parse_primitivedp_refine = standard_refine
 
 def parse_ndp_eval(v, context):
     from .eval_ndp_imp import eval_ndp
@@ -77,36 +79,39 @@ def parse_poset(string, context=None):
     from mocdp.comp.context import Context
     from .syntax import Syntax
 
+    v = parse_wrap(Syntax.space, string)[0]
+
     if context is None:
         context = Context()
-
-    v = parse_wrap(Syntax.space, string)[0]
 
     v2 = parse_poset_refine(v, context)
     res = parse_poset_eval(v2, context)
     return res 
 
-
 def parse_poset_eval(x, context):
     from .eval_space_imp import eval_space
     res = eval_space(x, context)
-    assert isinstance(res, Poset), res
+    check_isinstance(res, Poset)
     return res
 
 @contract(returns=PrimitiveDP)
 def parse_primitivedp(string, context=None):
     from mocdp.comp.context import Context
     from mcdp_lang.syntax import Syntax
-    from mcdp_lang.eval_primitivedp_imp import eval_primitivedp
 
     v = parse_wrap(Syntax.primitivedp_expr, string)[0]
 
     if context is None:
         context = Context()
 
-    res = eval_primitivedp(v, context)
+    v2 = parse_primitivedp_refine(v, context)
+    res = parse_primitivedp_eval(v2, context)
+    return res 
 
-    assert isinstance(res, PrimitiveDP), res
+def parse_primitivedp_eval(x, context):
+    from mcdp_lang.eval_primitivedp_imp import eval_primitivedp
+    res = eval_primitivedp(x, context)
+    check_isinstance(res, PrimitiveDP)
     return res
 
 @contract(returns='isinstance(ValueWithUnits)')

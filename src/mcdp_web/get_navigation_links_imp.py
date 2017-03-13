@@ -57,7 +57,7 @@ def get_navigation_links_context(e):
 
         
         d[SPEC_MODELS] = []
-        models = e.library.list_ndps()
+        models = e.library.list_spec(SPEC_MODELS)
         for _ in natural_sorted(models):
             is_current = (e.spec_name == SPEC_MODELS) and (e.thing_name == _)
 
@@ -71,7 +71,7 @@ def get_navigation_links_context(e):
                         url_delete=url_delete, current=is_current)
             d[SPEC_MODELS].append(desc) 
        
-        templates = e.library.list_templates()
+        templates = e.library.list_spec(SPEC_TEMPLATES)
         d[SPEC_TEMPLATES] = []
         for _ in natural_sorted(templates):
             is_current = (e.spec_name == SPEC_TEMPLATES) and (e.thing_name == _)
@@ -86,7 +86,7 @@ def get_navigation_links_context(e):
             d[SPEC_TEMPLATES].append(desc)
 
         
-        posets = e.library.list_posets()
+        posets = e.library.list_spec(SPEC_POSETS)
         d[SPEC_POSETS] = []
         for _ in natural_sorted(posets):
             is_current = (e.spec_name == SPEC_POSETS) and (e.thing_name == _)
@@ -100,7 +100,7 @@ def get_navigation_links_context(e):
             desc = dict(id=_, name=name, url=url, current=is_current, url_edit=url_edit, url_delete=url_delete)
             d[SPEC_POSETS].append(desc)
 
-        values =e.library.list_values()
+        values =e.library.list_spec(SPEC_VALUES)
         d[SPEC_VALUES] = []
         for _ in natural_sorted(values):
             is_current = (e.spec_name == SPEC_VALUES) and (e.thing_name == _)

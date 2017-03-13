@@ -19,6 +19,7 @@ from mcdp.exceptions import mcdp_dev_warning
 from reprep import Report
 from mcdp.constants import MCDPConstants
 from mcdp_utils_misc.dir_from_package_nam import dir_from_package_name
+from mcdp_library.specs_def import SPEC_MODELS
 
 
 def get_test_library2(libnames):
@@ -46,7 +47,7 @@ def opt_basic_1_long():
     
     library.use_cache_dir(os.path.join(outdir, 'cache'))
 
-    options = library.list_ndps()
+    options = library.list_spec(SPEC_MODELS)
     options.remove('RigidBodyAssignID')
     options.remove('YoubotBaseBattery')
     options.remove('YoubotBaseComputer')

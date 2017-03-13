@@ -1,23 +1,25 @@
 # -*- coding: utf-8 -*-
 from collections import namedtuple
 
+from mcdp.constants import MCDPConstants
 from mcdp_lang.parse_interface import (parse_ndp_eval, parse_ndp_refine,
                                        parse_template_eval, parse_template_refine, parse_constant_eval,
-                                       parse_constant_refine, parse_poset_eval, parse_poset_refine)
+                                       parse_constant_refine, parse_poset_eval, parse_poset_refine,
+                                       parse_primitivedp_refine, parse_primitivedp_eval)
 from mcdp_lang.syntax import Syntax
 from mcdp_library import MCDPLibrary
 
 
 # XXX: to revise
+def get_png_data_unavailable(*args, **kwargs):
+    from mcdp_web.editor_fancy.image import get_png_data_unavailable
+    return get_png_data_unavailable(*args, **kwargs)
 def get_png_data_model(*args, **kwargs):
     from mcdp_web.editor_fancy.image import get_png_data_model
     return get_png_data_model(*args, **kwargs)
 def ndp_template_enclosed(*args, **kwargs):
     from mcdp_web.editor_fancy.image import ndp_template_enclosed
     return ndp_template_enclosed(*args, **kwargs)
-def get_png_data_unavailable(*args, **kwargs):
-    from mcdp_web.editor_fancy.image import get_png_data_unavailable
-    return get_png_data_unavailable(*args, **kwargs)
 def get_png_data_poset(*args, **kwargs):
     from mcdp_web.editor_fancy.image import get_png_data_poset
     return get_png_data_poset(*args, **kwargs)
@@ -26,7 +28,6 @@ def get_png_data_syntax_model(*args, **kwargs):
     return get_png_data_syntax_model(*args, **kwargs)
 
 
-from mcdp.constants import MCDPConstants
 
 
 Spec = namedtuple('Spec', 
@@ -46,7 +47,7 @@ SPEC_MODELS = 'models'
 SPEC_TEMPLATES = 'templates'
 SPEC_VALUES = 'values'
 SPEC_POSETS = 'posets'
-
+SPEC_PRIMITIVEDPS = 'primitivedps'
 
 spec_models = specs[SPEC_MODELS] = Spec(url_part=SPEC_MODELS,  
                       extension=MCDPConstants.ext_ndps,
@@ -95,3 +96,20 @@ spec_posets =specs[SPEC_POSETS]= Spec(url_part=SPEC_POSETS,
                    get_png_data_syntax=get_png_data_poset,
                    write=MCDPLibrary.write_to_poset,
                    minimal_source_code="poset {\n    \n}")
+ 
+
+
+spec_primitivedps = specs[SPEC_PRIMITIVEDPS] = Spec(
+                    url_part=SPEC_PRIMITIVEDPS,  
+                   extension=MCDPConstants.ext_primitivedps,
+                   parse=MCDPLibrary.parse_primitivedp,
+                   parse_expr=Syntax.primitivedp_expr,
+                   parse_refine=parse_primitivedp_refine,
+                   parse_eval=parse_primitivedp_eval,
+                   load=MCDPLibrary.load_primitivedp,
+                   get_png_data=get_png_data_unavailable,
+                   get_png_data_syntax=get_png_data_unavailable,
+                   write=MCDPLibrary.write_to_primitivedp,
+                   minimal_source_code="# no example available")
+
+ 

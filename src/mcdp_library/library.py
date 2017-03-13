@@ -312,33 +312,42 @@ class MCDPLibrary():
         msg = 'Could not load library %r.' % id_library
         msg += "\n---\n".join([str(_) for _ in errors])
         raise_desc(DPSemanticError, msg)
+# 
+#     @contract(returns='set(str)')
+#     def list_ndps(self):
+#         """ Returns all models defined in this library with .mcdp files. """
+#         return self._list_with_extension(MCDPConstants.ext_ndps)
+# 
+#     get_models = list_ndps
+# 
+#     @contract(returns='set(str)')
+#     def list_posets(self):
+#         """ Returns all models defined in this library with .mcdp files. """
+#         return self._list_with_extension(MCDPConstants.ext_posets)
+# 
+#     @contract(returns='set(str)')
+#     def list_primitivedps(self):
+#         """ Returns all models defined in this library with .mcdp files. """
+#         return self._list_with_extension(MCDPConstants.ext_primitivedps)
 
-    @contract(returns='set(str)')
-    def list_ndps(self):
-        """ Returns all models defined in this library with .mcdp files. """
-        return self._list_with_extension(MCDPConstants.ext_ndps)
+#     @contract(returns='set(str)')
+#     def list_templates(self):
+#         """ Returns all models defined in this library with .mcdp files. """
+#         return self._list_with_extension(MCDPConstants.ext_templates)
 
-    get_models = list_ndps
+#     @contract(returns='set(str)')
+#     def list_values(self):
+#         return self._list_with_extension(MCDPConstants.ext_values)
 
-    @contract(returns='set(str)')
-    def list_posets(self):
-        """ Returns all models defined in this library with .mcdp files. """
-        return self._list_with_extension(MCDPConstants.ext_posets)
-
-    @contract(returns='set(str)')
-    def list_primitivedps(self):
-        """ Returns all models defined in this library with .mcdp files. """
-        return self._list_with_extension(MCDPConstants.ext_primitivedps)
-
-    @contract(returns='set(str)')
-    def list_templates(self):
-        """ Returns all models defined in this library with .mcdp files. """
-        return self._list_with_extension(MCDPConstants.ext_templates)
-
-    @contract(returns='set(str)')
-    def list_values(self):
-        return self._list_with_extension(MCDPConstants.ext_values)
-
+    def list_spec(self, spec_name):
+        ''' Lists files of the given spec. '''
+        from .specs_def import specs
+        if not spec_name in specs:
+            msg = 'Invalid spec name "%s".' % spec_name
+            raise ValueError(msg)
+        extension = specs[spec_name]
+        return self._list_with_extension(extension)
+    
     @contract(ext=str)
     def _list_with_extension(self, ext):
         ''' Lists all files with a certain extension. 

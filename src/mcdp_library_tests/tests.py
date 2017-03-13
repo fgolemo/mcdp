@@ -8,6 +8,8 @@ from contracts.utils import raise_desc, raise_wrapped
 
 from mcdp import MCDPConstants, logger
 from mcdp.exceptions import DPSemanticError, DPNotImplementedError
+from mcdp_library.specs_def import SPEC_VALUES, SPEC_TEMPLATES, SPEC_MODELS,\
+    SPEC_POSETS, SPEC_PRIMITIVEDPS
 from mcdp_library.stdlib import get_test_librarian
 from mcdp_tests import get_test_index
 from mcdp_tests.generation import for_all_source_mcdp,\
@@ -165,7 +167,7 @@ def mcdplib_test_setup_nameddps(context, libname):
     """
     from mcdp_tests import load_tests_modules
     l = get_test_library(libname)
-    models = l.get_models()
+    models = l.list_spec(SPEC_MODELS)
 
     from mcdp_tests.generation import for_all_nameddps, for_all_nameddps_dyn
     load_tests_modules()
@@ -183,7 +185,7 @@ def mcdplib_test_setup_nameddps(context, libname):
         source = f['data']
 
         if gives_syntax_error(source):
-            #print('Skipping because syntax error')
+            print('Skipping because syntax error')
             # TODO: actually check syntax error
             pass
         else:
@@ -325,7 +327,7 @@ def mcdplib_test_setup_value(context, libname):
 
     l = get_test_library(libname)
 
-    values = l.list_values()
+    values = l.list_spec(SPEC_VALUES)
 
     from mcdp_tests.generation import for_all_values
     load_tests_modules()
@@ -351,7 +353,7 @@ def mcdplib_test_setup_posets(context, libname):
 
     l = get_test_library(libname)
 
-    posets = l.list_posets()
+    posets = l.list_spec(SPEC_POSETS)
 
     from mcdp_tests.generation import for_all_posets
     load_tests_modules()
@@ -372,7 +374,7 @@ def mcdplib_test_setup_posets(context, libname):
 def mcdplib_test_setup_primitivedps(context, libname):
     from mcdp_tests import load_tests_modules
     l = get_test_library(libname)
-    dps = l.list_primitivedps()
+    dps = l.list_spec(SPEC_PRIMITIVEDPS)
 
     from mcdp_tests.generation import for_all_dps
     load_tests_modules()
@@ -392,7 +394,7 @@ def mcdplib_test_setup_primitivedps(context, libname):
 def mcdplib_test_setup_template(context, libname):
     from mcdp_tests import load_tests_modules
     l = get_test_library(libname)
-    templates = l.list_templates()
+    templates = l.list_spec(SPEC_TEMPLATES)
 
     from mcdp_tests.generation import for_all_templates
     load_tests_modules()

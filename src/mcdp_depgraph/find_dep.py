@@ -12,6 +12,7 @@ from mcdp_lang.syntax import Syntax
 from mcdp_library import Librarian
 from mcdp_utils_misc import memoize_simple
 import networkx as nx
+from mcdp_library.specs_def import SPEC_MODELS
 
 
 @contract(config_dirs='list(str)', maindir='str', seeds='None|seq(str)')
@@ -34,7 +35,7 @@ def find_dependencies(config_dirs, maindir, seeds):
         seeds = []
         for libname in libnames:
             library = librarian.load_library(libname)
-            ndps = library.list_ndps()
+            ndps = library.list_spec(SPEC_MODELS)
             
             for name in ndps:
                 seeds.append('%s.%s' % (libname, name))
