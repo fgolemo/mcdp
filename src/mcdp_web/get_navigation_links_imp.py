@@ -118,7 +118,7 @@ def get_navigation_links_context(e):
 
         d['views'] = []
         
-        if e.spec_name == SPEC_MODELS is not None:
+        if e.spec_name == SPEC_MODELS:
             views = e.app._get_views()
             for v in views:
                 view = e.app.views[v] 

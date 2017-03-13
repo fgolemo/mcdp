@@ -88,19 +88,14 @@ class Spider():
             logger.error('Failed: %d' % len(self.failed))
         for url in sorted(self.visited):
             logger.info('visisted %s' % url)
-        for url in sorted(self.skipped):
-            logger.debug('skipped %s' % url)
+        # for url in sorted(self.skipped):
+        # logger.debug('skipped %s' % url)
         for url in sorted(self.failed):
             logger.error('failed %s' % url)
             for r in self.referrers[url]:
                 logger.error(' referred from %s' % r)
                 u0 = list(self.referrers[url])[0]
-                logger.debug(indent(self.visited[u0].body, ' referrer page '))
-#                 for u0 in self.referrers[url]:
-#                     res = self.visited[u0]
-#                     i = res.body.index(url)
-#                     where = Where(res.body, i, i+len(url))
-#                     logger.error(indent(format_where(where),' >'))
+                # logger.debug(indent(self.visited[u0].body, ' referrer page '))
 
                     
             logger.error(self.failed[url])

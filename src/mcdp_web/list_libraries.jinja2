@@ -13,6 +13,7 @@
 <body>
 {% include 'menu.jinja2' %}
 {% include 'user.jinja2' %}
+{% from 'list_libraries_by_shelf.jinja2' import list_libraries_by_shelf %}
 
 <p>This is the list of libraries available, organized by shelf.
     See <a href="{{root}}/repos/{{navigation.repo_name}}/shelves/">here</a> to disable some of the shelves.
@@ -22,7 +23,8 @@
 </p>
 
 <div id='around'>
-  {% include 'list_libraries_by_shelf.jinja2' %}
+
+  {{list_libraries_by_shelf(navigation.repo_name)}}
  </div>
 
 {% include 'footer.jinja2' %}
