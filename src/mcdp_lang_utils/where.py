@@ -3,7 +3,6 @@ from contracts.utils import raise_desc
 from mcdp_lang_utils.where_utils import line_and_col, location
 
 from .where_utils import printable_length_where
-from mcdp_utils_misc.string_repr import make_chars_visible
 
 
 class Where(object):

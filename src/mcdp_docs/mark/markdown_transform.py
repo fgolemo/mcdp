@@ -1,4 +1,7 @@
 from contracts.utils import raise_desc
+from mcdp_lang_utils.where import Where
+from mcdp.exceptions import DPSyntaxError
+from mcdp_lang_utils.where_utils import location
 
 
 def is_inside_markdown_quoted_block(s, i):
@@ -101,7 +104,9 @@ def replace_markdown_line_by_line(s, line_transform=None, code_transform=None, i
             i += 1
         msg = 'Cannot find matching tag to %r. Around line %d.' % (tagname, approximate_line)
         msg + '\n Remember I want it either on the first line (anywhere) or at the start of a line.'
-        raise_desc(ValueError, msg, first_line=first_line)
+        character = location(approximate_line, 0, s)
+        where = Where(s, character)
+        raise DPSyntaxError(msg, where=where)
     
     MARK = ' ' *4
     def eat_code(line_in, line_out):

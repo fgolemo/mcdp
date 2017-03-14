@@ -3,9 +3,7 @@ import logging
 import urlparse
 import xml.sax.saxutils as saxutils
 
-from webtest.app import AppError
-from mcdp_lang_utils.where import format_where, Where
-from contracts.utils import indent
+from webtest.app import AppError 
 
 
 logger = logging.getLogger('mcdp.spider')
@@ -49,11 +47,12 @@ class Spider():
         
         try:
             url2, res = self.get_maybe_follow(url)
-        except AppError as e:
+        except (AppError) as e:
             logger.error('failed %s' % url)
             s = unicode(e).encode('utf8')
             self.failed[url] = saxutils.unescape(s)
             return
+        
             
         if url2 != url:
             self.visited[url] = 'redirect to %s' % url2

@@ -98,13 +98,14 @@ class FunctionalTests(unittest.TestCase):
         return url0, res
  
     def runTest(self):
-        ushelf = '/repos/global/shelves/%s/' % another_name_for_unittests_shelf
+        ushelf = '/repos/global/shelves/%s' % another_name_for_unittests_shelf
         bugs = [
             ushelf + '/libraries/basic/models/sum2f_rcomp/views/solver',
             ushelf + '/libraries/pop/models/pop_example_3_7_newsyntax/views/ndp_repr/',
             
             # this refers to a library that is not in this shelf
             ushelf + '/libraries/making/models/test1/views/syntax/',
+            ushelf + '/libraries/documents/test_par.html',
         ]
         for b in bugs:
             self.testapp.get(b)

@@ -56,6 +56,7 @@
 
 <pre>root = <a href="{{root}}">{{root}}</a></pre>
 
+{% if contents is defined %}
 {% if not print %}
 <a class='make_button' href="{{library_url(navigation.library_name)}}/">
 	Library
@@ -74,13 +75,14 @@
 {{ render_library_doc(toc) | safe }}
 {% endif %}
 </div>
+{% endif %}
 
 {% if contents is defined %}
     <div id='content'>
     {{contents | safe }}
     </div>
 {% else %}
-<pre>{{error}}</pre>
+    <pre>{{error}}</pre>
 {% endif %}
 
 {% endif %}
