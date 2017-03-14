@@ -1,6 +1,5 @@
-from contracts.utils import raise_desc
-from mcdp_lang_utils.where import Where
 from mcdp.exceptions import DPSyntaxError
+from mcdp_lang_utils.where import Where
 from mcdp_lang_utils.where_utils import location
 
 
