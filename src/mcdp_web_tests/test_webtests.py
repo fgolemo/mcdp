@@ -142,6 +142,7 @@ class FunctionalTests(unittest.TestCase):
                 return True
             
             exclude = ['png','pdf','dot','svg','txt']
+            exclude = []
             for x in exclude:
                 if x in parsed.path: return True
             

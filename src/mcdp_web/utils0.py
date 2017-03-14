@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 import traceback
+import urlparse
 
 from contracts.utils import check_isinstance, indent
 from pyramid.httpexceptions import HTTPException, HTTPFound
+from pyramid.response import Response
 
 from mcdp import MCDPConstants,  logger, __version__
 from mcdp_shelf import PRIVILEGE_SUBSCRIBE, PRIVILEGE_READ, PRIVILEGE_WRITE, PRIVILEGE_ADMIN
 from mcdp_utils_misc import duration_compact,  format_list
-import urlparse
-from pyramid.response import Response
 
 
 def add_other_fields(self, res, request, context):
@@ -46,8 +46,8 @@ def add_other_fields(self, res, request, context):
     def shelf_privilege(repo_name, sname, privilege):
         repo = session.repos[repo_name]
         if not sname in repo.shelves:
-            msg = 'Cannot find shelf "%s" in repo "%s".' % (repo_name, sname)
-            msg += '\n get_all_available_plotters: ' + format_list(repo.shelves)
+            msg = 'Cannot find shelf "%s" in repo "%s".' % (sname, repo_name)
+            msg += '\n available: ' + format_list(repo.shelves)
             raise ValueError(msg) 
         acl = repo.shelves[sname].get_acl()
         return acl.allowed2(privilege, user)
@@ -56,7 +56,7 @@ def add_other_fields(self, res, request, context):
         return shelf_privilege(repo_name, sname, PRIVILEGE_SUBSCRIBE)
     
     def can_read(repo_name, sname):
-        return shelf_privilege(repo_name,sname, PRIVILEGE_READ)
+        return shelf_privilege(repo_name, sname, PRIVILEGE_READ)
     
     def can_write(repo_name, sname):
         return shelf_privilege(repo_name, sname, PRIVILEGE_WRITE)

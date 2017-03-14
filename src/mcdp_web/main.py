@@ -54,6 +54,8 @@ from .utils.image_error_catch_imp import response_image
 from .utils.response import response_data
 from .utils0 import add_other_fields, add_std_vars_context
 from .visualization.app_visualization import AppVisualization
+from mcdp_web.resource_tree import ResourceAllShelves, ResourceShelfForbidden,\
+    ResourceShelfNotFound, ResourceRepoNotFound
 
 
 __all__ = [
@@ -170,6 +172,20 @@ class WebApp(AppVisualization, AppStatus,
     @cr2e
     def view_dummy(self, e):  # @UnusedVariable
         return {}
+    
+    @add_std_vars_context_no_redir
+    @cr2e
+    def view_resource_not_found(self, e):  
+        e.request.response.status = 404
+        return {}
+    
+    @add_std_vars_context_no_redir
+    @cr2e
+    def view_resource_forbidden(self, e): 
+        e.request.response.status = 403
+        return {}
+    
+    
     
     @add_std_vars_context
     @cr2e
@@ -519,7 +535,7 @@ class WebApp(AppVisualization, AppStatus,
         
         config.add_view(self.view_dummy, context=ResourceRepo, renderer='shelves_index.jinja2')
         config.add_view(self.view_dummy, context=ResourceShelves, renderer='shelves_index.jinja2') # same as above
-        
+        config.add_view(self.view_dummy, context=ResourceAllShelves, renderer='shelves_index.jinja2') # same as above
         config.add_view(self.view_changes, context=ResourceChanges, renderer='changes.jinja2')
         config.add_view(self.view_tree, context=ResourceTree, renderer='tree.jinja2')
         
@@ -537,7 +553,11 @@ class WebApp(AppVisualization, AppStatus,
 
         config.add_view(self.view_exceptions_occurred_json, context=ResourceExceptionsJSON, renderer='json', permission=NO_PERMISSION_REQUIRED)
         config.add_view(self.view_exceptions_occurred, context=ResourceExceptionsFormatted, renderer='exceptions_formatted.jinja2', permission=NO_PERMISSION_REQUIRED)
+        
+        config.add_view(self.view_dummy, context=ResourceShelfNotFound, renderer='shelf_not_found.jinja2')
+        config.add_view(self.view_dummy, context=ResourceShelfForbidden, renderer='shelf_forbidden.jinja2')
         config.add_view(self.view_dummy, context=ResourceShelfInactive, renderer='shelf_inactive.jinja2')
+        config.add_view(self.view_resource_not_found, context=ResourceRepoNotFound, renderer='repo_not_found.jinja2')
         config.add_view(self.view_thing_delete, context=ResourceThingDelete)
         config.add_view(self.view_thing, context=ResourceThing)
         config.add_view(serve_robots, context=ResourceRobots, permission=NO_PERMISSION_REQUIRED)

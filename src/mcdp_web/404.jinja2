@@ -1,15 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <title></title>
-    {% include 'head.jinja2' %}
-</head>
-<body>
-<h1>404 - not found </h1>
-<p>Not found: <code>{{url}}</code></p>
+{% extends "base_page.jinja2" %}
+{% block title %}404 Not Found{% endblock %}
+{% block content %}
+    <h1>404 - not found </h1>
+    <p>Not found: <code>{{url}}</code></p>
 
-<pre>Referrer: <code>{{referrer}}</code></p>
+    <pre>Referrer: <code>{{referrer}}</code></p>
 
-<pre>{{context}}</pre>
-</body>
-</html>
+    <pre>{{context}}</pre>
+{% endblock %}

@@ -104,7 +104,11 @@ class Resource(object):
         request = self.get_request()
         session = app.get_session(request)
         return session
-    
+
+class ResourceEndOfTheLine(Resource):
+    ''' Always returns itself '''
+    def getitem(self, key):  # @UnusedVariable
+        return self
 
 def context_display_in_detail(context):
     ''' Returns a string that displays in detail the context tree and acls. '''
@@ -144,7 +148,7 @@ class MCDPResourceRoot(Resource):
             'exit': ResourceExit(),
             'login': ResourceLogin(),
             'logout': ResourceLogout(),
-            'shelves': ResourceShelves(),
+            'shelves': ResourceAllShelves(),
             'robots.txt': ResourceRobots(),
         }    
         
@@ -154,28 +158,43 @@ class ResourceExit(Resource): pass
 class ResourceLogin(Resource): pass
 class ResourceLogout(Resource): pass
 class ResourceChanges(Resource): pass
-        
+class ResourceAllShelves(Resource): pass
+
 class ResourceShelves(Resource):
+    
+    def get_repo(self):
+        session = self.get_session()
+        repos = session.repos
+        repo_name = self.__parent__.name
+        repo = repos[repo_name]
+        return repo
     def getitem(self, key):
+        session = self.get_session()
+        user = session.get_user()
+        repo = self.get_repo()
+        shelves = repo.get_shelves()
+        
+        if not key in shelves:
+            return ResourceShelfNotFound(key)
+        shelf = shelves[key]
+        if not shelf.get_acl().allowed2(PRIVILEGE_READ, user):
+            return ResourceShelfForbidden(key)
+                
         return ResourceShelf(key)
     
     def __iter__(self):
         session = self.get_session()
         user = session.get_user()
-        repos = session.repos
-        
-        repo_name = self.__parent__.name
-        
-        if repo_name == 'root':
-            return
-        else:
-            repo = repos[repo_name]
-            shelves = repo.get_shelves()
-            for id_shelf, shelf in shelves.items():
-                if shelf.get_acl().allowed2(PRIVILEGE_READ, user):
-                    yield id_shelf
-        
+        repo = self.get_repo()
 
+        shelves = repo.get_shelves()
+        for id_shelf, shelf in shelves.items():
+            if shelf.get_acl().allowed2(PRIVILEGE_READ, user):
+                yield id_shelf
+
+class ResourceShelfForbidden(ResourceEndOfTheLine): pass        
+class ResourceShelfNotFound(ResourceEndOfTheLine): pass
+    
 class ResourceShelvesShelfSubscribe(Resource): pass
 class ResourceShelvesShelfUnsubscribe(Resource): pass
 class ResourceExceptionsFormatted(Resource): pass 
@@ -186,8 +205,7 @@ class ResourceLibrariesNew(Resource):
     def getitem(self, key):
         return ResourceLibrariesNewLibname(key)
     
-class ResourceLibrariesNewLibname(Resource):
-    pass 
+class ResourceLibrariesNewLibname(Resource): pass 
         
 class ResourceLibraries(Resource): 
     
@@ -200,8 +218,8 @@ class ResourceLibraries(Resource):
         libname = key 
         shelf = context_get_shelf(self)
         if not libname in shelf.get_libraries_path():
-            logger.error('Could not find library "%s".' % libname)
-            print('Could not find library "%s".' % libname)
+#             logger.error('Could not find library "%s".' % libname)
+#             print('Could not find library "%s".' % libname)
             return ResourceLibraryNotFound(libname)
         return ResourceLibrary(libname)
     
@@ -238,19 +256,20 @@ class ResourceShelf(Resource):
                 return ResourceShelfInactive(self.name)
             
             return ResourceLibraries()
+
     
-class ResourceShelfInactive(Resource):
-    def getitem(self, key):  # @UnusedVariable
-        return self
+class ResourceShelfInactive(ResourceEndOfTheLine): 
+    pass
   
 
 class ResourceRepos(Resource):
+    
     def getitem(self, key):
         session = self.get_session()
         repos = session.repos
         if not key in repos:
             #msg = 'Could not find repository "%s".' % key
-            raise KeyError(key)
+            return ResourceRepoNotFound(key)
         return ResourceRepo(key)
         
     def __iter__(self):
@@ -258,13 +277,16 @@ class ResourceRepos(Resource):
         repos = list(session.repos)
         return list(repos).__iter__()
     
-    
+class ResourceRepoNotFound(ResourceEndOfTheLine):
+    pass
+
 class ResourceRepo(Resource):
     def get_subs(self):
         return {'shelves':ResourceShelves()}
     
-class ResourceLibraryNotFound(Resource):
+class ResourceLibraryNotFound(ResourceEndOfTheLine):
     pass
+
 class ResourceLibrary(Resource): 
     
     def __iter__(self):

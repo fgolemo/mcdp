@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% block head %}
+    <link rel="stylesheet" href="style.css" />
+    <title>{% block title %}{% endblock %}</title>
+    {% endblock %}
+    {% include 'head.jinja2' %}
+</head>
+<body>
+    {% block content %}{% endblock %}
+{% include 'footer.jinja2' %}
+</body>
+</html>

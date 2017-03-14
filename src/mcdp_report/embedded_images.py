@@ -6,14 +6,14 @@ import re
 
 from bs4 import BeautifulSoup
 from bs4.element import Tag
-
 from contracts import contract
 from contracts.utils import check_isinstance
+
 from mcdp import logger
-from mcdp_utils_misc.string_utils import get_md5
+from mcdp_utils_misc import get_md5
+from mcdp_utils_xml import add_style, add_class
 
 from .pdf_conversion import png_from_pdf
-from mcdp_utils_xml.add_class_and_style import add_style
 
 
 # def embed_images(html, basedir):
@@ -284,16 +284,15 @@ def embed_pdf_images(soup, resolve, density):
     """ 
         Converts PDFs to PNGs and embeds them
         resolve: filename --> string
-    """
-    for tag in soup.select('img[src$=pdf], img[src$=PDF]'):
-        embed_pdf_image(tag, resolve, density)
+    """  
+    for tag in soup.select('img'):
+        if tag.has_attr('src') and tag['src'].lower().endswith('pdf'):
+            embed_pdf_image(tag, resolve, density)
          
 def embed_pdf_image(tag, resolve, density):
     assert tag.name == 'img'
     assert tag.has_attr('src')
-    # load pdf data
-    from mcdp_docs.highlight import add_class # XXX
-    
+    # load pdf data    
     data_pdf = resolve(tag['src'])
     if data_pdf is None:
         add_class(tag, 'missing-image')
