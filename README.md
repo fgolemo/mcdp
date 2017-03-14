@@ -26,7 +26,7 @@
 
 **PyMCDP** is a Python interpreter and solver for Monotone Co-Design Problems.
 
-Please see [the manual (PDF)][manual], which contains up-to-date installation instructions.
+Please see the website <http://co-design.science> and in particular [the manual (PDF)][manual], which contains up-to-date installation instructions.
 
 [manual]: http://co-design.science/media/manual.pdf
 
@@ -150,8 +150,6 @@ will produce these graphs:
         </td>
     </tr>
     <tr><td>Verbose graph</td><td><a href="web/co-design.science/media/battery-out_expected3/battery-ndp_graph_enclosed_LR.png"><img src="web/co-design.science/media/battery-out_expected3/battery-ndp_graph_enclosed_LR.png"/></a></td></tr>
-<!--     <tr><td>Cleaned-up graph</td><td ><a href="web/co-design.science/media/battery-out_expected3/battery-clean.png">
-    <img src="web/co-design.science/media/battery-out_expected3/battery-clean.png" height="300px"/></a></td></tr> -->
     <tr><td>Tree representation</td><td><img src="web/co-design.science/media/battery-out_expected3/battery-dp_graph_tree.png"/></td></tr>
     </tr>
 </table>
