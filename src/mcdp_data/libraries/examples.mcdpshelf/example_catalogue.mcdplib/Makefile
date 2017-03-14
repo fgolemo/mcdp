@@ -2,13 +2,13 @@ all: plots solve
 
 dp1=catalogue1
 dp2=catalogue_plus_coproduct
-dp3=catalogue_plus_coproduct-compact
+dp3=catalogue_plus_coproduct_compact
 dp4=sizes
 outp=--out out/
 
 clean:
 	rm -rf out/
-	
+
 plots: plot1 plot2 plot3 plot4
 
 plot1:
