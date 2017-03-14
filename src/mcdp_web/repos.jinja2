@@ -10,7 +10,7 @@
 
 <ul>
     {% for id_repo, repo in navigation.repos.items() %}
-    <li><a href='{{root}}/repos/{{id_repo}}/'>Repo {{id_repo}}</a></li>
+    <li><a href='{{root}}/repos/{{id_repo}}/'>{{icon_repo|safe}} Repository <code>{{id_repo}}</code></a></li>
     {% endfor %}
 </ul>
 {% include 'footer.jinja2' %}

@@ -7,6 +7,7 @@ from pyramid.httpexceptions import HTTPException, HTTPFound
 from mcdp import MCDPConstants,  logger, __version__
 from mcdp_shelf import PRIVILEGE_SUBSCRIBE, PRIVILEGE_READ, PRIVILEGE_WRITE, PRIVILEGE_ADMIN
 from mcdp_utils_misc import duration_compact,  format_list
+import urlparse
 
 
 def add_other_fields(self, res, request, context):
@@ -128,6 +129,10 @@ def add_std_vars_context_(f, redir):
     from .resource_tree import context_display_in_detail, Resource
 
     def f0(self, context, request):
+        if '//' in urlparse.urlparse(request.url).path:
+            msg = 'This is an invalid URL with 2 slashes: %s' % request.url
+            raise ValueError('//')
+        
         if redir:
             url = request.url
             if not url.endswith('/'):

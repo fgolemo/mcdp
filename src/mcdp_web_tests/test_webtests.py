@@ -152,7 +152,7 @@ class FunctionalTests(unittest.TestCase):
         
         spider.visit('/tree')
         try:
-            spider.go(max_fails=1)
+            spider.go(max_fails=10)
         except KeyboardInterrupt:
             pass
         spider.log_summary()
