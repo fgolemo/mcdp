@@ -131,7 +131,7 @@ def add_std_vars_context_(f, redir):
     def f0(self, context, request):
         if '//' in urlparse.urlparse(request.url).path:
             msg = 'This is an invalid URL with 2 slashes: %s' % request.url
-            raise ValueError('//')
+            raise ValueError(msg)
         
         if redir:
             url = request.url
