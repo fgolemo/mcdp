@@ -1,0 +1,12 @@
+{% extends "base_page.jinja2" %}
+{% block title %}
+    404 - Page not found
+{% endblock %}
+{% block content %}
+    <p>
+        Page {{context.name}} not found.
+    </p>
+    <pre>
+        {{context_detail}}
+    </pre>
+{% endblock %}

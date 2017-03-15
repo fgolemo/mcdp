@@ -1,9 +1,10 @@
 from collections import defaultdict
 import logging
 import urlparse
-import xml.sax.saxutils as saxutils
 
-from webtest.app import AppError 
+from webtest.app import AppError
+
+import xml.sax.saxutils as saxutils
 
 
 logger = logging.getLogger('mcdp.spider')
@@ -17,7 +18,10 @@ class Spider():
         self.ignore = ignore
         self.queue = []
         self.skipped = set()
+        # 
         self.failed = {} # url -> Exception
+        # 404
+        self.not_found = {} # url -> Exception
         self.visited = {} # url -> Response
         self.referrers = defaultdict(lambda: set()) # url -> url referred to
         
@@ -48,12 +52,17 @@ class Spider():
         try:
             url2, res = self.get_maybe_follow(url)
         except (AppError) as e:
-            logger.error('failed %s' % url)
+            
             s = unicode(e).encode('utf8')
-            self.failed[url] = saxutils.unescape(s)
+            s = saxutils.unescape(s)
+            if '500' in e:
+                self.failed[url] = s
+                logger.error('failed %s' % url)
+            else:
+                self.not_found[url] = s
+                logger.error('not found %s' % url)
             return
         
-            
         if url2 != url:
             self.visited[url] = 'redirect to %s' % url2
             logger.debug('redirected %s -> %s' % (url, url2))
@@ -96,11 +105,10 @@ class Spider():
                 u0 = list(self.referrers[url])[0]
                 # logger.debug(indent(self.visited[u0].body, ' referrer page '))
 
-                    
             logger.error(self.failed[url])
 
-                
-                
+
+
 def find_links(html, url_base):
     '''
         Ignores "data:" urls in images.

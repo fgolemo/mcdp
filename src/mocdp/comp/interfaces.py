@@ -2,6 +2,7 @@
 from abc import ABCMeta, abstractmethod
 
 from contracts import contract
+
 from mcdp_posets import PosetProduct
 
 
@@ -11,24 +12,24 @@ __all__ = [
 ]
 
 class NotConnected(Exception):
-    """
+    '''
         Use the following fields to annotate:
         
         self.unconnected_functions = set of CFunction
         self.unconnected_resources = set of CResources
-    """
+    '''
      
 class NamedDP():
-    """ A DP with names """
+    ''' A DP with names '''
     __metaclass__ = ABCMeta
 
     @abstractmethod
     def get_dp(self):
-        pass
+        ''' '''
 
     @abstractmethod
     def check_fully_connected(self):
-        """ Raise NotConnected """
+        ''' Raise NotConnected '''
 
     def is_fully_connected(self):
         try:
@@ -47,17 +48,17 @@ class NamedDP():
     @abstractmethod
     @contract(returns='isinstance(SimpleWrap)')
     def abstract(self):
-        """ Returns a SimpleWrap """
+        ''' Returns a SimpleWrap '''
 
     @abstractmethod
     @contract(returns='list(str)')
     def get_fnames(self):
-        pass
+        ''' '''
 
     @abstractmethod
     @contract(returns='list(str)')
     def get_rnames(self):
-        pass
+        ''' '''
 
     def rindex(self, rn):
         rnames = self.get_rnames()
@@ -74,12 +75,12 @@ class NamedDP():
     @abstractmethod
     @contract(rname=str)
     def get_rtype(self, rname):
-        pass
+        ''' '''
 
     @abstractmethod
     @contract(fname=str)
     def get_ftype(self, fname):
-        pass
+        ''' '''
 
     def repr_long(self):
         return self.__repr__()
@@ -95,7 +96,4 @@ class NamedDP():
         # Returns the product space
         types = [self.get_rtype(s) for s in signals]
         return PosetProduct(tuple(types))
-
-
-
 

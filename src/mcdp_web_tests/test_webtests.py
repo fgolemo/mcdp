@@ -106,6 +106,7 @@ class FunctionalTests(unittest.TestCase):
             # this refers to a library that is not in this shelf
             ushelf + '/libraries/making/models/test1/views/syntax/',
             ushelf + '/libraries/documents/test_par.html',
+            ushelf + '/libraries/documents/test_subfigures.html',
         ]
         for b in bugs:
             self.testapp.get(b)
@@ -129,7 +130,6 @@ class FunctionalTests(unittest.TestCase):
         _, res = self.get_maybe_follow('/')
         assert_not_contains(res.body, 'function shelf')
          
-
         def ignore(url, parsed):  # @UnusedVariable
             if ':' in parsed.path:
                 return True
@@ -151,6 +151,7 @@ class FunctionalTests(unittest.TestCase):
         spider = Spider(self.get_maybe_follow, ignore=ignore)
          
         spider.visit(ushelf + '/libraries/making/models/test1/views/syntax/')
+        spider.visit(ushelf + '/libraries/documents/test_subfigure.html')
         
         spider.visit('/tree')
         try:

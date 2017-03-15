@@ -1,51 +1,12 @@
-'''
-
-root
-    login
-    logout
-    changes
-    repos
-        <reponame>
-            bundles
-                <shelfname>
-                    subscribe
-                    unsubscribe
-                    libraries
-                        :new [write]
-                            <libname>
-                        
-                        <libname> [read]
-                            refresh_library
-                            interactive
-                                mcdp_value
-                            <specname>
-                                new/<thingname>
-                                <thingname>
-                                    <views>
-                                        solver
-                                        edit_fancy [write]
-                                            ajax_parse
-                                            save
-    shelves
-    exceptions
-    exceptions_formatted
-    status
-        status.json
-    refresh
-    exit
-'''
-
-import logging
 import os
 
 from contracts.utils import indent
 from pyramid.security import Allow, Authenticated, Everyone
 
+from mcdp import MCDPConstants
+from mcdp.logs import logger_web_resource_tree as logger
 from mcdp_shelf.access import PRIVILEGE_ACCESS, PRIVILEGE_READ
 
-
-logger = logging.getLogger('resource_tree')
-logger.setLevel(logging.FATAL)
 
 class Resource(object):
     
@@ -80,7 +41,7 @@ class Resource(object):
         r = self.getitem(key)
         if r is None:
             logger.debug('asked for %r - not found' % key)
-            raise KeyError(key)
+            return ResourceNotFoundGeneric(key)
         
         if not hasattr(r, '__parent__'):
             r.__parent__ = self
@@ -106,9 +67,12 @@ class Resource(object):
         return session
 
 class ResourceEndOfTheLine(Resource):
-    ''' Always returns itself '''
+    ''' Always returns a copy of itself '''
     def getitem(self, key):  # @UnusedVariable
-        return self
+        return type(self)(key)
+    
+class ResourceNotFoundGeneric(ResourceEndOfTheLine):
+    pass
 
 def context_display_in_detail(context):
     ''' Returns a string that displays in detail the context tree and acls. '''
@@ -194,7 +158,9 @@ class ResourceShelves(Resource):
 
 class ResourceShelfForbidden(ResourceEndOfTheLine): pass        
 class ResourceShelfNotFound(ResourceEndOfTheLine): pass
-    
+class ResourceLibraryDocNotFound(ResourceEndOfTheLine): pass
+class ResourceLibraryAssetNotFound(ResourceEndOfTheLine): pass
+
 class ResourceShelvesShelfSubscribe(Resource): pass
 class ResourceShelvesShelfUnsubscribe(Resource): pass
 class ResourceExceptionsFormatted(Resource): pass 
@@ -218,8 +184,6 @@ class ResourceLibraries(Resource):
         libname = key 
         shelf = context_get_shelf(self)
         if not libname in shelf.get_libraries_path():
-#             logger.error('Could not find library "%s".' % libname)
-#             print('Could not find library "%s".' % libname)
             return ResourceLibraryNotFound(libname)
         return ResourceLibrary(libname)
     
@@ -301,10 +265,19 @@ class ResourceLibrary(Resource):
         if key == 'interactive':
             return ResourceLibraryInteractive()
         
+        library = context_get_library(self)
+        
         if key.endswith('.html'):
             docname = os.path.splitext(key)[0]
+            filename = '%s.%s' % (docname, MCDPConstants.ext_doc_md)
+            if not library.file_exists(filename):
+                return ResourceLibraryDocNotFound(docname)
+
             return ResourceLibraryDocRender(docname)
+        
         if '.' in key:
+            if not library.file_exists(key):
+                return ResourceLibraryAssetNotFound(key)
             return ResourceLibraryAsset(key)
         return ResourceThings(key)
 
@@ -509,38 +482,19 @@ def context_get_shelf(context):
     shelf = repo.get_shelves()[shelf_name]
     return shelf
 
-def context_get_library(context):
-#     shelf = context_get_shelf(context)
-    library_name = context_get_library_name(context)
-#     library = shelf.get_libraries_path()[library_name]
+def context_get_library(context): 
+    library_name = context_get_library_name(context) 
     session = context.get_session()
     library = session.get_library(library_name)
-    return library
-#     
-# def context_get_shelf(context, request):
-#     shelf_name = context_get_shelf_name(context)
-#     from mcdp_web.main import WebApp
-#     app = WebApp.singleton
-#     session = app.get_session(request)
-#     return session.get_shelf(shelf_name)
-# 
+    return library 
+
 def context_get_library_name(context):
     library_name = get_from_context(ResourceLibrary, context).name
     return library_name
-
-# def context_get_library(context, request):
-#     from mcdp_web.main import WebApp
-#     app = WebApp.singleton
-#     session = app.get_session(request)
-#     library_name = context_get_library_name(context)
-#     library = session.get_library(library_name)
-#     return library
  
 def context_get_spec(context):
     from mcdp_web.editor_fancy.app_editor_fancy_generic import specs
     specname = get_from_context(ResourceThings, context).specname
     spec = specs[specname]
-    return spec
+    return spec 
 
-# def context_get_widget_name(context):
-#     return get_from_context(ResourceThing, context).name

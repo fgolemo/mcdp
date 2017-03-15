@@ -139,7 +139,8 @@ class AppEditorFancyGeneric():
             template = 'editor_fancy/error_model_exists_generic.jinja2'
             res = {'error': error, 'url_edit': url_edit,
                       'widget_name': new_thing_name, 'root': e.root}
-            return render_to_response(template, res, request=e.request)
+            e.request.response.status = 409 # Conflict
+            return render_to_response(template, res, request=e.request, response=e.request.response)
     
         else:
             path = e.session.librarian.libraries[e.library_name]['path']

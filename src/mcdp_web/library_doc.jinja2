@@ -1,88 +1,88 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <title>{{title}}</title>
+    <head>
+        <title>{{title}}</title>
 
-    {% include 'head.jinja2' %}
-    {% include 'head_markdown.jinja2' %}
+        {% include 'head.jinja2' %}
+        {% include 'head_markdown.jinja2' %}
 
+    	<script type='text/javascript'>
+    	 	$(document).ready(function() {
+    	    	$(".make_button").button();
+    		});
+    	</script>
 
-	 <script type='text/javascript'>
-	 	$(document).ready(function() {
-	    	$(".make_button").button();
-		});
-	</script>
+    	<style type='text/css'>
+        	a.make_button { font-size: 70%; }
+        	a.make_button { display: none; }
 
-	<style type='text/css'>
-	a.make_button { font-size: 70%; }
-	a.make_button { display: none; }
+        	div#content {
+        		margin-left: 13em;
+        		padding-right: 2em;
+        	}
+        	div#content {
+        		/*overflow: hidden;*/
+        	}
+        	div#toc strong {
+                padding-top: 0.5em;
+                display: block;
+             }
+        	div#toc {
+        		float: left;
+        		width: 10em;
+        		display: block;
+        	}
+        	div#toc p {
+            	margin: 0;
+            	padding: 0;
+        	}
+        	div#toc a {
+        		text-decoration: none;
+        		color:black;
+        		display: block;
+        		width: 100%;
+        		padding: 0.3em;
+        	}
+        	div#toc a:hover {
+        		background-color: #f0f0ff;
+        	}
+        	div#toc a.current {
+        	    background-color: #eee;
+        	}
+    	</style>
+    </head>
+    <body class='markdown'>
+        {% include 'refresh_shortcut.jinja2' %}
 
-	div#content {
-		margin-left: 13em;
-		padding-right: 2em;
-	}
-	div#content {
-		/*overflow: hidden;*/
-	}
-	div#toc strong {padding-top: 0.5em;   display: block}
-	div#toc {
-		float: left;
-		width: 10em;
-		display: block;
-	}
-	div#toc p {
-	margin: 0;
-	padding: 0;
-	}
-	div#toc a {
-		text-decoration: none;
-		color:black;
-		display: block;
-		width: 100%;
-		padding: 0.3em;
-	}
-	div#toc a:hover {
-		background-color: #f0f0ff;
+        {% if contents is defined %}
+            {% if not print %}
+                <a class='make_button' href="{{library_url(navigation.library_name)}}/">
+                	Library
+                	 		 <span class="library_name">
+                	 		 	{{navigation.library_name}}
+                	 		 </span>
+                </a>
+            {% endif %}
 
-	}
-	div#toc a.current {
-	 background-color: #eee;
+            {% if print %}
+                {{contents | safe }}
+            {% else %}
+                <div id='toc'>
+                    {% set toc = navigation.library_name + '-toc' %}
+                    {% if has_library_doc(toc) %}
+                        {{ render_library_doc(toc) | safe }}
+                    {% endif %}
+                </div>
+            {% endif %}
 
-	}
-	</style>
-</head>
-<body class='markdown'>
-{% include 'refresh_shortcut.jinja2' %}
+            {% if contents is defined %}
+                <div id='content'>
+                    {{contents | safe }}
+                </div>
+            {% else %}
+                <pre>{{error}}</pre>
+            {% endif %}
 
-{% if contents is defined %}
-{% if not print %}
-<a class='make_button' href="{{library_url(navigation.library_name)}}/">
-	Library
-	 		 <span class="library_name">
-	 		 	{{navigation.library_name}}
-	 		 </span>
-</a>
-{% endif %}
-
-{% if print %}
-{{contents | safe }}
-{% else %}
-<div id='toc'>
-{% set toc = navigation.library_name + '-toc' %}
-{% if has_library_doc(toc) %}
-{{ render_library_doc(toc) | safe }}
-{% endif %}
-</div>
-{% endif %}
-
-{% if contents is defined %}
-    <div id='content'>
-    {{contents | safe }}
-    </div>
-{% else %}
-    <pre>{{error}}</pre>
-{% endif %}
-
-{% endif %}
-</body>
+        {% endif %}
+    </body>
 </html>

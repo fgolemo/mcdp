@@ -21,3 +21,6 @@ logger_tmp = logger.getChild('tmp')
 logger_access = logger.getChild('access')
 logger_access.setLevel(logging.INFO)
 logger_performance = logger.getChild('performance')
+
+logger_web_resource_tree = logger.getChild('resource_tree')
+# logger_web_resource_tree.setLevel(logging.FATAL)

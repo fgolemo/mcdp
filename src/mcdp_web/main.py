@@ -8,7 +8,6 @@ import traceback
 import urlparse
 from wsgiref.simple_server import make_server
 
-from contracts import contract
 from contracts.utils import indent, check_isinstance
 import git.cmd  # @UnusedImport
 from pyramid.authentication import AuthTktAuthenticationPolicy
@@ -27,24 +26,21 @@ from mcdp.exceptions import DPSemanticError, DPSyntaxError
 from mcdp_docs import render_complete
 from mcdp_library import MCDPLibrary
 from mcdp_repo import MCDPGitRepo, MCDPythonRepo
-from mcdp_shelf import PRIVILEGE_ACCESS, PRIVILEGE_READ, PRIVILEGE_SUBSCRIBE, PRIVILEGE_DISCOVER
+from mcdp_shelf import PRIVILEGE_ACCESS, PRIVILEGE_READ, PRIVILEGE_SUBSCRIBE, PRIVILEGE_DISCOVER, PRIVILEGE_WRITE
 from mcdp_user_db import UserDB, UserInfo
 from mcdp_utils_misc import create_tmpdir, duration_compact, dir_from_package_name
+from mcdp_web.resource_tree import ResourceAllShelves, ResourceShelfForbidden,\
+    ResourceShelfNotFound, ResourceRepoNotFound, ResourceLibraryAssetNotFound,\
+    ResourceLibraryDocNotFound, ResourceNotFoundGeneric
 from mcdp_web.utils0 import add_std_vars_context_no_redir
 
 from .confi import describe_mcdpweb_params, parse_mcdpweb_params_from_dict
 from .editor_fancy import AppEditorFancyGeneric
-from .environment import Environment, cr2e
+from .environment import cr2e
 from .images.images import WebAppImages, get_mime_for_format
 from .interactive.app_interactive import AppInteractive
 from .qr.app_qr import AppQR
-from .resource_tree import MCDPResourceRoot, ResourceLibraries,\
-    ResourceLibrary,  ResourceLibraryRefresh, ResourceRefresh,\
-    ResourceExit, ResourceLibraryDocRender,\
-    ResourceLibraryAsset, ResourceRobots, ResourceShelves,\
-    ResourceShelvesShelfUnsubscribe, ResourceShelvesShelfSubscribe,\
-    ResourceExceptionsFormatted, ResourceExceptionsJSON, ResourceShelf, ResourceLibrariesNewLibname,\
-    Resource, context_display_in_detail, ResourceShelfInactive, ResourceThingDelete, ResourceChanges, ResourceTree, ResourceThing, ResourceRepos, ResourceRepo, ResourceThings, ResourceLibraryInteractive
+from .resource_tree import MCDPResourceRoot, ResourceLibraries, ResourceLibrary,  ResourceLibraryRefresh, ResourceRefresh, ResourceExit, ResourceLibraryDocRender, ResourceLibraryAsset, ResourceRobots, ResourceShelves, ResourceShelvesShelfUnsubscribe, ResourceShelvesShelfSubscribe, ResourceExceptionsFormatted, ResourceExceptionsJSON, ResourceShelf, ResourceLibrariesNewLibname, Resource, context_display_in_detail, ResourceShelfInactive, ResourceThingDelete, ResourceChanges, ResourceTree, ResourceThing, ResourceRepos, ResourceRepo, ResourceThings, ResourceLibraryInteractive
 from .security import AppLogin, groupfinder
 from .sessions import Session
 from .solver.app_solver import AppSolver
@@ -54,8 +50,6 @@ from .utils.image_error_catch_imp import response_image
 from .utils.response import response_data
 from .utils0 import add_other_fields, add_std_vars_context
 from .visualization.app_visualization import AppVisualization
-from mcdp_web.resource_tree import ResourceAllShelves, ResourceShelfForbidden,\
-    ResourceShelfNotFound, ResourceRepoNotFound
 
 
 __all__ = [
@@ -185,8 +179,6 @@ class WebApp(AppVisualization, AppStatus,
         e.request.response.status = 403
         return {}
     
-    
-    
     @add_std_vars_context
     @cr2e
     def view_index(self, e):
@@ -242,14 +234,17 @@ class WebApp(AppVisualization, AppStatus,
 
         if new_library_name in e.shelf.libraries:
             error = 'The library "%s" already exists.' %new_library_name
-            template = 'error_library_exists.jinja2'
+            
             res = {
                 'error': error,
                 'library_name': new_library_name,
                 'url_edit': url_edit,
             }
             add_other_fields(self, res, e.request, context=e.context)
-            return render_to_response(template, res, request=e.request)
+            template = 'error_library_exists.jinja2'
+            e.request.response.status = 409  # Conflict
+            return render_to_response(template, res, request=e.request, 
+                                      response=e.request.response)
         else:
             # does not exist
             dirname = os.path.join(e.shelf.write_to, new_library_name + '.' + MCDPConstants.library_extension)
@@ -405,7 +400,6 @@ class WebApp(AppVisualization, AppStatus,
         root = self.get_root_relative_to_here(request)
         comb = root + url
         return comb
-    
 
     def get_root_relative_to_here(self, request):
         if request is None:
@@ -417,15 +411,24 @@ class WebApp(AppVisualization, AppStatus,
         if not path.endswith('/'):
             last = path.rfind('/')
             path = path[:last]
-#             logger.info('Correcting parsed %r in %r' % (parsed.path, path))
-        
+
         if path == '':
             return '/'
         r = os.path.relpath('/', path)
-#         logger.debug('os.path.relpath("/", %r) = %r' % (path, r))
         return r
 
+    @add_std_vars_context_no_redir
+    @cr2e
+    def view_library_asset_not_found(self, e):
+        e.request.response.status = 404
+        return {}
 
+    @add_std_vars_context_no_redir
+    @cr2e
+    def view_library_doc_not_found(self, e):
+        e.request.response.status = 404
+        return {}
+    
     @add_std_vars_context_no_redir
     @cr2e
     def view_library_doc(self, e):
@@ -433,13 +436,22 @@ class WebApp(AppVisualization, AppStatus,
         # f['data'] not utf-8
         # reopen as utf-8
         document = e.context.name
+#         filename = '%s.%s' % (document, MCDPConstants.ext_doc_md)
+#         if not e.library.file_exists(filename):
+#             res = {}
+#             add_other_fields(self, res, e.request, context=e.context)
+#             response = e.request.response
+#             response.status = 404 # not found
+#             template = 'library_doc_not_found.jinja2'
+#             return render_to_response(template, res, request=e.request, response=response)
+
         try:
-            html = self._render_library_doc(e.context, e.request, document)
-        except DPSyntaxError as e:
+            html = self._render_library_doc(e, document)
+        except DPSyntaxError as exc:
             res = {}
-            res['error'] = e
+            res['error'] = exc
             res['title'] = document
-            return res
+            return res 
         # we work with utf-8 strings
         assert isinstance(html, str)
         # but we need to convert to unicode later
@@ -450,29 +462,39 @@ class WebApp(AppVisualization, AppStatus,
         res['print'] = bool(e.request.params.get('print', False))
         return res
 
-    @contract(returns=str)
-    def _render_library_doc(self, context, request, document):
-        import codecs
-        e = Environment(context, request)
-
-        strict = int(request.params.get('strict', '0'))
-
+    def _render_library_doc(self, e, document):
+        strict = int(e.request.params.get('strict', '0'))
         filename = '%s.%s' % (document, MCDPConstants.ext_doc_md)
+            
         f = e.library._get_file_data(filename)
+        
         realpath = f['realpath']
         # read unicode
+        import codecs 
         data_unicode = codecs.open(realpath, encoding='utf-8').read()
         data_str = data_unicode.encode('utf-8')
         raise_errors = bool(strict)
-        html = render_complete(library=e.library, s=data_str, realpath=realpath, raise_errors=raise_errors)
+        html = render_complete(library=e.library, s=data_str, 
+                               realpath=realpath, raise_errors=raise_errors)
         return html
 
     @cr2e
     def view_library_asset(self, e):
-        asset = os.path.splitext(e.context.name)[0]
-        ext = os.path.splitext(e.context.name)[1][1:]
+        name = e.context.name
+        asset = os.path.splitext(name)[0]
+        ext = os.path.splitext(name)[1][1:]
         filename = '%s.%s' % (asset, ext)
-        f = e.library._get_file_data(filename)
+        try:
+            f = e.library._get_file_data(filename)
+        except DPSemanticError as exc:
+            res = {
+                'error': exc, 
+            }
+            add_other_fields(self, res, e.request, context=e.context)
+            response = e.request.response
+            response.status = 404 # not found
+            template = 'asset_not_found.jinja2'
+            return render_to_response(template, res, request=e.request, response=response)
         data = f['data']
         content_type = get_mime_for_format(ext)
         return response_data(e.request, data, content_type)
@@ -538,12 +560,14 @@ class WebApp(AppVisualization, AppStatus,
         config.add_view(self.view_dummy, context=ResourceAllShelves, renderer='shelves_index.jinja2') # same as above
         config.add_view(self.view_changes, context=ResourceChanges, renderer='changes.jinja2')
         config.add_view(self.view_tree, context=ResourceTree, renderer='tree.jinja2')
-        
-        config.add_view(self.view_shelf_library_new, context=ResourceLibrariesNewLibname)
+        config.add_view(self.view_not_found_generic, context=ResourceNotFoundGeneric, renderer='not_found_generic.jinja2', permission=NO_PERMISSION_REQUIRED)
+        config.add_view(self.view_shelf_library_new, context=ResourceLibrariesNewLibname, permission=PRIVILEGE_WRITE)
         config.add_view(self.view_shelf, context=ResourceShelf, renderer='shelf.jinja2', permission=PRIVILEGE_DISCOVER)
         config.add_view(self.view_shelves_subscribe, context=ResourceShelvesShelfSubscribe, permission=PRIVILEGE_SUBSCRIBE)
         config.add_view(self.view_shelves_unsubscribe, context=ResourceShelvesShelfUnsubscribe, permission=PRIVILEGE_SUBSCRIBE)
         config.add_view(self.view_library_doc, context=ResourceLibraryDocRender, renderer='library_doc.jinja2', permission=PRIVILEGE_READ)
+        config.add_view(self.view_library_doc_not_found, context=ResourceLibraryDocNotFound, renderer='library_doc_not_found.jinja2', permission=PRIVILEGE_READ)
+        config.add_view(self.view_library_asset_not_found, context=ResourceLibraryAssetNotFound, renderer='asset_not_found.jinja2', permission=PRIVILEGE_READ)
         config.add_view(self.view_library_asset, context=ResourceLibraryAsset, permission=PRIVILEGE_READ)
         config.add_view(self.view_refresh_library, context=ResourceLibraryRefresh, permission=PRIVILEGE_READ)
         config.add_view(self.view_refresh, context=ResourceRefresh)
@@ -599,18 +623,25 @@ class WebApp(AppVisualization, AppStatus,
                 #print('change: %s url = %s' % (change, change['url']))
                 change['date_human'] =  datetime.datetime.fromtimestamp(change['date']).strftime('%b %d, %H:%M')
                 changes.append(change)
-                
+
         return changes
-        
+
     @add_std_vars_context
     @cr2e
     def view_changes(self, e):
         return {
             'changes': self._get_changes(e),
         } 
-    
 
-    
+    @add_std_vars_context
+    @cr2e
+    def view_not_found_generic(self, e):
+        e.request.response.status = 404
+        res = {
+            'context_detail': context_display_in_detail(e.context)
+        }
+        return res
+
     @add_std_vars_context
     @cr2e
     def view_thing_delete(self, e):
@@ -620,8 +651,8 @@ class WebApp(AppVisualization, AppStatus,
         filename = e.library.delete_file(basename)
         e.session.notify_deleted_file(e.shelf_name, e.library_name, filename)
         raise HTTPFound(e.request.referrer)
-    
-    
+
+
 def serve_robots(request):  # @UnusedVariable
     body = "User-agent: *\nDisallow:"
     return Response(content_type='text/plain', body=body)
