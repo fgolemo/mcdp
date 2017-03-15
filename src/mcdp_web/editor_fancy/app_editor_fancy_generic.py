@@ -11,6 +11,7 @@ from pyramid.renderers import render_to_response
 from mcdp import logger
 from mcdp.exceptions import DPInternalError, DPSemanticError, DPSyntaxError
 from mcdp_lang.suggestions import get_suggestions, apply_suggestions
+from mcdp_library.specs_def import specs
 from mcdp_report.html import ast_to_html
 from mcdp_shelf.access import PRIVILEGE_WRITE
 from mcdp_utils_misc import get_sha1, timeit_wall
@@ -24,7 +25,6 @@ from mcdp_web.utils0 import add_std_vars_context
 from mocdp.comp.interfaces import NamedDP
 
 from .html_mark_imp import html_mark, html_mark_syntax_error
-from mcdp_library.specs_def import specs
 from .warnings_unconnected import generate_unconnected_warnings
 
 
@@ -49,7 +49,7 @@ class AppEditorFancyGeneric():
         string = get_text_from_request2(e.request)
         
         def go():
-            e.library.write_spec(e.thing_name, string)
+            e.library.write_spec(e.spec_name, e.thing_name, string)
             print('committing repo on save %s' % e.repo)
             e.repo.commit(e.user)
             return {'ok': True, 'saved_string': string}

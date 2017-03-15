@@ -5,6 +5,8 @@
     <button class='size-button' style='visibility: hidden' id='size-reset'>=</button>
     <script type='text/javascript'>
 
+        cookie_name = 'mcdp-user-font-size';
+
         var initial_size = null;
         var element = '{{element}}';
 
@@ -12,9 +14,11 @@
            return parseInt($(element).css('font-size'));
         }
 
-
         function set_size(size) {
-           $(element).css('font-size', size);
+           //console.log('Setting size to ' + size);
+           $(element).css('font-size', size + 'px');
+           //console.log('Now the size is ' + $(element).css('font-size'));
+           Cookies.set(cookie_name, size);
 
            if(size != initial_size) {
                $('#size-reset').css('visibility','');
@@ -33,28 +37,34 @@
         function size_plus() {
            c = current_size();
            if(initial_size == null) {
-            initial_size = c;
+               initial_size = c;
            }
            set_size(c + 1);
-
         }
 
         function size_minus() {
-        c = current_size();
-        if(initial_size == null) {
-
-         initial_size = c;
-         }
+            c = current_size();
+            if(initial_size == null) {
+                initial_size = c;
+            }
             set_size(c - 1);
         }
 
         function init_size() {
-
+            console.log(Cookies.getJSON());
             $('.size-button').button();
             $('#size-plus').click(size_plus);
             $('#size-minus').click(size_minus);
             $('#size-reset').click(size_reset);
             $('#size-plus, #size-minus').css('visibility','');
+
+            prev = Cookies.get(cookie_name);
+            //console.log('memorized:');
+            //console.log(prev);
+            if(prev != undefined) {
+                set_size(prev);
+            }
+
         }
 
         $(document).ready(init_size);

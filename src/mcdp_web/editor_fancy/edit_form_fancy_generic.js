@@ -342,8 +342,10 @@ function click_button_close(res) {
     window.location = url;
 }
 
+status_saving = '&#8987; saving... ';
+status_done = '&#x2705; success.';
 function click_button_save() {
-    $('#save_status').html('saving...');
+    $('#save_status').html(status_saving);
     data = {
         'text': current_text()
     };
@@ -354,7 +356,7 @@ function click_button_save() {
 }
 
 function click_button_save_success(res) {
-    show_status('#save_status', 'success');
+    show_status('#save_status', status_done);
     console.log()
     console.log('success');
     console.log(JSON.stringify(res));

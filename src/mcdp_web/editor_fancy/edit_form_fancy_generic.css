@@ -44,7 +44,7 @@ tr, td {
     color: red;
 }
 
- 
+
 
 #around_editor>pre {
     min-height: 20em;
@@ -83,4 +83,8 @@ html, body {
     border: solid 0px red;
     padding: 0;
     margin: 0;
+}
+
+#save_status {
+    font-size: 70%;
 }
