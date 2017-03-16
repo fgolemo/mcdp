@@ -164,3 +164,8 @@ class MCDPConstants():
         ['Allow', 'Everyone', 'admin'],
     ]
 
+    # if True, disables computing the actual images.
+    test_spider_exclude_images = True
+    
+    
+    

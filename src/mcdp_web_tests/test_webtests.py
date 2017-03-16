@@ -98,6 +98,11 @@ class FunctionalTests(unittest.TestCase):
         return url0, res
  
     def runTest(self):
+        if MCDPConstants.test_spider_exclude_images:
+            exclude = ['png','pdf','dot','svg','txt']
+        else:
+            exclude = []
+                
         ushelf = '/repos/global/shelves/%s' % another_name_for_unittests_shelf
         bugs = [
             ushelf + '/libraries/basic/models/sum2f_rcomp/views/solver',
@@ -141,8 +146,7 @@ class FunctionalTests(unittest.TestCase):
             if 'solver' in parsed.path:
                 return True
             
-            exclude = ['png','pdf','dot','svg','txt']
-            exclude = []
+            
             for x in exclude:
                 if x in parsed.path: return True
             
