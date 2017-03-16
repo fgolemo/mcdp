@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 from bs4.element import NavigableString, Tag
-
 from contracts import contract
+
 from mcdp_report.html import get_css_filename
 from mcdp_utils_xml import bs,\
-    check_html_fragment, to_html_stripping_fragment_document 
+    check_html_fragment, to_html_stripping_fragment_document
 
 
 @contract(body_contents=str, returns=str)

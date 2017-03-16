@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from comptests.registrar import comptest_fails, comptest, run_module_tests
-from mcdp_lang.parse_interface import parse_constant, parse_ndp
 from mcdp_lang.parse_actions import parse_wrap
+from mcdp_lang.parse_interface import parse_constant, parse_ndp
 from mcdp_lang.syntax import Syntax
 
 

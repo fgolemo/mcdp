@@ -1,4 +1,5 @@
 from contracts.utils import raise_desc
+
 from mcdp_lang.parse_actions import parse_wrap
 from mcdp_lang.parse_interface import parse_ndp_refine
 from mcdp_lang.suggestions import apply_suggestions, get_suggestions

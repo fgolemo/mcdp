@@ -2,16 +2,13 @@
 from nose.tools import assert_equal, assert_raises
 
 from comptests.registrar import comptest, comptest_fails, run_module_tests
+from mcdp.exceptions import DPSemanticError
 from mcdp_lang import parse_constant, parse_ndp, parse_poset
 from mcdp_lang.syntax import Syntax, SyntaxBasics
 from mcdp_lang_tests.utils import parse_wrap_check
 from mcdp_lang_tests.utils2 import eval_rvalue_as_constant, eval_rvalue_as_constant_same_exactly, \
     eval_constant_same_exactly
-from mcdp_posets import get_types_universe
-from mcdp_posets.nat import Nat
-from mcdp_posets.rcomp import Rcomp
-from mcdp_lang.eval_constant_imp import eval_constant
-from mcdp.exceptions import DPSemanticError
+from mcdp_posets import get_types_universe, Nat, Rcomp
 
 
 @comptest

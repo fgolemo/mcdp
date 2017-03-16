@@ -9,9 +9,10 @@ from quickapp import QuickAppBase
 from system_cmd import system_cmd_show
 
 from mcdp import MCDPConstants, logger, mcdp_dev_warning
-from mcdp_docs.minimal_doc import get_minimal_document
 from mcdp_library import Librarian
 from mcdp_report.html import get_css_filename
+
+from .minimal_doc import get_minimal_document
 
 
 class Render(QuickAppBase):

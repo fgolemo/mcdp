@@ -9,7 +9,7 @@ from system_cmd import CmdException, system_cmd_result
 
  
  
-from mcdp_docs.minimal_doc import get_minimal_document
+from .minimal_doc import get_minimal_document
 
 
 def crop_pdf(pdf, margins=0):

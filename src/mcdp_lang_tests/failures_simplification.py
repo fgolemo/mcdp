@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
-from comptests.registrar import comptest_fails
 from contracts.utils import check_isinstance
+
+from comptests.registrar import comptest_fails
 from mcdp_dp import JoinNDP
 
 from .utils import assert_parsable_to_connected_ndp

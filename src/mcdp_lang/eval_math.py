@@ -226,7 +226,8 @@ def eval_MultN(x, context, wants_constant):
         except NotConstant as e:
             if wants_constant:
                 msg = 'Product not constant because one op is not constant.'
-                raise_wrapped(NotConstant, e, msg, op=op)
+                raise_wrapped(NotConstant, e, msg, #op=op, 
+                              compact=True)
             x = eval_rvalue(op, context)
             assert isinstance(x, CResource)
             resources.append(x)
@@ -360,12 +361,12 @@ def eval_PlusN_sort_ops(ops, context, wants_constant):
                 neg_constants.append(x)
             else:
                 msg = 'Cannot use the type %s in a sum.' % x.unit
-                raise_desc(DPInternalError, msg, x=x)
+                raise_desc(DPInternalError, msg, x=x, compact=True)
                 
         except NotConstant as e:
             if wants_constant:
                 msg = 'Sum not constant because one op is not constant.'
-                raise_wrapped(NotConstant, e, msg, op=op)
+                raise_wrapped(NotConstant, e, msg, op=op, compact=True)
             x = eval_rvalue(op, context)
             assert isinstance(x, CResource)
             resources.append(x)

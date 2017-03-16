@@ -1,9 +1,9 @@
 from nose.tools import assert_equal
 
 from comptests.registrar import run_module_tests
+from mcdp import mcdp_dev_warning
 from mcdp_lang.eval_warnings import MCDPWarnings
 from mcdp_lang.parse_interface import parse_ndp
-from mcdp import mcdp_dev_warning
 from mocdp.comp.context import ModelBuildingContext
 
 

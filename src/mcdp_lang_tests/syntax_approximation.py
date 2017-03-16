@@ -2,10 +2,10 @@
 from nose.tools import assert_equal
 
 from comptests.registrar import comptest
+from mcdp.exceptions import DPSemanticError, DPSyntaxError
 from mcdp_dp.dp_transformations import get_dp_bounds
 from mcdp_lang.parse_interface import parse_ndp
 from mcdp_lang.syntax import Syntax
-from mcdp.exceptions import DPSemanticError, DPSyntaxError
 
 from .utils import parse_wrap_check
 

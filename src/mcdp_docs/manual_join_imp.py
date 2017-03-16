@@ -5,13 +5,15 @@ import sys
 
 from bs4 import BeautifulSoup
 from bs4.element import Comment, Tag, NavigableString
-
 from contracts import contract
+
 from mcdp.logs import logger
-from mcdp_docs.manual_constants import MCDPManualConstants
-from mcdp_docs.read_bibtex import get_bibliography
-from mcdp_utils_xml.add_class_and_style import add_class
-from mcdp_docs.macros import replace_macros
+from mcdp_utils_xml import add_class
+
+from .macros import replace_macros
+from .manual_constants import MCDPManualConstants
+from .read_bibtex import get_bibliography
+
 
 def get_manual_css_frag():
     """ Returns fragment of doc with CSS, either inline or linked,

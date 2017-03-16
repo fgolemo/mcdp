@@ -1895,14 +1895,11 @@ def constant_inverse_ok():
 def constant_inverse():
     s = """ 1 / 2 """
     val = parse_constant(s)
-    print val
+    print(val)
     
-@comptest_fails
 def expect_sem_error():
     s = "1 g + 10 k"
     assert_raises(DPSemanticError, parse_constant, s)
-    
-    
     
 @comptest_fails
 def math_constants3():

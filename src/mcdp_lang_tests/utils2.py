@@ -7,7 +7,7 @@ from mcdp_lang.syntax import Syntax
 from mcdp_posets import express_value_in_isomorphic_space
 from mocdp.comp.context import Context
 from mocdp.comp.context_eval_as_constant import (can_resource_be_constant,
-    eval_constant_resource)
+                                                 eval_constant_resource)
 
 
 def parse_as_rvalue(s):

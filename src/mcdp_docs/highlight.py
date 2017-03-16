@@ -11,8 +11,6 @@ from contracts.utils import raise_desc, raise_wrapped, indent
 from mcdp import logger, MCDPConstants
 from mcdp.development import mcdp_dev_warning
 from mcdp.exceptions import DPSemanticError, DPSyntaxError, DPInternalError
-from mcdp_docs.make_plots_imp import make_plots
-from mcdp_docs.pdf_ops import crop_pdf, get_ast_as_pdf
 from mcdp_figures import MakeFiguresNDP, MakeFiguresTemplate, MakeFiguresPoset
 from mcdp_lang.parse_actions import parse_wrap
 from mcdp_lang.parse_interface import (parse_template_refine, parse_poset_refine,
@@ -21,11 +19,11 @@ from mcdp_lang.suggestions import get_suggestions, apply_suggestions, get_sugges
 from mcdp_lang.syntax import Syntax
 from mcdp_library.specs_def import SPEC_TEMPLATES
 from mcdp_report.html import ast_to_html
-from mcdp_utils_xml import to_html_stripping_fragment, describe_tag, project_html
-from mcdp_utils_xml.add_class_and_style import add_class
-from mcdp_utils_xml.images import create_img_png_base64, create_a_to_data
-from mcdp_utils_xml.note_errors_inline import note_error
+from mcdp_utils_xml import add_class, create_img_png_base64, create_a_to_data, note_error, to_html_stripping_fragment, describe_tag, project_html
 from mocdp.comp.context import Context
+
+from .make_plots_imp import make_plots
+from .pdf_ops import crop_pdf, get_ast_as_pdf
 
 
 def html_interpret(library, soup, raise_errors=False,

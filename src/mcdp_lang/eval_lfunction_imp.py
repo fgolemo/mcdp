@@ -262,7 +262,7 @@ def eval_lfunction_invplus_sort_ops(ops, context, wants_constant):
         except NotConstant as e:
             if wants_constant:
                 msg = 'Sum not constant because one op is not constant.'
-                raise_wrapped(NotConstant, e, msg, op=op)
+                raise_wrapped(NotConstant, e, msg, op=op, compact=True)
             x = eval_lfunction(op, context)
             assert isinstance(x, CFunction)
             functions.append(x)
@@ -394,7 +394,8 @@ def eval_lfunction_invmult_sort_ops(ops, context, wants_constant):
         
         if wants_constant:
             msg = 'Product not constant because one op is not constant.'
-            raise_wrapped(NotConstant, e, msg, op=op)
+            raise_wrapped(NotConstant, e, msg, # op=op, 
+                          compact=True)
         x = eval_lfunction(op, context)
         assert isinstance(x, CFunction)
         functions.append(x)
