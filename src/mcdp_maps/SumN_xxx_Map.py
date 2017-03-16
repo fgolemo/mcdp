@@ -85,7 +85,10 @@ def sum_dimensionality_works(Fs, R):
 from pint import DimensionalityError as pint_DimensionalityError  # @UnresolvedImport
 
 # Fs: sequence of Rcompunits
+class IncompatibleUnits(BaseException):
+    pass
 def sum_units(Fs, values, R):
+    ''' Might raise IncompatibleUnits '''
     for Fi in Fs:
         check_isinstance(Fi, RcompUnits)
     res = 0.0
@@ -97,9 +100,7 @@ def sum_units(Fs, values, R):
         try:
             factor = 1.0 / float(R.units / Fi.units)
         except pint_DimensionalityError as e:  # pragma: no cover (DimensionalityError)
-#             msg = 'Cannot '
-            raise_wrapped(Exception, e, 'some error', Fs=Fs, R=R)
-
+            raise_wrapped(IncompatibleUnits, e, 'Pint cannot convert', Fs=Fs, R=R)
         try:
             res += factor * x
         except FloatingPointError as e:

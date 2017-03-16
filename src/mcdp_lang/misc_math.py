@@ -4,7 +4,7 @@ import warnings
 
 from contracts import contract
 from contracts.utils import check_isinstance, raise_desc
-from mcdp_maps.SumN_xxx_Map import sum_units
+from mcdp_maps.SumN_xxx_Map import sum_units, IncompatibleUnits
 from mcdp_posets import Nat, RcompUnits, mult_table, Rcomp, express_value_in_isomorphic_space
 from mcdp_posets.nat import Nat_mult_uppersets_continuous, Nat_add
 from mcdp_posets.rcomp_units import (R_dimensionless, mult_table_seq,
@@ -184,7 +184,11 @@ def plus_constants2_rcompunits(a, b):
     R = a.unit
     Fs = [a.unit, b.unit]
     values = [a.value, b.value]
-    res = sum_units(Fs, values, R)
+    try:
+        res = sum_units(Fs, values, R)
+    except IncompatibleUnits:
+        msg = 'The units "%s" and "%s" are incompatible.' % (a.unit.string, b.unit.string)
+        raise DPSemanticError(msg)
     return ValueWithUnits(value=res, unit=R)
 
 def plus_constantsN(constants):
