@@ -8,9 +8,10 @@
 {% endblock %}
 {% block content %}
 
+{% include 'menu.jinja2' %}
 {% include 'user.jinja2' %}
 {% include 'prompt.jinja2' %}
-
+<div id='mycontent'>
 <script type='text/javascript'>
 
     $(document).ready(function() {
@@ -55,8 +56,7 @@
 </div>
 
 
-
-
+<h3>Do</h3>
 
 <!--<p><button id='show-available'>Show available libraries</button></p>-->
 <ul>
@@ -105,4 +105,6 @@
 }
 </style>
 
+
+</div>
 {% endblock %}

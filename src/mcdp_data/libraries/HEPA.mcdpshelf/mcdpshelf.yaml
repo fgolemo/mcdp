@@ -5,5 +5,5 @@ acl: [
 
     [Allow, Everyone, discover],
     [Allow, Authenticated, subscribe],
-    [Allow, Authenticated, read],
+    [Allow, Everyone, read],
 ]

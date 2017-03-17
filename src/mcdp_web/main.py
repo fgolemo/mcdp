@@ -555,7 +555,7 @@ class WebApp(AppVisualization, AppStatus,
         
         config.add_view(self.view_dummy, context=ResourceLibrary, renderer='library_index.jinja2', permission=PRIVILEGE_READ)
         config.add_view(self.view_dummy, context=ResourceThings, renderer='library_index.jinja2', permission=PRIVILEGE_READ)  # same as above
-        
+    
         config.add_view(self.view_dummy, context=ResourceRepo, renderer='shelves_index.jinja2')
         config.add_view(self.view_dummy, context=ResourceShelves, renderer='shelves_index.jinja2') # same as above
         config.add_view(self.view_dummy, context=ResourceAllShelves, renderer='shelves_index.jinja2') # same as above
