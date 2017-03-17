@@ -493,6 +493,11 @@ body {
   background-color: white;
   font-family: Georgia;
 }
+.unicode-icons {
+  margin-bottom: -5px;
+  margin-top: -5px;
+  margin-right: 0.5em;
+}
 a {
   text-decoration: none;
 }
