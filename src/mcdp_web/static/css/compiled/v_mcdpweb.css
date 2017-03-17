@@ -131,9 +131,6 @@ nav,
 section {
   display: block;
 }
-body {
-  line-height: 1;
-}
 blockquote,
 q {
   quotes: none;
@@ -500,10 +497,6 @@ body {
 }
 a {
   text-decoration: none;
-}
-a:hover {
-  background-color: #fff8c7;
-  color: blue;
 }
 pre code {
   font-family: "Anka/Coder Narrow", "Lucida Console", monospace;

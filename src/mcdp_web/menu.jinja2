@@ -9,17 +9,17 @@
     <ul id="menu" style='visibility: hidden'>
         <li id='root'>&#9776;
             <ul>
-                <li><a class='l1' href='{{root}}/'>⌂ Front page</a></li>
-                <li><a class='l1' href='{{root}}/repos/'>{{icon_repo|safe}} List of repositories</a></li>
+                <li><a class='l1' href='{{root}}/'>⌂&nbsp;Front&nbsp;page</a></li>
+                <!-- <li><a class='l1' href='{{root}}/repos/'>{{icon_repo|safe}} All repos</a></li> -->
                 {% if navigation.repo_name %}
-                <li><a class='l1' href='{{root}}/repos/{{navigation.repo_name}}/shelves/'>
-                    {{icon_shelf|safe}} List of shelves for repo {{navigation.repo_name}}
+                <li><a class='l1' href='{{repo_url(navigation.repo_name)}}/'>
+                    {{icon_repo|safe}} Repo {{navigation.repo_name}}
                 </a></li>
                 {% endif %}
 
                 {% if navigation.shelf_name %}
-                <li><a class='l1' href='{{root}}/repos/{{navigation.repo_name}}/shelves/{{navigation.shelf_name}}/libraries/'>
-                    {{icon_library|safe}} List of libraries for shelf {{navigation.shelf_name}}
+                <li><a class='l1' href='{{shelf_url(navigation.repo_name, navigation.shelf_name)}}/libraries/'>
+                    {{icon_shelf|safe}} Shelf {{navigation.shelf_name}}
                 </a></li>
                 {% endif %}
 
@@ -27,7 +27,8 @@
                     <script type="text/javascript">
                         url_base = "{{library_url(navigation.library_name)}}/";
                     </script>
-                    <li class="l1" id='menu_new'><span><span class='unicode-icons'>✎</span>Create new&hellip;</span>
+                    <li class="l1" id='menu_new'>
+                        <span><span class='unicode-icons'>✎</span>Create new&hellip;</span>
                     <ul>
                       <li><a id='new_model'><span class='unicode-icons'>&#10213;</span> MCDP&hellip;</a></li>
                       <li><a id='new_template'><span class='unicode-icons'>&#x2661;</span>template&hellip;</a></li>
@@ -36,18 +37,22 @@
                     </ul>
                     </li>
                 {% endif %}
-                <li>
-                <a href="{{root}}/refresh"><span class='unicode-icons'>↻</span>Refresh caches</a>
-                </li>
-                {% if navigation.library_name %}
-                <li>
-                    <a href="{{library_url(navigation.library_name)}}/interactive/mcdp_value/">
-                    	<span class='unicode-icons'>📟</span>Calculator</a>
-                </li>
-                {% endif %}
-                <li>
-                	<a href="{{request.url}}" target="_blank">
-                        <span class='unicode-icons'>📓</span>open a copy of this page</a>
+                <li class='l1'><span>Misc</span>
+                    <ul>
+                        <li>
+                            <a href="{{root}}/refresh"><span class='unicode-icons'>↻</span>Refresh caches</a>
+                        </li>
+                        {% if navigation.library_name %}
+                        <li>
+                            <a href="{{library_url(navigation.library_name)}}/interactive/mcdp_value/">
+                            	<span class='unicode-icons'>📟</span>Calculator</a>
+                        </li>
+                        {% endif %}
+                        <li>
+                        	<a href="{{request.url}}" target="_blank">
+                                <span class='unicode-icons'>📓</span>open a copy of this page</a>
+                        </li>
+                    </ul>
                 </li>
             </ul>
         </li>

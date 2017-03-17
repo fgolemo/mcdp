@@ -109,8 +109,13 @@ def add_other_fields(self, res, request, context):
     res['library_url'] = library_url
     res['library_url2'] = library_url2
 
+    def repo_url(repo_name):
+        return e.root + '/repos/' + repo_name
+
     def shelf_url(repo_name, shelf_name):
         return e.root + '/repos/' + repo_name + '/shelves/' + shelf_name
+    res['repo_url'] = repo_url
+
     res['shelf_url'] = shelf_url
     res['static'] = e.root + '/static'
 

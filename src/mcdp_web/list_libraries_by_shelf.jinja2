@@ -2,7 +2,7 @@
 {%  from 'add_library_button.jinja2' import add_library_button with context %}
 {%  from 'list_libraries_for_shelf.jinja2' import list_libraries_for_shelf with context %}
 <style>
-ul.shelves_list
+{# ul.shelves_list
 {
     list-style: none;
     padding: 0;
@@ -10,17 +10,19 @@ ul.shelves_list
 ul.shelves_list > li > *:first-child:before {
     content: '{{icon_shelf_css|safe}}';
     margin-right: 0.5em;
-}
+} #}
 
 </style>
 <ul class='shelves_list'>
     {% for shelf_name, shelf in navigation.repos[repo_name].shelves.items() %}
         <li>
 
-        <a href='{{shelf_url(repo_name, shelf_name)}}'><code>{{shelf_name}}</code></a>
+            {{links.shelf(repo_name, shelf_name)}}
+
+        {# <a href='{{shelf_url(repo_name, shelf_name)}}'><code>{{shelf_name}}</code></a> #}
 
             {% if shelf.get_libraries_path() %}
-                {{list_libraries_for_shelf(repo_name, shelf_name, shelf)}}
+                {{list_libraries_for_shelf(repo_name, shelf_name)}}
             {% else %}
             <p>(No libraries)</p>
             {% endif %}

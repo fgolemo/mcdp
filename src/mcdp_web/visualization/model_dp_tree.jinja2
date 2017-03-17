@@ -1,11 +1,9 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <title>{{navigation.thing_name}}/dp_graph_tree</title>
-    {% include 'head.jinja2' %}
+{% extends "base_page.jinja2" %}
+{% block title %}
+    {{navigation.thing_name}}
+{% endblock %}
+{% block content %}
 
-</head>
-<body>
     {% include 'model_views_navigation.jinja2' %}
 
     <style type='text/css'>
@@ -16,7 +14,7 @@
 
     <img id="graph" src='{{thing_url(navigation.thing_name)}}/views/images/dp_graph_tree.svg'/>
 
-    
+
     <p>
     <a href='{{thing_url(navigation.thing_name)}}/views/images/dp_graph_tree.png'>PNG</a>,
     <a href='{{thing_url(navigation.thing_name)}}/views/images/dp_graph_tree.pdf'>PDF</a>,
@@ -24,5 +22,4 @@
     <a href='{{thing_url(navigation.thing_name)}}/views/images/dp_graph_tree.dot'>dot</a>
     </p>
 
-</body>
-</html>
+{% endblock %}

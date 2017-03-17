@@ -1,32 +1,28 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <title>List of libraries</title>
+{% extends "base_page.jinja2" %}
+{% block title %}
+    List of libraries
+{% endblock %}
+{% block content %}
 
-    {% include 'head.jinja2' %}
     <style>
     #around {
         column-width: 18em;
     }
     </style>
-</head>
-<body>
-{% include 'menu.jinja2' %}
-{% include 'user.jinja2' %}
-{% from 'list_libraries_by_shelf.jinja2' import list_libraries_by_shelf with context%}
+    
+    {% include 'menu.jinja2' %}
+    {% include 'user.jinja2' %}
+    {% from 'list_libraries_by_shelf.jinja2' import list_libraries_by_shelf with context%}
 
-<p>This is the list of libraries available, organized by shelf.
-    See <a href="{{root}}/repos/{{navigation.repo_name}}/shelves/">here</a> to disable some of the shelves.
-    {% if navigation.shelves_unused %}
-    You also have an additional {{navigation.shelves_unused|length}} shelves to activate.
-    {% endif %}
-</p>
+    <p>This is the list of libraries available, organized by shelf.
+        See <a href="{{root}}/repos/{{navigation.repo_name}}/shelves/">here</a> to disable some of the shelves.
+        {% if navigation.shelves_unused %}
+        You also have an additional {{navigation.shelves_unused|length}} shelves to activate.
+        {% endif %}
+    </p>
 
-<div id='around'>
+    <div id='around'>
+      {{list_libraries_by_shelf(navigation.repo_name)}}
+     </div>
 
-  {{list_libraries_by_shelf(navigation.repo_name)}}
- </div>
-
-{% include 'footer.jinja2' %}
-</body>
-</html>
+{% endblock %}

@@ -50,6 +50,7 @@ from .utils.image_error_catch_imp import response_image
 from .utils.response import response_data
 from .utils0 import add_other_fields, add_std_vars_context
 from .visualization.app_visualization import AppVisualization
+from mcdp_utils_misc.string_utils import format_list
 
 
 __all__ = [
@@ -600,9 +601,21 @@ class WebApp(AppVisualization, AppStatus,
         raise HTTPFound(url2)
     
     def _get_changes(self, e):
+        def shelf_privilege(repo_name, sname, privilege):
+            repo = e.session.repos[repo_name]
+            if not sname in repo.shelves:
+                msg = 'Cannot find shelf "%s" in repo "%s".' % (sname, repo_name)
+                msg += '\n available: ' + format_list(repo.shelves)
+                raise ValueError(msg)
+            acl = repo.shelves[sname].get_acl()
+            return acl.allowed2(privilege, e.user)
+        
         changes = []
         for id_repo, repo in self.repos.items():   
             for change in repo.get_changes():
+                
+                if not shelf_privilege(id_repo, change['shelf_name'], PRIVILEGE_READ):
+                    continue
                 
                 change['repo_name'] = id_repo
                 a = change['author']

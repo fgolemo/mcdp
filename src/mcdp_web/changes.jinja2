@@ -1,15 +1,17 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <title>Recent changes</title>
-    {% include 'head.jinja2' %}
+{% extends "base_page.jinja2" %}
+{% block title %}
+    Recent changes
+{% endblock %}
+{% block head_extra %}
     <style>{% include 'library_index.css' %}</style>
     <script>{% include 'library_index.js' %}</script>
-</head>
-<body>
+{% endblock %}
+{% block content %}
+
   {% include 'prompt.jinja2' %}
   {%  from 'list_changes.jinja2' import list_changes with context %}
 {{list_changes(changes)}}
 {% include 'footer.jinja2' %}
-</body>
-</html>
+
+
+{% endblock %}

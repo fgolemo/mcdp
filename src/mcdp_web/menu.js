@@ -22,10 +22,11 @@ function new_poset() {
 $(document).ready(function() {
     options = {
         position: {
-            my: "left top",
-            at: "right top"
+            //my: "left top",
+            //at: "right top"
         }
     };
+    console.log('here');
     $('#menu').menu(options);
     $('#menu').css('visibility', 'visible');
     $("#home").css('visibility', 'visible');

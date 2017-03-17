@@ -29,9 +29,9 @@
 otherwise it is hard to click */
 
 #menu li a {
-    padding: 10px;
-    display: block;
-    width: 90%;
+    /*padding: 10px;*/
+    /*display: block;*/
+    /*width: 90%;*/
 }
 
 .ui-widget {

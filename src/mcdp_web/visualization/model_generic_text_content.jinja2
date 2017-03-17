@@ -1,14 +1,10 @@
-<!DOCTYPE html>
-<!--
-	Displays a generic text content in the "content" variable.
--->
-<html lang="en">
-<head>
-    <title>Rendering for {{navigation.thing_name}}</title>
-    {% include 'head.jinja2' %}
+{% extends "base_page.jinja2" %}
+{% block title %}
+    {{navigation.thing_name}}
+{% endblock %}
+{% block content %}
 
-</head>
-<body>
+
 	{% include 'model_views_navigation.jinja2' %}
 	<style type='text/css'>
 	#content { font-family: monospace; }
@@ -20,5 +16,4 @@
 	<pre id='error'><code>{{error}}</pre></code>
     {% endif %}
 
-</body>
-</html>
+{% endblock %}

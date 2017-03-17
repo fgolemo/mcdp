@@ -1,11 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <title>{{navigation.thing_name}}/ndp_graph_normal</title>
-    {% include 'head.jinja2' %}
+{% extends "base_page.jinja2" %}
+{% block title %}
+    {{navigation.thing_name}}
+{% endblock %}
+{% block content %}
 
-</head>
-<body>
+
 	{% include 'model_views_navigation.jinja2' %}
 
 	 <style type='text/css'>
@@ -23,5 +22,4 @@
 	<a href='../images/ndp_graph_normal.dot'>dot</a>
 	</p>
 
-</body>
-</html>
+{% endblock %}

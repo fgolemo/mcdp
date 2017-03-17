@@ -23,8 +23,9 @@
         <thead>
         <tr>
             <td colspan="5">
-                {{icon_shelf|safe}}&nbsp;<a href="{{shelf_url_}}/">{{navigation.shelf_name}}</a> /
-                {{icon_library|safe}}&nbsp;<code>{{navigation.library_name}}</code>
+                {# {{icon_shelf|safe}}&nbsp;<a href="{{shelf_url_}}/">{{navigation.shelf_name}}</a> /
+                {{icon_library|safe}}&nbsp;<code>{{navigation.library_name}}</code> #}
+                {{links.library(navigation.repo_name, navigation.shelf_name, navigation.library_name)}}
             </td>
         </tr>
         <tr id="things">
