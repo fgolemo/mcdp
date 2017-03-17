@@ -1,13 +1,12 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <title>List of shelves</title>
-    {% include 'head.jinja2' %}
+{% extends "base_page.jinja2" %}
+{% block title %}
+    Shelves
+{% endblock %}
+{% block head_extra %}
     <style>{% include 'shelves_index.css' %}</style>
     <script>{% include 'shelves_index.js' %}</script>
-
-</head>
-<body>
+{% endblock %}
+{% block content %}
 
 {% include 'model_views_navigation.jinja2' %}
 
@@ -16,9 +15,6 @@
 {% from 'shelf_row.jinja2' import shelf_row with context %}
 {% from 'shelf_rows.jinja2' import shelf_rows with context %}
 
-<p>MCDP libraries are organized in <em>shelves</em>.
-    These are all the <em>shelves</em> available to you. If you wish to use the libraries
-    in a particular shelf, you need to activate it here first.</p>
 
 <table class="shelves_list" cellspacing="0" cellpadding="0">
     <thead>
@@ -34,21 +30,17 @@
             {{shelf_rows(navigation.repo_name, navigation.repos[navigation.repo_name])}}
     {% else %}
         {% for repo_name, repo in navigation.repos.items() %}
-            <tr><td colspan=5>{{icon_repo|safe}} repository {{repo_name}}</td></tr>
+            <tr><td colspan=5>{{links.repo(repo_name)}}</td></tr>
             {{shelf_rows(repo_name, repo)}}
         {% endfor %}
     {% endif %}
 </table>
 
-{% include 'footer.jinja2' %}
 
+<p class='tip' id='shelf-organization'>
+    MCDP models are organized in <em>shelves</em>.
+    These are all the <em>shelves</em> available to you. If you wish to use the libraries
+    in a particular shelf, you need to activate it here first.
+</p>
 
-<!--http://marketplace.eclipse.org/marketplace-client-intro?mpc_install=2894763
-<script>
-    $(document).ready(function() {
-        $("body").show();
-    });
-</script> -->
-
-</body>
-</html>
+{% endblock %}

@@ -4,8 +4,7 @@
     Library {{navigation.library_name}}
 {% endblock %}
 
-{% block head %}
-    {{ super() }}
+{% block head_extra %}
     <style>{% include 'library_index.css' %}</style>
     <script>{% include 'library_index.js' %}</script>
 {% endblock %}

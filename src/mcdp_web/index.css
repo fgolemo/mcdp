@@ -1,8 +1,11 @@
 body {
-    font-family: Georgia;
+    /*font-family: Georgia;*/
 }
 
+#table1 td {
+    vertical-align: top;
 
+}
 /* logo */
 
 #diagram {

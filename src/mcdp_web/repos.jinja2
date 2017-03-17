@@ -1,18 +1,18 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <title>Repositories</title>
-    {% include 'head.jinja2' %}
-</head>
-<body>
-{% include 'user.jinja2' %}
-{% include 'model_views_navigation.jinja2' %}
-
-<ul>
-    {% for id_repo, repo in navigation.repos.items() %}
-    <li><a href='{{root}}/repos/{{id_repo}}/'>{{icon_repo|safe}} Repository <code>{{id_repo}}</code></a></li>
-    {% endfor %}
-</ul>
-{% include 'footer.jinja2' %}
-</body>
-</html>
+{% extends "base_page.jinja2" %}
+{% block title %}
+    Repositories
+{% endblock %}
+{% block content %}
+    {% include 'user.jinja2' %}
+    {% include 'model_views_navigation.jinja2' %}
+    <style>
+    #one {
+        
+    }
+    </style>
+    <ul id='one'>
+        {% for repo_name in navigation.repos %}
+        <li>{{links.repo(repo_name)}}</li>
+        {% endfor %}
+    </ul>
+{% endblock %}

@@ -1,47 +1,50 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <title>Shelf {{sname}}</title>
-    {% include 'head.jinja2' %}
-</head>
-<body>
-{% include 'user.jinja2' %}
-{% include 'model_views_navigation.jinja2' %}
+{% extends "base_page.jinja2" %}
+{% block title %}
+    Shelf {{navigation.repo_name}}
 
-{% from 'add_library_button.jinja2' import add_library_button with context %}
-{% from 'list_libraries_for_shelf.jinja2' import list_libraries_for_shelf with context %}
-{% from 'user_name_and_picture.jinja2' import user_name_and_picture with context %}
-{% from 'shelf_row.jinja2' import shelf_row with context %}
-<table class="shelves_list" cellspacing="0" cellpadding="0">
-     {{shelf_row(navigation.repo_name, navigation.shelf_name, navigation.shelf)}}
-</table>
-
-{% if navigation.shelf.get_authors() %}
-<table><tr>
-    <td>Authors:</td>
-    {% for author in navigation.shelf.get_authors()%}
-    <td>{{ user_name_and_picture(author) }}</td>
-    {% endfor %}
-</tr></table>
-{% endif %}
+{% endblock %}
+{% block head_extra %}
+    <style>{% include 'shelves_index.css' %}</style>
+    <script>{% include 'shelves_index.js' %}</script>
+{% endblock %}
+{% block content %}
 
 
-<p>{{desc_long|safe}}</p>
+    {% include 'user.jinja2' %}
+    {% include 'model_views_navigation.jinja2' %}
 
-{% if shelf.get_libraries_path() %}
+    {% from 'add_library_button.jinja2' import add_library_button with context %}
+    {% from 'list_libraries_for_shelf.jinja2' import list_libraries_for_shelf with context %}
+    {% from 'user_name_and_picture.jinja2' import user_name_and_picture with context %}
+    {% from 'shelf_row.jinja2' import shelf_row with context %}
+    <table class="shelves_list" cellspacing="0" cellpadding="0">
+         {{shelf_row(navigation.repo_name, navigation.shelf_name, navigation.shelf)}}
+    </table>
 
-    <div style='column-width: 15em'>
-        {{list_libraries_for_shelf(navigation.repo_name, sname, shelf)}}
-    </div>
+    {% if navigation.shelf.get_authors() %}
+    <table><tr>
+        <td>Authors:</td>
+        {% for author in navigation.shelf.get_authors()%}
+        <td>{{ user_name_and_picture(author) }}</td>
+        {% endfor %}
+    </tr></table>
+    {% endif %}
 
-{% else %}
-<p>This bundle contains no libraries yet.</p>
 
-{% endif %}
+    <p>{{desc_long|safe}}</p>
+
+    {% if shelf.get_libraries_path() %}
+
+        <div style='column-width: 15em'>
+            {{list_libraries_for_shelf(navigation.repo_name, sname)}}
+        </div>
+
+    {% else %}
+    <p>This bundle contains no libraries yet.</p>
+
+    {% endif %}
 
 
-{{add_library_button(navigation.repo_name, sname)}}
+    {{add_library_button(navigation.repo_name, sname)}}
 
-{% include 'footer.jinja2' %}
-</body>
-</html>
+{% endblock %}

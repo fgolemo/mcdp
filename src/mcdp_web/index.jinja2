@@ -1,12 +1,13 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <title>PyMCDP Interactive Environment</title>
-    {% include 'head.jinja2' %}
+{% extends "base_page.jinja2" %}
+{% block title %}
+    PyMCDP Interactive Environment
+{% endblock %}
+{% block head_extra %}
     <style type='text/css'>{% include 'index.css' %}</style>
     <script>{% include 'index.js' %}</script>
-</head>
-<body>
+{% endblock %}
+{% block content %}
+
 {% include 'user.jinja2' %}
 {% include 'prompt.jinja2' %}
 
@@ -15,12 +16,11 @@
     $(document).ready(function() {
         $("#refresh").button();
         $("#buttons").css('visibility', 'visible');
-       // $("#create_library").disable();
     });
 
 </script>
 
-<table><tr>
+<table id=table1><tr>
 <td>
 <img id='diagram' src='{{static}}/diagram_blank.png'/>
 </td>
@@ -62,11 +62,11 @@
 <ul>
 <!-- <li><a class='button' href='{{root}}/shelves/'>Activate/deactivate shelves</a></li> -->
 <li>
-{% for repo_name in navigation.repos %}
+    <a href='{{root}}/shelves/'>List of shelves</a>
+<!-- {% for repo_name in navigation.repos %}
 <a href="{{root}}/repos/{{repo_name}}/shelves/">{{repo_name}}</a>
-    <!-- <a class='button' href='{{root}}/repos/'>Currently available repositories</a></li> -->
 {% endfor %}
-</ul>
+</ul> -->
 
 
 
@@ -88,11 +88,21 @@
 {{list_changes(changes)}}
 </div>
 
+
+
+<p class='tip' id='welcome'>
+    Welcome to MCDPL! This is how a tip looks like.
+    <a href="">Click here</a> to disable all of these tips.
+</p>
+
+<p class='tip hidden' id='hidden-example'>
+    This is a hidden tip.
+</p>
+
 <style>
 .changes {
     font-size: smaller;
 }
 </style>
-{% include 'footer.jinja2' %}
-</body>
-</html>
+
+{% endblock %}

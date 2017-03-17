@@ -1,10 +1,17 @@
+{% import 'snippets/links.jinja2' as links with context %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     {% block head %}
     <title>{% block title %}{% endblock %}</title>
     {% endblock %}
+
     {% include 'head.jinja2' %}
+    
+    {% block head_extra %}
+    {% endblock %}
+
+
 </head>
 <body>
     {% block content %}{% endblock %}

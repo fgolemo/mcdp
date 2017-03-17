@@ -1,4 +1,8 @@
-{% macro list_libraries_for_shelf(repo_name, S, the_shelf) %}
+{% macro list_libraries_for_shelf(repo_name, shelf_name) %}
+
+    {% set shelf = navigation.repos[repo_name].get_shelves()[shelf_name] %}
+    {% set shelf_url_ = shelf_url(repo_name, shelf_name) %}
+
 <style>
 
 ul.libraries_list {
@@ -7,18 +11,17 @@ ul.libraries_list {
     list-style: none;
     padding-left: 1em;
 }
-
+/*
 ul.libraries_list > li > *:first-child:before {
     content: '{{icon_library_css|safe}}';
     margin-right: 0.5em;
-}
+}*/
 </style>
 
 <ul class='libraries_list'>
-    {% for libname in the_shelf.get_libraries_path() %}
-        <li><a href="{{shelf_url(repo_name, S)}}/libraries/{{libname}}/">
-                <code><span>{{libname}}</span></code></a>
-        </li>
+
+    {% for library_name in shelf.get_libraries_path() %}
+        <li>{{links.library(repo_name, shelf_name, library_name)}}</li>
     {% endfor %}
 </ul>
 {% endmacro %}

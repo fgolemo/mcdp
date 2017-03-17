@@ -28,13 +28,14 @@
 /* This makes the link fill all of the menu item
 otherwise it is hard to click */
 
-li a {
+#menu li a {
+    padding: 10px;
     display: block;
     width: 90%;
 }
 
 .ui-widget {
-    font-size: 70%;
+    /*font-size: 70%;*/
 }
 
 #menu li li li {

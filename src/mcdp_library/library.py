@@ -15,7 +15,6 @@ from mcdp_lang import parse_ndp, parse_poset
 from mcdp_utils_misc import assert_good_plain_identifier, format_list, get_mcdp_tmp_dir, memo_disk_cache2, locate_files
 from mocdp.comp.context import Context
 
-
 __all__ = [
     'MCDPLibrary', 
 ]
@@ -426,7 +425,9 @@ class MCDPLibrary():
     def _update_file(self, f, from_search_dir=None):
         """ from_search_dir: from whence we arrived at this file. """
         if not os.path.exists(f):
-            msg = 'File does not exist: %s' % f
+            msg = 'File does not exist:'
+            msg += '\n filename: %s' % f
+            msg += '\n from_search_dir: %s' % from_search_dir
             raise ValueError(msg)
         basename = os.path.basename(f)
         check_isinstance(basename, str)

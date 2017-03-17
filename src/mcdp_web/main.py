@@ -613,10 +613,10 @@ class WebApp(AppVisualization, AppStatus,
                     u = UserInfo(username=a, name=None, 
                                  password=None, email=None, website=None, affiliation=None, groups=[], subscriptions=[])
                 change['user'] = u
-                p = '/repos/{repo_name}/shelves/{shelf_name}/libraries/{library_name}/{spec_name}/{thing_name}/views/syntax/'
+                p = '{root}/repos/{repo_name}/shelves/{shelf_name}/libraries/{library_name}/{spec_name}/{thing_name}/views/syntax/'
                 
                 if change['exists']:
-                    change['url'] = e.root + p.format(**change)
+                    change['url'] = p.format(root=e.root, **change)
                 else:
                     change['url'] = None
 
@@ -658,8 +658,8 @@ def serve_robots(request):  # @UnusedVariable
     return Response(content_type='text/plain', body=body)
 
 def get_url_library(e, shelf_name, library_name):
-    url = e.root + '/repos/{repo_name}/shelves/{shelf_name}/libraries/{library_name}'
-    url = url.format(shelf_name=shelf_name, repo_name=e.repo_name, library_name=library_name)
+    url = '{root}/repos/{repo_name}/shelves/{shelf_name}/libraries/{library_name}'
+    url = url.format(root=e.root, shelf_name=shelf_name, repo_name=e.repo_name, library_name=library_name)
     return url
 
 class MCDPWeb(QuickAppBase):

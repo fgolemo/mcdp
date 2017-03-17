@@ -1,28 +1,41 @@
 {% macro shelf_rows(repo_name, repo) %}
 {% for shelf_name, shelf in repo.shelves.items() %}
 
+    {% if shelf_can_discover(repo_name, shelf_name) %}
     {{shelf_row(repo_name, shelf_name, shelf)}}
 
     {% if shelf_can_read(repo_name, shelf_name) %}
     <tr style='display:none' id="contents-{{shelf_name}}">
         <td colspan=6>
 
-            {% if shelf.get_authors() %}
-            <table><tr>
-                <td>Authors:</td>
-                {% for author in shelf.get_authors()%}
-                <td>{{ user_name_and_picture(author) }}</td>
-                {% endfor %}
-            </tr></table>
-            {% endif %}
+            <table>
+            <tr>
+            <td>
+                {% if shelf.get_authors() %}
+                <table>
+                    <tr><td>Authors of this shelf</td></tr>
+                    {% for author in shelf.get_authors()%}
+                    <tr><td>{{ user_name_and_picture(author) }}</td></tr>
+                    {% endfor %}
+                </table>
+                {% endif %}
 
             <!-- <p>This shelf contains {{ shelf.get_libraries_path() | length}} libraries:</p> -->
+            </td>
+
+            <td>
             <div style='column-width: 15em'>
-                {{list_libraries_for_shelf(repo_name, shelf_name, shelf)}}
+                {{list_libraries_for_shelf(repo_name, shelf_name)}}
             </div>
+            </td>
+            </tr>
+            </table>
          </td>
     </tr>
     <script>setup("{{shelf_name}}");</script>
+    {% endif %}
+    {% else %}
+    <tr><td>cannot subscribe {{shelf_name}} </td></tr>
     {% endif %}
 {% endfor %}
 {% endmacro %}

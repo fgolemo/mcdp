@@ -1,5 +1,5 @@
 mcdp {
-   requires y [m]
-   provides x [m]
-   required y >= approxu(provided x, 1 cm)
+    requires y [m]
+    provides x [m]
+    required y ≽ approxu(provided x, 1 cm)
 }

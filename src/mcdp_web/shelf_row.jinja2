@@ -1,14 +1,9 @@
 {% macro shelf_row(repo_name, shelf_name, shelf) %}
-{% set shelf_url_ = shelf_url(repo_name, shelf_name) %}
 {% set shelf_used = shelf_name in navigation.shelves_used %}
 <tr class={% if shelf_used %}"used"{%else%}"unused"{%endif%}>
 <td>
 
-{%if shelf_subscribed(repo_name, shelf_name)%}
-    <a href="{{shelf_url_}}">{{icon_shelf|safe}}&nbsp;Shelf <code>{{shelf_name}}<code></a>
-{% else %}
-    {{icon_shelf|safe}}&nbsp;Shelf <code>{{shelf_name}}</code>
-{% endif %}
+{{links.shelf(repo_name, shelf_name)}}
 
     </td>
  <td class="permissions">
@@ -28,21 +23,12 @@
     </td>
 
     <td>
-    {% if shelf_name in navigation.shelves_used %}
-
-    <form action="{{shelf_url_}}/:unsubscribe/" method="post">
-        <input type="submit" class='inactive' value="deactivate"/>
-    </form>
-    {% else %}
-    <form action="{{shelf_url_}}/:subscribe/" method="post">
-        <input type="submit" class='active' value="activate"/>
-    </form>
-    {% endif %}
+    {{links.shelf_activation_button(repo_name, shelf_name)}}
     </td>
 {% else %}
 <td colspan=2>
-{% if not shelf_subscribed(repo_name, shelf_name) %}
-    unavailable to you
+{% if not shelf_subscribed(repo_name, shelf_name) and not shelf_can_subscribe(repo_name, shelf_name) %}
+    cannot subscribe
 {% endif %}
 </td>
 {% endif %}

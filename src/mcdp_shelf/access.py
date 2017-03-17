@@ -14,7 +14,7 @@ USER_ANONYMOUS = 'anonymous'
 USER_AUTHENTICATED = 'Authenticated'
 USER_EVERYONE = 'Everyone'
 PRIVILEGE_DISCOVER = 'discover'
-PRIVILEGE_SUBSCRIBE = 'subscribe'
+PRIVILEGE_SUBSCRIBE = 'subscribe' # = can change the subscription status
 PRIVILEGE_READ = 'read'
 PRIVILEGE_WRITE = 'write'
 PRIVILEGE_ADMIN = 'admin'
