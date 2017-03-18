@@ -31,7 +31,7 @@ from mcdp_user_db import UserDB, UserInfo
 from mcdp_utils_misc import create_tmpdir, duration_compact, dir_from_package_name
 from mcdp_web.resource_tree import ResourceAllShelves, ResourceShelfForbidden,\
     ResourceShelfNotFound, ResourceRepoNotFound, ResourceLibraryAssetNotFound,\
-    ResourceLibraryDocNotFound, ResourceNotFoundGeneric
+    ResourceLibraryDocNotFound, ResourceNotFoundGeneric, ResourceAbout
 from mcdp_web.utils0 import add_std_vars_context_no_redir
 
 from .confi import describe_mcdpweb_params, parse_mcdpweb_params_from_dict
@@ -119,12 +119,13 @@ class WebApp(AppVisualization, AppStatus,
         REPO_BUNDLED = 'bundled'
         REPO_USERS = 'global'
         if self.options.load_mcdp_data:
+            desc_short = 'Contains models bundled with the code.'
             if os.path.exists('.git'):
                 logger.info('Loading mcdp_data repo as MCDPGitRepo')
-                b = MCDPGitRepo(where='.')
+                b = MCDPGitRepo(where='.', desc_short=desc_short)
             else:
                 logger.info('Loading mcdp_data repo as MCDPythonRepo')
-                b = MCDPythonRepo('mcdp_data')
+                b = MCDPythonRepo('mcdp_data', desc_short=desc_short)
                     
             self.repos[REPO_BUNDLED]  = b
         else:
@@ -132,7 +133,8 @@ class WebApp(AppVisualization, AppStatus,
             
         if self.options.users is not None:
             self.user_db = UserDB(self.options.users)            
-            self.repos[REPO_USERS] = MCDPGitRepo(where=self.options.users)
+            desc_short = 'Global database of shared models.'
+            self.repos[REPO_USERS] = MCDPGitRepo(where=self.options.users, desc_short=desc_short)
 
         shelf2repo = {}
         for id_repo, repo in self.repos.items():
@@ -548,6 +550,7 @@ class WebApp(AppVisualization, AppStatus,
         AppLogin.config(self, config)
         AppSolver2.config(self, config)
 
+        config.add_view(self.view_dummy, context=ResourceAbout, renderer='about.jinja2')
         config.add_view(self.view_index, context=MCDPResourceRoot, renderer='index.jinja2')
         config.add_view(self.view_dummy, context=ResourceLibraries, renderer='list_libraries.jinja2')
         config.add_view(self.view_dummy, context=ResourceRepos, renderer='repos.jinja2')

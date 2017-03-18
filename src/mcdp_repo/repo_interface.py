@@ -151,10 +151,11 @@ class MyProgressPrinter(RemoteProgress):
 
 
 class MCDPGitRepo(MCDPRepo):
-    def __init__(self, url=None, where=None):
+    def __init__(self, url=None, where=None, desc_short=None):
         '''
             where: local directory
         '''
+        self.desc_short = desc_short
         if where is None:
             where = create_tmpdir(prefix='git_repo')
             create = True
@@ -281,7 +282,7 @@ class MCDPGitRepo(MCDPRepo):
         return self.shelves
  
     def get_desc_short(self):
-        return 'Python package %r' % self.package
+        return self.desc_short
     
     def checkout(self, where):
         ''' Checks out a local copy for remote repos. '''

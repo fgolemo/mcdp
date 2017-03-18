@@ -28,7 +28,7 @@
 {% else %}
 <td colspan=2>
 {% if not shelf_subscribed(repo_name, shelf_name) and not shelf_can_subscribe(repo_name, shelf_name) %}
-    cannot subscribe
+    <!-- cannot subscribe -->
 {% endif %}
 </td>
 {% endif %}
@@ -55,7 +55,8 @@
 tr.used {}
 
 tr.unused {
-    background-color: lightgrey;
+    /*background-color: #eee;*/
+    color: gray;
 }
 
 .shelves_list {
@@ -68,6 +69,9 @@ tr.unused {
 
 td.permissions {
     text-align:center;
+
+    padding-left: 0.4em;
+    padding-right: 0.4em;
 }
 </style>
 {% endmacro %}

@@ -15,6 +15,17 @@
 		<script type = "text/javascript" src = "{{static}}/javascript/sha1.js"></script>
 		<script type = "text/javascript" src = "{{static}}/javascript/tips.js"></script>
 
+		<style>
+		.hide { display: none;}
+		</style>
+		<script>
+		    $('html').addClass('hide');
+		    $(window).load(function(){
+		        $('html').removeClass('hide');
+				// console.log('show body');
+		    });
+		</script>
+
 		<!--<script>
 		  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
 		  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),

@@ -1,7 +1,8 @@
 {% macro user_name_and_picture(username) %}
     {% set a_user = get_user(username) %}
 
-    <img id='gravatar' src='{{a_user.gravatar32}}'/>
+    <span class='user_name_and_picture'>
+    <img id='gravatar2' src='{{a_user.gravatar32}}'/>
 
     <!-- XXX: this doesn't work -->
 
@@ -16,5 +17,13 @@
     {% else %}
     {{name}}
     {% endif %}
+</span>
 
+<style>
+img#gravatar2 {
+    width: 13pt;
+    /*baseline-shift: 10pt;*/
+    margin-bottom: -4pt;
+}
+</style>
 {% endmacro %}

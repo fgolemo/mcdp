@@ -14,9 +14,9 @@
 	}
 
 	#select_view, #select_model {
-		display: none;
+		/*display: none;*/
 	}
-	.hot_select { visibility: hidden;}
+	/*.hot_select { visibility: hidden;}*/
 
 	table#maintable {
 		position: fixed;
@@ -50,7 +50,8 @@
 		{% endif %}
 
 		{% if navigation.shelf_name %}
-		/ <a id='shelves_list' style='visibility: hidden'
+		<!-- / -->
+		<a id='shelves_list' style='visibility: hidden'
 		href="{{root}}/repos/{{navigation.repo_name}}/shelves/">
 			{{icon_repo|safe}} {{navigation.repo_name}}</a>
 		<script type='text/javascript'>
@@ -62,7 +63,8 @@
 		{% endif %}
 
 		{% if navigation.library_name %}
-		/ <a id='back_to_shelf' style='visibility: hidden'
+		<!-- /  -->
+		<a id='back_to_shelf' style='visibility: hidden'
 		href="{{shelf_url(navigation.repo_name, navigation.shelf_name)}}/">
 			<!-- <span class='unicode-icons'>⟲</span> -->
 			 <span class="shelf_name">
@@ -81,7 +83,7 @@
 	<select id='select_shelf' class='hot_select'>
 		<option value="#"  selected = 1>{{icon_shelf|safe}}&nbsp;{{navigation.shelf_name}}</option>
 
-		{% for shelf_name in navigation.repos[navigation.repo_name].shelves %}
+		{% for shelf_name in navigation.repos[navigation.repo_name].shelves if shelf_name != navigation.shelf_name %}
 			<option name='{{shelf_name}}' value="{{shelf_url(navigation.repo_name, shelf_name)}}">
 				{{icon_shelf|safe}}&nbsp;{{shelf_name}}
 			</option>
@@ -112,7 +114,8 @@
  	 {% endif %}
 
 	 {% if navigation.library_name and navigation.thing_name %}
-	 	/ <a id='back_to_library' style='visibility: hidden'
+	 	<!-- /  -->
+		<a id='back_to_library' style='visibility: hidden'
 		href="{{library_url(navigation.library_name)}}/">
 	 		<!-- <span class='unicode-icons'>⟲</span> -->
 	 		 <span class="library_name">
@@ -132,7 +135,8 @@
 	  <td>
 
 		  {% if navigation.library_name %}
-	  / <select id='select_model' class='hot_select'>
+	  <!-- /  -->
+	  <select id='select_model' class='hot_select'>
 	  	{% if  navigation.spec_name != 'models' and  navigation.spec_name  != 'templates'
 	  		and navigation.spec_name != 'posets' %}
 
@@ -176,7 +180,7 @@
 
 			{# Also add the same but with hidden links #}
 			{% for vi in navigation['views'] %}
-			    <a style='display:none' href="{{vi['url']}}""></a>
+			    <a style='display:none' href="{{vi.url}}"></a>
 			{% endfor %}
 
 	  {% endif %}
@@ -188,19 +192,18 @@
 <div id='aftertable'/>
 
 
-
-
 <script type = "text/javascript">
 	$(document).ready(function() {
+		$('.hot_select').selectmenu({change: handle});
+		/*$('.hot_select').show();*/
+		// $('.hot_select').css('visibility', 'visible');
 
 		function handle(event, ui) {
 		 console.log('change');
 		  window.location = $(this).val();
 		}
 
-		$('.hot_select').selectmenu({change: handle});
-		$('.hot_select').css('visibility', 'visible');
-		/*$('.hot_select').show();*/
+
 	});
 </script>
 

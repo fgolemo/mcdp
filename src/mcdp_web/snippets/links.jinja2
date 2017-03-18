@@ -31,12 +31,17 @@
 {% macro shelf_activation_button(repo_name, shelf_name) %}
     {% set shelf_url_ =  shelf_url(repo_name, shelf_name) %}
     {% if shelf_name in navigation.shelves_used %}
-        <form action="{{shelf_url_}}/:unsubscribe/" method="post">
+        <form class='shelf_activation' action="{{shelf_url_}}/:unsubscribe/" method="post">
             <input type="submit" class='inactive' value="deactivate"/>
         </form>
     {% else %}
-        <form action="{{shelf_url_}}/:subscribe/" method="post">
+        <form  class='shelf_activation'  action="{{shelf_url_}}/:subscribe/" method="post">
             <input type="submit" class='active' value="activate"/>
         </form>
     {% endif %}
+    <style>
+    form.shelf_activation {
+        display: inline-block;
+    }
+    </style>
 {% endmacro %}

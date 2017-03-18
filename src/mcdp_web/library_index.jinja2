@@ -1,4 +1,5 @@
-{% extends "base_page.jinja2" %}
+{% extends "desc_page.jinja2" %}
+{% set can_write = shelf_can_write(navigation.repo_name, navigation.shelf_name) %}
 
 {% block title %}
     Library {{navigation.library_name}}
@@ -9,45 +10,44 @@
     <script>{% include 'library_index.js' %}</script>
 {% endblock %}
 
-{% block content %}
+{% block desc_page_title %}
+    {{links.library(navigation.repo_name, navigation.shelf_name, navigation.library_name)}}
+{% endblock %}
 
-    {% set can_write = shelf_can_write(navigation.repo_name, navigation.shelf_name) %}
+{% block desc_page_desc %}
+    <p>This is the content of the library <code>{{navigation.library_name}}</code>.</p>
+
+    {% if not can_write %}
+        <p> This library is read-only for you. </p>
+    {% else %}
+    <p> You can modify this library. </p>
+    {%endif%}
+
+{% endblock %}
+
+
+{% block desc_page_content %}
+
     {% set shelf_url_ = shelf_url(navigation.repo_name, navigation.shelf_name) %}
 
     {% include 'refresh_shortcut.jinja2' %}
-    {% include 'model_views_navigation.jinja2' %}
 
     <div id='allcontents' >
         <div id='outside'>
+
         <table align='center' id='library-contents'>
-        <thead>
-        <tr>
-            <td colspan="5">
-                {# {{icon_shelf|safe}}&nbsp;<a href="{{shelf_url_}}/">{{navigation.shelf_name}}</a> /
-                {{icon_library|safe}}&nbsp;<code>{{navigation.library_name}}</code> #}
-                {{links.library(navigation.repo_name, navigation.shelf_name, navigation.library_name)}}
-            </td>
-        </tr>
-        <tr id="things">
-        	<td>MCDPs</td>
-        	<td>Templates</td>
-        	<td>Posets</td>
-        	<td>Values</td>
-        	{% if navigation['documents'] %}
-        	<td>Documents</td>
-        	{% endif %}
-        </tr></thead>
-
         <tbody>
-            <tr>
-            	{% for what in ["models","templates","posets","values","documents"] %}
-            	<!-- only put the documents if they exist -->
-            	{% if what != 'documents' or navigation[what] %}
-                    <td>
-                    	{% if not navigation[what] %}
-                    	   <p class='none-available'>(none)</p><br/>
-                    	{% endif %}
 
+            	{% for what in ["models","templates","posets","values","documents"] %}
+                <tr class='what-row'>
+                       <td class='what'>{{what}}</td>
+            	<!-- only put the documents if they exist -->
+                    <td class='contents'>
+                    	{% if not navigation[what] %}
+                    	   <p class='none-available'>None available.</p>
+
+                    	{% endif %}
+                        <div class='things'>
                     	{% for d in navigation[what] %}
                     		<p class='entry'>
                     		{% if 'url_edit' in d and can_write %}
@@ -57,39 +57,25 @@
                                 <code><a class="url" href="{{d['url']}}">{{icon_spec(what)|safe}}&nbsp;{{d['id']}}</a></code>
                     		</p>
                     	{% endfor %}
+                    </div>
+                        {% if what != 'documents' and can_write %}
+                            <button id="table_new_{{what}}">+</button>
+                        {% endif %}
+
+                        {% if what == 'models' and  navigation['models'] %}
+                            <p><button id='show_previews'>Show MCDP previews</button></p>
+                        {% endif %}
 
                     </td>
-            	{% endif %}
-            	{% endfor %}
 
-            </tr>
-            <tr>
-                {% for what in ["models","templates","posets","values","documents"] %}
-                    {% if what != 'documents' or navigation[what] %}
-                        <td class='plus'>
-                            {% if what != 'documents' %}
-                                {% if can_write %}
-                                    <button id="table_new_{{what}}">+</button>
-                                {% endif %}
-                            {% endif %}
-                        </td>
-                    {% endif %}
-                {% endfor %}
-            </tr>
+                </tr>
+            	{% endfor %}
 
         </tbody>
 
         </table>
 
-        <div id='extra_commands'>
-        {% if not can_write %}
-            <p> This library is read-only for this user. </p>
-        {%endif%}
 
-        {% if navigation['models'] %}
-            <p><button id='show_previews'>Show MCDP previews</button></p>
-        {% endif %}
-        </div>
 
         </div>
 

@@ -113,10 +113,11 @@ class MCDPResourceRoot(Resource):
             'login': ResourceLogin(),
             'logout': ResourceLogout(),
             'shelves': ResourceAllShelves(),
+            'about': ResourceAbout(),
             'robots.txt': ResourceRobots(),
         }    
         
-    
+class ResourceAbout(Resource): pass          
 class ResourceTree(Resource): pass            
 class ResourceExit(Resource): pass
 class ResourceLogin(Resource): pass
