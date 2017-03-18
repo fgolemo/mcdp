@@ -7,8 +7,8 @@ import tempfile
 
 from contracts.utils import check_isinstance
 
-from mcdp import logger
 from mcdp import MCDPConstants
+from mcdp import logger
 from mcdp.exceptions import mcdp_dev_warning, DPSyntaxError
 from mcdp_docs.minimal_doc import get_minimal_document
 from mcdp_docs.pipeline import render_complete

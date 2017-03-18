@@ -7,9 +7,8 @@ from contracts.utils import raise_desc
 from mcdp.logs import logger
 from mcdp_library import Librarian
 from mcdp_shelf import PRIVILEGE_DISCOVER, PRIVILEGE_READ, Shelf
-from mcdp_utils_misc import natural_sorted
-from mcdp_user_db.user import UserInfo
-from mcdp_utils_misc.string_utils import format_list
+from mcdp_user_db import UserInfo
+from mcdp_utils_misc import format_list, natural_sorted
 
 
 _ = Shelf
@@ -46,12 +45,14 @@ class Session():
         ''' Returns a UserInfo struct. It is the user 'anonymous' if no login was given.
         
             self.request.authenticated_userid == None == get_user().username == 'anonymous'
-            
-            
         '''
         userdb = self.app.user_db  # @UndefinedVariable
         if username is None:
             username = self.request.authenticated_userid 
+            if username is not None and not username in userdb:
+                logger.error('User appears to have not existent id "%s".' % username)
+                username = None
+            
         if username is not None:
             username = username.encode('utf8')
             if username in userdb:

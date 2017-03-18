@@ -50,7 +50,7 @@ p.none-available {
 	padding-top: 0.5em;
 }
 #library-contents tbody td {
-	font-size: smaller;
+	/*font-size: smaller;*/
 }
 
 tr.what-row {

@@ -36,11 +36,16 @@ def add_other_fields(self, res, request, context):
     res['authenticated_userid'] = request.authenticated_userid
 
     session = self.get_session(request)
+# 
+#     if not request.authenticated_userid in self.user_db:
+#         msg = 'The user is authenticated as "%s" but no such user in DB.' % request.authenticated_userid
+#         logger.error(msg)
+#         user = self.user_db[None] # anonymous
+#     else:
+#         user = self.user_db[request.authenticated_userid]
 
-    user = self.user_db[request.authenticated_userid]
-
-    if request.authenticated_userid is not None:
-        res['user'] = user.dict_for_page()
+    if e.username is not None:
+        res['user'] = e.user.dict_for_page()
     else:
         res['user'] = None
 
@@ -51,7 +56,7 @@ def add_other_fields(self, res, request, context):
             msg += '\n available: ' + format_list(repo.shelves)
             raise ValueError(msg)
         acl = repo.shelves[sname].get_acl()
-        return acl.allowed2(privilege, user)
+        return acl.allowed2(privilege, e.user)
 
     def can_subscribe(repo_name, sname):
         return shelf_privilege(repo_name, sname, PRIVILEGE_SUBSCRIBE)
@@ -88,17 +93,10 @@ def add_other_fields(self, res, request, context):
         url = '{root}/repos/{repo_name}/shelves/{shelf_name}/libraries/{this}'
         return url.format(this=_, **e.__dict__)
 
-    def library_url2(repo_name, shelf_name, library_name):
-#         if library_name is None:
-#             msg = 'library_name = None'
-#             raise ValueError(msg)
-#         if e.shelf_name is None:
-#             msg = 'shelf_name is not set'
-#             raise ValueError(msg)
+    def library_url2(repo_name, shelf_name, library_name): 
         url = '{root}/repos/{repo_name}/shelves/{shelf_name}/libraries/{library_name}'
         return url.format(root=e.root,  repo_name=repo_name, shelf_name=shelf_name, library_name=library_name)
-# return e.root + '/repos/' + e.repo_name + '/shelves/' + e.shelf_name +
-# '/libraries/' + _
+
 
     def thing_url(t):
         url = '{root}/repos/{repo_name}/shelves/{shelf_name}/libraries/{library_name}/{spec_name}/%s' % t
@@ -133,6 +131,12 @@ def add_other_fields(self, res, request, context):
     res['icon_primitivedps'] = '&#x2712;'
 
     res['icon_documents'] = '&#128196;'
+    
+    providers = self.get_authomatic_config()
+    other_logins = {}
+    for x in providers:
+        other_logins[x] = e.root + '/authomatic/' + x
+    res['other_logins'] = other_logins
 
     def icon_spec(spec_name):
         return res['icon_%s' % spec_name]
@@ -162,10 +166,16 @@ def add_std_vars_context_(f, redir):
             response = Response(msg)
             response.status_int = 500
             return response
+        
         if redir:
             url = request.url
-            if not url.endswith('/'):
-                url2 = url + '/'
+            p = urlparse.urlparse(url)
+            url2 = url
+            if '127.0.0.1' in p.netloc:
+                url2 = url2.replace('127.0.0.1', 'localhost')
+            if not p.path.endswith('/'):
+                url2 = url2.replace(p.path, p.path + '/')
+            if url2 != url:
                 raise HTTPFound(url2)
 
         try:

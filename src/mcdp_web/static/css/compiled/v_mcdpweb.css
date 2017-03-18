@@ -488,7 +488,9 @@ code.rvalue span.RcompUnit {
 }
 body {
   background-color: white;
-  font-family: Georgia;
+  font-family: "Input Serif";
+  font-family: "PT Sans";
+  font-family: "Trebuchet MS", Tahoma, Verdana, Arial, sans-serif;
 }
 .unicode-icons {
   margin-bottom: -5px;
@@ -510,6 +512,9 @@ pre code {
   background: #73AD21;
   color: white;
   max-width: 20em;
+}
+ul {
+  padding-left: 2em;
 }
 /*
 

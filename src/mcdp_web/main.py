@@ -8,6 +8,8 @@ import traceback
 import urlparse
 from wsgiref.simple_server import make_server
 
+from authomatic.adapters import WebObAdapter
+from authomatic import Authomatic
 from contracts.utils import indent, check_isinstance
 import git.cmd  # @UnusedImport
 from pyramid.authentication import AuthTktAuthenticationPolicy
@@ -16,7 +18,7 @@ from pyramid.config import Configurator
 from pyramid.httpexceptions import HTTPFound
 from pyramid.renderers import JSONP, render_to_response
 from pyramid.response import Response
-from pyramid.security import NO_PERMISSION_REQUIRED
+from pyramid.security import NO_PERMISSION_REQUIRED, remember
 from pyramid.session import SignedCookieSessionFactory
 from quickapp import QuickAppBase
 
@@ -29,9 +31,9 @@ from mcdp_repo import MCDPGitRepo, MCDPythonRepo
 from mcdp_shelf import PRIVILEGE_ACCESS, PRIVILEGE_READ, PRIVILEGE_SUBSCRIBE, PRIVILEGE_DISCOVER, PRIVILEGE_WRITE
 from mcdp_user_db import UserDB, UserInfo
 from mcdp_utils_misc import create_tmpdir, duration_compact, dir_from_package_name
-from mcdp_web.resource_tree import ResourceAllShelves, ResourceShelfForbidden,\
-    ResourceShelfNotFound, ResourceRepoNotFound, ResourceLibraryAssetNotFound,\
-    ResourceLibraryDocNotFound, ResourceNotFoundGeneric, ResourceAbout
+from mcdp_utils_misc import format_list
+from mcdp_utils_misc.memoize_simple_imp import memoize_simple
+from mcdp_web.resource_tree import ResourceAuthomaticProvider
 from mcdp_web.utils0 import add_std_vars_context_no_redir
 
 from .confi import describe_mcdpweb_params, parse_mcdpweb_params_from_dict
@@ -41,6 +43,9 @@ from .images.images import WebAppImages, get_mime_for_format
 from .interactive.app_interactive import AppInteractive
 from .qr.app_qr import AppQR
 from .resource_tree import MCDPResourceRoot, ResourceLibraries, ResourceLibrary,  ResourceLibraryRefresh, ResourceRefresh, ResourceExit, ResourceLibraryDocRender, ResourceLibraryAsset, ResourceRobots, ResourceShelves, ResourceShelvesShelfUnsubscribe, ResourceShelvesShelfSubscribe, ResourceExceptionsFormatted, ResourceExceptionsJSON, ResourceShelf, ResourceLibrariesNewLibname, Resource, context_display_in_detail, ResourceShelfInactive, ResourceThingDelete, ResourceChanges, ResourceTree, ResourceThing, ResourceRepos, ResourceRepo, ResourceThings, ResourceLibraryInteractive
+from .resource_tree import ResourceAllShelves, ResourceShelfForbidden,\
+    ResourceShelfNotFound, ResourceRepoNotFound, ResourceLibraryAssetNotFound,\
+    ResourceLibraryDocNotFound, ResourceNotFoundGeneric, ResourceAbout
 from .security import AppLogin, groupfinder
 from .sessions import Session
 from .solver.app_solver import AppSolver
@@ -50,7 +55,7 @@ from .utils.image_error_catch_imp import response_image
 from .utils.response import response_data
 from .utils0 import add_other_fields, add_std_vars_context
 from .visualization.app_visualization import AppVisualization
-from mcdp_utils_misc.string_utils import format_list
+import urllib2
 
 
 __all__ = [
@@ -66,9 +71,13 @@ class WebApp(AppVisualization, AppStatus,
              AppQR, AppSolver, AppInteractive,
              AppSolver2, AppEditorFancyGeneric, WebAppImages,
              AppLogin):
+    
     singleton = None
-    def __init__(self, options):
+    
+    def __init__(self, options, settings):
+        from mcdp_library_tests.create_mockups import write_hierarchy
         self.options = options
+        self.settings =settings
         WebApp.singleton = self
         
         dirname = options.libraries
@@ -113,7 +122,29 @@ class WebApp(AppVisualization, AppStatus,
         
         if self.options.users is None:
             self.options.users = create_tmpdir('tmp-user-db')
-            os.makedirs(self.options.users)
+            db = {
+                'anonymous.mcdp_user': {
+                    'user.yaml' : '''
+                        name: Anonimo
+                    '''
+                }
+            }
+            if not os.path.exists(self.options.users):
+                os.makedirs(self.options.users)
+#             repo = Repo.init(self.options.users)
+#             
+#             origin = repo.create_remote('origin', url='file://invalid')
+#             for filename in create_file_and_yield(db, self.options.users):
+# #             print('written %r' % filename)
+# #             print('untracked_files: %s' % repo0.untracked_files)
+# #             print('Dirty: %s' % repo0.is_dirty(untracked_files=True))
+#                 repo.index.add(repo.untracked_files)
+#                 message = 'author: system'
+#                 author = Actor('system', 'system')
+#                 repo.index.commit(message, author=author)
+                
+            write_hierarchy(self.options.users, db)
+            
 
         self.repos = {}
         REPO_BUNDLED = 'bundled'
@@ -134,7 +165,9 @@ class WebApp(AppVisualization, AppStatus,
         if self.options.users is not None:
             self.user_db = UserDB(self.options.users)            
             desc_short = 'Global database of shared models.'
-            self.repos[REPO_USERS] = MCDPGitRepo(where=self.options.users, desc_short=desc_short)
+            is_git = os.path.exists(os.path.join(self.options.users, '.git'))
+            if is_git:
+                self.repos[REPO_USERS] = MCDPGitRepo(where=self.options.users, desc_short=desc_short)
 
         shelf2repo = {}
         for id_repo, repo in self.repos.items():
@@ -149,6 +182,12 @@ class WebApp(AppVisualization, AppStatus,
                 shelf2repo[shelf_name] = id_repo
 
             self.all_shelves.update(shelves)
+        
+        picture = 'http://graph.facebook.com/10154724108563171/picture?type=large'
+        h = urllib2.urlopen(picture)
+        logger.info('urlp opened  %s' % h)
+        jpg = h.read()
+        logger.info('read %s bytes' % len(jpg)) 
         
     def add_model_view(self, name, desc):
         self.views[name] = dict(desc=desc, order=len(self.views))
@@ -188,7 +227,6 @@ class WebApp(AppVisualization, AppStatus,
         return {
             'changes': self._get_changes(e),
         }
- 
     @add_std_vars_context
     @cr2e
     def view_tree(self, e):
@@ -523,8 +561,8 @@ class WebApp(AppVisualization, AppStatus,
         secret = 'itsasecreet' # XXX
         
         self.my_session_factory = SignedCookieSessionFactory(secret+'sign')
-
-        config = Configurator(root_factory=MCDPResourceRoot)
+        root_factory =MCDPResourceRoot
+        config = Configurator(root_factory=root_factory, settings=self.settings)
         config.set_session_factory(self.my_session_factory)
 
         # config.include('pyramid_debugtoolbar')
@@ -591,9 +629,213 @@ class WebApp(AppVisualization, AppStatus,
         config.add_view(serve_robots, context=ResourceRobots, permission=NO_PERMISSION_REQUIRED)
         config.add_notfound_view(self.view_not_found, renderer='404.jinja2')
         config.scan()
-
+    
+        config.add_view(self.view_authomatic, context=ResourceAuthomaticProvider)
+        self.get_authomatic_config()
         app = config.make_wsgi_app()
         return app
+    
+    @memoize_simple
+    def get_authomatic_config(self):
+        CONFIG = {}
+        from authomatic.providers import oauth2
+        if 'google.consumer_key' in self.settings:
+            google_consumer_key = self.settings['google.consumer_key'] 
+            google_consumer_secret = self.settings['google.consumer_secret']
+            CONFIG['google'] = {                   
+                    'class_': oauth2.Google,
+                    'consumer_key':  google_consumer_key,
+                    'consumer_secret': google_consumer_secret,
+                    'scope': ['profile', 'email'],
+            }
+            logger.info('Configured Google authentication.')
+        else:
+            logger.warn('No Google authentication configuration found.')
+        
+        if 'facebook.consumer_key' in self.settings:
+            oauth2.Facebook.user_info_url = 'https://graph.facebook.com/v2.5/me?fields=id,first_name,last_name,picture,email,gender,timezone,location,middle_name,name_format,third_party_id,website,birthday,locale'
+            facebook_consumer_key = self.settings['facebook.consumer_key'] 
+            facebook_consumer_secret = self.settings['facebook.consumer_secret']
+            CONFIG['facebook'] = {                   
+                    'class_': oauth2.Facebook,
+                    'consumer_key':  facebook_consumer_key,
+                    'consumer_secret': facebook_consumer_secret,
+                    'scope': ['public_profile', 'email'],
+            }
+            logger.info('Configured Facebook authentication.')
+        else:
+            logger.warn('No Facebook authentication configuration found.')
+            
+        if 'github.consumer_key' in self.settings:
+            github_consumer_key = self.settings['github.consumer_key'] 
+            github_consumer_secret = self.settings['github.consumer_secret']
+            CONFIG['github'] =  {
+                'class_': oauth2.GitHub,
+                'consumer_key': github_consumer_key,
+                'consumer_secret': github_consumer_secret,
+                'access_headers': {'User-Agent': 'PyMCDP'},
+            }
+            logger.info('Configured Github authentication.')
+        else:
+            logger.warn('No Github authentication configuration found.')
+        return CONFIG
+    
+    @cr2e
+    def view_authomatic(self, e):
+        response = Response()
+        p = urlparse.urlparse(e.request.url)
+        logger.info(p)
+        if '127.0.0.1' in p.netloc:
+            msg = 'The address 127.0.0.1 cannot be used with authentication.'
+            raise ValueError(msg)
+        provider_name = e.context.name
+        logger.info('using provider %r' % provider_name)
+        
+        config = self.get_authomatic_config()
+        authomatic = Authomatic(config=config, secret='some random secret string')
+        result = authomatic.login(WebObAdapter(e.request, response), provider_name)
+        
+        if not result:
+            return response
+        
+        # If there is result, the login procedure is over and we can write to response.
+        response.write('<a href="..">Home</a>')
+        
+        if result.error:
+            # Login procedure finished with an error.
+            response.status = 500
+            response.write(u'<h2>Damn that error: {0}</h2>'.format(result.error.message))
+            return response
+        elif result.user:
+            # OAuth 2.0 and OAuth 1.0a provide only limited user data on login,
+            # We need to update the user to get more info.
+            #if not (result.user.name and result.user.id):
+            result.user.update()
+            
+            
+            s = "user info: \n"
+            for k, v in result.user.__dict__.items():
+                s += '\n %s  : %s' % (k,v)
+            print(s)
+            
+            next_location = e.root
+            self.handle_auth_success(e, provider_name, result, next_location)
+
+            response.write('<pre>'+s+'</pre>')
+            # Welcome the user.
+            response.write(u'<h1>Hi {0}</h1>'.format(result.user.name))
+            response.write(u'<h2>Your id is: {0}</h2>'.format(result.user.id))
+            response.write(u'<h2>Your email is: {0}</h2>'.format(result.user.email))
+        
+        # just regular login
+        return response
+        
+    def handle_auth_success(self, e, provider_name, result, next_location):
+        assert result.user
+        # 1) If we are currently logged in:
+        #    a) if we match to current account, do nothing.
+        #    b) if we match with another account, log with that account
+        #    c) if we don't match, ask the user if they want to bound
+        #        this account to the MCDP account
+        # 2) If we are not currently logged in:
+        #    a) if we can match the Openid with an existing account, because:
+        #         i. same email  or
+        #        ii. same name (ignore conflict for now)
+        #       then we log in
+        #    b) if not, we ask the user if they want to create an account.
+        
+        # get the data
+        name = result.user.name
+        email = result.user.email
+        picture = result.user.picture
+
+        if provider_name == 'github':
+            username = result.user.username 
+            website = result.user.data['blog']
+            affiliation = result.user.data['company']
+        elif provider_name == 'facebook':
+            if name is None:
+                msg = 'Could not get name from Facebook so cannot create username.'
+                raise Exception(msg)
+
+            username = name.replace(' ','_').lower() 
+            website = None
+            affiliation = None
+        elif provider_name == 'google':
+            if name is None:
+                msg = 'Could not get name from Google so cannot create username.'
+                raise Exception(msg)
+            username = name.replace(' ','_').lower()
+            website = result.user.link
+            website = None
+            affiliation = None
+#             * first_name
+#             * gender
+#             * id
+#             * last_name
+#             
+        else:
+            assert False, provider_name
+        best = self.user_db.best_match(username, name, email)
+        res = {}
+        currently_logged_in = e.username is not None
+        if currently_logged_in:
+            if best is not None:
+                if best.username ==  e.username:
+                    # do nothing
+                    res['message'] = 'Already authenticated'
+                    raise HTTPFound(location=next_location)
+                else:
+                    logger.info('Switching user to %r.' % best.username)
+                    self.success_auth(e.request, best.username, next_location)
+            else:
+                # no match
+                res['message'] = 'Do you want to bind account to this one?'
+                confirm_bind = e.root + '/confirm_bind?user=xxx'
+                raise HTTPFound(location=confirm_bind)
+        else:
+            # not logged in
+            if best is not None:
+                # user already exists: login 
+                self.success_auth(e.request, best.username, next_location)
+            else:
+                # not logged in, and the user does not exist already
+                # we create an accounts
+                res = {}
+                res['username']= username
+                res['name'] = name
+                res['password'] = None
+                res['email'] = email
+                res['website'] = website
+                res['affiliation'] = affiliation
+                logger.info('Reading picture %s' % picture)
+                try:
+                    h = urllib2.urlopen(picture)
+                    logger.info('urlp opened  %s' % h)
+                    jpg = h.read()
+                    logger.info('read %s bytes' % len(jpg)) 
+                    res['picture'] = jpg
+                except BaseException as e:
+                    logger.error(e)
+                    res['picture'] = None
+                for k in res:
+                    if isinstance(res[k], unicode):
+                        res[k] = res[k].encode('utf8')
+                res['subscriptions'] = []
+                res['groups'] = ['account_created_automatically',
+                                 'account_created_using_%s' % provider_name]
+                u = UserInfo(**res) 
+                self.user_db.users[username] = u
+                self.user_db.save_user(username, new_user=True)
+                self.success_auth(e.request, username, next_location)
+    
+    def success_auth(self, request, username, next_location):
+        if not username in self.user_db:
+            msg = 'Could not find user %r' % username
+            raise Exception(msg)
+        logger.info('successfully authenticated user %s' % username)
+        headers = remember(request, username)
+        raise HTTPFound(location=next_location, headers=headers)
     
     @cr2e
     def view_thing(self, e):
@@ -601,6 +843,7 @@ class WebApp(AppVisualization, AppStatus,
         if not url.endswith('/'):
             url += '/'
         url2 = url + 'views/syntax/'
+        logger.debug('Redirect to  ' + url2)
         raise HTTPFound(url2)
     
     def _get_changes(self, e):
@@ -613,6 +856,9 @@ class WebApp(AppVisualization, AppStatus,
             acl = repo.shelves[sname].get_acl()
             return acl.allowed2(privilege, e.user)
         
+        def shelf_subscribed(repo_name, shelf_name):
+            return shelf_name in e.user.subscriptions # XXX
+
         changes = []
         for id_repo, repo in self.repos.items():   
             for change in repo.get_changes():
@@ -627,15 +873,19 @@ class WebApp(AppVisualization, AppStatus,
                 else:
                     #logger.debug('Cannot find user %r' % a )
                     u = UserInfo(username=a, name=None, 
-                                 password=None, email=None, website=None, affiliation=None, groups=[], subscriptions=[])
+                                 password=None, email=None, website=None, affiliation=None, groups=[], subscriptions=[],
+                                 picture=None)
                 change['user'] = u
                 p = '{root}/repos/{repo_name}/shelves/{shelf_name}/libraries/{library_name}/{spec_name}/{thing_name}/views/syntax/'
                 
-                if change['exists']:
+                subscribed = shelf_subscribed(id_repo, change['shelf_name'])
+                
+                if change['exists'] and subscribed:
                     change['url'] = p.format(root=e.root, **change)
                 else:
                     change['url'] = None
-
+ 
+                
                 #print('change: %s url = %s' % (change, change['url']))
                 change['date_human'] =  datetime.datetime.fromtimestamp(change['date']).strftime('%b %d, %H:%M')
                 changes.append(change)
@@ -687,7 +937,10 @@ class MCDPWeb(QuickAppBase):
         
     def go(self):
         options = self.get_options()
-        wa = WebApp(options)
+        settings = {        
+        }
+
+        wa = WebApp(options, settings=settings)
         msg = """Welcome to PyMCDP!
         
 To access the interface, open your browser at the address
@@ -711,12 +964,12 @@ def get_only_prefixed(settings, prefix):
             res[k2]= v
     return res
             
-def app_factory(global_config, **settings):  # @UnusedVariable
-    settings = get_only_prefixed(settings, 'mcdp_web.')
+def app_factory(global_config, **settings0):  # @UnusedVariable
+    settings = get_only_prefixed(settings0, 'mcdp_web.')
     #print('app_factory settings %s' % settings)
     options = parse_mcdpweb_params_from_dict(settings)
     
-    wa = WebApp(options)
+    wa = WebApp(options, settings=settings0)
     app = wa.get_app()
     return app
 

@@ -1,5 +1,6 @@
 from .resource_tree import ResourceRepo, get_from_context, ResourceLibrary, ResourceShelf, ResourceThings, ResourceThing, ResourceThingView
 from decorator import decorator
+from mcdp_shelf.access import USER_ANONYMOUS
 
 
 def cr2e(f):
@@ -62,6 +63,8 @@ class Environment():
         self.view_name = rview.name if rview is not None else None
  
         self.user = self.session.get_user()
+        # use username instead of authenticated_id
+        self.username = None if self.user.username == USER_ANONYMOUS else self.user.username
         
         self.root = app.get_root_relative_to_here(request)
         

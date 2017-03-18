@@ -27,7 +27,7 @@ class AppLogin():
         # if using as argument, context is the HTTPForbidden exception
         context = request.context
         e = Environment(context, request)
-        user = self.user_db[request.authenticated_userid]
+        
         logger.error('forbidden url: %s' % request.url)
         logger.error('forbidden referrer: %s' %request.referrer)
         logger.error('forbidden exception: %s' % request.exception.message)
@@ -49,9 +49,9 @@ class AppLogin():
         else:
             res['context_detail'] =  'no context provided'
         
-        if request.authenticated_userid is not None:
+        if e.username is not None:
             #res['error'] = ''
-            res['user'] = user.dict_for_page()
+            res['user'] = e.user.dict_for_page()
         else:
             res['error'] = 'You need to login to access this resource.'
             res['user'] = None
@@ -118,7 +118,10 @@ class AppLogin():
 def groupfinder(userid, request):  # @UnusedVariable
     from mcdp_web.main import WebApp
     app = WebApp.singleton
-    
+    if not userid in app.user_db:
+        msg = 'The user is authenticated as "%s" but no such user in DB.' % userid
+        logger.error(msg)
+        userid = None # anonymous
     user = app.user_db[userid]
     return ['group:%s' % _ for _ in user.groups]  
 # 

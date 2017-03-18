@@ -28,6 +28,16 @@ class UserDB():
     def __contains__(self, key):
         return key in self.users
     
+    def best_match(self, username, name, email):
+        if username in self.users:
+            return self.users[username]
+        for u in self.users.values():
+            if u.name == name:
+                return u
+            if u.email == email:
+                return u
+        return None
+    
     def __getitem__(self, key):
         if key is None:
             key = 'anonymous'
@@ -40,9 +50,17 @@ class UserDB():
         user = self.users[login]
         return password == user.password
     
-    def save_user(self, username):
-        filename = os.path.join(self.userdir, username + '.' + MCDPConstants.user_extension,  MCDPConstants.user_desc_file)
-        if not os.path.exists(filename):
+    def save_user(self, username, new_user=False):
+        userdir = os.path.join(self.userdir, username + '.' + MCDPConstants.user_extension)
+        if not os.path.exists(userdir):
+            if new_user:
+                os.makedirs(userdir)
+            else:
+                msg = 'Could not find user dir %r.' % userdir
+                raise ValueError(msg)
+
+        filename = os.path.join(userdir,  MCDPConstants.user_desc_file)
+        if not os.path.exists(filename) and not new_user:
             msg = 'Could not find user filename %r.' % filename
             raise ValueError(msg)
         user = self.users[username]
@@ -52,6 +70,10 @@ class UserDB():
         with open(filename, 'w') as f:
             f.write(s)
             
+        if user.picture is not None:            
+            fn = os.path.join(userdir, MCDPConstants.user_image_file)
+            with open(fn, 'wb') as f:
+                f.write(user.picture)
         
 def load_users(userdir):
     ''' Returns a dictionary of username -> User profile '''
@@ -64,13 +86,15 @@ def load_users(userdir):
         
     assert exists
         
-    l = locate_files(userdir, pattern='*.%s' % MCDPConstants.user_extension, followlinks=True,
-                 include_directories=True,
-                 include_files=False)
+    l = locate_files(userdir, 
+                     pattern='*.%s' % MCDPConstants.user_extension, 
+                     followlinks=True,
+                     include_directories=True,
+                     include_files=False)
     
     for userd in l:
         username = os.path.splitext(os.path.basename(userd))[0]
-        info = os.path.join(userdir, userd, MCDPConstants.user_desc_file)
+        info = os.path.join(userd, MCDPConstants.user_desc_file)
         if not os.path.exists(info):
             msg = 'Info file %s does not exist.'  % info
             raise Exception(msg)
@@ -78,6 +102,11 @@ def load_users(userdir):
         s = yaml.load(data)
         
         users[username] = userinfo_from_yaml(s, username)
+        
+        f = os.path.join(userd, MCDPConstants.user_image_file)
+        if os.path.exists(f):
+            users[username].picture = open(f, 'rb').read()
+        
     if not users:
         msg = 'Could not load any user from %r' % userdir
         raise Exception(msg)

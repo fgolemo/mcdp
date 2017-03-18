@@ -38,6 +38,8 @@ class Resource(object):
             return '%s(%s)' % (type(self).__name__, self.name)
     
     def __getitem__(self, key):
+#         if key in ['login']:
+#             return None
         r = self.getitem(key)
         if r is None:
             logger.debug('asked for %r - not found' % key)
@@ -115,6 +117,7 @@ class MCDPResourceRoot(Resource):
             'shelves': ResourceAllShelves(),
             'about': ResourceAbout(),
             'robots.txt': ResourceRobots(),
+            'authomatic': ResourceAuthomatic(),
         }    
         
 class ResourceAbout(Resource): pass          
@@ -448,6 +451,17 @@ class ResourceThingViewImagesOne(Resource):
         self.name = '%s.%s' % (which, data_format)
         
 class ResourceRobots(Resource): pass
+class ResourceAuthomatic(Resource):
+    def get_subs(self):
+        subs =  {
+            'github': ResourceAuthomaticProvider('github'),
+            'facebook': ResourceAuthomaticProvider('facebook'),
+            'google': ResourceAuthomaticProvider('google'),
+            'linkedin': ResourceAuthomaticProvider('linkedin'),
+        }
+        return subs
+    
+class ResourceAuthomaticProvider(Resource): pass 
 
 def get_all_contexts(context):
     if hasattr(context, '__parent__'):

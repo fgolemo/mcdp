@@ -5,7 +5,7 @@ from git.util import Actor
 
 class UserInfo():
     
-    def __init__(self, username, name, password, email, website, affiliation, groups, subscriptions):
+    def __init__(self, username, name, password, email, website, affiliation, groups, subscriptions, picture):
         self.username = username
         self.name = name
         self.password = password
@@ -14,6 +14,7 @@ class UserInfo():
         self.affiliation = affiliation
         self.groups = groups
         self.subscriptions = subscriptions
+        self.picture = picture
         
     def get_gravatar(self, size):
         if self.email is not None:
@@ -29,6 +30,7 @@ class UserInfo():
     
     def __repr__(self):
         return 'UserInfo(%s)' % self.dict_for_page()
+    
     def dict_for_page(self):
         res = {
             'username': self.username,
@@ -68,7 +70,7 @@ class UserInfo():
 # - u_maxxon_motors
 
 @contract(s=dict)    
-def userinfo_from_yaml(s,username):
+def userinfo_from_yaml(s, username):
     res = {}
     res['username']=username
     res['name'] = s.pop('name', None)
@@ -78,6 +80,7 @@ def userinfo_from_yaml(s,username):
     res['affiliation'] = s.pop('affiliation', None)
     res['subscriptions'] = s.pop('subscriptions', [])
     res['groups'] = s.pop('groups', [])
+    res['picture'] = None
     return UserInfo(**res) 
 
 def yaml_from_userinfo(user):

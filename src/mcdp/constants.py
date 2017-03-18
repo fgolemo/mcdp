@@ -148,6 +148,7 @@ class MCDPConstants():
     
     user_extension = 'mcdp_user'
     user_desc_file = 'user.yaml'
+    user_image_file = 'user.jpg'
     library_extension = 'mcdplib'
     
     all_extensions = (ext_ndps, ext_posets, ext_values, ext_templates, ext_primitivedps,

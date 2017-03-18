@@ -14,6 +14,89 @@ font-size: smaller;
 
 {% endif %}
 
+
+<div id='outer-outer'>
+<div id='outer'>
+	{% if 'facebook' in other_logins %}
+		<p>
+			<a id='facebook' class="but" href='{{other_logins["facebook"]}}'>
+			<img src='{{static}}/facebook.png'/>
+			Log in using your Facebook account</a>
+		</p>
+	{% endif %}
+
+	{% if 'github' in other_logins %}
+		<p><a  id='github' class='but' href='{{other_logins["github"]}}'>
+			<img src='{{static}}/github-light.png'/>
+			Log in using your Github account</a></p>
+	{% endif %}
+
+	{% if 'google' in other_logins %}
+		<p><a  id='google' class='but' href='{{other_logins["google"]}}'>
+			<img src='{{static}}/google.png'/>
+			Log in using a Google account</a></p>
+	{% endif %}
+
+	<p><a href="#" id='local' class='but'>
+		<img src='{{static}}/login_icon.png'/>
+		Log in using MCDP account</a></p>
+
+</div></div>
+<style>
+#outer-outer {
+	text-align: center;
+	margin-top: 3em;
+}
+#outer {
+/*border: solid 1px red;*/
+	display: inline-block;
+	padding:0;
+}
+a#facebook::over {
+	background-color: blue;
+}
+
+a#facebook {
+	background-color: #3b5998;
+	color: white;
+	font-family: "Lucida Grande", "Tahoma";
+}
+
+
+a#google {
+	background-color: #d34836;
+	color: white;
+	font-family: "Lucida Grande", "Tahoma";
+}
+
+a#github {
+	background-color: black;
+	color: white;
+	font-family: "Arial";
+}
+
+a#local {
+	background-color: white;
+	border: solid 1px black;
+	color :black;
+}
+a.but {
+	display: inline-block; margin: 0.5em;
+
+	width: 100%;
+	border-radius: 4px;
+	padding-top: 10px;
+	padding-bottom: 10px;
+	padding-right: 5px;
+	 box-shadow: 3px 3px 5px #aaa;
+}
+a.but img {
+	height: 1.5em;
+	margin-bottom: -0.3em;
+	margin-right: 1em;
+}
+</style>
+
 <!-- <pre>came_from = {{came_from}}</pre> -->
 
   <form id='form' action="{{root}}/login/" method="post" title='Please enter login information'>
@@ -44,34 +127,41 @@ font-size: smaller;
   </form>
 
 <style>
+#form { display: none}
 	td#last {
 		text-align: center;
 		padding-top:10pt;
 	}
 
 	p#req {
+		margin-top: 5em;
 		text-align:center;
-		margin-top: 40vh;
+		/*margin-top: 40vh;*/
+	}
+	p#login-error {
+		margin-top: 3em;
 	}
 </style>
 <script>
 
 function button_click() {
-	$('div#iframe').show();
+	// $('div#iframe').show();
 	$('#req2').hide();
 }
 
+function show_dialog() {
+	$( "#form" ).dialog({
+		 classes: {
+		   "ui-dialog": "highlight"
+		 },
+
+	   position: { my: 'top', at: 'top+100' }
+   });
+}
 function init_dialog() {
-  $( "#form" ).dialog({
-		  classes: {
-		    "ui-dialog": "highlight"
-		  },
 
-		  position: { my: 'top', at: 'top+100' }
-	});
-
-	$('#request').button().click(button_click);
-
+	$('#local').click(show_dialog);
+	// $('#request').button().click(button_click);
 }
 $(document).ready(init_dialog);
 
