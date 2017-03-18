@@ -69,6 +69,7 @@ setup(name=name,
         'lxml',
         'junit_xml',
         'gitpython',
+        'authomatic',
         'webtest',
       ],
       # This avoids creating the egg file, which is a zip file, which makes our data
