@@ -1,5 +1,8 @@
 from contracts import contract
 from git.util import Actor
+from mcdp_utils_misc.string_utils import format_list
+from contracts.utils import indent
+import yaml
 
 
 
@@ -79,6 +82,7 @@ class UserInfo():
 @contract(s=dict)    
 def userinfo_from_yaml(s, username):
     res = {}
+    s0 = dict(**s)
     res['username']=username
     res['name'] = s.pop('name', None)
     res['authentication_ids'] = s.pop('authentication_ids', [])
@@ -90,6 +94,11 @@ def userinfo_from_yaml(s, username):
     res['account_last_active'] = s.pop('account_last_active', None)
     res['account_created'] = s.pop('account_created', None)
     res['picture'] = None
+    if s:
+        msg = 'Unknown fields: %s.' % format_list(s)
+        msg += '\nOriginal: \n'
+        msg += indent(yaml.dump(s0), '> ')
+        raise ValueError(msg)
     return UserInfo(**res) 
 
 def yaml_from_userinfo(user):
