@@ -92,11 +92,11 @@ def get_authomatic_config_(self):
 
 def view_authomatic_(self, config, e):
     response = Response()
-    p = urlparse.urlparse(e.request.url)
-    logger.info(p)
-    if '127.0.0.1' in p.netloc:
-        msg = 'The address 127.0.0.1 cannot be used with authentication.'
-        raise ValueError(msg)
+#     p = urlparse.urlparse(e.request.url)
+# #     logger.info(p)
+#     if '127.0.0.1' in p.netloc:
+#         msg = 'The address 127.0.0.1 cannot be used with authentication.'
+#         raise ValueError(msg)
     provider_name = e.context.name
     logger.info('using provider %r' % provider_name)
     
@@ -121,13 +121,12 @@ def view_authomatic_(self, config, e):
         #if not (result.user.name and result.user.id):
         result.user.update()
         
-        
         s = "user info: \n"
         for k, v in result.user.__dict__.items():
             s += '\n %s  : %s' % (k,v)
         print(s)
         
-        next_location = e.root
+        next_location = config.get('next_location', e.root)
         handle_auth_success(self, e, provider_name, result, next_location)
 
         response.write('<pre>'+s+'</pre>')

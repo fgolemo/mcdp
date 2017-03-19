@@ -29,10 +29,12 @@ class AppLogin():
         e = Environment(context, request)
         
         logger.error('forbidden url: %s' % request.url)
-        logger.error('forbidden referrer: %s' %request.referrer)
+        logger.error('forbidden referrer: %s' % request.referrer)
         logger.error('forbidden exception: %s' % request.exception.message)
         logger.error('forbidden result: %s' % request.exception.result)
         request.response.status = 403
+        config = self.get_authomatic_config()
+        config['next_location'] = request.url
         res = {}
         res['request_exception_message'] = request.exception.message
         res['request_exception_result'] = request.exception.result
