@@ -85,7 +85,7 @@ class FunctionalTests(unittest.TestCase):
                 'load_mcdp_data': '0',
             }
             options = parse_mcdpweb_params_from_dict(settings)
-            wa = WebApp(options)
+            wa = WebApp(options, settings)
             app = wa.get_app()
             self.testapp = TestApp(app)
 
