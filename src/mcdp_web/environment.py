@@ -1,6 +1,7 @@
-from .resource_tree import ResourceRepo, get_from_context, ResourceLibrary, ResourceShelf, ResourceThings, ResourceThing, ResourceThingView
-from decorator import decorator
+
 from mcdp_shelf.access import USER_ANONYMOUS
+
+from .resource_tree import ResourceRepo, get_from_context, ResourceLibrary, ResourceShelf, ResourceThings, ResourceThing, ResourceThingView
 
 
 def cr2e(f):

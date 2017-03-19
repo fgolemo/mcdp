@@ -180,6 +180,8 @@ def add_std_vars_context_(f, redir):
             if not p.path.endswith('/'):
                 url2 = url2.replace(p.path, p.path + '/')
             if url2 != url:
+                print request
+                logger.info('Redirection:\n from: %s\n   to: %s' % (url, url2))
                 raise HTTPFound(url2)
 
             if request.authenticated_userid:

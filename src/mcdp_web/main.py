@@ -80,6 +80,9 @@ class WebApp(AppVisualization, AppStatus,
         from mcdp_library_tests.create_mockups import write_hierarchy
         self.options = options
         self.settings =settings
+        
+        self.url_base_internal = settings['url_base_internal']
+        self.url_base_public = settings['url_base_public']
         WebApp.singleton = self
         
         dirname = options.libraries
@@ -198,12 +201,13 @@ class WebApp(AppVisualization, AppStatus,
                 shelf2repo[shelf_name] = id_repo
 
             self.all_shelves.update(shelves)
-        
-        picture = 'http://graph.facebook.com/10154724108563171/picture?type=large'
-        h = urllib2.urlopen(picture)
-        logger.info('urlp opened  %s' % h)
-        jpg = h.read()
-        logger.info('read %s bytes' % len(jpg)) 
+#         
+#         picture = 'http://graph.facebook.com/10154724108563171/picture?type=large'
+#         h = urllib2.urlopen(picture)
+#         logger.info('urlp opened  %s' % h)
+#         jpg = h.read()
+#         h.close()
+#         logger.info('read %s bytes' % len(jpg)) 
         
     def add_model_view(self, name, desc):
         self.views[name] = dict(desc=desc, order=len(self.views))

@@ -43,6 +43,13 @@ font-size: smaller;
 			Log in using a Linkedin account</a></p>
 	{% endif %}
 
+
+	{% if 'amazon' in other_logins %}
+		<p><a  id='amazon' class='but' href='{{other_logins["amazon"]}}'>
+			<img src='{{static}}/amazon.png'/>
+			Log in using an Amazon account</a></p>
+	{% endif %}
+
 	<p><a href="#" id='local' class='but'>
 		<img src='{{static}}/login_icon.png'/>
 		Log in using MCDP account</a></p>
@@ -65,6 +72,13 @@ a#facebook::over {
 a#facebook {
 	background-color: #3b5998;
 	color: white;
+	font-family: "Lucida Grande", "Tahoma";
+}
+
+
+a#amazon {
+	background-color: #ecb731;
+	color: black;
 	font-family: "Lucida Grande", "Tahoma";
 }
 

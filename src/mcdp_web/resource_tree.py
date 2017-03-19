@@ -495,6 +495,7 @@ class ResourceAuthomatic(Resource):
             'facebook': ResourceAuthomaticProvider('facebook'),
             'google': ResourceAuthomaticProvider('google'),
             'linkedin': ResourceAuthomaticProvider('linkedin'),
+            'amazon': ResourceAuthomaticProvider('amazon'),
         }
         return subs
     

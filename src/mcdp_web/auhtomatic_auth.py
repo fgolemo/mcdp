@@ -12,7 +12,8 @@ from pyramid.security import remember
 
 from mcdp import logger
 from mcdp_user_db import UserInfo
-from mcdp_utils_misc import memoize_simple
+from mcdp_utils_misc import memoize_simple 
+from system_cmd.meat import system_cmd_result
 
 
 @memoize_simple
@@ -27,7 +28,7 @@ def get_authomatic_config_(self):
                 'consumer_key':  google_consumer_key,
                 'consumer_secret': google_consumer_secret,
                 'scope': [
-                    'https://www.googleapis.com/auth/plus.me',
+#                     'https://www.googleapis.com/auth/plus.me',
                     'https://www.googleapis.com/auth/userinfo.email',
                     'https://www.googleapis.com/auth/userinfo.profile',
                 ],
@@ -64,6 +65,18 @@ def get_authomatic_config_(self):
         logger.info('Configured Github authentication.')
     else:
         logger.warn('No Github authentication configuration found.')
+        
+    if 'amazon.consumer_key' in self.settings:
+        CONFIG['amazon'] =  {
+            'class_': oauth2.Amazon,
+            'consumer_key': self.settings['amazon.consumer_key'],
+            'consumer_secret': self.settings['amazon.consumer_secret'],
+            'scope': ['profile'],
+            
+        }
+        logger.info('Configured Amazon authentication.')
+    else:
+        logger.warn('No Amazon authentication configuration found.')
 
     if 'linkedin.consumer_key' in self.settings:
         CONFIG['linkedin'] =  {
@@ -100,11 +113,15 @@ def view_authomatic_(self, config, e):
     provider_name = e.context.name
     logger.info('using provider %r' % provider_name)
     
-    
+#     try:
     authomatic = Authomatic(config=config, secret='some random secret string')
-    result = authomatic.login(WebObAdapter(e.request, response), provider_name)
-    
-    if not result:
+    url_base_public = self.url_base_public
+    url_base_internal = self.url_base_internal
+#     e.request.url = e.request.url.replace(url_base_internal, url_base_public)
+#     print('using request url %s' % e.request.url)
+    result = authomatic.login(MyWebObAdapter(e.request, response, url_base_internal, url_base_public), 
+                              provider_name)
+    if not result: 
         return response
     
     # If there is result, the login procedure is over and we can write to response.
@@ -155,7 +172,7 @@ def handle_auth_success(self, e, provider_name, result, next_location):
     # get the data
     name = result.user.name
     email = result.user.email
-    picture = result.user.picture
+    
     if result.user.id is None:
         msg = 'Cannot obtain ID for authentication.'
         raise Exception(msg)
@@ -165,6 +182,7 @@ def handle_auth_success(self, e, provider_name, result, next_location):
         website = result.user.data['blog']
         affiliation = result.user.data['company']
         unique_id = result.user.id
+        picture = result.user.picture
     elif provider_name == 'facebook':
         if name is None:
             msg = 'Could not get name from Facebook so cannot create username.'
@@ -174,6 +192,7 @@ def handle_auth_success(self, e, provider_name, result, next_location):
         website = None
         affiliation = None
         unique_id = result.user.id
+        picture = result.user.picture
     elif provider_name == 'google':
         if name is None:
             msg = 'Could not get name from Google so cannot create username.'
@@ -181,17 +200,20 @@ def handle_auth_success(self, e, provider_name, result, next_location):
         candidate_username = name.replace(' ','_').lower()
         website = result.user.link
         affiliation = None
-        unique_id = result.user.id
-#             * first_name
-#             * gender
-#             * id
-#             * last_name
-#             
+        unique_id = result.user.id 
+        picture = result.user.picture
     elif provider_name == 'linkedin':
         candidate_username = name.replace(' ', '_').lower()
         website = result.user.link
         affiliation = None
         unique_id = result.user.id
+        picture = result.user.picture
+    elif provider_name == 'amazon':
+        candidate_username = name.replace(' ', '_').lower()
+        website = result.user.link
+        affiliation = None
+        unique_id = result.user.id
+        picture = None
     else:
         assert False, provider_name
     best = self.user_db.match_by_id(provider_name, unique_id)
@@ -223,7 +245,6 @@ def handle_auth_success(self, e, provider_name, result, next_location):
             
             candidate_usernames = [candidate_username]
             
-            
             username = self.user_db.find_available_user_name(candidate_usernames)
             res = {}
             res['username']= username
@@ -236,15 +257,30 @@ def handle_auth_success(self, e, provider_name, result, next_location):
             res['authentication_ids'] = [ {'provider': provider_name,
                                            'id': unique_id}]
             logger.info('Reading picture %s' % picture)
-            try:
-                h = urllib2.urlopen(picture)
-                logger.info('url opened  %s' % h)
-                jpg = h.read()
-                logger.info('read %s bytes' % len(jpg)) 
-                res['picture'] = jpg
-            except BaseException as e:
-                logger.error(e)
+            if picture is None:
                 res['picture'] = None
+            else:
+                try:
+                    local_filename = 'pic.jpg'
+                    cwd = '.'
+                    cmd = ['wget', '-O', local_filename, picture]
+                    system_cmd_result(cwd, cmd,
+                      display_stdout=True,
+                      display_stderr=True,
+                      raise_on_error=True)
+                    
+#                     local_filename, headers = urlretrieve(picture)
+                    with open(local_filename, 'rb') as f:
+                        jpg = f.read()
+#                     h = urllib2.urlopen(picture)
+#                     logger.info('url opened  %s' % h)
+#                     jpg = h.read()
+#                     h.close()
+                    logger.info('read %s bytes' % len(jpg)) 
+                    res['picture'] = jpg
+                except BaseException as exc:
+                    logger.error(exc)
+                    res['picture'] = None
             for k in res:
                 if isinstance(res[k], unicode):
                     res[k] = res[k].encode('utf8')
@@ -263,3 +299,57 @@ def success_auth(self, request, username, next_location):
     logger.info('successfully authenticated user %s' % username)
     headers = remember(request, username)
     raise HTTPFound(location=next_location, headers=headers)
+# 
+# def transform_location(Location, url_base_internal, url_base_public):
+#     Location_parsed = urlparse.urlparse(Location)    
+# #     logger.info('redir url: %s' % str(Location_parsed))
+#     qs = dict(urlparse.parse_qsl(Location_parsed.query, keep_blank_values=1, strict_parsing=1))
+# #     logger.info('query: %s' % qs)
+# #     logger.info('query: %s' % type(qs))
+#     redirect_uri = qs.get('redirect_uri',None)
+#     logger.info('redirect_uri: %s' % redirect_uri)
+#     if redirect_uri is None:
+#         msg = 'Expected to see redirect_uri in response.'
+#         raise_desc(ValueError, msg, Location=Location, qs=qs)
+# #     assert isinstance(redirect_uri, list)
+# #     redirect_uri = redirect_uri[0]
+#     if not redirect_uri.startswith(url_base_internal):
+#         msg = 'Expected redirect_uri to start with url_base_internal.'
+#         raise_desc(ValueError, msg, redirect_uri=redirect_uri, url_base_internal=url_base_internal)
+#     redirect_uri2 = redirect_uri.replace(url_base_internal, url_base_public)
+#     qs['redirect_uri'] = redirect_uri2
+# #     print('redirect_uri2: %s' % redirect_uri2)
+#     query2 = urllib.urlencode(qs)
+# #     print('query2: %s' % query2)
+#     
+#     scheme, netloc, path, params, _, fragment = Location_parsed
+#     Location2 = urlunparse((scheme, netloc, path, params, query2, fragment))
+#     return Location2 
+#     
+# def fix_response(response, url_base_internal, url_base_public):
+#     for i, (a, b) in list(enumerate(response.headerlist)):
+# #         logger.warn('%r | %r' % (a,b))
+#         if a == 'Location---':
+#             Location = b
+#             Location2 = transform_location(Location, url_base_internal, url_base_public)
+#             logger.warn('rewritten reposnse:\na %s\nb %s' % (Location, Location2))
+#             response.headerlist[i] = (a, Location2)
+#     return response
+
+
+
+class MyWebObAdapter(WebObAdapter):
+    """Adapter for the |webob|_ package."""
+    
+    def __init__(self, request, response, url_base_internal, url_base_public):
+        self.request = request
+        self.response = response
+        self.url_base_internal = url_base_internal
+        self.url_base_public = url_base_public
+
+    @property
+    def url(self):
+        url =  self.request.path_url
+        print('url: %s' % url)
+        url = url.replace(self.url_base_internal, self.url_base_public)
+        return url
