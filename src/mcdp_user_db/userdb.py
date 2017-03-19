@@ -28,6 +28,13 @@ class UserDB():
     def __contains__(self, key):
         return key in self.users
     
+    def match_by_id(self, provider, id):
+        for u in self.users.values():
+            for w in u.authentication_ids:
+                if w['provider'] == provider and w.get('id', None) == id:
+                    return u
+        return None
+        
     def best_match(self, username, name, email):
         if username in self.users:
             return self.users[username]
@@ -48,7 +55,33 @@ class UserDB():
     
     def authenticate(self, login, password):
         user = self.users[login]
-        return password == user.password
+        for p in user.authentication_ids:
+            if p['provider'] == 'password':
+                pwd = p['password']
+                match = password == pwd
+                if not match:
+                    msg = 'Password %s does not match with stored %s.' % (password, pwd)
+                    logger.warn(msg)
+                return match
+        return False
+    
+    def find_available_user_name(self, candidate_usernames):
+        for x in candidate_usernames:
+            if x not in self.users:
+                return x
+        for i in range(2,10):
+            for x in candidate_usernames:
+                y = '%s%d' % (x, i)
+                if y not in self.users:
+                    return y
+        raise ValueError(candidate_usernames)
+    
+    def create_new_user(self, u):
+        if u.username in self.users:
+            msg = 'User "%s" already present.'
+            raise ValueError(msg)
+        self.users[u.username] = u
+        self.save_user(u.username, new_user=True)
     
     def save_user(self, username, new_user=False):
         userdir = os.path.join(self.userdir, username + '.' + MCDPConstants.user_extension)
@@ -74,7 +107,12 @@ class UserDB():
             fn = os.path.join(userdir, MCDPConstants.user_image_file)
             with open(fn, 'wb') as f:
                 f.write(user.picture)
+        logger.debug('Saved user information here: %s' % userdir)
         
+    def get_unknown_user_struct(self, username):
+        s = {}
+        return userinfo_from_yaml(s, username)
+
 def load_users(userdir):
     ''' Returns a dictionary of username -> User profile '''
     users = {}

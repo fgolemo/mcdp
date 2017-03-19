@@ -8,11 +8,16 @@ def describe_mcdpweb_params(dp):
     dp.add_bool('allow_user_login', default=True)
     dp.add_bool('allow_user_signups', default=False)
     dp.add_bool('delete_cache', default=True)
+    dp.add_string('config', short='-c', default=None, 
+                  help='Reads .ini file configuration.') 
     dp.add_string('libraries', short='-d',default=None, 
                   help='Library directories containing models.') 
                   
     dp.add_bool('libraries_writable', default=True)
     dp.add_string('users', help='Directories for user data.', default=None)
+    
+    dp.add_int('port', default=8080, help='Port to listen to.')
+  
     return dp
 
 @contract(x=dict)

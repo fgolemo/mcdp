@@ -37,6 +37,12 @@ font-size: smaller;
 			Log in using a Google account</a></p>
 	{% endif %}
 
+	{% if 'linkedin' in other_logins %}
+		<p><a  id='linkedin' class='but' href='{{other_logins["linkedin"]}}'>
+			<img src='{{static}}/linkedin.png'/>
+			Log in using a Linkedin account</a></p>
+	{% endif %}
+
 	<p><a href="#" id='local' class='but'>
 		<img src='{{static}}/login_icon.png'/>
 		Log in using MCDP account</a></p>

@@ -20,6 +20,17 @@ PRIVILEGE_WRITE = 'write'
 PRIVILEGE_ADMIN = 'admin'
 PRIVILEGE_ACCESS = 'access'
 PRIVILEGE_ALL = 'all'
+PRIVILEGE_VIEW_USER_LIST = 'view_user_list'
+
+# Remember to change somewhere else
+# view the public profile
+PRIVILEGE_VIEW_USER_PROFILE_PUBLIC = 'view_user_profile_public'
+# view the private profile (email)
+PRIVILEGE_VIEW_USER_PROFILE_PRIVATE = 'view_user_profile_private'
+# view the internal details profile (ids of connected accounts, etc.)
+PRIVILEGE_VIEW_USER_PROFILE_INTERNAL = 'view_user_profile_internal'
+PRIVILEGE_EDIT_USER_PROFILE = 'edit_user_profile'
+
 PRIVILEGES = [PRIVILEGE_DISCOVER, PRIVILEGE_SUBSCRIBE, PRIVILEGE_READ, PRIVILEGE_WRITE, PRIVILEGE_ADMIN, 
               PRIVILEGE_ACCESS, PRIVILEGE_ALL]
 

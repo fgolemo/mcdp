@@ -10,6 +10,8 @@ from mcdp import MCDPConstants,  logger, __version__
 from mcdp_shelf import PRIVILEGE_SUBSCRIBE, PRIVILEGE_READ, PRIVILEGE_WRITE, PRIVILEGE_ADMIN
 from mcdp_shelf.access import PRIVILEGE_DISCOVER
 from mcdp_utils_misc import duration_compact,  format_list
+from pyramid.security import forget
+
 
 
 def add_other_fields(self, res, request, context):
@@ -49,6 +51,8 @@ def add_other_fields(self, res, request, context):
     else:
         res['user'] = None
 
+    res['user_db'] = e.app.user_db
+    
     def shelf_privilege(repo_name, sname, privilege):
         repo = session.repos[repo_name]
         if not sname in repo.shelves:
@@ -178,6 +182,17 @@ def add_std_vars_context_(f, redir):
             if url2 != url:
                 raise HTTPFound(url2)
 
+            if request.authenticated_userid:
+                uid = request.authenticated_userid
+                from mcdp_web.main import WebApp
+                app = WebApp.singleton
+                if not uid in app.user_db:
+                    msg = 'The user is authenticated as "%s" but no such user in DB.' % uid
+                    msg += 'We are logging out the user.'
+                    logger.warn(msg)
+                    headers = forget(request)
+                    raise HTTPFound(location=request.url, headers=headers)
+ 
         try:
             res = f(self, context, request)
         except HTTPException:

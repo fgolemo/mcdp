@@ -5,7 +5,10 @@ from pyramid.security import Allow, Authenticated, Everyone
 
 from mcdp import MCDPConstants
 from mcdp.logs import logger_web_resource_tree as logger
-from mcdp_shelf.access import PRIVILEGE_ACCESS, PRIVILEGE_READ
+from mcdp_shelf.access import PRIVILEGE_ACCESS, PRIVILEGE_READ,\
+    PRIVILEGE_VIEW_USER_PROFILE_PUBLIC, PRIVILEGE_VIEW_USER_LIST,\
+    PRIVILEGE_VIEW_USER_PROFILE_PRIVATE, PRIVILEGE_VIEW_USER_PROFILE_INTERNAL,\
+    PRIVILEGE_EDIT_USER_PROFILE
 
 
 class Resource(object):
@@ -95,7 +98,10 @@ class MCDPResourceRoot(Resource):
         self.request = request
         from mcdp_web.main import WebApp
         options = WebApp.singleton.options    # @UndefinedVariable
-        self.__acl__ = []
+        self.__acl__ = [
+            (Allow, Authenticated, PRIVILEGE_VIEW_USER_LIST),
+            (Allow, Authenticated, PRIVILEGE_VIEW_USER_PROFILE_PUBLIC),
+        ]
         if options.allow_anonymous:
             self.__acl__.append((Allow, Everyone, PRIVILEGE_ACCESS))
             #logger.info('Allowing everyone to access')
@@ -118,10 +124,41 @@ class MCDPResourceRoot(Resource):
             'about': ResourceAbout(),
             'robots.txt': ResourceRobots(),
             'authomatic': ResourceAuthomatic(),
+            'users': ResourceListUsers(),
         }    
         
 class ResourceAbout(Resource): pass          
 class ResourceTree(Resource): pass            
+
+class ResourceListUsers(Resource):
+    def getitem(self, key):
+        return ResourceListUsersUser(key)
+        
+class ResourceListUsersUser(Resource):
+    def __init__(self, name):
+        Resource.__init__(self, name)
+        self.__acl__ = [
+            (Allow, name, PRIVILEGE_VIEW_USER_PROFILE_PRIVATE),
+            (Allow, name, PRIVILEGE_EDIT_USER_PROFILE),
+            (Allow, 'group:admin', PRIVILEGE_EDIT_USER_PROFILE),
+            (Allow, 'group:admin', PRIVILEGE_VIEW_USER_PROFILE_PRIVATE),
+            (Allow, 'group:admin', PRIVILEGE_VIEW_USER_PROFILE_INTERNAL),
+        ]
+
+    def getitem(self, key):
+        #print('key : %s' % key)
+        if key == 'large.jpg':
+            return ResourceUserPicture(self.name, 'large', 'jpg')
+        if key == 'small.jpg':
+            return ResourceUserPicture(self.name, 'small', 'jpg')
+
+class ResourceUserPicture(Resource): 
+    def __init__(self, name, size, data_format):
+        self.name = name
+        self.size = size
+        self.data_format = data_format
+
+    
 class ResourceExit(Resource): pass
 class ResourceLogin(Resource): pass
 class ResourceLogout(Resource): pass

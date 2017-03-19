@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
+from ConfigParser import RawConfigParser
 from collections import OrderedDict
 import datetime
 import os
 import sys
 import time
 import traceback
+import urllib2
 import urlparse
 from wsgiref.simple_server import make_server
 
-from authomatic.adapters import WebObAdapter
-from authomatic import Authomatic
 from contracts.utils import indent, check_isinstance
 import git.cmd  # @UnusedImport
 from pyramid.authentication import AuthTktAuthenticationPolicy
@@ -18,7 +18,7 @@ from pyramid.config import Configurator
 from pyramid.httpexceptions import HTTPFound
 from pyramid.renderers import JSONP, render_to_response
 from pyramid.response import Response
-from pyramid.security import NO_PERMISSION_REQUIRED, remember
+from pyramid.security import NO_PERMISSION_REQUIRED
 from pyramid.session import SignedCookieSessionFactory
 from quickapp import QuickAppBase
 
@@ -29,13 +29,13 @@ from mcdp_docs import render_complete
 from mcdp_library import MCDPLibrary
 from mcdp_repo import MCDPGitRepo, MCDPythonRepo
 from mcdp_shelf import PRIVILEGE_ACCESS, PRIVILEGE_READ, PRIVILEGE_SUBSCRIBE, PRIVILEGE_DISCOVER, PRIVILEGE_WRITE
-from mcdp_user_db import UserDB, UserInfo
+from mcdp_shelf.access import PRIVILEGE_VIEW_USER_LIST,\
+    PRIVILEGE_VIEW_USER_PROFILE_PUBLIC
+from mcdp_user_db import UserDB
 from mcdp_utils_misc import create_tmpdir, duration_compact, dir_from_package_name
 from mcdp_utils_misc import format_list
-from mcdp_utils_misc.memoize_simple_imp import memoize_simple
-from mcdp_web.resource_tree import ResourceAuthomaticProvider
-from mcdp_web.utils0 import add_std_vars_context_no_redir
 
+from .auhtomatic_auth import get_authomatic_config_, view_authomatic_
 from .confi import describe_mcdpweb_params, parse_mcdpweb_params_from_dict
 from .editor_fancy import AppEditorFancyGeneric
 from .environment import cr2e
@@ -46,6 +46,8 @@ from .resource_tree import MCDPResourceRoot, ResourceLibraries, ResourceLibrary,
 from .resource_tree import ResourceAllShelves, ResourceShelfForbidden,\
     ResourceShelfNotFound, ResourceRepoNotFound, ResourceLibraryAssetNotFound,\
     ResourceLibraryDocNotFound, ResourceNotFoundGeneric, ResourceAbout
+from .resource_tree import ResourceAuthomaticProvider, ResourceListUsers,\
+    ResourceListUsersUser, ResourceUserPicture
 from .security import AppLogin, groupfinder
 from .sessions import Session
 from .solver.app_solver import AppSolver
@@ -54,8 +56,8 @@ from .status import AppStatus
 from .utils.image_error_catch_imp import response_image
 from .utils.response import response_data
 from .utils0 import add_other_fields, add_std_vars_context
+from .utils0 import add_std_vars_context_no_redir
 from .visualization.app_visualization import AppVisualization
-import urllib2
 
 
 __all__ = [
@@ -121,16 +123,28 @@ class WebApp(AppVisualization, AppStatus,
         self.all_shelves = OrderedDict()
         
         if self.options.users is None:
+            logger.info('No user directory passed (%s). Creating user dir.' % self.options.users)
             self.options.users = create_tmpdir('tmp-user-db')
             db = {
                 'anonymous.mcdp_user': {
                     'user.yaml' : '''
                         name: Anonimo
                     '''
+                },
+                'admin.mcdp_user': {
+                    'user.yaml' : '''
+                        name: Administrator
+                        groups:
+                        - admin
+                        authentication_ids:
+                        - provider: password
+                          password: admin
+                    '''
                 }
             }
             if not os.path.exists(self.options.users):
                 os.makedirs(self.options.users)
+            logger.info('Temporary user dir is %s' % self.options.users)
 #             repo = Repo.init(self.options.users)
 #             
 #             origin = repo.create_remote('origin', url='file://invalid')
@@ -163,7 +177,9 @@ class WebApp(AppVisualization, AppStatus,
             logger.info('Not loading mcdp_data')
             
         if self.options.users is not None:
-            self.user_db = UserDB(self.options.users)            
+            logger.info('Loading user db from %s' % self.options.users)
+            self.user_db = UserDB(self.options.users)
+            logger.info('Loaded %s users' % len(self.user_db.users))
             desc_short = 'Global database of shared models.'
             is_git = os.path.exists(os.path.join(self.options.users, '.git'))
             if is_git:
@@ -613,6 +629,9 @@ class WebApp(AppVisualization, AppStatus,
         config.add_view(self.view_library_asset, context=ResourceLibraryAsset, permission=PRIVILEGE_READ)
         config.add_view(self.view_refresh_library, context=ResourceLibraryRefresh, permission=PRIVILEGE_READ)
         config.add_view(self.view_refresh, context=ResourceRefresh)
+        config.add_view(self.view_users, context=ResourceListUsers, renderer='users.jinja2', permission=PRIVILEGE_VIEW_USER_LIST)
+        config.add_view(self.view_users_user, context=ResourceListUsersUser, renderer='user_page.jinja2',
+                                              permission=PRIVILEGE_VIEW_USER_PROFILE_PUBLIC)
         
         config.add_view(self.view_exception, context=Exception, renderer='exception.jinja2')
         config.add_view(self.exit, context=ResourceExit, renderer='json', permission=NO_PERMISSION_REQUIRED)
@@ -626,6 +645,7 @@ class WebApp(AppVisualization, AppStatus,
         config.add_view(self.view_resource_not_found, context=ResourceRepoNotFound, renderer='repo_not_found.jinja2')
         config.add_view(self.view_thing_delete, context=ResourceThingDelete)
         config.add_view(self.view_thing, context=ResourceThing)
+        config.add_view(self.view_picture, context=ResourceUserPicture)
         config.add_view(serve_robots, context=ResourceRobots, permission=NO_PERMISSION_REQUIRED)
         config.add_notfound_view(self.view_not_found, renderer='404.jinja2')
         config.scan()
@@ -634,209 +654,31 @@ class WebApp(AppVisualization, AppStatus,
         self.get_authomatic_config()
         app = config.make_wsgi_app()
         return app
-    
-    @memoize_simple
+   
     def get_authomatic_config(self):
-        CONFIG = {}
-        from authomatic.providers import oauth2
-        if 'google.consumer_key' in self.settings:
-            google_consumer_key = self.settings['google.consumer_key'] 
-            google_consumer_secret = self.settings['google.consumer_secret']
-            CONFIG['google'] = {                   
-                    'class_': oauth2.Google,
-                    'consumer_key':  google_consumer_key,
-                    'consumer_secret': google_consumer_secret,
-                    'scope': ['profile', 'email'],
-            }
-            logger.info('Configured Google authentication.')
-        else:
-            logger.warn('No Google authentication configuration found.')
-        
-        if 'facebook.consumer_key' in self.settings:
-            oauth2.Facebook.user_info_url = 'https://graph.facebook.com/v2.5/me?fields=id,first_name,last_name,picture,email,gender,timezone,location,middle_name,name_format,third_party_id,website,birthday,locale'
-            facebook_consumer_key = self.settings['facebook.consumer_key'] 
-            facebook_consumer_secret = self.settings['facebook.consumer_secret']
-            CONFIG['facebook'] = {                   
-                    'class_': oauth2.Facebook,
-                    'consumer_key':  facebook_consumer_key,
-                    'consumer_secret': facebook_consumer_secret,
-                    'scope': ['public_profile', 'email'],
-            }
-            logger.info('Configured Facebook authentication.')
-        else:
-            logger.warn('No Facebook authentication configuration found.')
-            
-        if 'github.consumer_key' in self.settings:
-            github_consumer_key = self.settings['github.consumer_key'] 
-            github_consumer_secret = self.settings['github.consumer_secret']
-            CONFIG['github'] =  {
-                'class_': oauth2.GitHub,
-                'consumer_key': github_consumer_key,
-                'consumer_secret': github_consumer_secret,
-                'access_headers': {'User-Agent': 'PyMCDP'},
-            }
-            logger.info('Configured Github authentication.')
-        else:
-            logger.warn('No Github authentication configuration found.')
-        return CONFIG
+        return get_authomatic_config_(self)
     
     @cr2e
     def view_authomatic(self, e):
-        response = Response()
-        p = urlparse.urlparse(e.request.url)
-        logger.info(p)
-        if '127.0.0.1' in p.netloc:
-            msg = 'The address 127.0.0.1 cannot be used with authentication.'
-            raise ValueError(msg)
-        provider_name = e.context.name
-        logger.info('using provider %r' % provider_name)
-        
         config = self.get_authomatic_config()
-        authomatic = Authomatic(config=config, secret='some random secret string')
-        result = authomatic.login(WebObAdapter(e.request, response), provider_name)
-        
-        if not result:
-            return response
-        
-        # If there is result, the login procedure is over and we can write to response.
-        response.write('<a href="..">Home</a>')
-        
-        if result.error:
-            # Login procedure finished with an error.
-            response.status = 500
-            response.write(u'<h2>Damn that error: {0}</h2>'.format(result.error.message))
-            return response
-        elif result.user:
-            # OAuth 2.0 and OAuth 1.0a provide only limited user data on login,
-            # We need to update the user to get more info.
-            #if not (result.user.name and result.user.id):
-            result.user.update()
-            
-            
-            s = "user info: \n"
-            for k, v in result.user.__dict__.items():
-                s += '\n %s  : %s' % (k,v)
-            print(s)
-            
-            next_location = e.root
-            self.handle_auth_success(e, provider_name, result, next_location)
+        return view_authomatic_(self, config, e)
 
-            response.write('<pre>'+s+'</pre>')
-            # Welcome the user.
-            response.write(u'<h1>Hi {0}</h1>'.format(result.user.name))
-            response.write(u'<h2>Your id is: {0}</h2>'.format(result.user.id))
-            response.write(u'<h2>Your email is: {0}</h2>'.format(result.user.email))
+    @cr2e
+    def view_picture(self, e):
+        username = e.context.name
+        size = e.context.size
+        data_format = e.context.data_format
+        assert data_format == 'jpg'
+        u = self.user_db[username]
+        if u.picture is None:
+            url = e.root + '/static/nopicture.jpg'
+            raise HTTPFound(url)
+        else: 
+            mime = get_mime_for_format(data_format)
+            data = u.picture
+#             if size == 'large':
+            return response_data(request=e.request, data=data, content_type=mime)
         
-        # just regular login
-        return response
-        
-    def handle_auth_success(self, e, provider_name, result, next_location):
-        assert result.user
-        # 1) If we are currently logged in:
-        #    a) if we match to current account, do nothing.
-        #    b) if we match with another account, log with that account
-        #    c) if we don't match, ask the user if they want to bound
-        #        this account to the MCDP account
-        # 2) If we are not currently logged in:
-        #    a) if we can match the Openid with an existing account, because:
-        #         i. same email  or
-        #        ii. same name (ignore conflict for now)
-        #       then we log in
-        #    b) if not, we ask the user if they want to create an account.
-        
-        # get the data
-        name = result.user.name
-        email = result.user.email
-        picture = result.user.picture
-
-        if provider_name == 'github':
-            username = result.user.username 
-            website = result.user.data['blog']
-            affiliation = result.user.data['company']
-        elif provider_name == 'facebook':
-            if name is None:
-                msg = 'Could not get name from Facebook so cannot create username.'
-                raise Exception(msg)
-
-            username = name.replace(' ','_').lower() 
-            website = None
-            affiliation = None
-        elif provider_name == 'google':
-            if name is None:
-                msg = 'Could not get name from Google so cannot create username.'
-                raise Exception(msg)
-            username = name.replace(' ','_').lower()
-            website = result.user.link
-            website = None
-            affiliation = None
-#             * first_name
-#             * gender
-#             * id
-#             * last_name
-#             
-        else:
-            assert False, provider_name
-        best = self.user_db.best_match(username, name, email)
-        res = {}
-        currently_logged_in = e.username is not None
-        if currently_logged_in:
-            if best is not None:
-                if best.username ==  e.username:
-                    # do nothing
-                    res['message'] = 'Already authenticated'
-                    raise HTTPFound(location=next_location)
-                else:
-                    logger.info('Switching user to %r.' % best.username)
-                    self.success_auth(e.request, best.username, next_location)
-            else:
-                # no match
-                res['message'] = 'Do you want to bind account to this one?'
-                confirm_bind = e.root + '/confirm_bind?user=xxx'
-                raise HTTPFound(location=confirm_bind)
-        else:
-            # not logged in
-            if best is not None:
-                # user already exists: login 
-                self.success_auth(e.request, best.username, next_location)
-            else:
-                # not logged in, and the user does not exist already
-                # we create an accounts
-                res = {}
-                res['username']= username
-                res['name'] = name
-                res['password'] = None
-                res['email'] = email
-                res['website'] = website
-                res['affiliation'] = affiliation
-                logger.info('Reading picture %s' % picture)
-                try:
-                    h = urllib2.urlopen(picture)
-                    logger.info('urlp opened  %s' % h)
-                    jpg = h.read()
-                    logger.info('read %s bytes' % len(jpg)) 
-                    res['picture'] = jpg
-                except BaseException as e:
-                    logger.error(e)
-                    res['picture'] = None
-                for k in res:
-                    if isinstance(res[k], unicode):
-                        res[k] = res[k].encode('utf8')
-                res['subscriptions'] = []
-                res['groups'] = ['account_created_automatically',
-                                 'account_created_using_%s' % provider_name]
-                u = UserInfo(**res) 
-                self.user_db.users[username] = u
-                self.user_db.save_user(username, new_user=True)
-                self.success_auth(e.request, username, next_location)
-    
-    def success_auth(self, request, username, next_location):
-        if not username in self.user_db:
-            msg = 'Could not find user %r' % username
-            raise Exception(msg)
-        logger.info('successfully authenticated user %s' % username)
-        headers = remember(request, username)
-        raise HTTPFound(location=next_location, headers=headers)
-    
     @cr2e
     def view_thing(self, e):
         url = e.request.url
@@ -872,9 +714,8 @@ class WebApp(AppVisualization, AppStatus,
                     u = e.session.app.user_db[a]
                 else:
                     #logger.debug('Cannot find user %r' % a )
-                    u = UserInfo(username=a, name=None, 
-                                 password=None, email=None, website=None, affiliation=None, groups=[], subscriptions=[],
-                                 picture=None)
+                    u = e.session.app.user_db.get_unknown_user_struct(a)
+                    
                 change['user'] = u
                 p = '{root}/repos/{repo_name}/shelves/{shelf_name}/libraries/{library_name}/{spec_name}/{thing_name}/views/syntax/'
                 
@@ -910,6 +751,16 @@ class WebApp(AppVisualization, AppStatus,
 
     @add_std_vars_context
     @cr2e
+    def view_users(self, e):
+        return {}
+    
+    @add_std_vars_context
+    @cr2e
+    def view_users_user(self, e):
+        return {}
+
+    @add_std_vars_context
+    @cr2e
     def view_thing_delete(self, e):
         name = e.thing_name
         basename = "%s.%s" % (name, e.spec.extension)
@@ -933,12 +784,35 @@ class MCDPWeb(QuickAppBase):
 
     def define_program_options(self, params):
         describe_mcdpweb_params(params)
-        params.add_int('port', default=8080, help='Port to listen to.')
         
     def go(self):
         options = self.get_options()
-        settings = {        
-        }
+        
+        if options.config is not None:
+            logger.info('Reading configuration from %s' % options.config)
+            logger.warn('Other options from command line will be ignored. ')
+            parser = RawConfigParser()
+            parser.read(options.config)
+            sections = parser.sections()
+            logger.info('sections: %s' % sections)
+            s = 'app:main'
+            if not s in sections:
+                msg = 'Could not find section "%s": available are %s.' % (s, format_list(sections))
+                msg += '\n file %s' % options.config
+                raise Exception(msg) # XXX
+            settings = dict((k, parser.get(s, k)) for k in parser.options(s))
+            
+            prefix = 'mcdp_web.'
+            mcdp_web_settings = {}
+            for k,v in settings.items():
+                if k.startswith(prefix):
+                    mcdp_web_settings[k[len(prefix):]] = v
+            options = parse_mcdpweb_params_from_dict(mcdp_web_settings)
+            
+            logger.debug('Using these options: %s' % options)
+        else:
+            logger.info('No configuration .ini specified (use --config).')   
+            settings = {}
 
         wa = WebApp(options, settings=settings)
         msg = """Welcome to PyMCDP!
@@ -968,7 +842,6 @@ def app_factory(global_config, **settings0):  # @UnusedVariable
     settings = get_only_prefixed(settings0, 'mcdp_web.')
     #print('app_factory settings %s' % settings)
     options = parse_mcdpweb_params_from_dict(settings)
-    
     wa = WebApp(options, settings=settings0)
     app = wa.get_app()
     return app

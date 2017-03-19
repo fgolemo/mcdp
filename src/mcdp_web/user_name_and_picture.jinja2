@@ -1,29 +1,28 @@
+{% macro user_picture(username) %}
+    <img id='gravatar2' src='{{root}}/users/{{username}}/small.jpg'/>
+    <style>
+    img#gravatar2 {
+        width: 13pt;
+        /*baseline-shift: 10pt;*/
+        margin-bottom: -4pt;
+    }
+    </style>
+{% endmacro%}
+{% macro user_name(username) %}
+    {% set a_user = get_user(username) %}
+    {% if user and user.username == username %}
+    {% set name = a_user.name + ' (you)' %}
+    {%else%}
+    {% set name = a_user.name %}
+    {%endif%}
+    <a href="{{root}}/users/{{a_user.username}}/">{{name}}</a>
+{%endmacro%}
+
 {% macro user_name_and_picture(username) %}
     {% set a_user = get_user(username) %}
 
     <span class='user_name_and_picture'>
-    <img id='gravatar2' src='{{a_user.gravatar32}}'/>
-
-    <!-- XXX: this doesn't work -->
-
-    {% if user and user.username == username %}
-    {% set name = 'you' %}
-    {%else%}
-    {% set name = a_user.name %}
-    {%endif%}
-
-    {% if a_user.website %}
-    <a href="{{a_user.website}}">{{name}}</a>
-    {% else %}
-    {{name}}
-    {% endif %}
+    {{user_picture(username)}}
+    {{user_name(username)}}
 </span>
-
-<style>
-img#gravatar2 {
-    width: 13pt;
-    /*baseline-shift: 10pt;*/
-    margin-bottom: -4pt;
-}
-</style>
 {% endmacro %}

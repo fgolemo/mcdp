@@ -1,0 +1,46 @@
+{% extends "desc_page.jinja2" %}
+{% block title %}
+    List of users
+{% endblock %}
+{% block desc_page_title %}
+    List of users
+{% endblock %}
+{% block desc_page_desc %}
+    This is the list of users.
+{% endblock %}
+{% block desc_page_content %}
+
+    <table id='userlist'>
+        <thead>
+        <tr>
+        <th></th>
+        <th>Username</th>
+        <th>Name</th>
+        <th>Affiliation</th>
+        </tr>
+        </thead>
+    <tbody>
+    {% for username, u in user_db.users.items()  if username != 'anonymous' %}
+    <tr>
+    <td>{{user_picture(username)}}</td>
+    <td><a href="{{root}}/users/{{username}}/"><code>{{username}}</code></a></td>
+
+    <td>
+    {{user_name(username)}}
+    </td>
+    <td>
+    {% if u.affiliation %}
+    {{u.affiliation}}
+    {% endif %}
+    </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+    </table>
+    <style>
+    #userlist td {
+        padding: 0.5em;
+    }
+    </style>
+
+{% endblock %}

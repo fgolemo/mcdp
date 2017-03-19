@@ -5,16 +5,22 @@ from git.util import Actor
 
 class UserInfo():
     
-    def __init__(self, username, name, password, email, website, affiliation, groups, subscriptions, picture):
+    def __init__(self, username, name, authentication_ids, email, website, affiliation, groups,
+                  subscriptions, picture,
+                  account_created,
+                  account_last_active,
+                  ):
         self.username = username
         self.name = name
-        self.password = password
+        self.authentication_ids = authentication_ids
         self.email = email
         self.website = website
         self.affiliation = affiliation
         self.groups = groups
         self.subscriptions = subscriptions
         self.picture = picture
+        self.account_created = account_created
+        self.account_last_active = account_last_active 
         
     def get_gravatar(self, size):
         if self.email is not None:
@@ -59,7 +65,8 @@ class UserInfo():
 # name: Andrea Censi
 # email: acensi@ethz.ch
 # website: https://censi.science/
-# password: editor
+# authentication_ids:
+#    password: editor
 # affiliation: ETH Zurich
 # groups: [admin]
 # 
@@ -74,23 +81,27 @@ def userinfo_from_yaml(s, username):
     res = {}
     res['username']=username
     res['name'] = s.pop('name', None)
-    res['password'] = s.pop('password', None)
+    res['authentication_ids'] = s.pop('authentication_ids', [])
     res['email'] = s.pop('email', None)
     res['website'] = s.pop('website', None)
     res['affiliation'] = s.pop('affiliation', None)
     res['subscriptions'] = s.pop('subscriptions', [])
     res['groups'] = s.pop('groups', [])
+    res['account_last_active'] = s.pop('account_last_active', None)
+    res['account_created'] = s.pop('account_created', None)
     res['picture'] = None
     return UserInfo(**res) 
 
 def yaml_from_userinfo(user):
     res = {}
     res['name'] = user.name
-    res['password'] = user.password
+    res['authentication_ids'] = user.authentication_ids
     res['email'] = user.email
     res['website'] = user.website
     res['affiliation'] = user.affiliation
     res['subscriptions'] = user.subscriptions
+    res['account_created'] = user.account_created
+    res['account_last_active'] = user.account_last_active
     res['groups'] = user.groups
     return res
 

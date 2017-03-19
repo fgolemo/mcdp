@@ -43,6 +43,13 @@ class AppLogin():
         res['url_logout'] = self.make_relative(request, URL_LOGOUT)
         res['root'] =   e.root
         res['static'] = e.root + '/static'
+        # XXX DRY
+        providers = self.get_authomatic_config()
+        other_logins = {}
+        for x in providers:
+            other_logins[x] = e.root + '/authomatic/' + x
+        res['other_logins'] = other_logins
+
         if context is not None:
             res['context_detail'] =  context_display_in_detail(context)
             logger.error(res['context_detail'])

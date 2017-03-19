@@ -1,0 +1,237 @@
+{% extends "desc_page.jinja2" %}
+
+    {% set u = user_db[context.name] %}
+    {% set this_is_you = u.username == user.username %}
+    {% set can_see_private = request.has_permission('view_user_profile_private', context) %}
+    {% set can_see_internals = request.has_permission('view_user_profile_internal', context) %}
+    {% set can_edit = request.has_permission('edit_user_profile', context) %}
+
+{% block title %}
+    User {{u.name}}
+{% endblock %}
+{% block desc_page_title %}
+    {% if this_is_you %}
+    Your account
+    {% else %}
+    <code>{{u.username}}</code> ({{u.name}})
+    {% endif %}
+{% endblock %}
+{% block desc_page_desc %}
+{% if  can_see_internals %}
+    <p><strong>Administrative view</strong></p>
+{% elif  this_is_you %}
+
+    <p>These are the details for your account. </p>
+    <p>Notice that sensitive information is indicated by the lock symbol &#128274;
+    and visible only to you.</p>
+    <p>This information cannot be edited yet.</p>
+{% else %}
+<p>These are the details for the user  {{u.name}} (<code>{{u.username}}</code>).</p>
+    {% endif %}
+
+{% endblock %}
+    {% if this_is_you %}
+        {% set privacy_public = '<br/><span class="privacy">&#127758 Visible to all</span>' %}
+        {% set privacy_private = '<br/><span class="privacy">&#128274; Visible only to you</span>' %}
+        {% set privacy_internals = '<br/><span class="privacy">&#128295; Visible to admins</span>' %}
+    {% elif can_see_internals %}
+        {% set privacy_public = '<br/><span class="privacy">&#127758 Visible to all</span>' %}
+        {% set privacy_private = '<br/><span class="privacy">&#128274; Visible only to user</span>' %}
+        {% set privacy_internals = '<br/><span class="privacy">&#128295; Visible to admins</span>' %}
+    {% else %}
+        {% set privacy_public = '' %}
+        {% set privacy_private = '' %}
+        {% set privacy_internals = '' %}
+    {% endif %}
+{% block desc_page_content %}
+
+
+
+
+{#{%if can_edit %}can_edit{%endif%}
+{%if can_see_internals %}can_see_internals{%endif%}
+{%if can_see_private %}can_see_private{%endif%}#}
+
+    <div id='profile-outer'>
+    <img id='profile' src='large.jpg'/>
+        {{privacy_public|safe}}
+    </div>
+
+    <table id='usertable'>
+
+    <tr>
+        <td class='prop'>
+            Account
+            {{privacy_public|safe}}
+        </td>
+        <td>
+
+                <code>{{u.username}}</code>
+
+        </td>
+    </tr>
+
+    <tr>
+        <td class='prop'>
+            Name
+            {{privacy_public|safe}}
+        </td>
+        <td>
+            {% if u.name %}
+                {{u.name}}
+            {% else %}
+                <span class='missing'>No name.</span>
+            {% endif %}
+        </td>
+    </tr>
+
+    {% if this_is_you or u.affiliation or can_see_internals %}
+    <tr>
+        <td class='prop'>
+            Affiliation
+            {{privacy_public|safe}}
+        </td>
+        <td>
+            {% if u.affiliation %}
+                {{u.affiliation}}
+            {% else %}
+                <span class='missing'>No affiliation.</span>
+            {% endif %}
+        </td>
+    </tr>
+    {% endif %}
+
+    {% if can_see_private %}
+        <tr>
+            <td class='prop'>Contact email
+
+                {{privacy_private|safe}}
+            </td>
+            <td>
+                {% if u.email %}
+                    <a href="mailto:{{u.email}}">{{u.email}}</a>
+                    {% else %}
+                        <span class='missing'>No e-mail.</span>
+                    {% endif %}
+            </td>
+        </tr>
+    {% endif %}
+
+    {% if this_is_you or u.website or can_see_internals %}
+        <tr>
+            <td class='prop'>Website
+            {{privacy_public|safe}}
+            </td>
+            <td>
+                {% if u.website %}
+                    <a href="{{u.website}}">{{u.website}}</a>
+                {% else %}
+                    <span class='missing'>No website.</span>
+                {% endif %}
+
+            </td>
+        </tr>
+    {% endif %}
+
+    {% if can_see_private %}
+    <tr>
+        <td class='prop'>
+            Connected accounts
+
+            {{privacy_private|safe}}
+        </td>
+        <td>
+            <table>
+            {% for a in u.authentication_ids %}
+            {% if a.provider in ['facebook', 'linkedin', 'github', 'google'] %}
+            <tr>
+                <td>{{a.provider}}</td><td>{{a.id}}</td>
+            </tr>
+            {% elif a.provider == 'password' %}
+            <tr>
+            <td>Password authentication enabled.</td><td></td>
+            </tr>
+            {% endif %}
+
+            {% endfor %}
+            </table>
+        </td>
+    </tr>
+    {%endif%}
+
+    {% if can_see_internals %}
+    <tr>
+        <td class='prop'>
+            Groups
+            {{privacy_internals|safe}}
+        </td>
+        <td>
+            {{u.groups}}
+        </td>
+
+    </tr>
+    {%endif%}
+
+    {% if can_see_internals %}
+    <tr>
+        <td class='prop'>
+            Subscriptions
+                {{privacy_internals|safe}}
+        </td>
+        <td>
+            {{u.subscriptions}}
+        </td>
+
+    </tr>
+    {%endif%}
+
+    {% if can_see_internals %}
+    <tr>
+        <td class='prop'>
+            Account created
+            {{privacy_internals|safe}}
+            </td>
+        <td>
+            {{u.account_created}}
+        </td>
+    </tr>
+    <tr>
+        <td class='prop'>
+            Account last active
+                {{privacy_internals|safe}}
+        </td>
+        <td>
+            {{u.account_last_active}}
+        </td>
+    </tr>
+    {%endif%}
+
+    </table>
+
+<style>
+#profile-outer {
+    float: right;
+    display: block;
+}
+img#profile {
+    width: 15em;
+}
+table#usertable td {
+    padding: 0.5em;
+}
+table#usertable td.prop {
+    font-weight: bold;
+}
+span.privacy {
+    font-size: smaller;
+    font-weight: normal;
+    opacity: 0.5;
+}
+span.missing {
+    color: grey;
+    font-style: italic;
+}
+</style>
+
+
+{% endblock %}
