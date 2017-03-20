@@ -664,7 +664,7 @@ class WebApp(AppVisualization, AppStatus,
         config.add_notfound_view(self.view_not_found, renderer='404.jinja2')
         config.scan()
     
-        config.add_view(self.view_authomatic, context=ResourceAuthomaticProvider)
+        config.add_view(self.view_authomatic, context=ResourceAuthomaticProvider, permission=NO_PERMISSION_REQUIRED)
         self.get_authomatic_config()
         app = config.make_wsgi_app()
         return app
