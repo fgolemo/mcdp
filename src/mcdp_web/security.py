@@ -118,7 +118,9 @@ class AppLogin():
         return res
 
     def logout(self, request):
+        logger.info('logging out')
         headers = forget(request)
+        logger.debug('headers: %s' % headers)
         came_from = request.referrer
         if came_from is None:
             came_from = self.get_root_relative_to_here(request)
