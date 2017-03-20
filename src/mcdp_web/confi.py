@@ -17,7 +17,12 @@ def describe_mcdpweb_params(dp):
     dp.add_string('users', help='Directories for user data.', default=None)
     
     dp.add_int('port', default=8080, help='Port to listen to.')
-  
+    
+    dp.add_string('url_base_internal', default=None)
+    dp.add_string('url_base_public', default=None)
+    for p in ['facebook','google','linkedin', 'github', 'amazon']:
+        dp.add_string('%s_consumer_key' % p, default=None)
+        dp.add_string('%s_consumer_secret' % p, default=None)
     return dp
 
 @contract(x=dict)

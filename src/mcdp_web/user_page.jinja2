@@ -1,7 +1,9 @@
+{% from 'login_button.jinja2' import login_button with context %}
 {% extends "desc_page.jinja2" %}
-
-    {% set u = user_db[context.name] %}
-    {% set this_is_you = u.username == user.username %}
+    {% set this_username = context.name %}
+    {# assert this_username in user_db #}
+    {% set u = user_db[this_username] %}
+    {% set this_is_you = user and (u['username'] == user['username']) %}
     {% set can_see_private = request.has_permission('view_user_profile_private', context) %}
     {% set can_see_internals = request.has_permission('view_user_profile_internal', context) %}
     {% set can_edit = request.has_permission('edit_user_profile', context) %}
@@ -145,18 +147,38 @@
             {% for a in u.authentication_ids %}
             {% if a.provider in ['facebook', 'linkedin', 'github', 'google'] %}
             <tr>
-                <td>{{a.provider}}</td><td>{{a.id}}</td>
+                <td> <img id='{{a.provider}}' class='small-logo' src='{{static}}/{{a.provider}}.png'/> </td>
+                <td>{{a.provider}} account connected. ✅</td>
             </tr>
             {% elif a.provider == 'password' %}
             <tr>
-            <td>Password authentication enabled.</td><td></td>
+            <td></td><td>Password authentication enabled. ✅</td>
             </tr>
             {% endif %}
 
             {% endfor %}
+            <style>
+            img.small-logo {
+                width: 1.3em;
+                margin-bottom: -0.2em;
+            }
+            img#google {
+                background-color: red;
+            }
+            img#github {
+                background-color: black;
+            }
+            </style>
             </table>
         </td>
     </tr>
+    {% if this_is_you %}
+    {% set already = user.get_external_providers() %}
+    {% for provider in other_logins if provider not in already %}
+    <tr><td></td><td>    {{login_button(provider, connect=True)}}</td></tr>
+    {% endfor %}
+    {% endif %}
+
     {%endif%}
 
     {% if can_see_internals %}

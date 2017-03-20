@@ -1,0 +1,21 @@
+{% extends "base_page.jinja2" %}
+
+{% block title %}
+    Confirm user creation
+{% endblock %}
+
+{% block content %}
+
+<p> You are one step away from user creation!</p>
+
+<p> Confirm creation of user {{candidate_user.username}}? </p>
+
+<a href='{{root}}/confirm_creation_create/' id='yes'>Create new account</a>
+
+<a href='{{root}}/login/' id='no'>Choose different login method</a>
+
+<script>
+$("#yes,#no").button();
+</script>
+
+{% endblock %}

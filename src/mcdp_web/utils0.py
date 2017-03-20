@@ -2,7 +2,7 @@
 import traceback
 import urlparse
 
-from contracts.utils import check_isinstance, indent
+from contracts.utils import check_isinstance, indent, raise_desc
 from pyramid.httpexceptions import HTTPException, HTTPFound
 from pyramid.response import Response
 
@@ -47,9 +47,10 @@ def add_other_fields(self, res, request, context):
 #         user = self.user_db[request.authenticated_userid]
 
     if e.username is not None:
-        res['user'] = e.user.dict_for_page()
+        res['user'] = e.user
     else:
         res['user'] = None
+#     res['username'] = e.username
 
     res['user_db'] = e.app.user_db
     
@@ -165,6 +166,15 @@ def add_std_vars_context_(f, redir):
     from .resource_tree import context_display_in_detail, Resource
 
     def f0(self, context, request):
+        url_base_internal = self.options.url_base_internal
+        if url_base_internal is not None:
+            if not request.url.startswith(url_base_internal):
+                msg = ('Given that url_base_internal is set, I was expecting that all urls'
+                       ' would start with it.')
+                raise_desc(Exception, msg, 
+                           request_url=request.url, 
+                           url_base_internal=url_base_internal)
+                
         if '//' in urlparse.urlparse(request.url).path:
             msg = 'This is an invalid URL with 2 slashes: %s' % request.url
             response = Response(msg)

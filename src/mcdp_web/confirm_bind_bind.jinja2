@@ -1,0 +1,22 @@
+{% extends "base_page.jinja2" %}
+
+{% block title %}
+    Confirmed
+{% endblock %}
+
+{% block content %}
+
+<p> You successfully bound the two accounts. </p>
+
+<p>
+    <a id='yes' href="{{next_location}}">Proceed</a>
+</p>
+
+<script>
+function init_ui() {
+	$('#yes,#no').button();
+}
+$(document).ready(init_ui);
+</script>
+
+{% endblock %}

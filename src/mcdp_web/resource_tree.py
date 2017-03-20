@@ -125,8 +125,21 @@ class MCDPResourceRoot(Resource):
             'robots.txt': ResourceRobots(),
             'authomatic': ResourceAuthomatic(),
             'users': ResourceListUsers(),
+            'confirm_bind': ResourceConfirmBind(),
+            'confirm_bind_bind': ResourceConfirmBindBind(),
+            'confirm_creation_similar': ResourceConfirmCreationSimilar(),
+            'confirm_creation': ResourceConfirmCreation(),
+            'confirm_creation_create': ResourceConfirmCreationCreate(),
         }    
-        
+
+class ResourceConfirmBind(Resource): pass
+class ResourceConfirmBindBind(Resource): pass
+class ResourceConfirmCreationSimilar(Resource): pass
+class ResourceConfirmCreation(Resource): pass
+class ResourceConfirmCreationCreate(Resource): pass
+
+    
+    
 class ResourceAbout(Resource): pass          
 class ResourceTree(Resource): pass            
 

@@ -1,0 +1,35 @@
+{% extends "base_page.jinja2" %}
+
+{% block title %}
+    Confirm binding accounts
+{% endblock %}
+
+{% block content %}
+
+<p> You are already logged in as user {{user.username}}. </p>
+
+<p> You just authenticated with a new user profile. </p>
+
+<p>You have two choices:</p>
+
+<ol>
+    <li> Bind this authenatication to the previous user -
+            you will be able to login using either services.</li>
+    <li> Log out from {{user.username}} and try again. </li>
+</ol>
+
+<p>
+<a id='yes' href="{{root}}/confirm_bind_bind/">Confirm bind</a>
+<a id='no' href="{{root}}/">Cancel</a>
+</p>
+
+<pre>{{candidate_user}}</pre>
+
+<script>
+function init_ui() {
+	$('#yes,#no').button();
+}
+$(document).ready(init_ui);
+</script>
+
+{% endblock %}

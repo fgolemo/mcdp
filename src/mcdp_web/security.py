@@ -60,7 +60,7 @@ class AppLogin():
         
         if e.username is not None:
             #res['error'] = ''
-            res['user'] = e.user.dict_for_page()
+            res['user'] = e.user
         else:
             res['error'] = 'You need to login to access this resource.'
             res['user'] = None

@@ -6,7 +6,6 @@ import os
 import sys
 import time
 import traceback
-import urllib2
 import urlparse
 from wsgiref.simple_server import make_server
 
@@ -34,6 +33,12 @@ from mcdp_shelf.access import PRIVILEGE_VIEW_USER_LIST,\
 from mcdp_user_db import UserDB
 from mcdp_utils_misc import create_tmpdir, duration_compact, dir_from_package_name
 from mcdp_utils_misc import format_list
+from mcdp_web.auhtomatic_auth import view_confirm_bind_,\
+    view_confirm_creation_similar_, view_confirm_creation_,\
+    view_confirm_creation_create_, view_confirm_bind_bind_
+from mcdp_web.resource_tree import ResourceConfirmBind,\
+    ResourceConfirmCreationSimilar, ResourceConfirmCreation,\
+    ResourceConfirmCreationCreate, ResourceConfirmBindBind
 
 from .auhtomatic_auth import get_authomatic_config_, view_authomatic_
 from .confi import describe_mcdpweb_params, parse_mcdpweb_params_from_dict
@@ -81,8 +86,6 @@ class WebApp(AppVisualization, AppStatus,
         self.options = options
         self.settings =settings
         
-        self.url_base_internal = settings['url_base_internal']
-        self.url_base_public = settings['url_base_public']
         WebApp.singleton = self
         
         dirname = options.libraries
@@ -650,6 +653,13 @@ class WebApp(AppVisualization, AppStatus,
         config.add_view(self.view_thing_delete, context=ResourceThingDelete)
         config.add_view(self.view_thing, context=ResourceThing)
         config.add_view(self.view_picture, context=ResourceUserPicture)
+        
+        config.add_view(self.view_confirm_bind, context=ResourceConfirmBind, renderer='confirm_bind.jinja2', permission=NO_PERMISSION_REQUIRED)
+        config.add_view(self.view_confirm_bind_bind, context=ResourceConfirmBindBind, renderer='confirm_bind_bind.jinja2', permission=NO_PERMISSION_REQUIRED)
+        config.add_view(self.view_confirm_creation_similar, context=ResourceConfirmCreationSimilar, renderer='confirm_creation_similar.jinja2', permission=NO_PERMISSION_REQUIRED)
+        config.add_view(self.view_confirm_creation, context=ResourceConfirmCreation, renderer='confirm_creation.jinja2', permission=NO_PERMISSION_REQUIRED)
+        config.add_view(self.view_confirm_creation_create, context=ResourceConfirmCreationCreate, renderer='confirm_creation_create.jinja2', permission=NO_PERMISSION_REQUIRED)
+        
         config.add_view(serve_robots, context=ResourceRobots, permission=NO_PERMISSION_REQUIRED)
         config.add_notfound_view(self.view_not_found, renderer='404.jinja2')
         config.scan()
@@ -667,6 +677,30 @@ class WebApp(AppVisualization, AppStatus,
         config = self.get_authomatic_config()
         return view_authomatic_(self, config, e)
 
+    @add_std_vars_context
+    @cr2e
+    def view_confirm_bind(self, e):
+        return view_confirm_bind_(self, e)
+    
+    @add_std_vars_context
+    @cr2e
+    def view_confirm_bind_bind(self, e):
+        return view_confirm_bind_bind_(self, e)
+    
+    
+    @add_std_vars_context
+    @cr2e
+    def view_confirm_creation_similar(self, e):
+        return view_confirm_creation_similar_(self, e)
+    @add_std_vars_context
+    @cr2e
+    def view_confirm_creation(self, e):
+        return view_confirm_creation_(self, e)
+    @add_std_vars_context
+    @cr2e
+    def view_confirm_creation_create(self, e):
+        return view_confirm_creation_create_(self, e)
+        
     @cr2e
     def view_picture(self, e):
         username = e.context.name

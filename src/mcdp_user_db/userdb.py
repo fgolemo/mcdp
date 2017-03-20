@@ -28,20 +28,21 @@ class UserDB():
     def __contains__(self, key):
         return key in self.users
     
-    def match_by_id(self, provider, id):
+    def match_by_id(self, provider, provider_id):
         for u in self.users.values():
             for w in u.authentication_ids:
-                if w['provider'] == provider and w.get('id', None) == id:
+                if w['provider'] == provider and w.get('id', None) == provider_id:
                     return u
         return None
         
     def best_match(self, username, name, email):
-        if username in self.users:
-            return self.users[username]
+        if username is not None:
+            if username in self.users:
+                return self.users[username]
         for u in self.users.values():
-            if u.name == name:
+            if name is not None and u.name == name:
                 return u
-            if u.email == email:
+            if email is not None and u.email == email:
                 return u
         return None
     

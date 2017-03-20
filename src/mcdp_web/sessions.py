@@ -28,6 +28,12 @@ class Session():
         
         self.librarian = Librarian()
         self.authenticated_userid = request.authenticated_userid
+        
+        # used during auth procedure
+        self.candidate_user = None
+        self.soft_match = None
+        self.next_location = None
+                
         self.recompute_available()
 
     def set_last_request(self, request):

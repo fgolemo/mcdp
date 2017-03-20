@@ -59,6 +59,18 @@ class UserInfo():
             
         return res
     
+    def get_external_providers(self):
+        """ Returns str -> id """
+        res = {}
+        for x in self.authentication_ids:
+            provider = x['provider']
+            if 'id' in provider:
+                _id = provider['id']
+            else: 
+                _id = None
+            res[provider] = _id
+        return res
+        
     def as_git_actor(self):
         hostname = 'hostname' # XXX
         email = '%s@%s' % (self.username, hostname)

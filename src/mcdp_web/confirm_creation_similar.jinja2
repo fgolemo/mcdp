@@ -1,0 +1,24 @@
+{% extends "base_page.jinja2" %}
+
+{% block title %}
+    Confirm user creation?
+{% endblock %}
+
+{% block content %}
+
+<p> You are one step away from user creation!</p>
+
+
+<p> We found a similar user in our DB. </p>
+
+<pre>{{soft_match}}</pre>
+
+<p> Is that you?  </p>
+
+
+<p> If so, logout and login again to bind this service to the old user. </p>
+
+<a href='{{root}}/confirm_creation_create/' id='yes'>
+       Proceed and create a new user account</a>
+
+{% endblock %}
