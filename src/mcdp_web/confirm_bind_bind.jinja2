@@ -1,22 +1,16 @@
-{% extends "base_page.jinja2" %}
+{% extends "procedure_steps.jinja2" %}
 
-{% block title %}
-    Confirmed
+{% block procedure_title %}
+    Accounts bound
 {% endblock %}
 
-{% block content %}
+{% block procedure_content %}
 
 <p> You successfully bound the two accounts. </p>
 
 <p>
-    <a id='yes' href="{{next_location}}">Proceed</a>
+    <a class='procedure_button' href="{{next_location}}">Proceed</a>
 </p>
 
-<script>
-function init_ui() {
-	$('#yes,#no').button();
-}
-$(document).ready(init_ui);
-</script>
 
 {% endblock %}

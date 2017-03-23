@@ -422,32 +422,31 @@ code {
 }
 @font-face {
   font-family: STIXMath;
-  src: url('/Users/andrea/Library/Fonts/STIX2Math.otf');
+  src: url('fonts/STIX2Math.otf');
 }
 @font-face {
   font-family: STIX;
   font-style: normal;
   font-weight: normal;
-  src: local("STIX Two Text");
+  src: url("fonts/STIX2Text-Regular.otf");
 }
 @font-face {
   font-family: STIX;
   font-style: normal;
   font-weight: bold;
-  src: url("/Users/andrea/Library/Fonts/STIX2Text-Bold.otf");
+  src: url("fonts/STIX2Text-Bold.otf");
 }
 @font-face {
   font-family: STIX;
   font-style: italic;
   font-weight: normal;
-  src: url("/Users/andrea/Library/Fonts/STIX2Text-Italic.otf");
+  src: url("fonts/STIX2Text-Italic.otf");
 }
 @font-face {
   font-family: STIX;
   font-style: italic;
   font-weight: bold;
-  src: local("STIX Two Text Bold Italic");
-  src: url("/Users/andrea/Library/Fonts/STIX2Text-BoldItalic.otf");
+  src: url("fonts/STIX2Text-BoldItalic.otf");
 }
 body {
   /*padding-left: 3em;*/

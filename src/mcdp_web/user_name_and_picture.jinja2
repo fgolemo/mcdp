@@ -1,3 +1,14 @@
+{% macro user_picture_userinfo(a_user) %}
+    <img id='gravatar2' src='{{root}}/users/{{a_user.username}}/small.jpg'/>
+    <style>
+    img#gravatar2 {
+        width: 13pt;
+        /*baseline-shift: 10pt;*/
+        margin-bottom: -4pt;
+    }
+    </style>
+{% endmacro%}
+
 {% macro user_picture(username) %}
     <img id='gravatar2' src='{{root}}/users/{{username}}/small.jpg'/>
     <style>
@@ -8,21 +19,35 @@
     }
     </style>
 {% endmacro%}
-{% macro user_name(username) %}
-    {% set a_user = get_user(username) %}
-    {% if user and user.username == username %}
+
+{% macro user_name(username, link=true) %}
+    {{ user_name_userinfo(user_db[username], link)}}
+{% endmacro %}
+
+{% macro user_name_userinfo(a_user, link) %}
+    {% if user and user.username == a_user.username %}
     {% set name = a_user.name + ' (you)' %}
     {%else%}
     {% set name = a_user.name %}
     {%endif%}
+    {% if link %}
     <a href="{{root}}/users/{{a_user.username}}/">{{name}}</a>
+    {% else %}
+    {{name}}
+    {% endif %}
 {%endmacro%}
 
 {% macro user_name_and_picture(username) %}
     {% set a_user = get_user(username) %}
+    {{user_name_and_picture_userinfo(a_user)}}
+{% endmacro %}
 
+{% macro user_name_and_picture_userinfo(a_user, link=True) %}
     <span class='user_name_and_picture'>
-    {{user_picture(username)}}
-    {{user_name(username)}}
-</span>
+
+        {% if a_user.username in user_db %}
+    {{user_picture_userinfo(a_user)}}
+    {% endif %}
+    {{user_name_userinfo(a_user, link=link)}}
+    </span>
 {% endmacro %}

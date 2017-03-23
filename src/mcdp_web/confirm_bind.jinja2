@@ -1,35 +1,69 @@
-{% extends "base_page.jinja2" %}
-
-{% block title %}
+{% extends "procedure_steps.jinja2" %}
+{% from 'user_name_and_picture.jinja2' import user_name_and_picture_userinfo with context %}
+{% block procedure_title %}
     Confirm binding accounts
 {% endblock %}
 
-{% block content %}
+{% block procedure_content %}
 
-<p> You are already logged in as user {{user.username}}. </p>
+<p> You are already logged in as user  <code>{{user.username}}</code>. </p>
 
 <p> You just authenticated with a new user profile. </p>
 
+<p id='found-outer'>
+<table id='found'>
+    <thead>
+        <th>Your existing account</th>
+        <th>Account you just logged in</th>
+    </thead>
+    <tbody>
+        <tr>
+           <td>
+               {{user_name_and_picture_userinfo(user)}}
+           </td>
+           <td>
+                <table>
+                    <tr>
+                        <td>Name</td>
+                        <td>{{user_name_and_picture_userinfo(candidate_user, link=False)}}</td>
+                    </tr><tr>
+                        <td>Email</td>
+                        <td>{{candidate_user.email}}</td>
+                    </tr>
+                </table>
+
+           </td>
+       </tr>
+   </tbody>
+</table>
+</p>
+
+<p> If you continue, we will bind this authenatication to the previous user -
+        you will be able to login to the same account using either services. </p>
+<!--
 <p>You have two choices:</p>
 
 <ol>
     <li> Bind this authenatication to the previous user -
             you will be able to login using either services.</li>
     <li> Log out from {{user.username}} and try again. </li>
-</ol>
+</ol> -->
 
 <p>
-<a id='yes' href="{{root}}/confirm_bind_bind/">Confirm bind</a>
-<a id='no' href="{{root}}/">Cancel</a>
+<a class='procedure_button' href="{{root}}/confirm_bind_bind/">Confirm bind</a>
+<a class='procedure_button' href="{{root}}/login/">Cancel</a>
 </p>
 
-<pre>{{candidate_user}}</pre>
-
-<script>
-function init_ui() {
-	$('#yes,#no').button();
+<style>
+#found-outer {
+    text-align: center;
 }
-$(document).ready(init_ui);
-</script>
+#found {
+    display: inline-block;
+    margin: auto;
+    margin-top: 2em;
+}
+#found td { padding: 0.4em; }
+</style>
 
 {% endblock %}

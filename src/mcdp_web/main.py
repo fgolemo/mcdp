@@ -84,7 +84,16 @@ class WebApp(AppVisualization, AppStatus,
     def __init__(self, options, settings):
         from mcdp_library_tests.create_mockups import write_hierarchy
         self.options = options
-        self.settings =settings
+        self.settings = settings
+        
+        # display options
+        for k in sorted(self.options._values):
+            v = self.options._values[k]
+            logger.debug('option %20s = %r ' % (k,v))
+        # display settings
+        for k in sorted(self.settings):
+            v = self.settings[k]
+            logger.debug('setting %20s = %r ' % (k,v))
         
         WebApp.singleton = self
         
@@ -654,11 +663,11 @@ class WebApp(AppVisualization, AppStatus,
         config.add_view(self.view_thing, context=ResourceThing)
         config.add_view(self.view_picture, context=ResourceUserPicture)
         
-        config.add_view(self.view_confirm_bind, context=ResourceConfirmBind, renderer='confirm_bind.jinja2', permission=NO_PERMISSION_REQUIRED)
-        config.add_view(self.view_confirm_bind_bind, context=ResourceConfirmBindBind, renderer='confirm_bind_bind.jinja2', permission=NO_PERMISSION_REQUIRED)
-        config.add_view(self.view_confirm_creation_similar, context=ResourceConfirmCreationSimilar, renderer='confirm_creation_similar.jinja2', permission=NO_PERMISSION_REQUIRED)
-        config.add_view(self.view_confirm_creation, context=ResourceConfirmCreation, renderer='confirm_creation.jinja2', permission=NO_PERMISSION_REQUIRED)
-        config.add_view(self.view_confirm_creation_create, context=ResourceConfirmCreationCreate, renderer='confirm_creation_create.jinja2', permission=NO_PERMISSION_REQUIRED)
+        config.add_view(self.view_confirm_bind, http_cache=0, context=ResourceConfirmBind, renderer='confirm_bind.jinja2', permission=NO_PERMISSION_REQUIRED)
+        config.add_view(self.view_confirm_bind_bind, http_cache=0, context=ResourceConfirmBindBind, renderer='confirm_bind_bind.jinja2', permission=NO_PERMISSION_REQUIRED)
+        config.add_view(self.view_confirm_creation_similar, http_cache=0, context=ResourceConfirmCreationSimilar, renderer='confirm_creation_similar.jinja2', permission=NO_PERMISSION_REQUIRED)
+        config.add_view(self.view_confirm_creation, http_cache=0, context=ResourceConfirmCreation, renderer='confirm_creation.jinja2', permission=NO_PERMISSION_REQUIRED)
+        config.add_view(self.view_confirm_creation_create, http_cache=0, context=ResourceConfirmCreationCreate, renderer='confirm_creation_create.jinja2', permission=NO_PERMISSION_REQUIRED)
         
         config.add_view(serve_robots, context=ResourceRobots, permission=NO_PERMISSION_REQUIRED)
         config.add_notfound_view(self.view_not_found, renderer='404.jinja2')
@@ -669,6 +678,19 @@ class WebApp(AppVisualization, AppStatus,
         app = config.make_wsgi_app()
         return app
    
+    def show_error(self, e, msg, status=500):
+        ''' Redirects the user to an error page with the message specified. 
+        
+            return self.show_error(e, 'invalid session')
+        '''
+        res = {
+            'error': msg,
+        }
+        e.request.response.status = status
+        add_other_fields(self, res, e.request, context=e.context)
+        return render_to_response('generic_error.jinja2', res, request=e.request, 
+                                      response=e.request.response)
+    
     def get_authomatic_config(self):
         return get_authomatic_config_(self)
     
@@ -841,10 +863,12 @@ class MCDPWeb(QuickAppBase):
             settings = dict((k, parser.get(s, k)) for k in parser.options(s))
             
             prefix = 'mcdp_web.'
-            mcdp_web_settings = {}
-            for k,v in settings.items():
-                if k.startswith(prefix):
-                    mcdp_web_settings[k[len(prefix):]] = v
+            mcdp_web_settings = get_only_prefixed(settings, prefix, delete=True)
+#             mcdp_web_settings = {}
+#             for k,v in list(settings.items()):
+#                 if k.startswith(prefix):
+#                     mcdp_web_settings[k[len(prefix):]] = v
+#                     del settings[k]
             options = parse_mcdpweb_params_from_dict(mcdp_web_settings)
             
             logger.debug('Using these options: %s' % options)
@@ -868,16 +892,18 @@ Use Chrome, Firefox, or Opera - Internet Explorer is not supported.
         logger.info(msg)
         wa.serve(port=options.port)
 
-def get_only_prefixed(settings, prefix):
+def get_only_prefixed(settings, prefix, delete=False):
     res = {}
-    for k, v in settings.items():
+    for k, v in list(settings.items()):
         if k.startswith(prefix):
             k2 = k[len(prefix):]
             res[k2]= v
+            if delete:
+                del settings[k]
     return res
             
 def app_factory(global_config, **settings0):  # @UnusedVariable
-    settings = get_only_prefixed(settings0, 'mcdp_web.')
+    settings = get_only_prefixed(settings0, 'mcdp_web.', delete=True)
     #print('app_factory settings %s' % settings)
     options = parse_mcdpweb_params_from_dict(settings)
     wa = WebApp(options, settings=settings0)

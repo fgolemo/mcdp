@@ -1,21 +1,51 @@
-{% extends "base_page.jinja2" %}
-
-{% block title %}
-    Confirm user creation
+{% extends "procedure_steps.jinja2" %}
+{% from 'user_name_and_picture.jinja2' import user_name_and_picture_userinfo with context %}
+{% block procedure_title %}
+    Confirm user creation?
 {% endblock %}
 
-{% block content %}
+{% block procedure_content %}
 
 <p> You are one step away from user creation!</p>
 
-<p> Confirm creation of user {{candidate_user.username}}? </p>
 
-<a href='{{root}}/confirm_creation_create/' id='yes'>Create new account</a>
+<table id='found'>
+    <tr>
+        <td>Account</td>
+        <td>
+              <code>{{candidate_user.username}}</code>
+        </td>
+    </tr>
 
-<a href='{{root}}/login/' id='no'>Choose different login method</a>
+    <tr>
+        <td>Name</td>
+        <td>
+               {{user_name_and_picture_userinfo(candidate_user, link=False)}}
+        </td>
+    </tr>
 
-<script>
-$("#yes,#no").button();
-</script>
+    <tr>
+        <td> Contact e-mail </td>
+        <td>
+               <code>{{candidate_user.email}}</code>
+        </td>
+    </tr>
+</table>
+
+<p id='buttons'>
+<a href='{{root}}/confirm_creation_create/' class='procedure_button'>Create new account</a>
+
+<a href='{{root}}/login/' class='procedure_button'>Cancel</a>
+</p>
+
+<style>
+#found { margin-top: 2em;}
+#found td { padding: 0.6em 2em;}
+#newone { padding-left: 4em; }
+#buttons {
+    /*text-align: center; */
+    margin-top: 2em;}
+
+</style>
 
 {% endblock %}

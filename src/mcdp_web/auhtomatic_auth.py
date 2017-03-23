@@ -55,6 +55,9 @@ def get_authomatic_config_(self):
             'class_': oauth2.GitHub,
             'consumer_key':  self.options.github_consumer_key,
             'consumer_secret':  self.options.github_consumer_secret,
+            # todo: implement
+            'scope': [#'user', 
+                      'user:email'],
             'access_headers': {'User-Agent': 'PyMCDP'},
         }
         logger.info('Configured Github authentication.')
@@ -108,9 +111,8 @@ def view_authomatic_(self, config, e):
     
     if result.error:
         # Login procedure finished with an error.
-        response.status = 500
-        response.write(u'<h2>Damn that error: {0}</h2>'.format(result.error.message))
-        return response
+        msg = result.error.message
+        return self.show_error(e, msg, status=500)
     elif result.user:
         # OAuth 2.0 and OAuth 1.0a provide only limited user data on login,
         # We need to update the user to get more info.
@@ -120,16 +122,16 @@ def view_authomatic_(self, config, e):
         s = "user info: \n"
         for k, v in result.user.__dict__.items():
             s += '\n %s  : %s' % (k,v)
-        print(s)
+        logger.debug(s)
         
         next_location = config.get('next_location', e.root)
         handle_auth_success(self, e, provider_name, result, next_location)
-
-        response.write('<pre>'+s+'</pre>')
-        # Welcome the user.
-        response.write(u'<h1>Hi {0}</h1>'.format(result.user.name))
-        response.write(u'<h2>Your id is: {0}</h2>'.format(result.user.id))
-        response.write(u'<h2>Your email is: {0}</h2>'.format(result.user.email))
+# 
+#         response.write('<pre>'+s+'</pre>')
+#         # Welcome the user.
+#         response.write(u'<h1>Hi {0}</h1>'.format(result.user.name))
+#         response.write(u'<h2>Your id is: {0}</h2>'.format(result.user.id))
+#         response.write(u'<h2>Your email is: {0}</h2>'.format(result.user.email))
     
     # just regular login
     return response
@@ -210,10 +212,12 @@ def handle_auth_success(self, e, provider_name, result, next_location):
                 raise HTTPFound(location=confirm_bind)
 
     
-                  
+                
 def view_confirm_bind_(self, e):
     u = e.session.candidate_user
-    assert u is not None
+    if u is None:
+        msg = "Page has expired."
+        return self.show_error(e, msg) 
     res = {
         'candidate_user': u,
     } 
@@ -221,7 +225,9 @@ def view_confirm_bind_(self, e):
 
 def view_confirm_bind_bind_(self, e):
     u = e.session.candidate_user
-    assert u is not None
+    if u is None:
+        msg = "Page has expired."
+        return self.show_error(e, msg)
     u0 = e.user
     # todo: also compy names
     u0.authentication_ids.extend(u.authentication_ids)
@@ -239,15 +245,21 @@ def view_confirm_bind_bind_(self, e):
 
 def view_confirm_creation_similar_(self, e):
     soft_match = e.session.soft_match
-    assert soft_match is not None
+    candidate_user = e.session.candidate_user
+    if soft_match is None:
+        msg = "Page has expired."
+        return self.show_error(e, msg)
     res = {
         'soft_match': soft_match,
+        'candidate_user': candidate_user,
     } 
     return res
 
 def view_confirm_creation_(self, e):
     u = e.session.candidate_user
-    assert u is not None
+    if u is None:
+        msg = "Page has expired."
+        return self.show_error(e, msg)
     res = {
         'candidate_user': u, 
     }
@@ -256,7 +268,9 @@ def view_confirm_creation_(self, e):
 def view_confirm_creation_create_(self, e):
     next_location = e.session.next_location
     u = e.session.candidate_user
-    assert u is not None
+    if u is None:
+        msg = "Page has expired."
+        return self.show_error(e, msg)
     e.session.candidate_user = u
     self.user_db.create_new_user(u)
     success_auth(self, e.request, u.username, next_location)
@@ -271,6 +285,9 @@ def get_candidate_user(user_db, result, provider_name):
     if result.user.id is None:
         msg = 'Cannot obtain ID for authentication.'
         raise Exception(msg)
+#     if email is None:
+#         msg = 'Cannot obtain email address'
+#         raise Exception(msg)
     
     if provider_name == 'github':
         candidate_username = result.user.username 
@@ -315,7 +332,7 @@ def get_candidate_user(user_db, result, provider_name):
             
     username = user_db.find_available_user_name(candidate_usernames)
     res = {}
-    res['username']= username
+    res['username'] = username
     res['name'] = name
     res['email'] = email
     res['website'] = website

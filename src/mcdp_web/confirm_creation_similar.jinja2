@@ -1,24 +1,46 @@
-{% extends "base_page.jinja2" %}
-
-{% block title %}
+{% extends "procedure_steps.jinja2" %}
+{% from 'user_name_and_picture.jinja2' import user_name_and_picture_userinfo with context %}
+{% block procedure_title %}
     Confirm user creation?
 {% endblock %}
 
-{% block content %}
+{% block procedure_content %}
 
 <p> You are one step away from user creation!</p>
 
+<p> We found a similar user in our DB: </p>
 
-<p> We found a similar user in our DB. </p>
+<table id='found'>
+    <thead>
+        <th>Existing user</th>
+        <th>New user to be created</th>
+    </thead>
+    <tbody>
+        <tr>
+           <td>
+               {{user_name_and_picture_userinfo(soft_match)}}
+           </td>
+           <td>
+               {{user_name_and_picture_userinfo(candidate_user, link=False)}}
+           </td>
+       </tr>
+   </tbody>
+</table>
 
-<pre>{{soft_match}}</pre>
-
-<p> Is that you?  </p>
+<p> Do you already have an account?  </p>
 
 
-<p> If so, logout and login again to bind this service to the old user. </p>
+<p> If so, please do not create a duplicate user.
+    First login with that user, and in the account page you can bind
+    the new identity to that user. </p>
 
-<a href='{{root}}/confirm_creation_create/' id='yes'>
+<p>
+<a href='{{root}}/confirm_creation_create/' class='procedure_button' id='yes'>
        Proceed and create a new user account</a>
+</p>
 
+<style>
+#found { margin-left: 4em; }
+#found td, #found  th {padding: 0.6em 2em;}
+</style>
 {% endblock %}

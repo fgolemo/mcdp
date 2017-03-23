@@ -214,6 +214,8 @@ def add_std_vars_context_(f, redir):
             msg += '\n' + indent(traceback.format_exc(e), ' >')
             logger.error(msg)
             raise
+        if isinstance(res, Response):
+            return res
         check_isinstance(res, dict)
         try:
             add_other_fields(self, res, request, context=context)
