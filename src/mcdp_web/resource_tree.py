@@ -5,11 +5,8 @@ from pyramid.security import Allow, Authenticated, Everyone
 
 from mcdp import MCDPConstants
 from mcdp.logs import logger_web_resource_tree as logger
-from mcdp_shelf.access import PRIVILEGE_ACCESS, PRIVILEGE_READ,\
-    PRIVILEGE_VIEW_USER_PROFILE_PUBLIC, PRIVILEGE_VIEW_USER_LIST,\
-    PRIVILEGE_VIEW_USER_PROFILE_PRIVATE, PRIVILEGE_VIEW_USER_PROFILE_INTERNAL,\
-    PRIVILEGE_EDIT_USER_PROFILE
 
+Privileges = MCDPConstants.Privileges
 
 class Resource(object):
 
@@ -99,14 +96,14 @@ class MCDPResourceRoot(Resource):
         from mcdp_web.main import WebApp
         options = WebApp.singleton.options    # @UndefinedVariable
         self.__acl__ = [
-            (Allow, Authenticated, PRIVILEGE_VIEW_USER_LIST),
-            (Allow, Authenticated, PRIVILEGE_VIEW_USER_PROFILE_PUBLIC),
+            (Allow, Authenticated, Privileges.VIEW_USER_LIST),
+            (Allow, Authenticated, Privileges.VIEW_USER_PROFILE_PUBLIC),
         ]
         if options.allow_anonymous:
-            self.__acl__.append((Allow, Everyone, PRIVILEGE_ACCESS))
+            self.__acl__.append((Allow, Everyone, Privileges.ACCESS))
             #logger.info('Allowing everyone to access')
         else:
-            self.__acl__.append((Allow, Authenticated, PRIVILEGE_ACCESS))
+            self.__acl__.append((Allow, Authenticated, Privileges.ACCESS))
             #logger.info('Allowing authenticated to access')
 
     def get_subs(self):
@@ -151,11 +148,12 @@ class ResourceListUsersUser(Resource):
     def __init__(self, name):
         Resource.__init__(self, name)
         self.__acl__ = [
-            (Allow, name, PRIVILEGE_VIEW_USER_PROFILE_PRIVATE),
-            (Allow, name, PRIVILEGE_EDIT_USER_PROFILE),
-            (Allow, 'group:admin', PRIVILEGE_EDIT_USER_PROFILE),
-            (Allow, 'group:admin', PRIVILEGE_VIEW_USER_PROFILE_PRIVATE),
-            (Allow, 'group:admin', PRIVILEGE_VIEW_USER_PROFILE_INTERNAL),
+            (Allow, name, Privileges.VIEW_USER_PROFILE_PRIVATE),
+            (Allow, name, Privileges.EDIT_USER_PROFILE),
+            (Allow, 'group:admin', Privileges.EDIT_USER_PROFILE),
+            (Allow, 'group:admin', Privileges.VIEW_USER_PROFILE_PRIVATE),
+            (Allow, 'group:admin', Privileges.VIEW_USER_PROFILE_INTERNAL),
+            (Allow, 'group:admin', Privileges.IMPERSONATE_USER),
         ]
 
     def getitem(self, key):
@@ -164,7 +162,14 @@ class ResourceListUsersUser(Resource):
             return ResourceUserPicture(self.name, 'large', 'jpg')
         if key == 'small.jpg':
             return ResourceUserPicture(self.name, 'small', 'jpg')
+        if key == ':impersonate':
+            return ResourceUserImpersonate(self.name)
 
+class ResourceUserImpersonate(Resource):
+    ''' Impersonate this user '''
+    
+
+    
 class ResourceUserPicture(Resource):
     def __init__(self, name, size, data_format):
         self.name = name
@@ -195,7 +200,7 @@ class ResourceShelves(Resource):
         if not key in shelves:
             return ResourceShelfNotFound(key)
         shelf = shelves[key]
-        if not shelf.get_acl().allowed2(PRIVILEGE_READ, user):
+        if not shelf.get_acl().allowed2(Privileges.READ, user):
             return ResourceShelfForbidden(key)
 
         return ResourceShelf(key)
@@ -207,7 +212,7 @@ class ResourceShelves(Resource):
 
         shelves = repo.get_shelves()
         for id_shelf, shelf in shelves.items():
-            if shelf.get_acl().allowed2(PRIVILEGE_READ, user):
+            if shelf.get_acl().allowed2(Privileges.READ, user):
                 yield id_shelf
 
 class ResourceShelfForbidden(ResourceEndOfTheLine): pass

@@ -7,11 +7,10 @@ from pyramid.httpexceptions import HTTPException, HTTPFound
 from pyramid.response import Response
 
 from mcdp import MCDPConstants,  logger, __version__
-from mcdp_shelf import PRIVILEGE_SUBSCRIBE, PRIVILEGE_READ, PRIVILEGE_WRITE, PRIVILEGE_ADMIN
-from mcdp_shelf.access import PRIVILEGE_DISCOVER
-from mcdp_utils_misc import duration_compact,  format_list
-from pyramid.security import forget
 
+from mcdp_utils_misc import duration_compact,  format_list
+from pyramid.security import forget 
+Privileges=MCDPConstants.Privileges
 
 
 def add_other_fields(self, res, request, context):
@@ -64,19 +63,19 @@ def add_other_fields(self, res, request, context):
         return acl.allowed2(privilege, e.user)
 
     def can_subscribe(repo_name, sname):
-        return shelf_privilege(repo_name, sname, PRIVILEGE_SUBSCRIBE)
+        return shelf_privilege(repo_name, sname, Privileges.SUBSCRIBE)
 
     def can_read(repo_name, sname):
-        return shelf_privilege(repo_name, sname, PRIVILEGE_READ)
+        return shelf_privilege(repo_name, sname, Privileges.READ)
 
     def can_write(repo_name, sname):
-        return shelf_privilege(repo_name, sname, PRIVILEGE_WRITE)
+        return shelf_privilege(repo_name, sname, Privileges.WRITE)
 
     def can_admin(repo_name, sname):
-        return shelf_privilege(repo_name, sname, PRIVILEGE_ADMIN)
+        return shelf_privilege(repo_name, sname, Privileges.ADMIN)
 
     def can_discover(repo_name, sname):
-        return shelf_privilege(repo_name, sname, PRIVILEGE_DISCOVER)
+        return shelf_privilege(repo_name, sname, Privileges.DISCOVER)
 
     def shelf_subscribed(repo_name, _):  # @UnusedVariable
         return _ in e.user.subscriptions

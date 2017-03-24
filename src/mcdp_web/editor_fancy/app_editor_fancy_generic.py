@@ -13,7 +13,6 @@ from mcdp.exceptions import DPInternalError, DPSemanticError, DPSyntaxError
 from mcdp_lang.suggestions import get_suggestions, apply_suggestions
 from mcdp_library.specs_def import specs
 from mcdp_report.html import ast_to_html
-from mcdp_shelf.access import PRIVILEGE_WRITE
 from mcdp_utils_misc import get_sha1, timeit_wall
 from mcdp_web.environment import cr2e
 from mcdp_web.images.images import get_mime_for_format
@@ -26,7 +25,8 @@ from mocdp.comp.interfaces import NamedDP
 
 from .html_mark_imp import html_mark, html_mark_syntax_error
 from .warnings_unconnected import generate_unconnected_warnings
-
+from mcdp.constants import MCDPConstants
+Privileges=MCDPConstants.Privileges
 
 class AppEditorFancyGeneric():
 
@@ -42,7 +42,7 @@ class AppEditorFancyGeneric():
         config.add_view(self.ajax_parse, context=ResourceThingViewEditorParse, renderer='json')
         config.add_view(self.save, context=ResourceThingViewEditorSave, renderer='json')
         config.add_view(self.graph_generic, context=ResourceThingViewEditorGraph)
-        config.add_view(self.view_new_model_generic, context=ResourceThingsNew, permission=PRIVILEGE_WRITE) 
+        config.add_view(self.view_new_model_generic, context=ResourceThingsNew, permission=Privileges.WRITE) 
     
     @cr2e
     def save(self, e):

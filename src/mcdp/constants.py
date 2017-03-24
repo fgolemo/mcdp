@@ -169,4 +169,27 @@ class MCDPConstants():
     test_spider_exclude_images = True
     
     
-    
+    class Privileges:
+        DISCOVER = 'discover'
+        SUBSCRIBE = 'subscribe' # = can change the subscription status
+        READ = 'read'
+        WRITE = 'write'
+        ADMIN = 'admin'
+        ACCESS = 'access'
+        SPECIAL_ALL_WILDCARD = 'all'
+        VIEW_USER_LIST = 'view_user_list'
+
+        # Remember to change somewhere else
+        # view the public profile
+        VIEW_USER_PROFILE_PUBLIC = 'view_user_profile_public'
+        # view the private profile (email)
+        VIEW_USER_PROFILE_PRIVATE = 'view_user_profile_private'
+        # view the internal details profile (ids of connected accounts, etc.)
+        VIEW_USER_PROFILE_INTERNAL = 'view_user_profile_internal'
+        EDIT_USER_PROFILE = 'edit_user_profile'
+        
+        IMPERSONATE_USER = 'impersonate'
+        
+        ALL_PRIVILEGES = [DISCOVER, SUBSCRIBE, READ, WRITE, ADMIN, ACCESS, SPECIAL_ALL_WILDCARD, 
+               VIEW_USER_LIST, VIEW_USER_PROFILE_PUBLIC, VIEW_USER_PROFILE_PRIVATE,
+               VIEW_USER_PROFILE_INTERNAL, EDIT_USER_PROFILE, IMPERSONATE_USER]

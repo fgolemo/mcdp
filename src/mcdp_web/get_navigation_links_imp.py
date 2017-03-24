@@ -1,14 +1,15 @@
 
+
 from mcdp.constants import MCDPConstants
 from mcdp.logs import logger
-from mcdp_shelf import PRIVILEGE_WRITE
-from mcdp_utils_misc import natural_sorted
 from mcdp_library.specs_def import SPEC_VALUES, SPEC_POSETS, SPEC_TEMPLATES, SPEC_MODELS
+from mcdp_utils_misc import natural_sorted
+Privileges=MCDPConstants.Privileges
 
 def get_navigation_links_context(e):
     """ Pass this as "navigation" to the page. """
     if e.shelf is not None:
-        shelf_write_permission = e.shelf.get_acl().allowed2(PRIVILEGE_WRITE, e.user)
+        shelf_write_permission = e.shelf.get_acl().allowed2(Privileges.WRITE, e.user)
     else:
         shelf_write_permission = False
         

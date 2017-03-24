@@ -27,20 +27,13 @@ from mcdp.exceptions import DPSemanticError, DPSyntaxError
 from mcdp_docs import render_complete
 from mcdp_library import MCDPLibrary
 from mcdp_repo import MCDPGitRepo, MCDPythonRepo
-from mcdp_shelf import PRIVILEGE_ACCESS, PRIVILEGE_READ, PRIVILEGE_SUBSCRIBE, PRIVILEGE_DISCOVER, PRIVILEGE_WRITE
-from mcdp_shelf.access import PRIVILEGE_VIEW_USER_LIST,\
-    PRIVILEGE_VIEW_USER_PROFILE_PUBLIC
 from mcdp_user_db import UserDB
-from mcdp_utils_misc import create_tmpdir, duration_compact, dir_from_package_name
-from mcdp_utils_misc import format_list
-from mcdp_web.auhtomatic_auth import view_confirm_bind_,\
-    view_confirm_creation_similar_, view_confirm_creation_,\
-    view_confirm_creation_create_, view_confirm_bind_bind_
-from mcdp_web.resource_tree import ResourceConfirmBind,\
-    ResourceConfirmCreationSimilar, ResourceConfirmCreation,\
-    ResourceConfirmCreationCreate, ResourceConfirmBindBind
+from mcdp_utils_misc import create_tmpdir, duration_compact, dir_from_package_name, format_list
 
 from .auhtomatic_auth import get_authomatic_config_, view_authomatic_
+from .auhtomatic_auth import view_confirm_bind_,\
+    view_confirm_creation_similar_, view_confirm_creation_,\
+    view_confirm_creation_create_, view_confirm_bind_bind_
 from .confi import describe_mcdpweb_params, parse_mcdpweb_params_from_dict
 from .editor_fancy import AppEditorFancyGeneric
 from .environment import cr2e
@@ -53,6 +46,9 @@ from .resource_tree import ResourceAllShelves, ResourceShelfForbidden,\
     ResourceLibraryDocNotFound, ResourceNotFoundGeneric, ResourceAbout
 from .resource_tree import ResourceAuthomaticProvider, ResourceListUsers,\
     ResourceListUsersUser, ResourceUserPicture
+from .resource_tree import ResourceConfirmBind,\
+    ResourceConfirmCreationSimilar, ResourceConfirmCreation,\
+    ResourceConfirmCreationCreate, ResourceConfirmBindBind
 from .security import AppLogin, groupfinder
 from .sessions import Session
 from .solver.app_solver import AppSolver
@@ -63,6 +59,12 @@ from .utils.response import response_data
 from .utils0 import add_other_fields, add_std_vars_context
 from .utils0 import add_std_vars_context_no_redir
 from .visualization.app_visualization import AppVisualization
+from mcdp_web.resource_tree import ResourceUserImpersonate
+
+
+Privileges = MCDPConstants.Privileges
+
+
 
 
 __all__ = [
@@ -603,7 +605,7 @@ class WebApp(AppVisualization, AppStatus,
         authz_policy = ACLAuthorizationPolicy()
         config.set_authentication_policy(authn_policy)
         config.set_authorization_policy(authz_policy)
-        config.set_default_permission(PRIVILEGE_ACCESS)
+        config.set_default_permission(Privileges.ACCESS)
 
         config.add_renderer('jsonp', JSONP(param_name='callback'))
 
@@ -626,8 +628,8 @@ class WebApp(AppVisualization, AppStatus,
         config.add_view(self.view_dummy, context=ResourceRepos, renderer='repos.jinja2')
         config.add_view(self.view_dummy, context=ResourceLibraryInteractive, renderer='empty.jinja2')
         
-        config.add_view(self.view_dummy, context=ResourceLibrary, renderer='library_index.jinja2', permission=PRIVILEGE_READ)
-        config.add_view(self.view_dummy, context=ResourceThings, renderer='library_index.jinja2', permission=PRIVILEGE_READ)  # same as above
+        config.add_view(self.view_dummy, context=ResourceLibrary, renderer='library_index.jinja2', permission=Privileges.READ)
+        config.add_view(self.view_dummy, context=ResourceThings, renderer='library_index.jinja2', permission=Privileges.READ)  # same as above
     
         config.add_view(self.view_dummy, context=ResourceRepo, renderer='shelves_index.jinja2')
         config.add_view(self.view_dummy, context=ResourceShelves, renderer='shelves_index.jinja2') # same as above
@@ -635,19 +637,22 @@ class WebApp(AppVisualization, AppStatus,
         config.add_view(self.view_changes, context=ResourceChanges, renderer='changes.jinja2')
         config.add_view(self.view_tree, context=ResourceTree, renderer='tree.jinja2')
         config.add_view(self.view_not_found_generic, context=ResourceNotFoundGeneric, renderer='not_found_generic.jinja2', permission=NO_PERMISSION_REQUIRED)
-        config.add_view(self.view_shelf_library_new, context=ResourceLibrariesNewLibname, permission=PRIVILEGE_WRITE)
-        config.add_view(self.view_shelf, context=ResourceShelf, renderer='shelf.jinja2', permission=PRIVILEGE_DISCOVER)
-        config.add_view(self.view_shelves_subscribe, context=ResourceShelvesShelfSubscribe, permission=PRIVILEGE_SUBSCRIBE)
-        config.add_view(self.view_shelves_unsubscribe, context=ResourceShelvesShelfUnsubscribe, permission=PRIVILEGE_SUBSCRIBE)
-        config.add_view(self.view_library_doc, context=ResourceLibraryDocRender, renderer='library_doc.jinja2', permission=PRIVILEGE_READ)
-        config.add_view(self.view_library_doc_not_found, context=ResourceLibraryDocNotFound, renderer='library_doc_not_found.jinja2', permission=PRIVILEGE_READ)
-        config.add_view(self.view_library_asset_not_found, context=ResourceLibraryAssetNotFound, renderer='asset_not_found.jinja2', permission=PRIVILEGE_READ)
-        config.add_view(self.view_library_asset, context=ResourceLibraryAsset, permission=PRIVILEGE_READ)
-        config.add_view(self.view_refresh_library, context=ResourceLibraryRefresh, permission=PRIVILEGE_READ)
+        config.add_view(self.view_shelf_library_new, context=ResourceLibrariesNewLibname, permission=Privileges.WRITE)
+        config.add_view(self.view_shelf, context=ResourceShelf, renderer='shelf.jinja2', permission=Privileges.DISCOVER)
+        config.add_view(self.view_shelves_subscribe, context=ResourceShelvesShelfSubscribe, permission=Privileges.SUBSCRIBE)
+        config.add_view(self.view_shelves_unsubscribe, context=ResourceShelvesShelfUnsubscribe, permission=Privileges.SUBSCRIBE)
+        config.add_view(self.view_library_doc, context=ResourceLibraryDocRender, renderer='library_doc.jinja2', permission=Privileges.READ)
+        config.add_view(self.view_library_doc_not_found, context=ResourceLibraryDocNotFound, renderer='library_doc_not_found.jinja2', permission=Privileges.READ)
+        config.add_view(self.view_library_asset_not_found, context=ResourceLibraryAssetNotFound, renderer='asset_not_found.jinja2', permission=Privileges.READ)
+        config.add_view(self.view_library_asset, context=ResourceLibraryAsset, permission=Privileges.READ)
+        config.add_view(self.view_refresh_library, context=ResourceLibraryRefresh, permission=Privileges.READ)
         config.add_view(self.view_refresh, context=ResourceRefresh)
-        config.add_view(self.view_users, context=ResourceListUsers, renderer='users.jinja2', permission=PRIVILEGE_VIEW_USER_LIST)
+        config.add_view(self.view_users, context=ResourceListUsers, renderer='users.jinja2', permission=Privileges.VIEW_USER_LIST)
         config.add_view(self.view_users_user, context=ResourceListUsersUser, renderer='user_page.jinja2',
-                                              permission=PRIVILEGE_VIEW_USER_PROFILE_PUBLIC)
+                                              permission=Privileges.VIEW_USER_PROFILE_PUBLIC)
+        
+        config.add_view(self.view_impersonate, context=ResourceUserImpersonate,
+                                                permission=Privileges.IMPERSONATE_USER)
         
         config.add_view(self.view_exception, context=Exception, renderer='exception.jinja2')
         config.add_view(self.exit, context=ResourceExit, renderer='json', permission=NO_PERMISSION_REQUIRED)
@@ -698,6 +703,13 @@ class WebApp(AppVisualization, AppStatus,
     def view_authomatic(self, e):
         config = self.get_authomatic_config()
         return view_authomatic_(self, config, e)
+
+    @cr2e
+    def view_impersonate(self, e):
+        from mcdp_web.auhtomatic_auth import success_auth
+        username = e.context.name
+        next_location = '..'
+        return success_auth(self, e.request, username, next_location)
 
     @add_std_vars_context
     @cr2e
@@ -765,7 +777,7 @@ class WebApp(AppVisualization, AppStatus,
         for id_repo, repo in self.repos.items():   
             for change in repo.get_changes():
                 
-                if not shelf_privilege(id_repo, change['shelf_name'], PRIVILEGE_READ):
+                if not shelf_privilege(id_repo, change['shelf_name'], Privileges.READ):
                     continue
                 
                 change['repo_name'] = id_repo

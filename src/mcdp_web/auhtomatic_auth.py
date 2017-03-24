@@ -1,23 +1,19 @@
 # -*- coding: utf-8 -*-
 import datetime
-import urllib2
-import urlparse
 
 from authomatic import Authomatic
 from authomatic.adapters import WebObAdapter
+from authomatic.providers import oauth2
 import git.cmd  # @UnusedImport
 from pyramid.httpexceptions import HTTPFound
 from pyramid.response import Response
 from pyramid.security import remember
+from system_cmd import system_cmd_result
 
 from mcdp import logger
 from mcdp_user_db import UserInfo
-from mcdp_utils_misc import memoize_simple 
-from system_cmd.meat import system_cmd_result
-import urllib
+from mcdp_utils_misc import memoize_simple
 
-
-from authomatic.providers import oauth2
 
 @memoize_simple
 def get_authomatic_config_(self):

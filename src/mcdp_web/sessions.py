@@ -4,11 +4,15 @@ import os
 from contracts import contract
 from contracts.utils import raise_desc
 
-from mcdp.logs import logger
+from mcdp import MCDPConstants
+from mcdp import logger
 from mcdp_library import Librarian
-from mcdp_shelf import PRIVILEGE_DISCOVER, PRIVILEGE_READ, Shelf
+from mcdp_shelf import Shelf
 from mcdp_user_db import UserInfo
 from mcdp_utils_misc import format_list, natural_sorted
+
+
+Privileges = MCDPConstants.Privileges
 
 
 _ = Shelf
@@ -92,7 +96,7 @@ class Session():
         self.shelves_used = OrderedDict()
         user = self.get_user()
         for sname, shelf in self.shelves_all.items():
-            if shelf.get_acl().allowed2(PRIVILEGE_DISCOVER, user):
+            if shelf.get_acl().allowed2(Privileges.DISCOVER, user):
                 self.shelves_available[sname] = shelf
             else:
                 #print('hiding shelf %r from %r' % (sname, user))
@@ -105,10 +109,10 @@ class Session():
             if sname in self.shelves_available:
                 shelf = self.shelves_available[sname]
                 acl = shelf.get_acl()
-                if acl.allowed2(PRIVILEGE_READ, user):
+                if acl.allowed2(Privileges.READ, user):
                     self.shelves_used[sname] = self.shelves_available[sname]
                 else:
-                    msg = 'User %r does not have %r for %r' % (user.username, PRIVILEGE_READ, sname)
+                    msg = 'User %r does not have %r for %r' % (user.username, Privileges.READ, sname)
                     msg += '\n%s' % acl
                     logger.error(msg)
             else:

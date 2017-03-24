@@ -6,33 +6,15 @@ from contracts.utils import indent, raise_desc
 from pyramid.security import Allow, Authenticated, Everyone, Deny
 
 from mcdp.logs import logger_access
+from mcdp.constants import MCDPConstants
 
+Privileges = MCDPConstants.Privileges
 
 USER_ANONYMOUS = 'anonymous'
 # todo: change this to system.Authenticated
 # todo: change this to system.Everyone
 USER_AUTHENTICATED = 'Authenticated'
-USER_EVERYONE = 'Everyone'
-PRIVILEGE_DISCOVER = 'discover'
-PRIVILEGE_SUBSCRIBE = 'subscribe' # = can change the subscription status
-PRIVILEGE_READ = 'read'
-PRIVILEGE_WRITE = 'write'
-PRIVILEGE_ADMIN = 'admin'
-PRIVILEGE_ACCESS = 'access'
-PRIVILEGE_ALL = 'all'
-PRIVILEGE_VIEW_USER_LIST = 'view_user_list'
-
-# Remember to change somewhere else
-# view the public profile
-PRIVILEGE_VIEW_USER_PROFILE_PUBLIC = 'view_user_profile_public'
-# view the private profile (email)
-PRIVILEGE_VIEW_USER_PROFILE_PRIVATE = 'view_user_profile_private'
-# view the internal details profile (ids of connected accounts, etc.)
-PRIVILEGE_VIEW_USER_PROFILE_INTERNAL = 'view_user_profile_internal'
-PRIVILEGE_EDIT_USER_PROFILE = 'edit_user_profile'
-
-PRIVILEGES = [PRIVILEGE_DISCOVER, PRIVILEGE_SUBSCRIBE, PRIVILEGE_READ, PRIVILEGE_WRITE, PRIVILEGE_ADMIN, 
-              PRIVILEGE_ACCESS, PRIVILEGE_ALL]
+USER_EVERYONE = 'Everyone' 
 
 ACLRule = namedtuple('ACLRule', 'allow_or_deny to_whom privilege')
 
@@ -67,7 +49,7 @@ class ACL():
         return self.allowed_(privilege, principals)
     
     def allowed_(self, privilege, principals):
-        if not privilege in PRIVILEGES:
+        if not privilege in Privileges.ALL_PRIVILEGES:
             msg = 'Unknown privilege %r' % privilege
             raise ValueError(msg)
         
@@ -112,11 +94,11 @@ def acl_from_yaml(x):
             raise_desc(ValueError, msg, x=x)
         
         privilege = y[2]
-        if not privilege in PRIVILEGES:
+        if not privilege in Privileges.ALL_PRIVILEGES:
             raise ValueError('Unknown privilege %r' % privilege)
-        if privilege == PRIVILEGE_ALL:
-            for p in PRIVILEGES:
-                if p == PRIVILEGE_ALL: continue
+        if privilege == Privileges.SPECIAL_ALL_WILDCARD:
+            for p in Privileges.ALL_PRIVILEGES:
+                if p == Privileges.SPECIAL_ALL_WILDCARD: continue
                 r = ACLRule(allow_or_deny=allow_or_deny, to_whom=to_whom, privilege=p)
                 rules.append(r)
         else:

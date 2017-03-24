@@ -6,6 +6,7 @@
     {% set this_is_you = user and (u['username'] == user['username']) %}
     {% set can_see_private = request.has_permission('view_user_profile_private', context) %}
     {% set can_see_internals = request.has_permission('view_user_profile_internal', context) %}
+    {% set can_impersonate = request.has_permission('impersonate', context) %}
     {% set can_edit = request.has_permission('edit_user_profile', context) %}
 
 {% block title %}
@@ -19,9 +20,9 @@
     {% endif %}
 {% endblock %}
 {% block desc_page_desc %}
-{% if  can_see_internals %}
+{% if can_see_internals %}
     <p><strong>Administrative view</strong></p>
-{% elif  this_is_you %}
+{% elif this_is_you %}
 
     <p>These are the details for your account. </p>
     <p>Notice that sensitive information is indicated by the lock symbol &#128274;
@@ -32,6 +33,7 @@
     {% endif %}
 
 {% endblock %}
+
     {% if this_is_you %}
         {% set privacy_public = '<br/><span class="privacy">&#127758 Visible to all</span>' %}
         {% set privacy_private = '<br/><span class="privacy">&#128274; Visible only to you</span>' %}
@@ -45,6 +47,7 @@
         {% set privacy_private = '' %}
         {% set privacy_internals = '' %}
     {% endif %}
+
 {% block desc_page_content %}
 
 
@@ -69,6 +72,10 @@
         <td>
 
                 <code>{{u.username}}</code>
+                {% if can_impersonate and not this_is_you %}
+
+                <a href=':impersonate/'>Impersonate this user</a>
+                {% endif %}
 
         </td>
     </tr>
