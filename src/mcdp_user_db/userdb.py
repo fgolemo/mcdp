@@ -1,11 +1,12 @@
 import os
-import yaml
-from mcdp_user_db.user import userinfo_from_yaml, yaml_from_userinfo
-from mcdp.logs import logger
-from mcdp_utils_misc import locate_files
-from mcdp import MCDPConstants
+
 from contracts.utils import raise_desc
-from mcdp_utils_misc.string_utils import format_list
+import yaml
+
+from mcdp import MCDPConstants
+from mcdp.logs import logger
+from mcdp_user_db.user import userinfo_from_yaml, yaml_from_userinfo
+from mcdp_utils_misc import format_list, locate_files
 
 
 __all__ = ['UserDB']

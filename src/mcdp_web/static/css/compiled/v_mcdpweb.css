@@ -164,7 +164,7 @@ span.RcompConstant {
   color: #cc6600;
 }
 span.RcompUnit {
-  color: #cc6600 ;
+  color: #cc6600;
 }
 span.MCDPKeyword,
 span.SubKeyword,
@@ -467,7 +467,7 @@ code.RName {
   color: darkred;
 }
 span.ImpName {
-  color: #cc7a00;
+  color: darkorange;
 }
 code.fvalue span.ValueExpr,
 code.fvalue span.RcompUnit {

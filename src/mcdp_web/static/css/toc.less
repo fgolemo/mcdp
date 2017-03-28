@@ -6,11 +6,13 @@
 
 /************ TOC ***************/
 
+ul.toc {
+  //  column-count: 2;
+    column-gap: 20px;
+}
+
 @media screen {
-    ul.toc {
-        column-count: 2;
-        column-gap: 20px;
-    }
+
     ul#main_toc > li > ul > li {
         padding-top: 2pt;
     }
@@ -23,10 +25,7 @@
 
 @media print {
     /** two-column format */
-    ul.toc {
-        column-count: 2;
-        column-gap: 20px;
-    }
+
 
     /** add page numbers for the first two */
     ul#main_toc > li > a::after {

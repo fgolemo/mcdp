@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
+
 from mcdp_dp import (ApproximableDP, CoProductDPLabels,
-    DPLoop2, LabelerDP, OpaqueDP, Parallel,
-    PrimitiveDP, Series0)
-from mcdp_dp.dp_parallel_n import ParallelN
+                     DPLoop2, LabelerDP, OpaqueDP, Parallel,
+                     PrimitiveDP, Series0, ParallelN)
 
 
 __all__ = [

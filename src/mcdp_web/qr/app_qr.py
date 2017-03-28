@@ -36,7 +36,8 @@ class AppQR():
                         route_name='qr_import', renderer='json')
 
     @add_std_vars_context
-    def view_qr_reader(self, request):  # @UnusedVariable
+    @cr2e
+    def view_qr_reader(self, e):  # @UnusedVariable
         return {}
 
     def appqr_reset(self):

@@ -2,14 +2,14 @@
 
 
 span.Unit, span.Nat, span.Int, span.Rcomp  {
-    color: #ac5600;
+    color: @unit-color;
 }
 
 span.ValueExpr, span.IntegerFraction, span.NatConstant, span.RcompConstant {
-    color: #cc6600;
+    color: @misc-color;
 }
 
-span.RcompUnit { color: #cc6600 ;}
+span.RcompUnit { color: @misc-color; }
 
 
 span.MCDPKeyword,
@@ -98,7 +98,9 @@ span.BetweenKeyword,
 span.BetweenAndKeyword
 {
     font-weight: bold;
-    color: #00a;
+    color: @keyword-color;
+
+
 
 }
 
@@ -307,7 +309,8 @@ code.keyword {
 code.FName { color: @fcolor; }
 code.RName { color: @rcolor; }
 
-span.ImpName { color: #cc7a00; }
+
+span.ImpName { color: @icolor; }
 
 code.fvalue {
     span.ValueExpr, span.RcompUnit {

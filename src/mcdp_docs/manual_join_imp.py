@@ -35,7 +35,7 @@ def get_manual_css_frag():
         assert False
             
 @contract(files_contents='list( tuple( tuple(str,str), str) )', returns='str')
-def manual_join(files_contents, bibfile, stylesheet):
+def manual_join(files_contents, bibfile, stylesheet, remove=None):
     from mcdp_utils_xml import bs
     
     fn = MCDPManualConstants.main_template
@@ -78,22 +78,7 @@ def manual_join(files_contents, bibfile, stylesheet):
         body.append(Comment('End of document dump of %r' % docname))
         body.append(NavigableString('\n\n'))
 
-    logger.info('adding toc')
-    toc = generate_doc(body)
-    toc_ul = bs(toc).ul
-    toc_ul.extract()
-    assert toc_ul.name == 'ul'
-    toc_ul['class'] = 'toc'
-    toc_ul['id'] = 'main_toc'
-    
-    toc_selector = 'div#toc'
-    tocs = list(d.select(toc_selector))
-    if not tocs:
-        msg = 'Cannot find any element of type %r to put TOC inside.' % toc_selector
-        logger.warning(msg)
-    else:
-        toc_place = tocs[0]
-        toc_place.replaceWith(toc_ul)
+
 
 
     logger.info('external bib')
@@ -109,6 +94,31 @@ def manual_join(files_contents, bibfile, stylesheet):
     logger.info('reorganizing contents in <sections>')    
     body2 = reorganize_contents(d.find('body'))
     body.replace_with(body2)
+    
+    ### Removing
+    if remove is not None:
+        nremoved = 0
+        for x in body.select(remove):
+            nremoved += 1
+            x.extract()
+        logger.info('Removed %d elements of selector %r' % (nremoved, remove))
+    
+    ###
+    logger.info('adding toc')
+    toc = generate_doc(body)
+    toc_ul = bs(toc).ul
+    toc_ul.extract()
+    assert toc_ul.name == 'ul'
+    toc_ul['class'] = 'toc'
+    toc_ul['id'] = 'main_toc'
+    toc_selector = 'div#toc'
+    tocs = list(d.select(toc_selector))
+    if not tocs:
+        msg = 'Cannot find any element of type %r to put TOC inside.' % toc_selector
+        logger.warning(msg)
+    else:
+        toc_place = tocs[0]
+        toc_place.replaceWith(toc_ul)
     
     logger.info('checking errors')
     check_various_errors(d)
@@ -358,10 +368,15 @@ def generate_doc(soup):
         def __str__(self, root=False):
             s = u''
             if not root:
+                use_name = self.name
+#                 if '<'in self.name:
+#                     print 'name: (%s)' % self.name
+#                     use_name = 'name of link'
+#                 
                 s += (u"""<a class="toc_link" href="#%s">
                             <span class="toc_number">%s –</span> 
                             <span class="toc_name">%s</span></a>""" % 
-                            (self.id, self.number, self.name))
+                            (self.id, self.number, use_name))
             if self.items:
                 s += '<ul>'
                 for item in self.items:
@@ -392,14 +407,15 @@ def generate_doc(soup):
         if ID is None: 
             header['id'] = '%s:%s' % (default_prefix, header_id)
         else:
-            if prefix is None: 
-                #msg = 'Invalid ID %r for tag %r, muststart with %r.' % (cur, header.name, prefix)
-                #raise_desc(ValueError, msg, tag=str(header))
-                msg = ('Adding prefix %r to current id %r for %s.' % 
-                       (default_prefix, ID, header.name))
-                #logger.debug(msg)
-                header.insert_before(Comment('Warning: ' + msg))
-                header['id'] = default_prefix + ':' + ID
+            if prefix is None:
+                if ID != 'booktitle': 
+                    #msg = 'Invalid ID %r for tag %r, muststart with %r.' % (cur, header.name, prefix)
+                    #raise_desc(ValueError, msg, tag=str(header))
+                    msg = ('Adding prefix %r to current id %r for %s.' % 
+                           (default_prefix, ID, header.name))
+                    #logger.debug(msg)
+                    header.insert_before(Comment('Warning: ' + msg))
+                    header['id'] = default_prefix + ':' + ID
             else:
                 if prefix not in allowed_prefixes:
                     msg = ('The prefix %r is not allowed for %s (ID=%r)' % 
@@ -410,11 +426,12 @@ def generate_doc(soup):
         depth = int(header.name[1])
 
         using = header.decode_contents(formatter=formatter)
+        item = Item(header, depth, using, header['id'], [])
+
         using =  using[:35]
         m = 'header %s %s   %-50s    %s  ' % (' '*2*depth,  header.name, header['id'],  using)
         m = m + ' ' * (120-len(m))
         print(m)
-        item = Item(header, depth, using, header['id'], [])
         
         while(stack[-1].depth >= depth):
             stack.pop()

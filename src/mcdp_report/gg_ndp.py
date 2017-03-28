@@ -161,6 +161,7 @@ def gvgen_from_ndp(ndp, style='default', direction='LR', images_paths=[], yourna
     gg.styleAppend("unconnected_link", "color", unconnected_color)
     gg.styleAppend("unconnected_link", "fontcolor", unconnected_color)
 
+    
     gg.styleAppend("container", "shape", "box")
     gg.styleAppend("container", "style", "rounded")
 #     gg.styleDefaultAppend('margin', "%f,%f" % (marginx * rel_to_8 * 3, marginy * rel_to_8 * 3))
@@ -789,6 +790,7 @@ def create_composite_(gdc0, ndp, plotting_info, SKIP_INITIAL):
                 if dec is not None:
                     l2_label = get_signal_label_namepart(c.s1) + '\n' + dec
                 l2 = gdc.newLink(n_b, box, label=l2_label)
+                
 
 #                 if False:
 #                     gdc.gg.propertyAppend(l2, "tailport", "e")

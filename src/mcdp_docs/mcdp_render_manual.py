@@ -55,7 +55,8 @@ class RenderManual(QuickApp):
         params.add_string('stylesheet', help='Stylesheet', default=None)
         params.add_flag('cache')
         params.add_flag('pdf', help='Generate PDF version of code and figures.')
-
+        params.add_string('remove', help='Remove the items with the given selector (so it does not mess indexing)')
+        
     def define_jobs_context(self, context):
         logger.setLevel(logging.DEBUG)
 
@@ -107,7 +108,8 @@ class RenderManual(QuickApp):
 
             files_contents.append(res)
 
-        d = context.comp(manual_join, files_contents, bibfile=bibfile, stylesheet=stylesheet)
+        d = context.comp(manual_join, files_contents, bibfile=bibfile, stylesheet=stylesheet,
+                         remove=options.remove)
         context.comp(write, d, output_file)
 
         context.comp(generate_metadata)

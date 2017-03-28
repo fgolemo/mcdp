@@ -278,11 +278,10 @@ ul.toc code:last-of-type::after {
   text-decoration: none;
 }
 /************ TOC ***************/
+ul.toc {
+  column-gap: 20px;
+}
 @media screen {
-  ul.toc {
-    column-count: 2;
-    column-gap: 20px;
-  }
   ul#main_toc > li > ul > li {
     padding-top: 2pt;
   }
@@ -293,10 +292,6 @@ ul.toc code:last-of-type::after {
 }
 @media print {
   /** two-column format */
-  ul.toc {
-    column-count: 2;
-    column-gap: 20px;
-  }
   /** add page numbers for the first two */
   ul#main_toc > li > a::after {
     content: leader('.') target-counter(attr(href), page);
@@ -615,7 +610,7 @@ span.RcompConstant {
   color: #cc6600;
 }
 span.RcompUnit {
-  color: #cc6600 ;
+  color: #cc6600;
 }
 span.MCDPKeyword,
 span.SubKeyword,
@@ -918,7 +913,7 @@ code.RName {
   color: darkred;
 }
 span.ImpName {
-  color: #cc7a00;
+  color: darkorange;
 }
 code.fvalue span.ValueExpr,
 code.fvalue span.RcompUnit {

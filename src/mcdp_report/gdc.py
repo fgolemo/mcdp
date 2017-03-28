@@ -160,7 +160,7 @@ class GraphDrawingContext():
         return imagepath
     
     def get_icon(self, options):
-        tmppath = self.get_temp_path()
+        #tmppath = self.get_temp_path()
         imagepaths = [self._get_default_imagepath()]
         imagepaths.extend(self.images_paths)
         
@@ -193,6 +193,7 @@ class GraphDrawingContext():
             propertyAppend(l1, 'arrowhead', 'dot')
             propertyAppend(l1, 'arrowtail', 'none')
             propertyAppend(l1, 'dir', 'both')
+        
 
         mcdp_dev_warning('this above has no effect')
         propertyAppend(l1, 'fontcolor', COLOR_DARKGREEN)
@@ -215,6 +216,9 @@ class GraphDrawingContext():
             propertyAppend(l2, 'arrowtail', 'dot')
             propertyAppend(l2, 'arrowhead', 'none')
             propertyAppend(l2, 'dir', 'both')
+
+        propertyAppend(l2, 'style', 'dashed')
+            
 
 
     def decorate_resource_name(self, n):
