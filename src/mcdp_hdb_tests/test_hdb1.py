@@ -8,19 +8,18 @@ from comptests.registrar import comptest, run_module_tests
 from mcdp_hdb.disk_map import DiskMap
 from mcdp_library_tests.create_mockups import write_hierarchy, read_hierarchy,\
     mockup_flatten
-from mcdp_hdb.main_db_schema import schema_users, schema_users_hints
+from mcdp_hdb.main_db_schema import DB
 
 
 @comptest
 def check_db_schema_custom():
-    schema = schema_users()
-    dm = schema_users_hints(schema)
-    run_tests(schema, dm, 'custom')
+    schema = DB.shelves
+    run_tests(schema, DB.dm, 'custom')
 
 @comptest
 def check_db_schema_default():
-    schema = schema_users()
-    dm = DiskMap(schema) # no customization
+    schema = DB.shelves
+    dm = DiskMap() # no customization
     run_tests(schema, dm, 'default')
     
 def run_tests(schema, dm, name):
@@ -29,7 +28,7 @@ def run_tests(schema, dm, name):
     
     print('This is the data:\n%s' % indent(yaml.dump(data1), ' > '))
     # serialize
-    h = dm.create_hierarchy(data1)
+    h = dm.create_hierarchy(schema, data1)
     
     print('This is the data serialized:\n')
     
@@ -51,7 +50,7 @@ def run_tests(schema, dm, name):
     print('These are the files found:\n%s' % indent(s, '  '))
     
     # now re-interpret the data
-    data2 = dm.interpret_hierarchy(h2)
+    data2 = dm.interpret_hierarchy(schema, h2)
     
     if data1 != data2:
         print ('data1:\n%s' % yaml.dump(data1))

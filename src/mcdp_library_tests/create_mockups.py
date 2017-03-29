@@ -54,8 +54,12 @@ def mockup_flatten(d):
     res = {}
     for k, v in d.items():
         if isinstance(v, dict):
+#             if not v: # empty directory
+#                 v = {'.empty':'# empty'}
             x = mockup_add_prefix(k, mockup_flatten(v))
             res.update(x)
+            
+                
         else:
             res[k] = v
     return res

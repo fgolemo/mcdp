@@ -1,6 +1,8 @@
 from collections import defaultdict
-from collections import namedtuple
-from contextlib import contextmanager
+import copy
+import datetime
+import os
+import sys
 
 from contracts.interface import describe_value
 from contracts.utils import raise_desc, raise_wrapped, indent, check_isinstance
@@ -8,19 +10,9 @@ import yaml
 
 from mcdp.logs import logger_tmp, logger
 from mcdp_hdb.schema import SchemaHash, SchemaString, SchemaContext,\
-    SchemaList, SchemaBytes, NOT_PASSED, SchemaDate
+    SchemaList, SchemaBytes, NOT_PASSED, SchemaDate, SchemaBase
 from mcdp_library_tests.create_mockups import mockup_flatten
-from mcdp_utils_misc.string_utils import format_list
-import datetime
-import sys
-import copy
-
-
-Hint = namedtuple('Hint', 'serialization pattern')
-SER_FILE_YAML = 'SER_FILE_YAML'
-SER_DIR = 'SER_DIR'
-SER_FILE = 'SER_FILE'
-SER_STRUCT = 'SER_STRUCT'
+from mcdp_utils_misc import format_list
 
 
 class IncorrectFormat(Exception):
@@ -29,8 +21,7 @@ class IncorrectFormat(Exception):
 
 def raise_incorrect_format(msg, schema, data):
     msg2 = 'Incorrect format:\n'
-    msg2 += indent(msg, '  ')
-#     datas = yaml.dump(data).encode('utf8')
+    msg2 += indent(msg, '  ') 
     if isinstance(data, str):
         datas = data
     else:
@@ -43,44 +34,53 @@ def raise_incorrect_format(msg, schema, data):
         msg2 += indent(datas, '  ')
     #     msg2 += 'repr: '+ datas.__repr__()
     raise_desc(IncorrectFormat, msg2, schema=schema)
+ 
+class HintExtensions():
+    def __init__(self, extensions):
+        self.extensions = extensions
 
-# 
-# @contextmanager
-# def error_context(schema, data):  # @UnusedVariable
-#     try:
-#         yield
-#     except IncorrectFormat as e:
-#         msg = 'While interpreting schema %s' % type(schema)
-#         raise_wrapped(IncorrectFormat, e, msg,# compact=True, 
-#                       exc = sys.exc_info())
+class HintFile():
+    def __init__(self, pattern='%'):
+        self.pattern = pattern
 
+class HintStruct():
+    def __init__(self):
+        pass
+        
+class HintDir():
+    def __init__(self, pattern='%'):
+        self.pattern = pattern
 
+class HintFileYAML():
+    def __init__(self, pattern='%'):
+        self.pattern = pattern
+        
 class DiskMap():
 
-    def __init__(self, schema):
+    def __init__(self):
         self.hints = {}
-        self.schema = schema
 
         self.inside_yaml = False
         self.hint_translation = defaultdict(lambda: dict())
 
     def get_hint(self, s):
+        check_isinstance(s, SchemaBase)
         if self.inside_yaml:
-            return Hint(SER_STRUCT, '%')
+            return HintStruct()
         if s in self.hints:
             return self.hints[s]
         if isinstance(s, SchemaString):
-            return Hint(SER_FILE, '%')
+            return HintFile()
         if isinstance(s, SchemaBytes):
-            return Hint(SER_FILE, '%')
+            return HintFile()
         if isinstance(s, SchemaHash):
-            return Hint(SER_DIR, '%')
+            return HintDir()
         if isinstance(s, SchemaContext):
-            return Hint(SER_DIR, '%')
+            return HintDir()
         if isinstance(s, SchemaList):
-            return Hint(SER_DIR, '%')
+            return HintDir()
         if isinstance(s, SchemaDate):
-            return Hint(SER_FILE, '%')
+            return HintFile()
         msg = 'Cannot find hint for %s' % describe_value(s)
         raise ValueError(msg)
 
@@ -88,27 +88,30 @@ class DiskMap():
         self.hint_translation[s].update(**dic)
 
     def hint_directory(self, s, pattern='%'):
-        self.hints[s] = Hint(SER_DIR, pattern)
+        self.hints[s] = HintDir(pattern)
+
+    def hint_extensions(self, s, extensions):
+        self.hints[s] = HintExtensions(extensions)
 
     def hint_file(self, s, pattern='%'):
         if isinstance(s, SchemaHash):
             if not '%' in pattern:
                 raise ValueError(s)
-        self.hints[s] = Hint(SER_FILE, pattern)
+        self.hints[s] = HintFile(pattern)
 
     def hint_file_yaml(self, s, pattern='%'):
-        self.hints[s] = Hint(SER_FILE_YAML, pattern)
+        self.hints[s] = HintFileYAML(pattern)
 
-    def interpret_hierarchy(self, fh):
+    def interpret_hierarchy(self, schema, fh):
         '''
             fh = Files in recursive dictionary format:
             {'dir': {'file': 'filecontents'}} 
         '''
         try:
-            return self.interpret_hierarchy_(schema=self.schema, fh=fh)
+            return self.interpret_hierarchy_(schema, fh=fh)
         except IncorrectFormat as e:
             msg = 'While parsing: \n'
-            msg += indent(str(self.schema), ' ')
+            msg += indent(str(schema), ' ')
             msg += '\n\nfiles:\n\n'
             flattened = mockup_flatten(fh)
             msg += indent("\n".join(flattened), '  ')
@@ -119,44 +122,28 @@ class DiskMap():
             hint = self.get_hint(schema)
 
             if isinstance(schema, SchemaHash):
-                if hint.serialization == SER_DIR:
+                if isinstance(hint, HintDir):
                     return read_SchemaHash_SER_DIR(self, schema, fh)
-                elif hint.serialization in [SER_FILE, SER_FILE_YAML]:
-                    msg = 'Invalid serialization %s for %r' % (
-                        hint.serialization, schema)
-                    raise_desc(ValueError, msg, hint=hint, schema=schema)
-                else:
-                    assert False
+                if isinstance(hint, HintExtensions):
+                    return read_SchemaHash_Extensions(self, schema, fh)
 
             if isinstance(schema, SchemaContext):
-                if hint.serialization == SER_DIR:
+                if isinstance(hint, HintDir):
                     check_isinstance(fh, dict)
                     return read_SchemaContext_SER_DIR(self, schema, fh)
-                elif hint.serialization == SER_STRUCT:
+                elif isinstance(hint, HintStruct):
                     return read_SchemaContext_SER_STRUCT(self, schema, fh)
-                elif hint.serialization == SER_FILE_YAML:
+                if isinstance(hint, HintFileYAML):
                     return read_SchemaContext_SER_FILE_YAML(self, schema, fh)
-                elif hint.serialization in [SER_FILE, SER_FILE_YAML]:
-                    msg = 'Invalid serialization %s for %r' % (
-                        hint.serialization, schema)
-                    raise_desc(ValueError, msg, hint=hint, schema=schema)
-                else:
-                    assert False
 
             if isinstance(schema, SchemaString):
                 return fh
 
             if isinstance(schema, SchemaList):
-                if hint.serialization == SER_DIR:
+                if isinstance(hint, HintDir):
                     return interpret_SchemaList_SER_DIR(self, schema, fh)
-                elif hint.serialization == SER_STRUCT:
+                elif isinstance(hint, HintStruct):
                     return interpret_SchemaList_SER_STRUCT(self, schema, fh)
-                elif hint.serialization in [SER_FILE, SER_FILE_YAML]:
-                    msg = 'Invalid serialization %s for %r' % (
-                        hint.serialization, schema)
-                    raise_desc(ValueError, msg, hint=hint, schema=schema)
-                else:
-                    assert False
                 return fh
 
             if isinstance(schema, SchemaBytes):
@@ -169,51 +156,36 @@ class DiskMap():
                     logger_tmp.debug('looking at %r' % fh)
                     return yaml.load(fh)
 
-            raise NotImplementedError(type(schema))
+            msg = 'NotImplemented'
+            raise_desc(NotImplementedError, msg, schema=type(schema), hint=hint)
         except IncorrectFormat as e:
             msg = 'While interpreting schema %s' % type(schema)
             msg += '\n hint: %s' % str(self.get_hint(schema))
             raise_wrapped(IncorrectFormat, e, msg, #compact=True, 
                           exc = sys.exc_info())
 
-    def create_hierarchy(self, data):
-        return self.create_hierarchy_(schema=self.schema, data=data)
+    def create_hierarchy(self, schema, data):
+        return self.create_hierarchy_(schema=schema, data=data)
 
     def create_hierarchy_(self,  schema, data):
         hint = self.get_hint(schema)
-        if hint.serialization == SER_FILE_YAML:
+        if isinstance(hint, HintFileYAML):
             return yaml.dump(data)
 
         if isinstance(schema, SchemaHash):
-            if hint.serialization == SER_DIR:
+            if isinstance(hint, HintDir):
                 return write_SchemaHash_SER_DIR(self, schema, data)
-            elif hint.serialization in [SER_FILE, SER_FILE_YAML]:
-                msg = 'Invalid serialization %s for %r' % (
-                    hint.serialization, schema)
-                raise_desc(
-                    ValueError, msg, hint=hint, schema=schema, data=data)
-            else:
-                assert False
+            if isinstance(hint, HintExtensions):
+                return write_SchemaHash_Extensions(self, schema, data)
+            
         if isinstance(schema, SchemaList):
-            if hint.serialization == SER_DIR:
+            if isinstance(hint, HintDir):
                 return write_SchemaList_SER_DIR(self, schema, data)
-            elif hint.serialization in [SER_FILE, SER_FILE_YAML]:
-                msg = 'Invalid serialization %s for %r' % (
-                    hint.serialization, schema)
-                raise_desc(
-                    ValueError, msg, hint=hint, schema=schema, data=data)
-            else:
-                assert False
+            
         if isinstance(schema, SchemaContext):
-            if hint.serialization == SER_DIR:
+            if isinstance(hint, HintDir):
                 return write_SchemaContext_SER_DIR(self, schema, data)
-            elif hint.serialization in [SER_FILE, SER_FILE_YAML]:
-                msg = 'Invalid serialization %s for %r' % (
-                    hint.serialization, schema)
-                raise_desc(
-                    ValueError, msg, hint=hint, schema=schema, data=data)
-            else:
-                assert False
+            
 
         if isinstance(schema, SchemaString):
             return data
@@ -287,37 +259,90 @@ def interpret_SchemaList_SER_DIR(self, schema, fh):
         res[i] = self.interpret_hierarchy_(schema.prototype, fh[filename])
     return res
 
+def read_SchemaHash_Extensions(self, schema, fh):
+    check_isinstance(schema, SchemaHash)
+    res = {}
+    extensions = self.get_hint(schema).extensions
+    
+    def recursive_list2(ff):
+        for filename, data in ff.items():
+            if isinstance(data, dict):
+                for x in recursive_list2(data):
+                    yield x
+            yield filename, data
+            
+    found = []
+    n = 0
+    for filename, data in recursive_list2(fh):
+        ext = os.path.splitext(filename)[1]
+        ok =  ext and ext[1:] in extensions
+        found.append(filename)
+        
+        if not ok:
+            continue
+        else:
+            n+= 1
+            res[filename] = self.interpret_hierarchy_(schema.prototype, data)
+    if n == 0:
+        logger.debug('Found no files with extensions %s' % format_list(extensions))
+        logger.debug(' found = %s' % format_list(found))
+
+    return res
 
 def read_SchemaHash_SER_DIR(self, schema, fh):
     check_isinstance(schema, SchemaHash)
     res = {}
     hint = self.get_hint(schema)
-    for filename in fh:
+    if hint.pattern == '%':
+        seq = fh.items()
+    else:
+        seq = recursive_list(fh, hint.pattern)
+
+    n = 0
+    for filename, data in seq:
+        logger.debug('Found %s with pattern %s' % (filename, hint.pattern))
         try:
             k = key_from_filename(pattern=hint.pattern, filename=filename)
         except NotKey:
             logger.warning('Ignoring file "%s": not a key' % filename)
             continue
-        
         #logger.debug('filename %s -> key %s' % (filename, k))
         assert not k in res, (k, hint.pattern, filename)
+        n += 1
+        res[k] = self.interpret_hierarchy_(schema.prototype, data)
+    if n == 0:
+        logger.debug('Found no files with pattern %s' % (hint.pattern))
 
-        res[k] = self.interpret_hierarchy_(schema.prototype, fh[filename])
     return res
 
+def recursive_list(fh, pattern):
+    for filename, data in fh.items():
+        if isinstance(data, dict):
+            for x in recursive_list(data, pattern):
+                yield x
+        try: 
+            key_from_filename(pattern=pattern, filename=filename)
+            yield filename, data
+        except NotKey:
+            pass
+        
 
 def write_SchemaHash_SER_DIR(self, schema, data):
     check_isinstance(schema, SchemaHash)
     res = {}
-    logger_tmp.info('write_SchemaHash_SER_DIR  %s' % (list(data)))
     hint = self.get_hint(schema)
     for k in data:
         filename = hint.pattern.replace('%', k)
         assert not filename in res, (k, hint.pattern, filename)
         res[filename] = self.create_hierarchy_(schema.prototype, data[k])
-    logger_tmp.info('Result of %s: \n %s' % (schema, res))
     return res
 
+def write_SchemaHash_Extensions(self, schema, data):
+    check_isinstance(schema, SchemaHash)
+    res = {}
+    for k in data:
+        res[k] = self.create_hierarchy_(schema.prototype, data[k])
+    return res
 
 def filename_for_k_SchemaContext_SER_DIR(self, schema, k):
     dic = self.hint_translation[schema]
@@ -339,10 +364,8 @@ def read_SchemaContext_SER_FILE_YAML(self, schema, yaml_data):
             default = schema_child.get_default()
             if default != NOT_PASSED:
                 # use default
-                use = schema_child.default
-                if use is not None:
-                    use = copy.copy(use)
-                res[k] = use
+                res[k] = copy.copy(schema_child.default)
+                logger.debug('Using default for key %s' % k)
                 continue
             else:
                 # no default
@@ -371,7 +394,9 @@ def read_SchemaContext_SER_STRUCT(self, schema, fh):
         if not k in fh:
             default = schema_child.get_default()
             if default != NOT_PASSED:
-                res[k] = default
+                
+                res[k] = copy.copy(default)
+                logger.debug('Using default for key %s' % k)
             else:
                 msg = 'Expected element "%s".' % k
                 raise_incorrect_format(msg, schema, fh)
@@ -389,25 +414,34 @@ def read_SchemaContext_SER_DIR(self, schema, fh):
     res = {}
     for k, schema_child in schema.children.items():
         filename = filename_for_k_SchemaContext_SER_DIR(self, schema, k)
-        if not filename in fh:
-            default = schema_child.get_default()
-            if default != NOT_PASSED:
-                res[k] = default
-            else:
-                msg = 'Expected filename "%s".' % filename
-                msg += '\n available: %s' % format_list(fh)
-                raise_incorrect_format(msg, schema, fh)
+        if filename is None:
+            # skip directory
+            res[k] = self.interpret_hierarchy_(schema_child, fh)
         else:
-            res[k] = self.interpret_hierarchy_(schema_child, fh[filename])
+            if not filename in fh:
+                default = schema_child.get_default()
+                if default != NOT_PASSED:
+                    res[k] =copy.copy( default)
+                    logger.debug('Using default for key %s' % k)
+                else:
+                    msg = 'Expected filename "%s".' % filename
+                    msg += '\n available: %s' % format_list(fh)
+                    raise_incorrect_format(msg, schema, fh)
+            else:
+                res[k] = self.interpret_hierarchy_(schema_child, fh[filename])
     return res
 
 
 def write_SchemaContext_SER_DIR(self, schema, data):
     res = {}
     for k, schema_child in schema.children.items():
+        rec = self.create_hierarchy_(schema_child, data[k])
         filename = filename_for_k_SchemaContext_SER_DIR(self, schema, k)
-        if filename in res:
-            msg = 'I already saw filename "%s".' % filename
-            raise_incorrect_format(msg, schema, data)
-        res[filename] = self.create_hierarchy_(schema_child, data[k])
+        if filename is None:
+            res.update(**rec)
+        else:
+            if filename in res:
+                msg = 'I already saw filename "%s".' % filename
+                raise_incorrect_format(msg, schema, data)
+            res[filename] = rec
     return res
