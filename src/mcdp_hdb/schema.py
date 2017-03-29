@@ -1,12 +1,15 @@
 from abc import ABCMeta, abstractmethod
 from collections import OrderedDict
+from contextlib import contextmanager
+import datetime
 import random
 
 from contracts.utils import indent, check_isinstance
 
-from mcdp_utils_misc.string_utils import format_list
-from contextlib import contextmanager
+from mcdp_utils_misc import format_list
 
+
+NOT_PASSED = 'no-default-given'
 
 class SchemaBase(object):
 
@@ -19,12 +22,30 @@ class SchemaBase(object):
     def generate(self):
         ''' Generate data compatible with this schema. '''
     
+    def get_default(self):
+        return NOT_PASSED
 
-class SchemaString(SchemaBase):
-    
+class SchemaDate(SchemaBase):
     def __init__(self, default):
         self.default = default
         
+    def get_default(self):
+        return self.default 
+    
+    def __str__(self):
+        return 'SchemaDate'
+    
+    def generate(self):
+        return datetime.datetime.now()
+    
+class SchemaString(SchemaBase):
+    
+    def __init__(self, default=NOT_PASSED):
+        self.default = default
+        
+    def get_default(self):
+        return self.default 
+    
     def __str__(self):
         return 'SchemaString'
     def generate(self):
@@ -35,8 +56,6 @@ class SchemaString(SchemaBase):
         return s
     
 class SchemaBytes(SchemaBase):
-#     def _describe(self):
-#         return 'SchemaBytes'
 
     def __init__(self, default):
         self.default = default
@@ -44,13 +63,18 @@ class SchemaBytes(SchemaBase):
         return 'SchemaBytes'
     
     def generate(self):
-        return b'ciao'
+        return b'some\nbytes'
 
 class SchemaHash(SchemaBase):
-    def __init__(self, schema):
+    def __init__(self, schema, default=NOT_PASSED):
         SchemaBase.__init__(self)
         self.prototype = schema
         
+        self.default = default
+    
+    def get_default(self):
+        return self.default 
+    
     def __str__(self):
         return 'SchemaHash:\n' + describe({'<prototype>':self.prototype})
     
@@ -65,7 +89,7 @@ class SchemaHash(SchemaBase):
 
 # def substitute_in_pattern(pattern, what):
 #     return re.sub(r'{.*}', what, pattern)
-NOT_PASSED = 'no-default-given'
+
 
 class SchemaContext(SchemaBase): 
     def __init__(self):
@@ -84,10 +108,10 @@ class SchemaContext(SchemaBase):
         self.context(name, s)
     
     @contextmanager
-    def list_e(self, name):
+    def list_e(self, name, default=NOT_PASSED):
         s = SchemaContext()
         yield s
-        self.list(name, s)
+        self.list(name, s, default=default)
         
     def context(self, name, child_schema=None):    
 #         child_schema = child_schema or self._child()
@@ -96,18 +120,22 @@ class SchemaContext(SchemaBase):
         self._add_child(name, child_schema)
         return child_schema
     
-    def hash(self, name, child_schema=None):
+    def hash(self, name, child_schema=None, default=NOT_PASSED):
         check_isinstance(name, str)
         child_schema = child_schema or self._child()
-        sc = SchemaHash(child_schema)
+        sc = SchemaHash(child_schema, default=default)
         self._add_child(name, sc)
         return child_schema
     
-    def list(self, name, child_schema=None):
+    def list(self, name, child_schema=None, default=NOT_PASSED):
         child_schema = child_schema or self._child()
-        sc = SchemaList(child_schema)
+        sc = SchemaList(child_schema, default=default)
         self._add_child(name, sc)
         return child_schema
+    
+    def date(self, name, default=NOT_PASSED):
+        schema = SchemaDate(default=default)
+        self._add_child(name, schema)
     
     def string(self, name, default=NOT_PASSED):
         schema = SchemaString(default=default)
@@ -131,7 +159,7 @@ class SchemaContext(SchemaBase):
         self.children[name] = cs
     
     def __str__(self):
-        return "Context:" + describe(self.children)
+        return "SchemaContext:" + describe(self.children)
 
     def generate(self): 
         res = {}
@@ -153,9 +181,13 @@ def describe(children):
     return s.rstrip()
 
 class SchemaList(SchemaBase):
-    def __init__(self, schema):
+    def __init__(self, schema, default=NOT_PASSED):
         self.prototype = schema
-        
+        self.default = default
+      
+    def get_default(self):
+        return self.default
+      
     def __str__(self):
         return 'SchemaList\n' + describe({'<prototype>': self.prototype})  
     

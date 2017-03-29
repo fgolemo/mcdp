@@ -6,20 +6,20 @@ import yaml
 
 from comptests.registrar import comptest, run_module_tests
 from mcdp_hdb.disk_map import DiskMap
-from mcdp_hdb.main_db_schema import get_mcdp_db_1_schema, get_mcdp_db_1_representation
 from mcdp_library_tests.create_mockups import write_hierarchy, read_hierarchy,\
     mockup_flatten
+from mcdp_hdb.main_db_schema import schema_users, schema_users_hints
 
 
 @comptest
 def check_db_schema_custom():
-    schema = get_mcdp_db_1_schema()
-    dm = get_mcdp_db_1_representation(schema)
+    schema = schema_users()
+    dm = schema_users_hints(schema)
     run_tests(schema, dm, 'custom')
 
 @comptest
 def check_db_schema_default():
-    schema = get_mcdp_db_1_schema()
+    schema = schema_users()
     dm = DiskMap(schema) # no customization
     run_tests(schema, dm, 'default')
     
