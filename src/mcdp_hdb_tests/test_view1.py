@@ -4,7 +4,7 @@ from nose.tools import assert_equal
 
 from comptests.registrar import comptest, run_module_tests
 from mcdp.logs import logger
-from mcdp_hdb.schema import Schema, NotValid
+from mcdp_hdb.schema import Schema, NotValid, SchemaString
 from mcdp_hdb_tests.dbview import ViewManager
 import yaml
 
@@ -19,6 +19,7 @@ def test_view1a():
     schema_user = Schema()
     schema_user.string('name')
     schema_user.string('email', can_be_none=True)
+    schema_user.list('groups', SchemaString())
     db_schema.hash('users', schema_user)
     
     db = {
@@ -26,10 +27,12 @@ def test_view1a():
             'andrea': {
                 'name': 'Andrea', 
                 'email': 'info@co-design.science',
+                'groups': ['group:admin', 'group:FDM'],
             },
             'pinco': {
                 'name': 'Pinco Pallo', 
                 'email': None,
+                'groups': ['group:FDM'],
             },
         }
     }
@@ -63,7 +66,7 @@ def test_view1a():
     except:
         pass
     
-    users['another'] = {'name': 'Another', 'email': 'another@email.com'}
+    users['another'] = {'name': 'Another', 'email': 'another@email.com', 'groups':[]}
     
     # no email
     try:
@@ -75,6 +78,9 @@ def test_view1a():
     assert 'another' in users
     del users['another']
     assert 'another' not in users
+
+    for group in u.groups:
+        print('%s is in group %s' % (u.name, group))
 
     l('db', yaml.dump(db))
     

@@ -1,8 +1,8 @@
 from contracts import contract
-from contracts.utils import raise_desc
+from contracts.utils import raise_desc, raise_wrapped
 
 from mcdp_hdb.schema import SchemaBase, SchemaContext, SchemaBytes, SchemaString,\
-    SchemaDate, SchemaHash
+    SchemaDate, SchemaHash, SchemaList
 from mcdp_utils_misc.string_utils import format_list
 from mcdp.logs import logger
 
@@ -94,6 +94,45 @@ class ViewHash0(object):
         del self._data[key]
             
 
+class ViewList0(object):
+    @contract(data=list, schema=SchemaList)
+    def __init__(self, view_manager, data, schema):
+        schema.validate(data)
+        self._view_manager = view_manager
+        self._data = data
+        self._schema = schema
+        
+    def __len__(self):
+        return self._data.__len__()
+    
+    def __iter__(self):
+        if is_simple_data(self._schema.prototype):
+            return self._data.__iter__()
+        else:
+            raise NotImplementedError()
+    
+    def __contains__(self, key):
+        return key in self._data
+    
+    def __getitem__(self, i):
+        try:
+            return self._data[i]
+        except IndexError as e:
+            msg = 'Could not use index %d' % i
+            raise_wrapped(EntryNotFound, e, msg)
+
+    def __setitem__(self, i, value):
+        prototype = self._schema.prototype
+        prototype.validate(value)
+        self._data.__setitem__(i, value)
+#         
+#     def __delitem__(self, key):
+#         if not key in self._data:
+#             msg = 'Could not delete not existing key "%s"; known: %s.' % (key, format_list(self._data))
+#             raise_desc(InvalidOperation, msg)
+#         del self._data[key]
+#             
+
 class ViewManager():
     @contract(schema=SchemaBase)
     def __init__(self, schema):
@@ -124,6 +163,11 @@ class ViewManager():
         if isinstance(s, SchemaHash):
             class ViewHash(Base, ViewHash0): pass
             return ViewHash(view_manager=self, data=data, schema=s)
+        
+        if isinstance(s, SchemaList):
+            class ViewList(Base, ViewList0): pass
+            return ViewList(view_manager=self, data=data, schema=s)
+        
 
         raise NotImplementedError(type(s))
 
