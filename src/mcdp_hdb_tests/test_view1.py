@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
-from mcdp_hdb.schema import Schema
-from comptests.registrar import comptest, run_module_tests
-from mcdp.constants import MCDPConstants
-import yaml
-from mcdp.logs import logger
 from contracts.utils import indent
-from mcdp_hdb.disk_map import DiskMap
-from mcdp_hdb_tests.dbview import ViewManager
 from nose.tools import assert_equal
+
+from comptests.registrar import comptest, run_module_tests
+from mcdp.logs import logger
+from mcdp_hdb.schema import Schema, NotValid
+from mcdp_hdb_tests.dbview import ViewManager
+import yaml
+
 
 def l(what, s):
     logger.info('\n' + indent(s, '%010s │  ' % what))
@@ -21,10 +21,19 @@ def test_view1a():
     schema_user.string('email', can_be_none=True)
     db_schema.hash('users', schema_user)
     
-    db = {'users': 
-          { 'andrea': {'name': 'Andrea', 'email': 'info@co-design.science'},
-                    'pinco': {'name': 'Pinco Pallo', 'email': None}}}
-    
+    db = {
+        'users': { 
+            'andrea': {
+                'name': 'Andrea', 
+                'email': 'info@co-design.science',
+            },
+            'pinco': {
+                'name': 'Pinco Pallo', 
+                'email': None,
+            },
+        }
+    }
+
     db_schema.validate(db)
     
     class UserView():
@@ -36,16 +45,38 @@ def test_view1a():
                               
     view = viewmanager.view(db)
     
-    u = view.users['andrea'] 
+    users = view.users
+    
+    u = users['andrea'] 
     assert_equal(u.name, 'Andrea')
     u.name = 'not Andrea'
     assert_equal(u.name, 'not Andrea')
     assert_equal(u.get_complete_address(), 'not Andrea <info@co-design.science>')
     try:
-        # Violates contract
         u.email = None
     except:
+        raise Exception('Should have been fine')
+    assert_equal(u.email, None)
+    try:
+        u.name = None
+        raise Exception('Name set to None')
+    except:
         pass
+    
+    users['another'] = {'name': 'Another', 'email': 'another@email.com'}
+    
+    # no email
+    try:
+        users['another'] = {'name': 'Another'}
+        raise Exception('Expected NotValid')
+    except NotValid:
+        pass
+
+    assert 'another' in users
+    del users['another']
+    assert 'another' not in users
+
+    l('db', yaml.dump(db))
     
 #     
 #     

@@ -1,10 +1,10 @@
-    - [Allow, Everyone, discover]
 from contracts import contract
 from contracts.utils import raise_desc
 
 from mcdp_hdb.schema import SchemaBase, SchemaContext, SchemaBytes, SchemaString,\
     SchemaDate, SchemaHash
 from mcdp_utils_misc.string_utils import format_list
+from mcdp.logs import logger
 
 
 class ViewError(Exception):
@@ -13,8 +13,13 @@ class ViewError(Exception):
 class FieldNotFound(ViewError):
     pass
 
-class EntryNotFound(ViewError):
+class EntryNotFound(ViewError, KeyError):
     pass
+
+class InvalidOperation(ViewError):
+    pass
+
+
 class ViewContext0(object):
     @contract(data=dict, schema=SchemaContext)
     def __init__(self, view_manager, data, schema):
@@ -35,13 +40,10 @@ class ViewContext0(object):
     def __getattr__(self, name):
         if name.startswith('_'):
             return object.__getattr__(self, name)
-
         child = self._get_child(name)
-        simple = isinstance(child, (SchemaString, SchemaBytes, SchemaDate))
         assert name in self._data
         child_data = self._data[name]
-
-        if simple:
+        if is_simple_data(child):
             # just return the value
             return child_data
         else:
@@ -54,6 +56,9 @@ class ViewContext0(object):
         child.validate(value)
         self._data[name] = value
 
+def is_simple_data(s):
+    return isinstance(s, (SchemaString, SchemaBytes, SchemaDate))
+
 class ViewHash0(object):
     @contract(data=dict, schema=SchemaHash)
     def __init__(self, view_manager, data, schema):
@@ -62,20 +67,32 @@ class ViewHash0(object):
         self._data = data
         self._schema = schema
 
+    def __contains__(self, key):
+        return key in self._data
+    
     def __getitem__(self, key):
+        logger.info('get with %r' % key)
         if not key in self._data:
             msg = 'Could not find key "%s"; available keys are %s' % (key, format_list(self._data))
             raise_desc(EntryNotFound, msg)
         d = self._data[key]
-
         prototype = self._schema.prototype
-        simple = isinstance(prototype, (SchemaString, SchemaBytes, SchemaDate))
-
-        if simple:
+        if is_simple_data(prototype):
             return d
         else:
             return self._view_manager.create_view_instance(prototype, d)
 
+    def __setitem__(self, key, value):
+        prototype = self._schema.prototype
+        prototype.validate(value)
+        self._data[key] = value
+        
+    def __delitem__(self, key):
+        if not key in self._data:
+            msg = 'Could not delete not existing key "%s"; known: %s.' % (key, format_list(self._data))
+            raise_desc(InvalidOperation, msg)
+        del self._data[key]
+            
 
 class ViewManager():
     @contract(schema=SchemaBase)
