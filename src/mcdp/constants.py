@@ -109,7 +109,8 @@ class MCDPConstants():
                                     '*.html_resources', 'out-*', 'compmake', '*.key']
 
     # images used to look for icons for DPs 
-    exts_for_icons = ('png', 'jpg', 'PNG', 'JPG', 'jpeg', 'JPEG') # XXX
+    exts_for_icons = ('png', 'jpg', 'PNG', 'JPG') # 'jpeg', 'JPEG') # XXX
+#     exts_for_icons = ('png', 'jpg', 'PNG', 'JPG', 'jpeg', 'JPEG') # XXX
     # all images 
     exts_images = exts_for_icons + ('svg', 'SVG', 'pdf', 'PDF')
     

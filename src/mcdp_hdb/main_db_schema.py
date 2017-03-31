@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from mcdp_hdb.schema import Schema, SchemaString, SchemaList,\
     SchemaHash
 from mcdp_hdb.disk_map import DiskMap
@@ -16,7 +17,11 @@ from mcdp.constants import MCDPConstants
 class DB():
     
     library = Schema()
-    library.hash('images', SchemaString())
+    image = Schema()
+    image_extensions = sorted(set(_.lower() for _ in MCDPConstants.exts_images))
+    for ext in image_extensions:
+        image.bytes(ext, can_be_none=True) # and can be none
+    library.hash('images', image)
     library.hash('documents', SchemaString())
     
     with library.context_e('things') as things:
@@ -26,8 +31,8 @@ class DB():
 
     shelf = Schema()
     with shelf.context_e('info') as shelf_info:
-        shelf_info.string('desc_short', default=None)
-        shelf_info.string('desc_long', default=None)
+        shelf_info.string('desc_short', default=None, can_be_none=True)
+        shelf_info.string('desc_long', default=None, can_be_none=True)
         shelf_info.list("authors", SchemaString(), default=[])
         shelf_info.list("dependencies", SchemaString(), default=[])
         acl_entry = SchemaList(SchemaString())
@@ -67,7 +72,7 @@ class DB():
     dm.hint_file_yaml(user['info'])
     
     dm.translate_children(library, {'images': None})
-    dm.hint_extensions(library['images'], MCDPConstants.exts_images)
+    dm.hint_extensions(library['images'], image_extensions)
     dm.translate_children(library, {'documents': None})
     dm.hint_directory(library['documents'], pattern='%.md')
     dm.translate_children(library, {'things': None})

@@ -39,21 +39,34 @@ class HintExtensions():
     def __init__(self, extensions):
         self.extensions = extensions
 
+    def __repr__(self):
+        return 'HintExtensions(%r)' % self.extensions
+    
 class HintFile():
     def __init__(self, pattern='%'):
         self.pattern = pattern
 
+    def __repr__(self):
+        return 'HintFile(%r)' % self.pattern
+
 class HintStruct():
     def __init__(self):
         pass
-        
+    def __repr__(self):
+        return 'HintStruct()'
+            
 class HintDir():
     def __init__(self, pattern='%'):
         self.pattern = pattern
+ 
+    def __repr__(self):
+        return 'HintDir(%r)' % self.pattern
 
 class HintFileYAML():
     def __init__(self, pattern='%'):
         self.pattern = pattern
+    def __repr__(self):
+        return 'HintFileYAML(%r)' % self.pattern
         
 class DiskMap():
 
@@ -113,7 +126,7 @@ class DiskMap():
             msg = 'While parsing: \n'
             msg += indent(str(schema), ' ')
             msg += '\n\nfiles:\n\n'
-            flattened = mockup_flatten(fh)
+            flattened = sorted(mockup_flatten(fh))
             msg += indent("\n".join(flattened), '  ')
             raise_wrapped(IncorrectFormat, e, msg)
 
@@ -129,7 +142,6 @@ class DiskMap():
 
             if isinstance(schema, SchemaContext):
                 if isinstance(hint, HintDir):
-                    check_isinstance(fh, dict)
                     return read_SchemaContext_SER_DIR(self, schema, fh)
                 elif isinstance(hint, HintStruct):
                     return read_SchemaContext_SER_STRUCT(self, schema, fh)
@@ -160,8 +172,8 @@ class DiskMap():
             raise_desc(NotImplementedError, msg, schema=type(schema), hint=hint)
         except IncorrectFormat as e:
             msg = 'While interpreting schema %s' % type(schema)
-            msg += '\n hint: %s' % str(self.get_hint(schema))
-            raise_wrapped(IncorrectFormat, e, msg, #compact=True, 
+            msg += ', hint: %s' % str(self.get_hint(schema))
+            raise_wrapped(IncorrectFormat, e, msg, compact=True, 
                           exc = sys.exc_info())
 
     def create_hierarchy(self, schema, data):
@@ -274,19 +286,28 @@ def read_SchemaHash_Extensions(self, schema, fh):
     found = []
     n = 0
     for filename, data in recursive_list2(fh):
-        ext = os.path.splitext(filename)[1]
-        ok =  ext and ext[1:] in extensions
         found.append(filename)
-        
-        if not ok:
-            continue
-        else:
-            n+= 1
-            res[filename] = self.interpret_hierarchy_(schema.prototype, data)
-    if n == 0:
-        logger.debug('Found no files with extensions %s' % format_list(extensions))
-        logger.debug(' found = %s' % format_list(found))
 
+        name, ext = os.path.splitext(filename)
+        if not ext:
+            continue
+        ext = ext[1:]
+        
+        if ext in extensions:
+            n+= 1
+            if not name in res:
+                res[name] = {}
+            res[name][ext] = self.interpret_hierarchy_(schema.prototype[ext], data)
+            # fill nulls for other extensions
+            for ext2 in extensions:
+                if not ext2 in res[name]: # do not overwrite
+                    res[name][ext2] = None
+#     if n == 0:
+#         logger.debug('Found no files with extensions %s' % format_list(extensions))
+#         logger.debug(' found = %s' % format_list(found))
+#     
+#     logger.debug('keys matching extensions %s: %s -> %s' % (extensions, 
+#                                                             format_list(found), format_list(res)))
     return res
 
 def read_SchemaHash_SER_DIR(self, schema, fh):
@@ -300,7 +321,7 @@ def read_SchemaHash_SER_DIR(self, schema, fh):
 
     n = 0
     for filename, data in seq:
-        logger.debug('Found %s with pattern %s' % (filename, hint.pattern))
+#         logger.debug('Found %s with pattern %s' % (filename, hint.pattern))
         try:
             k = key_from_filename(pattern=hint.pattern, filename=filename)
         except NotKey:
@@ -309,9 +330,16 @@ def read_SchemaHash_SER_DIR(self, schema, fh):
         #logger.debug('filename %s -> key %s' % (filename, k))
         assert not k in res, (k, hint.pattern, filename)
         n += 1
-        res[k] = self.interpret_hierarchy_(schema.prototype, data)
-    if n == 0:
-        logger.debug('Found no files with pattern %s' % (hint.pattern))
+        
+        try:
+            res[k] = self.interpret_hierarchy_(schema.prototype, data)
+        except IncorrectFormat as e:
+            msg = 'While interpreting filename "%s":' % filename
+            raise_wrapped(IncorrectFormat, e, msg, compact=True, exc=sys.exc_info())
+            
+#         
+#     if n == 0:
+#         logger.debug('Found no files with pattern %s' % (hint.pattern))
 
     return res
 
@@ -329,6 +357,7 @@ def recursive_list(fh, pattern):
 
 def write_SchemaHash_SER_DIR(self, schema, data):
     check_isinstance(schema, SchemaHash)
+    check_isinstance(data, dict)
     res = {}
     hint = self.get_hint(schema)
     for k in data:
@@ -339,9 +368,16 @@ def write_SchemaHash_SER_DIR(self, schema, data):
 
 def write_SchemaHash_Extensions(self, schema, data):
     check_isinstance(schema, SchemaHash)
+    check_isinstance(data, dict)
     res = {}
+    hint = self.get_hint(schema)
+#     logger.info('creating %s' % list(data))
     for k in data:
-        res[k] = self.create_hierarchy_(schema.prototype, data[k])
+        for ext in hint.extensions:
+            filedata = data[k][ext]
+            if filedata is not None:
+                filename = '%s.%s' % (k, ext)
+                res[filename] = self.create_hierarchy_(schema.prototype[ext], filedata)
     return res
 
 def filename_for_k_SchemaContext_SER_DIR(self, schema, k):
@@ -365,7 +401,7 @@ def read_SchemaContext_SER_FILE_YAML(self, schema, yaml_data):
             if default != NOT_PASSED:
                 # use default
                 res[k] = copy.copy(schema_child.default)
-                logger.debug('Using default for key %s' % k)
+                logger.warning('Using default for key %s' % k)
                 continue
             else:
                 # no default
@@ -394,7 +430,6 @@ def read_SchemaContext_SER_STRUCT(self, schema, fh):
         if not k in fh:
             default = schema_child.get_default()
             if default != NOT_PASSED:
-                
                 res[k] = copy.copy(default)
                 logger.debug('Using default for key %s' % k)
             else:
@@ -410,6 +445,10 @@ def read_SchemaContext_SER_STRUCT(self, schema, fh):
 
 
 def read_SchemaContext_SER_DIR(self, schema, fh):
+    if not isinstance(fh, dict):
+        msg = 'I expected a dictionary representing dir entries.'
+        msg += indent(str(schema), 'schema ')
+        raise_desc(IncorrectFormat, msg, fh=fh)
     check_isinstance(fh, dict)
     res = {}
     for k, schema_child in schema.children.items():
@@ -428,17 +467,25 @@ def read_SchemaContext_SER_DIR(self, schema, fh):
                     msg += '\n available: %s' % format_list(fh)
                     raise_incorrect_format(msg, schema, fh)
             else:
-                res[k] = self.interpret_hierarchy_(schema_child, fh[filename])
+                try:
+                    res[k] = self.interpret_hierarchy_(schema_child, fh[filename])
+                except IncorrectFormat as e:
+                    msg = 'While interpreting child "%s", filename "%s":' % (k, filename)
+                    raise_wrapped(IncorrectFormat, e, msg, compact=True, exc=sys.exc_info())
+              
     return res
-
-
+ 
 def write_SchemaContext_SER_DIR(self, schema, data):
     res = {}
     for k, schema_child in schema.children.items():
         rec = self.create_hierarchy_(schema_child, data[k])
         filename = filename_for_k_SchemaContext_SER_DIR(self, schema, k)
         if filename is None:
-            res.update(**rec)
+            for kk, vv in rec.items():
+                if kk in res:
+                    msg = 'Already set file %r' % kk
+                    raise Exception(msg)
+                res[kk] = vv 
         else:
             if filename in res:
                 msg = 'I already saw filename "%s".' % filename

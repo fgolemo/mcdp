@@ -6,9 +6,9 @@ import yaml
 
 from comptests.registrar import comptest, run_module_tests
 from mcdp_hdb.disk_map import DiskMap
+from mcdp_hdb.main_db_schema import DB
 from mcdp_library_tests.create_mockups import write_hierarchy, read_hierarchy,\
     mockup_flatten
-from mcdp_hdb.main_db_schema import DB
 
 
 @comptest
@@ -24,6 +24,7 @@ def check_db_schema_default():
     
 def run_tests(schema, dm, name):
     data1 = schema.generate()
+    schema.validate(data1)
     print('This is the schema:\n%s' % indent(str(schema), ' ~ '))
     
     print('This is the data:\n%s' % indent(yaml.dump(data1), ' > '))
@@ -46,7 +47,7 @@ def run_tests(schema, dm, name):
     write_hierarchy(where, h)
     print('Reading it back.')
     h2 = read_hierarchy(where)
-    s = "\n".join(mockup_flatten(h2))
+    s = "\n".join(sorted(mockup_flatten(h2)))
     print('These are the files found:\n%s' % indent(s, '  '))
     
     # now re-interpret the data

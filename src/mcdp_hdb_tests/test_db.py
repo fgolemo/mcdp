@@ -14,14 +14,18 @@ def read(dirname):
     dm = DB.dm
     
     hierarchy = read_hierarchy(dirname)
+    
     s = "\n".join(sorted(mockup_flatten(hierarchy)))
-    print('These are the files found:\n%s' % indent(s, '  '))
+#     print('These are the files found:\n%s' % indent(s, '  '))
     
     users_data = dm.interpret_hierarchy(DB.users, hierarchy)
+    DB.users.validate(users_data)
     
     print ('users_data:\n%s' % yaml.dump(users_data))
 
     shelves_data = dm.interpret_hierarchy(DB.shelves, hierarchy)
+    DB.shelves.validate(shelves_data)
+    
 #     print ('shelves_data:\n%s' % yaml.dump(shelves_data))
      
     if len(sys.argv) >= 3:
