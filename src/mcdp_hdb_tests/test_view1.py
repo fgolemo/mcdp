@@ -10,6 +10,8 @@ from mcdp.logs import logger
 from mcdp_hdb.schema import Schema, NotValid, SchemaString
 from mcdp_hdb.dbview import ViewManager
 from mcdp_hdb.change_events import replay_events
+from mcdp_shelf.access import ACLRule
+from mcdp.constants import MCDPConstants
 
 def l(what, s):
     logger.info('\n' + indent(s, '%010s │  ' % what))
@@ -40,6 +42,10 @@ def test_view1a():
     }
 
     db_schema.validate(db0)
+    all_everything = ACLRule(MCDPConstants.ALLOW, 
+                             MCDPConstants.EVERYONE, 
+                             MCDPConstants.Privileges.SPECIAL_ALL_WILDCARD)
+    db_schema.add_acl_rules([all_everything])
     db = deepcopy(db0)
     
     class UserView():
@@ -49,7 +55,7 @@ def test_view1a():
     viewmanager = ViewManager(db_schema)
     viewmanager.set_view_class(schema_user, UserView) 
     actor = 'user:andrea'
-    principals = ['user:andrea']
+    principals = ['user:andrea', MCDPConstants.EVERYONE]
     view = viewmanager.view(db, actor, principals)
     events = []
     def notify_callback(event):

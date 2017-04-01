@@ -105,7 +105,41 @@ For example, this is a valid Python representation:
 
 
     db_schema['users'].set_acl(yaml.load(acl_users))
-    schema_user.set
+    schema_user. add ...
+
+## Functorial relations
+
+Let `db0` be an initial dataset (in-memory plain data), `db1` the final data
+and `events` the list of change events.
+
+It holds that
+
+    db1 = apply(e[-1], apply(e[-1], ... apply(e[0], data))
+
+Now suppose we have φ: MemoryStructure -> DiskStructures
+so that
+
+    ds0 = φ(db0)
+    ds1 = φ(db1)
+
+
+Let:
+
+    mem_apply: MemoryEvent x MemoryStructure -> MemoryStructure
+    disk_apply: DiskEvent x DiskStructure -> DiskStructure
+
+now we want a translation function
+
+    β : MemoryEvent -> DiskEvent
+
+Then we ask that the following holds:
+
+    For all e \in MemoryEvent:
+
+        mem_apply(e, db0) = disk_apply( β(e), φ)
+
+
+
 
 
 Application interface  <--> Memory <--> Disk abstraction <-> Git repo

@@ -6,11 +6,9 @@ from contracts.utils import raise_desc, check_isinstance
 
 from mcdp import MCDPConstants, logger
 from mcdp.exceptions import DPSemanticError
-from mcdp_utils_misc.good_identifiers import assert_good_plain_identifier
-from mcdp_utils_misc import dir_from_package_name, locate_files
+from mcdp_utils_misc import assert_good_plain_identifier, dir_from_package_name, locate_files, format_list
 
 from .library import MCDPLibrary
-from mcdp_utils_misc.string_utils import format_list
 
 
 __all__ = [
@@ -64,13 +62,9 @@ class Librarian():
         for short, data in self.libraries.items():
             l = data['library']
             for ext in MCDPConstants.exts_images:
-                basenames = l._list_with_extension(ext)
-#                 print('basenames: for %s are  %s' % (ext, basenames))
+                basenames = l._list_with_extension(ext) 
                 for b in basenames:
-                    b_ext = b + '.' + ext
-#                     print('b_Ext: %s b_Ext in ftc: %s' % (b_ext, b_ext in l.file_to_contents))
-#                     if not b_ext in l.file_to_contents:
-#                         print 'avialable: %s' % sorted(l.file_to_contents)
+                    b_ext = b + '.' + ext 
                     allimages[b_ext] = l.file_to_contents[b_ext]
                     
         for short, data in self.libraries.items():
@@ -155,8 +149,7 @@ def find_libraries(d0):
         if dirname == '.':
             dirname = os.path.realpath(dirname)
         library_name = os.path.splitext(os.path.basename(dirname))[0]
-        assert_good_plain_identifier(library_name, 'libraries')
-        #library_name = library_name.replace('.', '_')
+        assert_good_plain_identifier(library_name, 'libraries') 
         res[library_name] = dirname
     return res
 
