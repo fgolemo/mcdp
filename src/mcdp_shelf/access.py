@@ -3,7 +3,7 @@ from contracts import contract
 from contracts.utils import indent, raise_desc
 from pyramid.security import Allow, Authenticated, Everyone, Deny
 
-from mcdp.logs import logger_access
+from mcdp.logs import logger_access, logger
 from mcdp.constants import MCDPConstants
 
 Privileges = MCDPConstants.Privileges
@@ -19,6 +19,29 @@ class ACLRule(object):
             raise ValueError('Unknown privilege %r' % privilege)
         if privilege == Privileges.SPECIAL_ALL_WILDCARD:
             raise ValueError('Cannot use privilege %r' % privilege)
+        
+        if to_whom.startswith('groups:'):
+            msg = 'Invalid key "%s" - should be "group:...".' % to_whom
+            raise_desc(ValueError, msg)
+            
+        def valid_group(x):
+            return len(x) > 0
+        def valid_username(x):
+            return len(x) > 0
+        valid = False
+        if to_whom in [MCDPConstants.EVERYONE, MCDPConstants.AUTHENTICATED]:
+            valid = True  
+        elif to_whom.startswith('user:'):
+            username = to_whom[to_whom.index(':')+1:]
+            valid = valid_username(username)
+        elif to_whom.startswith('group:'):
+            group = to_whom[to_whom.index(':')+1:]
+            valid = valid_group(group)
+        else:
+            pass
+        if not valid:
+            msg = 'Invalid to_whom spec: %s' % to_whom
+            logger.error(msg)
 
     def as_pyramid_acl(self):
         a = {MCDPConstants.ALLOW: Allow, MCDPConstants.DENY: Deny}[self.allow_or_deny]
@@ -99,13 +122,7 @@ def acl_from_yaml(x):
     for y in x:
         allow_or_deny = y[0]
         to_whom = y[1]
-        if to_whom.startswith('groups:'):
-            msg = 'Invalid key "%s" - should be "group:...".' % to_whom
-            raise_desc(ValueError, msg, x=x)
-        
-        privilege = y[2]
-        if not privilege in Privileges.ALL_PRIVILEGES:
-            raise ValueError('Unknown privilege %r' % privilege)
+        privilege = y[2] 
         if privilege == Privileges.SPECIAL_ALL_WILDCARD:
             for p in Privileges.ALL_PRIVILEGES:
                 if p == Privileges.SPECIAL_ALL_WILDCARD: continue

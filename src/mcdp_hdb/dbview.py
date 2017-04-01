@@ -2,12 +2,16 @@ from abc import abstractmethod, ABCMeta
 import time
 
 from contracts import contract
-from contracts.utils import raise_desc, raise_wrapped
+from contracts.utils import raise_desc, raise_wrapped, indent
 
 from mcdp_hdb.change_events import event_set, event_delete, event_rename
 from mcdp_hdb.schema import SchemaBase, SchemaContext, SchemaBytes, SchemaString,\
     SchemaDate, SchemaHash, SchemaList
 from mcdp_utils_misc.string_utils import format_list
+from mcdp_utils_misc.memoize_simple_imp import memoize_simple
+from mcdp.constants import MCDPConstants
+from mcdp.logs import logger
+from copy import deepcopy
 
 
 class ViewError(Exception):
@@ -22,6 +26,28 @@ class EntryNotFound(ViewError, KeyError):
 class InvalidOperation(ViewError):
     pass
 
+class InsufficientPrivileges(ViewError):
+    pass
+
+def interpret(s, prefix):
+    ''' s = 'user:${path[-1]}' 
+        prefix = (a, b, c)
+        returns 'user:a'
+    '''
+#     n = len(prefix)
+    for i in range(-5, 0):
+        pattern = '${path[%d]}'% i
+        if pattern in s:
+            sub = prefix[i]
+            s = s.replace(pattern, sub)
+    
+    if '$' in s:
+        msg = 'Could not find special expression for %r' % s
+        raise ValueError(msg)
+    return s
+            
+    
+
 class ViewBase(object):
     
     __metaclass__ = ABCMeta
@@ -32,7 +58,8 @@ class ViewBase(object):
         self._data = data
         self._schema = schema
         self._prefix = ()
-        self._who = {}
+        self._who = None
+        self._principals = []
         # if not none, it will be called when an event is generated
         self._notify_callback = None
         
@@ -41,13 +68,42 @@ class ViewBase(object):
         v = self._view_manager.create_view_instance(s, data)
         v._prefix = self._prefix + (url,)
         v._who = self._who
+        v._principals = self._principals 
         v._notify_callback = self._notify_callback
         return v
     
     @abstractmethod
     def child(self, key):
         ''' '''
+    def check_can_read(self):
+        privilege = MCDPConstants.Privileges.READ
+        self.check_privilege(privilege)
     
+    def check_can_write(self):
+        privilege = MCDPConstants.Privileges.WRITE
+        self.check_privilege(privilege)
+        
+    def check_privilege(self, privilege):
+        ''' Raises exception InsufficientPrivileges ''' 
+        acl = self._schema.get_acl()
+        # interpret special rules
+#         print 'prefix: %s' % str(self._prefix)
+        acl.rules = deepcopy(acl.rules)
+        for r in acl.rules:
+            if r.to_whom.startswith('special:'):
+                rest = r.to_whom[r.to_whom.index(':')+1:]
+                r.to_whom = interpret(rest, self._prefix)
+    
+        principals = self._principals
+        ok = acl.allowed_(privilege, principals)
+        if not ok:
+            msg = 'Cannot have privilege %r for principals %s.' % (privilege, principals)
+            msg += '\n' + indent(acl, ' > ')
+            raise_desc(InsufficientPrivileges, msg)
+        msg = 'Permission %s granted to %s' % (privilege, principals)
+        msg += '\n' + indent(acl, ' > ')
+        logger.debug(msg)
+        
     def _get_event_id(self):
         return int(time.time() * 1000000)
     
@@ -97,6 +153,9 @@ class ViewContext0(ViewBase):
         assert name in self._data
         child_data = self._data[name]
         if is_simple_data(child):
+            # check access
+            v = self._create_view_instance(child, child_data, name)
+            v.check_can_read()
             # just return the value
             return child_data
         else:
@@ -107,6 +166,9 @@ class ViewContext0(ViewBase):
             return object.__setattr__(self, name, value)
         child = self._get_child(name)
         child.validate(value)
+        v = self._create_view_instance(child, self._data[name], name)
+        v.check_can_write()
+            
         self._notify_set(name, value)
         self._data[name] = value
         
@@ -154,17 +216,20 @@ class ViewHash0(ViewBase):
         d = self._data[key]
         prototype = self._schema.prototype
         if is_simple_data(prototype):
+            self.child(d).check_can_read()
             return d
         else:
             return self._create_view_instance(prototype, d, key)
 
     def __setitem__(self, key, value):
+        self.check_can_write()
         prototype = self._schema.prototype
         prototype.validate(value)
         self._notify_set(key, value)
         self._data[key] = value
         
     def __delitem__(self, key):
+        self.check_can_write()
         if not key in self._data:
             msg = ('Could not delete not existing key "%s"; known: %s.' % 
                    (key, format_list(self._data)))
@@ -239,6 +304,15 @@ class ViewList0(ViewBase):
 #         del self._data[key]
 #             
 
+@memoize_simple
+def host_name():
+    import socket
+    if socket.gethostname().find('.')>=0:
+        name=socket.gethostname()
+    else:
+        name=socket.gethostbyaddr(socket.gethostname())[0]
+    return name
+
 class ViewManager(object):
     
     @contract(schema=SchemaBase)
@@ -250,9 +324,16 @@ class ViewManager(object):
     def set_view_class(self, s, baseclass):
         self.s2baseclass[s] = baseclass
 
-    def view(self, data, who):
+    def view(self, data, actor=None, principals=None, host=None):
         v = self.create_view_instance(self.schema, data)
-        v._who = who
+        if actor is None:
+            actor = 'system'
+        if principals is None:
+            principals = ['group:admin']
+        if host is None:
+            host = {'hostname': host_name()}
+        v._who = {'host': host, 'actor': actor, 'principals': principals}
+        v._principals = principals
         return v
 
     @contract(s=SchemaBase)

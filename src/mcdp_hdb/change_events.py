@@ -41,37 +41,41 @@ def event_rename(_id, who, what, key2):
 def replay_events(view_manager, db0, events):
     from mcdp_hdb.dbview import InvalidOperation, ViewHash0
 
-    v0 = view_manager.view(db0, who={})
-    def get(w):
-        v = v0
+    
+    def get(v00, w):
+        v = v00
         while len(w):
             v = v.child(w[0])
             w = w[1:]
         return v
     
     for event in events:
+        actor = event['who']['actor']
+        principals = event['who']['principals']
+        v0 = view_manager.view(db0, actor=actor, principals=principals)
+        
         try:
             args = event['arguments']
             if event['operation'] == 'set':
                 what = tuple(args['what'])
                 value = args['value']
                 if len(what) > 1: # maybe >= 1
-                    prev = get(what[:-1])
+                    prev = get(v0, what[:-1])
                     if isinstance(prev, ViewHash0):
                         key = what[-1]
                         prev[key] = value
                     else:
-                        v = get(what)
+                        v = get(v0, what)
                         v.set(value)
                 else:
-                    v = get(what)
+                    v = get(v0, what)
                     v._schema.validate(value)
                     v.set(value)
             elif event['operation'] == 'delete':
                 what = tuple(args['what'])
                 assert len(what) >= 1
                 
-                prev = get(what[:-1])
+                prev = get(v0, what[:-1])
                 if isinstance(prev, ViewHash0):
                     key = what[-1]
                     del prev[key]
@@ -82,7 +86,7 @@ def replay_events(view_manager, db0, events):
                 what = tuple(args['what'])
                 assert len(what) >= 1
                 
-                prev = get(what[:-1])
+                prev = get(v0, what[:-1])
                 if isinstance(prev, ViewHash0):
                     key = what[-1]
                     key2 = args['value']

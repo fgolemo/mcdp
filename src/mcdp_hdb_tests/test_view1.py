@@ -48,8 +48,9 @@ def test_view1a():
     
     viewmanager = ViewManager(db_schema)
     viewmanager.set_view_class(schema_user, UserView) 
-    who = {'user': 'user:andrea', 'host': 'arl00'}
-    view = viewmanager.view(db, who=who)
+    actor = 'user:andrea'
+    principals = ['user:andrea']
+    view = viewmanager.view(db, actor, principals)
     events = []
     def notify_callback(event):
         logger.debug('\n' + yaml.dump(event))
@@ -98,8 +99,7 @@ def test_view1a():
 
     l('db', yaml.dump(db))
      
-    db2 = replay_events(viewmanager, db0, events)
-    who = {'user': 'user:andrea', 'host': 'arl00'}
+    db2 = replay_events(viewmanager, db0, events) 
     
     l('db2', yaml.dump(db2))
     assert_equal(db, db2)

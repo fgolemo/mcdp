@@ -55,7 +55,6 @@ def run_tests(schema, dm, name):
     
     if data1 != data2:
         print ('data1:\n%s' % yaml.dump(data1))
-        
         print('data2:\n%s' % yaml.dump(data2)) 
         msg = 'De-serialization did not work'
         raise_desc(Exception, msg, data1=data1,data2=data2)
