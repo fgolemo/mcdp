@@ -83,6 +83,7 @@ def test_view1a():
     users['another'] = {'name': 'Another', 'email': 'another@email.com', 'groups':[]}
     
     # no email
+
     try:
         users['another'] = {'name': 'Another'}
         raise Exception('Expected NotValid')
@@ -105,6 +106,7 @@ def test_view1a():
 
     l('db', yaml.dump(db))
      
+    print yaml.dump(events)
     db2 = replay_events(viewmanager, db0, events) 
     
     l('db2', yaml.dump(db2))

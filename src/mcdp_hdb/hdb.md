@@ -107,6 +107,28 @@ For example, this is a valid Python representation:
     db_schema['users'].set_acl(yaml.load(acl_users))
     schema_user. add ...
 
+
+struct events:
+
+    value_set <name> <value>
+        For simple values: int, string, date
+    struct_set <name> <value>
+    increment <name> <value>
+    list_append <list> <data>
+    list_delete <list> <index>
+    dict_setitem <dict> <key> <value>
+    dict_delitem <dict> <key>
+    dict_rename <dict> <key> <key2>
+
+file events:
+
+    disk_dir_rename <dirname> <name>
+    disk_dir_delete <dirname>
+    disk_file_rename <dirname> <basename> <basename2>
+    disk_file_write <filename> <contents>
+    disk_file_delete <filename>
+
+
 ## Functorial relations
 
 Let `db0` be an initial dataset (in-memory plain data), `db1` the final data
@@ -186,13 +208,6 @@ Application interface  <--> Memory <--> Disk abstraction <-> Git repo
            context: list of strings
            data: any yaml structure
 
-       Operations:
-
-           list-append <parent-list> <data>
-           list-delete <prent-list> <index>
-           dict-set <parent-hash> <key> <value>
-           dict-rename <parent-hash> <key> <new key>
-           dict-delete <parent-hash>
 
 
    On disk structure: converts everything to disk.

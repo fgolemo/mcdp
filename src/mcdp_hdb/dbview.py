@@ -4,7 +4,6 @@ import time
 from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped, indent
 
-from mcdp_hdb.change_events import event_set, event_delete, event_rename
 from mcdp_hdb.schema import SchemaBase, SchemaContext, SchemaBytes, SchemaString,\
     SchemaDate, SchemaHash, SchemaList
 from mcdp_utils_misc.string_utils import format_list
@@ -12,6 +11,8 @@ from mcdp_utils_misc.memoize_simple_imp import memoize_simple
 from mcdp.constants import MCDPConstants
 from mcdp.logs import logger
 from copy import deepcopy
+from mcdp_hdb.change_events import event_leaf_set, event_dict_setitem,\
+    event_dict_delitem, event_dict_rename
 
 
 class ViewError(Exception):
@@ -112,25 +113,11 @@ class ViewBase(object):
             return self._prefix
         else:
             return self._prefix + (append,)
-    
-    def _notify_set(self, what, value):
-        _id = self._get_event_id()
-        what = self._get_prefix(what)
-        event = event_set(_id=_id, who=self._who, what=what, value=value)
-        self._notify(event)
-        
-    def _notify_delete(self, what): 
-        _id = self._get_event_id()
-        what = self._get_prefix(what)
-        event = event_delete(_id=_id, who=self._who, what=what)
-        self._notify(event)
-    
-    def _notify_rename(self, what, key2):
-        _id = self._get_event_id()
-        what = self._get_prefix(what)
-        event = event_rename(_id=_id, who=self._who, what=what, key2=key2)
-        self._notify(event)
 
+    def _get_event_kwargs(self):
+        _id = self._get_event_id()
+        who= self._who
+        return dict(_id=_id, who=who) 
     def _notify(self, event):
         if self._notify_callback is not None:
             self._notify_callback.__call__(event)
@@ -169,7 +156,12 @@ class ViewContext0(ViewBase):
         v = self._create_view_instance(child, self._data[name], name)
         v.check_can_write()
             
-        self._notify_set(name, value)
+        event = event_leaf_set(parent=self._prefix,
+                               name=name, 
+                               value=value, 
+                               **self._get_event_kwargs())
+        self._notify(event)
+
         self._data[name] = value
         
     def child(self, name):
@@ -179,6 +171,12 @@ class ViewContext0(ViewBase):
         if is_simple_data(child):
             def set_callback(value):
                 self._data[name] = value
+                
+                event = event_leaf_set(parent=self._prefix,
+                                       name=name, value=value,
+                                        **self._get_event_kwargs())
+                self._notify(event)
+                
             v._set_callback = set_callback
         return v
     
@@ -224,8 +222,15 @@ class ViewHash0(ViewBase):
     def __setitem__(self, key, value):
         self.check_can_write()
         prototype = self._schema.prototype
-        prototype.validate(value)
-        self._notify_set(key, value)
+        prototype.validate(value) 
+        
+        event = event_dict_setitem(name=self._prefix,
+                                   key=key, 
+                                   value=value, 
+                                   **self._get_event_kwargs())
+        self._notify(event)
+
+
         self._data[key] = value
         
     def __delitem__(self, key):
@@ -234,17 +239,28 @@ class ViewHash0(ViewBase):
             msg = ('Could not delete not existing key "%s"; known: %s.' % 
                    (key, format_list(self._data)))
             raise_desc(InvalidOperation, msg)
+        
+        event = event_dict_delitem(name=self._prefix,
+                                   key=key, 
+                                   **self._get_event_kwargs())
+        self._notify(event)
+
         del self._data[key]
-        self._notify_delete(key)
         
     def rename(self, key1, key2):
+        self.check_can_write()
         if not key1 in self._data:
             msg = ('Could not rename not existing key "%s"; known: %s.' % 
                    (key1, format_list(self._data)))
             raise_desc(InvalidOperation, msg)
-        self._data[key2] = self._data.pop(key1)
-        self._notify_rename(key1, key2)    
+        
+        event = event_dict_rename(name=self._prefix,
+                                   key=key1, key2=key2,
+                                   **self._get_event_kwargs())
+        self._notify(event)
 
+        self._data[key2] = self._data.pop(key1)
+        
 class ViewString(ViewBase):
     def child(self, i):  # @UnusedVariable
         msg = 'Cannot get child of view for basic types.'
