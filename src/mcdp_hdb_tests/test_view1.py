@@ -8,7 +8,7 @@ import yaml
 from comptests.registrar import comptest, run_module_tests
 from mcdp.logs import logger
 from mcdp_hdb.schema import Schema, NotValid, SchemaString
-from mcdp_hdb_tests.dbview import ViewManager
+from mcdp_hdb.dbview import ViewManager
 from mcdp_hdb.change_events import replay_events
 
 def l(what, s):

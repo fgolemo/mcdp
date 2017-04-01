@@ -2,7 +2,7 @@ import os
 import shutil
 import sys
 
-from contracts.utils import indent
+
 import yaml
 
 from mcdp_hdb.main_db_schema import DB
@@ -15,7 +15,7 @@ def read(dirname):
     
     hierarchy = read_hierarchy(dirname)
     
-    s = "\n".join(sorted(mockup_flatten(hierarchy)))
+    _s = "\n".join(sorted(mockup_flatten(hierarchy)))
 #     print('These are the files found:\n%s' % indent(s, '  '))
     
     users_data = dm.interpret_hierarchy(DB.users, hierarchy)

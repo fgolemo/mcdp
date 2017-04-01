@@ -39,7 +39,7 @@ def event_rename(_id, who, what, key2):
     return event
 
 def replay_events(view_manager, db0, events):
-    from mcdp_hdb_tests.dbview import InvalidOperation, ViewHash0
+    from mcdp_hdb.dbview import InvalidOperation, ViewHash0
 
     v0 = view_manager.view(db0, who={})
     def get(w):
