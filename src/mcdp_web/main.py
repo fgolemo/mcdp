@@ -738,7 +738,7 @@ class WebApp(AppVisualization, AppStatus,
     @cr2e
     def view_picture(self, e):
         username = e.context.name
-        size = e.context.size
+        _size = e.context.size # Not used so far
         data_format = e.context.data_format
         assert data_format == 'jpg'
         u = self.user_db[username]
@@ -770,7 +770,7 @@ class WebApp(AppVisualization, AppStatus,
             acl = repo.shelves[sname].get_acl()
             return acl.allowed2(privilege, e.user)
         
-        def shelf_subscribed(repo_name, shelf_name):
+        def shelf_subscribed(repo_name, shelf_name):# @UnusedVariable
             return shelf_name in e.user.subscriptions # XXX
 
         changes = []
@@ -823,12 +823,12 @@ class WebApp(AppVisualization, AppStatus,
 
     @add_std_vars_context
     @cr2e
-    def view_users(self, e):
+    def view_users(self, e):  # @UnusedVariable
         return {}
     
     @add_std_vars_context
     @cr2e
-    def view_users_user(self, e):
+    def view_users_user(self, e): # @UnusedVariable
         return {}
 
     @add_std_vars_context

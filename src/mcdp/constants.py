@@ -157,14 +157,6 @@ class MCDPConstants():
 
     repo_prefix = 'mcdpr:'
     
-    default_acl = [
-        ['Allow', 'Everyone', 'discover'],
-        # we don't want to allow anonymous to desubscribe
-        #['Allow', 'Everyone', 'subscribe'],
-        ['Allow', 'Everyone', 'read'],
-        ['Allow', 'Everyone', 'write'],
-        ['Allow', 'Everyone', 'admin'],
-    ]
 
     # if True, disables computing the actual images.
     test_spider_exclude_images = True
@@ -194,3 +186,20 @@ class MCDPConstants():
         ALL_PRIVILEGES = [DISCOVER, SUBSCRIBE, READ, WRITE, ADMIN, ACCESS, SPECIAL_ALL_WILDCARD, 
                VIEW_USER_LIST, VIEW_USER_PROFILE_PUBLIC, VIEW_USER_PROFILE_PRIVATE,
                VIEW_USER_PROFILE_INTERNAL, EDIT_USER_PROFILE, IMPERSONATE_USER]
+        
+    USER_ANONYMOUS = 'anonymous'
+    # todo: change this to system.Authenticated
+    # todo: change this to system.Everyone
+    AUTHENTICATED = 'Authenticated'
+    EVERYONE = 'Everyone' 
+    ALLOW = 'Allow'
+    DENY = 'Deny' 
+    
+    default_acl = [
+        [ALLOW, EVERYONE, Privileges.DISCOVER],
+        # we don't want to allow anonymous to desubscribe
+        #['Allow', 'Everyone', 'subscribe'],
+        [ALLOW, EVERYONE, Privileges.READ],
+        [ALLOW, EVERYONE, Privileges.WRITE],
+        [ALLOW, EVERYONE, Privileges.ADMIN],
+    ]

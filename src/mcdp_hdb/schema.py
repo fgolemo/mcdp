@@ -9,6 +9,7 @@ from contracts.interface import describe_value
 from contracts.utils import indent, check_isinstance, raise_desc, raise_wrapped
 
 from mcdp_utils_misc import format_list
+from mcdp_shelf.access import ACL
 
 
 NOT_PASSED = 'no-default-given'
@@ -20,7 +21,8 @@ class NotValid(Exception):
 class SchemaBase(object):
 
     def __init__(self):
-        pass
+        self._acl_rules_self = []
+        self._parent = None
     
     __metaclass__ = ABCMeta
     
@@ -31,6 +33,30 @@ class SchemaBase(object):
     def get_default(self):
         return NOT_PASSED
     
+    def add_acl_rules(self, acl_rules):
+        self._acl_rules_self.extend(acl_rules)
+        
+    def get_acl_rules(self):
+        if self._parent is not None:
+            others = self._parent.get_acl_rules()
+        else:
+            others = ()
+        return others + tuple(self._acl_rules_self)
+    
+    def get_acl_local(self):
+        return ACL(self._acl_rules_self)
+    
+    def get_acl(self):
+        return ACL(self.get_acl_rules())
+    
+        
+    def __str__(self):
+        s = '%s' % type(self).__name__ 
+        acl = self.get_acl_local()
+        if acl.rules:
+            s += '\n' + acl.__str__()
+        return s 
+    
     @abstractmethod
     def validate(self, data):
         ''' Raises NotValid '''
@@ -38,12 +64,11 @@ class SchemaBase(object):
 class SchemaDate(SchemaBase):
     def __init__(self, default):
         self.default = default
+        SchemaBase.__init__(self)
         
     def get_default(self):
         return self.default 
     
-    def __str__(self):
-        return 'SchemaDate'
     
     def generate(self):
         return datetime.datetime.now()
@@ -58,12 +83,11 @@ class SchemaString(SchemaBase):
     def __init__(self, default=NOT_PASSED, can_be_none=False):
         self.default = default
         self.can_be_none = can_be_none
+        SchemaBase.__init__(self)
         
     def get_default(self):
         return self.default 
-    
-    def __str__(self):
-        return 'SchemaString'
+     
     
     def generate(self):
         words = ["boo","bar","fiz","buz"]
@@ -86,9 +110,8 @@ class SchemaBytes(SchemaBase):
     def __init__(self, default, can_be_none=False):
         self.default = default
         self.can_be_none = can_be_none
-        
-    def __str__(self):
-        return 'SchemaBytes'
+        SchemaBase.__init__(self)
+         
     
     def generate(self):
         return b'somebytes'
@@ -105,14 +128,21 @@ class SchemaHash(SchemaBase):
     def __init__(self, schema, default=NOT_PASSED):
         SchemaBase.__init__(self)
         self.prototype = schema
+        self.prototype._parent = self
         
         self.default = default
+        SchemaBase.__init__(self)
     
     def get_default(self):
         return self.default 
     
     def __str__(self):
-        return 'SchemaHash:\n' + describe({'<prototype>':self.prototype})
+        s = 'SchemaHash' 
+        acl = self.get_acl_local()
+        if acl.rules:
+            s += '\n' + acl.__str__()
+        s += '\n' + describe({'<prototype>':self.prototype})
+        return s 
     
     def generate(self):
         res = {}
@@ -134,15 +164,12 @@ class SchemaHash(SchemaBase):
             except NotValid as e:
                 msg = 'For entry "%s":' % k
                 raise_wrapped(NotValid, e, msg) 
-            
-
-# def substitute_in_pattern(pattern, what):
-#     return re.sub(r'{.*}', what, pattern)
-
+             
 
 class SchemaContext(SchemaBase): 
     def __init__(self):
         self.children = OrderedDict() 
+        SchemaBase.__init__(self)
     
     def validate(self, data):
         
@@ -163,13 +190,13 @@ class SchemaContext(SchemaBase):
 
     @contextmanager
     def hash_e(self, name):
-        s = SchemaContext()
+        s = SchemaContext() 
         yield s
         self.hash(name, s)
 
     @contextmanager
     def context_e(self, name):
-        s = SchemaContext()
+        s = SchemaContext() 
         yield s
         self.context(name, s)
     
@@ -179,8 +206,7 @@ class SchemaContext(SchemaBase):
         yield s
         self.list(name, s, default=default)
         
-    def context(self, name, child_schema=None):    
-#         child_schema = child_schema or self._child()
+    def context(self, name, child_schema=None):     
         if child_schema is None:
             child_schema = SchemaContext()
         self._add_child(name, child_schema)
@@ -218,6 +244,7 @@ class SchemaContext(SchemaBase):
         return self.children[name]
     
     def _add_child(self, name, cs):
+        cs._parent = self
         check_isinstance(name, str)
         if name in self.children:
             msg =  'I already know "%s".' % name
@@ -225,8 +252,14 @@ class SchemaContext(SchemaBase):
         self.children[name] = cs
     
     def __str__(self):
-        return "SchemaContext:\n" + indent(describe(self.children),' ')
-
+        s = 'SchemaContext:' 
+        
+        acl = self.get_acl_local()
+        if acl.rules:
+            s += '\n' + acl.__str__()
+        s += '\n' + indent(describe(self.children),' ')
+        return s 
+    
     def generate(self): 
         res = {}
         for k, c in self.children.items():
@@ -250,6 +283,7 @@ class SchemaList(SchemaBase):
     def __init__(self, schema, default=NOT_PASSED):
         self.prototype = schema
         self.default = default
+        SchemaBase.__init__(self)
         
 #     def __repr__(self):
 #         return 'SchemaList(%r)' % self.prototype
@@ -271,7 +305,13 @@ class SchemaList(SchemaBase):
         return self.default
       
     def __str__(self):
-        return 'SchemaList\n' + describe({'<prototype>': self.prototype})  
+        s = 'SchemaList' 
+        acl = self.get_acl_local()
+        if acl.rules:
+            s += '\n' + acl.__str__()
+        s += '\n' + describe({'<prototype>':self.prototype})
+        return s 
+     
     
     def generate(self):
         res = []

@@ -3,16 +3,7 @@ from mcdp_hdb.schema import Schema, SchemaString, SchemaList,\
     SchemaHash
 from mcdp_hdb.disk_map import DiskMap
 from mcdp_library.specs_def import specs
-from mcdp.constants import MCDPConstants
-# from abc import abstractmethod
-# class ViewBase():
-#     __
-#     @abstractmethod
-#     @staticmethod
-#     def from_data(data):
-#         pass
-# 
-# class UserInfo(ViewBase):
+from mcdp import MCDPConstants 
     
 class DB():
     
@@ -80,4 +71,44 @@ class DB():
         dm.translate_children(things, {spec_name: None})
         dm.hint_directory(things[spec_name], pattern='%%.%s' % spec.extension)
 
-        
+    user2 = Schema()
+    # info/ 
+    #     public/      # Things that everybody can see
+    #        name
+    #            full:
+    #            nick:             
+    #        links:
+    #            website:
+    #            twitter:
+    #            github: 
+    #            coinbase
+    #        affiliation:
+    #        __acl__:
+    #            allow special:self write 
+    #            allow system:authenticated read
+    #     private/     # Things that the user can change 
+    #        __acl__:
+    #            allow self write 
+    #            allow self read
+    #        email
+    #            __acl__
+    #                allow-if:../preferences/email_is_public system:authenticated read  
+    #        preferences:
+    #            email_is_public : bool 
+    #     system/ 
+    #        groups
+    #        subscriptions []: 
+    #            repo: <repo_name>
+    #            shelf: <shelf_name>
+    #            version: <version> or 'latest'
+    #        authentication_ids[]:
+    #        verified_emails/
+    #            <email>: <date>
+    #        authentication_history []:
+    #            installation: <system>
+    #            date: <date>
+    #            method: <date>
+    #            where: <where in the world>
+    #        activity/
+    #            likes: []    
+    # 

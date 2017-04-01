@@ -1,13 +1,15 @@
 # -*- coding: utf-8 -*-
+from copy import deepcopy
+
 from contracts.utils import indent
 from nose.tools import assert_equal
+import yaml
 
 from comptests.registrar import comptest, run_module_tests
 from mcdp.logs import logger
 from mcdp_hdb.schema import Schema, NotValid, SchemaString
 from mcdp_hdb_tests.dbview import ViewManager
-import yaml
-
+from mcdp_hdb.change_events import replay_events
 
 def l(what, s):
     logger.info('\n' + indent(s, '%010s │  ' % what))
@@ -22,7 +24,7 @@ def test_view1a():
     schema_user.list('groups', SchemaString())
     db_schema.hash('users', schema_user)
     
-    db = {
+    db0 = {
         'users': { 
             'andrea': {
                 'name': 'Andrea', 
@@ -37,7 +39,8 @@ def test_view1a():
         }
     }
 
-    db_schema.validate(db)
+    db_schema.validate(db0)
+    db = deepcopy(db0)
     
     class UserView():
         def get_complete_address(self):
@@ -45,9 +48,13 @@ def test_view1a():
     
     viewmanager = ViewManager(db_schema)
     viewmanager.set_view_class(schema_user, UserView) 
-                              
-    view = viewmanager.view(db)
-    
+    who = {'user': 'user:andrea', 'host': 'arl00'}
+    view = viewmanager.view(db, who=who)
+    events = []
+    def notify_callback(event):
+        logger.debug('\n' + yaml.dump(event))
+        events.append(event)
+    view._notify_callback = notify_callback
     users = view.users
     
     u = users['andrea'] 
@@ -81,40 +88,21 @@ def test_view1a():
 
     for group in u.groups:
         print('%s is in group %s' % (u.name, group))
+    
+    assert_equal(list(u.groups), ['group:admin', 'group:FDM'])
+    
+    users.rename('pinco', 'pallo')
+    all_users = set(users)
+    print all_users
+    assert_equal(all_users, set(['pallo','andrea']))
 
     l('db', yaml.dump(db))
+     
+    db2 = replay_events(viewmanager, db0, events)
+    who = {'user': 'user:andrea', 'host': 'arl00'}
     
-#     
-#     
-#     
-#     
-#     image = Schema()
-#     for ext in exts:
-#         image.bytes(ext, can_be_none=True) # and can be none
-#     s.hash('images', image)
-#     
-#     l('schema', s)
-# 
-#     dm = DiskMap()
-#     dm.hint_extensions(s['images'], exts)
-# 
-# #     data = s.generate()
-#     
-#     d = 'contents'
-#     h0 = {'images': {'im1.jpg': d, 'im2.png': d, 'im2.jpg': d}}
-#     l('h0', yaml.dump(h0))
-#     
-#     data = dm.interpret_hierarchy(s, h0)
-#     l('data', yaml.dump(data))
-#     s.validate(data)
-# #     
-# #     dm1 = DiskMap()
-# #     h1 = dm1.create_hierarchy(s, data)
-# #     l('h1', yaml.dump(h1))
-# 
-#     h1 = dm.create_hierarchy(s, data)
-#     l('h1', yaml.dump(h1))
-
-
+    l('db2', yaml.dump(db2))
+    assert_equal(db, db2)
+    
 if __name__ == '__main__':
     run_module_tests()

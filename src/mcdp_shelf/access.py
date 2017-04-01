@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-from collections import namedtuple
-
+# -*- coding: utf-8 -*- 
 from contracts import contract
 from contracts.utils import indent, raise_desc
 from pyramid.security import Allow, Authenticated, Everyone, Deny
@@ -10,37 +8,43 @@ from mcdp.constants import MCDPConstants
 
 Privileges = MCDPConstants.Privileges
 
-USER_ANONYMOUS = 'anonymous'
-# todo: change this to system.Authenticated
-# todo: change this to system.Everyone
-USER_AUTHENTICATED = 'Authenticated'
-USER_EVERYONE = 'Everyone' 
+class ACLRule(object):
+    
+    def __init__(self, allow_or_deny, to_whom, privilege):
+        self.allow_or_deny = allow_or_deny
+        self.to_whom = to_whom
+        self.privilege = privilege
+        
+        if not privilege in Privileges.ALL_PRIVILEGES:
+            raise ValueError('Unknown privilege %r' % privilege)
+        if privilege == Privileges.SPECIAL_ALL_WILDCARD:
+            raise ValueError('Cannot use privilege %r' % privilege)
 
-ACLRule = namedtuple('ACLRule', 'allow_or_deny to_whom privilege')
+    def as_pyramid_acl(self):
+        a = {MCDPConstants.ALLOW: Allow, MCDPConstants.DENY: Deny}[self.allow_or_deny]
+        d = {MCDPConstants.EVERYONE: Everyone, MCDPConstants.AUTHENTICATED: Authenticated}
+        b = d.get(self.to_whom, self.to_whom)
+        c = self.privilege    
+        return (a,b,c)
+    
+    def __repr__(self):
+        return 'ACLRule(%s %s to %s)' % (self.allow_or_deny, self.privilege, self.to_whom)
 
-class ACL():
+class ACL(object):
     def __init__(self, rules):
         self.rules = rules
         
-        
     def as_pyramid_acl(self):
-        res = []
-        for r in self.rules:
-            a = {'Allow': Allow, 'Deny': Deny}[r.allow_or_deny]
-            b = {USER_EVERYONE: Everyone, USER_AUTHENTICATED: Authenticated}.get(r.to_whom, r.to_whom)
-            c = r.privilege    
-            res.append((a,b,c))
-        return res
-        
+        return map(ACLRule.as_pyramid_acl, self.rules)
         
     def allowed2(self, privilege, user):
         return self.allowed(privilege, user.username, user.groups)
     
     def allowed(self, privilege, username, groups):
         principals = []
-        principals.append('Everyone')
-        if username is not None and username != USER_ANONYMOUS:
-            principals.append('Authenticated')
+        principals.append(MCDPConstants.EVERYONE)
+        if username is not None and username != MCDPConstants.USER_ANONYMOUS:
+            principals.append(MCDPConstants.AUTHENTICATED)
             principals.append(username)
         if groups:
             for g in groups:
@@ -56,10 +60,12 @@ class ACL():
         for r in self.rules:
             if r.privilege == privilege:
                 if r.to_whom in principals:
-                    if r.allow_or_deny == 'Allow':
+                    if r.allow_or_deny == MCDPConstants.ALLOW:
                         return True
-                    if r.allow_or_deny == 'Deny':
+                    elif r.allow_or_deny ==  MCDPConstants.DENY:
                         return False
+                    else: 
+                        assert False, r
         
         msg = 'Permission %r denied for %s' % (privilege, principals)
         msg += '\n' + indent('\n'.join(str(_) for _ in self.rules), '  ')
@@ -67,7 +73,11 @@ class ACL():
         return False 
 
     def __str__(self):
-        return str(self.rules)
+        s = 'ACL('
+        for r in self.rules:
+            s += '\n %s' % r  
+        s += '\n)'
+        return s
 
 @contract(x='list(list[3](str))')
 def acl_from_yaml(x):
@@ -99,10 +109,10 @@ def acl_from_yaml(x):
         if privilege == Privileges.SPECIAL_ALL_WILDCARD:
             for p in Privileges.ALL_PRIVILEGES:
                 if p == Privileges.SPECIAL_ALL_WILDCARD: continue
-                r = ACLRule(allow_or_deny=allow_or_deny, to_whom=to_whom, privilege=p)
+                r = ACLRule(allow_or_deny, to_whom, p)
                 rules.append(r)
         else:
-            r = ACLRule(allow_or_deny=allow_or_deny, to_whom=to_whom, privilege=privilege)
+            r = ACLRule(allow_or_deny, to_whom, privilege)
             rules.append(r)
     return ACL(rules) 
     

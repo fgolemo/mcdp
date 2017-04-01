@@ -20,9 +20,8 @@ class UserDB():
         self.userdir = userdir
         self.users.update(us)
         
-        from mcdp_shelf.access import USER_ANONYMOUS
-        if not USER_ANONYMOUS in self.users:
-            msg = 'Need account for the anonymous user "%s".' % USER_ANONYMOUS
+        if not MCDPConstants.USER_ANONYMOUS in self.users:
+            msg = 'Need account for the anonymous user "%s".' % MCDPConstants.USER_ANONYMOUS
             raise_desc(ValueError, msg, found=self.users)
             
         

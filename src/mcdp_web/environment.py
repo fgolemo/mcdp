@@ -1,5 +1,4 @@
-
-from mcdp_shelf.access import USER_ANONYMOUS
+from mcdp.constants import MCDPConstants
 
 from .resource_tree import ResourceRepo, get_from_context, ResourceLibrary, ResourceShelf, ResourceThings, ResourceThing, ResourceThingView
 
@@ -65,7 +64,7 @@ class Environment():
  
         self.user = self.session.get_user()
         # use username instead of authenticated_id
-        self.username = None if self.user.username == USER_ANONYMOUS else self.user.username
+        self.username = None if self.user.username == MCDPConstants.USER_ANONYMOUS else self.user.username
         
         self.root = app.get_root_relative_to_here(request)
         
