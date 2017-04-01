@@ -123,10 +123,11 @@ struct events:
 file events:
 
     disk_dir_rename <dirname> <name>
-    disk_dir_delete <dirname>
-    disk_file_rename <dirname> <basename> <basename2>
-    disk_file_write <filename> <contents>
+    disk_file_create <filename> <contents>
+    disk_file_modify <filename> <contents>
     disk_file_delete <filename>
+    # disk_dir_delete <dirname>
+    # disk_file_rename <dirname> <basename> <basename2>
 
 
 ## Functorial relations

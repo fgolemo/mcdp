@@ -6,9 +6,10 @@ import yaml
 
 from comptests.registrar import comptest, run_module_tests
 from mcdp_hdb.disk_map import DiskMap
-from mcdp_hdb.main_db_schema import DB
-from mcdp_library_tests.create_mockups import write_hierarchy, read_hierarchy,\
-    mockup_flatten
+from mcdp_hdb.main_db_schema import DB 
+from mcdp_hdb.disk_struct import ProxyDirectory
+from mcdp.logs import logger
+
 
 
 @comptest
@@ -33,22 +34,20 @@ def run_tests(schema, dm, name):
     
     print('This is the data serialized:\n')
     
-    
-    print(indent("\n".join(mockup_flatten(h)), ' > '))
+    print(indent(h.tree(), ' > '))
     
     where = os.path.join('test_hdb1', name)
-    
     
     print('Creating directory %s' % where)
     if os.path.exists(where):
         shutil.rmtree(where)    
     os.makedirs(where)
     print('Writing data there.')
-    write_hierarchy(where, h)
+    h.to_disk(where)
+    
     print('Reading it back.')
-    h2 = read_hierarchy(where)
-    s = "\n".join(sorted(mockup_flatten(h2)))
-    print('These are the files found:\n%s' % indent(s, '  '))
+    h2 = ProxyDirectory.from_disk(where)
+    print('These are the files found:\n%s' % indent(h2.tree(), '  '))
     
     # now re-interpret the data
     data2 = dm.interpret_hierarchy(schema, h2)
@@ -59,7 +58,7 @@ def run_tests(schema, dm, name):
         msg = 'De-serialization did not work'
         raise_desc(Exception, msg, data1=data1,data2=data2)
         
-    
+    logger.info('test_hdb1 ok')
     
 if __name__ == '__main__':
     run_module_tests()

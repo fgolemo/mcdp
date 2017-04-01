@@ -4,11 +4,13 @@ import datetime
 import os
 import sys
 
+from contracts import contract
 from contracts.interface import describe_value
 from contracts.utils import raise_desc, raise_wrapped, indent, check_isinstance
 import yaml
 
 from mcdp.logs import logger_tmp, logger
+from mcdp_hdb.disk_struct import ProxyDirectory, ProxyFile
 from mcdp_hdb.schema import SchemaHash, SchemaString, SchemaContext,\
     SchemaList, SchemaBytes, NOT_PASSED, SchemaDate, SchemaBase
 from mcdp_library_tests.create_mockups import mockup_flatten
@@ -115,6 +117,7 @@ class DiskMap():
     def hint_file_yaml(self, s, pattern='%'):
         self.hints[s] = HintFileYAML(pattern)
 
+    @contract(fh=ProxyDirectory)
     def interpret_hierarchy(self, schema, fh):
         '''
             fh = Files in recursive dictionary format:
@@ -130,6 +133,7 @@ class DiskMap():
             msg += indent("\n".join(flattened), '  ')
             raise_wrapped(IncorrectFormat, e, msg)
 
+    @contract(fh='isinstance(ProxyDirectory)|isinstance(ProxyFile)')
     def interpret_hierarchy_(self, schema, fh):
         try:
             hint = self.get_hint(schema)
@@ -149,21 +153,21 @@ class DiskMap():
                     return read_SchemaContext_SER_FILE_YAML(self, schema, fh)
 
             if isinstance(schema, SchemaString):
-                return fh
+                return fh.contents
 
             if isinstance(schema, SchemaList):
                 if isinstance(hint, HintDir):
                     return interpret_SchemaList_SER_DIR(self, schema, fh)
                 elif isinstance(hint, HintStruct):
                     return interpret_SchemaList_SER_STRUCT(self, schema, fh)
-                return fh
+                return fh.contents
 
             if isinstance(schema, SchemaBytes):
-                return fh
+                return fh.contents
 
             if isinstance(schema, SchemaDate):
                 if isinstance(fh, datetime.datetime):
-                    return fh
+                    return fh.contents
                 else:
                     logger_tmp.debug('looking at %r' % fh)
                     return yaml.load(fh)
@@ -176,13 +180,15 @@ class DiskMap():
             raise_wrapped(IncorrectFormat, e, msg, compact=True, 
                           exc = sys.exc_info())
 
+    @contract(returns=ProxyDirectory)
     def create_hierarchy(self, schema, data):
         return self.create_hierarchy_(schema=schema, data=data)
 
     def create_hierarchy_(self,  schema, data):
         hint = self.get_hint(schema)
+        
         if isinstance(hint, HintFileYAML):
-            return yaml.dump(data)
+            return ProxyFile(yaml.dump(data))
 
         if isinstance(schema, SchemaHash):
             if isinstance(hint, HintDir):
@@ -197,21 +203,21 @@ class DiskMap():
         if isinstance(schema, SchemaContext):
             if isinstance(hint, HintDir):
                 return write_SchemaContext_SER_DIR(self, schema, data)
-            
-
+    
+        # inside yaml
         if isinstance(schema, SchemaString):
-            return data
+            return ProxyFile(data)
 
         if isinstance(schema, SchemaList):
-            return data
+            return data # XXXX
 
         if isinstance(schema, SchemaBytes):
-            return data
+            return ProxyFile(data)
         
         if isinstance(schema, SchemaDate):
-            return yaml.dump(data)
+            return ProxyFile(yaml.dump(data))
         
-        msg = 'Not implemented for %s' % schema
+        msg = 'Not implemented for %s, hint %s' % (schema, hint)
         raise ValueError(msg)
 
 class NotKey(Exception):
@@ -237,7 +243,7 @@ def key_from_filename(pattern, filename):
 def write_SchemaList_SER_DIR(self, schema, data):
     check_isinstance(schema, SchemaList)
     hint = self.get_hint(schema)
-    res = {}
+    res = ProxyDirectory()
     for i, d in enumerate(data):
         filename = hint.pattern.replace('%', str(i))
         res[filename] = self.create_hierarchy_(schema.prototype, d)
@@ -318,29 +324,21 @@ def read_SchemaHash_SER_DIR(self, schema, fh):
         seq = fh.items()
     else:
         seq = recursive_list(fh, hint.pattern)
-
-    n = 0
+ 
     for filename, data in seq:
-#         logger.debug('Found %s with pattern %s' % (filename, hint.pattern))
         try:
             k = key_from_filename(pattern=hint.pattern, filename=filename)
         except NotKey:
             logger.warning('Ignoring file "%s": not a key' % filename)
             continue
-        #logger.debug('filename %s -> key %s' % (filename, k))
         assert not k in res, (k, hint.pattern, filename)
-        n += 1
         
         try:
             res[k] = self.interpret_hierarchy_(schema.prototype, data)
         except IncorrectFormat as e:
             msg = 'While interpreting filename "%s":' % filename
             raise_wrapped(IncorrectFormat, e, msg, compact=True, exc=sys.exc_info())
-            
-#         
-#     if n == 0:
-#         logger.debug('Found no files with pattern %s' % (hint.pattern))
-
+             
     return res
 
 def recursive_list(fh, pattern):
@@ -354,11 +352,11 @@ def recursive_list(fh, pattern):
         except NotKey:
             pass
         
-
+@contract(returns=ProxyDirectory)
 def write_SchemaHash_SER_DIR(self, schema, data):
     check_isinstance(schema, SchemaHash)
     check_isinstance(data, dict)
-    res = {}
+    res = ProxyDirectory()
     hint = self.get_hint(schema)
     for k in data:
         filename = hint.pattern.replace('%', k)
@@ -366,12 +364,12 @@ def write_SchemaHash_SER_DIR(self, schema, data):
         res[filename] = self.create_hierarchy_(schema.prototype, data[k])
     return res
 
+@contract(returns=ProxyDirectory)
 def write_SchemaHash_Extensions(self, schema, data):
     check_isinstance(schema, SchemaHash)
     check_isinstance(data, dict)
-    res = {}
-    hint = self.get_hint(schema)
-#     logger.info('creating %s' % list(data))
+    res = ProxyDirectory()
+    hint = self.get_hint(schema) 
     for k in data:
         for ext in hint.extensions:
             filedata = data[k][ext]
@@ -385,9 +383,9 @@ def filename_for_k_SchemaContext_SER_DIR(self, schema, k):
     filename = dic.get(k, k)
     return filename
 
-
-def read_SchemaContext_SER_FILE_YAML(self, schema, yaml_data):
-    data = yaml.load(yaml_data)
+@contract(f=ProxyFile)
+def read_SchemaContext_SER_FILE_YAML(self, schema, f):
+    data = yaml.load(f.contents)
     res = {}
     present = set(data)
     used = set()
@@ -406,20 +404,22 @@ def read_SchemaContext_SER_FILE_YAML(self, schema, yaml_data):
             else:
                 # no default
                 msg = 'Expected key "%s".' % k
-                raise_incorrect_format(msg, schema, yaml_data)
+                raise_incorrect_format(msg, schema, data)
         used.add(k)
-        self.inside_yaml = True
-        try:
-            res[k] = self.interpret_hierarchy_(schema_child, data[k])
-        finally:
-            self.inside_yaml = False
+        res[k] = data[k]
+#         self.inside_yaml = True
+#         try:
+#             res[k] = self.interpret_hierarchy_(schema_child, data[k])
+#         finally:
+#             self.inside_yaml = False
     extra = set(present) - set(used)
 
     if extra:
         msg = 'Extra fields: %s.' % format_list(sorted(extra))
         msg += '\nPresent: %s' % format_list(present)
         msg += '\nUsed: %s' % format_list(used)
-        raise_incorrect_format(msg, schema, yaml_data)
+        raise_incorrect_format(msg, schema, data)
+    schema.validate(res)
     return res
 
 
@@ -441,15 +441,15 @@ def read_SchemaContext_SER_STRUCT(self, schema, fh):
     if remaining:
         msg = 'Extra keys: %s' % format_list(remaining)
         raise_incorrect_format(msg, schema, fh)
+    schema.validate(res)
     return res
 
 
 def read_SchemaContext_SER_DIR(self, schema, fh):
-    if not isinstance(fh, dict):
-        msg = 'I expected a dictionary representing dir entries.'
+    if not isinstance(fh, ProxyDirectory):
+        msg = 'I expected a ProxyDirectory representing dir entries.'
         msg += indent(str(schema), 'schema ')
         raise_desc(IncorrectFormat, msg, fh=fh)
-    check_isinstance(fh, dict)
     res = {}
     for k, schema_child in schema.children.items():
         filename = filename_for_k_SchemaContext_SER_DIR(self, schema, k)
@@ -472,11 +472,12 @@ def read_SchemaContext_SER_DIR(self, schema, fh):
                 except IncorrectFormat as e:
                     msg = 'While interpreting child "%s", filename "%s":' % (k, filename)
                     raise_wrapped(IncorrectFormat, e, msg, compact=True, exc=sys.exc_info())
-              
+    schema.validate(res)
     return res
  
+@contract(returns=ProxyDirectory)
 def write_SchemaContext_SER_DIR(self, schema, data):
-    res = {}
+    res = ProxyDirectory()
     for k, schema_child in schema.children.items():
         rec = self.create_hierarchy_(schema_child, data[k])
         filename = filename_for_k_SchemaContext_SER_DIR(self, schema, k)
