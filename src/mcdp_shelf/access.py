@@ -3,8 +3,9 @@ from contracts import contract
 from contracts.utils import indent, raise_desc
 from pyramid.security import Allow, Authenticated, Everyone, Deny
 
-from mcdp.logs import logger_access, logger
 from mcdp.constants import MCDPConstants
+from mcdp.logs import logger_access, logger
+
 
 Privileges = MCDPConstants.Privileges
 
@@ -37,6 +38,8 @@ class ACLRule(object):
         elif to_whom.startswith('group:'):
             group = to_whom[to_whom.index(':')+1:]
             valid = valid_group(group)
+        elif to_whom.startswith('special:'):
+            valid = True
         else:
             pass
         if not valid:
