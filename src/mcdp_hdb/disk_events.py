@@ -1,7 +1,9 @@
-from contracts import contract
 from collections import OrderedDict
+
+from contracts import contract
 from decorator import decorator
-from mcdp_hdb.disk_struct import ProxyDirectory
+
+from .disk_struct import ProxyDirectory
 
 
 class DiskEvents(object):
@@ -16,10 +18,18 @@ class DiskEvents(object):
     all_events = [dir_rename, dir_delete, 
                   file_create, file_modify, file_delete, file_rename] 
 
-class DiskView(object):
+class DirView(object):
+
     @contract(directory=ProxyDirectory)
     def __init__(self, directory):
         self.directory = directory
+
+class DiskView(DirView):
+    
+    def __init__(self, directory):
+        DirView.__init__(self, directory)
+        self._event_callback = None
+
     
 @decorator
 def ff(f):

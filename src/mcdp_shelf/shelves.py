@@ -2,7 +2,7 @@ import os
 
 from contracts import contract
 from contracts.utils import raise_wrapped, raise_desc
-import yaml
+
 
 from mcdp import MCDPConstants
 from mcdp.exceptions import FormatException
@@ -11,6 +11,7 @@ from mcdp_library.libraries import find_libraries
 from mcdp_utils_misc import indent_plus_invisibles, read_file_encoded_as_utf8, locate_files
 
 from .access import acl_from_yaml
+from mcdp_utils_misc.my_yaml import yaml_load
 
 
 class Shelf():
@@ -80,7 +81,7 @@ def shelf_from_directory_(dirname):
 
     u = read_file_encoded_as_utf8(fn)
     try:
-        y = yaml.load(u)
+        y = yaml_load(u)
         acl = acl_from_yaml(y.pop('acl', MCDPConstants.default_acl))
         dependencies = y.pop('dependencies', [])
         desc_short = y.pop('desc_short', None)

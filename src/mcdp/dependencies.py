@@ -49,11 +49,11 @@ except ImportError as e: # pragma: no cover
     # raise_wrapped(Exception, e, 'Matplotlib not available')
 
 try:
-    import yaml  # @UnusedImport @NoMove
+    from rueml import yaml  # @UnusedImport @NoMove
 except ImportError as e: # pragma: no cover
     logger.error(e)
-    suggest_package('python-yaml')
-    msg = 'YAML package not available'
+    suggest_package('rueml.yaml')
+    msg = 'rueml.yaml package not available'
     logger.error(msg)
     
     

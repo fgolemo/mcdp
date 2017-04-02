@@ -1,9 +1,8 @@
 from contracts import contract
-from git.util import Actor
-from mcdp_utils_misc.string_utils import format_list
 from contracts.utils import indent
-import yaml
+from git.util import Actor
 
+from mcdp_utils_misc import format_list, yaml_dump
 
 
 class UserInfo():
@@ -109,7 +108,7 @@ def userinfo_from_yaml(s, username):
     if s:
         msg = 'Unknown fields: %s.' % format_list(s)
         msg += '\nOriginal: \n'
-        msg += indent(yaml.dump(s0), '> ')
+        msg += indent(yaml_dump(s0), '> ')
         raise ValueError(msg)
     return UserInfo(**res) 
 
