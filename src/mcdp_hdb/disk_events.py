@@ -4,11 +4,9 @@ from contracts import contract
 from contracts.utils import check_isinstance, indent, raise_wrapped
 
 from mcdp.logs import logger
-from mcdp_utils_misc import format_list, yaml_dump
+from mcdp_utils_misc import yaml_dump
 
-from .disk_struct import ProxyDirectory, ProxyFile
-from mcdp_hdb.disk_errors import InvalidDiskOperation
-
+from .disk_struct import ProxyDirectory
 
 
 class DiskEvents(object):
@@ -18,7 +16,7 @@ class DiskEvents(object):
     file_create = 'file_create' # <dirname> <name> <contents>
     file_modify = 'file_modify' # <dirname> <name> <contents>
     file_delete = 'file_delete' #  <dirname> <name>
-    file_rename = 'file_rename' #  <dirname> <name> <basename2>
+    file_rename = 'file_rename' #  <dirname> <name> <name2>
     
     all_events = [dir_rename, dir_delete, dir_create,
                   file_create, file_modify, file_delete, file_rename] 

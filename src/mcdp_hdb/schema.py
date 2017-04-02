@@ -5,12 +5,14 @@ from contextlib import contextmanager
 import datetime
 import random
 
-from contracts.interface import describe_value
+from contracts.interface import describe_value, describe_type
 from contracts.utils import indent, check_isinstance, raise_desc, raise_wrapped
 
 from mcdp_utils_misc import format_list
 from mcdp_shelf.access import ACL
 from contracts import contract
+from mcdp_utils_misc.string_utils import get_md5
+from mcdp_utils_misc.my_yaml import yaml_dump
 
 
 NOT_PASSED = 'no-default-given'
@@ -338,7 +340,7 @@ class SchemaString(SchemaSimple):
         else:
             return s
         
-    @contract(returns=str, b=bytes)
+    @contract(returns='str|None', b=bytes)
     def decode(self, b):
         if b == SchemaString.NONE_TAG:
             return None
@@ -346,7 +348,7 @@ class SchemaString(SchemaSimple):
             return b
         
     def generate(self):
-        words = ["boo","bar","fiz","buz"]
+        words = ["boo", "bar", "fiz", "buz"]
         s = ""
         for _ in range(3):
             s += words[random.randint(0,len(words)-1)]
@@ -377,4 +379,22 @@ class SchemaBytes(SchemaSimple):
             msg = 'Expected a bytes object.'
             raise_desc(NotValid, msg, data=describe_value(data))
 
+    
+def data_hash_code(s):
+    if isinstance(s, str):
+        return get_md5(s)
+    elif isinstance(s, datetime.datetime):
+        return get_md5(yaml_dump(s))
+    elif isinstance(s, list):
+        return get_md5("-".join(map(data_hash_code, s)))
+    elif isinstance(s, dict):
+        keys = sorted(s)
+        values = [s[k] for k in keys]
+        codes = ['%s-%s' % (k, data_hash_code(v)) for k,v in zip(keys, values)]
+        return data_hash_code("_".join(codes))
+    else:
+        msg = 'Invalid type %s' % describe_type(s)
+        raise ValueError(msg)
+    
+    
     

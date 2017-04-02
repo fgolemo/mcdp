@@ -14,6 +14,7 @@ from .dbview import ViewManager, InvalidOperation
 from .disk_events import disk_event_file_modify, disk_event_dir_delete, disk_event_file_create, disk_event_dir_create, disk_event_file_delete, disk_event_file_rename, disk_event_dir_rename
 from .disk_struct import ProxyDirectory, ProxyFile
 from .schema import SchemaHash, SchemaString, SchemaContext, SchemaList, SchemaBytes, NOT_PASSED, SchemaDate, SchemaBase
+from mcdp_hdb.disk_events import DiskEvents
 
 
 # from mcdp_library_tests.create_mockups import mockup_flatten
@@ -223,7 +224,62 @@ class DiskMap():
         msg = 'Not implemented for %s, hint %s' % (schema, hint)
         raise ValueError(msg)
 
+@contract(returns='list(dict)')
+def data_events_from_disk_event(disk_map, schema, disk_rep, disk_event):
+    def not_implement():
+        raise NotImplementedError(yaml_dump(disk_event))
+    
+    handlers = {
+        DiskEvents.dir_create: data_events_from_dir_create,
+        DiskEvents.dir_rename: data_events_from_dir_rename,
+        DiskEvents.dir_delete: data_events_from_dir_delete,
+        DiskEvents.file_create: data_events_from_file_create,
+        DiskEvents.file_modify: data_events_from_file_modify,
+        DiskEvents.file_delete: data_events_from_file_delete,
+        DiskEvents.file_rename: data_events_from_file_rename,
+    } 
+    operation = disk_event['operation']
+    if operation in handlers:
+        f = handlers[operation]
+        arguments = disk_event['arguments']
+        who = disk_event['who']
+        try:
+            evs = f(disk_map=disk_map, disk_rep=disk_rep, _id='tmp-id', who=who, **arguments)
+            _id = disk_rep['id']
+            for i, ev in enumerate(evs):
+                ev['id'] = _id + '-translated_inverse-%d' % i
+            return evs 
+        except Exception as e:
+            msg = 'Could not succesfully translate using %r:' % f.__name__
+            msg += '\n' + 'Schema: ' + '\n' + indent(schema, ' schema ')
+            msg += '\n' + 'Disk event: ' + '\n' + indent(yaml_dump(disk_event), ' disk_event ')
+            raise_wrapped(Exception, e, msg)
+    else:
+        raise NotImplementedError(operation)
+    
+def data_events_from_dir_create(disk_map, disk_rep, _id, who, dirname, name):
+    raise NotImplementedError()
 
+def data_events_from_dir_rename(disk_map, disk_rep, _id, who, dirname, name, name2):
+    raise NotImplementedError()
+
+def data_events_from_dir_delete(disk_map, disk_rep, _id, who, dirname, name):
+    raise NotImplementedError()
+
+def data_events_from_file_create(disk_map, disk_rep, _id, who, dirname, name, contents):
+    raise NotImplementedError()
+
+def data_events_from_file_modify(disk_map, disk_rep, _id, who, dirname, name, contents):
+    raise NotImplementedError()
+
+def data_events_from_file_rename(disk_map, disk_rep, _id, who, dirname, name, name2):
+    raise NotImplementedError()
+
+def data_events_from_file_delete(disk_map, disk_rep, _id, who, dirname, name):
+    raise NotImplementedError()
+    
+
+    
 @contract(returns='list(dict)')
 def disk_events_from_data_event(disk_map, schema, data_rep, data_event):
     handlers = {

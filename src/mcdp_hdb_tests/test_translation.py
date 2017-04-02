@@ -11,9 +11,10 @@ from mcdp import logger
 from mcdp_hdb.change_events import replay_events, event_intepret
 from mcdp_hdb.dbview import ViewManager
 from mcdp_hdb.disk_events import disk_event_interpret
-from mcdp_hdb.disk_map import DiskMap, disk_events_from_data_event
-from mcdp_hdb.schema import Schema, SchemaString
-from mcdp_utils_misc import yaml_dump, yaml_load
+from mcdp_hdb.disk_map import DiskMap, disk_events_from_data_event,\
+    data_events_from_disk_event
+from mcdp_hdb.schema import Schema, SchemaString, data_hash_code
+from mcdp_utils_misc import yaml_dump
 
 
 def l(what, s):
@@ -83,7 +84,8 @@ def check_translation(schema, data_rep0, data_events, data_rep1, disk_map):
     
     data_rep = deepcopy(data_rep0)
     disk_rep = disk_map.create_hierarchy(schema, data_rep0)
-        
+    disk_rep0 = deepcopy(disk_rep)
+    
     out = 'out/test_translation'
     if os.path.exists(out):
         shutil.rmtree(out)
@@ -142,7 +144,76 @@ def check_translation(schema, data_rep0, data_events, data_rep1, disk_map):
             msg += '\n' + indent(disk_rep_by_translation.tree(), 'disk_rep_by_tr ')
             raise Exception(msg)
              
+    check_translation_inverse(schema, disk_rep0, disk_events, disk_rep, disk_map)
+    
+def check_translation_inverse(schema, disk_rep0, disk_events, disk_rep1, disk_map):
+    view_manager = ViewManager(schema)
+    out = 'out/test_translation_inverse'
+    if os.path.exists(out):
+        shutil.rmtree(out)
+    if not os.path.exists(out):
+        os.makedirs(out) 
+        
+    def write_file_(name, what):
+        name = os.path.join(out, name)
+        with open(name, 'w') as f:
+            f.write(what)
+        logger.info('wrote on %s' % name)
+        
+    def write_file(i, n, what):
+        name = '%d-%s.txt' % (i, n)
+        write_file_(name, what)
+    
+    write_file_('0-aa-disk_events.yaml', yaml_dump(disk_events))
+    
+    # first translate the data 
+    disk_rep = deepcopy(disk_rep0)
+    data_rep = disk_map.interpret_hierarchy(schema, disk_rep)
 
+
+    data_events = []
+    for i, disk_event in enumerate(disk_events):
+        write_file(i, 'a-disk_rep', disk_rep.tree())
+        write_file(i, 'b-data_rep', yaml_dump(data_rep))
+        write_file(i, 'c-disk_event', yaml_dump(disk_event))
+        
+        evs = data_events_from_disk_event(disk_map, schema, disk_rep, disk_event)
+        
+        if not evs:
+            msg = 'The disk event resulted in 0 data events.'
+            msg += '\n' + indent(yaml_dump(disk_event), ' disk_event ')
+            raise Exception(msg)
+        
+        write_file(i, 'd-evs', yaml_dump(evs))
+        
+        data_events.extend(evs)
+        
+        # interpret disk event
+        disk_event_interpret(disk_rep, disk_event)
+        write_file(i, 'e-disk_rep-modified', disk_rep.tree())
+         
+        data_rep_by_translation = disk_map.interpret_hierarchy(schema, disk_rep)
+        write_file(i, 'f-disk_rep-modified-translated-to-data_rep', 
+                   yaml_dump(data_rep_by_translation))
+        
+        for data_event in evs:
+            event_intepret(view_manager, data_rep, data_event)
+        
+        write_file(i, 'g-data_rep-with-evs-applied', yaml_dump(data_rep))
+        
+        msg = 'Disk event:\n'+ indent(yaml_dump(disk_event), ' disk_event ')
+        msg += '\Data events:\n' + indent(yaml_dump(evs), ' events ')
+        logger.debug(msg)
+        
+        h1 = data_hash_code(data_rep_by_translation)
+        h2 = data_hash_code(data_rep)
+        if h1 != h2:
+            msg = 'Hash codes differ.'
+            msg += '\n' + indent( yaml_dump(data_rep), 'data_rep ')
+            msg += '\n' + indent( yaml_dump(data_rep_by_translation, 'data_rep_by_tr '))
+            raise Exception(msg)
+    
+    
 if __name__ == '__main__':
     run_module_tests()
     
