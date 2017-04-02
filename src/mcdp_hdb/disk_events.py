@@ -1,16 +1,15 @@
 from collections import OrderedDict
 
-from contracts import contract 
-
-from .disk_struct import ProxyDirectory
-from mcdp.logs import logger
+from contracts import contract
 from contracts.utils import check_isinstance, indent, raise_wrapped
-from mcdp_utils_misc.my_yaml import yaml_dump
-from mcdp_hdb.disk_struct import ProxyFile
-from mcdp_utils_misc.string_utils import format_list
 
-class InvalidDiskOperation(Exception):
-    pass
+from mcdp.logs import logger
+from mcdp_utils_misc import format_list, yaml_dump
+
+from .disk_struct import ProxyDirectory, ProxyFile
+from mcdp_hdb.disk_errors import InvalidDiskOperation
+
+
 
 class DiskEvents(object):
     dir_create = 'dir_create' # <dirname> <name>
@@ -62,15 +61,9 @@ def disk_event_dir_rename(dirname, name, name2):
 
 def disk_event_dir_rename_interpret(disk_rep, dirname, name, name2):
     d = disk_rep.get_descendant(dirname)
-    if not name in d.directories:
-        msg = ('Cannot rename directory %r to %r if does not exist in %s.' % 
-               (name, name2, format_list(d.directories)))
-        raise InvalidDiskOperation(msg)
-    if name2 in d.directories:
-        msg = ('Cannot rename directory %r to %r if %r already exists' % 
-                (name, name2, name2))
-        raise InvalidDiskOperation(msg)
-    d.directories[name2] = d.directories.pop(name)
+    
+    d.dir_rename(name, name2)
+
 
 @ff
 def disk_event_dir_delete(dirname, name):
@@ -78,10 +71,7 @@ def disk_event_dir_delete(dirname, name):
 
 def disk_event_dir_delete_interpret(disk_rep, dirname, name):
     d = disk_rep.get_descendant(dirname)
-    if not name in d.directories:
-        msg = 'Cannot delete directory that does not exist %r.' % name
-        raise InvalidDiskOperation(msg)
-    del d.directories[name]
+    d.dir_delete(name)
 
 
 @ff
@@ -90,10 +80,7 @@ def disk_event_file_create(dirname, name, contents):
 
 def disk_event_file_create_interpret(disk_rep, dirname, name, contents):
     d = disk_rep.get_descendant(dirname)
-    if name in d.files:
-        msg = 'Cannot create file that already exists  %r.' % name
-        raise InvalidDiskOperation(msg)
-    d.files[name] = ProxyFile(contents)
+    d.file_create(name, contents)
 
 @ff
 def disk_event_file_modify(dirname, name, contents):
@@ -101,17 +88,15 @@ def disk_event_file_modify(dirname, name, contents):
 
 def disk_event_file_modify_interpret(disk_rep, dirname, name, contents):
     d = disk_rep.get_descendant(dirname)
-    if not name in d.files:
-        msg = 'Cannot modify file that does not exist %r.' % name
-        raise InvalidDiskOperation(msg)
-    d.files[name] = ProxyFile(contents)
+    d.file_modify(name, contents)
 
 @ff
 def disk_event_file_delete(dirname, name):
     return DiskEvents.file_delete, dict(dirname=dirname, name=name)
 
 def disk_event_file_delete_interpret(disk_rep, dirname, name):
-    raise NotImplementedError()
+    d = disk_rep.get_descendant(dirname)
+    d.file_delete(name)
  
 @ff
 def disk_event_file_rename(dirname, name, name2):

@@ -1,10 +1,14 @@
-from contracts import contract
-import os
-from contracts.utils import indent, raise_desc
 import fnmatch
-from mcdp.constants import MCDPConstants
-from mcdp_utils_misc.my_yaml import yaml_dump
-from mcdp_utils_misc.string_utils import get_md5
+import os
+
+from contracts import contract
+from contracts.utils import indent, raise_desc, check_isinstance
+
+from mcdp import MCDPConstants
+from mcdp_utils_misc import yaml_dump, get_md5, format_list
+
+from .disk_errors import InvalidDiskOperation
+
 
 class ProxyDirectory(object):
     
@@ -14,46 +18,63 @@ class ProxyDirectory(object):
             files = {}
         if directories is None:
             directories = {}
-        self.files = files
-        self.directories = directories
-        
+        for k, f in files.items():
+            if not isinstance(f, ProxyFile):
+                raise ValueError((k, f))
+        for k, d in directories.items():
+            if not isinstance(d, ProxyDirectory):
+                raise ValueError((k, d))
+
+        self._files = files
+        self._directories = directories
+    
+    def get_files(self):
+        return self._files
+    
+    def get_directories(self):
+        return self._directories
+    
     def hash_code(self):
         codes = []
-        for f in sorted(self.files):
-            codes.append([f, self.files[f].hash_code()])
-        for d in sorted(self.directories):
-            codes.append([d, self.directories[d].hash_code()])
+        for f in sorted(self._files):
+            codes.append([f, self._files[f].hash_code()])
+        for d in sorted(self._directories):
+            codes.append([d, self._directories[d].hash_code()])
         return get_md5(yaml_dump(codes))
     
     def __len__(self):
-        return len(self.files) + len(self.directories)
+        return len(self._files) + len(self._directories)
     
     def __getitem__(self, key):
-        if key in self.files:
-            return self.files[key]
-        if key in self.directories:
-            return self.directories[key]
+        if key in self._files:
+            return self._files[key]
+        if key in self._directories:
+            return self._directories[key]
         raise KeyError(key)
     
     def __setitem__(self, key, x):
         if isinstance(x, ProxyDirectory):
-            self.directories[key] =x
+            self._directories[key] =x
+            if key in self._files:
+                raise ValueError('duplicated key %r' % key)
         elif isinstance(x, ProxyFile):
-            self.files[key] =x
+            self._files[key] =x
+            if key in self._directories:
+                raise ValueError('duplicated key %r' % key)
         else:
             msg = 'Cannot set key %r to %r' % (key, x)
             raise ValueError(msg)
     
     def __iter__(self):
-        for x in self.files:
+        for x in self._files:
             yield x
-        for x in self.directories:
+        for x in self._directories:
             yield x
             
     def items(self):
-        for x in self.files.items():
+        for x in self._files.items():
             yield x
-        for x in self.directories.items():
+        for x in self._directories.items():
             yield x
             
     def to_disk(self, base):
@@ -61,11 +82,11 @@ class ProxyDirectory(object):
         if not os.path.exists(base):
             os.makedirs(base)
             
-        for filename, proxy_file in self.files.items():
+        for filename, proxy_file in self._files.items():
             fn = os.path.join(base, filename)
             proxy_file.to_disk(fn)
         
-        for dirname, proxy_dir in self.directories.items():
+        for dirname, proxy_dir in self._directories.items():
             d = os.path.join(base, dirname)
             proxy_dir.to_disk(d)                
     
@@ -91,25 +112,27 @@ class ProxyDirectory(object):
         if max_levels < 0:
             return 'skipping'
         s = ''
-        for k in sorted(self.files):
-            f = self.files[k]
+        for k in sorted(self._files):
+            f = self._files[k]
             MAX = 20
             if len(f.contents) < MAX:
                 s += '%r = %r\n' % (k, f.contents)
             else:
                 s += '%s: %d bytes\n' % (k, len(f.contents))
-        for k in sorted(self.directories):
-            d = self.directories[k]
+        for k in sorted(self._directories):
+            d = self._directories[k]
             s += '%s/\n' % k
             s += indent(d.tree(max_levels-1).rstrip(), '.   ') + '\n' 
         return s
 
     def recursive_list_files(self):
         ''' Yields a list of basename, ProxyFile '''
-        for k, f in self.files.items():
+        for k, f in self._files.items():
+            check_isinstance(f, ProxyFile)
             yield k, f
-        for _, d in self.directories.items():
+        for _, d in self._directories.items():
             for k, f in d.recursive_list_files():
+                check_isinstance(f, ProxyFile)
                 yield k, f
 
     @contract(prefix='seq(str)')
@@ -119,17 +142,53 @@ class ProxyDirectory(object):
             return self
         else:
             first = prefix[0]
-            if first in self.directories:
-                return self.directories[first].get_descendant(prefix[1:])
-            elif first in self.files:
+            if first in self._directories:
+                return self._directories[first].get_descendant(prefix[1:])
+            elif first in self._files:
                 if len(prefix) > 1:
                     msg = 'Invalid url %r because %r is a file.' % (prefix, first)
                     raise ValueError(msg)
                 else:
-                    return self.files[first]
+                    return self._files[first]
             else:
                 msg = 'Invalid name %r.' % first
                 raise_desc(ValueError, msg)   
+    
+    def dir_rename(self, name, name2):    
+        if not name in self._directories:
+            msg = ('Cannot rename directory %r to %r if does not exist in %s.' % 
+                   (name, name2, format_list(self._directories)))
+            raise InvalidDiskOperation(msg)
+        if name2 in self._directories:
+            msg = ('Cannot rename directory %r to %r if %r already exists' % 
+                    (name, name2, name2))
+            raise InvalidDiskOperation(msg)
+        self._directories[name2] = self._directories.pop(name)
+    
+    def file_modify(self, name, contents):
+        if not name in self._files:
+            msg = 'Cannot modify file %r that does not exist.' % name
+            raise InvalidDiskOperation(msg)
+        self._files[name] = ProxyFile(contents)
+
+    def file_delete(self, name):
+        if not name in self._files:
+            msg = 'Cannot delete file %r that does not exist.' % name
+            raise InvalidDiskOperation(msg)
+        del self._files[name]
+        
+    def file_create(self, name, contents):
+        if name in self._files or name in self._directories:
+            msg = 'Cannot create file that already exists  %r.' % name
+            raise InvalidDiskOperation(msg)
+        self._files[name] = ProxyFile(contents)
+
+    def dir_delete(self, name):
+        if not name in self._directories:
+            msg = 'Cannot delete directory that does not exist %r.' % name
+            raise InvalidDiskOperation(msg)
+        del self._directories[name]
+
 
 class ProxyFile(object):
     @contract(contents=str)

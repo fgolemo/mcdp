@@ -2,10 +2,11 @@
 from mcdp_hdb.schema import Schema
 from comptests.registrar import comptest, run_module_tests
 from mcdp.constants import MCDPConstants
-import yaml
 from mcdp.logs import logger
 from contracts.utils import indent
 from mcdp_hdb.disk_map import DiskMap
+from mcdp_hdb.disk_struct import ProxyDirectory, ProxyFile
+from mcdp_utils_misc.my_yaml import yaml_dump
 
 def l(what, s):
     logger.info('\n' + indent(s, '%010s │  ' % what))
@@ -24,24 +25,28 @@ def test_extension():
 
     dm = DiskMap()
     dm.hint_extensions(s['images'], exts)
-
-#     data = s.generate()
     
     d = 'contents'
-    h0 = {'images': {'im1.jpg': d, 'im2.png': d, 'im2.jpg': d}}
-    l('h0', yaml.dump(h0))
+    h0 = ProxyDirectory(directories={'images':
+                                     ProxyDirectory(files={'im1.jpg': ProxyFile(d), 
+                                                           'im2.png': ProxyFile(d), 
+                                                           'im2.jpg': ProxyFile(d)})})
+    
     
     data = dm.interpret_hierarchy(s, h0)
-    l('data', yaml.dump(data))
+    l('data', yaml_dump(data))
     s.validate(data)
-#     
-#     dm1 = DiskMap()
-#     h1 = dm1.create_hierarchy(s, data)
-#     l('h1', yaml.dump(h1))
 
     h1 = dm.create_hierarchy(s, data)
-    l('h1', yaml.dump(h1))
+    l('h1', h1.tree())
 
 
+    if h0.hash_code() != h1.hash_code():
+        msg = 'They do not match'
+        msg += '\n' + indent(h0.tree(), 'h0 ')
+        msg += '\n' + indent(h1.tree(), 'h1 ')
+        raise Exception(msg) 
+    
+    
 if __name__ == '__main__':
     run_module_tests()

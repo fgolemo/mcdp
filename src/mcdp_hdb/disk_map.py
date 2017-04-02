@@ -157,8 +157,6 @@ class DiskMap():
                 if isinstance(hint, HintFileYAML):
                     return read_SchemaContext_SER_FILE_YAML(self, schema, fh)
 
-            if isinstance(schema, SchemaString):
-                return fh.contents
 
             if isinstance(schema, SchemaList):
                 if isinstance(hint, HintDir):
@@ -170,11 +168,14 @@ class DiskMap():
             if isinstance(schema, SchemaBytes):
                 return fh.contents
 
+            if isinstance(schema, SchemaString):
+                return yaml_load(fh.contents)
+
             if isinstance(schema, SchemaDate):
-                if isinstance(fh, datetime.datetime):
-                    return fh.contents
-                else:
-                    logger_tmp.debug('looking at %r' % fh)
+#                 if isinstance(fh, datetime.datetime):
+#                     return fh.contents
+#                 else:
+#                     logger_tmp.debug('looking at %r' % fh)
                     return yaml_load(fh)
 
             msg = 'NotImplemented'
@@ -209,7 +210,10 @@ class DiskMap():
             if isinstance(hint, HintDir):
                 return write_SchemaContext_SER_DIR(self, schema, data)
     
-        if isinstance(schema, (SchemaString, SchemaBytes, SchemaDate)):
+        if isinstance(schema, SchemaBytes):
+            return ProxyFile(data)
+        
+        if isinstance(schema, (SchemaString, SchemaDate)):
             return ProxyFile(yaml_dump(data))
 
         if isinstance(schema, SchemaList):
@@ -369,12 +373,12 @@ def disk_events_from_dict_rename(disk_map, view, _id, who, name, key, key2):
 def disk_events_for_creating(_id, who, d, prefix):
     # create this dir
     yield disk_event_dir_create(_id, who, dirname=prefix[:-1], name=prefix[-1])
-    for fn, f in d.files.items():
+    for fn, f in d.get_files().items():
         yield disk_event_file_create(_id, who, 
                                      dirname=list(prefix), 
                                      name=fn, 
                                      contents=f.contents)
-    for d2_name, d2 in d.directories.items():
+    for d2_name, d2 in d.get_directories().items():
         prefix2 = prefix + (d2_name,)
         for _ in disk_events_for_creating(_id, who, d2, prefix2):
             yield _
@@ -444,7 +448,7 @@ def read_SchemaHash_Extensions(self, schema, fh):
     check_isinstance(schema, SchemaHash)
     res = {}
     extensions = self.get_hint(schema).extensions 
-            
+    
     found = [] 
     for filename, data in fh.recursive_list_files():
         found.append(filename)
@@ -457,6 +461,8 @@ def read_SchemaHash_Extensions(self, schema, fh):
         if ext in extensions: 
             if not name in res:
                 res[name] = {}
+                
+            check_isinstance(data, ProxyFile)
             res[name][ext] = self.interpret_hierarchy_(schema.prototype[ext], data)
             # fill nulls for other extensions
             for ext2 in extensions:

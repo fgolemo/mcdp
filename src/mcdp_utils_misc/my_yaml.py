@@ -10,7 +10,7 @@ if True:
     def yaml_load(s):
         if s.startswith('...'):
             return None
-        return yaml.load(s, yaml.RoundTripLoader)
+        return yaml.load(s, Loader=yaml.RoundTripLoader)
     
     def yaml_dump(s):
         return yaml.dump(s, Dumper=yaml.RoundTripDumper)
