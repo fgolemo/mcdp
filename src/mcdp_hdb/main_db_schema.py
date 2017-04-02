@@ -30,11 +30,10 @@ class DB():
         shelf_info.list('acl', acl_entry, default=[])
     
     shelf.hash('libraries', library)
+    shelves = SchemaHash(shelf)
     
     repo = Schema()
-    repo.hash('shelves', shelf)
-
-    shelves = SchemaHash(shelf)
+    repo._add_child('shelves', shelves)
 
     user = Schema() 
     with user.context_e('info') as user_info:
@@ -52,26 +51,25 @@ class DB():
         user_info.list('groups', SchemaString(), default=[])
     users = SchemaHash(user)
     
-    dm = DiskMap()
+    dm = DiskMap(repo)
     dm.hint_directory(shelves, pattern='%.mcdpshelf')
-    dm.translate_children(shelf, {'info':'mcdpshelf.yaml'})
-    dm.translate_children(shelf, {'libraries':None})
+    dm.hint_directory(shelf, translations={'info':'mcdpshelf.yaml', 'libraries':None})
     dm.hint_file_yaml(shelf['info'])
     dm.hint_directory(shelf['libraries'], pattern='%.mcdplib')
     dm.hint_directory(users, pattern='%.mcdp_user') 
-    dm.translate_children(user, {'info':'user.yaml'})
+    dm.hint_directory(user, translations={'info':'user.yaml'})
     dm.hint_file_yaml(user['info'])
     
-    dm.translate_children(library, {'images': None})
+    dm.hint_directory(library, translations={'images': None, 'documents': None, 'things': None})
     dm.hint_extensions(library['images'], image_extensions)
-    dm.translate_children(library, {'documents': None})
     dm.hint_directory(library['documents'], pattern='%.md')
-    dm.translate_children(library, {'things': None})
+    spec_translations = dict((k,None) for k in list(specs))
+    dm.hint_directory(things, translations=spec_translations)
+    
     for spec_name, spec in specs.items():  # @UnusedVariable
-        dm.translate_children(things, {spec_name: None})
-        dm.hint_directory(things[spec_name], pattern='%%.%s' % spec.extension)
+        dm.hint_directory(things[spec_name], pattern='%.' + spec.extension)
 
-    user2 = Schema()
+#     user2 = Schema()
     # info/ 
     #     public/      # Things that everybody can see
     #        name

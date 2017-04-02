@@ -17,19 +17,19 @@ def read(dirname):
     
     print('These are the files found:\n%s' % indent(hierarchy.tree(), '  '))
     
-    users_data = dm.interpret_hierarchy(DB.users, hierarchy)
+    users_data = dm.interpret_hierarchy_(DB.users, hierarchy)
     DB.users.validate(users_data)
     
     print ('users_data:\n%s' % yaml.dump(users_data))
 
-    shelves_data = dm.interpret_hierarchy(DB.shelves, hierarchy)
+    shelves_data = dm.interpret_hierarchy_(DB.shelves, hierarchy)
     DB.shelves.validate(shelves_data)
     
     #print ('shelves_data:\n%s' % yaml.dump(shelves_data))
      
     if len(sys.argv) >= 3:
         # serialize
-        h2 = dm.create_hierarchy(DB.shelves, shelves_data)
+        h2 = dm.create_hierarchy_(DB.shelves, shelves_data)
         where = sys.argv[2]
         print('Creating directory %s' % where)
         if os.path.exists(where):

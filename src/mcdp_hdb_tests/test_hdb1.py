@@ -19,7 +19,7 @@ def check_db_schema_custom():
 @comptest
 def check_db_schema_default():
     schema = DB.shelves
-    dm = DiskMap() # no customization
+    dm = DiskMap(schema) # no customization
     run_tests(schema, dm, 'default')
     
 def run_tests(schema, dm, name):
@@ -29,7 +29,7 @@ def run_tests(schema, dm, name):
     
     print('This is the data:\n%s' % indent(yaml.dump(data1), ' > '))
     # serialize
-    h = dm.create_hierarchy(schema, data1)
+    h = dm.create_hierarchy_(schema, data1)
     
     print('This is the data serialized:\n')
     
@@ -49,7 +49,7 @@ def run_tests(schema, dm, name):
     print('These are the files found:\n%s' % indent(h2.tree(), '  '))
     
     # now re-interpret the data
-    data2 = dm.interpret_hierarchy(schema, h2)
+    data2 = dm.interpret_hierarchy_(schema, h2)
     
     if data1 != data2:
         print ('data1:\n%s' % yaml.dump(data1))

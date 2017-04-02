@@ -69,7 +69,7 @@ def test_view1a():
     db2 = replay_events(viewmanager, db0, events) 
     assert_equal(db, db2)
 
-    dm = DiskMap()
+    dm = DiskMap(db_schema)
     check_translation(db_schema, db0, events, db2, dm)
 
 
