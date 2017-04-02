@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*- 
 from contracts import contract
-from contracts.utils import indent, raise_desc
+from contracts.utils import indent
 from pyramid.security import Allow, Authenticated, Everyone, Deny
 
 from mcdp.constants import MCDPConstants
@@ -62,7 +62,9 @@ class ACL(object):
         self.rules = rules
         
     def as_pyramid_acl(self):
-        return map(ACLRule.as_pyramid_acl, self.rules)
+        root_rule = (Allow, MCDPConstants.ROOT, tuple(Privileges.ALL_PRIVILEGES))
+        rules = map(ACLRule.as_pyramid_acl, self.rules)
+        return [root_rule] + rules
         
     def allowed2(self, privilege, user):
         return self.allowed(privilege, user.username, user.groups)
@@ -84,13 +86,14 @@ class ACL(object):
             msg = 'Unknown privilege %r' % privilege
             raise ValueError(msg)
         
-        print('checking privilege %s for %s' % (privilege, principals))
+        # We grant root all privileges
+        if MCDPConstants.ROOT in principals:
+            return True
         
         for r in self.rules:
             matches = ((r.privilege == Privileges.SPECIAL_ALL_WILDCARD) or
                        (r.privilege==privilege))
             
-            print('%s -> %s ' %  (r, matches))
             if not matches: continue
             
             if r.to_whom in principals:

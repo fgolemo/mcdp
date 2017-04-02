@@ -123,11 +123,11 @@ struct events:
 file events:
 
     disk_dir_rename <dirname> <name>
-    disk_file_create <filename> <contents>
-    disk_file_modify <filename> <contents>
-    disk_file_delete <filename>
-    # disk_dir_delete <dirname>
-    # disk_file_rename <dirname> <basename> <basename2>
+    disk_file_create  <dirname> <filename> <contents>
+    disk_file_modify  <dirname> <filename> <contents>
+    disk_file_delete  <dirname> <filename>
+    disk_dir_delete <dirname>
+    disk_file_rename <dirname> <basename> <basename2>
 
 
 ## Functorial relations
@@ -151,16 +151,28 @@ Let:
     mem_apply: MemoryEvent x MemoryStructure -> MemoryStructure
     disk_apply: DiskEvent x DiskStructure -> DiskStructure
 
-now we want a translation function
+and
 
-    β : MemoryEvent -> DiskEvent
+    mem_apply_s: MemoryEvents* x MemoryStructure -> MemoryStructure
+    disk_apply_s: DiskEvent* x DiskStructure -> DiskStructure
+
+now we want a translation function that takes a sequence of events
+
+    β : MemoryEvent* -> DiskEvent*
 
 Then we ask that the following holds:
 
-    For all e \in MemoryEvent:
+    For all es \in MemoryEvent*:
 
-        mem_apply(e, db0) = disk_apply( β(e), φ)
+        mem_apply_s(es, db0) = disk_apply( β(es), φ)
 
+Furthermore we look at the single β0 that translates a single event
+
+    β0: MemoryEvent -> DiskEvent+
+
+So that
+
+    β([e :: es]) = β0(e) + β(es)
 
 
 

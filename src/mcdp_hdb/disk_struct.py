@@ -1,6 +1,8 @@
 from contracts import contract
 import os
 from contracts.utils import indent
+import fnmatch
+from mcdp.constants import MCDPConstants
 
 class ProxyDirectory(object):
     
@@ -59,8 +61,15 @@ class ProxyDirectory(object):
     
     @staticmethod
     def from_disk(base):
+        ignore_patterns = MCDPConstants.locate_files_ignore_patterns
+        
+        def should_ignore_resource(x):
+            return any(fnmatch.fnmatch(x, ip) for ip in ignore_patterns)
+         
         d0 = ProxyDirectory()
         for fn in os.listdir(base):
+            if should_ignore_resource(fn):
+                continue
             full = os.path.join(base, fn)
             if os.path.isdir(full):
                 d0[fn] = ProxyDirectory.from_disk(full)
@@ -68,21 +77,30 @@ class ProxyDirectory(object):
                 d0[fn] = ProxyFile.from_disk(full)
         return d0
     
-    def tree(self):
+    def tree(self, max_levels=1000):
+        if max_levels < 0:
+            return 'skipping'
         s = ''
         for k in sorted(self.files):
             f = self.files[k]
             MAX = 20
             if len(f.contents) < MAX:
-                s += '%s = %r\n' % (k, f.contents)
+                s += '%r = %r\n' % (k, f.contents)
             else:
                 s += '%s: %d bytes\n' % (k, len(f.contents))
         for k in sorted(self.directories):
             d = self.directories[k]
             s += '%s/\n' % k
-            s += indent(d.tree().rstrip(), '.   ') + '\n' 
+            s += indent(d.tree(max_levels-1).rstrip(), '.   ') + '\n' 
         return s
 
+    def recursive_list_files(self):
+        ''' Yields a list of basename, ProxyFile '''
+        for k, f in self.files.items():
+            yield k, f
+        for _, d in self.directories.items():
+            for k, f in d.recursive_list_files():
+                yield k, f
 
 class ProxyFile(object):
     @contract(contents=str)

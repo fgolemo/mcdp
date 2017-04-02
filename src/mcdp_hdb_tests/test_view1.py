@@ -3,7 +3,7 @@ from copy import deepcopy
 
 from contracts.utils import indent
 from nose.tools import assert_equal
-import yaml
+from ruamel import yaml
 
 from comptests.registrar import comptest, run_module_tests
 from mcdp.logs import logger

@@ -1,9 +1,9 @@
 from contracts import contract
 from contracts.utils import check_isinstance, indent, raise_wrapped
-import yaml
 
 from mcdp.logs import logger
 from collections import OrderedDict
+from mcdp_utils_misc.my_yaml import yaml_dump
 
 
 class DataEvents(object):
@@ -22,7 +22,7 @@ class DataEvents(object):
     all_events = [leaf_set, struct_set, increment, list_append, 
                   list_delete, dict_setitem, dict_delitem, dict_rename]
 
-@contract(name=tuple)
+@contract(name='seq(str)')
 def get_view_node(view, name):
     v = view
     while len(name):
@@ -46,6 +46,7 @@ def event_leaf_set_interpret(view, parent, name, value):
     vc.set(value)
 
 def event_struct_set(name, value, **kwargs):
+    name = list(name)
     arguments = dict(name=name, value=value)
     return event_make(event_name=DataEvents.struct_set, arguments=arguments, **kwargs)
 
@@ -53,6 +54,7 @@ def event_struct_set_interpret(view, arguments):
     raise NotImplementedError()
 
 def event_increment(name, value, **kwargs):
+    name = list(name)
     arguments = dict(name=name, value=value)
     return event_make(event_name=DataEvents.increment, arguments=arguments, **kwargs)
 
@@ -60,6 +62,7 @@ def event_increment_interpret(view, arguments):
     raise NotImplementedError()
 
 def event_set_add(name, value, **kwargs):
+    name = list(name)
     arguments = dict(name=name, value=value)
     return event_make(event_name=DataEvents.set_add, arguments=arguments, **kwargs)
 
@@ -67,6 +70,7 @@ def event_set_add_interpret(view, arguments):
     raise NotImplementedError()
 
 def event_set_remove(name, value, **kwargs):
+    name = list(name)
     arguments = dict(name=name, value=value)
     return event_make(event_name=DataEvents.set_remove,  arguments=arguments, **kwargs)
 
@@ -83,6 +87,7 @@ def event_list_append_interpret(view, arguments):
     raise NotImplementedError()
 
 def event_list_delete(name, index, **kwargs):
+    name = list(name)
     arguments = dict(name=name, index=index)
     return event_make(event_name=DataEvents.list_delete, arguments=arguments, **kwargs)
 
@@ -90,6 +95,7 @@ def event_list_delete_interpret(view, arguments):
     raise NotImplementedError()
 
 def event_list_remove(name, value, **kwargs):
+    name = list(name)
     arguments = dict(name=name, value=value)
     return event_make(event_name=DataEvents.list_delete, arguments=arguments, **kwargs)
 
@@ -97,6 +103,7 @@ def event_list_remove_interpret(view, arguments):
     raise NotImplementedError()
 
 def event_dict_setitem(name, key, value, **kwargs):
+    name = list(name)
     arguments = dict(name=name, key=key, value=value)
     e = event_make(event_name=DataEvents.dict_setitem,  arguments=arguments, **kwargs)
     return e
@@ -112,6 +119,7 @@ def event_dict_setitem_interpret(view, name, key, value):
     v._data[key] = value
     
 def event_dict_delitem(name, key, **kwargs):
+    name = list(name)
     arguments = dict(name=name, key=key)
     return event_make(event_name=DataEvents.dict_delitem, arguments=arguments, **kwargs)
 
@@ -124,6 +132,7 @@ def event_dict_delitem_interpret(view, name, key):
     del v._data[key] 
 
 def event_dict_rename(name, key, key2, **kwargs):
+    name = list(name)
     arguments = dict(name=name, key=key, key2=key2)
     return event_make(event_name=DataEvents.dict_rename,  arguments=arguments, **kwargs)
 
@@ -136,21 +145,16 @@ def event_dict_rename_interpret(view, name, key, key2):
     v._data[key2] = v._data.pop(key)
 
 
+@contract(_id=str, event_name=str)
 def event_make(_id, event_name, who, arguments):
     assert event_name in DataEvents.all_events
-#     return {
-#      'operation': event_name, 
-#      'id': _id,
-#      'who': who, 
-#      'arguments': arguments,
-#     }
     d = OrderedDict()
-    d['id'] = _id,
-    d['operation'] = event_name
+    d['id'] = _id
     d['who'] = who
-    d['arguments']=arguments
+    d['operation'] = event_name
+    d['arguments'] = arguments
     return d
-# 
+#
 def event_intepret(view_manager, db0, event):
     actor = event['who']['actor']
     principals = event['who']['principals']
@@ -176,7 +180,7 @@ def event_intepret(view_manager, db0, event):
         intf(view=view, **arguments)
     except Exception as e:
         msg = 'Could not complete the replay of this event: \n'
-        msg += indent(yaml.dump(event), 'event: ')
+        msg += indent(yaml_dump(event), 'event: ')
         from mcdp_hdb.dbview import InvalidOperation
         raise_wrapped(InvalidOperation, e, msg)
     view._schema.validate(db0)
@@ -186,9 +190,9 @@ def replay_events(view_manager, db0, events):
     for event in events:
         event_intepret(view_manager, db0, event)
         msg = '\nAfter playing event:\n'
-        msg += indent(yaml.dump(event), '   event: ')
+        msg += indent(yaml_dump(event), '   event: ')
         msg += '\nthe DB is:\n'
-        msg += indent(yaml.dump(db0), '   db: ')
+        msg += indent(yaml_dump(db0), '   db: ')
         logger.debug(msg)
     return db0
 

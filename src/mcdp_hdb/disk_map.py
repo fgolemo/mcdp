@@ -7,14 +7,14 @@ import sys
 from contracts import contract
 from contracts.interface import describe_value
 from contracts.utils import raise_desc, raise_wrapped, indent, check_isinstance
-import yaml
 
 from mcdp.logs import logger_tmp, logger
 from mcdp_hdb.disk_struct import ProxyDirectory, ProxyFile
 from mcdp_hdb.schema import SchemaHash, SchemaString, SchemaContext,\
     SchemaList, SchemaBytes, NOT_PASSED, SchemaDate, SchemaBase
-from mcdp_library_tests.create_mockups import mockup_flatten
+# from mcdp_library_tests.create_mockups import mockup_flatten
 from mcdp_utils_misc import format_list
+from mcdp_utils_misc.my_yaml import yaml_dump, yaml_load
 
 
 class IncorrectFormat(Exception):
@@ -27,7 +27,7 @@ def raise_incorrect_format(msg, schema, data):
     if isinstance(data, str):
         datas = data
     else:
-        datas = yaml.dump(data).encode('utf8')
+        datas = yaml_dump(data).encode('utf8')
     MAX = 512
     if len(datas) > MAX:
         datas = datas[:MAX] + ' [truncated]'
@@ -129,8 +129,7 @@ class DiskMap():
             msg = 'While parsing: \n'
             msg += indent(str(schema), ' ')
             msg += '\n\nfiles:\n\n'
-            flattened = sorted(mockup_flatten(fh))
-            msg += indent("\n".join(flattened), '  ')
+            msg += indent(fh.tree(), '  ')
             raise_wrapped(IncorrectFormat, e, msg)
 
     @contract(fh='isinstance(ProxyDirectory)|isinstance(ProxyFile)')
@@ -170,7 +169,7 @@ class DiskMap():
                     return fh.contents
                 else:
                     logger_tmp.debug('looking at %r' % fh)
-                    return yaml.load(fh)
+                    return yaml_load(fh)
 
             msg = 'NotImplemented'
             raise_desc(NotImplementedError, msg, schema=type(schema), hint=hint)
@@ -188,7 +187,7 @@ class DiskMap():
         hint = self.get_hint(schema)
         
         if isinstance(hint, HintFileYAML):
-            return ProxyFile(yaml.dump(data))
+            return ProxyFile(yaml_dump(data))
 
         if isinstance(schema, SchemaHash):
             if isinstance(hint, HintDir):
@@ -215,7 +214,7 @@ class DiskMap():
             return ProxyFile(data)
         
         if isinstance(schema, SchemaDate):
-            return ProxyFile(yaml.dump(data))
+            return ProxyFile(yaml_dump(data))
         
         msg = 'Not implemented for %s, hint %s' % (schema, hint)
         raise ValueError(msg)
@@ -277,21 +276,14 @@ def interpret_SchemaList_SER_DIR(self, schema, fh):
         res[i] = self.interpret_hierarchy_(schema.prototype, fh[filename])
     return res
 
+@contract(fh=ProxyDirectory)
 def read_SchemaHash_Extensions(self, schema, fh):
     check_isinstance(schema, SchemaHash)
     res = {}
-    extensions = self.get_hint(schema).extensions
-    
-    def recursive_list2(ff):
-        for filename, data in ff.items():
-            if isinstance(data, dict):
-                for x in recursive_list2(data):
-                    yield x
-            yield filename, data
+    extensions = self.get_hint(schema).extensions 
             
-    found = []
-    n = 0
-    for filename, data in recursive_list2(fh):
+    found = [] 
+    for filename, data in fh.recursive_list_files():
         found.append(filename)
 
         name, ext = os.path.splitext(filename)
@@ -299,21 +291,14 @@ def read_SchemaHash_Extensions(self, schema, fh):
             continue
         ext = ext[1:]
         
-        if ext in extensions:
-            n+= 1
+        if ext in extensions: 
             if not name in res:
                 res[name] = {}
             res[name][ext] = self.interpret_hierarchy_(schema.prototype[ext], data)
             # fill nulls for other extensions
             for ext2 in extensions:
                 if not ext2 in res[name]: # do not overwrite
-                    res[name][ext2] = None
-#     if n == 0:
-#         logger.debug('Found no files with extensions %s' % format_list(extensions))
-#         logger.debug(' found = %s' % format_list(found))
-#     
-#     logger.debug('keys matching extensions %s: %s -> %s' % (extensions, 
-#                                                             format_list(found), format_list(res)))
+                    res[name][ext2] = None 
     return res
 
 def read_SchemaHash_SER_DIR(self, schema, fh):
@@ -325,6 +310,13 @@ def read_SchemaHash_SER_DIR(self, schema, fh):
     else:
         seq = recursive_list(fh, hint.pattern)
  
+    seq = list(seq)
+    msg = 'read_SchemaHash_SER_DIR\n'
+    msg += indent(fh.tree(0), 'files  ') + '\n'
+    msg += 'pattern is %r\n' % hint.pattern
+    msg += 'list is %s\n' % seq
+    #logger.info(msg)
+    
     for filename, data in seq:
         try:
             k = key_from_filename(pattern=hint.pattern, filename=filename)
@@ -385,7 +377,7 @@ def filename_for_k_SchemaContext_SER_DIR(self, schema, k):
 
 @contract(f=ProxyFile)
 def read_SchemaContext_SER_FILE_YAML(self, schema, f):
-    data = yaml.load(f.contents)
+    data = yaml_load(f.contents)
     res = {}
     present = set(data)
     used = set()

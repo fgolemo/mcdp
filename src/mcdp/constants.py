@@ -194,6 +194,8 @@ class MCDPConstants():
     EVERYONE = 'Everyone' 
     ALLOW = 'Allow'
     DENY = 'Deny' 
+    # This is somebody who is granted all permissions
+    ROOT = 'system:root'
     
     default_acl = [
         [ALLOW, EVERYONE, Privileges.DISCOVER],

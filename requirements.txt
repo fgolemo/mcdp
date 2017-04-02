@@ -17,7 +17,7 @@ junit_xml
 lxml
 bcrypt
 waitress
-
+ruamel.yaml
 
 gitpython
 webtest

@@ -1,14 +1,13 @@
 from abc import abstractmethod, ABCMeta
-import time
 
 from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped, indent
 
 from mcdp_hdb.schema import SchemaBase, SchemaContext, SchemaBytes, SchemaString,\
     SchemaDate, SchemaHash, SchemaList
-from mcdp_utils_misc.string_utils import format_list
-from mcdp_utils_misc.memoize_simple_imp import memoize_simple
-from mcdp.constants import MCDPConstants
+from mcdp_utils_misc import format_list
+from mcdp_utils_misc import memoize_simple
+from mcdp import MCDPConstants
 from mcdp.logs import logger
 from copy import deepcopy
 from mcdp_hdb.change_events import event_leaf_set, event_dict_setitem,\
@@ -87,8 +86,7 @@ class ViewBase(object):
     def check_privilege(self, privilege):
         ''' Raises exception InsufficientPrivileges ''' 
         acl = self._schema.get_acl()
-        # interpret special rules
-#         print 'prefix: %s' % str(self._prefix)
+        # interpret special rules 
         acl.rules = deepcopy(acl.rules)
         for r in acl.rules:
             if r.to_whom.startswith('special:'):
@@ -106,7 +104,10 @@ class ViewBase(object):
         logger.debug(msg)
         
     def _get_event_id(self):
-        return int(time.time() * 1000000)
+        from time import gmtime, strftime, time
+        ms = int(time() * 1000) % 1000
+        d = strftime("%Y-%m-%d:%H:%M:%S:", gmtime()) + '%03d' % ms
+        return d        
     
     def _get_prefix(self, append):
         if append is None:
@@ -345,7 +346,7 @@ class ViewManager(object):
         if actor is None:
             actor = 'system'
         if principals is None:
-            principals = ['group:admin']
+            principals = [MCDPConstants.ROOT]
         if host is None:
             host = {'hostname': host_name()}
         v._who = {'host': host, 'actor': actor, 'principals': principals}
@@ -376,7 +377,6 @@ class ViewManager(object):
     
         if isinstance(s, SchemaString):
             return ViewString(view_manager=self, data=data, schema=s)
-
         
         raise NotImplementedError(type(s))
 
