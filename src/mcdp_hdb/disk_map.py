@@ -1,14 +1,12 @@
 from collections import defaultdict
 import copy
-import datetime
 import os
 import sys
 
-from contracts import contract
-from contracts.interface import describe_value
+from contracts import contract, describe_value
 from contracts.utils import raise_desc, raise_wrapped, indent, check_isinstance
 
-from mcdp.logs import logger_tmp, logger
+from mcdp import logger
 from mcdp_utils_misc import format_list, yaml_dump, yaml_load
 
 from .change_events import DataEvents, get_view_node
@@ -169,7 +167,7 @@ class DiskMap():
                 return fh.contents
 
             if isinstance(schema, SchemaString):
-                return yaml_load(fh.contents)
+                return schema.decode(fh.contents) # todo: encode to UTF-8
 
             if isinstance(schema, SchemaDate):
 #                 if isinstance(fh, datetime.datetime):
@@ -213,7 +211,10 @@ class DiskMap():
         if isinstance(schema, SchemaBytes):
             return ProxyFile(data)
         
-        if isinstance(schema, (SchemaString, SchemaDate)):
+        if isinstance(schema, SchemaString):
+            return ProxyFile(schema.encode(data))
+        
+        if isinstance(schema, SchemaDate):
             return ProxyFile(yaml_dump(data))
 
         if isinstance(schema, SchemaList):
@@ -221,7 +222,8 @@ class DiskMap():
         
         msg = 'Not implemented for %s, hint %s' % (schema, hint)
         raise ValueError(msg)
- 
+
+
 @contract(returns='list(dict)')
 def disk_events_from_data_event(disk_map, schema, data_rep, data_event):
     handlers = {

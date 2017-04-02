@@ -318,15 +318,33 @@ class SchemaDate(SchemaSimple):
     
 class SchemaString(SchemaSimple):
     
+    # how to represent None
+    NONE_TAG = 'null'
+    
     def __init__(self, default=NOT_PASSED, can_be_none=False):
         self.default = default
         self.can_be_none = can_be_none
         SchemaBase.__init__(self)
         
+    
     def get_default(self):
         return self.default 
      
-    
+    @contract(returns=bytes, s='str|None')
+    def encode(self, s):
+        ''' encode from memory to disk '''
+        if s is None:
+            return SchemaString.NONE_TAG
+        else:
+            return s
+        
+    @contract(returns=str, b=bytes)
+    def decode(self, b):
+        if b == SchemaString.NONE_TAG:
+            return None
+        else:
+            return b
+        
     def generate(self):
         words = ["boo","bar","fiz","buz"]
         s = ""
