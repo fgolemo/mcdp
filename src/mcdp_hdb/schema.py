@@ -10,13 +10,14 @@ from contracts.utils import indent, check_isinstance, raise_desc, raise_wrapped
 
 from mcdp_utils_misc import format_list
 from mcdp_shelf.access import ACL
+from contracts import contract
 
 
 NOT_PASSED = 'no-default-given'
 
 class NotValid(Exception):
-    ''' Raisedd by SchemaBase::validate() ''' 
-    pass
+    ''' Raised by SchemaBase::validate() ''' 
+    
  
 class SchemaBase(object):
 
@@ -48,7 +49,6 @@ class SchemaBase(object):
     
     def get_acl(self):
         return ACL(self.get_acl_rules())
-    
         
     def __str__(self):
         s = '%s' % type(self).__name__ 
@@ -61,70 +61,28 @@ class SchemaBase(object):
     def validate(self, data):
         ''' Raises NotValid '''
 
-class SchemaDate(SchemaBase):
-    def __init__(self, default):
-        self.default = default
-        SchemaBase.__init__(self)
+class SchemaRecursive(SchemaBase):
+    
+    @abstractmethod
+    @contract(prefix='seq(str)', returns=SchemaBase)
+    def get_descendant(self, prefix):
+        ''' Returns the schema for a descendant. '''
+
+
+class SchemaSimple(SchemaBase):
+    ''' Base class for simple data types '''
+    def get_descendant(self, prefix):
+        if not prefix:
+            return self
+        else:
+            msg = 'A basic datatype does not have descendants.'
+            raise_desc(ValueError, msg, self=self)
+            
         
-    def get_default(self):
-        return self.default 
-    
-    
-    def generate(self):
-        return datetime.datetime.now()
-    
-    def validate(self, data):
-        if not isinstance(data, datetime.datetime):
-            msg = 'Expected a datetime.datetime object.'
-            raise_desc(NotValid, msg, data=describe_value(data))
-    
-class SchemaString(SchemaBase):
-    
-    def __init__(self, default=NOT_PASSED, can_be_none=False):
-        self.default = default
-        self.can_be_none = can_be_none
-        SchemaBase.__init__(self)
-        
-    def get_default(self):
-        return self.default 
-     
-    
-    def generate(self):
-        words = ["boo","bar","fiz","buz"]
-        s = ""
-        for _ in range(3):
-            s += words[random.randint(0,len(words)-1)]
-        return s
-    
-    def validate(self, data):
-        if self.can_be_none and data is None:
-            return
-        
-        if not isinstance(data, str):
-            msg = 'Expected a string object.'
-            raise_desc(NotValid, msg, data=describe_value(data))
 
+class SchemaHash(SchemaRecursive):
     
-class SchemaBytes(SchemaBase):
-
-    def __init__(self, default, can_be_none=False):
-        self.default = default
-        self.can_be_none = can_be_none
-        SchemaBase.__init__(self)
-         
     
-    def generate(self):
-        return b'somebytes'
-    
-    def validate(self, data):
-        if self.can_be_none and data is None:
-            return
-        if not isinstance(data, bytes):
-            msg = 'Expected a bytes object.'
-            raise_desc(NotValid, msg, data=describe_value(data))
-
-
-class SchemaHash(SchemaBase):
     def __init__(self, schema, default=NOT_PASSED):
         SchemaBase.__init__(self)
         self.prototype = schema
@@ -132,6 +90,13 @@ class SchemaHash(SchemaBase):
         
         self.default = default
         SchemaBase.__init__(self)
+    
+    def get_descendant(self, prefix):
+        ''' Returns the schema for a descendant. '''
+        if prefix:
+            return self.prototype.get_descendant(prefix[1:])
+        else:
+            return self
     
     def get_default(self):
         return self.default 
@@ -166,13 +131,21 @@ class SchemaHash(SchemaBase):
                 raise_wrapped(NotValid, e, msg) 
              
 
-class SchemaContext(SchemaBase): 
+class SchemaContext(SchemaRecursive): 
+    
     def __init__(self):
         self.children = OrderedDict() 
         SchemaBase.__init__(self)
     
-    def validate(self, data):
+    def get_descendant(self, prefix):
+        ''' Returns the schema for a descendant. '''
+        if prefix:
+            first = prefix[0]
+            return self.children[first].get_descendant(prefix[1:])
+        else:
+            return self
         
+    def validate(self, data):
         if not isinstance(data, dict):
             msg = 'Expected a dictionary object.'
             raise_desc(NotValid, msg, data=describe_value(data))
@@ -279,14 +252,18 @@ def describe(children):
         s += '\n'
     return s.rstrip()
 
-class SchemaList(SchemaBase):
+class SchemaList(SchemaRecursive):
     def __init__(self, schema, default=NOT_PASSED):
         self.prototype = schema
         self.default = default
         SchemaBase.__init__(self)
         
-#     def __repr__(self):
-#         return 'SchemaList(%r)' % self.prototype
+    def get_descendant(self, prefix):
+        ''' Returns the schema for a descendant. '''
+        if prefix:
+            return self.prototype.get_descendant(prefix[1:])
+        else:
+            return self
       
     def validate(self, data):
         if not isinstance(data, list):
@@ -320,4 +297,66 @@ class SchemaList(SchemaBase):
             res.append(self.prototype.generate())
         return res
     
+
+    
+class SchemaDate(SchemaSimple):
+    def __init__(self, default):
+        self.default = default
+        SchemaBase.__init__(self)
+        
+    def get_default(self):
+        return self.default 
+    
+    
+    def generate(self):
+        return datetime.datetime.now()
+    
+    def validate(self, data):
+        if not isinstance(data, datetime.datetime):
+            msg = 'Expected a datetime.datetime object.'
+            raise_desc(NotValid, msg, data=describe_value(data))
+    
+class SchemaString(SchemaSimple):
+    
+    def __init__(self, default=NOT_PASSED, can_be_none=False):
+        self.default = default
+        self.can_be_none = can_be_none
+        SchemaBase.__init__(self)
+        
+    def get_default(self):
+        return self.default 
+     
+    
+    def generate(self):
+        words = ["boo","bar","fiz","buz"]
+        s = ""
+        for _ in range(3):
+            s += words[random.randint(0,len(words)-1)]
+        return s
+    
+    def validate(self, data):
+        if self.can_be_none and data is None:
+            return
+        
+        if not isinstance(data, str):
+            msg = 'Expected a string object.'
+            raise_desc(NotValid, msg, data=describe_value(data))
+
+class SchemaBytes(SchemaSimple):
+
+    def __init__(self, default, can_be_none=False):
+        self.default = default
+        self.can_be_none = can_be_none
+        SchemaBase.__init__(self)
+    
+    def generate(self):
+        return b'somebytes'
+    
+    def validate(self, data):
+        if self.can_be_none and data is None:
+            return
+        if not isinstance(data, bytes):
+            msg = 'Expected a bytes object.'
+            raise_desc(NotValid, msg, data=describe_value(data))
+
     

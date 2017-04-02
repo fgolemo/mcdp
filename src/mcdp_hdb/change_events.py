@@ -3,7 +3,10 @@ from contracts.utils import check_isinstance, indent, raise_wrapped
 
 from mcdp.logs import logger
 from collections import OrderedDict
-from mcdp_utils_misc.my_yaml import yaml_dump
+from mcdp_utils_misc import yaml_dump
+from mcdp_utils_misc import format_list
+from copy import deepcopy
+
 
 
 class DataEvents(object):
@@ -142,8 +145,12 @@ def event_dict_rename_interpret(view, name, key, key2):
     check_isinstance(v, ViewHash0)
     # permissions
     v.check_can_write()
+    from mcdp_hdb.dbview import InvalidOperation
+    if not key in v._data:
+        msg = ('Cannot rename key %r to %r if it does not exist in %s.' % 
+               (key, key2, format_list(v._data)))
+        raise InvalidOperation(msg)
     v._data[key2] = v._data.pop(key)
-
 
 @contract(_id=str, event_name=str)
 def event_make(_id, event_name, who, arguments):
@@ -187,6 +194,7 @@ def event_intepret(view_manager, db0, event):
 
         
 def replay_events(view_manager, db0, events):
+    db0 = deepcopy(db0)
     for event in events:
         event_intepret(view_manager, db0, event)
         msg = '\nAfter playing event:\n'

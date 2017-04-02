@@ -3,15 +3,16 @@ from copy import deepcopy
 
 from contracts.utils import indent
 from nose.tools import assert_equal
-from ruamel import yaml
 
 from comptests.registrar import comptest, run_module_tests
+from mcdp import MCDPConstants
 from mcdp.logs import logger
-from mcdp_hdb.schema import Schema, NotValid, SchemaString
-from mcdp_hdb.dbview import ViewManager
 from mcdp_hdb.change_events import replay_events
+from mcdp_hdb.dbview import ViewManager
+from mcdp_hdb.schema import Schema, NotValid, SchemaString
 from mcdp_shelf.access import ACLRule
-from mcdp.constants import MCDPConstants
+from mcdp_utils_misc import yaml_dump
+
 
 def l(what, s):
     logger.info('\n' + indent(s, '%010s │  ' % what))
@@ -59,7 +60,7 @@ def test_view1a():
     view = viewmanager.view(db, actor, principals)
     events = []
     def notify_callback(event):
-        logger.debug('\n' + yaml.dump(event))
+        logger.debug('\n' + yaml_dump(event))
         events.append(event)
     view._notify_callback = notify_callback
     users = view.users
@@ -104,13 +105,15 @@ def test_view1a():
     print all_users
     assert_equal(all_users, set(['pallo','andrea']))
 
-    l('db', yaml.dump(db))
+    l('db', yaml_dump(db))
      
-    print yaml.dump(events)
+    print yaml_dump(events)
     db2 = replay_events(viewmanager, db0, events) 
     
-    l('db2', yaml.dump(db2))
+    l('db2', yaml_dump(db2))
     assert_equal(db, db2)
     
 if __name__ == '__main__':
     run_module_tests()
+    
+    

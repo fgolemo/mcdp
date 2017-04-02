@@ -1,17 +1,16 @@
 from abc import abstractmethod, ABCMeta
+from copy import deepcopy
 
 from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped, indent
 
-from mcdp_hdb.schema import SchemaBase, SchemaContext, SchemaBytes, SchemaString,\
-    SchemaDate, SchemaHash, SchemaList
-from mcdp_utils_misc import format_list
-from mcdp_utils_misc import memoize_simple
 from mcdp import MCDPConstants
 from mcdp.logs import logger
-from copy import deepcopy
 from mcdp_hdb.change_events import event_leaf_set, event_dict_setitem,\
     event_dict_delitem, event_dict_rename
+from mcdp_hdb.schema import SchemaBase, SchemaContext, SchemaBytes, SchemaString,\
+    SchemaDate, SchemaHash, SchemaList
+from mcdp_utils_misc import format_list, memoize_simple
 
 
 class ViewError(Exception):
@@ -118,7 +117,8 @@ class ViewBase(object):
     def _get_event_kwargs(self):
         _id = self._get_event_id()
         who= self._who
-        return dict(_id=_id, who=who) 
+        return dict(_id=_id, who=who)
+     
     def _notify(self, event):
         if self._notify_callback is not None:
             self._notify_callback.__call__(event)

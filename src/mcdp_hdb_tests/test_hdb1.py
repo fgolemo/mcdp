@@ -5,11 +5,10 @@ from contracts.utils import raise_desc, indent
 import yaml
 
 from comptests.registrar import comptest, run_module_tests
+from mcdp import logger
 from mcdp_hdb.disk_map import DiskMap
-from mcdp_hdb.main_db_schema import DB 
 from mcdp_hdb.disk_struct import ProxyDirectory
-from mcdp.logs import logger
-
+from mcdp_hdb.main_db_schema import DB
 
 
 @comptest
@@ -62,4 +61,3 @@ def run_tests(schema, dm, name):
     
 if __name__ == '__main__':
     run_module_tests()
-    pass

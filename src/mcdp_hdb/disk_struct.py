@@ -1,8 +1,10 @@
 from contracts import contract
 import os
-from contracts.utils import indent
+from contracts.utils import indent, raise_desc
 import fnmatch
 from mcdp.constants import MCDPConstants
+from mcdp_utils_misc.my_yaml import yaml_dump
+from mcdp_utils_misc.string_utils import get_md5
 
 class ProxyDirectory(object):
     
@@ -14,6 +16,14 @@ class ProxyDirectory(object):
             directories = {}
         self.files = files
         self.directories = directories
+        
+    def hash_code(self):
+        codes = []
+        for f in sorted(self.files):
+            codes.append([f, self.files[f].hash_code()])
+        for d in sorted(self.directories):
+            codes.append([d, self.directories[d].hash_code()])
+        return get_md5(yaml_dump(codes))
     
     def __len__(self):
         return len(self.files) + len(self.directories)
@@ -102,11 +112,33 @@ class ProxyDirectory(object):
             for k, f in d.recursive_list_files():
                 yield k, f
 
+    @contract(prefix='seq(str)')
+    def get_descendant(self, prefix):
+        prefix = tuple(prefix)
+        if not prefix:
+            return self
+        else:
+            first = prefix[0]
+            if first in self.directories:
+                return self.directories[first].get_descendant(prefix[1:])
+            elif first in self.files:
+                if len(prefix) > 1:
+                    msg = 'Invalid url %r because %r is a file.' % (prefix, first)
+                    raise ValueError(msg)
+                else:
+                    return self.files[first]
+            else:
+                msg = 'Invalid name %r.' % first
+                raise_desc(ValueError, msg)   
+
 class ProxyFile(object):
     @contract(contents=str)
     def __init__(self, contents):
         self.contents = contents
         
+    def hash_code(self):
+        return get_md5(self.contents)
+    
     @staticmethod
     def from_disk(fn):
         with open(fn, 'r') as f:
