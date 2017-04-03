@@ -23,7 +23,7 @@ def test_extension():
     
     l('schema', s)
 
-    dm = DiskMap()
+    dm = DiskMap(s)
     dm.hint_extensions(s['images'], exts)
     
     d = 'contents'
@@ -33,11 +33,11 @@ def test_extension():
                                                            'im2.jpg': ProxyFile(d)})})
     
     
-    data = dm.interpret_hierarchy(s, h0)
+    data = dm.interpret_hierarchy_(s, h0)
     l('data', yaml_dump(data))
     s.validate(data)
 
-    h1 = dm.create_hierarchy(s, data)
+    h1 = dm.create_hierarchy_(s, data)
     l('h1', h1.tree())
 
 

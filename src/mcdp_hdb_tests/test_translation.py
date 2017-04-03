@@ -2,6 +2,7 @@
 from copy import deepcopy
 import os
 import shutil
+import traceback
 
 from contracts.utils import indent
 from nose.tools import assert_equal
@@ -12,11 +13,10 @@ from mcdp_hdb.change_events import replay_events, event_intepret
 from mcdp_hdb.dbview import ViewManager
 from mcdp_hdb.disk_events import disk_event_interpret
 from mcdp_hdb.disk_map import DiskMap, disk_events_from_data_event,\
-     IncorrectFormat,\
+    IncorrectFormat,\
     data_events_from_disk_event_queue
 from mcdp_hdb.schema import Schema, SchemaString, data_hash_code
 from mcdp_utils_misc import yaml_dump
-import traceback
 
 
 def l(what, s):
@@ -181,6 +181,7 @@ def check_translation_inverse(schema, disk_rep0, disk_events, disk_rep1, disk_ma
         write_file(i, 'b-data_rep', yaml_dump(data_rep))
         write_file(i, 'c-disk_event', yaml_dump(disk_events[0]))
         
+        
         evs, disk_events_consumed = data_events_from_disk_event_queue(disk_map, schema, disk_rep, disk_events)
         
         if not evs:
@@ -188,6 +189,7 @@ def check_translation_inverse(schema, disk_rep0, disk_events, disk_rep1, disk_ma
             msg += '\n' + indent(yaml_dump(disk_events[0]), ' disk_event ')
             raise Exception(msg)
         
+        write_file(i, 'c-disk_event-consumed', yaml_dump(disk_events_consumed))
         write_file(i, 'd-evs', yaml_dump(evs))
         
         data_events.extend(evs)
@@ -213,7 +215,7 @@ def check_translation_inverse(schema, disk_rep0, disk_events, disk_rep1, disk_ma
         
         write_file(i, 'g-data_rep-with-evs-applied', yaml_dump(data_rep))
         
-        msg = 'Disk event:\n'+ indent(yaml_dump(disk_event), ' disk_event ')
+        msg = 'Disk event:\n'+ indent(yaml_dump(disk_events_consumed), ' disk_events_consumed ')
         msg += '\Data events:\n' + indent(yaml_dump(evs), ' events ')
         logger.debug(msg)
         
