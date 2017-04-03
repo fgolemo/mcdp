@@ -14,6 +14,10 @@ from .disk_events import DiskEvents
 from .disk_events import disk_event_file_modify, disk_event_dir_delete, disk_event_file_create, disk_event_dir_create, disk_event_file_delete, disk_event_file_rename, disk_event_dir_rename
 from .disk_struct import ProxyDirectory, ProxyFile
 from .schema import SchemaHash, SchemaString, SchemaContext, SchemaList, SchemaBytes, NOT_PASSED, SchemaDate, SchemaBase
+from mcdp_hdb.change_events import event_leaf_set, event_dict_setitem,\
+    event_dict_delitem, event_dict_rename
+from mcdp_hdb.disk_events import disk_event_interpret
+from copy import deepcopy
 
 
 # from mcdp_library_tests.create_mockups import mockup_flatten
@@ -122,23 +126,37 @@ class DiskMap(object):
         self.hints[s] = HintExtensions(extensions)
  
     def hint_file_yaml(self, s):
-        self.hints[s] = HintFileYAML()
-
-#     @contract(fh=ProxyDirectory)
-#     def interpret_hierarchy(self, schema, fh):
-#         '''
-#             fh = Files in recursive dictionary format:
-#             {'dir': {'file': 'filecontents'}} 
-#         '''
-#         assert self.schema == schema
-#         try:
-#             return self.interpret_hierarchy_(schema, fh=fh)
-#         except IncorrectFormat as e:
-#             msg = 'While parsing: \n'
-#             msg += indent(str(schema), ' ')
-#             msg += '\n\nfiles:\n\n'
-#             msg += indent(fh.tree(), '  ')
-#             raise_wrapped(IncorrectFormat, e, msg)
+        self.hints[s] = HintFileYAML() 
+        
+    @contract(dirname='seq(str)')
+    def data_url_from_dirname(self, dirname):
+        return self.data_url_from_dirname_(self.schema, tuple(dirname))
+    
+    @contract(dirname='tuple,seq(str)')
+    def data_url_from_dirname_(self, schema, dirname):
+        if not dirname:
+            return ()
+        # We know we will only get Context, List and Hash
+        check_isinstance(schema, (SchemaHash, SchemaList, SchemaContext))
+        # things that are serialized using hintdir
+        hint = self.get_hint(schema)
+        check_isinstance(hint, HintDir)
+        
+        first = dirname[0]
+        rest = dirname[1:]
+        first_translated = hint.key_from_filename(first)
+        
+        if isinstance(schema, SchemaHash):
+            rest_translated = self.data_url_from_dirname_(schema.prototype, rest)
+        if isinstance(schema, SchemaList):
+            rest_translated = self.data_url_from_dirname_(schema.prototype, rest)
+        if isinstance(schema, SchemaContext):
+            schema_child = schema.children[first_translated]
+            rest_translated = self.data_url_from_dirname_(schema_child, rest)
+            
+        return (first_translated,) + rest_translated 
+        
+        
 
     @contract(fh='isinstance(ProxyDirectory)|isinstance(ProxyFile)')
     def interpret_hierarchy_(self, schema, fh):
@@ -178,13 +196,9 @@ class DiskMap(object):
         except IncorrectFormat as e:
             msg = 'While interpreting schema %s' % type(schema)
             msg += ', hint: %s' % str(self.get_hint(schema))
+            msg += '\nDisk representation (1) level:\n%s' % indent(fh.tree(1), ' tree(1) ')
             raise_wrapped(IncorrectFormat, e, msg, compact=True, 
-                          exc = sys.exc_info())
-# 
-#     @contract(returns=ProxyDirectory)
-#     def create_hierarchy(self, schema, data):
-#         assert self.schema == schema
-#         return self.create_hierarchy_(schema=schema, data=data)
+                          exc = sys.exc_info()) 
 
     def create_hierarchy_(self, schema, data):
         hint = self.get_hint(schema)
@@ -195,6 +209,7 @@ class DiskMap(object):
         if isinstance(schema, SchemaHash):
             if isinstance(hint, HintDir):
                 return write_SchemaHash_SER_DIR(self, schema, data)
+            
             if isinstance(hint, HintExtensions):
                 return write_SchemaHash_Extensions(self, schema, data)
             
@@ -221,10 +236,10 @@ class DiskMap(object):
         msg = 'Not implemented for %s, hint %s' % (schema, hint)
         raise ValueError(msg)
 
-@contract(returns='list(dict)')
-def data_events_from_disk_event(disk_map, schema, disk_rep, disk_event):
+@contract(returns='tuple(list(dict), list(dict))')
+def data_events_from_disk_event_queue(disk_map, schema, disk_rep, disk_events_queue):
     def not_implement():
-        raise NotImplementedError(yaml_dump(disk_event))
+        raise NotImplementedError(yaml_dump(disk_events_queue[0]))
     
     handlers = {
         DiskEvents.dir_create: data_events_from_dir_create,
@@ -235,17 +250,22 @@ def data_events_from_disk_event(disk_map, schema, disk_rep, disk_event):
         DiskEvents.file_delete: data_events_from_file_delete,
         DiskEvents.file_rename: data_events_from_file_rename,
     } 
+    disk_event_consumed = []
+    disk_event = disk_events_queue.pop(0)
+    disk_event_consumed.append(disk_event)
     operation = disk_event['operation']
     if operation in handlers:
         f = handlers[operation]
         arguments = disk_event['arguments']
         who = disk_event['who']
+        _id = disk_event['id']
         try:
-            evs = f(disk_map=disk_map, disk_rep=disk_rep, _id='tmp-id', who=who, **arguments)
-            _id = disk_rep['id']
+            evs, consumed = f(disk_map=disk_map, disk_rep=disk_rep, disk_events_queue=disk_events_queue,
+                               _id='tmp-id', who=who, **arguments)
             for i, ev in enumerate(evs):
                 ev['id'] = _id + '-translated_inverse-%d' % i
-            return evs 
+            disk_event_consumed.extend(consumed)
+            return evs, disk_event_consumed 
         except Exception as e:
             msg = 'Could not succesfully translate using %r:' % f.__name__
             msg += '\n' + 'Schema: ' + '\n' + indent(schema, ' schema ')
@@ -254,24 +274,102 @@ def data_events_from_disk_event(disk_map, schema, disk_rep, disk_event):
     else:
         raise NotImplementedError(operation)
     
-def data_events_from_dir_create(disk_map, disk_rep, _id, who, dirname, name):
-    raise NotImplementedError()
+def data_events_from_dir_create(disk_map, disk_rep, disk_events_queue, _id, who, dirname, name):
+    dirname = tuple(dirname)
+    disk_rep = deepcopy(disk_rep)
+    parent = disk_map.data_url_from_dirname(dirname)
+    schema_parent = disk_map.schema.get_descendant(parent)
+    hint = disk_map.get_hint(schema_parent)
+    if isinstance(schema_parent, SchemaHash):
+        if isinstance(hint, HintDir):
+            key = hint.key_from_filename(name)
+            schema_child = schema_parent.prototype
+            logger.debug('Dir creation event dirname = %s name = %s' % (dirname, name))
 
-def data_events_from_dir_rename(disk_map, disk_rep, _id, who, dirname, name, name2):
-    raise NotImplementedError()
+            # get more events that create file in this directory
+            related_disk_events = get_disk_events_for_dir(dirname, disk_events_queue)
+            logger.debug('Related events: \n %s' % indent(yaml_dump(related_disk_events), 'related '))
+            disk_rep.get_descendant(dirname).dir_create(name)
+            for re in related_disk_events:
+                disk_event_interpret(disk_rep, re)
+            disk_rep_child = disk_rep.get_descendant(dirname + (name,))
+            logger.debug('Child to interpret: \n %s' % disk_rep_child.tree())
+            value = disk_map.interpret_hierarchy_(schema_child, disk_rep_child)
+            logger.debug('Value obtained: \n %s' % yaml_dump(value))
+            e = event_dict_setitem(name=parent, key=key, value=value, _id=_id, who=who)
+            return [e], related_disk_events
+    msg = 'Not implemented %s with %s' % (schema_parent, hint)
+    raise NotImplementedError(msg)
 
-def data_events_from_dir_delete(disk_map, disk_rep, _id, who, dirname, name):
-    raise NotImplementedError()
+def get_disk_events_for_dir(dirname, disk_events_queue):
+    consumed = []
+    while disk_events_queue:
+        e = disk_events_queue[0]
+        accept = e['operation'] in [DiskEvents.dir_create, DiskEvents.file_create]
+        if not accept:
+            break
+        accept = a_is_prefix_of_b(dirname, e['arguments']['dirname'])
+        if accept:
+            disk_events_queue.pop(0)
+            consumed.append(e)
+        else: 
+            break
+    return consumed
 
-def data_events_from_file_create(disk_map, disk_rep, _id, who, dirname, name, contents):
-    schema = disk_map.schema
-    data_url = disk_map.data_url_from_dirname(dirname)
+def a_is_prefix_of_b(l1, l2):
+    if len(l2) < len(l1): 
+        return False
+    for a, b in zip(l1, l2):
+        if a != b:
+            return False
+    return True
     
-    
+def data_events_from_dir_rename(disk_map, disk_rep, disk_events_queue, _id, who, dirname, name, name2):
+    dirname = tuple(dirname)
+    disk_rep = deepcopy(disk_rep)
+    parent = disk_map.data_url_from_dirname(dirname)
+    schema_parent = disk_map.schema.get_descendant(parent)
+    hint = disk_map.get_hint(schema_parent)
+    if isinstance(schema_parent, SchemaHash):
+        if isinstance(hint, HintDir):
+            key = hint.key_from_filename(name)
+            key2 = hint.key_from_filename(name2)
+            e = event_dict_rename(name=parent, key=key, key2=key2, _id=_id, who=who)
+            return [e], []
+    msg = 'Not implemented %s with %s' % (schema_parent, hint)
+    raise NotImplementedError(msg)
+
+def data_events_from_dir_delete(disk_map, disk_rep, disk_events_queue, _id, who, dirname, name):
+    dirname = tuple(dirname)
+    disk_rep = deepcopy(disk_rep)
+    parent = disk_map.data_url_from_dirname(dirname)
+    schema_parent = disk_map.schema.get_descendant(parent)
+    hint = disk_map.get_hint(schema_parent)
+    if isinstance(schema_parent, SchemaHash):
+        if isinstance(hint, HintDir):
+            key = hint.key_from_filename(name)
+            e = event_dict_delitem(name=parent, key=key, _id=_id, who=who)
+            return [e], []
+    msg = 'Not implemented %s with %s' % (schema_parent, hint)
+    raise NotImplementedError(msg)
+
+def data_events_from_file_create(disk_map, disk_rep,disk_events_queue, _id, who, dirname, name, contents):
     raise NotImplementedError()
 
-def data_events_from_file_modify(disk_map, disk_rep, _id, who, dirname, name, contents):
-    raise NotImplementedError()
+def data_events_from_file_modify(disk_map, disk_rep, disk_events_queue, _id, who, dirname, name, contents):
+    parent = disk_map.data_url_from_dirname(dirname)
+    schema_parent = disk_map.schema.get_descendant(parent)
+    hint = disk_map.get_hint(schema_parent)
+    if isinstance(schema_parent, SchemaContext):
+        if isinstance(hint, HintDir):
+            key = hint.key_from_filename(name)
+            schema_child = schema_parent.get_descendant((key,))
+            value = disk_map.interpret_hierarchy_(schema_child, ProxyFile(contents))
+            e = event_leaf_set(parent=parent, name=key, value=value, _id=_id, who=who)
+            consumed = []
+            return [e], consumed
+    msg = 'Not implemented %s with %s' % (schema_parent, hint)
+    raise NotImplementedError(msg)
 
 def data_events_from_file_rename(disk_map, disk_rep, _id, who, dirname, name, name2):
     raise NotImplementedError()
@@ -468,10 +566,10 @@ def interpret_SchemaList_SER_DIR(self, schema, fh):
             i = int(filename)
         except ValueError:
             msg = 'Filename "%s" does not represent a number.' % filename
-            raise_incorrect_format(msg, schema, fh)
+            raise_incorrect_format(msg, schema, fh.tree())
         if not (0 <= i < n):
             msg = 'Integer %d is not in the bounds (n = %d).' % (i, n)
-            raise_incorrect_format(msg, schema, fh)
+            raise_incorrect_format(msg, schema, fh.tree())
 
         res[i] = self.interpret_hierarchy_(schema.prototype, fh[filename])
     return res
@@ -633,7 +731,7 @@ def read_SchemaContext_SER_DIR(self, schema, fh):
                 else:
                     msg = 'Expected filename "%s".' % filename
                     msg += '\n available: %s' % format_list(fh)
-                    raise_incorrect_format(msg, schema, fh)
+                    raise_incorrect_format(msg, schema, fh.tree())
             else:
                 try:
                     res[k] = self.interpret_hierarchy_(schema_child, fh[filename])

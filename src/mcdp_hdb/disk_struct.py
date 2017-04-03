@@ -154,16 +154,7 @@ class ProxyDirectory(object):
                 msg = 'Invalid name %r.' % first
                 raise_desc(ValueError, msg)   
     
-    def dir_rename(self, name, name2):    
-        if not name in self._directories:
-            msg = ('Cannot rename directory %r to %r if does not exist in %s.' % 
-                   (name, name2, format_list(self._directories)))
-            raise InvalidDiskOperation(msg)
-        if name2 in self._directories:
-            msg = ('Cannot rename directory %r to %r if %r already exists' % 
-                    (name, name2, name2))
-            raise InvalidDiskOperation(msg)
-        self._directories[name2] = self._directories.pop(name)
+   
     
     def file_modify(self, name, contents):
         if not name in self._files:
@@ -188,6 +179,23 @@ class ProxyDirectory(object):
             msg = 'Cannot delete directory that does not exist %r.' % name
             raise InvalidDiskOperation(msg)
         del self._directories[name]
+
+    def dir_create(self, name):
+        if name in self._directories:
+            msg = 'Cannot create directory %s that already exists.' % name
+            raise InvalidDiskOperation(msg)
+        self._directories[name] = ProxyDirectory()
+    
+    def dir_rename(self, name, name2):    
+        if not name in self._directories:
+            msg = ('Cannot rename directory %r to %r if does not exist in %s.' % 
+                   (name, name2, format_list(self._directories)))
+            raise InvalidDiskOperation(msg)
+        if name2 in self._directories:
+            msg = ('Cannot rename directory %r to %r if %r already exists' % 
+                    (name, name2, name2))
+            raise InvalidDiskOperation(msg)
+        self._directories[name2] = self._directories.pop(name)
 
 
 class ProxyFile(object):

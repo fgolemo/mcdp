@@ -381,6 +381,8 @@ class SchemaBytes(SchemaSimple):
 
     
 def data_hash_code(s):
+    if s is None:
+        return 'None'
     if isinstance(s, str):
         return get_md5(s)
     elif isinstance(s, datetime.datetime):

@@ -33,7 +33,7 @@ def get_view_node(view, name):
         name = name[1:]
     return v
 
-
+@contract(parent='seq(str)', name=str)
 def event_leaf_set(parent, name, value, **kwargs):
     arguments = dict(parent=parent, name=name, value=value)
     return event_make(event_name=DataEvents.leaf_set, arguments=arguments, **kwargs)
@@ -48,6 +48,7 @@ def event_leaf_set_interpret(view, parent, name, value):
     vc.check_can_write()
     vc.set(value)
 
+@contract(name='seq(str)')
 def event_struct_set(name, value, **kwargs):
     name = list(name)
     arguments = dict(name=name, value=value)
@@ -56,6 +57,7 @@ def event_struct_set(name, value, **kwargs):
 def event_struct_set_interpret(view, arguments):
     raise NotImplementedError()
 
+@contract(name='seq(str)')
 def event_increment(name, value, **kwargs):
     name = list(name)
     arguments = dict(name=name, value=value)
@@ -64,6 +66,7 @@ def event_increment(name, value, **kwargs):
 def event_increment_interpret(view, arguments):
     raise NotImplementedError()
 
+@contract(name='seq(str)')
 def event_set_add(name, value, **kwargs):
     name = list(name)
     arguments = dict(name=name, value=value)
@@ -72,23 +75,24 @@ def event_set_add(name, value, **kwargs):
 def event_set_add_interpret(view, arguments):
     raise NotImplementedError()
 
+@contract(name='seq(str)')
 def event_set_remove(name, value, **kwargs):
     name = list(name)
     arguments = dict(name=name, value=value)
     return event_make(event_name=DataEvents.set_remove,  arguments=arguments, **kwargs)
 
-
 def event_set_remove_interpret(view, arguments):
     raise NotImplementedError()
 
+@contract(name='seq(str)')
 def event_list_append(name, value, **kwargs):
     arguments = dict(name=name, value=value)
     return event_make(event_name=DataEvents.list_append, arguments=arguments, **kwargs)
 
-
 def event_list_append_interpret(view, arguments):
     raise NotImplementedError()
 
+@contract(name='seq(str)')
 def event_list_delete(name, index, **kwargs):
     name = list(name)
     arguments = dict(name=name, index=index)
@@ -97,6 +101,7 @@ def event_list_delete(name, index, **kwargs):
 def event_list_delete_interpret(view, arguments):
     raise NotImplementedError()
 
+@contract(name='seq(str)')
 def event_list_remove(name, value, **kwargs):
     name = list(name)
     arguments = dict(name=name, value=value)
@@ -105,6 +110,7 @@ def event_list_remove(name, value, **kwargs):
 def event_list_remove_interpret(view, arguments):
     raise NotImplementedError()
 
+@contract(name='seq(str)')
 def event_dict_setitem(name, key, value, **kwargs):
     name = list(name)
     arguments = dict(name=name, key=key, value=value)
@@ -161,7 +167,7 @@ def event_make(_id, event_name, who, arguments):
     d['operation'] = event_name
     d['arguments'] = arguments
     return d
-#
+
 def event_intepret(view_manager, db0, event):
     actor = event['who']['actor']
     principals = event['who']['principals']

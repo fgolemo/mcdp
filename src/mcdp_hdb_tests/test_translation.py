@@ -12,9 +12,11 @@ from mcdp_hdb.change_events import replay_events, event_intepret
 from mcdp_hdb.dbview import ViewManager
 from mcdp_hdb.disk_events import disk_event_interpret
 from mcdp_hdb.disk_map import DiskMap, disk_events_from_data_event,\
-    data_events_from_disk_event
+     IncorrectFormat,\
+    data_events_from_disk_event_queue
 from mcdp_hdb.schema import Schema, SchemaString, data_hash_code
 from mcdp_utils_misc import yaml_dump
+import traceback
 
 
 def l(what, s):
@@ -60,7 +62,7 @@ def test_view1a():
     u = users['andrea'] 
     u.name = 'not Andrea'
     u.email = None    
-    users['another'] = {'name': 'Another', 'email': 'another@email.com', 'groups':[]}
+    users['another'] = {'name': 'Another', 'email': 'another@email.com', 'groups':['group:extra']}
     del users['another']
     users.rename('pinco', 'pallo')
     db2 = replay_events(viewmanager, db0, events) 
@@ -83,7 +85,7 @@ def check_translation(schema, data_rep0, data_events, data_rep1, disk_map):
     disk_events = []
     
     data_rep = deepcopy(data_rep0)
-    disk_rep = disk_map.create_hierarchy(schema, data_rep0)
+    disk_rep = disk_map.create_hierarchy_(schema, data_rep0)
     disk_rep0 = deepcopy(disk_rep)
     
     out = 'out/test_translation'
@@ -123,7 +125,7 @@ def check_translation(schema, data_rep0, data_events, data_rep1, disk_map):
         event_intepret(view_manager, data_rep, data_event)
         write_file(i, 'e-data_rep-modified', yaml_dump(data_rep))
          
-        disk_rep_by_translation = disk_map.create_hierarchy(schema, data_rep)
+        disk_rep_by_translation = disk_map.create_hierarchy_(schema, data_rep)
         write_file(i, 'f-data_rep-modified-translated-to-disk_rep', 
                    disk_rep_by_translation.tree())
         
@@ -168,20 +170,22 @@ def check_translation_inverse(schema, disk_rep0, disk_events, disk_rep1, disk_ma
     
     # first translate the data 
     disk_rep = deepcopy(disk_rep0)
-    data_rep = disk_map.interpret_hierarchy(schema, disk_rep)
+    data_rep = disk_map.interpret_hierarchy_(schema, disk_rep)
 
 
     data_events = []
-    for i, disk_event in enumerate(disk_events):
+    i = 0
+#     for i, disk_event in enumerate(disk_events):
+    while disk_events:
         write_file(i, 'a-disk_rep', disk_rep.tree())
         write_file(i, 'b-data_rep', yaml_dump(data_rep))
-        write_file(i, 'c-disk_event', yaml_dump(disk_event))
+        write_file(i, 'c-disk_event', yaml_dump(disk_events[0]))
         
-        evs = data_events_from_disk_event(disk_map, schema, disk_rep, disk_event)
+        evs, disk_events_consumed = data_events_from_disk_event_queue(disk_map, schema, disk_rep, disk_events)
         
         if not evs:
             msg = 'The disk event resulted in 0 data events.'
-            msg += '\n' + indent(yaml_dump(disk_event), ' disk_event ')
+            msg += '\n' + indent(yaml_dump(disk_events[0]), ' disk_event ')
             raise Exception(msg)
         
         write_file(i, 'd-evs', yaml_dump(evs))
@@ -189,12 +193,20 @@ def check_translation_inverse(schema, disk_rep0, disk_events, disk_rep1, disk_ma
         data_events.extend(evs)
         
         # interpret disk event
-        disk_event_interpret(disk_rep, disk_event)
+        for disk_event in disk_events_consumed:
+            disk_event_interpret(disk_rep, disk_event)
         write_file(i, 'e-disk_rep-modified', disk_rep.tree())
          
-        data_rep_by_translation = disk_map.interpret_hierarchy(schema, disk_rep)
-        write_file(i, 'f-disk_rep-modified-translated-to-data_rep', 
-                   yaml_dump(data_rep_by_translation))
+        try:
+            data_rep_by_translation = disk_map.interpret_hierarchy_(schema, disk_rep)
+        except IncorrectFormat as exc:
+            s = traceback.format_exc(exc)
+            logger.warning('Failed check')
+            write_file(i, 'f-disk_rep-modified-translated-to-data_rep-FAIL', s)
+        
+        else:
+            write_file(i, 'f-disk_rep-modified-translated-to-data_rep', 
+                       yaml_dump(data_rep_by_translation))
         
         for data_event in evs:
             event_intepret(view_manager, data_rep, data_event)
@@ -210,10 +222,11 @@ def check_translation_inverse(schema, disk_rep0, disk_events, disk_rep1, disk_ma
         if h1 != h2:
             msg = 'Hash codes differ.'
             msg += '\n' + indent( yaml_dump(data_rep), 'data_rep ')
-            msg += '\n' + indent( yaml_dump(data_rep_by_translation, 'data_rep_by_tr '))
+            msg += '\n' + indent( yaml_dump(data_rep_by_translation), 'data_rep_by_tr ')
             raise Exception(msg)
     
-    
+        i += 1
+    logger.info('test_translation_inverse OK')
 if __name__ == '__main__':
     run_module_tests()
     
