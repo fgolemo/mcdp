@@ -1,48 +1,63 @@
 from copy import deepcopy
 
 from contracts import contract
-from kiva.tests.agg.image_test_case import assert_equal
 
-from mcdp_hdb import ViewManager
 from mcdp_hdb import DiskMap
-from mcdp_hdb import replay_events
 from mcdp_hdb import SchemaBase, Schema, SchemaString
+from mcdp_hdb import ViewManager
+from mcdp_hdb import assert_data_events_consistent
+from mcdp_hdb import event_interpret_
 
 
 class DataTestCase(object):
+    
 
-    def __init__(self, schema, data1, events, data2):    
+    @contract(schema=SchemaBase, events=list, disk_map=DiskMap)
+    def __init__(self, schema, data1, events, data2, disk_map):   
+        schema.validate(data1)
+        schema.validate(data2) 
+        assert_data_events_consistent(schema, data1, events, data2)
         self.data1 = data1
         self.events = events
         self.data2 = data2
+        self.disk_map = disk_map
+        self.schema = schema
         
-        # verify consistency
-        db1 = deepcopy(data1)
-        for event in events:
-            `(view, event)
-            event_intepret(view_manager, db0, event)
-        msg = '\nAfter playing event:\n'
-        msg += indent(yaml_dump(event), '   event: ')
-        msg += '\nthe DB is:\n'
-        msg += indent(yaml_dump(db0), '   db: ')
-        logger.debug(msg)
-    return db0
-
-
+    def get_data1(self):
+        ''' Returns a copy of data1 (safe to modify) '''
+        return deepcopy(self.data1)
+    
+    def get_data2(self):
+        ''' Returns a copy of data2 (safe to modify) '''
+        return deepcopy(self.data2)
+    
     @contract(returns=SchemaBase)
     def get_schema(self):
         ''' returns the schema '''
-        return self._schema
+        return self.schema
+
+    @contract(returns=list)
+    def get_events(self):
+        return deepcopy(self.events)
+    
+    @contract(returns=DiskMap)
+    def get_disk_map(self):
+        return self.disk_map
     
     def enumerate_data_diff(self):
         ''' 
             Enumerates the transitions. Use as:
-            
             for d1, data_event, d2 in enumerate_data_diff():
-        
         ''' 
-        
-@contract(returns=DataTestCase)    
+        data_i = self.get_data1()
+        view_manager = ViewManager(self.schema)
+        for e in self.events:
+            current = deepcopy(data_i)
+            view = view_manager.view(data_i)
+            event_interpret_(view, e)
+            yield current, e, data_i
+    
+@contract(returns='dict(str:isinstance(DataTestCase))')    
 def testcases_SimpleUserDB():
     
     db_schema = Schema()
@@ -84,11 +99,12 @@ def testcases_SimpleUserDB():
     users['another'] = {'name': 'Another', 'email': 'another@email.com', 'groups':['group:extra']}
     del users['another']
     users.rename('pinco', 'pallo')
-    db2 = replay_events(viewmanager, deepcopy(db0), events) 
-    assert_equal(db, db2)
-    # check that we didn't modify the original
-    db2 = replay_events(viewmanager, deepcopy(db0), events) 
-    assert_equal(db, db2)
+#     db_replay = deepcopy(db0)
+#     replay_events(viewmanager, db_replay, events) 
+#     assert_data_equal(db_schema, db_replay, db)
+    
+    assert_data_events_consistent(db_schema, db0, events, db)
+    
     
     disk_map_with_hint = DiskMap(db_schema)
     disk_map_with_hint.hint_directory(db_schema['users'], pattern='%.user')
@@ -100,4 +116,10 @@ def testcases_SimpleUserDB():
     disk_maps['vanilla'] = DiskMap(db_schema)
     disk_maps['with_hint'] = disk_map_with_hint
     disk_maps['files_are_yaml'] = disk_map_files_are_yaml
-    return dict(db_schema=db_schema, db0=db0, events=events, db2=db2, disk_maps=disk_maps)
+    
+    res = {}
+    for k in disk_maps:
+        dm = disk_maps[k]
+        res[k] = DataTestCase(db_schema, db0, events, db, dm)
+    return res
+

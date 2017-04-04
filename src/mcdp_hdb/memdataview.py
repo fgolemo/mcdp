@@ -301,3 +301,44 @@ class ViewList0(ViewBase):
         prototype = self._schema.prototype
         prototype.validate(value)
         self._data.__setitem__(i, value) 
+
+        from .memdata_events import event_list_setitem
+        event = event_list_setitem(name=self._prefix,
+                                   index=i,
+                                   value=value, 
+                                   **self._get_event_kwargs())
+        self._notify(event)
+        
+
+        
+    def insert(self, i, value):
+        self._schema.prototype.validate(value) 
+        self._data.insert(i, value) 
+
+        from .memdata_events import event_list_insert
+        event = event_list_insert(name=self._prefix,
+                                   index=i,
+                                   value=value, 
+                                   **self._get_event_kwargs())
+        self._notify(event)
+        
+        
+    def delete(self, i):
+        # todo: check i 
+        self._data.pop(i) 
+        
+        from .memdata_events import event_list_delete
+        event = event_list_delete(name=self._prefix,
+                                   index=i, 
+                                   **self._get_event_kwargs())
+        self._notify(event)
+        
+    def append(self, value):
+        self._schema.prototype.validate(value) 
+        self._data.append(value) 
+          
+        from .memdata_events import event_list_append
+        event = event_list_append(name=self._prefix,
+                                   value=value, 
+                                   **self._get_event_kwargs())
+        self._notify(event)

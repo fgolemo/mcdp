@@ -10,6 +10,7 @@ from .disk_struct import *
 
 from .memdata_diff import *
 from .memdata_events import *
+from .memdata_utils import *
 
 from .memdataview import *
 from .memdataview_manager import *

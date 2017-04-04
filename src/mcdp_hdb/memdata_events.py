@@ -9,6 +9,7 @@ from mcdp_utils_misc import format_list
 from mcdp_utils_misc import yaml_dump
 
 from .memdataview import ViewBase
+from .memdataview_exceptions import InvalidOperation
 
 
 class DataEvents(object):
@@ -18,13 +19,15 @@ class DataEvents(object):
     increment = 'increment' # increment <name> <value>
     list_append = 'list_append' # list_append <list> <value>
     list_delete = 'list_delete' # list_delete <list> <index> # by index
+    list_insert = 'list_insert' # list_delete <list> <index> <value> 
     list_remove = 'list_remove' # list_remove <list> <value> # by value
+    list_setitem = 'list_setitem' # list_remove <list> <i> <value>
     set_add = 'set_add' # set_add <set> <value>
     set_remove = 'set_remove' # set_remove <set> <value>
     dict_setitem = 'dict_setitem' # dict_setitem <dict> <key> <value>
     dict_delitem = 'dict_delitem' # dict_delitem <dict> <key>
     dict_rename = 'dict_rename' # dict_rename <dict> <key> <key2>
-    all_events = [leaf_set, struct_set, increment, list_append, 
+    all_events = [leaf_set, struct_set, increment, list_append, list_insert, list_setitem,
                   list_delete, dict_setitem, dict_delitem, dict_rename]
 
 @contract(name='seq(str)')
@@ -43,12 +46,17 @@ def event_leaf_set(parent, name, value, **kwargs):
 def event_leaf_set_interpret(view, parent, name, value):
     v = get_view_node(view, parent)
     from mcdp_hdb.memdataview import ViewContext0
-
     check_isinstance(v, ViewContext0)
     vc = v.child(name)
     vc._schema.validate(value)
     vc.check_can_write()
     vc.set(value)
+    
+def get_the_list(view, name):
+    v = get_view_node(view, name)
+    from mcdp_hdb.memdataview import ViewList0
+    check_isinstance(v, ViewList0)
+    return v
 
 @contract(name='seq(str)')
 def event_struct_set(name, value, **kwargs):
@@ -83,7 +91,7 @@ def event_set_remove(name, value, **kwargs):
     arguments = dict(name=name, value=value)
     return event_make(event_name=DataEvents.set_remove,  arguments=arguments, **kwargs)
 
-def event_set_remove_interpret(view, arguments):
+def event_set_remove_interpret(view, name, value):
     raise NotImplementedError()
 
 @contract(name='seq(str)')
@@ -91,17 +99,42 @@ def event_list_append(name, value, **kwargs):
     arguments = dict(name=name, value=value)
     return event_make(event_name=DataEvents.list_append, arguments=arguments, **kwargs)
 
-def event_list_append_interpret(view, arguments):
-    raise NotImplementedError()
+def event_list_append_interpret(view, name, value):
+    l = get_the_list(view, name)
+    l.check_can_write()
+    l.append(value)
 
+@contract(name='seq(str)')
+def event_list_setitem(name, index, value, **kwargs):
+    arguments = dict(name=name,index=index, value=value)
+    return event_make(event_name=DataEvents.list_setitem, arguments=arguments, **kwargs)
+
+def event_list_setitem_interpret(view, name, index, value):
+    l = get_the_list(view, name)
+    l.check_can_write()
+    l[index] = value
+    
 @contract(name='seq(str)')
 def event_list_delete(name, index, **kwargs):
     name = list(name)
     arguments = dict(name=name, index=index)
     return event_make(event_name=DataEvents.list_delete, arguments=arguments, **kwargs)
 
-def event_list_delete_interpret(view, arguments):
-    raise NotImplementedError()
+def event_list_delete_interpret(view, name, index):
+    l = get_the_list(view, name)
+    l.check_can_write()
+    l.delete(index)
+
+@contract(name='seq(str)')
+def event_list_insert(name, index, value, **kwargs):
+    name = list(name)
+    arguments = dict(name=name, index=index, value=value)
+    return event_make(event_name=DataEvents.list_insert, arguments=arguments, **kwargs)
+
+def event_list_insert_interpret(view, name, index, value):
+    l = get_the_list(view, name)
+    l.check_can_write()
+    l.insert(index, value)
 
 @contract(name='seq(str)')
 def event_list_remove(name, value, **kwargs):
@@ -109,8 +142,10 @@ def event_list_remove(name, value, **kwargs):
     arguments = dict(name=name, value=value)
     return event_make(event_name=DataEvents.list_delete, arguments=arguments, **kwargs)
 
-def event_list_remove_interpret(view, arguments):
-    raise NotImplementedError()
+def event_list_remove_interpret(view, name, value):
+    l = get_the_list(view, name)
+    l.check_can_write()
+    l.remove(value)
 
 @contract(name='seq(str)')
 def event_dict_setitem(name, key, value, **kwargs):
@@ -186,6 +221,9 @@ def event_interpret_(view, event):
         DataEvents.list_append: event_list_append_interpret,
         DataEvents.list_remove: event_list_remove_interpret,
         DataEvents.list_delete: event_list_delete_interpret,
+        DataEvents.list_insert: event_list_insert_interpret,
+        DataEvents.list_setitem: event_list_setitem_interpret,
+        
         DataEvents.set_add: event_set_add_interpret,
         DataEvents.set_remove: event_set_remove_interpret,
         DataEvents.dict_setitem: event_dict_setitem_interpret,
@@ -196,16 +234,14 @@ def event_interpret_(view, event):
     intf = fs[ename]
     arguments = event['arguments']
     try:
-        logger.info('Arguments: %s' % arguments)
         intf(view=view, **arguments)
     except Exception as e:
         msg = 'Could not complete the replay of this event: \n'
         msg += indent(yaml_dump(event), 'event: ')
-        from mcdp_hdb.memdataview import InvalidOperation
-        raise_wrapped(InvalidOperation, e, msg)
-    
-
         
+        raise_wrapped(InvalidOperation, e, msg)
+
+
 def replay_events(view_manager, db0, events):
     db0 = deepcopy(db0)
     for event in events:
@@ -216,4 +252,3 @@ def replay_events(view_manager, db0, events):
         msg += indent(yaml_dump(db0), '   db: ')
         logger.debug(msg)
     return db0
-
