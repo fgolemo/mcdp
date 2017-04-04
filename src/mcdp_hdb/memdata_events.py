@@ -206,9 +206,12 @@ def event_make(_id, event_name, who, arguments):
     return d
 
 def event_intepret(view_manager, db0, event):
-    actor = event['who']['actor']
-    principals = event['who']['principals']
-    view = view_manager.view(db0, actor=actor, principals=principals)
+    if event['who'] is not None:
+        actor = event['who']['actor']
+        principals = event['who']['principals']
+        view = view_manager.view(db0, actor=actor, principals=principals)
+    else:
+        view = view_manager.view(db0)
     event_interpret_(view, event)
     view._schema.validate(db0) # XXX
 

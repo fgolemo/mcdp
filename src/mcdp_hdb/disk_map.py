@@ -13,12 +13,11 @@ from .disk_events import DiskEvents, disk_event_file_modify, disk_event_dir_dele
 from .disk_events import disk_event_interpret
 from .disk_struct import ProxyDirectory, ProxyFile
 from .memdata_diff import data_diff
-from .memdata_events import DataEvents, get_view_node
-from .memdata_events import event_leaf_set, event_dict_setitem,\
-    event_dict_delitem, event_dict_rename
+from .memdata_events import DataEvents, get_view_node,  event_leaf_set, event_dict_setitem, event_dict_delitem, event_dict_rename
 from .memdataview import InvalidOperation
 from .memdataview_manager import ViewManager
 from .schema import SchemaHash, SchemaString, SchemaContext, SchemaList, SchemaBytes, NOT_PASSED, SchemaDate, SchemaBase
+from mcdp_hdb.memdata_utils import assert_data_events_consistent
 
 
 # from mcdp_library_tests.create_mockups import mockup_flatten
@@ -298,8 +297,12 @@ def data_events_from_disk_event_queue(disk_map, schema, disk_rep, disk_events_qu
         who = disk_event['who']
         _id = disk_event['id']
         try:
-            evs, consumed = f(disk_map=disk_map, disk_rep=disk_rep, disk_events_queue=disk_events_queue,
+            res= f(disk_map=disk_map, disk_rep=disk_rep, disk_events_queue=disk_events_queue,
                                _id='tmp-id', who=who, **arguments)
+            if not isinstance(res, tuple) or len(res) != 2:
+                msg = 'Expected %r to return a tuple of len 2, got %s' % (f, describe_value(res))
+                raise Exception(msg)
+            evs, consumed = res
             for i, ev in enumerate(evs):
                 ev['id'] = _id + '-translated_inverse-%d' % i
             disk_event_consumed.extend(consumed)
@@ -308,7 +311,8 @@ def data_events_from_disk_event_queue(disk_map, schema, disk_rep, disk_events_qu
             msg = 'Could not succesfully translate using %r:' % f.__name__
             msg += '\n' + 'Schema: ' + '\n' + indent(schema, ' schema ')
             msg += '\n' + 'Disk event: ' + '\n' + indent(yaml_dump(disk_event), ' disk_event ')
-            raise_wrapped(Exception, e, msg)
+            
+            raise_wrapped(Exception, e, msg, arguments=arguments)
     else:
         raise NotImplementedError(operation)
     
@@ -391,8 +395,29 @@ def data_events_from_dir_delete(disk_map, disk_rep, disk_events_queue, _id, who,
     msg = 'Not implemented %s with %s' % (schema_parent, hint)
     raise NotImplementedError(msg)
 
-def data_events_from_file_create(disk_map, disk_rep,disk_events_queue, _id, who, dirname, name, contents):
-    raise NotImplementedError()
+def data_events_from_file_create(disk_map, disk_rep, disk_events_queue, _id, who, dirname, name, contents):
+    parent = disk_map.data_url_from_dirname(dirname)
+    schema_parent = disk_map.schema.get_descendant(parent)
+    hint = disk_map.get_hint(schema_parent)
+    if isinstance(schema_parent, SchemaHash):
+        if isinstance(hint, HintDir):
+            # creating a file
+            logger.debug('data_events_from_file_create dirname %r name %r contents = %r' % (dirname, name, contents))
+                         
+            # the interesting case is when it is yaml file
+            prototype = schema_parent.prototype
+            is_yaml = isinstance(disk_map.get_hint(prototype), HintFileYAML)
+            if is_yaml:
+                key = hint.key_from_filename(name)
+                schema_child = schema_parent.get_descendant((key,))
+                data = disk_map.interpret_hierarchy_(schema_child, ProxyFile(contents))
+                e = event_dict_setitem(name=parent, key=key, value=data, _id=_id, who=who)
+                events = [e]
+                consumed = [] 
+                return events, consumed
+
+    msg = 'Not implemented %s with %s' % (type(schema_parent), hint)
+    raise NotImplementedError(msg)
 
 def data_events_from_file_modify(disk_map, disk_rep, disk_events_queue, _id, who, dirname, name, contents):
     parent = disk_map.data_url_from_dirname(dirname)
@@ -406,6 +431,7 @@ def data_events_from_file_modify(disk_map, disk_rep, disk_events_queue, _id, who
             e = event_leaf_set(parent=parent, name=key, value=value, _id=_id, who=who)
             consumed = []
             return [e], consumed
+        
     if isinstance(schema_parent, SchemaHash):
         if isinstance(hint, HintDir):
             # modified a file
@@ -424,27 +450,56 @@ def data_events_from_file_modify(disk_map, disk_rep, disk_events_queue, _id, who
                 data1 = disk_map.interpret_hierarchy_(schema_child, current_file)
                 
                 diff = data_diff(schema_child, data1, data2)
+                
+                assert_data_events_consistent(schema_child, data1, diff, data2)
+                
                 sdata1 = indent(yaml_dump(data1), '  data1  | ')
                 sdata2 = indent(yaml_dump(data2), '  data2  | ')
                 sdiff = indent(yaml_dump(diff), 'diff ')
                 logger.info('difference between:\n%s\nand\n%s\nis\n%s' % (sdata1,sdata2,sdiff))
                 
-            raise NotImplementedError()
-#             key = hint.key_from_filename(name)
-#             schema_child = schema_parent.get_descendant((key,))
-#             value = disk_map.interpret_hierarchy_(schema_child, ProxyFile(contents))
-#             e = event_leaf_set(parent=parent, name=key, value=value, _id=_id, who=who)
-#             consumed = []
-#             return [e], consumed
+                def add_prefix(e):
+                    e2 = deepcopy(e)
+                    logger.info(indent(yaml_dump(e2), 'e2 ')) 
+                    if 'parent' in e2['arguments']:
+                        e2['arguments']['parent'] = parent+ (key,) + e2['arguments']['parent']
+                    print e2
+                    return e2
+                
+                diff2 = map(add_prefix, diff)
+                logger.info(indent(yaml_dump(diff2), 'diff2 '))
+                consumed = [] 
+                return diff2, consumed
         
     msg = 'Not implemented %s with %s' % (type(schema_parent), hint)
     raise NotImplementedError(msg)
 
-def data_events_from_file_rename(disk_map, disk_rep, _id, who, dirname, name, name2):
-    raise NotImplementedError()
+def data_events_from_file_rename(disk_map, disk_rep, disk_events_queue, _id, who, dirname, name, name2):
+    parent = disk_map.data_url_from_dirname(dirname)
+    schema_parent = disk_map.schema.get_descendant(parent)
+    hint = disk_map.get_hint(schema_parent)
+    if isinstance(schema_parent, SchemaHash):
+        if isinstance(hint, HintDir):
+            key = hint.key_from_filename(name)
+            key2 = hint.key_from_filename(name2)                        
+            e = event_dict_rename(name=parent, key=key, key2=key2, _id=_id, who=who)
+            return [e],[]
 
-def data_events_from_file_delete(disk_map, disk_rep, _id, who, dirname, name):
-    raise NotImplementedError()
+    msg = 'Not implemented %s with %s' % (type(schema_parent), hint)
+    raise NotImplementedError(msg)
+
+def data_events_from_file_delete(disk_map, disk_rep, disk_events_queue, _id, who, dirname, name):
+    parent = disk_map.data_url_from_dirname(dirname)
+    schema_parent = disk_map.schema.get_descendant(parent)
+    hint = disk_map.get_hint(schema_parent)
+    if isinstance(schema_parent, SchemaHash):
+        if isinstance(hint, HintDir):
+            key = hint.key_from_filename(name)                     
+            e = event_dict_delitem(name=parent, key=key, _id=_id, who=who)
+            return [e],[]
+
+    msg = 'Not implemented %s with %s' % (type(schema_parent), hint)
+    raise NotImplementedError(msg)
      
 @contract(returns='list(dict)')
 def disk_events_from_data_event(disk_map, schema, data_rep, data_event):
