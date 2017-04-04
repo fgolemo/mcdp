@@ -11,8 +11,7 @@ from contracts.utils import indent, check_isinstance, raise_desc, raise_wrapped
 from mcdp_utils_misc import format_list
 from mcdp_shelf.access import ACL
 from contracts import contract
-from mcdp_utils_misc.string_utils import get_md5
-from mcdp_utils_misc.my_yaml import yaml_dump
+from mcdp_utils_misc import get_md5, yaml_dump
 
 
 NOT_PASSED = 'no-default-given'

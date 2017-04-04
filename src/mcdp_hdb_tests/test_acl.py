@@ -2,7 +2,7 @@ from mcdp.constants import MCDPConstants
 from mcdp_hdb.schema import SchemaString, Schema
 from comptests.registrar import run_module_tests, comptest
 from mcdp_shelf.access import ACLRule
-from mcdp_hdb.dbview import InsufficientPrivileges, ViewManager
+from mcdp_hdb import InsufficientPrivileges, ViewManager
 from contextlib import contextmanager
 
 @comptest
@@ -81,5 +81,8 @@ def expect_permissions_error():
     else:
         msg = 'Expected InsufficientPrivileges'
         raise Exception(msg)
+
 if __name__ == '__main__':
     run_module_tests()
+    
+    

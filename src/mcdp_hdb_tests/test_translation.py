@@ -9,13 +9,13 @@ from nose.tools import assert_equal
 
 from comptests.registrar import comptest, run_module_tests
 from mcdp import logger
-from mcdp_hdb.change_events import replay_events, event_intepret
-from mcdp_hdb.dbview import ViewManager
-from mcdp_hdb.disk_events import disk_event_interpret
-from mcdp_hdb.disk_map import DiskMap, disk_events_from_data_event,\
+from mcdp_hdb import replay_events, event_intepret
+from mcdp_hdb import ViewManager
+from mcdp_hdb import disk_event_interpret
+from mcdp_hdb import DiskMap, disk_events_from_data_event,\
     IncorrectFormat,\
     data_events_from_disk_event_queue
-from mcdp_hdb.schema import Schema, SchemaString, data_hash_code
+from mcdp_hdb import Schema, SchemaString, data_hash_code
 from mcdp_utils_misc import yaml_dump
 
 
@@ -23,9 +23,7 @@ def l(what, s):
     logger.info('\n' + indent(s, '%010s │  ' % what))
 
 
-    
-@comptest
-def test_view1a():
+def get_schema_and_data():
     db_schema = Schema()
     schema_user = Schema()
     schema_user.string('name')
@@ -70,12 +68,55 @@ def test_view1a():
     # check that we didn't modify the original
     db2 = replay_events(viewmanager, db0, events) 
     assert_equal(db, db2)
+    
+    disk_map_with_hint = DiskMap(db_schema)
+    disk_map_with_hint.hint_directory(db_schema['users'], pattern='%.user')
+    
+    disk_map_files_are_yaml= DiskMap(db_schema)
+    disk_map_files_are_yaml.hint_directory(db_schema['users'], pattern='%.yaml')
+    disk_map_files_are_yaml.hint_file_yaml(db_schema['users'].prototype)
+    disk_maps= {}
+    disk_maps['vanilla'] = DiskMap(db_schema)
+    disk_maps['with_hint'] = disk_map_with_hint
+    disk_maps['files_are_yaml'] = disk_map_files_are_yaml
+    return dict(db_schema=db_schema, db0=db0, events=events, db2=db2, disk_maps=disk_maps)
 
-    dm = DiskMap(db_schema)
-    check_translation(db_schema, db0, events, db2, dm)
+@comptest
+def test_regular_schema():
+    ts = get_schema_and_data()
+    db_schema = ts['db_schema']
+    db0 = ts['db0']
+    db2 = ts['db2']
+    events = ts['events']
+    dm = ts['disk_maps']['vanilla']
+    out = 'out/test_translation/vanilla'
+    check_translation(db_schema, db0, events, db2, dm, out)
 
+@comptest
+def test_disk_map_with_hint():
+    ts = get_schema_and_data()
+    db_schema = ts['db_schema']
+    db0 = ts['db0']
+    db2 = ts['db2']
+    events = ts['events']
+    dm = ts['disk_maps']['with_hint']
+    out = 'out/test_translation/with_hint'
+    check_translation(db_schema, db0, events, db2, dm, out)
+ 
 
-def check_translation(schema, data_rep0, data_events, data_rep1, disk_map):
+@comptest
+def test_disk_map_files_are_yaml():
+    ts = get_schema_and_data()
+    db_schema = ts['db_schema']
+    db0 = ts['db0']
+    db2 = ts['db2']
+    events = ts['events']
+    dm = ts['disk_maps']['files_are_yaml']
+    out = 'out/test_translation/files_are_yaml'
+    check_translation(db_schema, db0, events, db2, dm, out)
+ 
+ 
+def check_translation(schema, data_rep0, data_events, data_rep1, disk_map, out):
     view_manager = ViewManager(schema)
     
     # first, make sure that the data is coherent
@@ -87,8 +128,7 @@ def check_translation(schema, data_rep0, data_events, data_rep1, disk_map):
     data_rep = deepcopy(data_rep0)
     disk_rep = disk_map.create_hierarchy_(schema, data_rep0)
     disk_rep0 = deepcopy(disk_rep)
-    
-    out = 'out/test_translation'
+
     if os.path.exists(out):
         shutil.rmtree(out)
     if not os.path.exists(out):
@@ -145,12 +185,13 @@ def check_translation(schema, data_rep0, data_events, data_rep1, disk_map):
             msg += '\n' + indent(disk_rep.tree(), 'disk_rep ')
             msg += '\n' + indent(disk_rep_by_translation.tree(), 'disk_rep_by_tr ')
             raise Exception(msg)
-             
-    check_translation_inverse(schema, disk_rep0, disk_events, disk_rep, disk_map)
     
-def check_translation_inverse(schema, disk_rep0, disk_events, disk_rep1, disk_map):
+    logger.info('test ok, written on %s' % out)
+    out = out + '_inverse'
+    check_translation_inverse(schema, disk_rep0, disk_events, disk_rep, disk_map, out)
+    
+def check_translation_inverse(schema, disk_rep0, disk_events, disk_rep1, disk_map, out):
     view_manager = ViewManager(schema)
-    out = 'out/test_translation_inverse'
     if os.path.exists(out):
         shutil.rmtree(out)
     if not os.path.exists(out):
@@ -228,7 +269,8 @@ def check_translation_inverse(schema, disk_rep0, disk_events, disk_rep1, disk_ma
             raise Exception(msg)
     
         i += 1
-    logger.info('test_translation_inverse OK')
+    logger.info('test_inverse ok, written on %s' % out)
+    
 if __name__ == '__main__':
     run_module_tests()
     

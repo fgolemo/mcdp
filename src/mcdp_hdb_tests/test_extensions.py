@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
-from mcdp_hdb.schema import Schema
+from contracts.utils import indent
+
 from comptests.registrar import comptest, run_module_tests
 from mcdp.constants import MCDPConstants
 from mcdp.logs import logger
-from contracts.utils import indent
 from mcdp_hdb.disk_map import DiskMap
 from mcdp_hdb.disk_struct import ProxyDirectory, ProxyFile
-from mcdp_utils_misc.my_yaml import yaml_dump
+from mcdp_hdb.schema import Schema
+from mcdp_utils_misc import yaml_dump
+
 
 def l(what, s):
     logger.info('\n' + indent(s, '%010s │  ' % what))

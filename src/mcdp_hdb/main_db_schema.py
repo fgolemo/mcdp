@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-from mcdp_hdb.schema import Schema, SchemaString, SchemaList,\
+from .schema import Schema, SchemaString, SchemaList,\
     SchemaHash
-from mcdp_hdb.disk_map import DiskMap
+from .disk_map import DiskMap
 from mcdp_library.specs_def import specs
 from mcdp import MCDPConstants 
     
@@ -32,7 +32,7 @@ class DB():
     shelf.hash('libraries', library)
     shelves = SchemaHash(shelf)
     
-    repo = Schema()
+    repo = Schema() 
     repo._add_child('shelves', shelves)
 
     user = Schema() 

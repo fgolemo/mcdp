@@ -114,11 +114,15 @@ class ProxyDirectory(object):
         s = ''
         for k in sorted(self._files):
             f = self._files[k]
-            MAX = 20
-            if len(f.contents) < MAX:
-                s += '%r = %r\n' % (k, f.contents)
-            else:
-                s += '%s: %d bytes\n' % (k, len(f.contents))
+            MAX = 50
+            if k.endswith('yaml'):
+                s += '%s' % k
+                s += '\n' + indent(f.contents, ' | ') + '\n'
+            else: 
+                if len(f.contents) < MAX:
+                    s += '%r = %r\n' % (k, f.contents)
+                else:
+                    s += '%s: %d bytes\n' % (k, len(f.contents))
         for k in sorted(self._directories):
             d = self._directories[k]
             s += '%s/\n' % k
@@ -167,6 +171,15 @@ class ProxyDirectory(object):
             msg = 'Cannot delete file %r that does not exist.' % name
             raise InvalidDiskOperation(msg)
         del self._files[name]
+    
+    def file_rename(self, name, name2):
+        if not name in self._files:
+            msg = 'Cannot rename file %r that does not exist.' % name
+            raise InvalidDiskOperation(msg)
+        if name2 in self._files or name2 in self._directories:
+            msg = 'Cannot rename file %r to %r because %r already exists' % (name, name2)
+            raise InvalidDiskOperation(msg)
+        self._files[name2] = self._files.pop(name)
         
     def file_create(self, name, contents):
         if name in self._files or name in self._directories:

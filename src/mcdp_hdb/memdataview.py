@@ -6,51 +6,30 @@ from contracts.utils import raise_desc, raise_wrapped, indent
 
 from mcdp import MCDPConstants
 from mcdp.logs import logger
-from mcdp_hdb.change_events import event_leaf_set, event_dict_setitem,\
-    event_dict_delitem, event_dict_rename
-from mcdp_hdb.schema import SchemaBase, SchemaContext, SchemaBytes, SchemaString,\
-    SchemaDate, SchemaHash, SchemaList
-from mcdp_utils_misc import format_list, memoize_simple
+from mcdp_utils_misc import format_list
+
+from .memdataview_exceptions import InsufficientPrivileges, FieldNotFound,\
+    InvalidOperation, EntryNotFound
+from .memdataview_utils import special_string_interpret
+from .schema import SchemaBase, SchemaBytes, SchemaString,\
+    SchemaDate
 
 
-class ViewError(Exception):
-    pass
-
-class FieldNotFound(ViewError):
-    pass
-
-class EntryNotFound(ViewError, KeyError):
-    pass
-
-class InvalidOperation(ViewError):
-    pass
-
-class InsufficientPrivileges(ViewError):
-    pass
-
-def interpret(s, prefix):
-    ''' s = 'user:${path[-1]}' 
-        prefix = (a, b, c)
-        returns 'user:a'
-    '''
-#     n = len(prefix)
-    for i in range(-5, 0):
-        pattern = '${path[%d]}'% i
-        if pattern in s:
-            sub = prefix[i]
-            s = s.replace(pattern, sub)
-    
-    if '$' in s:
-        msg = 'Could not find special expression for %r' % s
-        raise ValueError(msg)
-    return s
-            
-    
+__all__ = [
+    'ViewBase',
+    'ViewContext0',
+    'ViewHash0',
+    'ViewList0',
+    'ViewString',
+#     'ViewBytes',
+#     'ViewDate',
+]
 
 class ViewBase(object):
     
     __metaclass__ = ABCMeta
     
+    @contract(view_manager='isinstance(ViewManager)')
     def __init__(self, view_manager, data, schema):
         schema.validate(data)
         self._view_manager = view_manager
@@ -90,7 +69,7 @@ class ViewBase(object):
         for r in acl.rules:
             if r.to_whom.startswith('special:'):
                 rest = r.to_whom[r.to_whom.index(':')+1:]
-                r.to_whom = interpret(rest, self._prefix)
+                r.to_whom = special_string_interpret(rest, self._prefix)
     
         principals = self._principals
         ok = acl.allowed_(privilege, principals)
@@ -157,6 +136,8 @@ class ViewContext0(ViewBase):
         v = self._create_view_instance(child, self._data[name], name)
         v.check_can_write()
             
+        from .memdata_events import event_leaf_set
+
         event = event_leaf_set(parent=self._prefix,
                                name=name, 
                                value=value, 
@@ -173,6 +154,7 @@ class ViewContext0(ViewBase):
             def set_callback(value):
                 self._data[name] = value
                 
+                from .memdata_events import event_leaf_set
                 event = event_leaf_set(parent=self._prefix,
                                        name=name, value=value,
                                         **self._get_event_kwargs())
@@ -221,9 +203,12 @@ class ViewHash0(ViewBase):
             return self._create_view_instance(prototype, d, key)
 
     def __setitem__(self, key, value):
+        from .memdata_events import event_dict_setitem
+        
         self.check_can_write()
         prototype = self._schema.prototype
         prototype.validate(value) 
+        
         
         event = event_dict_setitem(name=self._prefix,
                                    key=key, 
@@ -235,6 +220,8 @@ class ViewHash0(ViewBase):
         self._data[key] = value
         
     def __delitem__(self, key):
+        from .memdata_events import event_dict_delitem
+        
         self.check_can_write()
         if not key in self._data:
             msg = ('Could not delete not existing key "%s"; known: %s.' % 
@@ -249,6 +236,7 @@ class ViewHash0(ViewBase):
         del self._data[key]
         
     def rename(self, key1, key2):
+        from .memdata_events import event_dict_rename
         self.check_can_write()
         if not key1 in self._data:
             msg = ('Could not rename not existing key "%s"; known: %s.' % 
@@ -312,76 +300,4 @@ class ViewList0(ViewBase):
     def __setitem__(self, i, value):
         prototype = self._schema.prototype
         prototype.validate(value)
-        self._data.__setitem__(i, value)
-#         
-#     def __delitem__(self, key):
-#         if not key in self._data:
-#             msg = 'Could not delete not existing key "%s"; known: %s.' % (key, format_list(self._data))
-#             raise_desc(InvalidOperation, msg)
-#         del self._data[key]
-#             
-
-@memoize_simple
-def host_name():
-    import socket
-    if socket.gethostname().find('.')>=0:
-        name=socket.gethostname()
-    else:
-        name=socket.gethostbyaddr(socket.gethostname())[0]
-    return name
-
-class ViewManager(object):
-    
-    @contract(schema=SchemaBase)
-    def __init__(self, schema):
-        self.schema = schema
-
-        self.s2baseclass = {}
-
-    def set_view_class(self, s, baseclass):
-        self.s2baseclass[s] = baseclass
-
-    def view(self, data, actor=None, principals=None, host=None):
-        v = self.create_view_instance(self.schema, data)
-        if actor is None:
-            actor = 'system'
-        if principals is None:
-            principals = [MCDPConstants.ROOT]
-        if host is None:
-            host = {'hostname': host_name()}
-        v._who = {'host': host, 'actor': actor, 'principals': principals}
-        v._principals = principals
-        return v
-
-    @contract(s=SchemaBase)
-    def create_view_instance(self, s, data):
-        s.validate(data)
-        if s in self.s2baseclass:
-            class Base(self.s2baseclass[s]):
-                pass
-        else:
-            class Base(object):
-                pass
-
-        if isinstance(s, SchemaContext):
-            class ViewContext(Base, ViewContext0): pass
-            return ViewContext(view_manager=self, data=data, schema=s)
-
-        if isinstance(s, SchemaHash):
-            class ViewHash(Base, ViewHash0): pass
-            return ViewHash(view_manager=self, data=data, schema=s)
-        
-        if isinstance(s, SchemaList):
-            class ViewList(Base, ViewList0): pass
-            return ViewList(view_manager=self, data=data, schema=s)
-    
-        if isinstance(s, SchemaString):
-            return ViewString(view_manager=self, data=data, schema=s)
-        
-        raise NotImplementedError(type(s))
-
-class View():
-    @contract(view_manager=ViewManager)
-    def __init__(self, data, view_manager):
-        self.data = data
-        self.view_manager = view_manager
+        self._data.__setitem__(i, value) 

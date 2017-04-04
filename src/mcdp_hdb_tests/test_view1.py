@@ -7,10 +7,10 @@ from nose.tools import assert_equal
 from comptests.registrar import comptest, run_module_tests
 from mcdp import MCDPConstants
 from mcdp.logs import logger
-from mcdp_hdb.change_events import replay_events
-from mcdp_hdb.dbview import ViewManager
-from mcdp_hdb.schema import Schema, NotValid, SchemaString
-from mcdp_shelf.access import ACLRule
+from mcdp_hdb import Schema, NotValid, SchemaString
+from mcdp_hdb import ViewManager
+from mcdp_hdb import replay_events
+from mcdp_shelf import ACLRule
 from mcdp_utils_misc import yaml_dump
 
 

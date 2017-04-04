@@ -7,6 +7,7 @@ from mcdp.logs import logger
 from mcdp_utils_misc import yaml_dump
 
 from .disk_struct import ProxyDirectory
+from .disk_struct import ProxyFile
 
 
 class DiskEvents(object):
@@ -21,20 +22,7 @@ class DiskEvents(object):
     all_events = [dir_rename, dir_delete, dir_create,
                   file_create, file_modify, file_delete, file_rename] 
 
-class DirView(object):
-
-    @contract(directory=ProxyDirectory)
-    def __init__(self, directory):
-        self.directory = directory
-
-class DiskView(DirView):
     
-    def __init__(self, directory):
-        DirView.__init__(self, directory)
-        self._event_callback = None
-
-    
-# @decorator
 def ff(f):
     @contract(_id=str)
     def f2(_id, who, *args, **kwargs):
@@ -50,7 +38,7 @@ def disk_event_dir_create(dirname, name):
     return DiskEvents.dir_create, dict(dirname=dirname, name=name)
 
 def disk_event_dir_create_interpret(disk_rep, dirname, name):
-    d = disk_rep.get_descendant(dirname)
+    d = get_dir(disk_rep, dirname)
     d[name] = ProxyDirectory()
 
 @ff
@@ -58,17 +46,15 @@ def disk_event_dir_rename(dirname, name, name2):
     return DiskEvents.dir_rename, dict(dirname=dirname, name=name, name2=name2)
 
 def disk_event_dir_rename_interpret(disk_rep, dirname, name, name2):
-    d = disk_rep.get_descendant(dirname)
-    
+    d = get_dir(disk_rep, dirname)
     d.dir_rename(name, name2)
-
 
 @ff
 def disk_event_dir_delete(dirname, name):
     return DiskEvents.dir_delete, dict(dirname=dirname, name=name)
 
 def disk_event_dir_delete_interpret(disk_rep, dirname, name):
-    d = disk_rep.get_descendant(dirname)
+    d = get_dir(disk_rep, dirname)
     d.dir_delete(name)
 
 
@@ -77,7 +63,7 @@ def disk_event_file_create(dirname, name, contents):
     return DiskEvents.file_create, dict(dirname=dirname, name=name, contents=contents)
 
 def disk_event_file_create_interpret(disk_rep, dirname, name, contents):
-    d = disk_rep.get_descendant(dirname)
+    d = get_dir(disk_rep, dirname)
     d.file_create(name, contents)
 
 @ff
@@ -85,15 +71,22 @@ def disk_event_file_modify(dirname, name, contents):
     return DiskEvents.file_modify, dict(dirname=dirname, name=name, contents=contents)
 
 def disk_event_file_modify_interpret(disk_rep, dirname, name, contents):
-    d = disk_rep.get_descendant(dirname)
+    d = get_dir(disk_rep, dirname)
     d.file_modify(name, contents)
+
+def get_dir(disk_rep, dirname):
+    d = disk_rep.get_descendant(dirname)
+    if isinstance(d, ProxyFile):
+        msg = 'Dirname %r corresponds to ProxyFile, not dir.' % (d)
+        raise ValueError(msg)
+    return d
 
 @ff
 def disk_event_file_delete(dirname, name):
     return DiskEvents.file_delete, dict(dirname=dirname, name=name)
 
 def disk_event_file_delete_interpret(disk_rep, dirname, name):
-    d = disk_rep.get_descendant(dirname)
+    d = get_dir(disk_rep, dirname)
     d.file_delete(name)
  
 @ff
@@ -101,7 +94,8 @@ def disk_event_file_rename(dirname, name, name2):
     return DiskEvents.file_rename, dict(dirname=dirname, name=name, name2=name2)
 
 def disk_event_file_rename_interpret(disk_rep, dirname, name, name2):
-    raise NotImplementedError()
+    d = get_dir(disk_rep, dirname)
+    d.file_rename(name, name2)
 
 def disk_event_make(_id, event_name, who, arguments):
     assert event_name in DiskEvents.all_events, event_name
@@ -111,15 +105,7 @@ def disk_event_make(_id, event_name, who, arguments):
     d['who'] = who
     d['arguments']=arguments
     return d
-
-#     dir_create = 'dir_create' # <dirname> <name>
-#     dir_rename = 'dir_rename' # <dirname> <name> <name2>
-#     dir_delete = 'dir_delete' # <dirname> <name> 
-#     file_create = 'file_create' # <dirname> <name> <contents>
-#     file_modify = 'file_modify' # <dirname> <name> <contents>
-#     file_delete = 'file_delete' #  <dirname> <name>
-#     file_rename = 'file_rename' #  <dirname> <name> <basename2>
-#     
+ 
 
 @contract(disk_rep=ProxyDirectory)
 def disk_event_interpret(disk_rep, disk_event):
@@ -145,5 +131,5 @@ def disk_event_interpret(disk_rep, disk_event):
         msg += indent(yaml_dump(disk_event), 'disk_event: ')
         msg += '\nFor this tree:\n'
         msg += indent((disk_rep.tree()), ' disk_rep: ')
-        from mcdp_hdb.dbview import InvalidOperation
+        from mcdp_hdb.memdataview import InvalidOperation
         raise_wrapped(InvalidOperation, e, msg)

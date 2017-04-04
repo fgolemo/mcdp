@@ -1,12 +1,14 @@
+from collections import OrderedDict
+from copy import deepcopy
+
 from contracts import contract
 from contracts.utils import check_isinstance, indent, raise_wrapped
 
 from mcdp.logs import logger
-from collections import OrderedDict
-from mcdp_utils_misc import yaml_dump
 from mcdp_utils_misc import format_list
-from copy import deepcopy
+from mcdp_utils_misc import yaml_dump
 
+from .memdataview import ViewBase
 
 
 class DataEvents(object):
@@ -40,7 +42,7 @@ def event_leaf_set(parent, name, value, **kwargs):
 
 def event_leaf_set_interpret(view, parent, name, value):
     v = get_view_node(view, parent)
-    from mcdp_hdb.dbview import ViewContext0
+    from mcdp_hdb.memdataview import ViewContext0
 
     check_isinstance(v, ViewContext0)
     vc = v.child(name)
@@ -118,7 +120,7 @@ def event_dict_setitem(name, key, value, **kwargs):
     return e
 
 def event_dict_setitem_interpret(view, name, key, value):
-    from mcdp_hdb.dbview import ViewHash0
+    from mcdp_hdb.memdataview import ViewHash0
     v = get_view_node(view, name)
     check_isinstance(v, ViewHash0)
     # permissions
@@ -133,7 +135,7 @@ def event_dict_delitem(name, key, **kwargs):
     return event_make(event_name=DataEvents.dict_delitem, arguments=arguments, **kwargs)
 
 def event_dict_delitem_interpret(view, name, key):
-    from mcdp_hdb.dbview import ViewHash0
+    from mcdp_hdb.memdataview import ViewHash0
     v = get_view_node(view, name)
     check_isinstance(v, ViewHash0)
     # permissions
@@ -146,12 +148,12 @@ def event_dict_rename(name, key, key2, **kwargs):
     return event_make(event_name=DataEvents.dict_rename,  arguments=arguments, **kwargs)
 
 def event_dict_rename_interpret(view, name, key, key2):
-    from mcdp_hdb.dbview import ViewHash0
+    from mcdp_hdb.memdataview import ViewHash0
     v = get_view_node(view, name)
     check_isinstance(v, ViewHash0)
     # permissions
     v.check_can_write()
-    from mcdp_hdb.dbview import InvalidOperation
+    from mcdp_hdb.memdataview import InvalidOperation
     if not key in v._data:
         msg = ('Cannot rename key %r to %r if it does not exist in %s.' % 
                (key, key2, format_list(v._data)))
@@ -172,6 +174,11 @@ def event_intepret(view_manager, db0, event):
     actor = event['who']['actor']
     principals = event['who']['principals']
     view = view_manager.view(db0, actor=actor, principals=principals)
+    event_interpret_(view, event)
+    view._schema.validate(db0) # XXX
+
+@contract(view=ViewBase, event=dict, returns=None)
+def event_interpret_(view, event):
     fs = {
         DataEvents.leaf_set: event_leaf_set_interpret,
         DataEvents.struct_set: event_struct_set_interpret,
@@ -194,9 +201,9 @@ def event_intepret(view_manager, db0, event):
     except Exception as e:
         msg = 'Could not complete the replay of this event: \n'
         msg += indent(yaml_dump(event), 'event: ')
-        from mcdp_hdb.dbview import InvalidOperation
+        from mcdp_hdb.memdataview import InvalidOperation
         raise_wrapped(InvalidOperation, e, msg)
-    view._schema.validate(db0)
+    
 
         
 def replay_events(view_manager, db0, events):
