@@ -1,7 +1,8 @@
 from contracts import contract
 
 from comptests.registrar import comptest, run_module_tests
-from mcdp_hdb_tests.test_translation import check_translation
+from mcdp_hdb_tests.functoriality_memdata_to_diskrep import \
+    check_translation_diskrep_to_memdata, check_translation_memdata_to_diskrep
 from mcdp_hdb_tests.testcases import testcases_SimpleUserDB, DataTestCase,\
     testcases_TranslateNone
 
@@ -29,7 +30,19 @@ def run_for_test_case(name, tc):
     schema = tc.get_schema()
     memdata_events = tc.get_events()
     disk_map = tc.get_disk_map()
-    check_translation(schema, data_rep0, memdata_events, data_rep1, disk_map, out)
+    out_memdata_to_diskrep = out + '/out_memdata_to_diskrep'
+    r = check_translation_memdata_to_diskrep(schema, data_rep0, memdata_events, data_rep1, disk_map, 
+                          out=out_memdata_to_diskrep)
+    
+    
+    disk_rep0 = r['disk_rep0']
+    disk_events = r['disk_events']
+    disk_rep = r['disk_rep']
+    out_diskrep_to_memdata = out + '/out_diskrep_to_memdata'
+    check_translation_diskrep_to_memdata(schema, disk_rep0, disk_events, disk_rep, disk_map, 
+                                         out=out_diskrep_to_memdata)
+    
+    
 
 if __name__ == '__main__':
     run_module_tests()

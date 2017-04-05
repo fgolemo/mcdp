@@ -3,4 +3,4 @@ from .test_db import *
 from .test_extensions import *
 from .test_view1 import *
 from .test_acl import *
-from .test_translation import *
+from mcdp_hdb_tests.functoriality_memdata_to_diskrep import *

@@ -63,7 +63,7 @@ def test_privilege1():
     view_pinco.child('users').child('andrea').name
     # pinco cannot read andrea's email
     with expect_permissions_error():
-        print '! pinco can see ' + view_pinco.child('users').child('andrea').email    
+        print('! pinco can see ' + view_pinco.child('users').child('andrea').email)
     # pinco cannot change andrea's name
     with expect_permissions_error():
         view_pinco.child('users').child('andrea').name = 'invalid'
