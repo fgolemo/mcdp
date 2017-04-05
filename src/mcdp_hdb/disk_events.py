@@ -6,8 +6,10 @@ from contracts.utils import check_isinstance, indent, raise_wrapped
 from mcdp.logs import logger
 from mcdp_utils_misc import yaml_dump
 
-from .disk_struct import ProxyDirectory
-from .disk_struct import ProxyFile
+from .disk_struct import ProxyDirectory,ProxyFile
+import os
+import shutil
+from copy import deepcopy
 
 
 class DiskEvents(object):
@@ -18,11 +20,10 @@ class DiskEvents(object):
     file_modify = 'file_modify' # <dirname> <name> <contents>
     file_delete = 'file_delete' #  <dirname> <name>
     file_rename = 'file_rename' #  <dirname> <name> <name2>
-    
+    disk_event_group = 'disk_event_group' # <events>
     all_events = [dir_rename, dir_delete, dir_create,
-                  file_create, file_modify, file_delete, file_rename] 
+                  file_create, file_modify, file_delete, file_rename, disk_event_group] 
 
-    
 def ff(f):
     @contract(_id=str)
     def f2(_id, who, *args, **kwargs):
@@ -41,6 +42,18 @@ def valid_dirname(x):
         msg = 'Invalid dirname %s' % x.__repr__()
         raise ValueError(msg) 
      
+@ff
+def disk_event_disk_event_group(events):
+    if not events:
+        msg = 'Group with no events?'
+        raise ValueError(msg)
+    assert len(events) >= 1
+    return DiskEvents.disk_event_group, dict(events=deepcopy(events))
+
+def disk_event_disk_event_group_interpret(disk_rep, events):
+    for event in events:
+        disk_event_interpret(disk_rep, event)
+        
 @ff
 @contract(dirname='valid_dirname')
 def disk_event_dir_create(dirname, name):
@@ -128,6 +141,7 @@ def disk_event_make(_id, event_name, who, arguments):
 @contract(disk_rep=ProxyDirectory)
 def disk_event_interpret(disk_rep, disk_event):
     fs = {
+        DiskEvents.disk_event_group: disk_event_disk_event_group_interpret,
         DiskEvents.dir_create: disk_event_dir_create_interpret,
         DiskEvents.dir_rename: disk_event_dir_rename_interpret,
         DiskEvents.dir_delete: disk_event_dir_delete_interpret,
@@ -151,3 +165,73 @@ def disk_event_interpret(disk_rep, disk_event):
         msg += indent((disk_rep.tree()), ' disk_rep: ')
         from mcdp_hdb.memdataview import InvalidOperation
         raise_wrapped(InvalidOperation, e, msg)
+
+def apply_disk_event_to_filesystem(wd, disk_event): 
+    
+    def as_path(dirname, sub):
+        path = os.path.join(wd, '/'.join(dirname))
+        res = os.path.join(path, sub)
+        return res
+    
+    def dir_create(dirname, name):
+        p = as_path(dirname, name)
+        os.makedirs(p)
+        
+    def dir_rename(dirname, name, name2):
+        p1 = as_path(dirname, name)
+        p2 = as_path(dirname, name2)
+        os.rename(p1, p2)
+        
+    def file_rename(dirname, name, name2):
+        p1 = as_path(dirname, name)
+        p2 = as_path(dirname, name2)
+        os.rename(p1, p2)
+        
+    def dir_delete(dirname, name):
+        p = as_path(dirname, name)
+        shutil.rmtree(p) 
+        
+    def file_create(dirname, name, contents):
+        p = as_path(dirname, name)
+        with open(p, 'wb') as f:
+            f.write(contents)
+    
+    def file_modify(dirname, name, contents):
+        p = as_path(dirname, name)
+        with open(p, 'wb') as f:
+            f.write(contents)
+    
+    def file_delete(dirname, name):
+        p = as_path(dirname, name)
+        os.unlink(p)
+        
+    def disk_event_group(events):
+        for e in events:
+            apply_disk_event_to_filesystem(wd, e)
+        
+       
+    fs = {
+        DiskEvents.disk_event_group: disk_event_group,
+        DiskEvents.dir_create: dir_create,
+        DiskEvents.dir_rename: dir_rename,
+        DiskEvents.dir_delete: dir_delete,
+        DiskEvents.file_create: file_create,
+        DiskEvents.file_modify: file_modify,
+        DiskEvents.file_delete: file_delete,
+        DiskEvents.file_rename: file_rename,
+    }
+    ename = disk_event['operation']
+    if not ename in fs:
+        raise NotImplementedError(ename)
+    intf = fs[ename]
+    arguments = disk_event['arguments']
+    try:
+        logger.info('Arguments: %s' % arguments)
+        intf(**arguments)
+    except Exception as e:
+        msg = 'Could not apply this event to filesystem: \n'
+        msg += indent(yaml_dump(disk_event), 'disk_event: ')
+        from mcdp_hdb.memdataview import InvalidOperation
+        raise_wrapped(InvalidOperation, e, msg)
+
+

@@ -18,6 +18,7 @@ from .memdata_utils import assert_data_events_consistent
 from .memdataview import InvalidOperation
 from .memdataview_manager import ViewManager
 from .schema import SchemaHash, SchemaString, SchemaContext, SchemaList, SchemaBytes, NOT_PASSED, SchemaDate, SchemaBase
+from mcdp_hdb.disk_events import disk_event_disk_event_group
 
 
 # from mcdp_library_tests.create_mockups import mockup_flatten
@@ -297,10 +298,9 @@ class DiskMap(object):
 
 @contract(returns='tuple(list(dict), list(dict))')
 def data_events_from_disk_event_queue(disk_map, schema, disk_rep, disk_events_queue):
-#     def not_implement():
-#         raise NotImplementedError(yaml_dump(disk_events_queue[0]))
-#     
+
     handlers = {
+        DiskEvents.disk_event_group: data_events_from_disk_event_group,
         DiskEvents.dir_create: data_events_from_dir_create,
         DiskEvents.dir_rename: data_events_from_dir_rename,
         DiskEvents.dir_delete: data_events_from_dir_delete,
@@ -338,6 +338,13 @@ def data_events_from_disk_event_queue(disk_map, schema, disk_rep, disk_events_qu
             raise_wrapped(Exception, e, msg, arguments=arguments)
     else:
         raise NotImplementedError(operation)
+    
+def data_events_from_disk_event_group(disk_map, disk_rep, disk_events_queue, _id, who, events):
+    if not events:
+        msg = 'Group with no events?'
+        raise ValueError(msg)
+    es, _consumed = data_events_from_disk_event_queue(disk_map, disk_map.schema, disk_rep, list(events))
+    return es, []
     
 def data_events_from_dir_create(disk_map, disk_rep, disk_events_queue, _id, who, dirname, name):
     parent, schema_parent, hint = get_parent_data(disk_map, dirname, name)    
@@ -655,7 +662,9 @@ def disk_events_from_dict_setitem(disk_map, view, _id, who, name, key, value):
             if key in view_parent._data:
                 events.append(disk_event_dir_delete(_id, who, dirname=list(dirname), name=its_name))
             events.extend(disk_events_for_creating(_id, who, d, tuple(dirname) + (its_name,)))
-            return events
+            
+            e = disk_event_disk_event_group(_id, who, events=events)
+            return [e]
         else:
             assert False 
     else:

@@ -97,7 +97,7 @@ def check_translation_memdata_to_diskrep(schema, data_rep0, data_events, data_re
     return dict(disk_rep0=disk_rep0, disk_events=disk_events, disk_rep=disk_rep)
 
 def check_translation_diskrep_to_memdata(schema, disk_rep0, disk_events, disk_rep1, disk_map, out):
-    
+    disk_events = deepcopy(disk_events)
     assert_disk_events_consistent(disk_rep0, disk_events, disk_rep1)
     
     view_manager = ViewManager(schema)

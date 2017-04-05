@@ -9,7 +9,6 @@ def assert_disk_events_consistent(disk_rep0, disk_events, disk_rep1):
         disk_event_interpret(x, disk_event)
     
     assert_diskreps_same(x, disk_rep1, 'obtained', 'disk_rep1')
-    
         
 def assert_diskreps_same(a, b, a_text='a', b_text='b'):
     n = max(len(a_text), len(b_text))
