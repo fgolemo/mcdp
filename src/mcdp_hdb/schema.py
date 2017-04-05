@@ -72,6 +72,7 @@ class SchemaRecursive(SchemaBase):
 
 class SchemaSimple(SchemaBase):
     ''' Base class for simple data types '''
+    @contract(prefix='seq(str)', returns=SchemaBase)
     def get_descendant(self, prefix):
         if not prefix:
             return self

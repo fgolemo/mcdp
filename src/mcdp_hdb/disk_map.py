@@ -340,33 +340,24 @@ def data_events_from_disk_event_queue(disk_map, schema, disk_rep, disk_events_qu
         raise NotImplementedError(operation)
     
 def data_events_from_dir_create(disk_map, disk_rep, disk_events_queue, _id, who, dirname, name):
-    name1 = disk_map.data_url_from_dirname(tuple(dirname) + (name,))
-    parent = name1[:-1] 
     
-    disk_rep = deepcopy(disk_rep)
-    
-    logger.debug('dirname %r -> parent %r' % (dirname, parent))
-    
-    
-    logger.debug('name 1 %r' % str(name1))
+    parent = disk_map.data_url_from_dirname(tuple(dirname) + (name,))[:-1]     
     schema_parent = disk_map.schema.get_descendant(parent)
     hint = disk_map.get_hint(schema_parent)
     if isinstance(schema_parent, SchemaHash):
         if isinstance(hint, HintDir):
             key = hint.key_from_filename(name)
             schema_child = schema_parent.prototype
-            logger.debug('Dir creation event dirname = %s name = %s' % (dirname, name))
-
             # get more events that create file in this directory
             related_disk_events = get_disk_events_for_dir(dirname, disk_events_queue)
-            logger.debug('Related events: \n %s' % indent(yaml_dump(related_disk_events), 'related '))
+            
+            disk_rep = deepcopy(disk_rep)
             disk_rep.get_descendant(dirname).dir_create(name)
             for re in related_disk_events:
                 disk_event_interpret(disk_rep, re)
             disk_rep_child = disk_rep.get_descendant(dirname + (name,))
-            logger.debug('Child to interpret: \n %s' % disk_rep_child.tree())
             value = disk_map.interpret_hierarchy_(schema_child, disk_rep_child)
-            logger.debug('Value obtained: \n %s' % yaml_dump(value))
+
             e = event_dict_setitem(name=parent, key=key, value=value, _id=_id, who=who)
             return [e], related_disk_events
     msg = 'Not implemented\n %s\nwith\n%s' % (schema_parent, hint)
@@ -396,8 +387,7 @@ def a_is_prefix_of_b(l1, l2):
     return True
     
 def data_events_from_dir_rename(disk_map, disk_rep, disk_events_queue, _id, who, dirname, name, name2):
-    name1 = disk_map.data_url_from_dirname(tuple(dirname) + (name,))
-    parent = name1[:-1]
+    parent = disk_map.data_url_from_dirname(tuple(dirname) + (name,))[:-1]
     
     disk_rep = deepcopy(disk_rep)
     schema_parent = disk_map.schema.get_descendant(parent)
@@ -412,12 +402,9 @@ def data_events_from_dir_rename(disk_map, disk_rep, disk_events_queue, _id, who,
     raise NotImplementedError(msg)
 
 def data_events_from_dir_delete(disk_map, disk_rep, disk_events_queue, _id, who, dirname, name):
-    name1 = disk_map.data_url_from_dirname(tuple(dirname) + (name,))
-    parent = name1[:-1]
+    parent = disk_map.data_url_from_dirname(tuple(dirname) + (name,))[:-1]
     
-#     dirname = tuple(dirname)
     disk_rep = deepcopy(disk_rep)
-#     parent = disk_map.data_url_from_dirname(dirname)
     schema_parent = disk_map.schema.get_descendant(parent)
     hint = disk_map.get_hint(schema_parent)
     if isinstance(schema_parent, SchemaHash):
@@ -429,7 +416,7 @@ def data_events_from_dir_delete(disk_map, disk_rep, disk_events_queue, _id, who,
     raise NotImplementedError(msg)
 
 def data_events_from_file_create(disk_map, disk_rep, disk_events_queue, _id, who, dirname, name, contents):
-    parent = disk_map.data_url_from_dirname(dirname)
+    parent = disk_map.data_url_from_dirname(tuple(dirname) + (name,))[:-1]
     schema_parent = disk_map.schema.get_descendant(parent)
     hint = disk_map.get_hint(schema_parent)
     if isinstance(schema_parent, SchemaHash):
@@ -453,7 +440,10 @@ def data_events_from_file_create(disk_map, disk_rep, disk_events_queue, _id, who
     raise NotImplementedError(msg)
 
 def data_events_from_file_modify(disk_map, disk_rep, disk_events_queue, _id, who, dirname, name, contents):
-    parent = disk_map.data_url_from_dirname(dirname)
+    name1 = disk_map.data_url_from_dirname(tuple(dirname) + (name,))
+    
+    parent = name1[:-1]
+    logger.debug('name1 %r dirname %s -> parent %s' % (name1, dirname, parent))
     schema_parent = disk_map.schema.get_descendant(parent)
     hint = disk_map.get_hint(schema_parent)
     if isinstance(schema_parent, SchemaContext):
@@ -509,7 +499,7 @@ def data_events_from_file_modify(disk_map, disk_rep, disk_events_queue, _id, who
     raise NotImplementedError(msg)
 
 def data_events_from_file_rename(disk_map, disk_rep, disk_events_queue, _id, who, dirname, name, name2):
-    parent = disk_map.data_url_from_dirname(dirname)
+    parent = disk_map.data_url_from_dirname(tuple(dirname) + (name,))[:-1]
     schema_parent = disk_map.schema.get_descendant(parent)
     hint = disk_map.get_hint(schema_parent)
     if isinstance(schema_parent, SchemaHash):
@@ -523,7 +513,7 @@ def data_events_from_file_rename(disk_map, disk_rep, disk_events_queue, _id, who
     raise NotImplementedError(msg)
 
 def data_events_from_file_delete(disk_map, disk_rep, disk_events_queue, _id, who, dirname, name):
-    parent = disk_map.data_url_from_dirname(dirname)
+    parent = disk_map.data_url_from_dirname(tuple(dirname) + (name,))[:-1]
     schema_parent = disk_map.schema.get_descendant(parent)
     hint = disk_map.get_hint(schema_parent)
     if isinstance(schema_parent, SchemaHash):
