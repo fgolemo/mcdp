@@ -2,11 +2,13 @@ from contracts import contract
 
 from comptests.registrar import comptest, run_module_tests
 from mcdp_hdb_tests.test_translation import check_translation
-from mcdp_hdb_tests.testcases import testcases_SimpleUserDB, DataTestCase
+from mcdp_hdb_tests.testcases import testcases_SimpleUserDB, DataTestCase,\
+    testcases_TranslateNone
 
 
 tcs = {}
 tcs.update(testcases_SimpleUserDB())
+tcs.update(testcases_TranslateNone())
 
 class X():
     def __init__(self, k, tc):

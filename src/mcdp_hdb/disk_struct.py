@@ -2,13 +2,15 @@ import fnmatch
 import os
 
 from contracts import contract
-from contracts.utils import indent, raise_desc, check_isinstance
+from contracts.utils import indent, raise_desc, check_isinstance, raise_wrapped
 
 from mcdp import MCDPConstants
 from mcdp_utils_misc import yaml_dump, get_md5, format_list
 
 from .disk_errors import InvalidDiskOperation
 
+class NoSuchDescendant(Exception):
+    pass
 
 class ProxyDirectory(object):
     
@@ -141,23 +143,27 @@ class ProxyDirectory(object):
 
     @contract(prefix='seq(str)')
     def get_descendant(self, prefix):
-        prefix = tuple(prefix)
-        if not prefix:
-            return self
-        else:
-            first = prefix[0]
-            if first in self._directories:
-                return self._directories[first].get_descendant(prefix[1:])
-            elif first in self._files:
-                if len(prefix) > 1:
-                    msg = 'Invalid url %r because %r is a file.' % (prefix, first)
-                    raise ValueError(msg)
-                else:
-                    return self._files[first]
+        try:
+            prefix = tuple(prefix)
+            if not prefix:
+                return self
             else:
-                msg = 'Invalid name %r.' % first
-                raise_desc(ValueError, msg)   
-    
+                first = prefix[0]
+                if first in self._directories:
+                    return self._directories[first].get_descendant(prefix[1:])
+                elif first in self._files:
+                    if len(prefix) > 1:
+                        msg = 'Invalid url %r because %r is a file.' % (prefix, first)
+                        raise_desc(NoSuchDescendant, msg)
+                    else:
+                        return self._files[first]
+                else:
+                    msg = 'Invalid name %r; it is neither a dir or a file.' % first
+                    raise_desc(NoSuchDescendant, msg)   
+        except NoSuchDescendant as e:
+            msg = 'Cannot get the descendant %s:' % prefix.__repr__()
+            msg += '\n' + indent(self.tree(), 'self | ')
+            raise_wrapped(NoSuchDescendant, e, msg, compact=True)
    
     
     def file_modify(self, name, contents):

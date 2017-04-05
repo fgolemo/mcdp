@@ -1,6 +1,6 @@
 from collections import OrderedDict
 
-from contracts import contract
+from contracts import contract, new_contract
 from contracts.utils import check_isinstance, indent, raise_wrapped
 
 from mcdp.logs import logger
@@ -33,7 +33,16 @@ def ff(f):
         return e
     return f2
 
+
+@new_contract
+def valid_dirname(x):
+    ''' Checks that it is a sequence of strings - not None '''
+    if None in x:
+        msg = 'Invalid dirname %s' % x.__repr__()
+        raise ValueError(msg) 
+     
 @ff
+@contract(dirname='valid_dirname')
 def disk_event_dir_create(dirname, name):
     return DiskEvents.dir_create, dict(dirname=dirname, name=name)
 
@@ -42,6 +51,7 @@ def disk_event_dir_create_interpret(disk_rep, dirname, name):
     d[name] = ProxyDirectory()
 
 @ff
+@contract(dirname='valid_dirname')
 def disk_event_dir_rename(dirname, name, name2):
     return DiskEvents.dir_rename, dict(dirname=dirname, name=name, name2=name2)
 
@@ -50,6 +60,7 @@ def disk_event_dir_rename_interpret(disk_rep, dirname, name, name2):
     d.dir_rename(name, name2)
 
 @ff
+@contract(dirname='valid_dirname')
 def disk_event_dir_delete(dirname, name):
     return DiskEvents.dir_delete, dict(dirname=dirname, name=name)
 
@@ -59,6 +70,7 @@ def disk_event_dir_delete_interpret(disk_rep, dirname, name):
 
 
 @ff
+@contract(dirname='valid_dirname')
 def disk_event_file_create(dirname, name, contents):
     return DiskEvents.file_create, dict(dirname=dirname, name=name, contents=contents)
 
@@ -66,7 +78,9 @@ def disk_event_file_create_interpret(disk_rep, dirname, name, contents):
     d = get_dir(disk_rep, dirname)
     d.file_create(name, contents)
 
+    
 @ff
+@contract(dirname='valid_dirname')
 def disk_event_file_modify(dirname, name, contents):
     return DiskEvents.file_modify, dict(dirname=dirname, name=name, contents=contents)
 
@@ -74,7 +88,9 @@ def disk_event_file_modify_interpret(disk_rep, dirname, name, contents):
     d = get_dir(disk_rep, dirname)
     d.file_modify(name, contents)
 
+@contract(dirname='valid_dirname')
 def get_dir(disk_rep, dirname):
+    # remove None components
     d = disk_rep.get_descendant(dirname)
     if isinstance(d, ProxyFile):
         msg = 'Dirname %r corresponds to ProxyFile, not dir.' % (d)
@@ -82,6 +98,7 @@ def get_dir(disk_rep, dirname):
     return d
 
 @ff
+@contract(dirname='valid_dirname')
 def disk_event_file_delete(dirname, name):
     return DiskEvents.file_delete, dict(dirname=dirname, name=name)
 
@@ -90,6 +107,7 @@ def disk_event_file_delete_interpret(disk_rep, dirname, name):
     d.file_delete(name)
  
 @ff
+@contract(dirname='valid_dirname')
 def disk_event_file_rename(dirname, name, name2):
     return DiskEvents.file_rename, dict(dirname=dirname, name=name, name2=name2)
 

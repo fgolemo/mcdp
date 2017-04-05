@@ -1,10 +1,11 @@
 from contracts import contract
 
 from mcdp import MCDPConstants
+
 from .memdataview import ViewContext0, ViewHash0, ViewList0, ViewString
+from .memdataview_utils import host_name
 from .schema import SchemaBase, SchemaContext, SchemaString,\
     SchemaHash, SchemaList
-from .memdataview_utils import host_name
 
 
 __all__ = [
@@ -31,9 +32,7 @@ class ViewManager(object):
             
             user_info = view.users[0]
 
-            
-            
-        Each view class contains a reference
+        Each view class contains a reference to a ViewManager.
     '''
     
     @contract(schema=SchemaBase)
@@ -55,6 +54,13 @@ class ViewManager(object):
             host = {'hostname': host_name()}
         v._who = {'host': host, 'actor': actor, 'principals': principals}
         v._principals = principals
+    
+        # create notify callback that saves everything to a .events
+        # variable
+        v._events = []    
+        def notify_callback(event):
+            v._events.append(event)
+        v._notify_callback = notify_callback
         return v
 
     @contract(s=SchemaBase)

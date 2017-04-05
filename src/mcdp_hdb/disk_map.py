@@ -14,10 +14,10 @@ from .disk_events import disk_event_interpret
 from .disk_struct import ProxyDirectory, ProxyFile
 from .memdata_diff import data_diff
 from .memdata_events import DataEvents, get_view_node,  event_leaf_set, event_dict_setitem, event_dict_delitem, event_dict_rename
+from .memdata_utils import assert_data_events_consistent
 from .memdataview import InvalidOperation
 from .memdataview_manager import ViewManager
 from .schema import SchemaHash, SchemaString, SchemaContext, SchemaList, SchemaBytes, NOT_PASSED, SchemaDate, SchemaBase
-from mcdp_hdb.memdata_utils import assert_data_events_consistent
 
 
 # from mcdp_library_tests.create_mockups import mockup_flatten
@@ -163,9 +163,13 @@ class DiskMap(object):
         if isinstance(schema, SchemaContext):
             schema_child = schema.children[first]
             rest_translated = self.dirname_from_data_url_(schema_child, rest)
-            
-        return (first_translated,) + rest_translated 
-
+           
+        if first_translated is not None: 
+            res = (first_translated,) + rest_translated
+        else:
+            res = rest_translated
+        
+        return res
         
     @contract(dirname='tuple,seq(str)')
     def data_url_from_dirname_(self, schema, dirname):
@@ -183,18 +187,36 @@ class DiskMap(object):
         
         if isinstance(schema, SchemaHash):
             rest_translated = self.data_url_from_dirname_(schema.prototype, rest)
-            
-        if isinstance(schema, SchemaList):
+            return (first_translated,) + rest_translated
+        elif isinstance(schema, SchemaList):
             rest_translated = self.data_url_from_dirname_(schema.prototype, rest)
+            return (first_translated,) + rest_translated
+        elif isinstance(schema, SchemaContext):
+            # all right, what could happen here is that we have one or more children
+            # whose file translation is None. What to do?
             
-        if isinstance(schema, SchemaContext):
-            schema_child = schema.children[first_translated]
-            rest_translated = self.data_url_from_dirname_(schema_child, rest)
+            # Let's first look at how many children have translation "None".
+            children_with_none = [k for k in schema.children if hint.translations.get(k, 'ok') is None]
+            if len(children_with_none) > 1:
+                msg = 'This is an ambiguous situation.'
+                raise_desc(NotImplementedError, msg, hint=hint, schema=schema)
+            elif len(children_with_none) == 0:
+                # easy case: 
+                schema_child = schema.children[first_translated]
+                rest_translated = self.data_url_from_dirname_(schema_child, rest)
+                return (first_translated,) + rest_translated
+            else:
+                
+                child_with_none = children_with_none[0]
+                logger.debug('We found one descendant with translation None: %r' % child_with_none)
+                schema_child = schema.children[child_with_none]
+                rest_translated = self.data_url_from_dirname_(schema_child, dirname)
+                res = (child_with_none,) + rest_translated
+                logger.debug('Result is dirname %r -> res %r' % (dirname, res))
+                return res
             
-        return (first_translated,) + rest_translated 
+         
         
-        
-
     @contract(fh='isinstance(ProxyDirectory)|isinstance(ProxyFile)')
     def interpret_hierarchy_(self, schema, fh):
         try:
@@ -275,9 +297,9 @@ class DiskMap(object):
 
 @contract(returns='tuple(list(dict), list(dict))')
 def data_events_from_disk_event_queue(disk_map, schema, disk_rep, disk_events_queue):
-    def not_implement():
-        raise NotImplementedError(yaml_dump(disk_events_queue[0]))
-    
+#     def not_implement():
+#         raise NotImplementedError(yaml_dump(disk_events_queue[0]))
+#     
     handlers = {
         DiskEvents.dir_create: data_events_from_dir_create,
         DiskEvents.dir_rename: data_events_from_dir_rename,
@@ -310,6 +332,7 @@ def data_events_from_disk_event_queue(disk_map, schema, disk_rep, disk_events_qu
         except Exception as e:
             msg = 'Could not succesfully translate using %r:' % f.__name__
             msg += '\n' + 'Schema: ' + '\n' + indent(schema, ' schema ')
+            msg += '\n' + 'Current disk representation: ' + '\n' + indent(disk_rep.tree(), ' tree ')
             msg += '\n' + 'Disk event: ' + '\n' + indent(yaml_dump(disk_event), ' disk_event ')
             
             raise_wrapped(Exception, e, msg, arguments=arguments)
@@ -317,9 +340,15 @@ def data_events_from_disk_event_queue(disk_map, schema, disk_rep, disk_events_qu
         raise NotImplementedError(operation)
     
 def data_events_from_dir_create(disk_map, disk_rep, disk_events_queue, _id, who, dirname, name):
-    dirname = tuple(dirname)
+    name1 = disk_map.data_url_from_dirname(tuple(dirname) + (name,))
+    parent = name1[:-1] 
+    
     disk_rep = deepcopy(disk_rep)
-    parent = disk_map.data_url_from_dirname(dirname)
+    
+    logger.debug('dirname %r -> parent %r' % (dirname, parent))
+    
+    
+    logger.debug('name 1 %r' % str(name1))
     schema_parent = disk_map.schema.get_descendant(parent)
     hint = disk_map.get_hint(schema_parent)
     if isinstance(schema_parent, SchemaHash):
@@ -340,7 +369,7 @@ def data_events_from_dir_create(disk_map, disk_rep, disk_events_queue, _id, who,
             logger.debug('Value obtained: \n %s' % yaml_dump(value))
             e = event_dict_setitem(name=parent, key=key, value=value, _id=_id, who=who)
             return [e], related_disk_events
-    msg = 'Not implemented %s with %s' % (schema_parent, hint)
+    msg = 'Not implemented\n %s\nwith\n%s' % (schema_parent, hint)
     raise NotImplementedError(msg)
 
 def get_disk_events_for_dir(dirname, disk_events_queue):
@@ -367,9 +396,10 @@ def a_is_prefix_of_b(l1, l2):
     return True
     
 def data_events_from_dir_rename(disk_map, disk_rep, disk_events_queue, _id, who, dirname, name, name2):
-    dirname = tuple(dirname)
+    name1 = disk_map.data_url_from_dirname(tuple(dirname) + (name,))
+    parent = name1[:-1]
+    
     disk_rep = deepcopy(disk_rep)
-    parent = disk_map.data_url_from_dirname(dirname)
     schema_parent = disk_map.schema.get_descendant(parent)
     hint = disk_map.get_hint(schema_parent)
     if isinstance(schema_parent, SchemaHash):
@@ -382,9 +412,12 @@ def data_events_from_dir_rename(disk_map, disk_rep, disk_events_queue, _id, who,
     raise NotImplementedError(msg)
 
 def data_events_from_dir_delete(disk_map, disk_rep, disk_events_queue, _id, who, dirname, name):
-    dirname = tuple(dirname)
+    name1 = disk_map.data_url_from_dirname(tuple(dirname) + (name,))
+    parent = name1[:-1]
+    
+#     dirname = tuple(dirname)
     disk_rep = deepcopy(disk_rep)
-    parent = disk_map.data_url_from_dirname(dirname)
+#     parent = disk_map.data_url_from_dirname(dirname)
     schema_parent = disk_map.schema.get_descendant(parent)
     hint = disk_map.get_hint(schema_parent)
     if isinstance(schema_parent, SchemaHash):
@@ -431,46 +464,47 @@ def data_events_from_file_modify(disk_map, disk_rep, disk_events_queue, _id, who
             e = event_leaf_set(parent=parent, name=key, value=value, _id=_id, who=who)
             consumed = []
             return [e], consumed
+
+    logger.debug('dirname %r -> parent %r' % (dirname, parent))
         
     if isinstance(schema_parent, SchemaHash):
         if isinstance(hint, HintDir):
             # modified a file
             logger.debug('data_events_from_file_modify dirname %r name %r contents = %r' % (dirname, name, contents))
-                         
+            logger.debug('hint %r' % hint)
+
+            key = hint.key_from_filename(name)         
             # the interesting case is when it is yaml file
             prototype = schema_parent.prototype
+            logger.debug('key %r' % key)
+            logger.debug('prototype %r' % prototype)
             is_yaml = isinstance(disk_map.get_hint(prototype), HintFileYAML)
             if is_yaml:
                 # let's get the new yaml file contents
-                key = hint.key_from_filename(name)
-                schema_child = schema_parent.get_descendant((key,))
-                data2 = disk_map.interpret_hierarchy_(schema_child, ProxyFile(contents))
+                data2 = disk_map.interpret_hierarchy_(prototype, ProxyFile(contents))
                 # now take the difference with respect to the current data
                 current_file = disk_rep.get_descendant(dirname)[name]
-                data1 = disk_map.interpret_hierarchy_(schema_child, current_file)
-                
-                diff = data_diff(schema_child, data1, data2)
-                
-                assert_data_events_consistent(schema_child, data1, diff, data2)
-                
-                sdata1 = indent(yaml_dump(data1), '  data1  | ')
-                sdata2 = indent(yaml_dump(data2), '  data2  | ')
-                sdiff = indent(yaml_dump(diff), 'diff ')
-                logger.info('difference between:\n%s\nand\n%s\nis\n%s' % (sdata1,sdata2,sdiff))
+                data1 = disk_map.interpret_hierarchy_(prototype, current_file)
+                diff = data_diff(prototype, data1, data2)
+                assert_data_events_consistent(prototype, data1, diff, data2) 
                 
                 def add_prefix(e):
-                    e2 = deepcopy(e)
-                    logger.info(indent(yaml_dump(e2), 'e2 ')) 
+                    e2 = deepcopy(e) 
                     if 'parent' in e2['arguments']:
-                        e2['arguments']['parent'] = parent+ (key,) + e2['arguments']['parent']
-                    print e2
+                        e2['arguments']['parent'] = parent+ (key,) + e2['arguments']['parent'] 
                     return e2
                 
-                diff2 = map(add_prefix, diff)
-                logger.info(indent(yaml_dump(diff2), 'diff2 '))
-                consumed = [] 
-                return diff2, consumed
-        
+                diff2 = map(add_prefix, diff) 
+                return diff2, [] 
+            else: 
+                # if a file is modified, it means that it was a leaf node
+                pass
+#                 data2 = disk_map.interpret_hierarchy_(schema_child, ProxyFile(contents))  
+# #                 e = data_event_dict_
+#                 return [e], [] 
+                
+                
+                
     msg = 'Not implemented %s with %s' % (type(schema_parent), hint)
     raise NotImplementedError(msg)
 
@@ -556,22 +590,21 @@ def disk_events_from_leaf_set_in_yaml(disk_map, view, _id, who, parent, name, va
     fh = disk_map.create_hierarchy_(p_schema, data_view._data)
     check_isinstance(fh, ProxyFile)
     contents = fh.contents
-    print('dirname %s filename %s contents %s' % (dirname, filename, contents))
     disk_event = disk_event_file_modify(_id, who, dirname, filename, contents)
     return [disk_event]
  
 
 def disk_events_from_leaf_set(disk_map, view, _id, who, parent, name, value):
     # check if it is contained in any dir that has HintFileYAML
-    logger.debug('leaf_set %s . %s = %s' % (parent, name, value))
+#     logger.debug('leaf_set %s . %s = %s' % (parent, name, value))
     for i in range(len(parent)+1):
         p = parent[:i]
         p_schema = view._schema.get_descendant(p)
         p_hint = disk_map.get_hint(p_schema)
-        logger.debug('parent %s p %s hint %s' % (parent, p,p_hint))
+#         logger.debug('parent %s p %s hint %s' % (parent, p,p_hint))
         if isinstance(p_hint, HintFileYAML):
-            msg = 'For leaf set %s.%s=%s, detected yaml at %s' % (parent, name, value, p)
-            logger.debug(msg)
+#             msg = 'For leaf set %s.%s=%s, detected yaml at %s' % (parent, name, value, p)
+#             logger.debug(msg)
             return disk_events_from_leaf_set_in_yaml(disk_map, view, _id, who, parent, name, value, p)
     
     view_parent = get_view_node(view, parent)
@@ -650,18 +683,17 @@ def disk_events_from_dict_delitem(disk_map, view, _id, who, name, key):
     
     hint = disk_map.get_hint(schema_parent)
     if isinstance(hint, HintDir):
+        dirname = disk_map.dirname_from_data_url(name) 
         its_name = hint.filename_for_key(key)
         # I just need to find out whether it would be ProxyDir or ProxyFile
         value = view_parent._data[key]
         d = disk_map.create_hierarchy_(prototype, value)
         if isinstance(d, ProxyFile):
-            dirname = name
             disk_event = disk_event_file_delete(_id, who, 
                                                 dirname=dirname, 
                                                 name=its_name)
             return [disk_event]
         elif isinstance(d, ProxyDirectory):
-            dirname = name
             disk_event = disk_event_dir_delete(_id, who, 
                                                 dirname=dirname, 
                                                 name=its_name)
@@ -679,6 +711,7 @@ def disk_events_from_dict_rename(disk_map, view, _id, who, name, key, key2):
     
     hint = disk_map.get_hint(schema_parent)
     if isinstance(hint, HintDir):
+        dirname = disk_map.dirname_from_data_url(name)
         its_name = hint.filename_for_key(key)
         its_name2 = hint.filename_for_key(key2)
         # I just need to find out whether it would be ProxyDir or ProxyFile
@@ -687,7 +720,6 @@ def disk_events_from_dict_rename(disk_map, view, _id, who, name, key, key2):
             raise InvalidOperation(msg)
         value = view_parent._data[key]
         d = disk_map.create_hierarchy_(prototype, value)
-        dirname = name
         if isinstance(d, ProxyFile):
             disk_event = disk_event_file_rename(_id, who, 
                                                 dirname=dirname, 

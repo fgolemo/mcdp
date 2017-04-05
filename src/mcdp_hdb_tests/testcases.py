@@ -56,7 +56,42 @@ class DataTestCase(object):
             view = view_manager.view(data_i)
             event_interpret_(view, e)
             yield current, e, data_i
+
+@contract(returns='dict(str:isinstance(DataTestCase))')    
+def testcases_TranslateNone():
+    # we have a list of images
+    schema = Schema()
+    user = Schema()
+    user.string('name')
+    schema.hash('users', user)
     
+    db = {'users': {'andrea': {'name': 'Andrea'}, 'john': {'name':'John'}}}
+    db0 = deepcopy(db)
+    
+    viewmanager = ViewManager(schema) 
+    view = viewmanager.view(db) 
+
+    users = view.users
+    u = users['andrea'] 
+    u.name = 'not-andrea'
+    users['another'] = {'name': 'Another'}
+    del users['another']
+    users.rename('john', 'jack') 
+    
+    events = view._events
+    assert len(events) > 2
+    
+    assert_data_events_consistent(schema, db0,  events, db)
+    
+    disk_map_with_hint = DiskMap(schema)
+    disk_map_with_hint.hint_directory(schema, translations={'users': None})
+#     disk_map_with_hint.hint_directory(schema['users'], pattern='%.user')
+
+    res = {}
+    res['x_normal'] = DataTestCase(schema, db0, events, db, DiskMap(schema))
+    res['x_none'] = DataTestCase(schema, db0, events, db, disk_map_with_hint)
+    return res
+
 @contract(returns='dict(str:isinstance(DataTestCase))')    
 def testcases_SimpleUserDB():
     
@@ -84,13 +119,9 @@ def testcases_SimpleUserDB():
 
     db_schema.validate(db0)
     db = deepcopy(db0)
-    events = []
+    
     viewmanager = ViewManager(db_schema) 
-    view = viewmanager.view(db)
-    def notify_callback(event):
-        #logger.debug('\n' + yaml_dump(event))
-        events.append(event)
-    view._notify_callback = notify_callback
+    view = viewmanager.view(db) 
 
     users = view.users
     u = users['andrea'] 
@@ -98,13 +129,13 @@ def testcases_SimpleUserDB():
     u.email = None    
     users['another'] = {'name': 'Another', 'email': 'another@email.com', 'groups':['group:extra']}
     del users['another']
-    users.rename('pinco', 'pallo')
-#     db_replay = deepcopy(db0)
-#     replay_events(viewmanager, db_replay, events) 
-#     assert_data_equal(db_schema, db_replay, db)
+    users.rename('pinco', 'pallo') 
+    
+    events = view._events
+    
+    assert len(events) > 3, events
     
     assert_data_events_consistent(db_schema, db0, events, db)
-    
     
     disk_map_with_hint = DiskMap(db_schema)
     disk_map_with_hint.hint_directory(db_schema['users'], pattern='%.user')
