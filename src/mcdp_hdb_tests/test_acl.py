@@ -22,7 +22,7 @@ def test_privilege1():
     admin_can_read = ACLRule(ALLOW, 'group:admin', READ)
     admin_can_modify = ACLRule(ALLOW, 'group:admin', WRITE)
     all_can_read = ACLRule(ALLOW, MCDPConstants.EVERYONE, READ)
-    authenticated_can_read = ACLRule(ALLOW, MCDPConstants.AUTHENTICATED, READ)
+    #authenticated_can_read = ACLRule(ALLOW, MCDPConstants.AUTHENTICATED, READ)
     self_can_modify = ACLRule(ALLOW, 'special:user:${path[-2]}', WRITE)
     self_can_read = ACLRule(ALLOW, 'special:user:${path[-2]}', READ)
 
@@ -58,7 +58,7 @@ def test_privilege1():
     view_admin = view_manager.view(db0, 'user:admin1', ['user:admin1', 'group:admin', AUTHENTICATED, EVERYONE])
 
     # andrea is able to read his email
-    print 'andrea can see ' + view_andrea.child('users').child('andrea').email
+    print('andrea can see ' + view_andrea.child('users').child('andrea').email)
     # pinco can read andrea's name
     view_pinco.child('users').child('andrea').name
     # pinco cannot read andrea's email
