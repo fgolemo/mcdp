@@ -1,4 +1,7 @@
 from collections import OrderedDict
+from copy import deepcopy
+import os
+import shutil
 
 from contracts import contract, new_contract
 from contracts.utils import check_isinstance, indent, raise_wrapped
@@ -6,10 +9,7 @@ from contracts.utils import check_isinstance, indent, raise_wrapped
 from mcdp.logs import logger
 from mcdp_utils_misc import yaml_dump
 
-from .disk_struct import ProxyDirectory,ProxyFile
-import os
-import shutil
-from copy import deepcopy
+from .disk_struct import ProxyDirectory, ProxyFile
 
 
 class DiskEvents(object):
@@ -208,8 +208,7 @@ def apply_disk_event_to_filesystem(wd, disk_event):
     def disk_event_group(events):
         for e in events:
             apply_disk_event_to_filesystem(wd, e)
-        
-       
+
     fs = {
         DiskEvents.disk_event_group: disk_event_group,
         DiskEvents.dir_create: dir_create,
