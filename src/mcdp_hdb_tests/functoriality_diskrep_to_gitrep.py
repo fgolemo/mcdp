@@ -27,9 +27,7 @@ def check_translation_diskrep_to_gitrep(disk_rep0, disk_events, disk_rep1, out):
             logger.debug('adding untracked file %r' % repo.untracked_files) 
             repo.index.add(repo.untracked_files)
         
-        diff_index = repo.index.diff(None)
-#         logger.debug('1) before commit')
-#         system_cmd_show(wd, ['git', 'status'])
+        diff_index = repo.index.diff(None) 
         for d in diff_index.iter_change_type('A'):
             repo.index.add([d.b_path])
         for d in diff_index.iter_change_type('M'):
@@ -51,5 +49,8 @@ def check_translation_diskrep_to_gitrep(disk_rep0, disk_events, disk_rep1, out):
 #         logger.debug('3) after commit')
 #         system_cmd_show(wd, ['git', 'status'])
     
+    res = {}
+    res['repo'] = repo
+    return res
     logger.info('done for wd %s' % wd)
 

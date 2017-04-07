@@ -10,6 +10,7 @@ from mcdp.logs import logger
 from mcdp_utils_misc import yaml_dump
 
 from .disk_struct import ProxyDirectory, ProxyFile
+from mcdp_hdb.disk_errors import InvalidDiskOperation
 
 
 class DiskEvents(object):
@@ -36,6 +37,7 @@ def ff(f):
 
 
 @new_contract
+@contract(x='seq(str)')
 def valid_dirname(x):
     ''' Checks that it is a sequence of strings - not None '''
     if None in x:
@@ -61,6 +63,9 @@ def disk_event_dir_create(dirname, name):
 
 def disk_event_dir_create_interpret(disk_rep, dirname, name):
     d = get_dir(disk_rep, dirname)
+    if name in d:
+        msg = 'Cannot create directory "%s" that already exists' % name
+        raise InvalidDiskOperation(msg)
     d[name] = ProxyDirectory()
 
 @ff
@@ -83,7 +88,7 @@ def disk_event_dir_delete_interpret(disk_rep, dirname, name):
 
 
 @ff
-@contract(dirname='valid_dirname')
+@contract(dirname='valid_dirname', name=str, contents=str)
 def disk_event_file_create(dirname, name, contents):
     return DiskEvents.file_create, dict(dirname=dirname, name=name, contents=contents)
 
@@ -156,7 +161,7 @@ def disk_event_interpret(disk_rep, disk_event):
     intf = fs[ename]
     arguments = disk_event['arguments']
     try:
-        logger.info('Arguments: %s' % arguments)
+        logger.info('%s %s' % (ename, arguments))
         intf(disk_rep=disk_rep, **arguments)
     except Exception as e:
         msg = 'Could not complete the replay of this event: \n'

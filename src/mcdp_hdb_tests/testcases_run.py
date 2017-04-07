@@ -6,6 +6,7 @@ from mcdp_hdb_tests.functoriality_memdata_to_diskrep import \
 from mcdp_hdb_tests.testcases import testcases_SimpleUserDB, DataTestCase,\
     testcases_TranslateNone
 from mcdp_hdb_tests.functoriality_diskrep_to_gitrep import check_translation_diskrep_to_gitrep
+from mcdp_hdb_tests.functoriality_gitrepo_to_diskrep import check_translation_gitrep_to_diskrep
 
 
 tcs = {}
@@ -46,7 +47,9 @@ def run_for_test_case(name, tc):
     
     r2 = check_translation_diskrep_to_gitrep(disk_rep0, disk_events, disk_rep,
                                               out=out_diskrep_to_memdata)
+    repo = r2['repo']
     
+    r3 = check_translation_gitrep_to_diskrep(repo)
 
 if __name__ == '__main__':
     run_module_tests()
