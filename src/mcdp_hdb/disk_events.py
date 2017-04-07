@@ -43,6 +43,10 @@ def valid_dirname(x):
     if None in x:
         msg = 'Invalid dirname %s' % x.__repr__()
         raise ValueError(msg) 
+    for c in x:
+        if c == '':
+            msg = 'Invalid component in %s' %str(x)
+            raise ValueError(msg)
      
 @ff
 def disk_event_disk_event_group(events):

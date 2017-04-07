@@ -238,4 +238,12 @@ class ProxyFile(object):
         with open(fn, 'w') as f:
             f.write(self.contents)
         
-        
+def assert_equal_disk_rep(a, b):
+    h1 = a.hash_code()
+    h2 = b.hash_code()
+    if h1 != h2:
+        msg = 'Hash codes differ.'
+        msg += '\n' + indent(a.tree(), 'disk_rep ')
+        msg += '\n' + indent(b.tree(), 'disk_rep_by_tr ')
+        raise Exception(msg)
+    

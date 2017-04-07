@@ -18,6 +18,7 @@ from mcdp_utils_misc import yaml_dump
 from mcdp_hdb import event_intepret
 from mcdp_hdb.memdata_utils import assert_data_events_consistent
 from mcdp_hdb.diskrep_utils import assert_disk_events_consistent
+from mcdp_hdb.disk_struct import assert_equal_disk_rep
 
 
 def l(what, s):
@@ -85,13 +86,8 @@ def check_translation_memdata_to_diskrep(schema, data_rep0, data_events, data_re
         msg += '\nDisk events:\n' + indent(yaml_dump(evs), ' events ')
         logger.debug(msg)
         
-        h1 = disk_rep_by_translation.hash_code()
-        h2 = disk_rep.hash_code()
-        if h1 != h2:
-            msg = 'Hash codes differ.'
-            msg += '\n' + indent(disk_rep.tree(), 'disk_rep ')
-            msg += '\n' + indent(disk_rep_by_translation.tree(), 'disk_rep_by_tr ')
-            raise Exception(msg)
+        assert_equal_disk_rep(disk_rep_by_translation, disk_rep)
+      
     
     logger.info('test ok, written on %s' % out)
     return dict(disk_rep0=disk_rep0, disk_events=disk_events, disk_rep=disk_rep)
