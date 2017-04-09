@@ -15,7 +15,6 @@ def bs(fragment):
     return res
 
 def to_html_stripping_fragment(soup):
-    
     """ Returns a string encoded in UTF-8 """
     assert soup.name == 'fragment'
     s = str(soup)

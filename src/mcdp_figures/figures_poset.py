@@ -1,12 +1,12 @@
 from contracts import contract
 from contracts.utils import check_isinstance
+
 from mcdp_posets import FinitePoset
 from mcdp_posets.find_poset_minima.baseline_n2 import poset_minima
 from mcdp_report.gdc import choose_best_icon
 
 from .figure_interface import MakeFigures
 from .formatters import GGFormatter
-from mcdp_utils_misc.fileutils import get_mcdp_tmp_dir
 
 
 __all__ = [

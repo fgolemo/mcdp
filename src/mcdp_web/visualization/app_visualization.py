@@ -16,11 +16,11 @@ from mcdp_web.environment import cr2e
 from mcdp_web.resource_tree import ResourceThingViewSyntax, ResourceThingViewNDPGraph,\
     ResourceThingViewDPTree, ResourceThingViewDPGraph, ResourceThingViewNDPRepr,\
     ResourceThingViews
+from mcdp_web.sessions import NoSuchLibrary
 from mcdp_web.utils0 import add_other_fields, add_std_vars_context
 from mocdp.comp.context import Context
 
 from .add_html_links_imp import add_html_links
-from mcdp_web.sessions import NoSuchLibrary
 
 
 class AppVisualization():

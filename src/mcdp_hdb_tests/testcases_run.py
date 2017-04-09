@@ -1,17 +1,19 @@
 from contracts import contract
 
 from comptests.registrar import comptest, run_module_tests
+from mcdp_hdb_tests.functoriality_diskrep_to_gitrep import check_translation_diskrep_to_gitrep
+from mcdp_hdb_tests.functoriality_gitrepo_to_diskrep import check_translation_gitrep_to_diskrep
 from mcdp_hdb_tests.functoriality_memdata_to_diskrep import \
     check_translation_diskrep_to_memdata, check_translation_memdata_to_diskrep
 from mcdp_hdb_tests.testcases import testcases_SimpleUserDB, DataTestCase,\
-    testcases_TranslateNone
-from mcdp_hdb_tests.functoriality_diskrep_to_gitrep import check_translation_diskrep_to_gitrep
-from mcdp_hdb_tests.functoriality_gitrepo_to_diskrep import check_translation_gitrep_to_diskrep
+    testcases_TranslateNone, testcases_arrays, testcases_minilibrary
 
 
 tcs = {}
 tcs.update(testcases_SimpleUserDB())
 tcs.update(testcases_TranslateNone())
+tcs.update(testcases_arrays())
+tcs.update(testcases_minilibrary())
 
 class X():
     def __init__(self, k, tc):

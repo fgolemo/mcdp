@@ -77,10 +77,12 @@ class ViewBase(object):
             msg = 'Cannot have privilege %r for principals %s.' % (privilege, principals)
             msg += '\n' + indent(acl, ' > ')
             raise_desc(InsufficientPrivileges, msg)
-        msg = 'Permission %s granted to %s' % (privilege, principals)
-        msg += '\n' + indent(acl, ' > ')
-        logger.debug(msg)
-        
+            
+        if False:
+            msg = 'Permission %s granted to %s' % (privilege, principals)
+            msg += '\n' + indent(acl, ' > ')
+            logger.debug(msg)
+            
     def _get_event_id(self):
         from time import gmtime, strftime, time
         ms = int(time() * 1000) % 1000
@@ -325,6 +327,9 @@ class ViewList0(ViewBase):
         
     def delete(self, i):
         # todo: check i 
+        if not( 0 <= i < len(self._data)):
+            msg ='Invalid index %d for list of length %d.' % (i, len(self._data))
+            raise ValueError(msg)
         self._data.pop(i) 
         
         from .memdata_events import event_list_delete

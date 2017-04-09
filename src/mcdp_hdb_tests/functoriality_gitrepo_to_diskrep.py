@@ -52,7 +52,6 @@ def diskevents_from_diff(commit_a, commit_b):
         path = path.encode('utf8')
         dirname = os.path.dirname(path)
         
-        
         if dirname == '':
             dirname = ()
         else:

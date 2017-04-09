@@ -20,7 +20,7 @@ from mcdp_library.stdlib import get_test_librarian
 from mcdp_utils_misc import locate_files
 
 from .manual_join_imp import manual_join
-from mcdp.constants import MCDPConstants
+from mcdp import MCDPConstants
 
 
 def get_manual_contents(srcdir):

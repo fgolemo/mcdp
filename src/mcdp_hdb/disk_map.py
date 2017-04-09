@@ -19,6 +19,8 @@ from .memdataview import InvalidOperation
 from .memdataview_manager import ViewManager
 from .schema import SchemaHash, SchemaString, SchemaContext, SchemaList, SchemaBytes, NOT_PASSED, SchemaDate, SchemaBase
 from mcdp_hdb.disk_events import disk_event_disk_event_group
+from mcdp_hdb.memdata_events import event_list_append
+import warnings
 
 
 # from mcdp_library_tests.create_mockups import mockup_flatten
@@ -199,18 +201,40 @@ class DiskMap(object):
             # Let's first look at how many children have translation "None".
             children_with_none = [k for k in schema.children if hint.translations.get(k, 'ok') is None]
             if len(children_with_none) > 1:
-                msg = 'This is an ambiguous situation.'
-                raise_desc(NotImplementedError, msg, hint=hint, schema=schema)
+#                 msg = 'This is a situation in which there are more than one child that have no translation.'
+#                 msg += ' These are children_with_none = %s' % children_with_none
+#                 msg += ' first = %s rest = %s first_translated %s' % (first, rest, first_translated)
+#                 logger.debug(msg)
+                successful = {}
+                for maybe_child in children_with_none:
+                    schema_child = schema.children[maybe_child]
+                    try:
+                        rest_translated = self.data_url_from_dirname_(schema_child, dirname)
+                    except NotKey:
+                        continue
+                    successful[maybe_child] = rest_translated
+                if not successful:
+                    msg = 'Could not translate rest = %s '% str(rest)
+                    raise ValueError(msg)
+                if len(successful) > 1: 
+                    msg = 'Too many ways to translate rest = %s : %s'% (str(rest), successful)
+                    raise ValueError(msg)
+                child_succeded = list(successful)[0]
+                rest_translated = successful[child_succeded]
+                res = (child_succeded,) + rest_translated
+#                 logger.debug('special: Result is dirname %r -> res %r' % (dirname, res))
+                return res
             elif len(children_with_none) == 0:
                 # easy case: 
                 schema_child = schema.children[first_translated]
                 rest_translated = self.data_url_from_dirname_(schema_child, rest)
                 return (first_translated,) + rest_translated
             else:
-                
                 child_with_none = children_with_none[0]
                 logger.debug('We found one descendant with translation None: %r' % child_with_none)
                 schema_child = schema.children[child_with_none]
+                warnings.warn('I think it should be rest but who knows')
+                # rest_translated = self.data_url_from_dirname_(schema_child, rest)
                 rest_translated = self.data_url_from_dirname_(schema_child, dirname)
                 res = (child_with_none,) + rest_translated
                 logger.debug('Result is dirname %r -> res %r' % (dirname, res))
@@ -422,16 +446,30 @@ def data_events_from_file_create(disk_map, disk_rep, disk_events_queue, _id, who
     if isinstance(schema_parent, SchemaHash):
         if isinstance(hint, HintDir):
             # creating a file
-            logger.debug('data_events_from_file_create dirname %r name %r contents = %r' % (dirname, name, contents))
-                         
+            #logger.debug('data_events_from_file_create dirname %r name %r contents = %r' % (dirname, name, contents))
+            key = hint.key_from_filename(name)
             # the interesting case is when it is yaml file
-            prototype = schema_parent.prototype
-            is_yaml = isinstance(disk_map.get_hint(prototype), HintFileYAML)
-            if is_yaml:
-                key = hint.key_from_filename(name)
-                schema_child = schema_parent.get_descendant((key,))
-                data = disk_map.interpret_hierarchy_(schema_child, ProxyFile(contents))
-                e = event_dict_setitem(name=parent, key=key, value=data, _id=_id, who=who)
+            prototype = schema_parent.prototype 
+            data = disk_map.interpret_hierarchy_(prototype, ProxyFile(contents))
+            e = event_dict_setitem(name=parent, key=key, value=data, _id=_id, who=who)
+            events = [e]
+            consumed = [] 
+            return events, consumed
+            
+    if isinstance(schema_parent, SchemaList):
+        if isinstance(hint, HintDir):
+            # creating a file
+            # logger.debug('data_events_from_file_create dirname %r name %r contents = %r' % (dirname, name, contents))
+               
+            key = hint.key_from_filename(name)
+            index = int(key)
+            
+            # if it is the last, then it is an append
+            is_last = True # XXX
+            if is_last:
+                prototype = schema_parent.prototype
+                data = disk_map.interpret_hierarchy_(prototype, ProxyFile(contents))
+                e = event_list_append(name=parent, value=data, _id=_id, who=who)    
                 events = [e]
                 consumed = [] 
                 return events, consumed
@@ -535,6 +573,9 @@ def disk_events_from_data_event(disk_map, schema, data_rep, data_event):
         DataEvents.dict_setitem: disk_events_from_dict_setitem,
         DataEvents.dict_delitem: disk_events_from_dict_delitem,
         DataEvents.dict_rename: disk_events_from_dict_rename,
+        DataEvents.list_append: disk_events_from_list_append,
+        DataEvents.list_delete: disk_events_from_list_delete,
+        DataEvents.list_insert: disk_events_from_list_insert,
     }
     viewmanager = ViewManager(schema) 
     view = viewmanager.view(data_rep)
@@ -594,10 +635,7 @@ def disk_events_from_leaf_set(disk_map, view, _id, who, parent, name, value):
         p = parent[:i]
         p_schema = view._schema.get_descendant(p)
         p_hint = disk_map.get_hint(p_schema)
-#         logger.debug('parent %s p %s hint %s' % (parent, p,p_hint))
         if isinstance(p_hint, HintFileYAML):
-#             msg = 'For leaf set %s.%s=%s, detected yaml at %s' % (parent, name, value, p)
-#             logger.debug(msg)
             return disk_events_from_leaf_set_in_yaml(disk_map, view, _id, who, parent, name, value, p)
     
     view_parent = get_view_node(view, parent)
@@ -628,6 +666,55 @@ def disk_events_from_leaf_set(disk_map, view, _id, who, parent, name, value):
         return [disk_event]
     else:
         raise NotImplementedError(hint)
+
+def disk_events_from_list_append(disk_map, view, _id, who, name, value):
+    view_parent = get_view_node(view, name)
+    schema_parent = view_parent._schema
+    check_isinstance(schema_parent, SchemaList)
+    hint = disk_map.get_hint(schema_parent)
+    if isinstance(hint, HintDir):
+        sub = disk_map.create_hierarchy_(schema_parent.prototype, value)
+        dirname = disk_map.dirname_from_data_url(name)
+        next_index = len(view_parent._data)
+        filename = hint.filename_for_key(str(next_index))
+        if isinstance(sub, ProxyFile):
+            contents = sub.contents
+            disk_event = disk_event_file_create(_id, who, dirname, filename, contents)
+            return [disk_event]
+        else: 
+            assert False 
+
+    else:
+        raise NotImplementedError(hint)
+
+def disk_events_from_list_insert(disk_map, view, _id, who, name, index, value):
+    raise NotImplementedError()
+
+def disk_events_from_list_delete(disk_map, view, _id, who, name, index):
+    view_parent = get_view_node(view, name)
+    schema_parent = view_parent._schema
+    check_isinstance(schema_parent, SchemaList)
+    hint = disk_map.get_hint(schema_parent)
+    length = len(view_parent._data)
+    if isinstance(hint, HintDir):
+        # TODO: what about it is not a list of files, but directories?
+        dirname = disk_map.dirname_from_data_url(name)
+        filename = hint.filename_for_key(str(index))
+        disk_event = disk_event_file_delete(_id, who, dirname, filename)
+        events = [disk_event]
+        for i in range(index+1, length):
+            i2 = i - 1
+            filename1 = hint.filename_for_key(str(i))
+            filename2 = hint.filename_for_key(str(i2))
+            dr = disk_event_file_rename(_id, who, dirname, filename1, filename2) 
+            events.append(dr)
+        return events
+    else:
+        raise NotImplementedError(hint)
+
+def disk_events_from_list_remove(disk_map, view, _id, who, name, value):
+    raise NotImplementedError()
+
 
 def disk_events_from_dict_setitem(disk_map, view, _id, who, name, key, value):
     view_parent = get_view_node(view, name)

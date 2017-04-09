@@ -4,6 +4,7 @@ from contracts import contract
 
 from mcdp_hdb import DiskMap
 from mcdp_hdb import SchemaBase, Schema, SchemaString
+from mcdp_hdb import SchemaHash
 from mcdp_hdb import ViewManager
 from mcdp_hdb import assert_data_events_consistent
 from mcdp_hdb import event_interpret_
@@ -58,8 +59,49 @@ class DataTestCase(object):
             yield current, e, data_i
 
 @contract(returns='dict(str:isinstance(DataTestCase))')    
-def testcases_TranslateNone():
-    # we have a list of images
+def testcases_minilibrary(): 
+    schema = Schema()
+    things = Schema()
+    models = SchemaHash(SchemaString())
+    posets = SchemaHash(SchemaString())
+    things._add_child('models', models)
+    things._add_child('posets', posets)
+    schema._add_child('things', things)
+    
+    dm = DiskMap(schema)
+    dm.hint_directory(schema, translations={'things': None})
+    dm.hint_directory(things, translations={'models': None, 'posets':None})
+    dm.hint_directory(posets, pattern='%.poset')
+    dm.hint_directory(models, pattern='%.mcdp')
+
+    db0 = {
+        'things': {
+            'models': {
+                'model1': 'mcdp {}',
+            },
+            'posets': {
+                'poset1': 'poset {}',
+            },     
+        },
+    }
+    db = deepcopy(db0)
+
+    viewmanager = ViewManager(schema) 
+    view = viewmanager.view(db) 
+    view.things.models['model2'] = 'mcdp { model2 }'
+    del view.things.models['model1']
+
+    events = view._events
+    assert len(events) >= 2    
+    assert_data_events_consistent(schema, db0,  events, db)
+
+
+    res = {}
+    res['minilib1'] = DataTestCase(schema, db0, events, db, dm)
+    return res
+
+@contract(returns='dict(str:isinstance(DataTestCase))')    
+def testcases_TranslateNone(): 
     schema = Schema()
     user = Schema()
     user.string('name')
@@ -154,3 +196,53 @@ def testcases_SimpleUserDB():
         res[k] = DataTestCase(db_schema, db0, events, db, dm)
     return res
 
+
+
+@contract(returns='dict(str:isinstance(DataTestCase))')    
+def testcases_arrays():
+    
+    db_schema = Schema()
+    
+    db_schema.list('alist', SchemaString())
+    
+    db0 = {
+        'alist': ['one']
+    }
+
+    db_schema.validate(db0)
+    db = deepcopy(db0)
+    
+    viewmanager = ViewManager(db_schema) 
+    view = viewmanager.view(db) 
+
+    # now do the manipulation
+    
+
+    view.alist.append('two')
+    
+    view.alist.delete(0)
+    view.alist.delete(0)
+    view.alist.append('append')
+    
+    events = view._events
+    
+    assert len(events) > 3, events
+    
+    assert_data_events_consistent(db_schema, db0, events, db)
+#     
+#     disk_map_with_hint = DiskMap(db_schema)
+#     disk_map_with_hint.hint_directory(db_schema['users'], pattern='%.user')
+#     
+#     disk_map_files_are_yaml= DiskMap(db_schema)
+#     disk_map_files_are_yaml.hint_directory(db_schema['users'], pattern='%.yaml')
+#     disk_map_files_are_yaml.hint_file_yaml(db_schema['users'].prototype)
+    disk_maps= {}
+    disk_maps['array_vanilla'] = DiskMap(db_schema)
+#     disk_maps['with_hint'] = disk_map_with_hint
+#     disk_maps['files_are_yaml'] = disk_map_files_are_yaml
+    
+    res = {}
+    for k in disk_maps:
+        dm = disk_maps[k]
+        res[k] = DataTestCase(db_schema, db0, events, db, dm)
+    return res

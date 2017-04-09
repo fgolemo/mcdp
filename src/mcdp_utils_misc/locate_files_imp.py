@@ -103,6 +103,6 @@ def locate_files(directory, pattern, followlinks=True,
     if seconds > 0.2:
         n = len(filenames)
         nuniques = len(set(filenames))
-        print('%.4f s for locate_files(%s,%s): %d traversed, found %d filenames (%d uniques)' % 
+        logger.debug('%.4f s for locate_files(%s,%s): %d traversed, found %d filenames (%d uniques)' % 
               (seconds, directory, pattern, ntraversed, n, nuniques))
     return filenames

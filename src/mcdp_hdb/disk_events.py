@@ -10,7 +10,7 @@ from mcdp.logs import logger
 from mcdp_utils_misc import yaml_dump
 
 from .disk_struct import ProxyDirectory, ProxyFile
-from mcdp_hdb.disk_errors import InvalidDiskOperation
+from .disk_errors import InvalidDiskOperation
 
 
 class DiskEvents(object):

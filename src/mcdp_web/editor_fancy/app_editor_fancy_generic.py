@@ -8,6 +8,7 @@ from contracts.utils import check_isinstance
 from pyramid.httpexceptions import HTTPFound
 from pyramid.renderers import render_to_response
 
+from mcdp import MCDPConstants
 from mcdp import logger
 from mcdp.exceptions import DPInternalError, DPSemanticError, DPSyntaxError
 from mcdp_lang.suggestions import get_suggestions, apply_suggestions
@@ -25,7 +26,8 @@ from mocdp.comp.interfaces import NamedDP
 
 from .html_mark_imp import html_mark, html_mark_syntax_error
 from .warnings_unconnected import generate_unconnected_warnings
-from mcdp.constants import MCDPConstants
+
+
 Privileges=MCDPConstants.Privileges
 
 class AppEditorFancyGeneric():
