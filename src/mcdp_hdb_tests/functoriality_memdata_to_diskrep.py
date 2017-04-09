@@ -146,9 +146,9 @@ def check_translation_diskrep_to_memdata(schema, disk_rep0, disk_events, disk_re
             data_rep_by_translation = disk_map.interpret_hierarchy_(schema, disk_rep)
         except IncorrectFormat as exc:
             s = traceback.format_exc(exc)
-            logger.warning('Failed check')
+            logger.error('Failed check:\n%s' %s)
             write_file(i, 'f-disk_rep-modified-translated-to-data_rep-FAIL', s)
-        
+            data_rep_by_translation = None
         else:
             write_file(i, 'f-disk_rep-modified-translated-to-data_rep', 
                        yaml_dump(data_rep_by_translation))
@@ -159,17 +159,19 @@ def check_translation_diskrep_to_memdata(schema, disk_rep0, disk_events, disk_re
         write_file(i, 'g-data_rep-with-evs-applied', yaml_dump(data_rep))
         
         msg = 'Disk event:\n'+ indent(yaml_dump(disk_events_consumed), ' disk_events_consumed ')
-        msg += '\Data events:\n' + indent(yaml_dump(evs), ' events ')
+        msg += '\nData events:\n' + indent(yaml_dump(evs), ' events ')
         logger.debug(msg)
         
-        h1 = data_hash_code(data_rep_by_translation)
-        h2 = data_hash_code(data_rep)
-        if h1 != h2:
-            msg = 'Hash codes differ.'
-            msg += '\n' + indent( yaml_dump(data_rep), 'data_rep ')
-            msg += '\n' + indent( yaml_dump(data_rep_by_translation), 'data_rep_by_tr ')
-            raise Exception(msg)
-    
+        if data_rep_by_translation is not None:
+            h1 = data_hash_code(data_rep_by_translation)
+            h2 = data_hash_code(data_rep)
+            if h1 != h2:
+                msg = 'Hash codes differ.'
+                msg += '\n' + indent( yaml_dump(data_rep), 'data_rep ')
+                msg += '\n' + indent( yaml_dump(data_rep_by_translation), 'data_rep_by_tr ')
+                raise Exception(msg)
+        else:
+            raise Exception()
         i += 1
     logger.info('test_inverse ok, written on %s' % out)
     return dict(data_rep0=data_rep0, data_events=data_events, data_rep=data_rep)

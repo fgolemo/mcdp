@@ -43,15 +43,25 @@ def run_for_test_case(name, tc):
     disk_events = r['disk_events']
     disk_rep = r['disk_rep']
     out_diskrep_to_memdata = out + '/out_diskrep_to_memdata'
-    check_translation_diskrep_to_memdata(schema, disk_rep0, disk_events, disk_rep, disk_map, 
+    r1 = check_translation_diskrep_to_memdata(schema, disk_rep0, disk_events, disk_rep, disk_map, 
                                          out=out_diskrep_to_memdata)
     
+    data_rep0_2 = r1['data_rep0']
+    data_rep1_2 = r1['data_rep']
+    data_events_2 = r1['data_events']
     
     r2 = check_translation_diskrep_to_gitrep(disk_rep0, disk_events, disk_rep,
                                               out=out_diskrep_to_memdata)
     repo = r2['repo']
     
-    r3 = check_translation_gitrep_to_diskrep(repo)
+    
+    out_gitrep_to_diskrep = out + '/out_gitrep_to_diskrep'
+    r3 = check_translation_gitrep_to_diskrep(repo, 'master', out_gitrep_to_diskrep)
+
+    disk_rep0 = r3['disk_rep0']
+    disk_rep = r3['disk_rep']
+    disk_events = r3['disk_events']
+    
 
 if __name__ == '__main__':
     run_module_tests()

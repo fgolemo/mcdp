@@ -2,11 +2,15 @@ from copy import deepcopy
 import copy
 import os
 import sys
+import warnings
 
 from contracts import contract, describe_value
 from contracts.utils import raise_desc, raise_wrapped, indent, check_isinstance
 
 from mcdp import logger
+from mcdp_hdb.disk_events import disk_event_disk_event_group
+from mcdp_hdb.memdata_events import event_list_append, event_list_delete,\
+    event_list_insert
 from mcdp_utils_misc import format_list, yaml_dump, yaml_load
 
 from .disk_events import DiskEvents, disk_event_file_modify, disk_event_dir_delete, disk_event_file_create, disk_event_dir_create, disk_event_file_delete, disk_event_file_rename, disk_event_dir_rename
@@ -18,9 +22,6 @@ from .memdata_utils import assert_data_events_consistent
 from .memdataview import InvalidOperation
 from .memdataview_manager import ViewManager
 from .schema import SchemaHash, SchemaString, SchemaContext, SchemaList, SchemaBytes, NOT_PASSED, SchemaDate, SchemaBase
-from mcdp_hdb.disk_events import disk_event_disk_event_group
-from mcdp_hdb.memdata_events import event_list_append
-import warnings
 
 
 # from mcdp_library_tests.create_mockups import mockup_flatten
@@ -551,6 +552,27 @@ def data_events_from_file_rename(disk_map, disk_rep, disk_events_queue, _id, who
             e = event_dict_rename(name=parent, key=key, key2=key2, _id=_id, who=who)
             return [e],[]
 
+    if isinstance(schema_parent, SchemaList):
+        if isinstance(hint, HintDir):
+            index = int(hint.key_from_filename(name))
+            index2 = int(hint.key_from_filename(name2))
+            logger.debug('renaming %s to %s' % (index, index2))
+            # this is now an operation with insert index
+            logger.debug('Next events:\n%s'%yaml_dump(disk_events_queue))
+            consumed = []
+            while disk_events_queue:
+                nexte = disk_events_queue.pop(0)
+                consumed.append(nexte)
+                if nexte['operation'] == 'file_create':
+                    assert nexte['arguments']['name'] == name
+                    contents = nexte['arguments']['contents']
+                    value = disk_map.interpret_hierarchy_(schema_parent.prototype, ProxyFile(contents))
+                    e = event_list_insert(_id=_id, who=who, name=parent, index=index, value=value)
+                                                      
+                    return [e], consumed
+            msg = 'I was waiting for a file_create_event'
+            raise Exception(msg)
+            
     msg = 'Not implemented %s with %s' % (type(schema_parent), hint)
     raise NotImplementedError(msg)
 
@@ -561,6 +583,12 @@ def data_events_from_file_delete(disk_map, disk_rep, disk_events_queue, _id, who
         if isinstance(hint, HintDir):
             key = hint.key_from_filename(name)                     
             e = event_dict_delitem(name=parent, key=key, _id=_id, who=who)
+            return [e],[]
+    
+    if isinstance(schema_parent, SchemaList):
+        if isinstance(hint, HintDir):
+            index = int(hint.key_from_filename(name))                     
+            e = event_list_delete(name=parent, index=index, _id=_id, who=who)
             return [e],[]
 
     msg = 'Not implemented %s with %s' % (type(schema_parent), hint)
@@ -688,8 +716,44 @@ def disk_events_from_list_append(disk_map, view, _id, who, name, value):
         raise NotImplementedError(hint)
 
 def disk_events_from_list_insert(disk_map, view, _id, who, name, index, value):
-    raise NotImplementedError()
-
+    view_parent = get_view_node(view, name)
+    schema_parent = view_parent._schema
+    check_isinstance(schema_parent, SchemaList)
+    hint = disk_map.get_hint(schema_parent)
+    length = len(view_parent._data)
+#     logger.debug('list:\n%s' % yaml_dump(view_parent._data))
+#     logger.debug('inserting at index %d value %s' % (index, value))
+    if isinstance(hint, HintDir):
+        # TODO: what about it is not a list of files, but directories?
+        dirname = disk_map.dirname_from_data_url(name)
+        
+        events = []
+        # first rename everything to i+1
+        to_rename = []
+        for i in range(index, length):
+            to_rename.append((i, i+1))
+#         logger.debug('to rename: %s' % to_rename)
+        for i in reversed(range(index, length)):
+            i2 = i + 1
+            filename1 = hint.filename_for_key(str(i))
+            filename2 = hint.filename_for_key(str(i2))
+            dr = disk_event_file_rename(_id, who, dirname, filename1, filename2) 
+            events.append(dr)
+#         logger.debug('Renaming events:\n %s' % yaml_dump(events))
+        # now create the file
+        sub = disk_map.create_hierarchy_(schema_parent.prototype, value)
+        if isinstance(sub, ProxyFile):
+            filename = hint.filename_for_key(str(index))
+            creation = disk_event_file_create(_id, who, dirname, filename, sub.contents)
+            events.append(creation)
+        else:
+            raise NotImplementedError()
+        
+        e = disk_event_disk_event_group(_id, who, events)
+        return [e]
+    else:
+        raise NotImplementedError(hint)
+    
 def disk_events_from_list_delete(disk_map, view, _id, who, name, index):
     view_parent = get_view_node(view, name)
     schema_parent = view_parent._schema
@@ -708,7 +772,8 @@ def disk_events_from_list_delete(disk_map, view, _id, who, name, index):
             filename2 = hint.filename_for_key(str(i2))
             dr = disk_event_file_rename(_id, who, dirname, filename1, filename2) 
             events.append(dr)
-        return events
+        e = disk_event_disk_event_group(_id, who, events)
+        return [e]
     else:
         raise NotImplementedError(hint)
 
@@ -853,17 +918,30 @@ def write_SchemaList_SER_DIR(self, schema, data):
 
 def interpret_SchemaList_SER_DIR(self, schema, fh):
     check_isinstance(schema, SchemaList)
-    n = len(fh)
-    res = [None] * n
+    found = []
     for filename in fh:
         try:
             i = int(filename)
         except ValueError:
             msg = 'Filename "%s" does not represent a number.' % filename
-            raise_incorrect_format(msg, schema, fh.tree())
+            logger.warning(msg + ' -- ignoring')
+            #raise_incorrect_format(msg, schema, fh.tree())
+        found.append(i)
+    if not found:
+        return []
+    max_found = max(found)
+    n = max_found + 1
+    res = [None] * n
+    if len(found) != n:
+        msg = 'Incomplete data. Found %s' % found
+        raise_incorrect_format(msg, schema, fh.tree())
+    for filename in fh:
+        try:
+            i = int(filename)
+        except ValueError:
+            continue
         if not (0 <= i < n):
-            msg = 'Integer %d is not in the bounds (n = %d).' % (i, n)
-            raise_incorrect_format(msg, schema, fh.tree())
+            assert False
 
         res[i] = self.interpret_hierarchy_(schema.prototype, fh[filename])
     return res

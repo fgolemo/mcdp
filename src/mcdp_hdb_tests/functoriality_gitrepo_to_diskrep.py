@@ -1,48 +1,103 @@
-from git import Repo
-from contracts import contract
-from mcdp_hdb.disk_struct import ProxyDirectory, assert_equal_disk_rep
 from copy import deepcopy
-from mcdp_hdb.disk_events import disk_event_file_create, disk_event_file_delete,\
-    disk_event_file_modify, disk_event_file_rename, disk_event_dir_rename,\
-    disk_event_interpret, disk_event_dir_create, disk_event_dir_delete
 import os
-from mcdp.logs import logger
-from mcdp_utils_misc.my_yaml import yaml_dump
+
+from contracts import contract
 from contracts.utils import indent
-import git
+from git import Repo
 from git.objects.blob import Blob
 from git.objects.tree import Tree
 
+from mcdp.logs import logger
+from mcdp_hdb.disk_events import disk_event_file_create, disk_event_file_delete,\
+    disk_event_file_modify, disk_event_file_rename, disk_event_dir_rename,\
+    disk_event_interpret, disk_event_dir_create, disk_event_dir_delete
+from mcdp_hdb.disk_struct import ProxyDirectory, assert_equal_disk_rep
+from mcdp_utils_misc.my_yaml import yaml_dump
+import shutil
+
+
 @contract(repo=Repo)
-def check_translation_gitrep_to_diskrep(repo, branch_name='master'):
+def check_translation_gitrep_to_diskrep(repo, branch_name, out):
     wd = repo.working_tree_dir
     
-    commits = list(repo.iter_commits(branch_name))
+    
+    commits = list(reversed(list(repo.iter_commits(branch_name))))
+    
+    # make sure that commits[0] is the first
+    for i in range(1, len(commits)):
+        assert commits[i].parents[0] == commits[i-1]
     repo.head.reference = commits[0]
     repo.head.reset(index=True, working_tree=True)
     
     disk_rep0 = ProxyDirectory.from_disk(wd)
     disk_rep = deepcopy(disk_rep0)
     
+    
+    if os.path.exists(out):
+        shutil.rmtree(out)
+    if not os.path.exists(out):
+        os.makedirs(out) 
+        
+    def write_file_(name, what):
+        name = os.path.join(out, name)
+        with open(name, 'w') as f:
+            f.write(what)
+        logger.info('wrote on %s' % name)
+        
+    def write_file(i, n, what):
+        name = '%d-%s.txt' % (i, n)
+        write_file_(name, what)
+    
+    logger.debug('Initial files: %s' % list(_.path for _ in commits[1].tree.traverse()))
+    
+    msg = ""
+    for i, commit in enumerate(commits):
+        d = disk_rep_from_git_tree(commit.tree)
+        msg += '\n\n' + indent(d.tree(), ' tree at commit #%d | '%i)
+    write_file_('00-commits.txt', msg)
+    
+    all_disk_events = []
     for i in range(1, len(commits)):
+        write_file(i, 'a-disk_rep', disk_rep.tree())
+        
+        msg = ""
+        for d in commits[i-1].diff(commits[i]):
+            msg += '\n' + str(d)
+        write_file(i, 'c-diffs', msg)    
         
         events = diskevents_from_diff(commits[i-1], commits[i])
+        write_file(i, 'd-diskevents_from_diff', yaml_dump(events))
         
         for disk_event in events:
             disk_event_interpret(disk_rep, disk_event)
+        all_disk_events.extend(events)
         
-#         write_file(i, 'g-disk_rep-with-evs-applied', disk_rep.tree())
-        
-        
-        logger.debug('\n'+indent(yaml_dump(events), 'events|'))
-         
+        write_file(i, 'e-disk_rep-after-diskevents', disk_rep.tree())
         
         repo.head.reference = commits[i]
         repo.head.reset(index=True, working_tree=True)
         supposedly = ProxyDirectory.from_disk(wd)
+        write_file(i, 'f-supposedly', supposedly.tree())
         
         assert_equal_disk_rep(disk_rep, supposedly)
 
+    logger.debug('wd: %s' % wd)
+    return dict(disk_rep0=disk_rep0, disk_events=all_disk_events, disk_rep=disk_rep)
+
+    
+def disk_rep_from_git_tree(tree):
+    filenames2contents = {} 
+    d = ProxyDirectory()
+    for x in tree.traverse():
+        if isinstance(x, Blob):
+            filename = x.path
+            contents = x.data_stream.read()  
+            filenames2contents[filename] = contents
+    
+    for path, contents in filenames2contents.items():
+        d.create_file_path(path, contents)
+        
+    return d
     
     
 def diskevents_from_diff(commit_a, commit_b):
@@ -108,9 +163,8 @@ def diskevents_from_diff(commit_a, commit_b):
         e = disk_event_file_delete(_id, who, dirname=dirname, name=name)
         events.append(e)
 
-#     existing.add('')
-#     print('existing: %s' % "\n- ".join(existing))
-#     print('trees: %s' % list(commit_a.tree.traverse()))
+    logger.debug('trees: %s' % list(commit_a.tree.traverse()))
+    logger.debug('existing: %s' % "\n- ".join(existing))
     
     for d in diff.iter_change_type('A'):
         dirname, name = dirname_name_from_path(d.b_path)
@@ -119,6 +173,7 @@ def diskevents_from_diff(commit_a, commit_b):
             partial = dirname[:i]
             partial_path = "/".join(partial)
             if not partial_path in existing:
+                logger.debug('I need to create directory %r' % partial_path)
                 d2 = partial[:-1]
                 n2 = partial[-1]
                 e = disk_event_dir_create(_id, who, dirname=d2,name=n2)

@@ -216,6 +216,24 @@ class ProxyDirectory(object):
             raise InvalidDiskOperation(msg)
         self._directories[name2] = self._directories.pop(name)
 
+    def create_file_path(self, path, contents):
+        ''' Creates files and required directories 
+        
+            create_file_path('a/b/filename', contents)
+            
+            This will create also a and b.
+        '''
+        components = path.split('/')
+        if len(components) == 1:
+            self[path] = ProxyFile(contents)
+        else:
+            first = components[0]
+            rest = "/".join(components[1:])
+            if not first in self:
+                self[first] = ProxyDirectory()
+            self[first].create_file_path(rest, contents)
+                
+
 
 class ProxyFile(object):
     @contract(contents=str)

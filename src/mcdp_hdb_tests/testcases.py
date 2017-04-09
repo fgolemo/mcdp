@@ -206,43 +206,55 @@ def testcases_arrays():
     db_schema.list('alist', SchemaString())
     
     db0 = {
-        'alist': ['one']
+        'alist': ['one', 'two']
     }
 
     db_schema.validate(db0)
-    db = deepcopy(db0)
     
-    viewmanager = ViewManager(db_schema) 
-    view = viewmanager.view(db) 
-
-    # now do the manipulation
     
-
-    view.alist.append('two')
+    seqs = []
+    def add_seq(f):
+        seqs.append(f)
+        return f
     
-    view.alist.delete(0)
-    view.alist.delete(0)
-    view.alist.append('append')
+    @add_seq
+    def seq_delete0(view):
+        view.alist.delete(0)
     
-    events = view._events
+    @add_seq
+    def seq_delete1(view):
+        view.alist.delete(1)
     
-    assert len(events) > 3, events
+    @add_seq
+    def seq_delete_all(view):
+        view.alist.delete(0)
+        view.alist.delete(0)
     
-    assert_data_events_consistent(db_schema, db0, events, db)
-#     
-#     disk_map_with_hint = DiskMap(db_schema)
-#     disk_map_with_hint.hint_directory(db_schema['users'], pattern='%.user')
-#     
-#     disk_map_files_are_yaml= DiskMap(db_schema)
-#     disk_map_files_are_yaml.hint_directory(db_schema['users'], pattern='%.yaml')
-#     disk_map_files_are_yaml.hint_file_yaml(db_schema['users'].prototype)
+    @add_seq
+    def seq_append(view):
+        view.alist.append('appended')
+        
+    @add_seq
+    def seq_insert(view):
+        view.alist.insert(1, 'between')
+    
     disk_maps= {}
-    disk_maps['array_vanilla'] = DiskMap(db_schema)
-#     disk_maps['with_hint'] = disk_map_with_hint
-#     disk_maps['files_are_yaml'] = disk_map_files_are_yaml
-    
+    disk_maps['vanilla'] = DiskMap(db_schema)
+
+    prefix = 'array1'
     res = {}
-    for k in disk_maps:
-        dm = disk_maps[k]
-        res[k] = DataTestCase(db_schema, db0, events, db, dm)
+    
+    for s in seqs:
+        db = deepcopy(db0)
+        viewmanager = ViewManager(db_schema) 
+        view = viewmanager.view(db) 
+        s(view)
+        events = view._events
+        assert_data_events_consistent(db_schema, db0, events, db)
+        
+        for id_dm, dm in disk_maps.items():
+            dtc = DataTestCase(db_schema, db0, events, db, dm)
+            k = '%s-%s-%s' % (prefix, s.__name__, id_dm)
+            res[k] = dtc 
+     
     return res
