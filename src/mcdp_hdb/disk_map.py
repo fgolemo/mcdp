@@ -522,10 +522,7 @@ def data_events_from_file_modify(disk_map, disk_rep, disk_events_queue, _id, who
                 return diff2, [] 
             else: 
                 # if a file is modified, it means that it was a leaf node
-                pass
-#                 data2 = disk_map.interpret_hierarchy_(schema_child, ProxyFile(contents))  
-# #                 e = data_event_dict_
-#                 return [e], [] 
+                pass 
                 
                 
                 
