@@ -19,7 +19,7 @@ def check_db_schema_custom():
 @comptest
 def check_db_schema_default():
     schema = DB.shelves
-    dm = DiskMap(schema) # no customization
+    dm = DiskMap() # no customization
     run_tests(schema, dm, 'default')
     
 def run_tests(schema, dm, name):

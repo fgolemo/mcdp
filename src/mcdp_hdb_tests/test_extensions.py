@@ -25,7 +25,7 @@ def test_extension():
     
     l('schema', s)
 
-    dm = DiskMap(s)
+    dm = DiskMap()
     dm.hint_extensions(s['images'], exts)
     
     d = 'contents'

@@ -68,7 +68,7 @@ def testcases_minilibrary():
     things._add_child('posets', posets)
     schema._add_child('things', things)
     
-    dm = DiskMap(schema)
+    dm = DiskMap()
     dm.hint_directory(schema, translations={'things': None})
     dm.hint_directory(things, translations={'models': None, 'posets':None})
     dm.hint_directory(posets, pattern='%.poset')
@@ -125,12 +125,12 @@ def testcases_TranslateNone():
     
     assert_data_events_consistent(schema, db0,  events, db)
     
-    disk_map_with_hint = DiskMap(schema)
+    disk_map_with_hint = DiskMap()
     disk_map_with_hint.hint_directory(schema, translations={'users': None})
 #     disk_map_with_hint.hint_directory(schema['users'], pattern='%.user')
 
     res = {}
-    res['x_normal'] = DataTestCase(schema, db0, events, db, DiskMap(schema))
+    res['x_normal'] = DataTestCase(schema, db0, events, db, DiskMap())
     res['x_none'] = DataTestCase(schema, db0, events, db, disk_map_with_hint)
     return res
 
@@ -179,14 +179,14 @@ def testcases_SimpleUserDB():
     
     assert_data_events_consistent(db_schema, db0, events, db)
     
-    disk_map_with_hint = DiskMap(db_schema)
+    disk_map_with_hint = DiskMap()
     disk_map_with_hint.hint_directory(db_schema['users'], pattern='%.user')
     
-    disk_map_files_are_yaml= DiskMap(db_schema)
+    disk_map_files_are_yaml= DiskMap()
     disk_map_files_are_yaml.hint_directory(db_schema['users'], pattern='%.yaml')
     disk_map_files_are_yaml.hint_file_yaml(db_schema['users'].prototype)
     disk_maps= {}
-    disk_maps['vanilla'] = DiskMap(db_schema)
+    disk_maps['vanilla'] = DiskMap()
     disk_maps['with_hint'] = disk_map_with_hint
     disk_maps['files_are_yaml'] = disk_map_files_are_yaml
     
@@ -239,7 +239,7 @@ def testcases_arrays():
         view.alist.insert(1, 'between')
     
     disk_maps= {}
-    disk_maps['vanilla'] = DiskMap(db_schema)
+    disk_maps['vanilla'] = DiskMap()
 
     prefix = 'array1'
     res = {}

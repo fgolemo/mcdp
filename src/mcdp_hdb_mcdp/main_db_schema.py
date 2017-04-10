@@ -59,7 +59,7 @@ class DB():
     user_db._add_child('users', users)
     db._add_child('user_db', user_db)
     
-    dm = DiskMap(repo)
+    dm = DiskMap()
     dm.hint_directory(shelves, pattern='%.mcdpshelf')
     dm.hint_directory(shelf, translations={'info':'mcdpshelf.yaml', 'libraries':None})
     dm.hint_file_yaml(shelf['info'])

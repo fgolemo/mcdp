@@ -9,7 +9,6 @@ from mcdp.logs import logger
 from mcdp_hdb.disk_struct import ProxyDirectory
 from mcdp_hdb_mcdp.main_db_schema import DB
 from mcdp_utils_misc.my_yaml import yaml_dump
-import inspect
 from mcdp_hdb.disk_map import disk_events_from_data_event
 
 
@@ -68,7 +67,7 @@ if __name__ == '__main__':
     
     for data_event in events:
         dm = DB.dm
-        dm.schema = user_db_view._schema
+#         dm.schema = user_db_view._schema
         disk_event = disk_events_from_data_event(disk_map=dm, 
                                                  schema=user_db_view._schema, 
                                                  data_rep=user_db_view._data, 
