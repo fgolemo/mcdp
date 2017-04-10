@@ -6,6 +6,8 @@ from .memdataview import ViewContext0, ViewHash0, ViewList0, ViewString
 from .memdataview_utils import host_name
 from .schema import SchemaBase, SchemaContext, SchemaString,\
     SchemaHash, SchemaList
+from contracts.utils import raise_wrapped
+from contracts.interface import describe_type
 
 
 __all__ = [
@@ -74,15 +76,21 @@ class ViewManager(object):
                 pass
 
         if isinstance(s, SchemaContext):
-            class ViewContext(Base, ViewContext0): pass
-            return ViewContext(view_manager=self, data=data, schema=s)
+            class ViewContext(ViewContext0, Base): pass
+            try:
+                return ViewContext(view_manager=self, data=data, schema=s)
+            except TypeError as e:
+                msg = 'Probably due to a constructor in Base = %s' % (Base)
+                if s in self.s2baseclass:
+                    msg += '\n' + str(self.s2baseclass[s])
+                raise_wrapped(ValueError, e, msg)
 
         if isinstance(s, SchemaHash):
-            class ViewHash(Base, ViewHash0): pass
+            class ViewHash(ViewHash0, Base): pass
             return ViewHash(view_manager=self, data=data, schema=s)
         
         if isinstance(s, SchemaList):
-            class ViewList(Base, ViewList0): pass
+            class ViewList(ViewList0, Base): pass
             return ViewList(view_manager=self, data=data, schema=s)
     
         if isinstance(s, SchemaString):

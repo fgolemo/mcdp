@@ -255,6 +255,13 @@ class ProxyFile(object):
             os.makedirs(dn)
         with open(fn, 'w') as f:
             f.write(self.contents)
+            
+    def tree(self, n=0):
+        contents = self.contents
+        if len(contents) < 30:
+            return 'ProxyFile(%r)' % contents
+        else:
+            return 'ProxyFile(%d bytes)' % len(contents)
         
 def assert_equal_disk_rep(a, b):
     h1 = a.hash_code()

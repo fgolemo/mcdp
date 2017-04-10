@@ -21,7 +21,7 @@ from .memdata_events import DataEvents, get_view_node,  event_leaf_set, event_di
 from .memdata_utils import assert_data_events_consistent
 from .memdataview import InvalidOperation
 from .memdataview_manager import ViewManager
-from .schema import SchemaHash, SchemaString, SchemaContext, SchemaList, SchemaBytes, NOT_PASSED, SchemaDate, SchemaBase
+from .schema import SchemaHash, SchemaString, SchemaContext, SchemaList, SchemaBytes, SchemaDate, SchemaBase
 
 
 # from mcdp_library_tests.create_mockups import mockup_flatten
@@ -42,7 +42,7 @@ def raise_incorrect_format(msg, schema, data):
         msg2 += '\nData:\n'
         msg2 += indent(datas, '  ')
     #     msg2 += 'repr: '+ datas.__repr__()
-    raise_desc(IncorrectFormat, msg2, schema=schema)
+    raise_desc(IncorrectFormat, msg2, schema=str(schema))
  
 class HintExtensions(object):
     
@@ -363,6 +363,7 @@ def data_events_from_disk_event_queue(disk_map, schema, disk_rep, disk_events_qu
             raise_wrapped(Exception, e, msg, arguments=arguments)
     else:
         raise NotImplementedError(operation)
+    
     
 def data_events_from_disk_event_group(disk_map, disk_rep, disk_events_queue, _id, who, events):
     if not events:
@@ -1054,21 +1055,23 @@ def read_SchemaContext_SER_FILE_YAML(self, schema, f):
     for k, schema_child in schema.children.items():
         if k in data:
             # have it
-            pass
+            res[k] = data[k]
         else:
             # dont' have it
-            default = schema_child.get_default()
-            if default != NOT_PASSED:
-                # use default
-                res[k] = copy.copy(schema_child.default)
-                logger.warning('Using default for key %s' % k)
-                continue
+            if schema_child.can_be_none:
+                res[k] = None
             else:
+                # use default
+#                 res[k] = copy.copy(schema_child.default)
+#                 logger.warning('Using default for key %s' % k)
+#                 continue
+#             else:
                 # no default
                 msg = 'Expected key "%s".' % k
-                raise_incorrect_format(msg, schema, data)
+                raise_incorrect_format(msg, schema, data,
+                                       )
         used.add(k)
-        res[k] = data[k] 
+         
     extra = set(present) - set(used)
 
     if extra:
@@ -1094,10 +1097,10 @@ def read_SchemaContext_SER_DIR(self, schema, fh):
             
         else:
             if not filename in fh:
-                default = schema_child.get_default()
-                if default != NOT_PASSED:
-                    res[k] =copy.copy( default)
-                    logger.debug('Using default for key %s' % k)
+                
+                if schema_child.can_be_none:
+                    res[k] = None
+#                     logger.debug('Using default for key %s' % k)
                 else:
                     msg = 'Expected filename "%s".' % filename
                     msg += '\n available: %s' % format_list(fh)

@@ -176,6 +176,10 @@ class ViewHash0(ViewBase):
     
     def keys(self):
         return self._data.keys()
+    
+    def values(self):
+        return self._data.values()
+    
     def __iter__(self):
         return self._data.__iter__()
     

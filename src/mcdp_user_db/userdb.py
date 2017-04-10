@@ -11,19 +11,18 @@ from mcdp_utils_misc import format_list, locate_files
 
 __all__ = ['UserDB']
 
-class UserDB():
+class UserDB(object):
 
-    def __init__(self, userdir):
-        
-        self.users = {}
-        us = load_users(userdir)
-        self.userdir = userdir
-        self.users.update(us)
-        
-        if not MCDPConstants.USER_ANONYMOUS in self.users:
-            msg = 'Need account for the anonymous user "%s".' % MCDPConstants.USER_ANONYMOUS
-            raise_desc(ValueError, msg, found=self.users)
-            
+#     def __init__(self, userdir):
+#         self.users = {}
+#         us = load_users(userdir)
+#         self.userdir = userdir
+#         self.users.update(us)
+#         
+#         if not MCDPConstants.USER_ANONYMOUS in self.users:
+#             msg = 'Need account for the anonymous user "%s".' % MCDPConstants.USER_ANONYMOUS
+#             raise_desc(ValueError, msg, found=self.users)
+#             
         
     def __contains__(self, key):
         return key in self.users

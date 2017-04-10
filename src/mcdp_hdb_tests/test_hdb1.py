@@ -8,7 +8,7 @@ from comptests.registrar import comptest, run_module_tests
 from mcdp import logger
 from mcdp_hdb.disk_map import DiskMap
 from mcdp_hdb.disk_struct import ProxyDirectory
-from mcdp_hdb.main_db_schema import DB
+from mcdp_hdb_mcdp.main_db_schema import DB
 
 
 @comptest

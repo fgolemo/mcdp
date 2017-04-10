@@ -1,12 +1,16 @@
 # -*- coding: utf-8 -*-
-from .schema import Schema, SchemaString, SchemaList,\
-    SchemaHash
-from .disk_map import DiskMap
+from mcdp import MCDPConstants
+from mcdp_hdb  import Schema, SchemaString, SchemaList,\
+    SchemaHash,  DiskMap
 from mcdp_library.specs_def import specs
-from mcdp import MCDPConstants 
-    
+from mcdp_user_db.user import UserInfo
+from mcdp_hdb.memdataview_manager import ViewManager
+from mcdp_user_db.userdb import UserDB
+
+
 class DB():
     
+    db = Schema()
     library = Schema()
     image = Schema()
     image_extensions = sorted(set(_.lower() for _ in MCDPConstants.exts_images))
@@ -22,12 +26,12 @@ class DB():
 
     shelf = Schema()
     with shelf.context_e('info') as shelf_info:
-        shelf_info.string('desc_short', default=None, can_be_none=True)
-        shelf_info.string('desc_long', default=None, can_be_none=True)
-        shelf_info.list("authors", SchemaString(), default=[])
-        shelf_info.list("dependencies", SchemaString(), default=[])
+        shelf_info.string('desc_short',  can_be_none=True)
+        shelf_info.string('desc_long',  can_be_none=True)
+        shelf_info.list("authors", SchemaString())
+        shelf_info.list("dependencies", SchemaString())
         acl_entry = SchemaList(SchemaString())
-        shelf_info.list('acl', acl_entry, default=[])
+        shelf_info.list('acl', acl_entry)
     
     shelf.hash('libraries', library)
     shelves = SchemaHash(shelf)
@@ -38,18 +42,22 @@ class DB():
     user = Schema() 
     with user.context_e('info') as user_info:
         user_info.string('name')
-        user_info.date('account_created', default=None)
-        user_info.date('account_last_active', default=None)
-        user_info.string('website', default=None)
-        user_info.string('affiliation', default=None)
-        user_info.list('subscriptions', SchemaString(), default=[])
-        user_info.string('email', default=None)
-        with user_info.list_e('authentication_ids', default=[]) as auth_id:
+        user_info.date('account_created', can_be_none=True)
+        user_info.date('account_last_active',  can_be_none=True)
+        user_info.string('website',  can_be_none=True)
+        user_info.string('affiliation',  can_be_none=True)
+        user_info.list('subscriptions', SchemaString())
+        user_info.string('email', can_be_none=True)
+        with user_info.list_e('authentication_ids') as auth_id:
             auth_id.string('provider')
-            auth_id.string('id', default=None)
-            auth_id.string('password', default=None)
-        user_info.list('groups', SchemaString(), default=[])
+            auth_id.string('id', can_be_none=True)
+            auth_id.string('password',  can_be_none=True)
+        user_info.list('groups', SchemaString())
     users = SchemaHash(user)
+    
+    user_db = Schema()
+    user_db._add_child('users', users)
+    db._add_child('user_db', user_db)
     
     dm = DiskMap(repo)
     dm.hint_directory(shelves, pattern='%.mcdpshelf')
@@ -59,7 +67,8 @@ class DB():
     dm.hint_directory(users, pattern='%.mcdp_user') 
     dm.hint_directory(user, translations={'info':'user.yaml'})
     dm.hint_file_yaml(user['info'])
-    
+    dm.hint_directory(user_db,translations={'users':None})
+                      
     dm.hint_directory(library, translations={'images': None, 'documents': None, 'things': None})
     dm.hint_extensions(library['images'], image_extensions)
     dm.hint_directory(library['documents'], pattern='%.md')
@@ -69,6 +78,10 @@ class DB():
     for spec_name, spec in specs.items():  # @UnusedVariable
         dm.hint_directory(things[spec_name], pattern='%.' + spec.extension)
 
+    view_manager = ViewManager(db)
+    view_manager.set_view_class(user, UserInfo)
+    view_manager.set_view_class(user_db, UserDB)
+    
 #     user2 = Schema()
     # info/ 
     #     public/      # Things that everybody can see

@@ -14,7 +14,7 @@ from contracts import contract
 from mcdp_utils_misc import get_md5, yaml_dump
 
 
-NOT_PASSED = 'no-default-given'
+
 
 class NotValid(Exception):
     ''' Raised by SchemaBase::validate() ''' 
@@ -23,6 +23,7 @@ class NotValid(Exception):
 class SchemaBase(object):
 
     def __init__(self):
+        self.can_be_none = False
         self._acl_rules_self = []
         self._parent = None
     
@@ -31,10 +32,7 @@ class SchemaBase(object):
     @abstractmethod
     def generate(self):
         ''' Generate data compatible with this schema. '''
-    
-    def get_default(self):
-        return NOT_PASSED
-    
+     
     def add_acl_rules(self, acl_rules):
         self._acl_rules_self.extend(acl_rules)
         
@@ -52,7 +50,8 @@ class SchemaBase(object):
         return ACL(self.get_acl_rules())
         
     def __str__(self):
-        s = '%s' % type(self).__name__ 
+        s = '%s' % type(self).__name__
+        s += '(Can be none: %s)' % self.can_be_none 
         acl = self.get_acl_local()
         if acl.rules:
             s += '\n' + acl.__str__()
@@ -85,12 +84,11 @@ class SchemaSimple(SchemaBase):
 class SchemaHash(SchemaRecursive):
     
     
-    def __init__(self, schema, default=NOT_PASSED):
+    def __init__(self, schema):
         SchemaBase.__init__(self)
         self.prototype = schema
         self.prototype._parent = self
-        
-        self.default = default
+         
         SchemaBase.__init__(self)
     
     def get_descendant(self, prefix):
@@ -155,7 +153,8 @@ class SchemaContext(SchemaRecursive):
         for k, v in self.children.items():
             if not k in data:
                 msg = 'Expecting key "%s" but not found in %s.' % (k, format_list(data))
-                raise_desc(NotValid, msg, data=describe_value(data))
+                
+                raise_desc(NotValid, msg, data=describe_value(data), self=str(self))
             try:
                 v.validate(data[k])
             except NotValid as e:
@@ -176,10 +175,10 @@ class SchemaContext(SchemaRecursive):
         self.context(name, s)
     
     @contextmanager
-    def list_e(self, name, default=NOT_PASSED):
+    def list_e(self, name):
         s = SchemaContext()
         yield s
-        self.list(name, s, default=default)
+        self.list(name, s)
         
     def context(self, name, child_schema=None):     
         if child_schema is None:
@@ -187,29 +186,29 @@ class SchemaContext(SchemaRecursive):
         self._add_child(name, child_schema)
         return child_schema
     
-    def hash(self, name, child_schema=None, default=NOT_PASSED):
+    def hash(self, name, child_schema=None):
         check_isinstance(name, str)
         child_schema = child_schema or self._child()
-        sc = SchemaHash(child_schema, default=default)
+        sc = SchemaHash(child_schema)
         self._add_child(name, sc)
         return child_schema
     
-    def list(self, name, child_schema=None, default=NOT_PASSED):
+    def list(self, name, child_schema=None):
         child_schema = child_schema or self._child()
-        sc = SchemaList(child_schema, default=default)
+        sc = SchemaList(child_schema)
         self._add_child(name, sc)
         return child_schema
     
-    def date(self, name, default=NOT_PASSED):
-        schema = SchemaDate(default=default)
+    def date(self, name,    can_be_none=False):
+        schema = SchemaDate(can_be_none=can_be_none)
         self._add_child(name, schema)
     
-    def string(self, name, default=NOT_PASSED, can_be_none=False):
-        schema = SchemaString(default=default, can_be_none=can_be_none)
+    def string(self, name,   can_be_none=False):
+        schema = SchemaString(can_be_none=can_be_none)
         self._add_child(name, schema)
         
-    def bytes(self, name, default=NOT_PASSED, can_be_none=False):
-        schema = SchemaBytes(default=default, can_be_none=can_be_none)
+    def bytes(self, name,  can_be_none=False):
+        schema = SchemaBytes(can_be_none=can_be_none)
         self._add_child(name, schema)
         
     def __getitem__(self, name):
@@ -255,9 +254,9 @@ def describe(children):
     return s.rstrip()
 
 class SchemaList(SchemaRecursive):
-    def __init__(self, schema, default=NOT_PASSED):
+    def __init__(self, schema):
         self.prototype = schema
-        self.default = default
+        
         SchemaBase.__init__(self)
         
     def get_descendant(self, prefix):
@@ -302,18 +301,19 @@ class SchemaList(SchemaRecursive):
 
     
 class SchemaDate(SchemaSimple):
-    def __init__(self, default):
-        self.default = default
-        SchemaBase.__init__(self)
+    def __init__(self,  can_be_none=False):
+        SchemaBase.__init__(self) 
+        self.can_be_none = can_be_none
         
     def get_default(self):
         return self.default 
-    
-    
+
     def generate(self):
         return datetime.datetime.now()
     
     def validate(self, data):
+        if self.can_be_none and data is None:
+            return
         if not isinstance(data, datetime.datetime):
             msg = 'Expected a datetime.datetime object.'
             raise_desc(NotValid, msg, data=describe_value(data))
@@ -323,10 +323,9 @@ class SchemaString(SchemaSimple):
     # how to represent None
     NONE_TAG = 'null'
     
-    def __init__(self, default=NOT_PASSED, can_be_none=False):
-        self.default = default
+    def __init__(self,   can_be_none=False):
+        SchemaBase.__init__(self) 
         self.can_be_none = can_be_none
-        SchemaBase.__init__(self)
         
     
     def get_default(self):
@@ -364,10 +363,9 @@ class SchemaString(SchemaSimple):
 
 class SchemaBytes(SchemaSimple):
 
-    def __init__(self, default, can_be_none=False):
-        self.default = default
-        self.can_be_none = can_be_none
+    def __init__(self, can_be_none=False):
         SchemaBase.__init__(self)
+        self.can_be_none = can_be_none
     
     def generate(self):
         return b'somebytes'
