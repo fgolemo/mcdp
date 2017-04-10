@@ -64,7 +64,6 @@ class ViewManager(object):
             v._events.append(event)
         v._notify_callback = notify_callback
         return v
-    
 
     @contract(s=SchemaBase)
     def create_view_instance(self, s, data):

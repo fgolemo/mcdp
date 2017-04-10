@@ -146,6 +146,7 @@ class DiskMap(object):
     def dirname_from_data_url(self, data_url):
         return self.dirname_from_data_url_(self.schema, tuple(data_url))
     
+    @contract(schema=SchemaBase)
     def dirname_from_data_url_(self, schema, data_url):
         if not data_url:
             return ()
@@ -166,6 +167,10 @@ class DiskMap(object):
             rest_translated = self.dirname_from_data_url_(schema.prototype, rest)
         
         if isinstance(schema, SchemaContext):
+            if not first in schema.children:
+                msg = ('Could not translate data url %r because could not find child %r: found %s' %
+                       (data_url, first, format_list(schema.children)))
+                raise_desc(ValueError, msg, schema=str(schema))
             schema_child = schema.children[first]
             rest_translated = self.dirname_from_data_url_(schema_child, rest)
            

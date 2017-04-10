@@ -1,19 +1,19 @@
 from abc import abstractmethod, ABCMeta
 from copy import deepcopy
+import inspect
 
 from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped, indent, check_isinstance
 
 from mcdp import MCDPConstants
-from mcdp.logs import logger
-from mcdp_hdb.schema import SchemaSimple
+from mcdp import logger
 from mcdp_utils_misc import format_list
 
 from .memdataview_exceptions import InsufficientPrivileges, FieldNotFound,\
     InvalidOperation, EntryNotFound
 from .memdataview_utils import special_string_interpret
 from .schema import SchemaBase
-import inspect
+from .schema import SchemaSimple
 
 
 __all__ = [
@@ -43,6 +43,7 @@ class ViewBase(object):
         self._principals = []
         # if not none, it will be called when an event is generated
         self._notify_callback = None
+        self._events = None
 
     def __str__(self):
         names = [base.__name__ for base in inspect.getmro(type(self))]
@@ -174,9 +175,7 @@ class ViewContext0(ViewBase):
     def __setattr__(self, name, value):
         if name.startswith('_'):
             return object.__setattr__(self, name, value)
-        child = self._get_child(name)
-        child.validate(value)
-        v = self._create_view_instance(child, self._data[name], name)
+        v = self._get_child(name)
         v.check_can_write()
             
         from .memdata_events import event_leaf_set
@@ -190,10 +189,10 @@ class ViewContext0(ViewBase):
         self._data[name] = value
         
     def child(self, name):
-        child = self._get_child(name)
+        child_schema = self._schema.get_descendant((name,))
         child_data = self._data[name]
-        v = self._create_view_instance(child, child_data, name)        
-        if is_simple_data(child):
+        v = self._create_view_instance(child_schema, child_data, name)        
+        if is_simple_data(child_schema):
             def set_callback(value):
                 self._data[name] = value
                 

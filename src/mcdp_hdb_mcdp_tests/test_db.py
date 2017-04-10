@@ -10,6 +10,7 @@ from mcdp_hdb.disk_struct import ProxyDirectory
 from mcdp_hdb_mcdp.main_db_schema import DB
 from mcdp_utils_misc.my_yaml import yaml_dump
 import inspect
+from mcdp_hdb.disk_map import disk_events_from_data_event
 
 
 def read_as_user_db(dirname):
@@ -55,11 +56,26 @@ def read_as_user_db(dirname):
          
 if __name__ == '__main__':
     user_db_view = read_as_user_db(sys.argv[1])
+    events = []    
+    def notify_callback(event): 
+        events.append(event)
+    user_db_view._notify_callback = notify_callback
+        
     user = user_db_view.best_match(None, None, 'censi@mit.edu')
     print user
-    print user.info
-    print type(user.info)
-    print inspect.getmro(type(user.info))
+    user.info.email = 'new email'
+    print yaml_dump(events)
+    
+    for data_event in events:
+        dm = DB.dm
+        dm.schema = user_db_view._schema
+        disk_event = disk_events_from_data_event(disk_map=dm, 
+                                                 schema=user_db_view._schema, 
+                                                 data_rep=user_db_view._data, 
+                                                 data_event=data_event)
+        print yaml_dump(disk_event)
+         
+    
      
     
     
