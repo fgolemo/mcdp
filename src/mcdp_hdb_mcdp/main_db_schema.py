@@ -2,9 +2,9 @@
 from mcdp import MCDPConstants
 from mcdp_hdb  import Schema, SchemaString, SchemaList,\
     SchemaHash,  DiskMap
+from mcdp_hdb.memdataview_manager import ViewManager
 from mcdp_library.specs_def import specs
 from mcdp_user_db.user import UserInfo
-from mcdp_hdb.memdataview_manager import ViewManager
 from mcdp_user_db.userdb import UserDB
 
 
@@ -79,7 +79,7 @@ class DB():
         dm.hint_directory(things[spec_name], pattern='%.' + spec.extension)
 
     view_manager = ViewManager(db)
-    view_manager.set_view_class(user, UserInfo)
+    view_manager.set_view_class(user_info, UserInfo)
     view_manager.set_view_class(user_db, UserDB)
     
 #     user2 = Schema()

@@ -22,6 +22,7 @@ from .memdata_utils import assert_data_events_consistent
 from .memdataview import InvalidOperation
 from .memdataview_manager import ViewManager
 from .schema import SchemaHash, SchemaString, SchemaContext, SchemaList, SchemaBytes, SchemaDate, SchemaBase
+from mcdp_hdb.schema import SchemaSimple
 
 
 # from mcdp_library_tests.create_mockups import mockup_flatten
@@ -1044,42 +1045,64 @@ def write_SchemaHash_Extensions(self, schema, data):
                 res[filename] = self.create_hierarchy_(schema.prototype[ext], filedata)
     return res 
 
+def fill_in_none(schema, data):
+    ''' Fills in the fields not passed and that can be None '''
+    if isinstance(schema, SchemaString):
+        if isinstance(data, unicode):
+            return data.encode('utf8')
+        else:
+            return data
+    elif isinstance(schema, SchemaSimple):
+        schema.validate(data)
+        return data
+    elif isinstance(schema, SchemaList):
+        check_isinstance(data, list)
+        res = [fill_in_none(schema.prototype, _) for _ in data]
+        schema.validate(res)
+        return res
+    elif isinstance(schema, SchemaHash):
+        check_isinstance(data, dict)
+        res = dict([(k, fill_in_none(schema.prototype, v)) for k, v in data.items()])
+        schema.validate(res)
+        return res
+    elif isinstance(schema, SchemaContext):
+        check_isinstance(data, dict)
+        # some of the fields might be missing
+        res = {}
+        present = set(data)
+        
+        for k, schema_child in schema.children.items():
+            if k in data:
+                # have it
+                res[k] = fill_in_none(schema_child, data[k])
+            else:
+                # dont' have it
+                if schema_child.can_be_none:
+                    res[k] = None
+                else: 
+                    # no default
+                    msg = 'Expected key "%s".' % k
+                    raise_incorrect_format(msg, schema, data,                    )
+        needed = set(schema.children)
+        extra = set(present) - needed
+    
+        if extra:
+            msg = 'Extra fields: %s.' % format_list(sorted(extra))
+            msg += '\nPresent: %s' % format_list(present)
+            msg += '\nNeeded: %s' % format_list(needed)
+            raise_incorrect_format(msg, schema, data)
+        schema.validate(res)
+        return res
+    else:
+        assert False, schema
 
 @contract(f=ProxyFile)
 def read_SchemaContext_SER_FILE_YAML(self, schema, f):
-    import yaml
-    data = yaml.load(f.contents)
-    res = {}
-    present = set(data)
-    used = set()
-    for k, schema_child in schema.children.items():
-        if k in data:
-            # have it
-            res[k] = data[k]
-        else:
-            # dont' have it
-            if schema_child.can_be_none:
-                res[k] = None
-            else:
-                # use default
-#                 res[k] = copy.copy(schema_child.default)
-#                 logger.warning('Using default for key %s' % k)
-#                 continue
-#             else:
-                # no default
-                msg = 'Expected key "%s".' % k
-                raise_incorrect_format(msg, schema, data,
-                                       )
-        used.add(k)
-         
-    extra = set(present) - set(used)
-
-    if extra:
-        msg = 'Extra fields: %s.' % format_list(sorted(extra))
-        msg += '\nPresent: %s' % format_list(present)
-        msg += '\nUsed: %s' % format_list(used)
-        raise_incorrect_format(msg, schema, data)
+    data = yaml_load(f.contents)
+    # now we need to iterate and fill the missing keys
+    res = fill_in_none(schema, data)
     schema.validate(res)
+    logger.info('OK validation for \n %s' % yaml_dump(res))
     return res 
 
 def read_SchemaContext_SER_DIR(self, schema, fh):

@@ -2,14 +2,14 @@ import os
 import shutil
 import sys
 
-
+from contracts.utils import indent
 import yaml
 
-from mcdp_hdb_mcdp.main_db_schema import DB
-from mcdp_hdb.disk_struct import ProxyDirectory
-from contracts.utils import indent
-from mcdp_utils_misc.my_yaml import yaml_dump
 from mcdp.logs import logger
+from mcdp_hdb.disk_struct import ProxyDirectory
+from mcdp_hdb_mcdp.main_db_schema import DB
+from mcdp_utils_misc.my_yaml import yaml_dump
+import inspect
 
 
 def read_as_user_db(dirname):
@@ -28,8 +28,9 @@ def read_as_user_db(dirname):
     DB.user_db.validate(user_db_data)
     
     user_db_view = DB.view_manager.create_view_instance(user_db_schema, user_db_data)
-    
+    user_db_view.set_root()
     return user_db_view
+
     if False:
         print ('users_data:\n%s' % yaml.dump(users_data))
     
@@ -54,7 +55,11 @@ def read_as_user_db(dirname):
          
 if __name__ == '__main__':
     user_db_view = read_as_user_db(sys.argv[1])
-    print user_db_view.best_match(None, None, 'censi@mit.edu')
+    user = user_db_view.best_match(None, None, 'censi@mit.edu')
+    print user
+    print user.info
+    print type(user.info)
+    print inspect.getmro(type(user.info))
      
     
     

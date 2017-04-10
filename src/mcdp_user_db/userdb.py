@@ -1,13 +1,12 @@
 import os
 
-from contracts.utils import raise_desc
 import yaml
 
 from mcdp import MCDPConstants
 from mcdp.logs import logger
-from mcdp_user_db.user import userinfo_from_yaml, yaml_from_userinfo
+from mcdp_user_db.user import userinfo_from_yaml, yaml_from_userinfo, UserInfo
 from mcdp_utils_misc import format_list, locate_files
-
+from contracts import contract 
 
 __all__ = ['UserDB']
 
@@ -29,7 +28,7 @@ class UserDB(object):
     
     def match_by_id(self, provider, provider_id):
         for u in self.users.values():
-            for w in u.authentication_ids:
+            for w in u.info.authentication_ids:
                 if w['provider'] == provider and w.get('id', None) == provider_id:
                     return u
         return None
@@ -38,24 +37,30 @@ class UserDB(object):
         if username is not None:
             if username in self.users:
                 return self.users[username]
+
         for u in self.users.values():
-            if name is not None and u.name == name:
+            user_info = u.info
+            if name is not None and user_info.get_name() == name:
                 return u
-            if email is not None and u.email == email:
+            if email is not None and user_info.get_email() == email:
                 return u
+            
         return None
     
+    @contract(returns=UserInfo)
     def __getitem__(self, key):
         if key is None:
             key = 'anonymous'
-        return self.users[key]
+        u = self.users[key].info
+        return u
     
     def exists(self, login):
         return login in self
     
+    @contract(returns=bool)
     def authenticate(self, login, password):
-        user = self.users[login]
-        for p in user.authentication_ids:
+        user_info = self.users[login].info
+        for p in user_info.authentication_ids:
             if p['provider'] == 'password':
                 pwd = p['password']
                 match = password == pwd
@@ -65,6 +70,7 @@ class UserDB(object):
                 return match
         return False
     
+    @contract(returns=str)
     def find_available_user_name(self, candidate_usernames):
         for x in candidate_usernames:
             if x not in self.users:

@@ -2,17 +2,18 @@ from abc import abstractmethod, ABCMeta
 from copy import deepcopy
 
 from contracts import contract
-from contracts.utils import raise_desc, raise_wrapped, indent
+from contracts.utils import raise_desc, raise_wrapped, indent, check_isinstance
 
 from mcdp import MCDPConstants
 from mcdp.logs import logger
+from mcdp_hdb.schema import SchemaSimple
 from mcdp_utils_misc import format_list
 
 from .memdataview_exceptions import InsufficientPrivileges, FieldNotFound,\
     InvalidOperation, EntryNotFound
 from .memdataview_utils import special_string_interpret
-from .schema import SchemaBase, SchemaBytes, SchemaString,\
-    SchemaDate
+from .schema import SchemaBase
+import inspect
 
 
 __all__ = [
@@ -20,15 +21,17 @@ __all__ = [
     'ViewContext0',
     'ViewHash0',
     'ViewList0',
-    'ViewString',
-#     'ViewBytes',
-#     'ViewDate',
+    'ViewString', 
 ]
 
 class ViewBase(object):
     
     __metaclass__ = ABCMeta
     
+    @abstractmethod
+    def child(self, key):
+        ''' '''
+        
     @contract(view_manager='isinstance(ViewManager)')
     def __init__(self, view_manager, data, schema):
         schema.validate(data)
@@ -40,7 +43,22 @@ class ViewBase(object):
         self._principals = []
         # if not none, it will be called when an event is generated
         self._notify_callback = None
-        
+
+    def __str__(self):
+        names = [base.__name__ for base in inspect.getmro(type(self))]
+        for n in list(names):
+            if n.endswith('0'):
+                names.remove(n)
+        remove = ['ViewBase','Base','object']
+        for r in remove:
+            if r in names:
+                names.remove(r)
+        return '%s[%s]' % ("/".join(names), self._data)
+
+    def set_root(self):
+        ''' Give this view all permissions '''
+        self._principals = [MCDPConstants.ROOT]
+
     @contract(s=SchemaBase)
     def _create_view_instance(self, s, data, url):
         v = self._view_manager.create_view_instance(s, data)
@@ -50,9 +68,6 @@ class ViewBase(object):
         v._notify_callback = self._notify_callback
         return v
     
-    @abstractmethod
-    def child(self, key):
-        ''' '''
     def check_can_read(self):
         privilege = MCDPConstants.Privileges.READ
         self.check_privilege(privilege)
@@ -106,29 +121,55 @@ class ViewBase(object):
         
 class ViewContext0(ViewBase): 
     
+    def __str__(self):
+        names = [base.__name__ for base in inspect.getmro(type(self))]
+        for n in list(names):
+            if n.endswith('0'):
+                names.remove(n)
+        remove = ['ViewBase','Base','object']
+        for r in remove:
+            if r in names:
+                names.remove(r)
+        #myname = "/".join(names)
+        myname = names[-1]
+        res = []
+        for k, schema_child in self._schema.children.items():
+            if isinstance(schema_child, SchemaSimple):
+                res.append('%s=%r' % (k, self._data[k]))
+            else:
+                res.append('%s=%s' % (k, self._get_child(k)))
+                
+        data_string = ", ".join(res) 
+        
+        return '%s[%s]' % (myname, data_string)
+
+    @contract(returns=ViewBase)
     def _get_child(self, name):
         children = self._schema.children
         if not name in children:
             msg = 'Could not find field "%s"; available: %s.' % (name, format_list(children))
-            raise_desc(FieldNotFound, msg)
+            raise_desc(FieldNotFound, msg, children=children, schema=str(self._schema))
 
-        child = children[name]
-        return child
+        child_schema = children[name]
+        check_isinstance(child_schema, SchemaBase)
+        child_data = self._data[name]
+        v = self._create_view_instance(child_schema, child_data, name)
+        return v 
 
     def __getattr__(self, name):
         if name.startswith('_') or name == 'child':
             return object.__getattr__(self, name)
-        child = self._get_child(name)
+        child_schema= self._schema.children[name]
         assert name in self._data
         child_data = self._data[name]
-        if is_simple_data(child):
+        if is_simple_data(child_schema):
             # check access
-            v = self._create_view_instance(child, child_data, name)
+            v = self._create_view_instance(child_schema, child_data, name)
             v.check_can_read()
             # just return the value
             return child_data
         else:
-            return self._create_view_instance(child, child_data, name)
+            return self._create_view_instance(child_schema, child_data, name)
 
     def __setattr__(self, name, value):
         if name.startswith('_'):
@@ -167,7 +208,7 @@ class ViewContext0(ViewBase):
     
 
 def is_simple_data(s):
-    return isinstance(s, (SchemaString, SchemaBytes, SchemaDate))
+    return isinstance(s, SchemaSimple)
 
 class ViewHash0(ViewBase):
 
@@ -178,11 +219,13 @@ class ViewHash0(ViewBase):
         return self._data.keys()
     
     def values(self):
-        return self._data.values()
-    
+        for k in self.keys():
+            yield self.child(k)
+        
     def __iter__(self):
-        return self._data.__iter__()
-    
+        for k in self.keys():
+            yield k, self.child(k)
+        
     def child(self, name):
         if not name in self._data:
             msg = 'Cannot get child "%s"; known: %s.' % (name, format_list(self.keys()))
@@ -190,7 +233,7 @@ class ViewHash0(ViewBase):
         d = self._data[name]
         prototype = self._schema.prototype    
         v = self._create_view_instance(prototype, d, name)
-        if is_simple_data(prototype):
+        if isinstance(prototype, SchemaSimple):
             def set_callback(value):
                 self._data[name] = value
             v._set_callback = set_callback
@@ -214,7 +257,6 @@ class ViewHash0(ViewBase):
         self.check_can_write()
         prototype = self._schema.prototype
         prototype.validate(value) 
-        
         
         event = event_dict_setitem(name=self._prefix,
                                    key=key, 

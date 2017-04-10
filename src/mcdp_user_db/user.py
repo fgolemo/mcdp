@@ -5,30 +5,33 @@ from git.util import Actor
 from mcdp_utils_misc import format_list, yaml_dump
 
 
-class UserInfo():
+class UserInfo(object):
     
-    def __init__(self, username, name, authentication_ids, email, website, affiliation, groups,
-                  subscriptions, picture,
-                  account_created,
-                  account_last_active,
-                  ):
-        self.username = username
-        self.name = name
-        self.authentication_ids = authentication_ids
-        self.email = email
-        self.website = website
-        self.affiliation = affiliation
-        self.groups = groups
-        self.subscriptions = subscriptions
-        self.picture = picture
-        self.account_created = account_created
-        self.account_last_active = account_last_active 
+#     def __init__(self, username, name, authentication_ids, email, website, affiliation, groups,
+#                   subscriptions, picture,
+#                   account_created,
+#                   account_last_active,
+#                   ):
+#         self.username = username
+#         self.name = name
+#         self.authentication_ids = authentication_ids
+#         self.email = email
+#         self.website = website
+#         self.affiliation = affiliation
+#         self.groups = groups
+#         self.subscriptions = subscriptions
+#         self.picture = picture
+#         self.account_created = account_created
+#         self.account_last_active = account_last_active 
         
-    def get_gravatar(self, size):
-        if self.email is not None:
-            return gravatar(self.email, size)
-        else:
-            return gravatar('invalid@invalid.com', size)
+#     def get_gravatar(self, size):
+#         if self.get_email() is not None:
+#             return gravatar(self.email, size)
+#         else:
+#             return gravatar('invalid@invalid.com', size)
+    
+    def get_email(self):
+        return self.email
     
     def get_groups(self):
         return self.groups
@@ -49,13 +52,13 @@ class UserInfo():
             'groups': self.groups,
             'subscriptions': self.subscriptions,
         }
-        if self.email is None:
-            res['gravatar64'] = self.get_gravatar(64)
-            res['gravatar32'] = self.get_gravatar(32)
-        else:
-            res['gravatar64'] = self.get_gravatar(64)
-            res['gravatar32'] = self.get_gravatar(32)
-            
+#         if self.email is None:
+#             res['gravatar64'] = self.get_gravatar(64)
+#             res['gravatar32'] = self.get_gravatar(32)
+#         else:
+#             res['gravatar64'] = self.get_gravatar(64)
+#             res['gravatar32'] = self.get_gravatar(32)
+#             
         return res
     
     def get_external_providers(self):
@@ -124,15 +127,15 @@ def yaml_from_userinfo(user):
     res['account_last_active'] = user.account_last_active
     res['groups'] = user.groups
     return res
-
-def gravatar(email, size, default=None):
-    import urllib, hashlib
-    digest = hashlib.md5(email.lower()).hexdigest()
-    gravatar_url = "https://www.gravatar.com/avatar/" + digest + "?"
-    p = {}
-    p['s'] = str(size)
-    if default:
-        p['d'] = default
-    gravatar_url += urllib.urlencode(p)
-    
-    return gravatar_url
+# 
+# def gravatar(email, size, default=None):
+#     import urllib, hashlib
+#     digest = hashlib.md5(email.lower()).hexdigest()
+#     gravatar_url = "https://www.gravatar.com/avatar/" + digest + "?"
+#     p = {}
+#     p['s'] = str(size)
+#     if default:
+#         p['d'] = default
+#     gravatar_url += urllib.urlencode(p)
+#     
+#     return gravatar_url
