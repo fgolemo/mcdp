@@ -6,7 +6,8 @@ from mcdp_hdb_tests.functoriality_gitrepo_to_diskrep import check_translation_gi
 from mcdp_hdb_tests.functoriality_memdata_to_diskrep import \
     check_translation_diskrep_to_memdata, check_translation_memdata_to_diskrep
 from mcdp_hdb_tests.testcases import testcases_SimpleUserDB, DataTestCase,\
-    testcases_TranslateNone, testcases_arrays, testcases_minilibrary
+    testcases_TranslateNone, testcases_arrays, testcases_minilibrary,\
+    testcases_arrays_inside_yaml
 
 
 tcs = {}
@@ -14,6 +15,7 @@ tcs.update(testcases_SimpleUserDB())
 tcs.update(testcases_TranslateNone())
 tcs.update(testcases_arrays())
 tcs.update(testcases_minilibrary())
+tcs.update(testcases_arrays_inside_yaml())
 
 class X():
     def __init__(self, k, tc):

@@ -21,4 +21,5 @@ from .gitrepo_map import *
 from .disk_map import *
 from .disk_map_events1 import *
 from .disk_map_events2 import *
-
+from .disk_map_data_events_from_disk_events import *
+from .disk_map_disk_events_from_data_events import *

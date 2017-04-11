@@ -6,10 +6,10 @@ from contracts.utils import indent
 import yaml
 
 from mcdp.logs import logger
-from mcdp_hdb.disk_struct import ProxyDirectory
+from mcdp_hdb import ProxyDirectory
+from mcdp_hdb import disk_events_from_data_event
 from mcdp_hdb_mcdp.main_db_schema import DB
-from mcdp_utils_misc.my_yaml import yaml_dump
-from mcdp_hdb.disk_map import disk_events_from_data_event
+from mcdp_utils_misc import yaml_dump
 
 
 def read_as_user_db(dirname):
@@ -61,13 +61,13 @@ if __name__ == '__main__':
     user_db_view._notify_callback = notify_callback
         
     user = user_db_view.best_match(None, None, 'censi@mit.edu')
-    print user
+    print('user: %s' % user)
     user.info.email = 'new email'
+    user.info.groups.append('group:new-group')
     print yaml_dump(events)
     
     for data_event in events:
         dm = DB.dm
-#         dm.schema = user_db_view._schema
         disk_event = disk_events_from_data_event(disk_map=dm, 
                                                  schema=user_db_view._schema, 
                                                  data_rep=user_db_view._data, 

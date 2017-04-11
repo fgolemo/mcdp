@@ -8,6 +8,7 @@ from mcdp_hdb import SchemaHash
 from mcdp_hdb import ViewManager
 from mcdp_hdb import assert_data_events_consistent
 from mcdp_hdb import event_interpret_
+from mcdp_hdb.schema import SchemaList
 
 
 class DataTestCase(object):
@@ -245,6 +246,67 @@ def testcases_arrays():
     res = {}
     
     for s in seqs:
+        db = deepcopy(db0)
+        viewmanager = ViewManager(db_schema) 
+        view = viewmanager.view(db) 
+        s(view)
+        events = view._events
+        assert_data_events_consistent(db_schema, db0, events, db)
+        
+        for id_dm, dm in disk_maps.items():
+            dtc = DataTestCase(db_schema, db0, events, db, dm)
+            k = '%s-%s-%s' % (prefix, s.__name__, id_dm)
+            res[k] = dtc 
+     
+    return res
+
+@contract(returns='dict(str:isinstance(DataTestCase))')    
+def testcases_arrays_inside_yaml():
+    
+    db_schema = Schema()
+    user = Schema()
+    user._add_child('name', SchemaString())
+    user._add_child('groups', SchemaList(SchemaString()))
+    db_schema.hash('users', user)
+    
+    db0 = {
+        'users': {
+            'andrea': {
+                'name': 'Andrea',
+                'groups': ['one', 'two'],
+            }
+        }
+    }
+
+    db_schema.validate(db0)
+    
+    operation_sequences = []
+    def add_seq(f):
+        operation_sequences.append(f)
+        return f
+    
+    @add_seq
+    def seq_set(view):
+        view.users['andrea'].name = 'new name'
+    @add_seq
+    def seq_append(view):
+        view.users['andrea'].groups.append('newgroup')
+        
+    dm = DiskMap()
+    dm.hint_file_yaml(user)
+    disk_maps= {}
+    disk_maps['vanilla'] = DiskMap()
+    disk_maps['yaml'] = dm
+
+    prefix = 'array_inside_yaml'
+    
+    res = get_combinations(db_schema, db0, prefix, operation_sequences, disk_maps)
+    return res
+
+def get_combinations(db_schema, db0, prefix, operation_sequences, disk_maps):
+    res = {}
+    
+    for s in operation_sequences:
         db = deepcopy(db0)
         viewmanager = ViewManager(db_schema) 
         view = viewmanager.view(db) 
