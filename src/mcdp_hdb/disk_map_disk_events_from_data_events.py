@@ -52,13 +52,13 @@ def disk_events_from_data_event(disk_map, schema, data_rep, data_event):
     else:
         raise NotImplementedError(operation)
     
-def disk_events_from_leaf_set_in_yaml(disk_map, view, _id, who, parent, name, value, parent_with_yaml):
+def disk_events_from_leaf_set_in_yaml(disk_map, view, _id, who, name, leaf, value, parent_with_yaml):
     p_schema = view._schema.get_descendant(parent_with_yaml)
     p_hint = disk_map.get_hint(p_schema)
     check_isinstance(p_hint, HintFileYAML)
     
-    relative_url = parent[len(parent_with_yaml):]
-    msg = 'Inside yaml:  set %s.%s = %s' % (relative_url, name, value)
+    relative_url = name[len(parent_with_yaml):]
+    msg = 'Inside yaml:  set %s.%s = %s' % (relative_url, leaf, value)
     logger.info(msg)
     
     parent_of_yaml = parent_with_yaml[:-1]
@@ -73,7 +73,7 @@ def disk_events_from_leaf_set_in_yaml(disk_map, view, _id, who, parent, name, va
     data_view._data = deepcopy(data_view._data)
     # now make the change
     _data= get_view_node(data_view, relative_url)._data
-    _data[name] = value
+    _data[leaf] = value
     fh = disk_map.create_hierarchy_(p_schema, data_view._data)
     check_isinstance(fh, ProxyFile)
     contents = fh.contents
@@ -81,29 +81,29 @@ def disk_events_from_leaf_set_in_yaml(disk_map, view, _id, who, parent, name, va
     return [disk_event]
  
 
-def disk_events_from_leaf_set(disk_map, view, _id, who, parent, name, value):
+def disk_events_from_leaf_set(disk_map, view, _id, who, name, leaf, value):
     # check if it is contained in any dir that has HintFileYAML
 #     logger.debug('leaf_set %s . %s = %s' % (parent, name, value))
-    for i in range(len(parent)+1):
-        p = parent[:i]
+    for i in range(len(name)+1):
+        p = name[:i]
         p_schema = view._schema.get_descendant(p)
         p_hint = disk_map.get_hint(p_schema)
         if isinstance(p_hint, HintFileYAML):
-            return disk_events_from_leaf_set_in_yaml(disk_map, view, _id, who, parent, name, value, p)
+            return disk_events_from_leaf_set_in_yaml(disk_map, view, _id, who, name, leaf, value, p)
     
-    view_parent = get_view_node(view, parent)
+    view_parent = get_view_node(view, name)
     schema_parent = view_parent._schema
     check_isinstance(schema_parent, SchemaContext)
-    view_child = view_parent.child(name)
+    view_child = view_parent.child(leaf)
     schema_child = view_child._schema
     
     hint = disk_map.get_hint(schema_parent)
     if isinstance(hint, HintDir):
         sub = disk_map.create_hierarchy_(schema_child, value)
-        dirname = disk_map.dirname_from_data_url_(view._schema, parent)
+        dirname = disk_map.dirname_from_data_url_(view._schema, name)
         
         if isinstance(sub, ProxyFile):
-            filename = name
+            filename = leaf
             contents = sub.contents
             disk_event = disk_event_file_modify(_id, who, dirname, filename, contents)
             return [disk_event]
@@ -112,8 +112,8 @@ def disk_events_from_leaf_set(disk_map, view, _id, who, parent, name, value):
     elif isinstance(hint, HintFileYAML):
         sub = disk_map.create_hierarchy_(schema_child, value)
         check_isinstance(sub, ProxyFile)
-        dirname = disk_map.dirname_from_data_url_(view._schema, parent)
-        filename = name
+        dirname = disk_map.dirname_from_data_url_(view._schema, name)
+        filename = leaf
         contents = sub.contents
         disk_event = disk_event_file_modify(_id, who, dirname, filename, contents)
         return [disk_event]

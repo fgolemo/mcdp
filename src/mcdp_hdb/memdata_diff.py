@@ -16,7 +16,7 @@ def data_diff(schema, data1, data2, prefix=()):
         for k, schema_child in schema.children.items():
             if isinstance(schema_child, SchemaSimple):
                 if data1[k] != data2[k]:
-                    e = event_leaf_set(parent=prefix, name=k, value=data2[k], _id='', who=None)
+                    e = event_leaf_set(name=prefix, leaf=k, value=data2[k], _id='', who=None)
                     events.append(e)
             else:
                 e = data_diff(schema_child, data1[k], data2[k], prefix=prefix+(k,))

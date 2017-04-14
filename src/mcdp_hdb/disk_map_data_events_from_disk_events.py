@@ -187,7 +187,7 @@ def data_events_from_file_modify(schema, disk_map, disk_rep, disk_events_queue, 
             key = hint.key_from_filename(name)
             schema_child = schema_parent.get_descendant((key,))
             value = disk_map.interpret_hierarchy_(schema_child, ProxyFile(contents))
-            e = event_leaf_set(parent=parent, name=key, value=value, _id=_id, who=who)
+            e = event_leaf_set(name=parent, leaf=key, value=value, _id=_id, who=who)
             consumed = []
             return [e], consumed
 

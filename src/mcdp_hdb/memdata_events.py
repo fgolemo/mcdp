@@ -14,7 +14,7 @@ from .memdataview_exceptions import InvalidOperation
 
 class DataEvents(object):
     # For simple values: int, string, float, date
-    leaf_set = 'leaf_set' # value_set <parent> <name> <value> 
+    leaf_set = 'leaf_set' # leaf_set <name> <leaf> <value> 
     struct_set = 'struct_set' # struct_set <name> <struct-value>
     increment = 'increment' # increment <name> <value>
     list_append = 'list_append' # list_append <name>[a list] <value>
@@ -42,10 +42,10 @@ def event_add_prefix(prefix, event):
         new = tuple(prefix) +  tuple(old)
         e['arguments'][which] = new
         return e
-    if event['operation'] == DataEvents.leaf_set:
-        return add_prefix_to(prefix, event, 'parent')
-    else:
-        return add_prefix_to(prefix, event, 'name')
+#     if event['operation'] == DataEvents.leaf_set:
+#         return add_prefix_to(prefix, event, 'parent')
+#     else:
+    return add_prefix_to(prefix, event, 'name')
     
 @contract(name='seq(str)')
 def get_view_node(view, name):
@@ -55,16 +55,16 @@ def get_view_node(view, name):
         name = name[1:]
     return v
 
-@contract(parent='seq(str)', name=str)
-def event_leaf_set(parent, name, value, **kwargs):
-    arguments = dict(parent=parent, name=name, value=value)
+@contract(name='seq(str)', leaf=str)
+def event_leaf_set(name, leaf, value, **kwargs):
+    arguments = dict(name=name, leaf=leaf, value=value)
     return event_make(event_name=DataEvents.leaf_set, arguments=arguments, **kwargs)
 
-def event_leaf_set_interpret(view, parent, name, value):
-    v = get_view_node(view, parent)
+def event_leaf_set_interpret(view, name, leaf, value):
+    v = get_view_node(view, name)
     from mcdp_hdb.memdataview import ViewContext0
     check_isinstance(v, ViewContext0)
-    vc = v.child(name)
+    vc = v.child(leaf)
     vc._schema.validate(value)
     vc.check_can_write()
     vc.set(value)

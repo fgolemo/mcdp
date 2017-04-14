@@ -192,21 +192,21 @@ class ViewContext0(ViewBase):
         else:
             return self._create_view_instance(child_schema, child_data, name)
 
-    def __setattr__(self, name, value):
-        if name.startswith('_'):
-            return object.__setattr__(self, name, value)
-        v = self._get_child(name)
+    def __setattr__(self, leaf, value):
+        if leaf.startswith('_'):
+            return object.__setattr__(self, leaf, value)
+        v = self._get_child(leaf)
         v.check_can_write()
             
         from .memdata_events import event_leaf_set
 
-        event = event_leaf_set(parent=self._prefix,
-                               name=name, 
+        event = event_leaf_set(name=self._prefix,
+                               leaf=leaf, 
                                value=value, 
                                **self._get_event_kwargs())
         self._notify(event)
 
-        self._data[name] = value
+        self._data[leaf] = value
         
     def child(self, name):
         child_schema = self._schema.get_descendant((name,))
@@ -217,8 +217,8 @@ class ViewContext0(ViewBase):
                 self._data[name] = value
                 
                 from .memdata_events import event_leaf_set
-                event = event_leaf_set(parent=self._prefix,
-                                       name=name, value=value,
+                event = event_leaf_set(name=self._prefix,
+                                       leaf=name, value=value,
                                         **self._get_event_kwargs())
                 self._notify(event)
                 
