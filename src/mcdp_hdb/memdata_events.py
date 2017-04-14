@@ -33,19 +33,20 @@ class DataEvents(object):
 
 def event_add_prefix(prefix, event):
     ''' Returns another event with the added prefix. '''
-    def add_prefix_to(prefix, event, which):
-        assert which in event['arguments']
-        check_isinstance(prefix, (list, tuple))
-        e = deepcopy(event)
-        old = e['arguments'][which]
-        check_isinstance(old, (list, tuple))
-        new = tuple(prefix) +  tuple(old)
-        e['arguments'][which] = new
-        return e
+#     def add_prefix_to(prefix, event, which):
+    which = 'name'
+    assert which in event['arguments']
+    check_isinstance(prefix, (list, tuple))
+    e = deepcopy(event)
+    old = e['arguments'][which]
+    check_isinstance(old, (list, tuple))
+    new = tuple(prefix) +  tuple(old)
+    e['arguments'][which] = new
+    return e
 #     if event['operation'] == DataEvents.leaf_set:
 #         return add_prefix_to(prefix, event, 'parent')
 #     else:
-    return add_prefix_to(prefix, event, 'name')
+#     return add_prefix_to(prefix, event, 'name')
     
 @contract(name='seq(str)')
 def get_view_node(view, name):
