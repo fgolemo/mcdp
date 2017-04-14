@@ -122,7 +122,10 @@ class ProxyDirectory(object):
                 s += '\n' + indent(f.contents, ' | ') + '\n'
             else: 
                 if len(f.contents) < MAX:
-                    s += '%r = %r\n' % (k, f.contents)
+                    if '\n' in f.contents:
+                        s += '%r =\n%s\n' % (k, indent(f.contents, '> '))
+                    else:
+                        s += '%r = %r\n' % (k, f.contents)
                 else:
                     s += '%s: %d bytes\n' % (k, len(f.contents))
         for k in sorted(self._directories):

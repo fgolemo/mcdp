@@ -5,15 +5,12 @@ from contextlib import contextmanager
 import datetime
 import random
 
+from contracts import contract
 from contracts.interface import describe_value, describe_type
 from contracts.utils import indent, check_isinstance, raise_desc, raise_wrapped
 
-from mcdp_utils_misc import format_list
 from mcdp_shelf.access import ACL
-from contracts import contract
-from mcdp_utils_misc import get_md5, yaml_dump
-
-
+from mcdp_utils_misc import format_list, get_md5, yaml_dump
 
 
 class NotValid(Exception):
@@ -141,7 +138,15 @@ class SchemaContext(SchemaRecursive):
         ''' Returns the schema for a descendant. '''
         if prefix:
             first = prefix[0]
-            return self.children[first].get_descendant(prefix[1:])
+            if not first in self.children:
+                msg = 'Could not find child %r in %s' % (first, format_list(self.children))
+                raise ValueError(msg)
+            child = self.children[first]
+            try:
+                return child.get_descendant(prefix[1:])
+            except ValueError as e:
+                msg = 'Could not get descendant "%s":' % str(prefix) 
+                raise_wrapped(ValueError, e, msg, compact=True)
         else:
             return self
         

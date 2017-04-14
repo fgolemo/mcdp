@@ -28,9 +28,19 @@ class ViewBase(object):
     
     __metaclass__ = ABCMeta
     
+    
     @abstractmethod
     def child(self, key):
         ''' '''
+    @contract(name='seq(str)')
+    def get_descendant(self, name):
+        check_isinstance(name, (list, tuple))
+        if len(name) == 0:
+            return self
+        elif len(name) >= 1:
+            child = self.child(name[0])
+            return child.get_descendant(name[1:])
+        assert False, name
         
     @contract(view_manager='isinstance(ViewManager)')
     def __init__(self, view_manager, data, schema):
@@ -44,6 +54,16 @@ class ViewBase(object):
         # if not none, it will be called when an event is generated
         self._notify_callback = None
         self._events = None
+        
+    def deepcopy(self):
+        ''' Will create a copy of the view and the data associated to it. '''
+        data = deepcopy(self._data)
+        n = type(self)(view_manager=self._view_manager, data=data, schema=self._schema)
+        n._who = self._who
+        n._principals = self._principals
+        n._notify_callback = self._notify_callback
+        n._events = self._events
+        return n
 
     def __str__(self):
         names = [base.__name__ for base in inspect.getmro(type(self))]
@@ -158,8 +178,8 @@ class ViewContext0(ViewBase):
         return v 
 
     def __getattr__(self, name):
-        if name.startswith('_') or name == 'child':
-            return object.__getattr__(self, name)
+        if name.startswith('_') or name in ['child', 'get_descendant']:
+            return object.__getattribute__(self, name)
         child_schema= self._schema.children[name]
         assert name in self._data
         child_data = self._data[name]

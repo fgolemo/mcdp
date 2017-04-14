@@ -16,6 +16,7 @@ from .memdata_events import event_leaf_set, event_dict_setitem, event_dict_delit
 from .memdata_events import event_list_append, event_list_delete, event_list_insert
 from .memdata_utils import assert_data_events_consistent
 from .schema import SchemaHash, SchemaContext, SchemaList, SchemaBase
+from .memdata_events import  event_add_prefix
 
 
 @contract(returns='tuple(list(dict), list(dict))')
@@ -213,13 +214,20 @@ def data_events_from_file_modify(schema, disk_map, disk_rep, disk_events_queue, 
                 diff = data_diff(prototype, data1, data2)
                 assert_data_events_consistent(prototype, data1, diff, data2) 
                 
-                def add_prefix(e):
-                    e2 = deepcopy(e) 
-                    if 'parent' in e2['arguments']:
-                        e2['arguments']['parent'] = parent+ (key,) + e2['arguments']['parent'] 
-                    return e2
+#                 def add_prefix(e):
+#                     e2 = deepcopy(e) 
+#                     if 'parent' in e2['arguments']:
+#                         prev = e2['arguments']['parent']
+#                         
+#                         logger.info('parent %s key %s prev %s' % (parent, key, prev))
+#                         new = parent + (key,) + prev
+#                         logger.info('add_prefix %s %s' % (prev, new))
+#                         e2['arguments']['parent'] = new 
+#                     return e2
                 
-                diff2 = map(add_prefix, diff) 
+                prefix = parent + (key,)
+                diff2 = [event_add_prefix(prefix, d) for d in diff]
+                logger.info('diff2:\n'+indent(diff2, '> ')) 
                 return diff2, [] 
             else: 
                 # if a file is modified, it means that it was a leaf node

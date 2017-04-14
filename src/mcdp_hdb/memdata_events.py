@@ -17,19 +17,36 @@ class DataEvents(object):
     leaf_set = 'leaf_set' # value_set <parent> <name> <value> 
     struct_set = 'struct_set' # struct_set <name> <struct-value>
     increment = 'increment' # increment <name> <value>
-    list_append = 'list_append' # list_append <list> <value>
-    list_delete = 'list_delete' # list_delete <list> <index> # by index
-    list_insert = 'list_insert' # list_delete <list> <index> <value> 
-    list_remove = 'list_remove' # list_remove <list> <value> # by value
-    list_setitem = 'list_setitem' # list_remove <list> <i> <value>
-    set_add = 'set_add' # set_add <set> <value>
-    set_remove = 'set_remove' # set_remove <set> <value>
-    dict_setitem = 'dict_setitem' # dict_setitem <dict> <key> <value>
-    dict_delitem = 'dict_delitem' # dict_delitem <dict> <key>
-    dict_rename = 'dict_rename' # dict_rename <dict> <key> <key2>
+    list_append = 'list_append' # list_append <name>[a list] <value>
+    list_delete = 'list_delete' # list_delete <name>[a list] <index> # by index
+    list_insert = 'list_insert' # list_delete <name>[seq(str)] <index> <value> 
+    list_remove = 'list_remove' # list_remove <name>[seq(str)] <value> # by value
+    list_setitem = 'list_setitem' # list_remove <name> <i> <value>
+    set_add = 'set_add' # set_add <name> <value>
+    set_remove = 'set_remove' # set_remove <name> <value>
+    dict_setitem = 'dict_setitem' # dict_setitem <name> <key> <value>
+    dict_delitem = 'dict_delitem' # dict_delitem <name> <key>
+    dict_rename = 'dict_rename' # dict_rename <name> <key> <key2>
     all_events = [leaf_set, struct_set, increment, list_append, list_insert, list_setitem,
                   list_delete, dict_setitem, dict_delitem, dict_rename]
 
+
+def event_add_prefix(prefix, event):
+    ''' Returns another event with the added prefix. '''
+    def add_prefix_to(prefix, event, which):
+        assert which in event['arguments']
+        check_isinstance(prefix, (list, tuple))
+        e = deepcopy(event)
+        old = e['arguments'][which]
+        check_isinstance(old, (list, tuple))
+        new = tuple(prefix) +  tuple(old)
+        e['arguments'][which] = new
+        return e
+    if event['operation'] == DataEvents.leaf_set:
+        return add_prefix_to(prefix, event, 'parent')
+    else:
+        return add_prefix_to(prefix, event, 'name')
+    
 @contract(name='seq(str)')
 def get_view_node(view, name):
     v = view
@@ -53,7 +70,8 @@ def event_leaf_set_interpret(view, parent, name, value):
     vc.set(value)
     
 def get_the_list(view, name):
-    v = get_view_node(view, name)
+    # v = get_view_node(view, name)
+    v = view.get_descendant(name)
     from mcdp_hdb.memdataview import ViewList0
     check_isinstance(v, ViewList0)
     return v
