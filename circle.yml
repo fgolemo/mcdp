@@ -56,14 +56,14 @@ test:
             MPLBACKEND: agg
     - "./misc/collect-test-artifacts.sh ${CIRCLE_ARTIFACTS} ${CIRCLE_TEST_REPORTS} ":
         parallel: true
-    - "./misc/upload-to-frankfurt.sh":
-        parallel: true
+    # - "./misc/upload-to-frankfurt.sh":
+    #     parallel: true
 
-  post: # done after all containers have finished
-    - "./misc/collect-test-artifacts.sh ${CIRCLE_ARTIFACTS} ${CIRCLE_TEST_REPORTS} ":
-        parallel: true
-    - "./misc/upload-to-frankfurt.sh ":
-        parallel: true
+  # post: # done after all containers have finished
+  #   - "./misc/collect-test-artifacts.sh ${CIRCLE_ARTIFACTS} ${CIRCLE_TEST_REPORTS} ":
+  #       parallel: true
+  #   - "./misc/upload-to-frankfurt.sh ":
+  #       parallel: true
 
 # general:
 #     artifacts:
