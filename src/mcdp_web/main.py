@@ -265,15 +265,15 @@ class WebApp(AppVisualization, AppStatus,
             user_db_view = DB.view_manager.create_view_instance(user_db_schema, user_db_data)
             user_db_view.set_root() 
             apply_changes_to_disk(dm, user_db_view, self.options.users)
-            user_db_view.users['andrea'].info.name = 'Andrea Censi 2'
+#             user_db_view.users['andrea'].info.name = 'Andrea Censi 2'
             self.user_db = user_db_view
             logger.info('Loaded %s users' % len(self.user_db.users))
             for username, user in self.user_db.users.items():
                 user.info.username = username
-#             desc_short = 'Global database of shared models.'
-#             is_git = os.path.exists(os.path.join(self.options.users, '.git'))
-#             if is_git:
-#                 self.repos[REPO_USERS] = MCDPGitRepo(where=self.options.users, desc_short=desc_short)
+            desc_short = 'Global database of shared models.'
+            is_git = os.path.exists(os.path.join(self.options.users, '.git'))
+            if is_git:
+                self.repos[REPO_USERS] = MCDPGitRepo(where=self.options.users, desc_short=desc_short)
 
         shelf2repo = {}
         for id_repo, repo in self.repos.items():
@@ -859,7 +859,7 @@ class WebApp(AppVisualization, AppStatus,
                     u = e.session.app.user_db[a]
                 else:
                     #logger.debug('Cannot find user %r' % a )
-                    u = e.session.app.user_db.get_unknown_user_struct(a)
+                    u = e.session.app.user_db.get_unknown_user_struct(a).info
                     
                 change['user'] = u
                 p = '{root}/repos/{repo_name}/shelves/{shelf_name}/libraries/{library_name}/{spec_name}/{thing_name}/views/syntax/'

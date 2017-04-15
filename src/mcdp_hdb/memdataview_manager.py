@@ -1,5 +1,5 @@
 from contracts import contract
-from contracts.utils import raise_wrapped
+from contracts.utils import raise_wrapped, raise_desc, indent
 
 from mcdp import MCDPConstants
 
@@ -7,6 +7,8 @@ from .memdataview import ViewContext0, ViewHash0, ViewList0, ViewString, ViewDat
 from .memdataview_utils import host_name
 from .schema import SchemaBase, SchemaContext, SchemaString, SchemaHash, SchemaList,  SchemaDate, SchemaBytes
 from mcdp_hdb.memdataview import ViewBytes
+from mcdp_hdb.schema import NotValid
+from mcdp_utils_misc.my_yaml import yaml_dump
 
 
 __all__ = [
@@ -66,7 +68,14 @@ class ViewManager(object):
 
     @contract(s=SchemaBase)
     def create_view_instance(self, s, data):
-        s.validate(data)
+        try:
+            s.validate(data)
+        except NotValid as e:
+            msg = 'Could not create view instance because the data is not valid '
+            msg += 'according to the schema.'
+            msg += '\n' + indent(s.__str__(), 'schema: ')
+            msg += '\n' + indent(yaml_dump(data), 'data: ')
+            raise_wrapped(NotValid, e, msg, compact=True) 
         if s in self.s2baseclass:
             class Base(self.s2baseclass[s]):
                 pass

@@ -74,12 +74,17 @@ def test_view1a():
         u.email = None
     except:
         raise Exception('Should have been fine')
+    
     assert_equal(u.email, None)
+    
     try:
         u.name = None
+    except NotValid as e:
+        logger.info(e)
+    else:
         raise Exception('Name set to None')
-    except:
-        pass
+    
+    assert u._data['name'] is not None, u._data
     
     users['another'] = {'name': 'Another', 'email': 'another@email.com', 'groups':[]}
     

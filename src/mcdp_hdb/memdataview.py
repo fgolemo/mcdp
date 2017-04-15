@@ -9,11 +9,11 @@ from mcdp import MCDPConstants
 from mcdp import logger
 from mcdp_utils_misc import format_list
 
-from .memdataview_exceptions import InsufficientPrivileges, FieldNotFound,\
-    InvalidOperation, EntryNotFound
+from .memdataview_exceptions import InsufficientPrivileges, FieldNotFound, InvalidOperation, EntryNotFound
 from .memdataview_utils import special_string_interpret
-from .schema import SchemaBase
-from .schema import SchemaSimple
+from .schema import SchemaBase, SchemaSimple
+from mcdp_hdb.schema import NotValid
+from contracts.interface import describe_value
 
 
 __all__ = [
@@ -180,7 +180,7 @@ class ViewContext0(ViewBase):
     def __getattr__(self, name):
         try:
             return object.__getattribute__(self, name)
-        except AttributeError as e:
+        except AttributeError:
 #             logger.debug('Could not get %r: %s\n for %s' % (name, e, self.__str__()))
             pass 
 #         if name.startswith('_') or name in ['child', 'get_descendant']:
@@ -193,7 +193,11 @@ class ViewContext0(ViewBase):
         child_data = self._data[name]
         if is_simple_data(child_schema):
             # check access
-            v = self._create_view_instance(child_schema, child_data, name)
+            try:
+                v = self._create_view_instance(child_schema, child_data, name)
+            except NotValid as e:
+                msg = 'Could not create view instance for __getattr__(%r):' % name
+                raise_wrapped(NotValid, e, msg, compact=True) 
             v.check_can_read()
             # just return the value
             return child_data
@@ -205,6 +209,12 @@ class ViewContext0(ViewBase):
             return object.__setattr__(self, leaf, value)
         v = self._get_child(leaf)
         v.check_can_write()
+        
+        try:
+            v._schema.validate(value)
+        except NotValid as e:
+            msg = 'Cannot set %s = %s:' % (leaf, describe_value(value))
+            raise_wrapped(NotValid, e, msg, compact=True)
             
         from .memdata_events import event_leaf_set
 
@@ -264,8 +274,8 @@ class ViewHash0(ViewBase):
             yield self.child(k)
         
     def __iter__(self):
-        for k in self.keys():
-            yield k, self.child(k)
+        for _ in self._data.__iter__():
+            yield _
         
     def child(self, name):
         if not name in self._data:

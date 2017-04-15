@@ -1,13 +1,12 @@
-import os
+from datetime import datetime
 
 from contracts import contract
-import yaml
 
-from mcdp import MCDPConstants
 from mcdp.logs import logger
+
 from .user import UserInfo
-from mcdp_utils_misc import format_list, locate_files
-from datetime import datetime
+from mcdp_utils_misc.my_yaml import yaml_load
+
 
 
 __all__ = ['UserDB']
@@ -92,6 +91,28 @@ class UserDB(object):
             msg = 'User "%s" already present.'
             raise ValueError(msg)
         self.users[username] = u
+    
+    @contract(returns='isinstance(User)')
+    def get_unknown_user_struct(self, username):
+        unknown = """
+        info:
+          username: %s
+          website: 
+          name: Unknown
+          subscriptions: []
+          account_last_active:
+          affiliation:
+          authentication_ids: []
+          groups: []
+          email: 
+          account_created:
+        images: {}
+        """ % username
+        user_data = yaml_load(unknown)
+        from mcdp_hdb_mcdp.main_db_schema import DB
+        user = DB.view_manager.create_view_instance(DB.user, user_data)
+        user.set_root() 
+        return user
 #         self.save_user(username, new_user=True)
 #     
 #     def save_user(self, username, new_user=False):
@@ -119,48 +140,45 @@ class UserDB(object):
 # #             with open(fn, 'wb') as f:
 # #                 f.write(user.picture)
 #         logger.debug('Saved user information here: %s' % userdir)
-        
-    def get_unknown_user_struct(self, username):
-        s = {}
-        return userinfo_from_yaml(s, username)
-
-def load_users(userdir):
-    ''' Returns a dictionary of username -> User profile '''
-    users = {}
-    
-    exists = os.path.exists(userdir) 
-    if not exists:
-        msg = 'Directory %s does not exist' % userdir
-        raise Exception(msg)
-        
-    assert exists
-        
-    l = locate_files(userdir, 
-                     pattern='*.%s' % MCDPConstants.user_extension, 
-                     followlinks=True,
-                     include_directories=True,
-                     include_files=False)
-    
-    for userd in l:
-        username = os.path.splitext(os.path.basename(userd))[0]
-        info = os.path.join(userd, MCDPConstants.user_desc_file)
-        if not os.path.exists(info):
-            msg = 'Info file %s does not exist.'  % info
-            raise Exception(msg)
-        data = open(info).read()
-        s = yaml.load(data)
-        
-        users[username] = userinfo_from_yaml(s, username)
-        
-        f = os.path.join(userd, MCDPConstants.user_image_file)
-        if os.path.exists(f):
-            users[username].picture = open(f, 'rb').read()
-        
-    if not users:
-        msg = 'Could not load any user from %r' % userdir
-        raise Exception(msg)
-    else:
-        logger.info('loaded users: %s.' % format_list(sorted(users)))
-        
-    return users
+#         
+# 
+# def load_users(userdir):
+#     ''' Returns a dictionary of username -> User profile '''
+#     users = {}
+#     
+#     exists = os.path.exists(userdir) 
+#     if not exists:
+#         msg = 'Directory %s does not exist' % userdir
+#         raise Exception(msg)
+#         
+#     assert exists
+#         
+#     l = locate_files(userdir, 
+#                      pattern='*.%s' % MCDPConstants.user_extension, 
+#                      followlinks=True,
+#                      include_directories=True,
+#                      include_files=False)
+#     
+#     for userd in l:
+#         username = os.path.splitext(os.path.basename(userd))[0]
+#         info = os.path.join(userd, MCDPConstants.user_desc_file)
+#         if not os.path.exists(info):
+#             msg = 'Info file %s does not exist.'  % info
+#             raise Exception(msg)
+#         data = open(info).read()
+#         s = yaml.load(data)
+#         
+#         users[username] = userinfo_from_yaml(s, username)
+#         
+#         f = os.path.join(userd, MCDPConstants.user_image_file)
+#         if os.path.exists(f):
+#             users[username].picture = open(f, 'rb').read()
+#         
+#     if not users:
+#         msg = 'Could not load any user from %r' % userdir
+#         raise Exception(msg)
+#     else:
+#         logger.info('loaded users: %s.' % format_list(sorted(users)))
+#         
+#     return users
         

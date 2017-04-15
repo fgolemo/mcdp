@@ -4,6 +4,7 @@
 {% endblock %}
 {% block content %}
     <p>
-        Repo {{context.name}} not found.
+        Repository <q><code>{{context.orig_key_not_found}}</code></q> not found; 
+        therefore, I cannot render <code>{{context.get_url_relative_to_not_found()}}</code>.
     </p>
 {% endblock %}

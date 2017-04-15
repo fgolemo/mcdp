@@ -359,7 +359,7 @@ class SchemaString(SchemaSimple):
         return s
     
     def validate(self, data):
-        if self.can_be_none and data is None:
+        if self.can_be_none and (data is None):
             return
         
         if not isinstance(data, str):

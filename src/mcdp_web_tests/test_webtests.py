@@ -43,6 +43,8 @@ def create_user_db_repo(where, bname):
         'anonymous.%s' % MCDPConstants.user_extension: {
             MCDPConstants.user_desc_file: '''
             name: Anonymous user
+            authentication_ids: []
+            groups: []
             subscriptions:
             - %s
             ''' % another_name_for_unittests_shelf,
@@ -52,7 +54,7 @@ def create_user_db_repo(where, bname):
     write_hierarchy(where, user_db_skeleton)
     repo_commit_all_changes(repo0)
     # checks that it use well formed
-    UserDB(where)
+    #UserDB(where)
     return repo0
 
 class FunctionalTests(unittest.TestCase):

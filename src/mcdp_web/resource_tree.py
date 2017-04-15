@@ -70,8 +70,29 @@ class Resource(object):
 
 class ResourceEndOfTheLine(Resource):
     ''' Always returns a copy of itself '''
+    def __init__(self, name, orig_key_not_found=None, relative=None):
+        '''
+            name: name of last leaf
+            orig_key_not_found: the first thing that was not found
+            relative: tuple of names relative to orig_key_not_found
+        '''
+        if orig_key_not_found is None:
+            orig_key_not_found = name
+        self.relative = relative or ()
+        self.orig_key_not_found = orig_key_not_found
+        self.name = name
+        
     def getitem(self, key):  # @UnusedVariable
-        return type(self)(key)
+        orig_key_not_found = self.orig_key_not_found
+        relative = self.relative + (self.name,)
+        return type(self)(name=key, relative=relative, orig_key_not_found=orig_key_not_found)
+ 
+    def get_url_relative_to_not_found(self):
+        return "/".join(self.relative[1:])
+    
+    def __repr__(self):
+        url = self.get_url_relative_to_not_found()
+        return '%s(%s, %s)' % (type(self).__name__, self.orig_key_not_found, url)
 
 class ResourceNotFoundGeneric(ResourceEndOfTheLine):
     pass
