@@ -7,7 +7,7 @@ mcdp {
 
     requires total_cost_ownership [$]
 
-    strategy = new Strategy
+    strategy = instance `Strategy
 
     actuation_energetics = instance specialize [Battery: Battery, Actuation: Actuation] `ActuationEnergeticsTemplate
 

@@ -9,8 +9,8 @@ from contracts.utils import check_isinstance, indent, raise_wrapped
 from mcdp.logs import logger
 from mcdp_utils_misc import yaml_dump
 
-from .disk_struct import ProxyDirectory, ProxyFile
 from .disk_errors import InvalidDiskOperation
+from .disk_struct import ProxyDirectory, ProxyFile
 
 
 class DiskEvents(object):
@@ -175,12 +175,40 @@ def disk_event_interpret(disk_rep, disk_event):
         from mcdp_hdb.memdataview import InvalidOperation
         raise_wrapped(InvalidOperation, e, msg)
 
-def apply_disk_event_to_filesystem(wd, disk_event): 
+class Changes():
+    def __init__(self, removed, added, modified, renamed):
+        pass
+        
+def apply_disk_event_to_filesystem(wd, disk_event, repo=None):
+    '''
+        Applies the disk events to the filesystem and to the repository index,
+        if repo_index is not None
+    '''  
+    if repo:
+        repo_index = repo.index
+    else:
+        repo_index = None
+        
+    def path_relative_to_repo(fn):
+        repo_dir = repo.working_dir
+        x = os.path.relpath(fn, repo_dir)
+        logger.debug('%s %s - > %s ' % (repo_dir, fn, x))
+        return x
     
+    def descendants_tracked(dirname):
+        ''' Yields absolute, relative (to dirname) '''
+        def tracked(absolute_fn):
+            return True # XXX
+        for root, _, files in os.walk(dirname, followlinks=False):
+            for f in files:
+                absolute = os.path.join(root, f)
+                if tracked(absolute):
+                    yield absolute, f
+        
     def as_path(dirname, sub):
         path = os.path.join(wd, '/'.join(dirname))
         res = os.path.join(path, sub)
-        return res
+        return res 
     
     def dir_create(dirname, name):
         p = as_path(dirname, name)
@@ -190,33 +218,55 @@ def apply_disk_event_to_filesystem(wd, disk_event):
         p1 = as_path(dirname, name)
         p2 = as_path(dirname, name2)
         os.rename(p1, p2)
+        if repo_index:
+            for _, rel in descendants_tracked(p1):
+                fn1 = path_relative_to_repo(os.path.join(p1, rel))
+                fn2 = path_relative_to_repo(os.path.join(p2, rel))
+                repo_index.rename(fn1, fn2)
         
     def file_rename(dirname, name, name2):
         p1 = as_path(dirname, name)
         p2 = as_path(dirname, name2)
         os.rename(p1, p2)
+        if repo_index:
+            fn1 = path_relative_to_repo(p1)
+            fn2 = path_relative_to_repo(p2)
+            repo_index.rename(fn1, fn2)
         
     def dir_delete(dirname, name):
         p = as_path(dirname, name)
         shutil.rmtree(p) 
+        if repo_index:
+            for absolute, _rel in descendants_tracked(p):
+                fn = path_relative_to_repo(absolute)
+                repo_index.remove([fn])
         
     def file_create(dirname, name, contents):
         p = as_path(dirname, name)
         with open(p, 'wb') as f:
             f.write(contents)
+        if repo_index:
+            fn  = path_relative_to_repo(p)
+            repo_index.add([fn])
     
     def file_modify(dirname, name, contents):
         p = as_path(dirname, name)
         with open(p, 'wb') as f:
             f.write(contents)
+        if repo_index:
+            fn  = path_relative_to_repo(p)
+            repo_index.add([fn])
     
     def file_delete(dirname, name):
         p = as_path(dirname, name)
         os.unlink(p)
+        if repo_index:
+            fn = path_relative_to_repo(p)
+            repo_index.delete([fn])
         
     def disk_event_group(events):
         for e in events:
-            apply_disk_event_to_filesystem(wd, e)
+            apply_disk_event_to_filesystem(wd, e, repo=repo)
 
     fs = {
         DiskEvents.disk_event_group: disk_event_group,
@@ -234,7 +284,7 @@ def apply_disk_event_to_filesystem(wd, disk_event):
     intf = fs[ename]
     arguments = disk_event['arguments']
     try:
-        logger.info('Arguments: %s' % arguments)
+#         logger.info('Arguments: %s' % arguments)
         intf(**arguments)
     except Exception as e:
         msg = 'Could not apply this event to filesystem: \n'

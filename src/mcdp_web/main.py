@@ -25,10 +25,12 @@ from mcdp import MCDPConstants
 from mcdp import logger
 from mcdp.exceptions import DPSemanticError, DPSyntaxError
 from mcdp_docs import render_complete
+from mcdp_hdb.disk_struct import ProxyDirectory
+
 from mcdp_library import MCDPLibrary
 from mcdp_repo import MCDPGitRepo, MCDPythonRepo
-from mcdp_user_db import UserDB
 from mcdp_utils_misc import create_tmpdir, duration_compact, dir_from_package_name, format_list
+from mcdp_utils_misc import yaml_dump
 
 from .auhtomatic_auth import get_authomatic_config_, view_authomatic_
 from .auhtomatic_auth import view_confirm_bind_,\
@@ -49,6 +51,7 @@ from .resource_tree import ResourceAuthomaticProvider, ResourceListUsers,\
 from .resource_tree import ResourceConfirmBind,\
     ResourceConfirmCreationSimilar, ResourceConfirmCreation,\
     ResourceConfirmCreationCreate, ResourceConfirmBindBind
+from .resource_tree import ResourceUserImpersonate
 from .security import AppLogin, groupfinder
 from .sessions import Session
 from .solver.app_solver import AppSolver
@@ -59,7 +62,9 @@ from .utils.response import response_data
 from .utils0 import add_other_fields, add_std_vars_context
 from .utils0 import add_std_vars_context_no_redir
 from .visualization.app_visualization import AppVisualization
-from mcdp_web.resource_tree import ResourceUserImpersonate
+from git.repo.base import Repo
+from git.util import Actor
+from mcdp_hdb.memdataview_utils import host_name
 
 
 Privileges = MCDPConstants.Privileges
@@ -74,6 +79,57 @@ __all__ = [
 
 
 git.cmd.log.disabled = True
+
+def get_git_repo(d, original_query=None):
+    ''' Get the root directory for a repository given 
+        one directory inside. '''
+    if original_query is None:
+        original_query = d
+    if not d:
+        msg = 'Could not find repo for %s' % original_query
+        raise ValueError(msg)
+    g = os.path.join(d, '.git')
+    if os.path.exists(g):
+        return d
+    else:
+        return get_git_repo(os.path.dirname(d), original_query)
+    
+def apply_changes_to_disk(disk_map, user_db_view, wd):
+    where = get_git_repo(wd)
+    repo = Repo.init(where)
+#     hierarchy = ProxyDirectory.from_disk(wd)
+    events = []
+    def notify_callback(data_event):
+        from mcdp_hdb.disk_map_disk_events_from_data_events import disk_events_from_data_event
+        from mcdp_hdb.disk_events import apply_disk_event_to_filesystem
+        s = yaml_dump(data_event)
+        logger.debug('Event #%d:\n%s' % (len(events), indent(s, '> ')) )
+        events.append(data_event)
+        disk_events = disk_events_from_data_event(disk_map=disk_map, 
+                                                 schema=user_db_view._schema, 
+                                                 data_rep=user_db_view._data, 
+                                                 data_event=data_event)
+        
+        for disk_event in disk_events:
+            logger.debug('Disk event:\n%s' % yaml_dump(disk_event))
+            apply_disk_event_to_filesystem(wd, disk_event, repo=repo)
+            
+        message = yaml_dump(data_event)
+        who = data_event['who']
+        if who is not None:
+            actor = who['actor']
+            system = who['host']['hostname']
+        else:
+            actor = 'system'
+            system = host_name()
+        author = Actor(actor, None)
+        committer = Actor(system, None)
+#         logger.debug('2) all added')
+#         system_cmd_show(wd, ['git', 'status'])
+        commit = repo.index.commit(message, author=author, committer=committer)
+#         commits.append(commit)
+            
+    user_db_view._notify_callback = notify_callback
 
 
 class WebApp(AppVisualization, AppStatus,
@@ -192,15 +248,32 @@ class WebApp(AppVisualization, AppStatus,
             self.repos[REPO_BUNDLED]  = b
         else:
             logger.info('Not loading mcdp_data')
-            
+        from mcdp_hdb_mcdp.main_db_schema import DB
         if self.options.users is not None:
             logger.info('Loading user db from %s' % self.options.users)
-            self.user_db = UserDB(self.options.users)
+            dm = DB.dm
+            hierarchy = ProxyDirectory.from_disk(self.options.users)
+            logger.info('These are the files found:\n%s' % indent(hierarchy.tree(), '  '))
+            user_db_schema = DB.user_db
+            user_db_data = dm.interpret_hierarchy_(user_db_schema, hierarchy)
+            
+            logger.debug('user_db schema: \n' + str(user_db_schema) )
+            logger.debug('user_db:\n' + indent(yaml_dump(user_db_data), ' > '))
+            
+            DB.user_db.validate(user_db_data)
+            
+            user_db_view = DB.view_manager.create_view_instance(user_db_schema, user_db_data)
+            user_db_view.set_root() 
+            apply_changes_to_disk(dm, user_db_view, self.options.users)
+            user_db_view.users['andrea'].info.name = 'Andrea Censi 2'
+            self.user_db = user_db_view
             logger.info('Loaded %s users' % len(self.user_db.users))
-            desc_short = 'Global database of shared models.'
-            is_git = os.path.exists(os.path.join(self.options.users, '.git'))
-            if is_git:
-                self.repos[REPO_USERS] = MCDPGitRepo(where=self.options.users, desc_short=desc_short)
+            for username, user in self.user_db.users.items():
+                user.info.username = username
+#             desc_short = 'Global database of shared models.'
+#             is_git = os.path.exists(os.path.join(self.options.users, '.git'))
+#             if is_git:
+#                 self.repos[REPO_USERS] = MCDPGitRepo(where=self.options.users, desc_short=desc_short)
 
         shelf2repo = {}
         for id_repo, repo in self.repos.items():
@@ -741,14 +814,14 @@ class WebApp(AppVisualization, AppStatus,
         _size = e.context.size # Not used so far
         data_format = e.context.data_format
         assert data_format == 'jpg'
-        u = self.user_db[username]
-        if u.picture is None:
+        u = self.user_db.users[username]
+        picture_data = u.get_picture_jpg()
+        if picture_data is None:
             url = e.root + '/static/nopicture.jpg'
             raise HTTPFound(url)
         else: 
             mime = get_mime_for_format(data_format)
-            data = u.picture
-#             if size == 'large':
+            data = picture_data 
             return response_data(request=e.request, data=data, content_type=mime)
         
     @cr2e

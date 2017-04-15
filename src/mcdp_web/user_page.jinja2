@@ -102,7 +102,7 @@
         </td>
         <td>
             {% if u.affiliation %}
-                {{u.affiliation}}
+                {{u.get_affiliation_u()}}
             {% else %}
                 <span class='missing'>No affiliation.</span>
             {% endif %}

@@ -178,8 +178,16 @@ class ViewContext0(ViewBase):
         return v 
 
     def __getattr__(self, name):
-        if name.startswith('_') or name in ['child', 'get_descendant']:
+        try:
             return object.__getattribute__(self, name)
+        except AttributeError as e:
+#             logger.debug('Could not get %r: %s\n for %s' % (name, e, self.__str__()))
+            pass 
+#         if name.startswith('_') or name in ['child', 'get_descendant']:
+#             return object.__getattribute__(self, name)
+        if not name in self._schema.children:
+            msg = 'Cannot get attribute %r: available %s' % (name, format_list(self._schema.children))
+            raise_desc(ValueError, msg, self=str(self))
         child_schema= self._schema.children[name]
         assert name in self._data
         child_data = self._data[name]
@@ -200,13 +208,16 @@ class ViewContext0(ViewBase):
             
         from .memdata_events import event_leaf_set
 
-        event = event_leaf_set(name=self._prefix,
-                               leaf=leaf, 
-                               value=value, 
-                               **self._get_event_kwargs())
-        self._notify(event)
-
-        self._data[leaf] = value
+        if self._data[leaf] == value:
+            pass
+        else:
+            event = event_leaf_set(name=self._prefix,
+                                   leaf=leaf, 
+                                   value=value, 
+                                   **self._get_event_kwargs())
+            self._notify(event)
+    
+            self._data[leaf] = value
         
     def child(self, name):
         child_schema = self._schema.get_descendant((name,))
@@ -214,14 +225,18 @@ class ViewContext0(ViewBase):
         v = self._create_view_instance(child_schema, child_data, name)        
         if is_simple_data(child_schema):
             def set_callback(value):
-                self._data[name] = value
-                
-                from .memdata_events import event_leaf_set
-                event = event_leaf_set(name=self._prefix,
-                                       leaf=name, value=value,
-                                        **self._get_event_kwargs())
-                self._notify(event)
-                
+                if self._data[name] == value:
+#                     logger.debug('ignoring setting %r to %r' % (name, value))
+                    return
+                else:
+                    self._data[name] = value
+                    
+                    from .memdata_events import event_leaf_set
+                    event = event_leaf_set(name=self._prefix,
+                                           leaf=name, value=value,
+                                            **self._get_event_kwargs())
+                    self._notify(event)
+                    
             v._set_callback = set_callback
         return v
     
@@ -234,6 +249,13 @@ class ViewHash0(ViewBase):
     def __contains__(self, key):
         return key in self._data
     
+    def __len__(self):
+        return len(self._data)
+    
+    def items(self):
+        for k in self.keys():
+            yield k, self.child(k)
+            
     def keys(self):
         return self._data.keys()
     
@@ -272,19 +294,24 @@ class ViewHash0(ViewBase):
 
     def __setitem__(self, key, value):
         from .memdata_events import event_dict_setitem
-        
+        if isinstance(value, ViewBase):
+            value = value._data
         self.check_can_write()
         prototype = self._schema.prototype
         prototype.validate(value) 
         
-        event = event_dict_setitem(name=self._prefix,
-                                   key=key, 
-                                   value=value, 
-                                   **self._get_event_kwargs())
-        self._notify(event)
-
-
-        self._data[key] = value
+        if key in self._data and self._data[key] == value:
+            pass
+        else:
+            
+            event = event_dict_setitem(name=self._prefix,
+                                       key=key, 
+                                       value=value, 
+                                       **self._get_event_kwargs())
+            self._notify(event)
+    
+    
+            self._data[key] = value
         
     def __delitem__(self, key):
         from .memdata_events import event_dict_delitem
@@ -328,6 +355,30 @@ class ViewString(ViewBase):
         
     def get(self):
         return self._data
+
+class ViewBytes(ViewBase):
+    def child(self, i):  # @UnusedVariable
+        msg = 'Cannot get child of view for basic types.'
+        raise_desc(InvalidOperation, msg)
+    
+    def set(self, value):
+        self._schema.validate(value)
+        self._set_callback(value)
+        
+    def get(self):
+        return self._data
+    
+class ViewDate(ViewBase):
+    def child(self, i):  # @UnusedVariable
+        msg = 'Cannot get child of view for basic types.'
+        raise_desc(InvalidOperation, msg)
+    
+    def set(self, value):
+        self._schema.validate(value)
+        self._set_callback(value)
+        
+    def get(self):
+        return self._data
         
 class ViewList0(ViewBase): 
         
@@ -336,9 +387,12 @@ class ViewList0(ViewBase):
     
     def __iter__(self):
         if is_simple_data(self._schema.prototype):
-            return self._data.__iter__()
+            for _ in self._data.__iter__():
+                yield _
         else:
-            raise NotImplementedError()
+            for i in range(len(self._data)):
+                yield self.child(i)
+            
     
     def __contains__(self, key):
         return key in self._data

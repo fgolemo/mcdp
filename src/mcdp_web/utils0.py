@@ -36,21 +36,13 @@ def add_other_fields(self, res, request, context):
     res['time_start'] = self.time_start
     res['authenticated_userid'] = request.authenticated_userid
 
-    session = self.get_session(request)
-# 
-#     if not request.authenticated_userid in self.user_db:
-#         msg = 'The user is authenticated as "%s" but no such user in DB.' % request.authenticated_userid
-#         logger.error(msg)
-#         user = self.user_db[None] # anonymous
-#     else:
-#         user = self.user_db[request.authenticated_userid]
-
+    session = self.get_session(request) 
+    
     if e.username is not None:
         res['user'] = e.user
     else:
-        res['user'] = None
-#     res['username'] = e.username
-
+        res['user'] = None 
+        
     res['user_db'] = e.app.user_db
     
     def shelf_privilege(repo_name, sname, privilege):
@@ -156,10 +148,8 @@ def add_other_fields(self, res, request, context):
 def add_std_vars_context(f):
     return add_std_vars_context_(f, redir=True)
 
-
 def add_std_vars_context_no_redir(f):
     return add_std_vars_context_(f, redir=False)
-
 
 def add_std_vars_context_(f, redir):
     from .resource_tree import context_display_in_detail, Resource

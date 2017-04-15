@@ -1,13 +1,12 @@
 from contracts import contract
+from contracts.utils import raise_wrapped
 
 from mcdp import MCDPConstants
 
-from .memdataview import ViewContext0, ViewHash0, ViewList0, ViewString
+from .memdataview import ViewContext0, ViewHash0, ViewList0, ViewString, ViewDate
 from .memdataview_utils import host_name
-from .schema import SchemaBase, SchemaContext, SchemaString,\
-    SchemaHash, SchemaList
-from contracts.utils import raise_wrapped
-from contracts.interface import describe_type
+from .schema import SchemaBase, SchemaContext, SchemaString, SchemaHash, SchemaList,  SchemaDate, SchemaBytes
+from mcdp_hdb.memdataview import ViewBytes
 
 
 __all__ = [
@@ -95,5 +94,11 @@ class ViewManager(object):
     
         if isinstance(s, SchemaString):
             return ViewString(view_manager=self, data=data, schema=s)
+
+        if isinstance(s, SchemaBytes):
+            return ViewBytes(view_manager=self, data=data, schema=s)
+        
+        if isinstance(s, SchemaDate):
+            return ViewDate(view_manager=self, data=data, schema=s)
         
         raise NotImplementedError(type(s))

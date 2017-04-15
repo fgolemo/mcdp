@@ -1,12 +1,14 @@
 import os
 
+from contracts import contract
 import yaml
 
 from mcdp import MCDPConstants
 from mcdp.logs import logger
-from mcdp_user_db.user import userinfo_from_yaml, yaml_from_userinfo, UserInfo
+from .user import UserInfo
 from mcdp_utils_misc import format_list, locate_files
-from contracts import contract 
+from datetime import datetime
+
 
 __all__ = ['UserDB']
 
@@ -29,7 +31,7 @@ class UserDB(object):
     def match_by_id(self, provider, provider_id):
         for u in self.users.values():
             for w in u.info.authentication_ids:
-                if w['provider'] == provider and w.get('id', None) == provider_id:
+                if w.provider == provider and w.id == provider_id:
                     return u
         return None
         
@@ -46,7 +48,7 @@ class UserDB(object):
                 return u
             
         return None
-    
+     
     @contract(returns=UserInfo)
     def __getitem__(self, key):
         if key is None:
@@ -61,13 +63,16 @@ class UserDB(object):
     def authenticate(self, login, password):
         user_info = self.users[login].info
         for p in user_info.authentication_ids:
-            if p['provider'] == 'password':
-                pwd = p['password']
+            if p.provider == 'password':
+                pwd = p.password
                 match = password == pwd
                 if not match:
                     msg = 'Password %s does not match with stored %s.' % (password, pwd)
                     logger.warn(msg)
+                    
+                    user_info.account_last_active = datetime.now()
                 return match
+        
         return False
     
     @contract(returns=str)
@@ -82,38 +87,38 @@ class UserDB(object):
                     return y
         raise ValueError(candidate_usernames)
     
-    def create_new_user(self, u):
-        if u.username in self.users:
+    def create_new_user(self, username, u):
+        if username in self.users:
             msg = 'User "%s" already present.'
             raise ValueError(msg)
-        self.users[u.username] = u
-        self.save_user(u.username, new_user=True)
-    
-    def save_user(self, username, new_user=False):
-        userdir = os.path.join(self.userdir, username + '.' + MCDPConstants.user_extension)
-        if not os.path.exists(userdir):
-            if new_user:
-                os.makedirs(userdir)
-            else:
-                msg = 'Could not find user dir %r.' % userdir
-                raise ValueError(msg)
-
-        filename = os.path.join(userdir,  MCDPConstants.user_desc_file)
-        if not os.path.exists(filename) and not new_user:
-            msg = 'Could not find user filename %r.' % filename
-            raise ValueError(msg)
-        user = self.users[username]
-        y = yaml_from_userinfo(user)
-        s = yaml.dump(y)
-        logger.info('Saving %r:\n%s' % (username, s))
-        with open(filename, 'w') as f:
-            f.write(s)
-            
-        if user.picture is not None:            
-            fn = os.path.join(userdir, MCDPConstants.user_image_file)
-            with open(fn, 'wb') as f:
-                f.write(user.picture)
-        logger.debug('Saved user information here: %s' % userdir)
+        self.users[username] = u
+#         self.save_user(username, new_user=True)
+#     
+#     def save_user(self, username, new_user=False):
+#         userdir = os.path.join(self.userdir, username + '.' + MCDPConstants.user_extension)
+#         if not os.path.exists(userdir):
+#             if new_user:
+#                 os.makedirs(userdir)
+#             else:
+#                 msg = 'Could not find user dir %r.' % userdir
+#                 raise ValueError(msg)
+# 
+#         filename = os.path.join(userdir,  MCDPConstants.user_desc_file)
+#         if not os.path.exists(filename) and not new_user:
+#             msg = 'Could not find user filename %r.' % filename
+#             raise ValueError(msg)
+#         user = self.users[username]
+#         y = yaml_from_userinfo(user)
+#         s = yaml.dump(y)
+#         logger.info('Saving %r:\n%s' % (username, s))
+#         with open(filename, 'w') as f:
+#             f.write(s)
+#             
+# #         if user.picture is not None:            
+# #             fn = os.path.join(userdir, MCDPConstants.user_image_file)
+# #             with open(fn, 'wb') as f:
+# #                 f.write(user.picture)
+#         logger.debug('Saved user information here: %s' % userdir)
         
     def get_unknown_user_struct(self, username):
         s = {}

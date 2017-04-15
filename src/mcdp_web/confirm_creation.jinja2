@@ -13,21 +13,21 @@
     <tr>
         <td>Account</td>
         <td>
-              <code>{{candidate_user.username}}</code>
+              <code>{{candidate_user.info.username}}</code>
         </td>
     </tr>
 
     <tr>
         <td>Name</td>
         <td>
-               {{user_name_and_picture_userinfo(candidate_user, link=False)}}
+               {{user_name_and_picture_userinfo(candidate_user.info, link=False)}}
         </td>
     </tr>
 
     <tr>
         <td> Contact e-mail </td>
         <td>
-               <code>{{candidate_user.email}}</code>
+               <code>{{candidate_user.info.email}}</code>
         </td>
     </tr>
 </table>

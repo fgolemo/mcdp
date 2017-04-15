@@ -13,6 +13,10 @@ from system_cmd import system_cmd_result
 from mcdp import logger
 from mcdp_user_db import UserInfo
 from mcdp_utils_misc import memoize_simple
+from mcdp_utils_misc.my_yaml import yaml_dump
+from mcdp_hdb_mcdp.main_db_schema import DB
+from mcdp_user_db.user import User
+from contracts.utils import check_isinstance
 
 
 @memoize_simple
@@ -152,9 +156,10 @@ def handle_auth_success(self, e, provider_name, result, next_location):
     
     # Get tue candidate user 
     u = get_candidate_user(self.user_db, result, provider_name)
+    check_isinstance(u, User)
     # we should already have an id
-    assert  u.authentication_ids[0]['provider'] == provider_name
-    unique_id = u.authentication_ids[0]['id'] 
+    assert  u.info.authentication_ids[0].provider == provider_name
+    unique_id = u.info.authentication_ids[0].id 
     
     best = self.user_db.match_by_id(provider_name, unique_id)
     
@@ -189,7 +194,7 @@ def handle_auth_success(self, e, provider_name, result, next_location):
             # not logged in, and the user does not exist already
             
             # check if there are other accounts with same email or same name
-            soft_match = self.user_db.best_match(None, u.name, u.email)
+            soft_match = self.user_db.best_match(None, u.info.name, u.info.email)
             
             if soft_match is not None:
                 # we should present a page in which we confirm whether this is correct
@@ -268,8 +273,8 @@ def view_confirm_creation_create_(self, e):
         msg = "Page has expired."
         return self.show_error(e, msg)
     e.session.candidate_user = u
-    self.user_db.create_new_user(u)
-    success_auth(self, e.request, u.username, next_location)
+    self.user_db.create_new_user(u.info.username, u)
+    success_auth(self, e.request, u.info.username, next_location)
     return {}
 
 def get_candidate_user(user_db, result, provider_name):
@@ -336,7 +341,7 @@ def get_candidate_user(user_db, result, provider_name):
     res['account_last_active'] = datetime.datetime.now()
     res['account_created'] = datetime.datetime.now()
     res['authentication_ids'] = [ {'provider': provider_name,
-                                   'id': unique_id}]
+                                   'id': unique_id, 'password': None}]
     logger.info('Reading picture %s' % picture)
     if picture is None:
         res['picture'] = None
@@ -353,18 +358,23 @@ def get_candidate_user(user_db, result, provider_name):
             with open(local_filename, 'rb') as f:
                 jpg = f.read()
             logger.info('read %s bytes' % len(jpg)) 
-            res['picture'] = jpg
         except BaseException as exc:
             logger.error(exc)
-            res['picture'] = None
+            jpg = None
     for k in res:
         if isinstance(res[k], unicode):
             res[k] = res[k].encode('utf8')
     res['subscriptions'] = []
     res['groups'] = ['account_created_automatically',
                      'account_created_using_%s' % provider_name]
-    u = UserInfo(**res) 
-    return u
+    data = {'info': res,
+            'images':{'user':{'jpg':jpg, 'png':None, 'svg': None, 'pdf': None}}} 
+    
+#     logger.debug('new user:\n%s' % yaml_dump(data))
+    
+    user = DB.view_manager.create_view_instance(DB.user, data)
+    user.set_root()
+    return user
 
 def success_auth(self, request, username, next_location):
     if not username in self.user_db:

@@ -21,21 +21,21 @@ def check_translation_diskrep_to_gitrep(disk_rep0, disk_events, disk_rep1, out):
     commits = []
     for disk_event in disk_events:
         logger.debug(indent(yaml_dump(disk_event), 'disk_event | '))
-        apply_disk_event_to_filesystem(wd, disk_event)
+        apply_disk_event_to_filesystem(wd, disk_event, repo=repo)
         
         if repo.untracked_files:
             logger.debug('adding untracked file %r' % repo.untracked_files) 
             repo.index.add(repo.untracked_files)
         
-        diff_index = repo.index.diff(None) 
-        for d in diff_index.iter_change_type('A'):
-            repo.index.add([d.b_path])
-        for d in diff_index.iter_change_type('M'):
-            repo.index.add([d.b_path])
-        for d in diff_index.iter_change_type('D'):
-            repo.index.remove([d.b_path])
-        for d in diff_index.iter_change_type('R'): # rename
-            repo.index.rename(d.a_path, d.b_path)
+#         diff_index = repo.index.diff(None) 
+#         for d in diff_index.iter_change_type('A'):
+#             repo.index.add([d.b_path])
+#         for d in diff_index.iter_change_type('M'):
+#             repo.index.add([d.b_path])
+#         for d in diff_index.iter_change_type('D'):
+#             repo.index.remove([d.b_path])
+#         for d in diff_index.iter_change_type('R'): # rename
+#             repo.index.rename(d.a_path, d.b_path)
             
         message = yaml_dump(disk_event)
         actor = disk_event['who']['actor']

@@ -4,7 +4,7 @@ from mcdp_hdb  import Schema, SchemaString, SchemaList,\
     SchemaHash,  DiskMap
 from mcdp_hdb.memdataview_manager import ViewManager
 from mcdp_library.specs_def import specs
-from mcdp_user_db.user import UserInfo
+from mcdp_user_db.user import UserInfo, User
 from mcdp_user_db.userdb import UserDB
 
 
@@ -42,6 +42,7 @@ class DB():
     user = Schema() 
     with user.context_e('info') as user_info:
         user_info.string('name')
+        user_info.string('username', can_be_none=True)
         user_info.date('account_created', can_be_none=True)
         user_info.date('account_last_active',  can_be_none=True)
         user_info.string('website',  can_be_none=True)
@@ -53,6 +54,7 @@ class DB():
             auth_id.string('id', can_be_none=True)
             auth_id.string('password',  can_be_none=True)
         user_info.list('groups', SchemaString())
+    user.hash('images', image)
     users = SchemaHash(user)
     
     user_db = Schema()
@@ -65,12 +67,13 @@ class DB():
     dm.hint_file_yaml(shelf['info'])
     dm.hint_directory(shelf['libraries'], pattern='%.mcdplib')
     dm.hint_directory(users, pattern='%.mcdp_user') 
-    dm.hint_directory(user, translations={'info':'user.yaml'})
+    dm.hint_directory(user, translations={'info':'user.yaml', 'images':None})
     dm.hint_file_yaml(user['info'])
     dm.hint_directory(user_db,translations={'users':None})
                       
     dm.hint_directory(library, translations={'images': None, 'documents': None, 'things': None})
     dm.hint_extensions(library['images'], image_extensions)
+    dm.hint_extensions(user['images'], image_extensions)
     dm.hint_directory(library['documents'], pattern='%.md')
     spec_translations = dict((k,None) for k in list(specs))
     dm.hint_directory(things, translations=spec_translations)
@@ -79,6 +82,7 @@ class DB():
         dm.hint_directory(things[spec_name], pattern='%.' + spec.extension)
 
     view_manager = ViewManager(db)
+    view_manager.set_view_class(user, User)
     view_manager.set_view_class(user_info, UserInfo)
     view_manager.set_view_class(user_db, UserDB)
     
