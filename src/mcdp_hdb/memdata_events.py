@@ -5,11 +5,11 @@ from contracts import contract
 from contracts.utils import check_isinstance, indent, raise_wrapped
 
 from mcdp.logs import logger
-from mcdp_utils_misc import format_list
-from mcdp_utils_misc import yaml_dump
+from mcdp_utils_misc import format_list, yaml_dump
 
 from .memdataview import ViewBase
 from .memdataview_exceptions import InvalidOperation
+from mcdp import MCDPConstants
 
 
 class DataEvents(object):
@@ -210,8 +210,7 @@ def event_dict_rename_interpret(view, name, key, key2):
     v = get_view_node(view, name)
     check_isinstance(v, ViewHash0)
     # permissions
-    v.check_can_write()
-    from mcdp_hdb.memdataview import InvalidOperation
+    v.check_can_write() 
     if not key in v._data:
         msg = ('Cannot rename key %r to %r if it does not exist in %s.' % 
                (key, key2, format_list(v._data)))
@@ -230,8 +229,10 @@ def event_make(_id, event_name, who, arguments):
 
 def event_intepret(view_manager, db0, event):
     if event['who'] is not None:
-        actor = event['who']['actor']
-        principals = event['who']['principals']
+        who = event['who']
+        actor = who['actor']
+#         principals = event['who']['principals']
+        principals = [MCDPConstants.ROOT]
         view = view_manager.view(db0, actor=actor, principals=principals)
     else:
         view = view_manager.view(db0)

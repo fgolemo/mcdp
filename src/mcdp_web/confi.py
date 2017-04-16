@@ -13,6 +13,12 @@ def describe_mcdpweb_params(dp):
     dp.add_string('libraries', short='-d',default=None, 
                   help='Library directories containing models.') 
                   
+    dp.add_string('inst_name', default='local')
+    default = """
+{}
+    """
+    dp.add_string('repos_yaml', default=default)
+    
     dp.add_bool('libraries_writable', default=True)
     dp.add_string('users', help='Directories for user data.', default=None)
     
@@ -20,7 +26,7 @@ def describe_mcdpweb_params(dp):
     
     dp.add_string('url_base_internal', default=None)
     dp.add_string('url_base_public', default=None)
-    for p in ['facebook','google','linkedin', 'github', 'amazon']:
+    for p in ['facebook', 'google', 'linkedin', 'github', 'amazon']:
         dp.add_string('%s_consumer_key' % p, default=None)
         dp.add_string('%s_consumer_secret' % p, default=None)
     return dp

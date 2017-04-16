@@ -446,7 +446,7 @@ def read_SchemaContext_SER_FILE_YAML(self, schema, f):
     # now we need to iterate and fill the missing keys
     res = fill_in_none(schema, data)
     schema.validate(res)
-    logger.info('OK validation for \n %s' % yaml_dump(res))
+#     logger.info('OK validation for \n %s' % yaml_dump(res))
     return res 
 
 def read_SchemaContext_SER_DIR(self, schema, fh):

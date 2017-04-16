@@ -3,7 +3,7 @@ out=out/comptests
 
 package=mcdp_tests
 
-libraries=src/mcdp_data/libraries
+libraries=src/mcdp_data/bundled.mcdp_repo/shelves
 
 prepare_tests:
 	mkdir -p $(out)

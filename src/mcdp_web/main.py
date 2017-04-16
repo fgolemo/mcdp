@@ -26,7 +26,7 @@ from mcdp import logger
 from mcdp.exceptions import DPSemanticError, DPSyntaxError
 from mcdp_docs import render_complete
 from mcdp_hdb.disk_struct import ProxyDirectory
-
+from mcdp_hdb.pipes import apply_changes_to_disk_and_repo
 from mcdp_library import MCDPLibrary
 from mcdp_repo import MCDPGitRepo, MCDPythonRepo
 from mcdp_utils_misc import create_tmpdir, duration_compact, dir_from_package_name, format_list
@@ -62,7 +62,8 @@ from .utils.response import response_data
 from .utils0 import add_other_fields, add_std_vars_context
 from .utils0 import add_std_vars_context_no_redir
 from .visualization.app_visualization import AppVisualization
-from mcdp_hdb.pipes import apply_changes_to_disk_and_repo
+from mcdp_utils_misc.my_yaml import yaml_load
+from mcdp_hdb_mcdp.host_instance import HostInstance
 
 
 Privileges = MCDPConstants.Privileges
@@ -91,6 +92,7 @@ class WebApp(AppVisualization, AppStatus,
         from mcdp_library_tests.create_mockups import write_hierarchy
         self.options = options
         self.settings = settings
+        
         
         # display options
         for k in sorted(self.options._values):
@@ -143,6 +145,17 @@ class WebApp(AppVisualization, AppStatus,
         # str -> Shelf
         self.all_shelves = OrderedDict()
         
+        config_repos = yaml_load(self.options.repos_yaml)
+        logger.info('Config:\n'+ indent(self.options.repos_yaml, '>'))
+        logger.info(config_repos)
+        inst_name = self.options.inst_name
+        root= 'out/root'
+        self.hi = HostInstance(inst_name=inst_name, 
+                               upstream='master', 
+                               root=root, 
+                               repo_git=config_repos['remote'], 
+                               repo_local=config_repos['local'])
+        
         if self.options.users is None:
             logger.info('No user directory passed (%s). Creating user dir.' % self.options.users)
             self.options.users = create_tmpdir('tmp-user-db')
@@ -189,12 +202,12 @@ class WebApp(AppVisualization, AppStatus,
             logger.info('Loading user db from %s' % self.options.users)
             dm = DB.dm
             hierarchy = ProxyDirectory.from_disk(self.options.users)
-            logger.info('These are the files found:\n%s' % indent(hierarchy.tree(), '  '))
+#             logger.info('These are the files found:\n%s' % indent(hierarchy.tree(), '  '))
             user_db_schema = DB.user_db
             user_db_data = dm.interpret_hierarchy_(user_db_schema, hierarchy)
             
-            logger.debug('user_db schema: \n' + str(user_db_schema) )
-            logger.debug('user_db:\n' + indent(yaml_dump(user_db_data), ' > '))
+#             logger.debug('user_db schema: \n' + str(user_db_schema) )
+#             logger.debug('user_db:\n' + indent(yaml_dump(user_db_data), ' > '))
             
             DB.user_db.validate(user_db_data)
             
