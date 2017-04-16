@@ -1,8 +1,0 @@
-# Note that this is not equivalent to the other
-# ceil(sqrt(x) + sqrt(y)) != ceil(sqrt(x)) + ceil(sqrt(y))
-mcdp {
-  provides z [Nat]
-  variable x, y [Nat]
-  x + y >= sqrt(x) + sqrt(y) + provided z 
-  requires x, y
-}

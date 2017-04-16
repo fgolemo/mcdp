@@ -1,6 +1,0 @@
-mcdp {
-    provides f [Rcomp]
-    requires r [Rcomp]
-
-    required r >= floor0(provided f)
-}

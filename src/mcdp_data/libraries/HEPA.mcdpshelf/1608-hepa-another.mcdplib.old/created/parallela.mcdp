@@ -1,5 +1,0 @@
-mcdp {
-   provides arm_flops [flops]
-   requires power [W]
-   requires cost [USD]
-}

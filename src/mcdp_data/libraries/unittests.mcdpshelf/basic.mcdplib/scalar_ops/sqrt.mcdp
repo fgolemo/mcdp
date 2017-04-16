@@ -1,5 +1,0 @@
-mcdp {
-    provides f [dimensionless]
-    requires r [dimensionless]
-    required r >= sqrt(provided f)
-}

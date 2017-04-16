@@ -1,9 +1,0 @@
-mcdp {
-    provides prob_success [dimensionless]
-    provides sweep_area [miles^2]
-#    provides opfor_num [Nat]
-
-    requires num_vehicles [Nat]
-    requires velocity [mph]
-    requires sweep_edge [m]
-}

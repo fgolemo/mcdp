@@ -1,6 +1,0 @@
-product(
-       socket: `socket_type,
-      voltage: `AC_voltages,
-    frequency: `AC_frequencies,
-        watts: W
-)

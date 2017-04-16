@@ -1,6 +1,0 @@
-mcdp {
-    requires payload [`Payload]
-    requires budget [USD]
-    provides usbcom [`USBCom]
-    requires usbcom [`USBCom]
-}

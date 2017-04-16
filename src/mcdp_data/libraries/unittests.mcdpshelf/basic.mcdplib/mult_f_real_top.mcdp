@@ -1,6 +1,0 @@
-mcdp  {
-    provides f  [m*s]
-    requires r  [m]
-
-    required r * Top s >= provided f 
-}

@@ -1,1 +1,0 @@
-coproduct(`barrel_connectors, `USB_connectors)

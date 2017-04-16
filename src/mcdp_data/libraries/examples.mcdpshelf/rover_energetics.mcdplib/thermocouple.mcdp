@@ -1,6 +1,0 @@
-template mcdp {
-  provides power [W]
-  requires heat [W]
-  requires mass [g]
-  requires cost [USD]
-}

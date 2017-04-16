@@ -1,9 +1,0 @@
-# https://www.amazon.com/Traxxas-2976-AC-DC-Converter/dp/B00P7X4S3K
-
-mcdp {
-    requires budget [USD]
-    budget >= 21.40 USD    
-
-    provides out [`DC_Charging]
-    requires in [`AC_Charging]
-}

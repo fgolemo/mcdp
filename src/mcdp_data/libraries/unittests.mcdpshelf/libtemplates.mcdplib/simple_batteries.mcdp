@@ -1,2 +1,0 @@
-# these are all the simple batteries available
-choose(b1:`battery1, b2: `battery2)

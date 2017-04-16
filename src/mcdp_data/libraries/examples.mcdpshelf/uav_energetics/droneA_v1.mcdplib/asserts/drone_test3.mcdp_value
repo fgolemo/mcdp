@@ -1,4 +1,0 @@
-assert_equal(
-    solve(<0s, 0kg, 0W>, `drone),
-    upperclosure {0.0 kg}
-) 

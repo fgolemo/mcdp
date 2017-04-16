@@ -1,5 +1,0 @@
-mcdp {
-    provides f [m]
-    requires r [m]
-    required r >=  provided f * 10
-}

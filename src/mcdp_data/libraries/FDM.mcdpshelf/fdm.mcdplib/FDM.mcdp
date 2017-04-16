@@ -1,4 +1,0 @@
-choose(
-   fixed_plate: `FDM_design_fixed_plate, 
-   moving_plate: `FDM_design_moving_plate
-)

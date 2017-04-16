@@ -1,5 +1,0 @@
-mcdp {
-    provides f [m]
-    requires r [m]
-    required r >= approx(provided f, 1 cm)
-}

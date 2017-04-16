@@ -1,4 +1,0 @@
-product(
-    tag: S(RGBLEDDriver),
-    rigid_body: `RigidBodyID
-)

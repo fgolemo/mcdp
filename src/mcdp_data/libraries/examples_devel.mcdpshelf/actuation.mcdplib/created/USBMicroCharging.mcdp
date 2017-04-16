@@ -1,9 +1,0 @@
-mcdp {
-  a = instance `plugs.USBMicroCharger
-  requires in [`AC_Charging]
-  provides out [`DC_Charging]
-  (in).duration >= (out).duration
-  (in).ac >= a.in
-  a.out >= (out).dc
-  requires budget >= a.budget
-}

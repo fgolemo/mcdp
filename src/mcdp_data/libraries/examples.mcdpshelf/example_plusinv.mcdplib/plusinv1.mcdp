@@ -1,8 +1,0 @@
-mcdp {
-    provides a [s]
-    
-    requires x [s]
-    requires y [s]
-    
-    required x + required y ≽ provided a
-}
