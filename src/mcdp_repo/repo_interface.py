@@ -6,14 +6,13 @@ from contracts.utils import raise_desc
 from git import RemoteProgress
 from git import Repo
 from git.remote import Remote
+from git.util import Actor
 
 from mcdp import MCDPConstants
 from mcdp.logs import logger
 from mcdp_shelf import find_shelves
 from mcdp_user_db import UserInfo
-from mcdp_utils_misc import create_tmpdir, dir_from_package_name
-from git.util import Actor
-from mcdp_utils_misc.timing import  timeit_wall
+from mcdp_utils_misc import timeit_wall, create_tmpdir, dir_from_package_name
 
 
 class RepoException(Exception):
@@ -170,12 +169,13 @@ class MCDPGitRepo(MCDPRepo):
         self.where = where
         if create:
             self.repo = Repo.init(self.where)
-            origin = self.repo.create_remote('origin', url=url)
-            assert origin.exists()
-            for _fetch_info in self.repo.remotes.origin.fetch(progress=MyProgressPrinter()):
-                pass
-            self.repo.create_head('master', origin.refs['master'])
-            self.repo.heads.master.checkout()
+            if url is not None:
+                origin = self.repo.create_remote('origin', url=url)
+                assert origin.exists()
+                for _fetch_info in self.repo.remotes.origin.fetch(progress=MyProgressPrinter()):
+                    pass
+                self.repo.create_head('master', origin.refs['master'])
+                self.repo.heads.master.checkout()
         else:
             self.repo = Repo(self.where)
             origin = Remote(self.repo, 'origin')
@@ -215,9 +215,7 @@ class MCDPGitRepo(MCDPRepo):
     def _note_commit(self, commit):
         if not commit.parents:
             return
-        for diff in commit.parents[0].diff(commit):
-#             print diff.change_type, diff.a_path, diff.b_path
-#                     print type(diff)
+        for diff in commit.parents[0].diff(commit): 
             filename = diff.b_path
             components = filename.split('/')
             res = {}

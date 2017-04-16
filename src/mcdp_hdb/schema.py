@@ -28,8 +28,8 @@ class SchemaBase(object):
     
     @abstractmethod
     def generate(self):
-        ''' Generate data compatible with this schema. '''
-     
+        ''' Generate random data compatible with this schema. '''
+      
     def add_acl_rules(self, acl_rules):
         self._acl_rules_self.extend(acl_rules)
         
@@ -65,6 +65,10 @@ class SchemaRecursive(SchemaBase):
     def get_descendant(self, prefix):
         ''' Returns the schema for a descendant. '''
 
+    @abstractmethod
+    def generate_empty(self):
+        ''' Generate the simplest data compatible with this schema. '''
+    
 
 class SchemaSimple(SchemaBase):
     ''' Base class for simple data types '''
@@ -114,6 +118,9 @@ class SchemaHash(SchemaRecursive):
             k = names[_]
             res[k] = self.prototype.generate()
         return res
+    
+    def generate_empty(self):
+        return {}
   
     def validate(self, data):
         if not isinstance(data, dict):
@@ -139,7 +146,7 @@ class SchemaContext(SchemaRecursive):
         if prefix:
             first = prefix[0]
             if not first in self.children:
-                msg = 'Could not find child %r in %s' % (first, format_list(self.children))
+                msg = 'Could not find child %r; available: %s.' % (first, format_list(self.children))
                 raise ValueError(msg)
             child = self.children[first]
             try:
@@ -244,6 +251,19 @@ class SchemaContext(SchemaRecursive):
         for k, c in self.children.items():
             res[k] = c.generate()
         return res
+    
+    def generate_empty(self):
+        res = {}
+        for k, c in self.children.items():
+            if isinstance(c, SchemaSimple):
+                if c.can_be_none:
+                    res[k] = None
+                else:
+                    msg = 'Cannot generate empty for child %r: %s.' % (k, c)
+                    raise ValueError(msg)
+            else:
+                res[k] = c.generate_empty()
+        return res
  
 Schema = SchemaContext
 
@@ -263,7 +283,8 @@ class SchemaList(SchemaRecursive):
         self.prototype = schema
         
         SchemaBase.__init__(self)
-        
+    def generate_empty(self):
+        return []
     def get_descendant(self, prefix):
         ''' Returns the schema for a descendant. '''
         if prefix:

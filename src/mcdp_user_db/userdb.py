@@ -74,7 +74,7 @@ class UserDB(object):
         
         return False
     
-    @contract(returns=str)
+    @contract(returns=bytes, candidate_usernames='list(str)')
     def find_available_user_name(self, candidate_usernames):
         for x in candidate_usernames:
             if x not in self.users:

@@ -27,8 +27,12 @@ class DataEvents(object):
     dict_setitem = 'dict_setitem' # dict_setitem <name> <key> <value>
     dict_delitem = 'dict_delitem' # dict_delitem <name> <key>
     dict_rename = 'dict_rename' # dict_rename <name> <key> <key2>
-    all_events = [leaf_set, struct_set, increment, list_append, list_insert, list_setitem,
-                  list_delete, dict_setitem, dict_delitem, dict_rename]
+    all_events = [leaf_set, 
+                  struct_set, 
+                  increment, 
+                  list_append, list_insert, list_setitem, list_delete, list_remove,
+                  set_add, set_remove,
+                  dict_setitem, dict_delitem, dict_rename]
 
 
 def event_add_prefix(prefix, event):
@@ -159,7 +163,7 @@ def event_list_insert_interpret(view, name, index, value):
 def event_list_remove(name, value, **kwargs):
     name = list(name)
     arguments = dict(name=name, value=value)
-    return event_make(event_name=DataEvents.list_delete, arguments=arguments, **kwargs)
+    return event_make(event_name=DataEvents.list_remove, arguments=arguments, **kwargs)
 
 def event_list_remove_interpret(view, name, value):
     l = get_the_list(view, name)

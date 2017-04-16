@@ -3,17 +3,17 @@ from copy import deepcopy
 import inspect
 
 from contracts import contract
+from contracts import describe_value
 from contracts.utils import raise_desc, raise_wrapped, indent, check_isinstance
 
 from mcdp import MCDPConstants
 from mcdp import logger
+from mcdp_hdb.schema import NotValid
 from mcdp_utils_misc import format_list
 
 from .memdataview_exceptions import InsufficientPrivileges, FieldNotFound, InvalidOperation, EntryNotFound
 from .memdataview_utils import special_string_interpret
 from .schema import SchemaBase, SchemaSimple
-from mcdp_hdb.schema import NotValid
-from contracts.interface import describe_value
 
 
 __all__ = [
@@ -27,11 +27,12 @@ __all__ = [
 class ViewBase(object):
     
     __metaclass__ = ABCMeta
-    
-    
+
+         
     @abstractmethod
     def child(self, key):
         ''' '''
+        
     @contract(name='seq(str)')
     def get_descendant(self, name):
         check_isinstance(name, (list, tuple))
@@ -139,8 +140,44 @@ class ViewBase(object):
     def _notify(self, event):
         if self._notify_callback is not None:
             self._notify_callback.__call__(event)
+
+class ViewMount(ViewBase):
+    ''' Types of views that support mount points '''
+    
+    @contract(view=ViewBase)
+    def mount(self, child_name, view):
+        ''' Mounts a view to be returned by this if it is ever called. '''
+        self.mount_points[child_name] = view
+
+    def mount_init(self):
+        ''' initializes mount points '''
+#         logger.debug('mount_init() for %s' % id(self))
+        object.__setattr__(self, 'mount_points', {})
         
-class ViewContext0(ViewBase): 
+class ViewContext0(ViewMount):  
+
+    @contract(returns=ViewBase)
+    def child(self, name):
+        if name in self.mount_points:
+            return self.mount_points[name]
+        child_schema = self._schema.get_descendant((name,))
+        child_data = self._data[name]
+        v = self._create_view_instance(child_schema, child_data, name)        
+        if is_simple_data(child_schema):
+            def set_callback(value):
+                if self._data[name] == value:
+                    return
+                else:
+                    self._data[name] = value
+                    
+                    from .memdata_events import event_leaf_set
+                    event = event_leaf_set(name=self._prefix,
+                                           leaf=name, value=value,
+                                            **self._get_event_kwargs())
+                    self._notify(event)
+                    
+            v._set_callback = set_callback
+        return v
     
     def __str__(self):
         names = [base.__name__ for base in inspect.getmro(type(self))]
@@ -158,36 +195,21 @@ class ViewContext0(ViewBase):
             if isinstance(schema_child, SchemaSimple):
                 res.append('%s=%r' % (k, self._data[k]))
             else:
-                res.append('%s=%s' % (k, self._get_child(k)))
+                res.append('%s=%s' % (k, self.child(k)))
                 
         data_string = ", ".join(res) 
         
         return '%s[%s]' % (myname, data_string)
 
-    @contract(returns=ViewBase)
-    def _get_child(self, name):
-        children = self._schema.children
-        if not name in children:
-            msg = 'Could not find field "%s"; available: %s.' % (name, format_list(children))
-            raise_desc(FieldNotFound, msg, children=children, schema=str(self._schema))
-
-        child_schema = children[name]
-        check_isinstance(child_schema, SchemaBase)
-        child_data = self._data[name]
-        v = self._create_view_instance(child_schema, child_data, name)
-        return v 
-
     def __getattr__(self, name):
         try:
             return object.__getattribute__(self, name)
-        except AttributeError:
-#             logger.debug('Could not get %r: %s\n for %s' % (name, e, self.__str__()))
-            pass 
-#         if name.startswith('_') or name in ['child', 'get_descendant']:
-#             return object.__getattribute__(self, name)
+        except AttributeError as e:
+            logger.debug('Could not get %r: %s: %s ' % (name, id(self), e))
+            pass  
         if not name in self._schema.children:
             msg = 'Cannot get attribute %r: available %s' % (name, format_list(self._schema.children))
-            raise_desc(ValueError, msg, self=str(self))
+            raise_desc(ValueError, msg) #, self=str(self))
         child_schema= self._schema.children[name]
         assert name in self._data
         child_data = self._data[name]
@@ -207,7 +229,7 @@ class ViewContext0(ViewBase):
     def __setattr__(self, leaf, value):
         if leaf.startswith('_'):
             return object.__setattr__(self, leaf, value)
-        v = self._get_child(leaf)
+        v = self.child(leaf)
         v.check_can_write()
         
         try:
@@ -229,55 +251,18 @@ class ViewContext0(ViewBase):
     
             self._data[leaf] = value
         
-    def child(self, name):
-        child_schema = self._schema.get_descendant((name,))
-        child_data = self._data[name]
-        v = self._create_view_instance(child_schema, child_data, name)        
-        if is_simple_data(child_schema):
-            def set_callback(value):
-                if self._data[name] == value:
-#                     logger.debug('ignoring setting %r to %r' % (name, value))
-                    return
-                else:
-                    self._data[name] = value
-                    
-                    from .memdata_events import event_leaf_set
-                    event = event_leaf_set(name=self._prefix,
-                                           leaf=name, value=value,
-                                            **self._get_event_kwargs())
-                    self._notify(event)
-                    
-            v._set_callback = set_callback
-        return v
+    
     
 
 def is_simple_data(s):
     return isinstance(s, SchemaSimple)
 
-class ViewHash0(ViewBase):
-
-    def __contains__(self, key):
-        return key in self._data
-    
-    def __len__(self):
-        return len(self._data)
-    
-    def items(self):
-        for k in self.keys():
-            yield k, self.child(k)
-            
-    def keys(self):
-        return self._data.keys()
-    
-    def values(self):
-        for k in self.keys():
-            yield self.child(k)
-        
-    def __iter__(self):
-        for _ in self._data.__iter__():
-            yield _
-        
+class ViewHash0(ViewMount):
+     
     def child(self, name):
+        if name in self.mount_points:
+            return self.mount_points[name]
+        
         if not name in self._data:
             msg = 'Cannot get child "%s"; known: %s.' % (name, format_list(self.keys()))
             raise_desc(InvalidOperation, msg)
@@ -353,7 +338,27 @@ class ViewHash0(ViewBase):
         self._notify(event)
 
         self._data[key2] = self._data.pop(key1)
+    # Dictionary interface
+    def __contains__(self, key):
+        return key in self._data
+    
+    def __len__(self):
+        return len(self._data)
+    
+    def items(self):
+        for k in self.keys():
+            yield k, self.child(k)
+            
+    def keys(self):
+        return self._data.keys()
+    
+    def values(self):
+        for k in self.keys():
+            yield self.child(k)
         
+    def __iter__(self):
+        for _ in self._data.__iter__():
+            yield _
 class ViewString(ViewBase):
     def child(self, i):  # @UnusedVariable
         msg = 'Cannot get child of view for basic types.'
@@ -453,7 +458,18 @@ class ViewList0(ViewBase):
                                    **self._get_event_kwargs())
         self._notify(event)
         
+    def remove(self, value):
+        if not value in self._data:
+            msg = 'The list does not contain %r: available %s' % (value, format_list(self._data))
+            raise ValueError(msg)
+        self._data.remove(value)
+        from .memdata_events import event_list_remove
+        event = event_list_remove(name=self._prefix,
+                                   value=value, 
+                                   **self._get_event_kwargs())
+        self._notify(event)
         
+         
     def delete(self, i):
         # todo: check i 
         if not( 0 <= i < len(self._data)):

@@ -74,10 +74,10 @@ class Session():
             # username is None:
             return userdb['anonymous']
     
-    def save_user(self):
-        userdb = self.app.user_db  # @UndefinedVariable
-        user = self.get_user()
-        userdb.save_user(user.username)
+#     def save_user(self):
+#         userdb = self.app.user_db  # @UndefinedVariable
+#         user = self.get_user()
+#         userdb.save_user(user.username)
         
     def notify_created_library(self, shelf_name, library_name):  # @UnusedVariable
         ''' Called when we just created the library. '''

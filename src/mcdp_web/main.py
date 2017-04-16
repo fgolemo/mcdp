@@ -62,9 +62,7 @@ from .utils.response import response_data
 from .utils0 import add_other_fields, add_std_vars_context
 from .utils0 import add_std_vars_context_no_redir
 from .visualization.app_visualization import AppVisualization
-from git.repo.base import Repo
-from git.util import Actor
-from mcdp_hdb.memdataview_utils import host_name
+from mcdp_hdb.pipes import apply_changes_to_disk
 
 
 Privileges = MCDPConstants.Privileges
@@ -80,56 +78,6 @@ __all__ = [
 
 git.cmd.log.disabled = True
 
-def get_git_repo(d, original_query=None):
-    ''' Get the root directory for a repository given 
-        one directory inside. '''
-    if original_query is None:
-        original_query = d
-    if not d:
-        msg = 'Could not find repo for %s' % original_query
-        raise ValueError(msg)
-    g = os.path.join(d, '.git')
-    if os.path.exists(g):
-        return d
-    else:
-        return get_git_repo(os.path.dirname(d), original_query)
-    
-def apply_changes_to_disk(disk_map, user_db_view, wd):
-    where = get_git_repo(wd)
-    repo = Repo.init(where)
-#     hierarchy = ProxyDirectory.from_disk(wd)
-    events = []
-    def notify_callback(data_event):
-        from mcdp_hdb.disk_map_disk_events_from_data_events import disk_events_from_data_event
-        from mcdp_hdb.disk_events import apply_disk_event_to_filesystem
-        s = yaml_dump(data_event)
-        logger.debug('Event #%d:\n%s' % (len(events), indent(s, '> ')) )
-        events.append(data_event)
-        disk_events = disk_events_from_data_event(disk_map=disk_map, 
-                                                 schema=user_db_view._schema, 
-                                                 data_rep=user_db_view._data, 
-                                                 data_event=data_event)
-        
-        for disk_event in disk_events:
-            logger.debug('Disk event:\n%s' % yaml_dump(disk_event))
-            apply_disk_event_to_filesystem(wd, disk_event, repo=repo)
-            
-        message = yaml_dump(data_event)
-        who = data_event['who']
-        if who is not None:
-            actor = who['actor']
-            system = who['host']['hostname']
-        else:
-            actor = 'system'
-            system = host_name()
-        author = Actor(actor, None)
-        committer = Actor(system, None)
-#         logger.debug('2) all added')
-#         system_cmd_show(wd, ['git', 'status'])
-        commit = repo.index.commit(message, author=author, committer=committer)
-#         commits.append(commit)
-            
-    user_db_view._notify_callback = notify_callback
 
 
 class WebApp(AppVisualization, AppStatus,
@@ -217,19 +165,7 @@ class WebApp(AppVisualization, AppStatus,
             }
             if not os.path.exists(self.options.users):
                 os.makedirs(self.options.users)
-            logger.info('Temporary user dir is %s' % self.options.users)
-#             repo = Repo.init(self.options.users)
-#             
-#             origin = repo.create_remote('origin', url='file://invalid')
-#             for filename in create_file_and_yield(db, self.options.users):
-# #             print('written %r' % filename)
-# #             print('untracked_files: %s' % repo0.untracked_files)
-# #             print('Dirty: %s' % repo0.is_dirty(untracked_files=True))
-#                 repo.index.add(repo.untracked_files)
-#                 message = 'author: system'
-#                 author = Actor('system', 'system')
-#                 repo.index.commit(message, author=author)
-                
+            logger.info('Temporary user dir is %s' % self.options.users) 
             write_hierarchy(self.options.users, db)
             
 
@@ -265,7 +201,6 @@ class WebApp(AppVisualization, AppStatus,
             user_db_view = DB.view_manager.create_view_instance(user_db_schema, user_db_data)
             user_db_view.set_root() 
             apply_changes_to_disk(dm, user_db_view, self.options.users)
-#             user_db_view.users['andrea'].info.name = 'Andrea Censi 2'
             self.user_db = user_db_view
             logger.info('Loaded %s users' % len(self.user_db.users))
             for username, user in self.user_db.users.items():
@@ -371,7 +306,7 @@ class WebApp(AppVisualization, AppStatus,
     def view_shelves_subscribe(self, e):  
         if not e.shelf_name in e.user.subscriptions:
             e.user.subscriptions.append(e.shelf_name)
-            e.session.save_user()
+#             e.session.save_user()
             e.session.recompute_available()
         raise HTTPFound(e.request.referrer)
     
@@ -415,7 +350,7 @@ class WebApp(AppVisualization, AppStatus,
         #print('unsubscribe %r' % sname)
         if sname in e.user.subscriptions:
             e.user.subscriptions.remove(sname)
-            e.session.save_user()
+#             e.session.save_user()
             e.session.recompute_available()
         raise HTTPFound(e.request.referrer)
 

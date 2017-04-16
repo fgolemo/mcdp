@@ -60,6 +60,7 @@ class DB():
     user_db = Schema()
     user_db._add_child('users', users)
     db._add_child('user_db', user_db)
+    db._add_child('repos', SchemaHash(repo))
     
     dm = DiskMap()
     dm.hint_directory(shelves, pattern='%.mcdpshelf')

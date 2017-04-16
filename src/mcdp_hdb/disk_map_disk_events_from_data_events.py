@@ -29,6 +29,7 @@ def disk_events_from_data_event(disk_map, schema, data_rep, data_event):
         DataEvents.list_append: disk_events_from_list_append,
         DataEvents.list_delete: disk_events_from_list_delete,
         DataEvents.list_insert: disk_events_from_list_insert,
+        DataEvents.list_remove: disk_events_from_list_remove,
     }
     viewmanager = ViewManager(schema) 
     view = viewmanager.create_view_instance(schema, data_rep)
@@ -231,14 +232,13 @@ def disk_events_from_list_insert(disk_map, view, _id, who, name, index, value):
         raise NotImplementedError(hint)
     
 def disk_events_from_list_delete(disk_map, view, _id, who, name, index):
-    view_parent = get_view_node(view, name)
+    view_parent = view.get_descendant(name)
     schema_parent = view_parent._schema
     check_isinstance(schema_parent, SchemaList)
     hint = disk_map.get_hint(schema_parent)
     length = len(view_parent._data)
     if isinstance(hint, HintDir):
-        # TODO: what about it is not a list of files, but directories?
-#         dirname = disk_map.dirname_from_data_url(name)
+        # TODO: what about it is not a list of files, but directories? 
         dirname = disk_map.dirname_from_data_url_(view._schema, name)
         filename = hint.filename_for_key(str(index))
         disk_event = disk_event_file_delete(_id, who, dirname, filename)
@@ -255,8 +255,13 @@ def disk_events_from_list_delete(disk_map, view, _id, who, name, index):
         raise NotImplementedError(hint)
 
 def disk_events_from_list_remove(disk_map, view, _id, who, name, value):
-    raise NotImplementedError()
-
+    view_parent = view.get_descendant(name)
+    data = view_parent._data
+    for index, v in enumerate(data):
+        if v == value:
+            return disk_events_from_list_delete(disk_map, view, _id, who, name, index)
+    msg = 'There is no value %s in the list' % value
+    raise InvalidOperation(msg)
 
 def disk_events_from_dict_setitem(disk_map, view, _id, who, name, key, value):
     view_parent = get_view_node(view, name)

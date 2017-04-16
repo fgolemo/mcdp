@@ -1,14 +1,14 @@
 from contracts import contract
-from contracts.utils import raise_wrapped, raise_desc, indent
+from contracts.utils import raise_wrapped, indent
 
 from mcdp import MCDPConstants
+from mcdp_hdb.memdataview import ViewBytes
+from mcdp_hdb.schema import NotValid
+from mcdp_utils_misc.my_yaml import yaml_dump
 
 from .memdataview import ViewContext0, ViewHash0, ViewList0, ViewString, ViewDate
 from .memdataview_utils import host_name
 from .schema import SchemaBase, SchemaContext, SchemaString, SchemaHash, SchemaList,  SchemaDate, SchemaBytes
-from mcdp_hdb.memdataview import ViewBytes
-from mcdp_hdb.schema import NotValid
-from mcdp_utils_misc.my_yaml import yaml_dump
 
 
 __all__ = [
@@ -84,9 +84,12 @@ class ViewManager(object):
                 pass
 
         if isinstance(s, SchemaContext):
-            class ViewContext(ViewContext0, Base): pass
+            class ViewContext(ViewContext0, Base): 
+                pass
             try:
-                return ViewContext(view_manager=self, data=data, schema=s)
+                view = ViewContext(view_manager=self, data=data, schema=s)
+                view.mount_init()
+                return view
             except TypeError as e:
                 msg = 'Probably due to a constructor in Base = %s' % (Base)
                 if s in self.s2baseclass:
@@ -94,11 +97,15 @@ class ViewManager(object):
                 raise_wrapped(ValueError, e, msg)
 
         if isinstance(s, SchemaHash):
-            class ViewHash(ViewHash0, Base): pass
-            return ViewHash(view_manager=self, data=data, schema=s)
+            class ViewHash(ViewHash0, Base): 
+                pass
+            view = ViewHash(view_manager=self, data=data, schema=s)
+            view.mount_init()
+            return view
         
         if isinstance(s, SchemaList):
-            class ViewList(ViewList0, Base): pass
+            class ViewList(ViewList0, Base): 
+                pass
             return ViewList(view_manager=self, data=data, schema=s)
     
         if isinstance(s, SchemaString):

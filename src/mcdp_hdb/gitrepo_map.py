@@ -32,8 +32,7 @@ def gitrep_from_diskrep(disk_rep, where=None):
     d2 = get_disk_rep_with_added_files(disk_rep)
     d2.to_disk(where)
     
-    
-    author = Actor("system","root@localhost")
+    author = Actor("system", "root@localhost")
     message = "initial commit"
     
     if repo.untracked_files: 

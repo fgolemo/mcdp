@@ -107,6 +107,7 @@ For example, this is a valid Python representation:
     db_schema['users'].set_acl(yaml.load(acl_users))
     schema_user. add ...
 
+## data events
 
 struct events:
 
@@ -119,6 +120,8 @@ struct events:
     dict_setitem <dict> <key> <value>
     dict_delitem <dict> <key>
     dict_rename <dict> <key> <key2>
+
+## File events
 
 file events:
 
@@ -175,6 +178,10 @@ So that
     β([e :: es]) = β0(e) + β(es)
 
 
+## Cookbook
+
+
+    disk_rep = diskrep_from_gitrep(repo)
 
 
 Application interface  <--> Memory <--> Disk abstraction <-> Git repo

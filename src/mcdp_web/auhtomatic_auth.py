@@ -237,7 +237,7 @@ def view_confirm_bind_bind_(self, e):
             setattr(u0, x, getattr(u, x))
     
     self.user_db.users[u0.username] = u0
-    self.user_db.save_user(u0.username)
+#     self.user_db.save_user(u0.username)
     
     res = {
         'next_location': e.session.next_location,
@@ -277,6 +277,7 @@ def view_confirm_creation_create_(self, e):
     success_auth(self, e.request, u.info.username, next_location)
     return {}
 
+
 def get_candidate_user(user_db, result, provider_name):
     ''' Returns a candidate UserInfo structure as observed from Oauth response '''
     # get the data
@@ -301,7 +302,7 @@ def get_candidate_user(user_db, result, provider_name):
             msg = 'Could not get name from Facebook so cannot create username.'
             raise Exception(msg)
 
-        candidate_username = name.replace(' ','_').lower() 
+        candidate_username = name.encode('utf8').replace(' ','_').lower() 
         website = None
         affiliation = None
         unique_id = result.user.id
@@ -310,19 +311,19 @@ def get_candidate_user(user_db, result, provider_name):
         if name is None:
             msg = 'Could not get name from Google so cannot create username.'
             raise Exception(msg)
-        candidate_username = name.replace(' ','_').lower()
+        candidate_username = name.encode('utf8').replace(' ','_').lower()
         website = result.user.link
         affiliation = None
         unique_id = result.user.id 
         picture = result.user.picture
     elif provider_name == 'linkedin':
-        candidate_username = name.replace(' ', '_').lower()
+        candidate_username = name.encode('utf8').replace(' ', '_').lower()
         website = result.user.link
         affiliation = None
         unique_id = result.user.id
         picture = result.user.picture
     elif provider_name == 'amazon':
-        candidate_username = name.replace(' ', '_').lower()
+        candidate_username = name.encode('utf8').replace(' ', '_').lower()
         website = result.user.link
         affiliation = None
         unique_id = result.user.id
