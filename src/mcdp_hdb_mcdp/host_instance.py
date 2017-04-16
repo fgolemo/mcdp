@@ -10,6 +10,7 @@ from mcdp_hdb.memdataview_utils import host_name
 from mcdp_hdb.pipes import mount_git_repo, WriteToRepoCallback, mount_directory
 
 from .main_db_schema import DB
+from nose.tools import assert_equal
 
 
 class HostInstance(object):
@@ -95,6 +96,8 @@ class HostInstance(object):
             else:
                 mount_directory(view0=view_repos, child_name=repo_name, disk_map=disk_map, dirname=dirname)
             
+                repo = view_repos[repo_name] 
+            
         for repo_name, repo in self.repos.items():
             if repo_name == 'user_db':
                 mount_git_repo(view0=db_view, child_name='user_db', disk_map=disk_map, repo=repo)
@@ -102,11 +105,21 @@ class HostInstance(object):
             else:
                 mount_git_repo(view0=view_repos, child_name=repo_name, disk_map=disk_map, repo=repo)
                 this_view = view_repos.child(repo_name)
+                repo = view_repos[repo_name]
             assert this_view._notify_callback is not None
             #logger.info('callback for repo.%s: %s' % (repo_name, view_repo._notify_callback)
             PushCallback.add_to(this_view)
+         
+        all_repo_names = set(list(self.repos) + list(self.repo_local))
+        all_repo_names.remove('user_db')
         
+        assert_equal(id(view_repos), id(db_view.child('repos')))
+        assert_equal(id(view_repos), id(db_view.repos))
         
+        assert_equal(all_repo_names, set(view_repos))
+        for repo_name in all_repo_names:
+            view_repos[repo_name]
+            db_view.repos[repo_name]
         
 class PushCallback(object):
     @staticmethod

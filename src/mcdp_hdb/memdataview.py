@@ -14,6 +14,7 @@ from mcdp_utils_misc import format_list
 from .memdataview_exceptions import InsufficientPrivileges, InvalidOperation, EntryNotFound
 from .memdataview_utils import special_string_interpret
 from .schema import SchemaBase, SchemaSimple
+from mcdp_utils_misc.memoize_simple_imp import memoize_simple
 
 
 __all__ = [
@@ -156,8 +157,15 @@ class ViewMount(ViewBase):
         
 class ViewContext0(ViewMount):  
 
+    def init_context(self):
+        self.mount_init()
+        object.__setattr__(self, 'children_already_provided', {})
+        
     @contract(returns=ViewBase)
     def child(self, name):
+        if name in self.children_already_provided:
+            return self.children_already_provided[name]
+        
         if name in self.mount_points:
             return self.mount_points[name]
         child_schema = self._schema.get_descendant((name,))
@@ -177,6 +185,7 @@ class ViewContext0(ViewMount):
                     self._notify(event)
                     
             v._set_callback = set_callback
+        self.children_already_provided[name] = v
         return v
     
     def __str__(self):
@@ -207,27 +216,35 @@ class ViewContext0(ViewMount):
         except AttributeError as e:
 #             logger.debug('Could not get %r: %s: %s ' % (name, id(self), e))
             pass  
-        if name in self.mount_points:
-            return self.mount_points[name]
-        # XXX this is very similar to child()
-        if not name in self._schema.children:
-            msg = 'Cannot get attribute %r: available %s' % (name, format_list(self._schema.children))
-            raise_desc(ValueError, msg) #, self=str(self))
-        child_schema= self._schema.children[name]
-        assert name in self._data
-        child_data = self._data[name]
-        if is_simple_data(child_schema):
-            # check access
-            try:
-                v = self._create_view_instance(child_schema, child_data, name)
-            except NotValid as e:
-                msg = 'Could not create view instance for __getattr__(%r):' % name
-                raise_wrapped(NotValid, e, msg, compact=True) 
-            v.check_can_read()
-            # just return the value
-            return child_data
+        
+        child = self.child(name)
+        
+        if is_simple_data(child._schema):
+            return child._data
         else:
-            return self._create_view_instance(child_schema, child_data, name)
+            return child
+#         
+#         if name in self.mount_points:
+#             return self.mount_points[name]
+#         # XXX this is very similar to child()
+#         if not name in self._schema.children:
+#             msg = 'Cannot get attribute %r: available %s' % (name, format_list(self._schema.children))
+#             raise_desc(ValueError, msg) #, self=str(self))
+#         child_schema= self._schema.children[name]
+#         assert name in self._data
+#         child_data = self._data[name]
+#         if is_simple_data(child_schema):
+#             # check access
+#             try:
+#                 v = self._create_view_instance(child_schema, child_data, name)
+#             except NotValid as e:
+#                 msg = 'Could not create view instance for __getattr__(%r):' % name
+#                 raise_wrapped(NotValid, e, msg, compact=True) 
+#             v.check_can_read()
+#             # just return the value
+#             return child_data
+#         else:
+#             return self._create_view_instance(child_schema, child_data, name)
 
     def __setattr__(self, leaf, value):
         if leaf.startswith('_'):
@@ -262,7 +279,16 @@ def is_simple_data(s):
 
 class ViewHash0(ViewMount):
      
+    def init_hash(self):
+        self.mount_init()
+        object.__setattr__(self, 'children_already_provided', {})
+        
+
+    @memoize_simple
     def child(self, name):
+        if name in self.children_already_provided:
+            return self.children_already_provided[name]
+        
         if name in self.mount_points:
             return self.mount_points[name]
         
@@ -276,11 +302,16 @@ class ViewHash0(ViewMount):
             def set_callback(value):
                 self._data[name] = value
             v._set_callback = set_callback
+        self.children_already_provided[name] = v
         return v
     
     def __getitem__(self, key):
+        if key in self.mount_points:
+            return self.mount_points[key]
+
         if not key in self._data:
-            msg = 'Could not find key "%s"; available keys are %s' % (key, format_list(self._data))
+            msg = 'Could not find key "%s"; available keys are %s, mount points %s' % (key, format_list(self._data),
+                                                                                       format_list(self.mount_points))
             raise_desc(EntryNotFound, msg)
         d = self._data[key]
         prototype = self._schema.prototype
@@ -341,19 +372,20 @@ class ViewHash0(ViewMount):
         self._notify(event)
 
         self._data[key2] = self._data.pop(key1)
+        
     # Dictionary interface
     def __contains__(self, key):
-        return key in self._data
+        return key in self._data or key in self.mount_points
     
     def __len__(self):
-        return len(self._data)
+        return len(self._data) + len(self.mount_points)
     
     def items(self):
         for k in self.keys():
-            yield k, self.child(k)
+            yield k, self.child(k)    
             
     def keys(self):
-        return self._data.keys()
+        return list(self._data.keys()) + list(self.mount_points)
     
     def values(self):
         for k in self.keys():
@@ -361,6 +393,8 @@ class ViewHash0(ViewMount):
         
     def __iter__(self):
         for _ in self._data.__iter__():
+            yield _
+        for _ in self.mount_points.__iter__():
             yield _
 class ViewString(ViewBase):
     def child(self, i):  # @UnusedVariable

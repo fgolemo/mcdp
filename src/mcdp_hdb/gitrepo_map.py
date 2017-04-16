@@ -1,8 +1,12 @@
-from mcdp_utils_misc.fileutils import create_tmpdir
-from mcdp_hdb.disk_struct import ProxyDirectory, ProxyFile
+from copy import deepcopy
+
 from contracts import contract
 from git import Repo
-from copy import deepcopy
+from git.util import Actor
+
+from .disk_struct import ProxyDirectory, ProxyFile
+from .memdataview_utils import host_name
+from mcdp_utils_misc import create_tmpdir
 
 
 def create_empty_dir_from_schema(dirname, schema, disk_map):
@@ -42,7 +46,8 @@ def gitrep_from_diskrep(disk_rep, where=None, branch=None):
         where = create_tmpdir('gitrep_from_diskrep')
         
     repo = Repo.init(where)
-    repo.index.commit('initial')
+    author = Actor("system", "system@%s" % host_name())
+    repo.index.commit('initial commit', author=author, committer=author)
     head = repo.create_head(branch)
     head.checkout()
     if branch != 'master':
@@ -57,9 +62,9 @@ def gitrep_from_diskrep(disk_rep, where=None, branch=None):
 #     for m in modified_files:
 #         repo.index.add([m.b_path])
 #         
-#     author = Actor("system", "root@localhost")
+    
     message = "gitrep_from_diskrep(%s)" % where
-    repo.index.commit(message) #, author=author)
+    repo.index.commit(message, author=author, committer=author)
     return repo
     
 @contract(repo=Repo)

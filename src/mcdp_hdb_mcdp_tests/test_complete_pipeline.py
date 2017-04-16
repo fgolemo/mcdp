@@ -9,6 +9,7 @@ from mcdp_utils_misc import create_tmpdir
 from mcdp_hdb.gitrepo_map import create_empty_repo_from_schema,\
     create_empty_dir_from_schema
 from copy import deepcopy
+from mcdp_library.specs_def import specs
 
 
 class Instance(object):
@@ -21,6 +22,35 @@ class Instance(object):
         name = '%s %s' % (username, username)
         u = DB.user.generate_empty(info=dict(name=name))
         db_view.user_db.users[username] = u
+        
+    def create_shelf(self, repo_name, shelf_name):
+        db_view = self.hi.db_view
+        repo = db_view.repos[repo_name]
+        if not shelf_name in repo.shelves:
+            repo.shelves[shelf_name] = repo.shelves._schema.prototype.generate_empty()
+        else:
+            raise ValueError('already existing %r' % shelf_name)
+        
+    def create_library(self, repo_name, shelf_name, library_name):
+        db_view = self.hi.db_view
+        shelf = db_view.repos[repo_name].shelves[shelf_name]
+        if not library_name in shelf.libraries:
+            shelf.libraries[library_name] = shelf.libraries._schema.prototype.generate_empty()
+        else:
+            raise ValueError('already existing %r' % library_name)
+        
+    def create_thing(self, repo_name, shelf_name, library_name, spec_name, thing_name):
+        db_view = self.hi.db_view
+        spec = specs[spec_name]
+        contents = spec.minimal_source_code
+        library = db_view.repos[repo_name].shelves[shelf_name].libraries[library_name]
+        things = library.things.child(spec_name)
+        if not thing_name in things:
+            things[thing_name] = contents
+        else:
+            msg = 'Already know thing %r' % thing_name
+            raise ValueError(msg)
+        
         
 class ComplicatedTestCase(object):
     def __init__(self, repo_names, root=None, upstream=None):
@@ -70,10 +100,17 @@ def test_pipeline1(root=None):
     tcs.instance_clone('host1', use_common_user_db=True)
     tcs.instance_clone('host2', use_common_user_db=True)
     tcs.instance_clone('host3', use_common_user_db=False)
-    tcs.instances['host1'].create_user('john')
+    host1 = tcs.instances['host1']
+    host1.create_user('john')
     tcs.instances['host2'].create_user('jack')
     tcs.instances['host3'].create_user('pete')
     
+    host1.create_shelf('repo1', 'shelfA')
+    host1.create_library('repo1', 'shelfA', 'lib1')
+    host1.create_thing('repo1', 'shelfA', 'lib1', 'models', 'model1')
+    host1.create_thing('repo1', 'shelfA', 'lib1', 'posets', 'poset1')
+    
+        
 if __name__ == '__main__':
     if len(sys.argv) > 1:
         root = sys.argv[-1]

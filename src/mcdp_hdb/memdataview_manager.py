@@ -88,7 +88,7 @@ class ViewManager(object):
                 pass
             try:
                 view = ViewContext(view_manager=self, data=data, schema=s)
-                view.mount_init()
+                view.init_context()
                 return view
             except TypeError as e:
                 msg = 'Probably due to a constructor in Base = %s' % (Base)
@@ -100,7 +100,7 @@ class ViewManager(object):
             class ViewHash(ViewHash0, Base): 
                 pass
             view = ViewHash(view_manager=self, data=data, schema=s)
-            view.mount_init()
+            view.init_hash()
             return view
         
         if isinstance(s, SchemaList):
