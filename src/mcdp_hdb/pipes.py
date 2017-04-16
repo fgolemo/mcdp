@@ -1,13 +1,36 @@
 import os
 
+from contracts import contract
 from contracts.utils import indent
 from git.repo.base import Repo
 from git.util import Actor
 
 from mcdp.logs import logger
+from mcdp_hdb.disk_map import DiskMap
+from mcdp_hdb.gitrepo_map import diskrep_from_gitrep
+from mcdp_hdb.memdataview import ViewMount
 from mcdp_hdb.memdataview_utils import host_name
 from mcdp_utils_misc.my_yaml import yaml_dump
 
+
+@contract(view0=ViewMount, child_name=str, disk_map=DiskMap, repo=Repo)
+def mount_git_repo(view0, child_name, disk_map, repo):
+    '''
+        Mounts a repo -- just like "mount" in UNIX.
+    '''
+    # first, is the child well defined?
+    child_schema = view0._schema.get_descendant((child_name,))
+    # load the data in the repo
+    disk_rep = diskrep_from_gitrep(repo)
+    # is the data in the repo conformant to the schema?
+    data = disk_map.interpret_hierarchy_(child_schema, disk_rep)
+    # now create a view for this
+    view_manager = view0._view_manager
+    view = view_manager.create_view_instance(child_schema, data)
+    view.set_root() # XXX
+    view0.mount(child_name, view)
+    
+    
 
 def get_git_repo(d, original_query=None):
     ''' Get the root directory for a repository given 
