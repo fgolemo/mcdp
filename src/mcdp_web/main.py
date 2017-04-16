@@ -62,7 +62,7 @@ from .utils.response import response_data
 from .utils0 import add_other_fields, add_std_vars_context
 from .utils0 import add_std_vars_context_no_redir
 from .visualization.app_visualization import AppVisualization
-from mcdp_hdb.pipes import apply_changes_to_disk
+from mcdp_hdb.pipes import apply_changes_to_disk_and_repo
 
 
 Privileges = MCDPConstants.Privileges
@@ -200,7 +200,7 @@ class WebApp(AppVisualization, AppStatus,
             
             user_db_view = DB.view_manager.create_view_instance(user_db_schema, user_db_data)
             user_db_view.set_root() 
-            apply_changes_to_disk(dm, user_db_view, self.options.users)
+            apply_changes_to_disk_and_repo(dm, user_db_view, self.options.users)
             self.user_db = user_db_view
             logger.info('Loaded %s users' % len(self.user_db.users))
             for username, user in self.user_db.users.items():

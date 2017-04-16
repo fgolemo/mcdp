@@ -11,7 +11,7 @@ from mcdp import logger
 from mcdp_hdb.schema import NotValid
 from mcdp_utils_misc import format_list
 
-from .memdataview_exceptions import InsufficientPrivileges, FieldNotFound, InvalidOperation, EntryNotFound
+from .memdataview_exceptions import InsufficientPrivileges, InvalidOperation, EntryNotFound
 from .memdataview_utils import special_string_interpret
 from .schema import SchemaBase, SchemaSimple
 
@@ -205,8 +205,11 @@ class ViewContext0(ViewMount):
         try:
             return object.__getattribute__(self, name)
         except AttributeError as e:
-            logger.debug('Could not get %r: %s: %s ' % (name, id(self), e))
+#             logger.debug('Could not get %r: %s: %s ' % (name, id(self), e))
             pass  
+        if name in self.mount_points:
+            return self.mount_points[name]
+        # XXX this is very similar to child()
         if not name in self._schema.children:
             msg = 'Cannot get attribute %r: available %s' % (name, format_list(self._schema.children))
             raise_desc(ValueError, msg) #, self=str(self))

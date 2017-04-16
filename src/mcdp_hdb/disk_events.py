@@ -192,7 +192,7 @@ def apply_disk_event_to_filesystem(wd, disk_event, repo=None):
     def path_relative_to_repo(fn):
         repo_dir = repo.working_dir
         x = os.path.relpath(fn, repo_dir)
-        logger.debug('%s %s - > %s ' % (repo_dir, fn, x))
+#         logger.debug('%s %s - > %s ' % (repo_dir, fn, x))
         return x
     
     def descendants_tracked(dirname):

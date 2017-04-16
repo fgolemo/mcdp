@@ -2,8 +2,21 @@ from mcdp_utils_misc.fileutils import create_tmpdir
 from mcdp_hdb.disk_struct import ProxyDirectory, ProxyFile
 from contracts import contract
 from git import Repo
-from git.util import Actor
 from copy import deepcopy
+
+
+def create_empty_dir_from_schema(dirname, schema, disk_map):
+    data = schema.generate_empty()
+    disk_rep = disk_map.create_hierarchy_(schema, data)
+    disk_rep.to_disk(dirname)
+
+def create_empty_repo_from_schema(dirname, schema, disk_map, branch=None):
+    ''' Creates a git repo initialized with the empty data of the schema. '''
+    # generate empty data
+    data = schema.generate_empty()
+    disk_rep = disk_map.create_hierarchy_(schema, data)
+    repo = gitrep_from_diskrep(disk_rep, dirname, branch=branch)
+    return repo
 
 @contract(disk_rep=ProxyDirectory, returns=ProxyDirectory)
 def get_disk_rep_with_added_files(disk_rep):
@@ -21,19 +34,21 @@ def get_disk_rep_with_added_files(disk_rep):
     return map_d(disk_rep)
 
 @contract(disk_rep=ProxyDirectory)
-def gitrep_from_diskrep(disk_rep, where=None):
+def gitrep_from_diskrep(disk_rep, where=None, branch=None):
     ''' Creates a repository with the contents. '''
-    
+    if branch is None:
+        branch = 'master'
     if where is None:
         where = create_tmpdir('gitrep_from_diskrep')
         
     repo = Repo.init(where)
-    
+    repo.index.commit('initial')
+    head = repo.create_head(branch)
+    head.checkout()
+    if branch != 'master':
+        repo.delete_head('master')
     d2 = get_disk_rep_with_added_files(disk_rep)
     d2.to_disk(where)
-    
-    author = Actor("system", "root@localhost")
-    message = "initial commit"
     
     if repo.untracked_files: 
         repo.index.add(repo.untracked_files)
@@ -42,7 +57,9 @@ def gitrep_from_diskrep(disk_rep, where=None):
 #     for m in modified_files:
 #         repo.index.add([m.b_path])
 #         
-    repo.index.commit(message, author=author)
+#     author = Actor("system", "root@localhost")
+    message = "gitrep_from_diskrep(%s)" % where
+    repo.index.commit(message) #, author=author)
     return repo
     
 @contract(repo=Repo)

@@ -11,6 +11,7 @@ from contracts.utils import indent, check_isinstance, raise_desc, raise_wrapped
 
 from mcdp_shelf.access import ACL
 from mcdp_utils_misc import format_list, get_md5, yaml_dump
+from copy import deepcopy
 
 
 class NotValid(Exception):
@@ -252,17 +253,30 @@ class SchemaContext(SchemaRecursive):
             res[k] = c.generate()
         return res
     
-    def generate_empty(self):
+    def generate_empty(self, **kwargs):
         res = {}
+        for k in kwargs:
+            if not k in self.children:
+                msg = 'Extra key %r not in %s.' % (k, format_list(self.children))
+                raise ValueError(msg)
+        kwargs = deepcopy(kwargs)
         for k, c in self.children.items():
+            
             if isinstance(c, SchemaSimple):
-                if c.can_be_none:
+                if k in kwargs:
+                    res[k] = kwargs.pop(k)
+                elif c.can_be_none:
                     res[k] = None
                 else:
                     msg = 'Cannot generate empty for child %r: %s.' % (k, c)
                     raise ValueError(msg)
             else:
-                res[k] = c.generate_empty()
+                if k in kwargs:
+                    x = kwargs.pop(k)
+                    res[k] = c.generate_empty(**x)
+                else:
+                    res[k] = c.generate_empty()
+        assert not kwargs     
         return res
  
 Schema = SchemaContext
