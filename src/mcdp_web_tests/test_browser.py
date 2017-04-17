@@ -4,7 +4,7 @@ from selenium import webdriver
 from mcdp.logs import logger
 
 
-class BrowserTest():
+class BrowserTest(object):
     def __init__(self):
         
         self.driver = webdriver.PhantomJS() # or add to your PATH

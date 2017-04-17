@@ -11,7 +11,6 @@ from mcdp import MCDPConstants
 from mcdp_docs.preliminary_checks import assert_not_contains
 from mcdp_library_tests.create_mockups import write_hierarchy
 from mcdp_repo.repo_interface import repo_commit_all_changes
-from mcdp_user_db import UserDB
 from mcdp_utils_misc import dir_from_package_name, tmpdir
 from mcdp_web.confi import parse_mcdpweb_params_from_dict
 from mcdp_web.main import WebApp
@@ -68,7 +67,7 @@ class FunctionalTests(unittest.TestCase):
             repo0 = create_user_db_repo(userdb_remote, bname)
            
             mcdp_data = dir_from_package_name('mcdp_data')
-            unittests = os.path.join(mcdp_data, 'libraries', 'unittests.' + MCDPConstants.shelf_extension )
+            unittests = os.path.join(mcdp_data, 'bundled.mcdp_repo','shelves', 'unittests.' + MCDPConstants.shelf_extension )
             assert os.path.exists(unittests), unittests
             dest = os.path.join(userdb_remote, another_name_for_unittests_shelf + '.' + MCDPConstants.shelf_extension )
             shutil.copytree(unittests, dest)
@@ -82,9 +81,17 @@ class FunctionalTests(unittest.TestCase):
             head = repo.create_head(bname, origin.refs[bname])
             head.set_tracking_branch(origin.refs[bname])  # set local "master" to track remote "master
             head.checkout()
+            
             settings = {
                 'users': userdb,
                 'load_mcdp_data': '0',
+                'repos_yaml': """{
+    'local': {
+#         'user_db': '../mcdp-user-db/users',
+#         'users': '../mcdp-user-db/users.mcdp_repo'
+    },
+    'remote': {}
+    }"""
             }
             options = parse_mcdpweb_params_from_dict(settings)
             wa = WebApp(options, settings)
@@ -105,7 +112,7 @@ class FunctionalTests(unittest.TestCase):
         else:
             exclude = []
                 
-        ushelf = '/repos/global/shelves/%s' % another_name_for_unittests_shelf
+        ushelf = '/repos/bundled/shelves/%s' % another_name_for_unittests_shelf
         bugs = [
             ushelf + '/libraries/basic/models/sum2f_rcomp/views/solver',
             ushelf + '/libraries/pop/models/pop_example_3_7_newsyntax/views/ndp_repr/',
@@ -119,7 +126,7 @@ class FunctionalTests(unittest.TestCase):
             self.testapp.get(b)
             
         # this should not redirect
-        url = '/repos/global/shelves/%s/libraries/documents/align.html'  % another_name_for_unittests_shelf
+        url = '/repos/bundled/shelves/%s/libraries/documents/align.html'  % another_name_for_unittests_shelf
         res = self.testapp.get(url)
         if '302' in res.status:
             msg = 'Document redirect: %s -> %s' % (url, res.headers['location'])

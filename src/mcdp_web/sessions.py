@@ -2,14 +2,13 @@ from collections import OrderedDict
 import os
 
 from contracts import contract
-from contracts.utils import raise_desc
 
 from mcdp import MCDPConstants
 from mcdp import logger
+from mcdp_hdb_mcdp.main_db_schema import DB
 from mcdp_library import Librarian
 from mcdp_shelf import Shelf
-from mcdp_user_db import UserInfo
-from mcdp_utils_misc import format_list, natural_sorted
+from mcdp_utils_misc import format_list
 
 
 Privileges = MCDPConstants.Privileges
@@ -20,15 +19,13 @@ _ = Shelf
 class NoSuchLibrary(Exception):
     ''' Raised by get_repo_shelf_for_library '''
 
-class Session():
-    
-    @contract(shelves_all='dict(str:$Shelf)')
-    def __init__(self, app, request, shelves_all):
+class Session(object):
+     
+    def __init__(self, app, request):
         ''' dirnames: list of directories where to find shelves '''
         self.app = app
-        self.shelves_all = shelves_all
-        self.request = request
-        self.repos = app.repos
+        self.shelves_all = {}
+        self.request = request 
         
         self.librarian = Librarian()
         self.authenticated_userid = request.authenticated_userid
@@ -51,33 +48,37 @@ class Session():
         from mcdp_web.main import WebApp
         return WebApp.singleton
     
+    @contract(returns='isinstance(UserInfo)')
     def get_user(self, username=None):
         ''' Returns a UserInfo struct. It is the user 'anonymous' if no login was given.
         
             self.request.authenticated_userid == None == get_user().username == 'anonymous'
         '''
-        userdb = self.app.user_db  # @UndefinedVariable
+        app = self.app
+        user_db = app.hi.db_view.user_db
+        
         if username is None:
             username = self.request.authenticated_userid 
-            if username is not None and not username in userdb:
+            if username is not None and not username in user_db:
                 logger.error('User appears to have not existent id "%s".' % username)
                 username = None
             
         if username is not None:
             username = username.encode('utf8')
-            if username in userdb:
-                return userdb[username]
+            if username in user_db:
+                return user_db[username]
             else:
-                return UserInfo(username, name=username, password=None, email=None, website=None, affiliation=None, 
-                                groups=[], subscriptions=[])
+                
+                schema = DB.user.child('info')
+                user_info_data = schema.generate_empty(username=username, name=username)
+                
+                view = DB.view_manager.create_view_instance(schema, user_info_data)
+                view.set_root()
+                return view 
         else:
             # username is None:
-            return userdb['anonymous']
-    
-#     def save_user(self):
-#         userdb = self.app.user_db  # @UndefinedVariable
-#         user = self.get_user()
-#         userdb.save_user(user.username)
+            return user_db['anonymous']
+     
         
     def notify_created_library(self, shelf_name, library_name):  # @UnusedVariable
         ''' Called when we just created the library. '''
@@ -87,9 +88,19 @@ class Session():
     def notify_deleted_file(self, shelf_name, library_name, filename):  # @UnusedVariable
         self.get_shelf(shelf_name).update_libraries()
         self.recompute_available()
-        
+
+    @contract(returns='seq(str)')
+    def get_subscribed_shelves(self):
+        return list(self.shelves_used)
+    
     def recompute_available(self):
         # all the ones we can discover
+        repos = self.app.hi.db_view.repos
+        for repo_name, repo in repos.items():
+            for shelf_name, shelf in repo.get_shelves().items():
+                self.shelves_all[shelf_name] = shelf
+        # shelf:repo/shelfname
+        # library:repo/shelf/library
         self.shelves_available = OrderedDict()
         
         # the ones that are actually in use
@@ -126,7 +137,8 @@ class Session():
         
         self.libname2shelfname = {}
         self.shelfname2reponame = {}
-        for repo_name, repo in self.repos.items():
+        repos = self.app.hi.db_view.repos
+        for repo_name, repo in repos.items():
             for shelf_name, shelf in repo.get_shelves().items():
                 if shelf_name in self.shelfname2reponame:
                     o = self.shelfname2reponame[shelf_name]
@@ -140,12 +152,14 @@ class Session():
                 self.shelfname2reponame[shelf_name] = repo_name
                 
         for sname, shelf in self.shelves_all.items():
-            for libname in shelf.get_libraries_path():
+            for libname in shelf.libraries:
                 self.libname2shelfname[libname] = sname
                 
         for sname, shelf in self.shelves_used.items():
-            for libname, libpath in shelf.get_libraries_path().items():
-                self.librarian.add_lib_by_path(libpath)                
+            if False: #
+                logger.error('need to reimplement this part')
+                for libname, libpath in shelf.get_libraries_path().items():
+                    self.librarian.add_lib_by_path(libpath)                
                 
         self.libraries = self.librarian.get_libraries()
         for _short, data in self.libraries.items():
@@ -175,12 +189,12 @@ class Session():
         """ Returns the list of libraries """
         return sorted(self.libraries) 
 
-    def get_library(self, library_name): 
-        if not library_name in self.libraries:
-            msg = 'Could not find library %r.' % library_name
-            msg += '\n available: ' + format_list(sorted(self.libraries)) + '.'
-            raise_desc(ValueError, msg)
-        return self.libraries[library_name]['library'] 
+#     def get_library(self, library_name): 
+#         if not library_name in self.libraries:
+#             msg = 'Could not find library %r.' % library_name
+#             msg += '\n available: ' + format_list(sorted(self.libraries)) + '.'
+#             raise_desc(ValueError, msg)
+#         return self.libraries[library_name]['library'] 
 
     def refresh_libraries(self):
         for l in [_['library'] for _ in self.libraries.values()]:
@@ -190,15 +204,15 @@ class Session():
         assert hasattr(get_images, 'cache')  # in case it changes later
         get_images.cache = {}
         
-    def get_libraries_indexed_by_shelf(self):
-        """
-            returns a list of tuples (dirname, list(libname))
-        """
-        res = []
-        for sname, shelf in self.shelves_used.items():
-            libnames = natural_sorted(shelf.get_libraries_path())
-            res.append((sname, libnames))
-        return res 
+#     def get_libraries_indexed_by_shelf(self):
+#         """
+#             returns a list of tuples (dirname, list(libname))
+#         """
+#         res = []
+#         for sname, shelf in self.shelves_used.items():
+#             libnames = natural_sorted(shelf.libraries)
+#             res.append((sname, libnames))
+#         return res 
     
     def get_shelves_used(self):
         ''' Returns an ordered dict of shelves '''

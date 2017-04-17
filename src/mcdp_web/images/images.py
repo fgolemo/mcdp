@@ -9,7 +9,7 @@ from mcdp_web.utils0 import add_std_vars_context
 
 __all__ = ['WebAppImages']
 
-class WebAppImages():
+class WebAppImages(object):
 
     def __init__(self):
         pass

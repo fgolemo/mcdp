@@ -26,11 +26,12 @@ from mocdp.comp.interfaces import NamedDP
 
 from .html_mark_imp import html_mark, html_mark_syntax_error
 from .warnings_unconnected import generate_unconnected_warnings
+from mcdp_hdb_mcdp.library_view import TheContext
 
 
 Privileges=MCDPConstants.Privileges
 
-class AppEditorFancyGeneric():
+class AppEditorFancyGeneric(object):
 
     def __init__(self):
         # library_name x spec ->  dict(text : ndp)
@@ -68,9 +69,16 @@ class AppEditorFancyGeneric():
         cache = self.last_processed2
 
         make_relative = lambda s: self.make_relative(e.request, s)
+        
+        db_view = e.app.hi.db_view
+        subscribed_shelves = e.session.get_subscribed_shelves()
+        current_library_name = e.library_name
+        context = TheContext(db_view, subscribed_shelves, current_library_name)
+        mcdp_library = context.get_library()
+
         def go():
             with timeit_wall('process_parse_request'):
-                res = process_parse_request(e.library, string, e.spec, key, cache, make_relative)
+                res = process_parse_request(mcdp_library, string, e.spec, key, cache, make_relative)
             res['request'] = req
             return res
 
@@ -79,12 +87,8 @@ class AppEditorFancyGeneric():
 
     @add_std_vars_context
     @cr2e
-    def view_edit_form_fancy(self, e):
-        filename = '%s.%s' % (e.thing_name, e.spec.extension)
-        
-        f = e.library._get_file_data(filename)
-        source_code = f['data']
-        realpath = f['realpath']
+    def view_edit_form_fancy(self, e): 
+        source_code = e.thing 
         nrows = int(len(source_code.split('\n')) + 6)
         nrows = min(nrows, 25)
     
@@ -92,8 +96,7 @@ class AppEditorFancyGeneric():
         res = {
             'source_code': unicode(source_code, 'utf-8'),
             'source_code_json': unicode(json.dumps(source_code), 'utf-8'),
-            'realpath': realpath,
-#             e.spec.url_variable: e.thing_name,
+#             'realpath': realpath, 
             'rows': nrows,
             'ajax_parse': e.spec.url_part + '_ajax_parse',
             'error': None,

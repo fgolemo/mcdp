@@ -1,0 +1,14 @@
+mcdp {
+   variable x, y [ℕ]
+   provides z [ℕ]
+   x + y ≥ ceil(sqrt(x)) + ceil(sqrt(y)) + z 
+   requires x, y
+}
+
+
+
+
+
+
+
+

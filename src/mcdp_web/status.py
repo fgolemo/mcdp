@@ -12,7 +12,7 @@ import mcdp
 from mcdp_utils_misc import duration_compact, memoize_simple
 
 
-class AppStatus():
+class AppStatus(object):
     """
        /status/status.json
     """

@@ -1,0 +1,6 @@
+mcdp {
+    provides f [Rcomp]
+    requires r [Rcomp]
+
+    required r - Rcomp: 2 >= provided f 
+}

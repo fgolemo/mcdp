@@ -161,7 +161,7 @@ def eval_ndp_addmake(r, context):
     return ndp
 
 
-class ImportedFunction():
+class ImportedFunction(object):
     def __init__(self, function_name):
         self.function_name = function_name
         self.sys_path = sys.path

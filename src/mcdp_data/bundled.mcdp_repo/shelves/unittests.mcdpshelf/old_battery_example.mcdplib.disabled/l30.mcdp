@@ -1,0 +1,9 @@
+# test unconnected
+mcdp {
+  sub motor = instance abstract dp {
+    provides energy [J]
+    requires mass [kg]
+
+    implemented-by load BatteryDP
+  }
+}

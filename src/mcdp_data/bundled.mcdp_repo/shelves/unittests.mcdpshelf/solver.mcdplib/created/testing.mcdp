@@ -1,0 +1,8 @@
+mcdp {
+ provides f [g]
+ requires r [g]
+ required r >= 10 g
+ provided f <= 14 g
+ provided f <= 10 g
+ required r >= 20 g
+}

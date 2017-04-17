@@ -1,0 +1,4 @@
+mcdp {
+    provides velocity [m/s]
+    requires power [W]
+}

@@ -1,0 +1,6 @@
+mcdp {
+     provides fa  [Interval(0g, 10g)]
+   provides fb  [Interval(0g, 10g)]
+   requires fg  [Interval(0g, 20g)]
+#   required fg >= provided fa + provided fb
+}

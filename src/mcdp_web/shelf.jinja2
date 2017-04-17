@@ -80,7 +80,7 @@ Shelf {{navigation.shelf_name}}
     {% from 'user_name_and_picture.jinja2' import user_name_and_picture with context %}
     {% from 'shelf_row.jinja2' import shelf_row with context %}
 
-    {% if shelf.get_libraries_path() %}
+    {% if shelf.libraries %}
         <p>These are the libraries available in this shelf:</p>
         <div style='column-width: 15em'>
             {{list_libraries_for_shelf(navigation.repo_name, sname)}}

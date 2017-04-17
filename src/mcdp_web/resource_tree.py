@@ -208,7 +208,7 @@ class ResourceShelves(Resource):
 
     def get_repo(self):
         session = self.get_session()
-        repos = session.repos
+        repos = session.app.hi.db_view.repos
         repo_name = self.__parent__.name
         repo = repos[repo_name]
         return repo
@@ -263,13 +263,13 @@ class ResourceLibraries(Resource):
 
         libname = key
         shelf = context_get_shelf(self)
-        if not libname in shelf.get_libraries_path():
+        if not libname in shelf.libraries:
             return ResourceLibraryNotFound(libname)
         return ResourceLibrary(libname)
 
     def __iter__(self):
         shelf = context_get_shelf(self)
-        libraries = sorted(shelf.get_libraries_path())
+        libraries = sorted(shelf.libraries)
         return libraries.__iter__()
 
 
@@ -310,7 +310,7 @@ class ResourceRepos(Resource):
 
     def getitem(self, key):
         session = self.get_session()
-        repos = session.repos
+        repos = session.app.hi.db_view.repos
         if not key in repos:
             #msg = 'Could not find repository "%s".' % key
             return ResourceRepoNotFound(key)
@@ -318,7 +318,7 @@ class ResourceRepos(Resource):
 
     def __iter__(self):
         session = self.get_session()
-        repos = list(session.repos)
+        repos = session.app.hi.db_view.repos
         return list(repos).__iter__()
 
 class ResourceRepoNotFound(ResourceEndOfTheLine):
@@ -565,7 +565,8 @@ def context_get_repo_name(context):
 def context_get_repo(context):
     session = context.get_session()
     repo_name = context_get_repo_name(context)
-    repo = session.repos[repo_name]
+    repos = session.app.hi.db_view.repos
+    repo = repos[repo_name]
     return repo
 
 def context_get_shelf(context):
@@ -576,8 +577,8 @@ def context_get_shelf(context):
 
 def context_get_library(context):
     library_name = context_get_library_name(context)
-    session = context.get_session()
-    library = session.get_library(library_name)
+    shelf = context_get_shelf(context)
+    library = shelf.libraries[library_name]
     return library
 
 def context_get_library_name(context):

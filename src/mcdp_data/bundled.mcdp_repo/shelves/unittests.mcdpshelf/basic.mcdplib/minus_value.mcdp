@@ -1,0 +1,9 @@
+mcdp {
+    provides f [m]
+    requires r [m]
+    required r >= provided f - 1 m
+}
+# r >= f - 1
+# f <= r + 1
+# r = 0 --> f <= 1
+# r = 0.1 --> f <= 1.1

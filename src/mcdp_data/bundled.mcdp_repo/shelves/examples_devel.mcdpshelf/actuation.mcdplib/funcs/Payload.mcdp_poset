@@ -1,0 +1,5 @@
+product(
+  mass: kg,
+  shape: m x m x m,
+  rigid_body: `RigidBodyID
+)

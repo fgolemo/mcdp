@@ -9,7 +9,7 @@ __all__ = [
     'FiniteCollection',
 ]
 
-class FiniteCollection():
+class FiniteCollection(object):
     """ This is used as a value, whose Space is FinitecollectionsInclusion """
     
     @contract(elements='set|list', S=Space)

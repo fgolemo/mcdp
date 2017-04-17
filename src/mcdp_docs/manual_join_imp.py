@@ -314,7 +314,7 @@ def generate_doc(soup):
 
     header_id = 1
 
-    class Item():
+    class Item(object):
         def __init__(self, tag, depth, name, _id, items):
             self.tag = tag
             self.name = name

@@ -49,7 +49,7 @@ def test_view1a():
     db_schema.add_acl_rules([all_everything])
     db = deepcopy(db0)
     
-    class UserView():
+    class UserView(object):
         def get_complete_address(self):
             return '%s <%s>' %  (self.name, self.email)
     

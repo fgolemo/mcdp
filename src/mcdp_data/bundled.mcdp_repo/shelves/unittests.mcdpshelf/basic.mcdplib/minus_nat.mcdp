@@ -1,0 +1,6 @@
+mcdp {
+    provides f [ℕ]
+    requires r [ℕ]
+
+    required r ≥ provided f - ℕ:2
+}

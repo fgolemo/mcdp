@@ -174,10 +174,10 @@ def disk_event_interpret(disk_rep, disk_event):
         msg += indent((disk_rep.tree()), ' disk_rep: ')
         from mcdp_hdb.memdataview import InvalidOperation
         raise_wrapped(InvalidOperation, e, msg)
-
-class Changes():
-    def __init__(self, removed, added, modified, renamed):
-        pass
+# 
+# class Changes(object):
+#     def __init__(self, removed, added, modified, renamed):
+#         pass
         
 def apply_disk_event_to_filesystem(wd, disk_event, repo=None):
     '''

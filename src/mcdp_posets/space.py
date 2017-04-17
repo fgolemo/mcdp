@@ -62,7 +62,7 @@ class Space(object):
 class MapNotDefinedHere(Exception):
     """ The map is not defined at this point """
 
-class Map():
+class Map(object):
 
     __metaclass__ = ABCMeta
 

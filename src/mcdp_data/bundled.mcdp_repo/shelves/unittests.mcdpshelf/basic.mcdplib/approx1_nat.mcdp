@@ -1,0 +1,6 @@
+# test not_implemented_error
+mcdp {
+    provides f [Nat]
+    requires r [Nat]
+    required r >= approx(provided f, Nat: 3)
+}

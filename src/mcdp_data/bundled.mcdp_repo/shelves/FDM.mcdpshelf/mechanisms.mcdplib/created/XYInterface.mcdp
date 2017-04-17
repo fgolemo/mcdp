@@ -1,0 +1,14 @@
+interface mcdp {
+    ''' This models an X, Y joint '''   
+    provides workspace [m]         'Dimension of workspace (assuming X=Y for simplicity)'
+    provides payload_mass [g]      'Weight of payload to be moved around'
+    provides precision [1/mm]      'Precision (higher is better) (assuming X=Y)'
+    provides velocity [mm/s]       'Velocity (assuming X=Y=Z)'
+    provides acceleration [mm/s²]  'Motion acceleration'
+    provides force [N]             'Force to be exerted in any direction'
+    
+
+    requires electric_power [W]
+    requires mass [g]
+    requires budget [$]
+}

@@ -1,0 +1,8 @@
+mcdp {
+    provides capacity [J]   
+    requires mass [g]
+
+    specific_energy = 10 Wh/kg      
+    provided capacity <= 1 MJ
+    required mass >= 5 g + provided capacity / specific_energy
+}

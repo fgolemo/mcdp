@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*-
 from mcdp import MCDPConstants
-from mcdp_hdb  import Schema, SchemaString, SchemaList,\
-    SchemaHash,  DiskMap
-from mcdp_hdb.memdataview_manager import ViewManager
+from mcdp_hdb import Schema, SchemaString, SchemaList, SchemaHash, DiskMap, ViewManager
+from mcdp_hdb_mcdp.RepoView import RepoView
+from mcdp_hdb_mcdp.library_view import LibraryView
 from mcdp_library.specs_def import specs
+from mcdp_shelf.shelves import Shelf
 from mcdp_user_db.user import UserInfo, User
 from mcdp_user_db.userdb import UserDB
 
 
-class DB():
+class DB(object):
     
     db = Schema()
     library = Schema()
@@ -37,6 +38,10 @@ class DB():
     shelves = SchemaHash(shelf)
     
     repo = Schema() 
+    with repo.context_e('info') as repo_info:
+        repo_info.string('desc_short',  can_be_none=True)
+        repo_info.string('desc_long',  can_be_none=True)
+    
     repo._add_child('shelves', shelves)
 
     user = Schema() 
@@ -64,6 +69,8 @@ class DB():
     
     dm = DiskMap()
     dm.hint_directory(shelves, pattern='%.mcdpshelf')
+    dm.hint_directory(repo, translations={'info':'mcdprepo.yaml'})
+    dm.hint_file_yaml(repo['info'])
     dm.hint_directory(shelf, translations={'info':'mcdpshelf.yaml', 'libraries':None})
     dm.hint_file_yaml(shelf['info'])
     dm.hint_directory(shelf['libraries'], pattern='%.mcdplib')
@@ -84,9 +91,11 @@ class DB():
 
     view_manager = ViewManager(db)
     view_manager.set_view_class(user, User)
+    view_manager.set_view_class(repo, RepoView)
+    view_manager.set_view_class(shelf, Shelf)
     view_manager.set_view_class(user_info, UserInfo)
     view_manager.set_view_class(user_db, UserDB)
-    
+    view_manager.set_view_class(library, LibraryView)
 #     user2 = Schema()
     # info/ 
     #     public/      # Things that everybody can see

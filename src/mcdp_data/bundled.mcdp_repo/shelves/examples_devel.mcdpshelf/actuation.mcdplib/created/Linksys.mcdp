@@ -1,0 +1,9 @@
+mcdp {
+
+    requires budget >= 40 USD
+
+    requires wlan [`WifiCom]
+    provides wlan [`WifiCom]
+    provides eth [`ETHCom]
+    requires eth [`ETHCom]
+}

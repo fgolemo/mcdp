@@ -3,14 +3,15 @@ import os
 from contracts import contract
 from contracts.utils import raise_desc
 from git.repo.base import Repo
+from nose.tools import assert_equal
 
 from mcdp.logs import logger
 from mcdp_hdb.gitrepo_map import create_empty_dir_from_schema
 from mcdp_hdb.memdataview_utils import host_name
 from mcdp_hdb.pipes import mount_git_repo, WriteToRepoCallback, mount_directory
+from mcdp_utils_misc import format_list
 
 from .main_db_schema import DB
-from nose.tools import assert_equal
 
 
 class HostInstance(object):
@@ -74,6 +75,11 @@ class HostInstance(object):
             self.repo_local['user_db'] = dirname
         self.mount()
         
+        logger.info('Set up repositories %s.' % format_list(self.db_view.repos))
+        for repo_name, repo in self.db_view.repos.items():
+            logger.info('* repo %r has shelves %s ' % (repo_name, format_list(repo.shelves)))
+        logger.info('Set up users %s.' % format_list(self.db_view.user_db.users))
+        
     def mount(self):
         db_schema = DB.db
         db_data = db_schema.generate_empty()
@@ -120,6 +126,10 @@ class HostInstance(object):
         for repo_name in all_repo_names:
             view_repos[repo_name]
             db_view.repos[repo_name]
+        username_anonymous = 'anonymous'
+        if not username_anonymous in db_view.user_db.users:
+            user = DB.user.generate_empty(info=dict(name='Anonymous', username=username_anonymous))
+            db_view.user_db.users[username_anonymous] = user
         
 class PushCallback(object):
     @staticmethod

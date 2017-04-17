@@ -1,0 +1,43 @@
+mcdp {
+    provides part_volume     [mm³]     'Volume of the part to be produced.'
+    provides part_resolution [1/mm]    '(Inverse) resolution of the part to be produced.' 
+    provides service_temperature [C]  'Temperature that the produced part can resist.'
+    
+    requires electric_power [W]         'Total power drawn during production'
+    requires time [s]                   'Time necessary to produce each part'
+    requires mass [g]                   'Total mass of the extruder'
+    requires budget [$]                 'Total cost of the extruder'
+    requires budget_per_part [$]        'Budget for each part to be produced'
+    
+    # The extruder's components 
+    nozzle = instance `Nozzle
+    liquefier = instance `Liquefier 
+    # The material (filament) used
+    material = instance `Materials2
+    # The parts that provide force to the filament
+    actuated_gears = instance `ActuatedGears 
+    
+    # The properties of the part produced that depend on the material
+    service_temperature provided by material ≽ provided service_temperature
+    
+    # The resolution depends on the nozzle (as well as material?)
+    part_resolution provided by nozzle ≽ provided part_resolution 
+    # Each material has a liquefaction temperature 
+    temperature provided by liquefier ≽ liquefaction_temperature required by material  
+   
+    force provided by actuated_gears ≽ force required by nozzle  
+    
+    # The time it takes to produce the part depends on the part volume
+    # and the nozzle properties (time_per_unit_volume)
+    required time ≽ (time_per_unit_volume required by nozzle) · provided part_volume 
+    # The cost of materials depends on the part volume and the specific cost
+    # of the material 
+    material_mass = provided part_volume · density required by material
+    cost_of_filament = (specific_cost required by material) · material_mass
+    required budget_per_part ≽ cost_of_filament
+    
+    # The total budget is the sum of budgets
+    required budget ≽  ∑ budget required by * 
+    required electric_power ≽ ∑ electric_power required by *
+    required mass ≽ ∑ mass required by *
+}

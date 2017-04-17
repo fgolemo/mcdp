@@ -1,0 +1,4 @@
+product(
+    tag: S(WifiCom),
+    duration: s
+)

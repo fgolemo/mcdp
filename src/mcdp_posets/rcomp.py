@@ -15,7 +15,7 @@ __all__ = [
    'Rcomp',
 ]
 
-class RcompTop():
+class RcompTop(object):
     def __str__(self):
         return self.__repr__()
     def __repr__(self):
@@ -30,7 +30,7 @@ class RcompTop():
     def __float__(self):
         return np.inf
 
-class RcompBottom():
+class RcompBottom(object):
     def __str__(self):
         return self.__repr__()
     def __repr__(self):

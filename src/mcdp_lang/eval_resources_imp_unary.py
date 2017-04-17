@@ -24,7 +24,7 @@ from .parts import CDPLanguage
 CDP = CDPLanguage
 
  
-class RuleInterface():
+class RuleInterface(object):
     __metaclass__ = ABCMeta
     
     @abstractmethod
@@ -194,7 +194,7 @@ class RuleSquareRcompunits(OneRGiveMeADP):
 class OpSpecDoesntMatch(Exception):
     pass
 
-class OpSpecInterface():
+class OpSpecInterface(object):
     
     @abstractmethod
     def applies(self, rtype, is_constant, symbols):

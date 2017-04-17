@@ -1,0 +1,6 @@
+template mcdp {
+   provides cuda_cores [Nat]
+   provided cuda_cores <= Nat: 192 
+
+   requires power [W]
+}

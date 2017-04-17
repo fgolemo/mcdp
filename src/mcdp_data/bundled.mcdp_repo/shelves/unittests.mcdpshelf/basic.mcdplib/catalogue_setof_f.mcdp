@@ -1,0 +1,6 @@
+catalogue {
+  provides f1 [set-of(V)]
+  requires r1 [$]
+  
+ {1.5 V} ⟻ model1 ⟼ 5 $   
+}

@@ -29,7 +29,7 @@ STYLE_GREENREDSYM = 'greenredsym'
 COLOR_DARKGREEN = 'darkgreen'
 COLOR_DARKRED = 'red'
 
-class PlottingInfo():
+class PlottingInfo(object):
 
     def should_I_expand(self, ndp_name, alternative):  # @UnusedVariable
         """ ndp: a coproduct, alternative """

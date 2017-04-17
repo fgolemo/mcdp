@@ -27,7 +27,7 @@ def get_code_spec_expr():
     return copy
 
 
-class SyntaxCodeSpec():
+class SyntaxCodeSpec(object):
     CODE = keyword('code', CDP.CodeKeyword)
 
     # Code specs

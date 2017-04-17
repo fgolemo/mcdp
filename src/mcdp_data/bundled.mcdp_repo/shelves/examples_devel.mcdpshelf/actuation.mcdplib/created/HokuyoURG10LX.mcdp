@@ -1,0 +1,8 @@
+mcdp {
+    requires budget >= 2000 USD
+
+    requires payload [`Payload]
+
+    requires in [`PortableDCPower]
+    provides usb [`USBCom] 
+}

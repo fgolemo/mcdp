@@ -24,7 +24,7 @@ class RepoInvalidURL(RepoException):
  
 
 
-class MCDPRepo():
+class MCDPRepo(object):
     ''' 
         An MCDP repo holds zero or more Bundles.
         
@@ -258,7 +258,7 @@ class MCDPGitRepo(MCDPRepo):
                     continue
                 else:
                     shelf = self.shelves[res['shelf_name']]
-                    if not res['library_name'] in shelf.get_libraries_path():
+                    if not res['library_name'] in shelf.librariess:
                         exists = False
                     else:
                         exists = True

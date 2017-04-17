@@ -98,7 +98,7 @@
  	  <select id='select_library' class='hot_select'>
  	  	<option value="#"  selected = 1>{{icon_library|safe}}&nbsp;{{navigation.library_name}}</option>
 
- 		{% for library_name in navigation.shelf.get_libraries_path() %}
+ 		{% for library_name in navigation.shelf.libraries %}
  		    <option name='library_name'
 				value="{{library_url(library_name)}}/">
  		    	{{icon_library|safe}}&nbsp; {{library_name}}

@@ -9,7 +9,7 @@ from mcdp_report.gg_ndp import format_unit
 import numpy as np
 
 
-class SolverState():
+class SolverState(object):
 
     def __init__(self, ndp):
         self.fun = []

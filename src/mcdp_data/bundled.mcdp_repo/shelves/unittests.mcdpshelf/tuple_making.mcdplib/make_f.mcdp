@@ -1,0 +1,8 @@
+mcdp {
+   provides fa [g]
+   provides fb [J]
+
+   requires r [g x J]
+
+   r >= <fa, fb>
+}

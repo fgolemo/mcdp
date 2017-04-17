@@ -15,7 +15,7 @@ gvgen_version = "2.0"
 debug = 0
 debug_tree_unroll = 0
 
-class GvGen():
+class GvGen(object):
     """
     Graphviz dot language Generation Class
     For example of usage, please see the __main__ function

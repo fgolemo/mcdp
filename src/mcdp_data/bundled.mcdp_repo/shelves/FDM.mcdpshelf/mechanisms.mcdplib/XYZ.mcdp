@@ -1,0 +1,46 @@
+mcdp { 
+    ''' 
+    This models a XYZ arm where X and Y are in parallel and equal and they hold Z.
+    '''
+    provides workspace [m] 'Dimension of workspace (assuming X=Y=Z for simplicity)'
+    provides payload_mass [g] 'Weight of payload to be moved around'
+    provides precision [1/mm] 'Precision (higher is better) (assuming X=Y=Z)'
+    provides velocity [mm/s] 'Velocity (assuming X=Y=Z)'
+    provides force [N] 'Velocity (assuming X=Y=Z)'
+    provides acceleration [mm/s²]
+    # for a robot arm we could be more precise by constraining acceleration, jerk, etc;
+    # and other properties. For a 3D printer it probably doesn't matter.
+    
+    # let's say 
+
+    # Consider Z first, because Z is attached to X and Y
+    z_joint = instance `Joint
+    workspace provided by z_joint ≽ provided workspace
+    precision provided by z_joint ≽ provided precision
+    payload_mass provided by z_joint ≽ provided payload_mass
+    force provided by z_joint ≽ provided force 
+    velocity provided by z_joint ≽ provided velocity 
+    acceleration provided by z_joint ≽ provided acceleration 
+
+    mass_total = provided payload_mass + mass required by z_joint
+
+    x_joint = instance `Joint
+    workspace provided by x_joint ≽ provided workspace
+    precision provided by x_joint ≽ provided precision
+    payload_mass provided by x_joint ≽ mass_total
+    force provided by x_joint ≽ provided force 
+    velocity provided by x_joint ≽ provided velocity 
+    acceleration provided by x_joint ≽ provided acceleration 
+
+    y_joint = instance `Joint
+    workspace provided by y_joint ≽ provided workspace    
+    precision provided by y_joint ≽ provided precision
+    payload_mass provided by y_joint ≽ mass_total
+    force provided by y_joint ≽ provided force 
+    velocity provided by y_joint ≽ provided velocity 
+    acceleration provided by y_joint ≽ provided acceleration 
+
+    requires budget = ∑ budget required by *
+    requires electric_power = ∑ electric_power required by *
+    requires mass = ∑ mass required by * 
+}

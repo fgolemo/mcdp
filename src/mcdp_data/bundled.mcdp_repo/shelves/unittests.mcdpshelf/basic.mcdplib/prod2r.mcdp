@@ -1,0 +1,7 @@
+mcdp  {
+    requires r1 [m]
+    requires r2 [s]
+    provides f  [m*s]
+
+    provided f ≤ required r1 · required r2
+}

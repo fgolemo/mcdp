@@ -1,0 +1,4 @@
+choose (
+   LiPo: instance `Battery_LiPO,
+   LMO:  instance `Battery_LMO
+)

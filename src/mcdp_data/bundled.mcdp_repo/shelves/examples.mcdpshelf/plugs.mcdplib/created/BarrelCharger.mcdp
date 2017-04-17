@@ -1,0 +1,22 @@
+mcdp {
+    provides out [`DC_Charging] 
+    requires in  [`AC_Charging] 
+    requires budget [USD]
+
+    required budget ≥ 10.99 USD    
+
+    ((required in).ac).socket ≥ `socket_type : TypeA
+    ((required in).ac).frequency ≥ `AC_frequencies : f50
+    ((required in).ac).voltage ≥ `AC_voltages : v110
+
+    ((provided out).dc).voltage   ≤ `DC_Voltages: v5
+    ((provided out).dc).connector ≤ `barrel_connectors: barrel_2_35mm
+ 
+    amps = ((provided out).dc).amps 
+    amps ≤  1.5 A
+    power = 5 V · (amps)
+
+    ((required in).ac).watts ≥ power
+
+    (required in).duration ≥ (provided out).duration
+}

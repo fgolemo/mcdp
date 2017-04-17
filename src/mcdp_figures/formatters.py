@@ -1,7 +1,7 @@
 from abc import abstractmethod, ABCMeta
 
 
-class MakeFigures_Formatter():
+class MakeFigures_Formatter(object):
     __metaclass__ = ABCMeta
     
     @abstractmethod

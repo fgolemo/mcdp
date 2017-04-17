@@ -1,0 +1,6 @@
+template mcdp {
+    provides in1 [`Payload]
+    provides in2 [`Payload]
+    provides in3 [`Payload]
+    requires out [`Payload]
+}

@@ -24,7 +24,7 @@ COLOR_DARKRED = '#861109'
 
 
 
-class GraphDrawingContext():
+class GraphDrawingContext(object):
     
     def __init__(self, gg, parent, yourname, library, level=0,
                  tmppath=None, style='default',

@@ -1,0 +1,9 @@
+template mcdp {
+    requires budget [$]
+    requires mass [kg]
+    requires electric_power [W]
+    #requires linear_velocity [m/s]
+    #requires force [N]
+    #provides force [N]
+    provides temperature [C]
+} 

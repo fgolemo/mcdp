@@ -1,0 +1,13 @@
+# test connected
+mcdp {
+    provides f [dimensionless]
+    
+    sub hnlin = instance dp {
+        provides x [dimensionless]
+        requires r [dimensionless]
+        
+        implemented-by load SimpleNonlinearity1
+    }
+    
+    max(f, hnlin.r) <= hnlin.x        
+}

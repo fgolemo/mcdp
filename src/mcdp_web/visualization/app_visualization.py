@@ -21,9 +21,10 @@ from mcdp_web.utils0 import add_other_fields, add_std_vars_context
 from mocdp.comp.context import Context
 
 from .add_html_links_imp import add_html_links
+from mcdp_hdb_mcdp.library_view import TheContext
 
 
-class AppVisualization():
+class AppVisualization(object):
 
     def __init__(self):
         pass
@@ -80,14 +81,9 @@ class AppVisualization():
     
     
 def generate_view_syntax(e, make_relative):
-    ext = e.spec.extension
     expr = e.spec.parse_expr
     parse_refine = e.spec.parse_refine
-
-    filename = '%s.%s' % (e.thing_name, ext)
-    f = e.library._get_file_data(filename)
-    source_code = f['data']
-    realpath = f['realpath']
+    source_code = e.thing
         
     context = Context()
     class Tmp:
@@ -128,11 +124,16 @@ def generate_view_syntax(e, make_relative):
      
     
     if parses:
-        context = e.library._generate_context_with_hooks()
+        db_view = e.app.hi.db_view
+        subscribed_shelves = e.session.get_subscribed_shelves()
+        current_library_name = e.library_name
+        context = TheContext(db_view, subscribed_shelves, current_library_name)
+        mcdp_library = context.get_library()
+
         try:
-            thing = e.spec.load(e.library, e.thing_name, context=context)
+            thing = e.spec.load(mcdp_library, e.thing_name, context=context)
                 
-            svg_data = get_svg_for_visualization(e, e.library, e.library_name, e.spec, 
+            svg_data = get_svg_for_visualization(e, mcdp_library, e.library_name, e.spec, 
                                                      e.thing_name, thing, Tmp.refined, 
                                                      make_relative)
         except (DPSemanticError, DPNotImplementedError) as exc:
@@ -150,7 +151,7 @@ def generate_view_syntax(e, make_relative):
         'source_code': source_code,
         'error': unicode(error, 'utf-8'),
         'highlight': unicode(highlight, 'utf-8'),
-        'realpath': realpath,
+#         'realpath': realpath,
         'current_view': 'syntax', 
         'explanation1_html': None,
         'explanation2_html': None,

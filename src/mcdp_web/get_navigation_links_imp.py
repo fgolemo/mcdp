@@ -23,7 +23,8 @@ def get_navigation_links_context(e):
     
     d['repo_name'] = e.repo_name
     d['repo'] = e.repo
-    d['repos'] = e.app.repos
+    repos = e.app.hi.db_view.repos
+    d['repos'] = repos
 
     d['shelf_name'] = e.shelf_name
     d['shelf'] = e.shelf
@@ -48,7 +49,7 @@ def get_navigation_links_context(e):
         p = '/repos/{repo_name}/shelves/{shelf_name}/libraries/{library_name}/'
         library_url = e.app.make_relative(e.request, p.format(**d))
 
-        documents = e.library._list_with_extension(MCDPConstants.ext_doc_md)
+        documents = list(e.library.documents)
 
         d['documents'] = []
         for id_doc in documents:
@@ -58,7 +59,10 @@ def get_navigation_links_context(e):
 
         
         d[SPEC_MODELS] = []
-        models = e.library.list_spec(SPEC_MODELS)
+        def list_spec(specname):
+            return list(e.library.things.child(specname))
+            
+        models = list_spec(SPEC_MODELS)
         for _ in natural_sorted(models):
             is_current = (e.spec_name == SPEC_MODELS) and (e.thing_name == _)
 
@@ -72,7 +76,7 @@ def get_navigation_links_context(e):
                         url_delete=url_delete, current=is_current)
             d[SPEC_MODELS].append(desc) 
        
-        templates = e.library.list_spec(SPEC_TEMPLATES)
+        templates = list_spec(SPEC_TEMPLATES)
         d[SPEC_TEMPLATES] = []
         for _ in natural_sorted(templates):
             is_current = (e.spec_name == SPEC_TEMPLATES) and (e.thing_name == _)
@@ -86,8 +90,8 @@ def get_navigation_links_context(e):
             desc = dict(id=_, name=name, url=url, current=is_current, url_edit=url_edit, url_delete=url_delete)
             d[SPEC_TEMPLATES].append(desc)
 
-        
-        posets = e.library.list_spec(SPEC_POSETS)
+        posets = list_spec(SPEC_POSETS)
+#         posets = e.library.list_spec(SPEC_POSETS)
         d[SPEC_POSETS] = []
         for _ in natural_sorted(posets):
             is_current = (e.spec_name == SPEC_POSETS) and (e.thing_name == _)
@@ -101,7 +105,7 @@ def get_navigation_links_context(e):
             desc = dict(id=_, name=name, url=url, current=is_current, url_edit=url_edit, url_delete=url_delete)
             d[SPEC_POSETS].append(desc)
 
-        values =e.library.list_spec(SPEC_VALUES)
+        values = list_spec(SPEC_VALUES)
         d[SPEC_VALUES] = []
         for _ in natural_sorted(values):
             is_current = (e.spec_name == SPEC_VALUES) and (e.thing_name == _)
@@ -114,7 +118,6 @@ def get_navigation_links_context(e):
             name = "Value: %s" % _
             desc = dict(id=_, name=name, url=url, current=is_current, url_edit=url_edit, url_delete=url_delete)
             d[SPEC_VALUES].append(desc)
-
             
 
         d['views'] = []
@@ -148,12 +151,12 @@ def get_navigation_links_context(e):
         desc = dict(id=l,name=name, url=url, current=is_current)
         libname2desc[l] =desc
         d['libraries'].append(desc)
-
-    indexed = e.session.get_libraries_indexed_by_shelf()
-    indexed = [(sup, [libname2desc[_] for _ in l]) 
-               for sup, l in indexed]
-    
-    
-    d['libraries_indexed'] = indexed 
-    
+# 
+#     indexed = e.session.get_libraries_indexed_by_shelf()
+#     indexed = [(sup, [libname2desc[_] for _ in l]) 
+#                for sup, l in indexed]
+#     
+#     
+#     d['libraries_indexed'] = indexed 
+#     
     return d

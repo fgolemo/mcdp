@@ -1,0 +1,6 @@
+mcdp {
+    provides lift [N]
+    requires power [W]
+    c = 10.0 W/N²
+    required power ≽ c · provided lift²
+}

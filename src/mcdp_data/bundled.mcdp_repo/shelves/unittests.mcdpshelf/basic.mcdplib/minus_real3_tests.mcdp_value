@@ -1,0 +1,10 @@
+# r + Top >= f
+
+< 
+    assert_equal( solve(0 m, `minus_real3), ↑ {0 m} ),
+    assert_equal( solve(⊤ m, `minus_real3), ↑ {0 m} ),
+
+    assert_equal( solve_r(0 m, `minus_real3), ↓ { ⊤ m } ),
+    assert_equal( solve_r(1 m, `minus_real3), ↓ { ⊤ m } ),
+    assert_equal( solve_r(⊤ m, `minus_real3), ↓ { ⊤ m })
+>

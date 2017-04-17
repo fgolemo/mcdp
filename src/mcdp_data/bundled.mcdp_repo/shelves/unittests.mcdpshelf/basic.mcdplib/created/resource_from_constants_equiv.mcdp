@@ -1,0 +1,7 @@
+mcdp {
+    requires a [ℕ]
+    requires b [ℕ]
+    
+    required a ≽ 1
+    required b ≽ 2
+}

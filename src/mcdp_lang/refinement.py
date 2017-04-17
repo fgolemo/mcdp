@@ -68,7 +68,7 @@ def infer_debug(s):
     # print(s)
     pass
     
-class SemanticInformationForEntity():
+class SemanticInformationForEntity(object):
     def __init__(self, element_defined, where_used=[]):
         element_defined.where
         #check_isinstance(where_defined, Where)
@@ -79,7 +79,7 @@ class SemanticInformationForEntity():
         check_isinstance(where, Where)
         self.where_used.append(where)
         
-class SemanticInformation():
+class SemanticInformation(object):
     def __init__(self):
         # maps str to SemanticInformationForEntity
         self.resources = {}  

@@ -1,0 +1,8 @@
+mcdp  {
+    provides f1 [m]
+    provides f2 [m]
+    provides f3 [m]
+    requires r  [m]
+
+    required r >= provided f1  + provided f2 + provided f3
+}

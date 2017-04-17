@@ -1,0 +1,7 @@
+mcdp {
+    provides cuteness [J]
+    requires payload [`Payload]
+    requires budget [USD]
+
+    budget >= 0.50 USD
+}

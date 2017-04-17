@@ -18,7 +18,7 @@ from .partial_result import get_lower_bound_ndp
 
 _ = UpperSet
 
-class OptimizationState():
+class OptimizationState(object):
     """
         
     

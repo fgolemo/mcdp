@@ -1,0 +1,7 @@
+specialize [
+   Battery: `batteries_nodisc.Battery_LiPo, 
+   Actuation: `droneD_complete_v2.Actuation, 
+   Perception: `Perception1,
+   PowerApprox: `PowerApprox
+] 
+`DroneCompleteTemplate

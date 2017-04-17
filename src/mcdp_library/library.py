@@ -23,7 +23,7 @@ __all__ = [
 class LibraryIsReadOnly(Exception):
     pass
 
-class MCDPLibrary():
+class MCDPLibrary(object):
     """
     
         to document:
@@ -142,12 +142,21 @@ class MCDPLibrary():
     def load_spec(self, spec_name, thing_name, context=None):
         from mcdp_library.specs_def import specs
         spec = specs[spec_name]
-        res = self._load_generic(thing_name, spec.extension, spec.parse, context)
+        res = self._load_generic(thing_name, spec_name, spec.parse, context)
         check_isinstance(res, spec.klass)
         return res
 
-    @contract(name=str, extension=str)
-    def _load_generic(self, name, extension, parsing_function, context):
+    def _load_spec_data(self, spec_name, thing_name):
+        from mcdp_library.specs_def import specs
+        spec = specs[spec_name]
+        filename = '%s.%s' % (thing_name, spec.extension)
+        f = self._get_file_data(filename)
+        data = f['data']
+        realpath = f['realpath']
+        return dict(data=data, realpath=realpath)
+        
+    @contract(name=str)
+    def _load_generic(self, name, spec_name, parsing_function, context):
         """
             parsing_function takes string, context 
         """
@@ -156,10 +165,15 @@ class MCDPLibrary():
         if not isinstance(name, str):
             msg = 'Expected a string for the name.'
             raise_desc(ValueError, msg, name=name)
-        filename = '%s.%s' % (name, extension)
-        f = self._get_file_data(filename)
-        data = f['data']
-        realpath = f['realpath']
+#         filename = '%s.%s' % (name, extension)
+#         f = self._get_file_data(filename)
+#         data = f['data']
+#         realpath = f['realpath']
+        
+        x =  self._load_spec_data(spec_name, name)
+        data = x['data']
+        realpath = x['realpath']
+        
 
         current_generation = 3
         
@@ -203,7 +217,7 @@ class MCDPLibrary():
             logger.debug('actual_load(): parsed %r with %d warnings %s' %
                           (name, len(context_warnings), cached))
             
-        class JustAHack:
+        class JustAHack(object):
             warnings = context_warnings
             
         msg = 'While loading %r.' % name
@@ -327,8 +341,7 @@ class MCDPLibrary():
             
             Images are allowed to have '-' in them.
         '''
-        r = []
-         
+        r = [] 
         
         for x in self.file_to_contents:
             assert isinstance(x, str), x.__repr__()

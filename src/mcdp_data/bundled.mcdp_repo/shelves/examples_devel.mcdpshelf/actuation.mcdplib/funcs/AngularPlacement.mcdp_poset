@@ -1,0 +1,8 @@
+product (
+   resolution: deg,
+   torque: N*m,
+   span: deg, 
+   transit_time_60deg: s, # XXX: this should be "opped"
+   duration: s,
+   rigid_body: `RigidBodyID
+)

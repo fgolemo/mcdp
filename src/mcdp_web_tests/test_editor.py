@@ -55,12 +55,12 @@ def check_generate_view_syntax(filename, source, libname):  # @UnusedVariable
     spec = filename2spec(filename)
     thing_name, _ext = os.path.splitext(os.path.basename(filename))
     make_relative = lambda x: x
-    class SessionMockup():
+    class SessionMockup(object):
         def __init__(self):
             pass
         def get_repo_shelf_for_libname(self, libname):  # @UnusedVariable
             return 'repo1', 'shelf1'
-    class EnvironmentMockup():
+    class EnvironmentMockup(object):
         def __init__(self):
             self.library_name = libname
             self.thing_name = thing_name

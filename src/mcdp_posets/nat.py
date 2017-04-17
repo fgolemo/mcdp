@@ -16,7 +16,7 @@ __all__ = [
    'Int',
 ]
 
-class NatTop():
+class NatTop(object):
     def __repr__(self):
         return "⊤"
     def __eq__(self, x):

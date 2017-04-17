@@ -23,7 +23,7 @@ __all__ = [
 ]
 
 
-class SeriesSimplificationRule():
+class SeriesSimplificationRule(object):
     __metaclass__ = ABCMeta
 
     @abstractmethod

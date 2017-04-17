@@ -89,10 +89,8 @@ class WebApp(AppVisualization, AppStatus,
     singleton = None
     
     def __init__(self, options, settings):
-        from mcdp_library_tests.create_mockups import write_hierarchy
         self.options = options
         self.settings = settings
-        
         
         # display options
         for k in sorted(self.options._values):
@@ -143,106 +141,103 @@ class WebApp(AppVisualization, AppStatus,
         self.sessions = OrderedDict()
         
         # str -> Shelf
-        self.all_shelves = OrderedDict()
+#         self.all_shelves = OrderedDict()
         
         config_repos = yaml_load(self.options.repos_yaml)
         logger.info('Config:\n'+ indent(self.options.repos_yaml, '>'))
         logger.info(config_repos)
         inst_name = self.options.inst_name
         root= 'out/root'
+        
+        config_repos['local']['bundled'] = os.path.join(dir_from_package_name('mcdp_data'), 'bundled.mcdp_repo')
+        
         self.hi = HostInstance(inst_name=inst_name, 
                                upstream='master', 
                                root=root, 
                                repo_git=config_repos['remote'], 
                                repo_local=config_repos['local'])
-        
-        if self.options.users is None:
-            logger.info('No user directory passed (%s). Creating user dir.' % self.options.users)
-            self.options.users = create_tmpdir('tmp-user-db')
-            db = {
-                'anonymous.mcdp_user': {
-                    'user.yaml' : '''
-                        name: Anonimo
-                    '''
-                },
-                'admin.mcdp_user': {
-                    'user.yaml' : '''
-                        name: Administrator
-                        groups:
-                        - admin
-                        authentication_ids:
-                        - provider: password
-                          password: admin
-                    '''
-                }
-            }
-            if not os.path.exists(self.options.users):
-                os.makedirs(self.options.users)
-            logger.info('Temporary user dir is %s' % self.options.users) 
-            write_hierarchy(self.options.users, db)
-            
-
-        self.repos = {}
-        REPO_BUNDLED = 'bundled'
-        REPO_USERS = 'global'
-        if self.options.load_mcdp_data:
-            desc_short = 'Contains models bundled with the code.'
-            if os.path.exists('.git'):
-                logger.info('Loading mcdp_data repo as MCDPGitRepo')
-                b = MCDPGitRepo(where='.', desc_short=desc_short)
-            else:
-                logger.info('Loading mcdp_data repo as MCDPythonRepo')
-                b = MCDPythonRepo('mcdp_data', desc_short=desc_short)
-                    
-            self.repos[REPO_BUNDLED]  = b
-        else:
-            logger.info('Not loading mcdp_data')
-        from mcdp_hdb_mcdp.main_db_schema import DB
-        if self.options.users is not None:
-            logger.info('Loading user db from %s' % self.options.users)
-            dm = DB.dm
-            hierarchy = ProxyDirectory.from_disk(self.options.users)
-#             logger.info('These are the files found:\n%s' % indent(hierarchy.tree(), '  '))
-            user_db_schema = DB.user_db
-            user_db_data = dm.interpret_hierarchy_(user_db_schema, hierarchy)
-            
-#             logger.debug('user_db schema: \n' + str(user_db_schema) )
-#             logger.debug('user_db:\n' + indent(yaml_dump(user_db_data), ' > '))
-            
-            DB.user_db.validate(user_db_data)
-            
-            user_db_view = DB.view_manager.create_view_instance(user_db_schema, user_db_data)
-            user_db_view.set_root() 
-            apply_changes_to_disk_and_repo(dm, user_db_view, self.options.users)
-            self.user_db = user_db_view
-            logger.info('Loaded %s users' % len(self.user_db.users))
-            for username, user in self.user_db.users.items():
-                user.info.username = username
-            desc_short = 'Global database of shared models.'
-            is_git = os.path.exists(os.path.join(self.options.users, '.git'))
-            if is_git:
-                self.repos[REPO_USERS] = MCDPGitRepo(where=self.options.users, desc_short=desc_short)
-
-        shelf2repo = {}
-        for id_repo, repo in self.repos.items():
-            shelves = repo.get_shelves()
-            
-            logger.info('repo %s: %s' % (id_repo, sorted(shelves)))
-            
-            for shelf_name in shelves:
-                if shelf_name in shelf2repo:
-                    msg = 'Shelf %r in %r and %r' % (shelf_name, id_repo, shelf2repo[shelf_name])
-                    raise ValueError(msg)
-                shelf2repo[shelf_name] = id_repo
-
-            self.all_shelves.update(shelves)
 #         
-#         picture = 'http://graph.facebook.com/10154724108563171/picture?type=large'
-#         h = urllib2.urlopen(picture)
-#         logger.info('urlp opened  %s' % h)
-#         jpg = h.read()
-#         h.close()
-#         logger.info('read %s bytes' % len(jpg)) 
+#         if self.options.users is None:
+#             logger.info('No user directory passed (%s). Creating user dir.' % self.options.users)
+#             self.options.users = create_tmpdir('tmp-user-db')
+#             db = {
+#                 'anonymous.mcdp_user': {
+#                     'user.yaml' : '''
+#                         name: Anonimo
+#                     '''
+#                 },
+#                 'admin.mcdp_user': {
+#                     'user.yaml' : '''
+#                         name: Administrator
+#                         groups:
+#                         - admin
+#                         authentication_ids:
+#                         - provider: password
+#                           password: admin
+#                     '''
+#                 }
+#             }
+#             if not os.path.exists(self.options.users):
+#                 os.makedirs(self.options.users)
+#             logger.info('Temporary user dir is %s' % self.options.users) 
+#             write_hierarchy(self.options.users, db)
+#         
+#         
+# 
+#         self.repos = {}
+#         REPO_BUNDLED = 'bundled'
+#         REPO_USERS = 'global'
+#         if self.options.load_mcdp_data:
+#             desc_short = 'Contains models bundled with the code.'
+#             if os.path.exists('.git'):
+#                 logger.info('Loading mcdp_data repo as MCDPGitRepo')
+#                 b = MCDPGitRepo(where='.', desc_short=desc_short)
+#             else:
+#                 logger.info('Loading mcdp_data repo as MCDPythonRepo')
+#                 b = MCDPythonRepo('mcdp_data', desc_short=desc_short)
+#                     
+#             self.repos[REPO_BUNDLED]  = b
+#         else:
+#             logger.info('Not loading mcdp_data')
+#         from mcdp_hdb_mcdp.main_db_schema import DB
+#         if self.options.users is not None:
+#             logger.info('Loading user db from %s' % self.options.users)
+#             dm = DB.dm
+#             hierarchy = ProxyDirectory.from_disk(self.options.users)
+# #             logger.info('These are the files found:\n%s' % indent(hierarchy.tree(), '  '))
+#             user_db_schema = DB.user_db
+#             user_db_data = dm.interpret_hierarchy_(user_db_schema, hierarchy)
+#             
+# #             logger.debug('user_db schema: \n' + str(user_db_schema) )
+# #             logger.debug('user_db:\n' + indent(yaml_dump(user_db_data), ' > '))
+#             
+#             DB.user_db.validate(user_db_data)
+#             
+#             user_db_view = DB.view_manager.create_view_instance(user_db_schema, user_db_data)
+#             user_db_view.set_root() 
+#             apply_changes_to_disk_and_repo(dm, user_db_view, self.options.users)
+#             self.user_db = user_db_view
+#             logger.info('Loaded %s users' % len(self.user_db.users))
+#             for username, user in self.user_db.users.items():
+#                 user.info.username = username
+#             desc_short = 'Global database of shared models.'
+#             is_git = os.path.exists(os.path.join(self.options.users, '.git'))
+#             if is_git:
+#                 self.repos[REPO_USERS] = MCDPGitRepo(where=self.options.users, desc_short=desc_short)
+# 
+#         shelf2repo = {}
+#         for id_repo, repo in self.repos.items():
+#             shelves = repo.get_shelves()
+#             
+#             logger.info('repo %s: %s' % (id_repo, sorted(shelves)))
+#             
+#             for shelf_name in shelves:
+#                 if shelf_name in shelf2repo:
+#                     msg = 'Shelf %r in %r and %r' % (shelf_name, id_repo, shelf2repo[shelf_name])
+#                     raise ValueError(msg)
+#                 shelf2repo[shelf_name] = id_repo
+# 
+#             self.all_shelves.update(shelves) 
         
     def add_model_view(self, name, desc):
         self.views[name] = dict(desc=desc, order=len(self.views))
@@ -251,7 +246,7 @@ class WebApp(AppVisualization, AppStatus,
         token = request.session.get_csrf_token()
         if not token in self.sessions:
             # print('creating new session for token %r' % token)
-            self.sessions[token] = Session(app=self, request=request, shelves_all=self.all_shelves)
+            self.sessions[token] = Session(app=self, request=request)
         session = self.sessions[token]
         session.set_last_request(request)
         return session
@@ -762,7 +757,9 @@ class WebApp(AppVisualization, AppStatus,
         _size = e.context.size # Not used so far
         data_format = e.context.data_format
         assert data_format == 'jpg'
-        u = self.user_db.users[username]
+        app = self
+        user_db = app.hi.db_view.user_db
+        u = user_db.users[username]
         picture_data = u.get_picture_jpg()
         if picture_data is None:
             url = e.root + '/static/nopicture.jpg'
@@ -782,8 +779,10 @@ class WebApp(AppVisualization, AppStatus,
         raise HTTPFound(url2)
     
     def _get_changes(self, e):
+        user_db =  e.session.app.hi.db_view.user_db
+        repos = e.session.app.hi.db_view.repos
         def shelf_privilege(repo_name, sname, privilege):
-            repo = e.session.repos[repo_name]
+            repo = repos[repo_name]
             if not sname in repo.shelves:
                 msg = 'Cannot find shelf "%s" in repo "%s".' % (sname, repo_name)
                 msg += '\n available: ' + format_list(repo.shelves)
@@ -795,34 +794,35 @@ class WebApp(AppVisualization, AppStatus,
             return shelf_name in e.user.subscriptions # XXX
 
         changes = []
-        for id_repo, repo in self.repos.items():   
-            for change in repo.get_changes():
-                
-                if not shelf_privilege(id_repo, change['shelf_name'], Privileges.READ):
-                    continue
-                
-                change['repo_name'] = id_repo
-                a = change['author']
-                if a in e.session.app.user_db:
-                    u = e.session.app.user_db[a]
-                else:
-                    #logger.debug('Cannot find user %r' % a )
-                    u = e.session.app.user_db.get_unknown_user_struct(a).info
+        for id_repo, repo in repos.items():
+            pass
+            if False: # XXX need to implement changes   
+                for change in repo.get_changes():
+                    if not shelf_privilege(id_repo, change['shelf_name'], Privileges.READ):
+                        continue
                     
-                change['user'] = u
-                p = '{root}/repos/{repo_name}/shelves/{shelf_name}/libraries/{library_name}/{spec_name}/{thing_name}/views/syntax/'
-                
-                subscribed = shelf_subscribed(id_repo, change['shelf_name'])
-                
-                if change['exists'] and subscribed:
-                    change['url'] = p.format(root=e.root, **change)
-                else:
-                    change['url'] = None
- 
-                
-                #print('change: %s url = %s' % (change, change['url']))
-                change['date_human'] =  datetime.datetime.fromtimestamp(change['date']).strftime('%b %d, %H:%M')
-                changes.append(change)
+                    change['repo_name'] = id_repo
+                    a = change['author']
+                    
+                    if a in user_db:
+                        u = user_db[a]
+                    else:
+                        #logger.debug('Cannot find user %r' % a )
+                        u = user_db.get_unknown_user_struct(a).info
+                        
+                    change['user'] = u
+                    p = '{root}/repos/{repo_name}/shelves/{shelf_name}/libraries/{library_name}/{spec_name}/{thing_name}/views/syntax/'
+                    
+                    subscribed = shelf_subscribed(id_repo, change['shelf_name'])
+                    
+                    if change['exists'] and subscribed:
+                        change['url'] = p.format(root=e.root, **change)
+                    else:
+                        change['url'] = None
+                    
+                    #print('change: %s url = %s' % (change, change['url']))
+                    change['date_human'] =  datetime.datetime.fromtimestamp(change['date']).strftime('%b %d, %H:%M')
+                    changes.append(change)
 
         return changes
 

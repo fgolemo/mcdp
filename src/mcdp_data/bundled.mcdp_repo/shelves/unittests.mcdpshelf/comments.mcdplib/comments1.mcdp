@@ -1,0 +1,31 @@
+ # one
+
+# two
+mcdp {
+    'comment'
+
+    provides f [Nat] 'comment'
+    requires r [Nat] 'comment'
+
+    
+
+    a = mcdp {
+        """ This is multiline comment """
+    }
+
+    provided f <= Nat:10  # unique
+    
+    b = mcdp { 
+        ''' This is multiline comment
+             We can go multiline.     
+        '''
+    }
+
+
+
+}
+
+# three 
+
+
+

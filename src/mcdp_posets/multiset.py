@@ -19,7 +19,7 @@ __all__ = [
     'Multisets',
 ]
 
-class Multiset():
+class Multiset(object):
     
     @contract(elements='dict(*:($NatTop|(int,>=1)))', S=Poset)
     def __init__(self, elements, S):

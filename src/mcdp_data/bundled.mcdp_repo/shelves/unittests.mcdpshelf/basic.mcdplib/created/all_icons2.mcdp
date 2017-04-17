@@ -1,0 +1,16 @@
+mcdp {
+    provides f [ℕ]  
+    requires r [ℕ]  
+    provides f2 [ℕ]
+    provided f2 ≼ ℕ: 2 
+    required r ≽ provided f
+    
+    provides f3 [ ℕ]
+    requires r3 [ℕ]
+    p_1 = instance `empty
+    
+    provides f4 [ ℕ]
+    requires r4 [ℕ] 
+    
+    provided f4 ≼ required r4 · ℕ: 4
+}

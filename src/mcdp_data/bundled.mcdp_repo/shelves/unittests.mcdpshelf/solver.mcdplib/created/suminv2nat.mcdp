@@ -1,0 +1,8 @@
+mcdp  {
+  provides a [s^2]
+            
+  requires x [s]
+  requires y [s]
+            
+  x * y >= a
+}

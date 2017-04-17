@@ -1,0 +1,11 @@
+mcdp {
+    provides lift [N]
+    requires power [W]
+
+    provided lift <= 10 N
+
+    p0 = 1 W
+    p1 = 20 W / N 
+    l  = provided lift
+    required power >= p0 + p1 * l
+}

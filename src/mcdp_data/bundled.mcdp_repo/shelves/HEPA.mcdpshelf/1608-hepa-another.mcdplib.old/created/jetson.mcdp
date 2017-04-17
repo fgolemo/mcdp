@@ -1,0 +1,14 @@
+mcdp {
+   requires power [W]
+   requires budget [USD]
+
+   arm_a15 = instance `arm_a15
+   nvidia_kepler = instance `NVIDIAKepler
+
+   provides cuda_cores using nvidia_kepler
+   provides arm_flops <= flops provided by arm_a15
+
+   required power >= arm_a15.power + nvidia_kepler.power
+
+   required budget >= 200 USD 
+}

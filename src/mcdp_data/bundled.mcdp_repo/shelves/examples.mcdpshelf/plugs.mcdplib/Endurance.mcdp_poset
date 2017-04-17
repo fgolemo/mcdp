@@ -1,0 +1,4 @@
+product(
+    tag: S(Endurance),
+    duration: s
+)

@@ -1,0 +1,7 @@
+mcdp  {
+    provides f1 [Rcomp]
+    provides f2 [Rcomp]
+    requires r  [Rcomp]
+
+    required r >= provided f1  + provided f2
+}

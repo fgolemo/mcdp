@@ -1,0 +1,18 @@
+mcdp {
+        provides f0 [dimensionless]
+        sub DP =instance  mcdp {
+            provides f [dimensionless]
+            requires r2 [dimensionless]
+            
+            sub hnlin = instance dp {
+                provides x [dimensionless]
+                requires r [dimensionless]
+                
+                implemented-by load SimpleNonlinearity1
+            }
+            
+            hnlin.x >= min(hnlin.r, f)        
+            r2 >= hnlin.r
+        }
+        DP.f >= max(DP.r2, f0)
+      }

@@ -1,0 +1,7 @@
+mcdp {
+    provides a [ℕ] 
+    provides b [ℕ]
+    
+    provided a ≼ 1
+    provided b ≼ 2 
+}

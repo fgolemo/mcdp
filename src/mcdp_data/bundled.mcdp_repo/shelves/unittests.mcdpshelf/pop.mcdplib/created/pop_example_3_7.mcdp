@@ -1,0 +1,46 @@
+flatten  mcdp {
+
+    requires objective [dimensionless]
+
+    a = instance mcdp {
+        provides a [dimensionless]
+        requires a [dimensionless]
+        required a ≽ provided a
+    }
+
+b = instance mcdp {
+    provides b [dimensionless]
+    requires b [dimensionless]
+    required b ≽ provided b
+}
+c = instance mcdp {
+    provides c [dimensionless]
+    requires c [dimensionless]
+    required c ≽ provided c
+}
+d = instance mcdp {
+    provides d [dimensionless]
+    requires d [dimensionless]
+    required d ≽ provided d
+}
+E = instance mcdp {
+    provides E [dimensionless]
+    requires E [dimensionless]
+    required E ≽ provided E
+}
+f = instance mcdp {
+    provides f [dimensionless]
+    requires f [dimensionless]
+    required f ≽ provided f
+}
+a provided by a ≽ 0.50 [] · min(b required by b, f required by f)
+a provided by a ≽ 0.50 [] · min(c required by c, d required by d)
+b provided by b ≽ 0.20 []
+c provided by c ≽ 0.45 []
+c provided by c ≽ 0.30 []
+d provided by d ≽ 1.00[]
+E provided by E ≽ 0.50 []
+f provided by f ≽ 0.90 [] · E required by E
+
+required objective ≽ min(a required by a, max(c required by c, E required by E))
+}

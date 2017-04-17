@@ -1,0 +1,8 @@
+# check that ↑ the empty set is the top of the uppersets
+< 
+    assert_equal(⊤ UpperSets(g), ↑ EmptySet g),
+
+    assert_equal(⊥ UpperSets(g), ↑ {0 g}),
+    
+    assert_leq( ↑ {1g}, ↑ EmptySet g)   
+>

@@ -151,7 +151,7 @@ def check_poset_bottom(_id_poset, poset):
         raise_wrapped(Exception, e, msg, bottom=bottom, witness=a,
                       compact=True)
 
-class Stranger():
+class Stranger(object):
     pass
 
 @for_all_posets

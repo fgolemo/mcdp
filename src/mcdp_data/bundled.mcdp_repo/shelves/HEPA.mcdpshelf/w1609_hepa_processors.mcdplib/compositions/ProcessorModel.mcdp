@@ -1,0 +1,9 @@
+interface mcdp {
+    requires power [W]
+    requires budget [USD]
+    requires mass [g]
+    
+    provides resolution [pixels/deg]
+    provides min_throughput [Hz]
+    provides inverse_of_max_latency [1/s]
+}

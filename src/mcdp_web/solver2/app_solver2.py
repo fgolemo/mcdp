@@ -39,7 +39,7 @@ QUERY_TYPE_RTOF = 'rtof'
 class NeedsApprox(Exception):
     pass
 
-class AppSolver2():
+class AppSolver2(object):
     """
         /libraries/{library}/models/{models}/views/solver2/
         /libraries/{library}/models/{models}/views/solver2/submit

@@ -1,0 +1,3 @@
+mcdp {
+  provides capacity <= Uncertain(1 J, 2 J)
+}

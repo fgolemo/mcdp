@@ -43,10 +43,12 @@ def add_other_fields(self, res, request, context):
     else:
         res['user'] = None 
         
-    res['user_db'] = e.app.user_db
+    app = self
+    res['user_db'] = app.hi.db_view.user_db
     
     def shelf_privilege(repo_name, sname, privilege):
-        repo = session.repos[repo_name]
+        repos = session.app.hi.db_view.repos
+        repo = repos[repo_name]
         if not sname in repo.shelves:
             msg = 'Cannot find shelf "%s" in repo "%s".' % (sname, repo_name)
             msg += '\n available: ' + format_list(repo.shelves)
@@ -176,10 +178,12 @@ def add_std_vars_context_(f, redir):
             url2 = url
             if '127.0.0.1' in p.netloc:
                 url2 = url2.replace('127.0.0.1', 'localhost')
-            if not p.path.endswith('/'):
-                url2 = url2.replace(p.path, p.path + '/')
+            if not p.path.endswith('.html'):
+                if not p.path.endswith('/'):
+                    url2 = url2.replace(p.path, p.path + '/')
+            
             if url2 != url:
-                print request
+                logger.info('Context: %s' % context)
                 logger.info('Redirection:\n from: %s\n   to: %s' % (url, url2))
                 raise HTTPFound(url2)
 
@@ -187,7 +191,8 @@ def add_std_vars_context_(f, redir):
                 uid = request.authenticated_userid
                 from mcdp_web.main import WebApp
                 app = WebApp.singleton
-                if not uid in app.user_db:
+                user_db = app.hi.db_view.user_db
+                if not uid in user_db:
                     msg = 'The user is authenticated as "%s" but no such user in DB.' % uid
                     msg += 'We are logging out the user.'
                     logger.warn(msg)

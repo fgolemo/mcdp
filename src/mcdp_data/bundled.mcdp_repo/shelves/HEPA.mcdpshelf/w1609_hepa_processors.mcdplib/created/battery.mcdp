@@ -1,0 +1,13 @@
+mcdp {
+    provides capacity [J]
+    
+    requires mass [g]
+    requires budget [USD]
+    
+    specific_energy = 300 Wh / kg
+    required mass ≽ 5g + provided capacity / specific_energy
+    specific_cost = 1 USD / Wh
+    required budget ≽ provided capacity · specific_cost
+    
+    provided capacity  ≼ 1000 Wh
+}

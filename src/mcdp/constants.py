@@ -3,7 +3,7 @@ import numpy as np
 __all__ = ['MCDPConstants']
 
 
-class MCDPConstants():
+class MCDPConstants(object):
     """ Some system-wide constants """
     
     # source

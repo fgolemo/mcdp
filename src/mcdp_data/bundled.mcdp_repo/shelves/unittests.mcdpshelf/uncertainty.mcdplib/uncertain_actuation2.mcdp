@@ -1,0 +1,9 @@
+mcdp {
+  provides lift [N]
+  requires power [W]
+
+
+  l = provided lift
+
+  required power >=  l * Uncertain(1.1 W/N, 1.4 W/N)
+}

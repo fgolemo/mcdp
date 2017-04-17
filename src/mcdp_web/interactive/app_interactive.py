@@ -7,7 +7,7 @@ from mcdp_web.utils.ajax_errors import ajax_error_catch
 from mcdp_web.utils0 import add_std_vars_context
 
 
-class AppInteractive():
+class AppInteractive(object):
     """
         /libraries/{library}/interactive/mcdp_value/
         /libraries/{library}/interactive/mcdp_value/parse

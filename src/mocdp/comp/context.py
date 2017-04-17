@@ -12,7 +12,7 @@ from mcdp_posets import express_value_in_isomorphic_space
 from mocdp.comp.interfaces import NamedDP
 from mocdp.comp.template_for_nameddp import TemplateForNamedDP
 from mocdp.comp.wrap import dpwrap
-from mcdp_utils_misc.string_utils import format_list
+from mcdp_utils_misc import format_list
 
 
 _ = logger
@@ -39,7 +39,7 @@ class Connection(Connection0):
 
 
 
-class ValueWithUnits():
+class ValueWithUnits(object):
     """ "unit" should have been "space" """
     @contract(unit=Space)
     def __init__(self, value, unit):
@@ -98,7 +98,7 @@ class NoSuchMCDPType(Exception):
 
 
 
-class Context():
+class Context(object):
 
     def __init__(self):
         self.names = {}  # name -> ndp

@@ -1,0 +1,13 @@
+mcdp {
+    provides out [`PortableDCPower]
+    requires in [`PortableDCPower]
+    requires budget [USD]
+    budget >= 5 USD
+
+    ((provided out).dc).connector <= `barrel_connectors: barrel_5mm # incorrect
+    ((required in).dc).connector >= `USB_connectors: USB_Std_A  # incorrect
+    ((provided out).dc).voltage <= ((required in).dc).voltage
+    ((provided out).dc).amps <= ((required in).dc).amps
+    (provided out).duration <= (required in).duration
+    (provided out).rigid_body <= (required in).rigid_body
+}

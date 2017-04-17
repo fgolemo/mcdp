@@ -14,7 +14,7 @@ from .access import acl_from_yaml
 from mcdp_utils_misc.my_yaml import yaml_load
 
 
-class Shelf():
+class Shelf(object):
     ''' 
         A shelf has:
         - a set of libraries
@@ -26,36 +26,36 @@ class Shelf():
 
         - a default directory for creating a new library
     '''
-    @contract(dependencies='list(str)', authors='list(str)')
-    def __init__(self, acl, dependencies, desc_short, desc_long, libraries, authors, dirname, write_to):
-        self.acl = acl
-        self.dependencies = dependencies
-        self.desc_short = desc_short
-        self.desc_long = desc_long
-        self.libraries = libraries
-        self.authors = authors
-        self.dirname = dirname
-        self.write_to = write_to
+#     @contract(dependencies='list(str)', authors='list(str)')
+#     def __init__(self, acl, dependencies, desc_short, desc_long, libraries, authors, dirname, write_to):
+#         self.acl = acl
+#         self.dependencies = dependencies
+#         self.desc_short = desc_short
+#         self.desc_long = desc_long
+#         self.libraries = libraries
+#         self.authors = authors
+#         self.dirname = dirname
+#         self.write_to = write_to
 
     def get_dependencies(self):
-        return self.dependencies
+        return self.info.dependencies
 
     def get_authors(self):
-        return self.authors
+        return self.info.authors
 
     def get_desc_short(self):
-        return self.desc_short
+        return self.info.desc_short
 
     def get_desc_long(self):
-        return self.desc_long
-
-    @contract(returns='dict(str:str)')
-    def get_libraries_path(self):
-        ''' Returns a dict of library name -> dirname '''
-        return self.libraries
+        return self.info.desc_long
+# 
+#     @contract(returns='dict(str:str)')
+#     def get_libraries_path(self):
+#         ''' Returns a dict of library name -> dirname '''
+#         return self.libraries
 
     def get_acl(self):
-        return self.acl
+        return acl_from_yaml(self.info.acl._data)
 
     def update_libraries(self):
         self.libraries = find_libraries(self.dirname)

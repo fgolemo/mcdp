@@ -1,0 +1,71 @@
+- id: simple_battery
+  desc: Simple battery
+  code:
+  - mocdp.example_battery.BatteryDP
+  - energy_density: 0.1
+
+
+- id: Weight2totalpayload
+  desc: Weight2totalpayload
+  code:
+  - mocdp.example_battery.Weight2totalpayload
+  - baseline: 100
+
+- id: Payload2energy
+  desc: Payload2energy
+  code:
+  - mocdp.example_battery.Payload2energy
+  - alpha: 0.1
+    T: 10
+
+- id: series1
+  desc: Simple series
+  code:
+  - mocdp.dp.Series
+  - dp1: simple_battery
+    dp2: Weight2totalpayload
+
+- id: series2
+  desc: Simple series
+  code:
+  - mocdp.dp.Series
+  - dp1: series1
+    dp2: Payload2energy
+
+# - id: loop1
+#   desc: Simple loop
+#   code:
+#   - mocdp.dp.SimpleLoop
+#   - dp1: series2
+
+
+
+- id: ex16_Payload2ET
+  desc: Example 16
+  code:
+  - mocdp.example_battery.Payload2ET
+  - {}
+
+- id: ex16_ET2Payload
+  desc: ET2Payload
+  code:
+  - mocdp.example_battery.ET2Payload
+  - Tmax: 11.5
+    W0:  1.0
+    rho: 100.0
+
+- id: ex16_series
+  desc: Simple series
+  code:
+  - mocdp.dp.Series
+  - dp1: ex16_Payload2ET
+    dp2: ex16_ET2Payload
+
+# - id: ex16_loop
+#   desc: ex16
+#   code:
+#   - mocdp.dp.SimpleLoop
+#   - dp1: ex16_series
+
+
+

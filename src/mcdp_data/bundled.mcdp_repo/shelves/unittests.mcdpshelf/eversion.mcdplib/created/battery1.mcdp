@@ -1,0 +1,10 @@
+mcdp {
+        battery = instance mcdp {
+            requires mass [g]
+            provides energy [J]
+            specific_energy = 0.1 J / g
+            provided energy <= required mass * specific_energy
+        }
+        mass   required by battery <= 2 g
+        energy provided by battery >= 5 J 
+ }

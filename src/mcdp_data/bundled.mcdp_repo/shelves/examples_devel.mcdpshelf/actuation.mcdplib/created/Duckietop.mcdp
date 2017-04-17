@@ -1,0 +1,9 @@
+mcdp {
+
+    provides eth [`ETHCom]
+    requires eth [`ETHCom]    
+
+    provides visualization [`Visualization]
+
+    requires budget [USD]
+}

@@ -1,0 +1,5 @@
+mcdp {
+    requires power [Nat]
+    provides power [Nat]
+    power >= power + Nat:1
+}

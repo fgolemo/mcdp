@@ -1,0 +1,7 @@
+mcdp  {
+    requires r1 [ℝ]
+    requires r2 [ℝ]
+    provides f  [ℝ]
+
+    provided f ≼ required r1 · required r2       
+}

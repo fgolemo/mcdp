@@ -1,0 +1,5 @@
+product(
+    tag: S(GPIOCom),
+    duration: s,
+    rigid_body: `RigidBodyID
+)

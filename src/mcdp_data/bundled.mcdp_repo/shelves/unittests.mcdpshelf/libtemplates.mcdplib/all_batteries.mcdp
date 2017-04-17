@@ -1,0 +1,3 @@
+choose(
+        simple:  `simple_batteries,
+        complex:   specialize [B1: `simple_batteries, B2: `simple_batteries] `sum_battery )

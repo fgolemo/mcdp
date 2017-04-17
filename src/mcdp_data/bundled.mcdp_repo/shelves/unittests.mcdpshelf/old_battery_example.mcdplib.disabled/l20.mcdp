@@ -1,0 +1,13 @@
+# test connected
+mcdp {
+    sub times = instance dp {
+        provides a [dimensionless]
+        provides b [dimensionless]
+        requires c [dimensionless]
+ 
+        implemented-by load times_R
+    }
+
+    times.a >= times.c
+    times.b >= times.c 
+}

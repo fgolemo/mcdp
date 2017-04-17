@@ -16,7 +16,7 @@ __all__ = [
 ]
 
 
-class Librarian():
+class Librarian(object):
     
     """ 
         Indexes several libraries. 

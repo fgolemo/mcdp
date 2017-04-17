@@ -16,7 +16,7 @@ from mcdp_web.utils0 import add_std_vars_context
 from .app_solver_state import SolverState, get_decisions_for_axes
 
 
-class AppSolver():
+class AppSolver(object):
     """
         /libraries/{}/models/{}/views/solver/   - redirects to one with the right amount of axis
     

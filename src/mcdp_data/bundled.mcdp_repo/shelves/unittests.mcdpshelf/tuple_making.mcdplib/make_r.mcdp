@@ -1,0 +1,6 @@
+mcdp {
+  requires ra [g]
+  requires rb [J]
+  provides f [g x J]
+  f <= <ra, rb + 2 J>
+}

@@ -1,7 +1,7 @@
 from contracts import contract
 
 
-class ParsingElement():
+class ParsingElement(object):
     def __init__(self, name):
         self.name = name
     def get(self):

@@ -19,7 +19,7 @@ class NotConnected(Exception):
         self.unconnected_resources = set of CResources
     '''
      
-class NamedDP():
+class NamedDP(object):
     ''' A DP with names '''
     __metaclass__ = ABCMeta
 

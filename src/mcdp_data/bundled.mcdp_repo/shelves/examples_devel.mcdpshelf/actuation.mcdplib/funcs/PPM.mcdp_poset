@@ -1,0 +1,9 @@
+product(
+ voltage_max: V,
+ amp_max: A,
+ freq_max: Hz,
+  resolution: dimensionless, # number between 0 and 1, lower is better
+ # resolution: op(R) # number between 0 and 1, lower is better
+ duration: s,
+ rigid_body: `RigidBodyID
+)

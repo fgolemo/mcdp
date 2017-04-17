@@ -1,0 +1,13 @@
+add_bottom poset {
+    # female (socket)
+    USB_Micro_A 
+    USB_Micro_B
+    USB_Mini_A
+    USB_Mini_B
+    USB_Std_A
+    USB_Std_B
+    USB_Type_C
+    # male
+    USB_Micro_A_male
+    USB_Micro_B_male
+}

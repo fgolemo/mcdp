@@ -1,0 +1,47 @@
+mcdp {
+    '''
+    This is a design in which the plate moves along Z and the
+    extruder moves along XY.
+    '''
+    implements `PartProducerInterface
+
+    # extruder
+    extruder = instance `Extruder
+    min_workspace = provided part_length
+
+    part_volume = (provided part_length)³
+    part_volume provided by extruder ≽ part_volume
+    service_temperature provided by extruder ≽ provided service_temperature
+    part_resolution provided by extruder ≽ provided part_resolution
+
+    # XY moves around the extruder
+    XY = instance `mechanisms.XY_concrete
+    workspace provided by XY ≽ min_workspace
+    precision provided by XY ≽ provided part_resolution
+    payload_mass provided by XY ≽ mass required by extruder
+    velocity provided by XY ≽ 2mm/s
+    force provided by XY ≽ 0 N # extruder does not exert force (?)
+
+    part_density = 0.0 kg/mm³ # XXX
+    part_mass = part_volume · part_density
+    gravity = 9.81 m/s²
+    weight = part_mass · gravity
+
+    # Z moves around the plate
+    Z = instance `mechanisms.Joint
+    workspace provided by Z ≽ min_workspace
+    precision provided by Z ≽ provided part_resolution
+    velocity provided by Z ≽ 0.1 mm/s # can be very slow
+    payload_mass provided by Z ≽ part_mass
+    force provided by Z ≽ weight
+    precision provided by Z ≽ provided part_resolution
+    # acceleration needed is negligible
+    acceleration provided by Z ≽ 1 mm/s²
+    acceleration provided by XY ≽ 1 mm/s²
+
+
+    required mass ≽ ∑ mass required by *
+    required initial_investment ≽ ∑ budget required by *
+    required electric_power ≽ ∑ electric_power required by *
+    required time_per_part ≽ time required by extruder
+}

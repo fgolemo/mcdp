@@ -1,0 +1,10 @@
+# this has a (4,4) isolated solution!
+# x + y >= ceil(sqrt(x)) + ceil(sqrt(y)) + 4
+mcdp {
+    provides z [s]
+    
+    variable x, y [s]
+    x + y  >= ceil(sqrt(x)) + ceil(sqrt(y)) + provided z 
+    
+    requires x, y
+}

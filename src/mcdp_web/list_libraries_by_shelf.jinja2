@@ -21,7 +21,7 @@ ul.shelves_list > li > *:first-child:before {
 
         {# <a href='{{shelf_url(repo_name, shelf_name)}}'><code>{{shelf_name}}</code></a> #}
 
-            {% if shelf.get_libraries_path() %}
+            {% if shelf.libraries %}
                 {{list_libraries_for_shelf(repo_name, shelf_name)}}
             {% else %}
             <p>(No libraries)</p>

@@ -9,7 +9,7 @@ from mcdp_web.utils0 import add_std_vars_context
 from mcdp_web.environment import  cr2e
 
 
-class AppQR():
+class AppQR(object):
     def __init__(self):
         self.appqr_reset()
 

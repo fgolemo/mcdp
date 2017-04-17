@@ -1,0 +1,29 @@
+- id: TimeEnergyTradeoff
+  desc: TimeEnergyTradeoff
+  code:
+  - mocdp.example_battery.TimeEnergyTradeoff
+  - {}
+
+- id: battery_complete
+  desc: battery_complete
+  code:
+  - mocdp.example_battery.battery_complete
+  - {}
+
+- id: energy_product
+  desc: ""
+  code:
+  - mocdp.example_battery.energy_product
+  - {}
+
+- id: BatteryDP
+  desc: ""
+  code:
+  - mocdp.example_battery.BatteryDP
+  - energy_density: 100
+
+- id: SimpleNonlinearity1
+  desc: "h(x) = 1+log(x+1)"
+  code:
+  - mocdp.example_battery.SimpleNonlinearity1
+  - {}

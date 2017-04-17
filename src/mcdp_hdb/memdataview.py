@@ -295,6 +295,7 @@ class ViewHash0(ViewMount):
         if not name in self._data:
             msg = 'Cannot get child "%s"; known: %s.' % (name, format_list(self.keys()))
             raise_desc(InvalidOperation, msg)
+            
         d = self._data[name]
         prototype = self._schema.prototype    
         v = self._create_view_instance(prototype, d, name)
@@ -316,7 +317,7 @@ class ViewHash0(ViewMount):
         d = self._data[key]
         prototype = self._schema.prototype
         if is_simple_data(prototype):
-            self.child(d).check_can_read()
+            self.child(key).check_can_read()
             return d
         else:
             return self._create_view_instance(prototype, d, key)

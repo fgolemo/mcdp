@@ -30,7 +30,7 @@ _ = UpperSet, CResource, Poset
 __all__ = ['Optimization']
 
 
-class Optimization():
+class Optimization(object):
 
     @contract(library=MCDPLibrary, initial=CompositeNamedDP)
     def __init__(self, library, options,
@@ -483,7 +483,7 @@ class Optimization():
         self.num_created += 1
         return n
         
-class ActionExpand():
+class ActionExpand(object):
     def __init__(self):
         pass
 

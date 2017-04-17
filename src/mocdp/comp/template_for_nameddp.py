@@ -14,7 +14,7 @@ __all__ = [
     'TemplateForNamedDP'
 ]
 
-class TemplateForNamedDP():
+class TemplateForNamedDP(object):
 
     @contract(parameters='dict(str:isinstance(NamedDP))')
     def __init__(self, parameters, template_code):

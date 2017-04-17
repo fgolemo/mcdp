@@ -142,14 +142,18 @@ class SchemaContext(SchemaRecursive):
         self.children = OrderedDict() 
         SchemaBase.__init__(self)
     
+    def child(self, name):
+        if not name in self.children:
+            msg = 'Could not find child %r; available: %s.' % (name, format_list(self.children))
+            raise ValueError(msg)
+        child = self.children[name]
+        return child
+        
     def get_descendant(self, prefix):
         ''' Returns the schema for a descendant. '''
         if prefix:
             first = prefix[0]
-            if not first in self.children:
-                msg = 'Could not find child %r; available: %s.' % (first, format_list(self.children))
-                raise ValueError(msg)
-            child = self.children[first]
+            child = self.child(first)
             try:
                 return child.get_descendant(prefix[1:])
             except ValueError as e:

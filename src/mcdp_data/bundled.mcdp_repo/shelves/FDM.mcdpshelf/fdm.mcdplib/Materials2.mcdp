@@ -1,0 +1,16 @@
+catalogue { 
+    '''  
+       PLA    https://en.wikipedia.org/wiki/Polylactic_acid
+       ULTEM  https://en.wikipedia.org/wiki/Polyetherimide
+       ABS    https://en.wikipedia.org/wiki/Acrylonitrile_butadiene_styrene
+    '''
+   provides service_temperature [C]  "Temperature that the produced part can resist." 
+   
+   requires liquefaction_temperature [C]  "Temperature required for liquefaction."
+   requires specific_cost [$/kg]      "Cost per unit weight." 
+   requires density [g/mm³]
+
+    65 C ⟻ PLA   ⟼ 205 C,  20 $/kg, 1 g/mm³
+   105 C ⟻ ABS   ⟼ 240 C,  20 $/kg, 1 g/mm³
+   217 C ⟻ ULTEM ⟼ 335 C, 200 $/kg, 1 g/mm³
+} 

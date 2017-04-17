@@ -1,0 +1,15 @@
+mcdp {
+    implements `XYInterface
+
+    provided workspace ≼ 40 cm
+    provided payload_mass ≼ 200 g
+    provided precision ≼ 1 / 0.5 mm
+    provided velocity ≼ 4 mm /s
+    provided acceleration ≼ 10 mm /s²
+    provided force ≼ 0.001 N
+
+    required electric_power ≽ 0.2 W
+    required mass ≽ 200 g
+    required budget  ≽ 20 $
+
+}

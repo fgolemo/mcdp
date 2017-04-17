@@ -1,0 +1,5 @@
+mcdp {
+      requires r [Nat]
+      provides f [Nat]
+      f <= required r + Rcomp:2.3
+}

@@ -1,6 +1,7 @@
 from mcdp.constants import MCDPConstants
 
 from .resource_tree import ResourceRepo, get_from_context, ResourceLibrary, ResourceShelf, ResourceThings, ResourceThing, ResourceThingView
+from mcdp.logs import logger
 
 
 def cr2e(f):
@@ -11,7 +12,7 @@ def cr2e(f):
     f2.__name__ = 'cr2e_%s' % f.__name__
     return f2
 
-class Environment():
+class Environment(object):
     def __init__(self, context, request):
         from mcdp_web.main import WebApp
         self.context = context
@@ -19,6 +20,7 @@ class Environment():
 
         app = WebApp.singleton
         self.app = app
+        repos = app.hi.db_view.repos
         self.session = app.get_session(request)
         rrepo = get_from_context(ResourceRepo, context)
         if rrepo is None:
@@ -26,15 +28,8 @@ class Environment():
             self.repo = None
         else:
             self.repo_name = rrepo.name
-            self.repo = app.repos[self.repo_name]
+            self.repo =  repos[self.repo_name]
 
-        rlibrary = get_from_context(ResourceLibrary, context)
-        if rlibrary is None:
-            self.library_name = None
-            self.library = None
-        else:
-            self.library_name = rlibrary.name 
-            self.library = self.session.get_library(self.library_name)
 
         rshelf = get_from_context(ResourceShelf, context)
         if rshelf is None:
@@ -43,6 +38,14 @@ class Environment():
         else:
             self.shelf_name = rshelf.name 
             self.shelf = self.session.get_shelf(self.shelf_name)
+            
+        rlibrary = get_from_context(ResourceLibrary, context)
+        if rlibrary is None:
+            self.library_name = None
+            self.library = None
+        else:
+            self.library_name = rlibrary.name 
+            self.library = self.shelf.libraries[self.library_name]
 
         from mcdp_web.editor_fancy.app_editor_fancy_generic import specs
         rspec = get_from_context(ResourceThings, context)
@@ -56,8 +59,12 @@ class Environment():
         rthing = get_from_context(ResourceThing, context)
         if rthing is None:
             self.thing_name = None
+            self.thing = None
         else:
             self.thing_name = rthing.name
+            things = self.library.things.child(self.spec_name)
+            logger.debug('thing_name: %s' % self.thing_name)
+            self.thing = things[self.thing_name]
             
         rview = get_from_context(ResourceThingView, context)
         self.view_name = rview.name if rview is not None else None

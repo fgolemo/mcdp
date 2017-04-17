@@ -1,0 +1,5 @@
+mcdp {
+      x = Nat: 2
+      y = Nat: 3
+      requires x, y
+}

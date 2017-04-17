@@ -1,0 +1,9 @@
+mcdp {
+	provides z [s]
+	variable x, y [s]
+
+	x + y >= sqrt(x) + y * 0.5 [] + provided z 
+
+	requires x, y
+}
+ 

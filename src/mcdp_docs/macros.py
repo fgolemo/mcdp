@@ -37,7 +37,7 @@ def replace_macros(s):
             w = Where(s, char)
             raise DPSyntaxError('Invalid placeholder', where=w)
 
-    class Sub():
+    class Sub(object):
         def __init__(self, data):
             self.data = data
         def __getitem__(self, key):

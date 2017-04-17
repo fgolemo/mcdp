@@ -1,0 +1,9 @@
+mcdp {
+	variable x, y [Nat]
+	provides z [Nat]
+
+	x + y >= ceil(sqrt(x)) + ceil(sqrt(y)) + provided z 
+
+	requires x, y
+}
+ 

@@ -29,7 +29,7 @@ SL = lambda x: S(L(x))
 CDP = CDPLanguage
 
 
-class SyntaxBasics():
+class SyntaxBasics(object):
     # numbers
     number = Word(nums).setName('number')
     point = Literal('.')
@@ -52,7 +52,7 @@ class SyntaxBasics():
 def not_any_of_these(ks):
     return NotAny(MatchFirst([Keyword(_) for _ in ks]))
 
-class SyntaxIdentifiers():
+class SyntaxIdentifiers(object):
     # unfortunately this needs to be maintained manually
     keywords = [
         'sum',
@@ -200,7 +200,7 @@ def decode_identifier(s):
     return s
 
 
-class Syntax():
+class Syntax(object):
     
     __version__ = '1.0.0'
     __changelog__ = {   

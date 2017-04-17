@@ -10,7 +10,7 @@ import xml.sax.saxutils as saxutils
 logger = logging.getLogger('mcdp.spider')
 logger.setLevel(logging.DEBUG)
 
-class Spider():
+class Spider(object):
     def __init__(self, get_maybe_follow, ignore=None):
         self.get_maybe_follow = get_maybe_follow
         if ignore is None:

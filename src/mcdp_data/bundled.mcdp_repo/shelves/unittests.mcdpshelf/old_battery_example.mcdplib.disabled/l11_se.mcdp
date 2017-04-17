@@ -1,0 +1,7 @@
+# test unconnected
+mcdp {
+    provides capacity [J]
+
+    sub battery = instance load battery
+    battery.capacity >= capacity
+}

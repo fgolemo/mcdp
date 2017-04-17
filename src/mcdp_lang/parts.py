@@ -7,7 +7,7 @@ __all__ = [
 ]
 
 
-class CDPLanguage():
+class CDPLanguage(object):
 
     # any type of the kind  <name>(op1, ..., opn) 
     # min(), max(), etc.
