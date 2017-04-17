@@ -157,6 +157,7 @@ class MCDPConstants(object):
 
     repo_prefix = 'mcdpr:'
     
+    gdc_image_size_pixels = 150
 
     # if True, disables computing the actual images.
     test_spider_exclude_images = True

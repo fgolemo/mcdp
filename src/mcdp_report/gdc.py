@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from contextlib import contextmanager
 import os
-from tempfile import mkdtemp
+from tempfile import mkdtemp, NamedTemporaryFile
 
 from contracts.utils import check_isinstance
 from system_cmd import CmdException, system_cmd_result
@@ -11,6 +11,8 @@ from mcdp.exceptions import mcdp_dev_warning
 from mcdp_utils_misc import dir_from_package_name, get_mcdp_tmp_dir, locate_files, memoize_simple
 
 from .utils import safe_makedirs
+from contracts import contract
+from mcdp_report.image_source import ImagesSource, ImagesFromPaths, TryMany
 
 
 __all__ = [
@@ -25,15 +27,15 @@ COLOR_DARKRED = '#861109'
 
 
 class GraphDrawingContext(object):
-    
-    def __init__(self, gg, parent, yourname, library, level=0,
+    @contract(image_source=ImagesSource)
+    def __init__(self, gg, parent, yourname, level=0,
                  tmppath=None, style='default',
-                 images_paths=[], skip_initial=True):
+                 image_source=None, skip_initial=True):
         self.gg = gg
         self.parent = parent
         self.yourname = yourname
         self.level = level
-        self.library = library
+#         self.library = library
 
         if tmppath is None:
             d = get_mcdp_tmp_dir()
@@ -42,7 +44,7 @@ class GraphDrawingContext(object):
             mcdp_dev_warning('need to share icons')
 
         self.tmppath = tmppath
-        self.images_paths = images_paths
+        self.image_source = image_source
 
         self.all_nodes = []
 
@@ -52,12 +54,12 @@ class GraphDrawingContext(object):
     def child_context(self, parent, yourname):
         c = GraphDrawingContext(gg=self.gg,
                                 parent=parent,
-                                library=self.library,
+#                                 library=self.library,
                                 yourname=yourname,
                                 level=self.level + 1,
                                 tmppath=self.tmppath,
                                 style=self.style,
-                                images_paths=self.images_paths,
+                                image_source=self.image_source,
                                 skip_initial=self.skip_initial)
         return c
 
@@ -159,23 +161,22 @@ class GraphDrawingContext(object):
             raise ValueError('Icons path does not exist: %r' % imagepath)
         return imagepath
     
-    def get_icon(self, options):
-        #tmppath = self.get_temp_path()
-        imagepaths = [self._get_default_imagepath()]
-        imagepaths.extend(self.images_paths)
-        
+    def get_icon(self, options): 
+        imagepaths = []
+        imagepaths.append(self._get_default_imagepath())
+
         libraries = os.path.join(dir_from_package_name('mcdp_data'), 'libraries')
         imagepaths.append(os.path.join(libraries, 'FDM.' + MCDPConstants.shelf_extension, 
                                        'fdm.' + MCDPConstants.library_extension))
         imagepaths.append(os.path.join(libraries, 'FDM.' +  MCDPConstants.shelf_extension, 
                                        'mechanisms.' + MCDPConstants.library_extension))
-        
-#         print 'library (%s)' % self.library.search_dirs
-        
-        #print('options: %s in %r' % (options, "\n ".join(imagepaths)))
-        best = choose_best_icon(options, imagepaths)
-        #print('best: %s' % best)
-        resized = resize_icon(best, 150)
+        sources = []
+        sources.append(self.image_source)
+        sources.append(ImagesFromPaths(imagepaths))
+        image_source = TryMany(sources) 
+
+        best = choose_best_icon(options, image_source)
+        resized = resize_icon(best, MCDPConstants.gdc_image_size_pixels)
         return resized
 
     def decorate_arrow_function(self, l1):
@@ -252,27 +253,25 @@ def get_images(dirname, exts=None):
         allfiles[basename] = f
     return allfiles
 
-
-def choose_best_icon(iconoptions, imagepaths):
+@contract(image_source=ImagesSource)
+def choose_best_icon(iconoptions, image_source):
+    ''' Returns the name of a file, or None. '''
 #     logger.debug('Looking for %s in %s.' % (str(iconoptions), imagepaths))
     exts = MCDPConstants.exts_for_icons
-
-    files = {}
-    for path in reversed(imagepaths):
-        files.update(get_images(path, exts=exts))
-
-    # print('avail: %s' % sorted(files))
     for option in iconoptions:
         if option is None:
             continue
 
         for ext in exts:
-            basename = '%s.%s' % (option, ext)
-            basename = basename.lower()
-            if basename in files:
-                return files[basename]
-                    # print('no %r in %r' % (basename, imagepath))
-    # logger.debug('Could not find PNG icon for %s.' % (str(iconoptions)))
+            try: 
+                data = image_source.get_image(option, ext)
+            except KeyError:
+                pass
+            else:
+                temp_file = NamedTemporaryFile(suffix='.'+ext,delete=False)
+                with open(temp_file.name, 'wb') as f:
+                    f.write(data)
+                return temp_file.name  
     return None
 
 

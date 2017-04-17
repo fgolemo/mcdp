@@ -8,13 +8,13 @@ from contracts.utils import check_isinstance
 from pyramid.httpexceptions import HTTPFound
 from pyramid.renderers import render_to_response
 
-from mcdp import MCDPConstants
-from mcdp import logger
+from mcdp import MCDPConstants, logger
 from mcdp.exceptions import DPInternalError, DPSemanticError, DPSyntaxError
 from mcdp_lang.suggestions import get_suggestions, apply_suggestions
 from mcdp_library.specs_def import specs
 from mcdp_report.html import ast_to_html
 from mcdp_utils_misc import get_sha1, timeit_wall
+from mcdp_web.context_from_env import library_from_env, image_source_from_env
 from mcdp_web.environment import cr2e
 from mcdp_web.images.images import get_mime_for_format
 from mcdp_web.resource_tree import ResourceThingViewEditor, ResourceThingViewEditorParse, ResourceThingViewEditorSave,\
@@ -26,7 +26,6 @@ from mocdp.comp.interfaces import NamedDP
 
 from .html_mark_imp import html_mark, html_mark_syntax_error
 from .warnings_unconnected import generate_unconnected_warnings
-from mcdp_hdb_mcdp.library_view import TheContext
 
 
 Privileges=MCDPConstants.Privileges
@@ -52,9 +51,14 @@ class AppEditorFancyGeneric(object):
         string = get_text_from_request2(e.request)
         
         def go():
-            e.library.write_spec(e.spec_name, e.thing_name, string)
-            print('committing repo on save %s' % e.repo)
-            e.repo.commit(e.user)
+            db_view = e.app.hi.db_view
+            library = db_view.repos[e.repo_name].shelves[e.shelf_name].libraries[e.library_name]
+#             things = library.things[e.spec_name]
+            things = library.things.child(e.spec_name)
+            things[e.thing_name] = string
+#             e.library.write_spec(e.spec_name, e.thing_name, string)
+#             print('committing repo on save %s' % e.repo)
+#             e.repo.commit(e.user)
             return {'ok': True, 'saved_string': string}
     
         return ajax_error_catch(go, environment=e)
@@ -69,16 +73,11 @@ class AppEditorFancyGeneric(object):
         cache = self.last_processed2
 
         make_relative = lambda s: self.make_relative(e.request, s)
-        
-        db_view = e.app.hi.db_view
-        subscribed_shelves = e.session.get_subscribed_shelves()
-        current_library_name = e.library_name
-        context = TheContext(db_view, subscribed_shelves, current_library_name)
-        mcdp_library = context.get_library()
+        library = library_from_env(e)
 
         def go():
             with timeit_wall('process_parse_request'):
-                res = process_parse_request(mcdp_library, string, e.spec, key, cache, make_relative)
+                res = process_parse_request(library, string, e.spec, key, cache, make_relative)
             res['request'] = req
             return res
 
@@ -110,6 +109,7 @@ class AppEditorFancyGeneric(object):
         text_hash = e.context.text_hash
         
         def go():
+            image_source = image_source_from_env(e)
             
             with timeit_wall('graph_generic', 1.0):
                 key = (e.library_name, e.spec.url_part, e.thing_name, text_hash)
@@ -125,8 +125,11 @@ class AppEditorFancyGeneric(object):
                         return response_image(e.request, 'Could not parse.')
     
                 with timeit_wall('graph_generic - get_png_data', 1.0):
-                    data = e.spec.get_png_data(e.library, e.thing_name, thing, 
-                                             data_format=data_format)
+#                     def get_png_data_model(image_source, name, ndp, data_format):
+                    data = e.spec.get_png_data(image_source,
+                                               e.thing_name, 
+                                               thing, 
+                                               data_format)
                 mime = get_mime_for_format(data_format)
                 return response_data(e.request, data, mime)
         return self.png_error_catch2(e.request, go)

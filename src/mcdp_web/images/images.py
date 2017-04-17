@@ -5,6 +5,7 @@ from mcdp_web.environment import cr2e
 from mcdp_web.resource_tree import ResourceThingViewImages, ResourceThingViewImagesOne
 from mcdp_web.utils.response import response_data
 from mcdp_web.utils0 import add_std_vars_context
+from mcdp_web.context_from_env import library_from_env, image_source_from_env
 
 
 __all__ = ['WebAppImages']
@@ -24,11 +25,12 @@ class WebAppImages(object):
         which = e.context.which
         data_format= e.context.data_format
          
-        def go():   
-            mycontext = e.library._generate_context_with_hooks()
-            ndp = e.library.load_ndp(e.thing_name, mycontext)
-    
-            mf = MakeFiguresNDP(ndp=ndp, library=e.library, yourname=e.thing_name)
+        def go():
+            library = library_from_env(e)
+            image_source = image_source_from_env(e)
+               
+            ndp = library.load_ndp(e.thing_name)
+            mf = MakeFiguresNDP(ndp=ndp, image_source=image_source, yourname=e.thing_name)
             data = mf.get_figure(which, data_format)
             mime = get_mime_for_format(data_format)
             return response_data(request=e.request, data=data, content_type=mime)

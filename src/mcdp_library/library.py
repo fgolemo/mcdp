@@ -15,13 +15,14 @@ from mcdp_lang import parse_ndp, parse_poset
 from mcdp_utils_misc import assert_good_plain_identifier, format_list, get_mcdp_tmp_dir, memo_disk_cache2, locate_files
 from mocdp.comp.context import Context
 
+
 __all__ = [
     'MCDPLibrary', 
 ]
 
 
-class LibraryIsReadOnly(Exception):
-    pass
+# class LibraryIsReadOnly(Exception):
+#     pass
 
 class MCDPLibrary(object):
     """
@@ -164,11 +165,7 @@ class MCDPLibrary(object):
             context = Context()
         if not isinstance(name, str):
             msg = 'Expected a string for the name.'
-            raise_desc(ValueError, msg, name=name)
-#         filename = '%s.%s' % (name, extension)
-#         f = self._get_file_data(filename)
-#         data = f['data']
-#         realpath = f['realpath']
+            raise_desc(ValueError, msg, name=name) 
         
         x =  self._load_spec_data(spec_name, name)
         data = x['data']
@@ -487,28 +484,28 @@ class MCDPLibrary(object):
 
         self.file_to_contents[basename] = res 
         
-    def write_spec(self, spec_name, name, data):
-        from mcdp_library.specs_def import specs
-        spec = specs[spec_name]
-        basename = name + '.' + spec.extension
-        self._write_generic(basename, data)
+#     def write_spec(self, spec_name, name, data):
+#         from mcdp_library.specs_def import specs
+#         spec = specs[spec_name]
+#         basename = name + '.' + spec.extension
+#         self._write_generic(basename, data)
 
     def set_read_only(self, read_only=True):
         ''' Sets the library to read-only. Any write operation will 
             create an error. '''
         self.read_only = read_only
         
-    def _write_generic(self, basename, data):
-        if self.read_only:
-            raise LibraryIsReadOnly()
-        
-        d = self._get_file_data(basename)
-        realpath = d['realpath']
-        logger.info('writing to %r' % realpath)
-        with open(realpath, 'w') as f:
-            f.write(data)
-        # reload
-        self._update_file_from_editor(realpath)
+#     def _write_generic(self, basename, data):
+#         if self.read_only:
+#             raise LibraryIsReadOnly()
+#         
+#         d = self._get_file_data(basename)
+#         realpath = d['realpath']
+#         logger.info('writing to %r' % realpath)
+#         with open(realpath, 'w') as f:
+#             f.write(data)
+#         # reload
+#         self._update_file_from_editor(realpath)
 
 
 

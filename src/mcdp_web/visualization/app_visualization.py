@@ -22,6 +22,7 @@ from mocdp.comp.context import Context
 
 from .add_html_links_imp import add_html_links
 from mcdp_hdb_mcdp.library_view import TheContext
+from mcdp_web.context_from_env import library_from_env, image_source_from_env
 
 
 class AppVisualization(object):
@@ -124,16 +125,13 @@ def generate_view_syntax(e, make_relative):
      
     
     if parses:
-        db_view = e.app.hi.db_view
-        subscribed_shelves = e.session.get_subscribed_shelves()
-        current_library_name = e.library_name
-        context = TheContext(db_view, subscribed_shelves, current_library_name)
-        mcdp_library = context.get_library()
+        mcdp_library = library_from_env(e)
+        image_source = image_source_from_env(e)
 
         try:
             thing = e.spec.load(mcdp_library, e.thing_name, context=context)
                 
-            svg_data = get_svg_for_visualization(e, mcdp_library, e.library_name, e.spec, 
+            svg_data = get_svg_for_visualization(e, image_source, e.library_name, e.spec, 
                                                      e.thing_name, thing, Tmp.refined, 
                                                      make_relative)
         except (DPSemanticError, DPNotImplementedError) as exc:
@@ -197,9 +195,10 @@ def add_html_links_to_svg(svg, link_for_dpname):
                 
         
 # with timeit_wall('graph_generic - get_png_data', 1.0):
-def get_svg_for_visualization(e, library, library_name, spec, name, thing, refined, make_relative):
+def get_svg_for_visualization(e, image_source, library_name, spec, name, thing, refined, make_relative):
 
-    svg_data0 = spec.get_png_data_syntax(library, name, thing, data_format='svg')
+    svg_data0 = spec.get_png_data_syntax(image_source, name, thing, data_format='svg')
+    
     fragment = bs(svg_data0)
     if fragment.svg is None:
         msg = 'Cannot interpret fragment.'

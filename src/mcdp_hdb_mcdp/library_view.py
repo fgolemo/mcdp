@@ -5,6 +5,7 @@ from contracts import contract
 from mcdp_utils_misc.string_utils import format_list
 from mcdp.exceptions import DPSemanticError
 from contracts.utils import raise_desc
+from mcdp_library.specs_def import specs
 
 
 __all__ = [
@@ -12,26 +13,7 @@ __all__ = [
 ]
 
 class LibraryView():
-    pass
-#     def _load_spec_data(self, spec_name, thing_name):
-#         object.__setattr__(self, 'cache_dir', None)
-#         
-#         things = self.things.child(spec_name)
-#         data = things[thing_name]
-#         realpath = 'XXX (cannot get realpath)'
-#         return dict(data=data, realpath=realpath)
-#     
-#     def clone(self):
-#         return self
-#     
-#     @contextmanager
-#     def _sys_path_adjust(self):
-#         yield
-#         
-# def generate_context(db_view, subscribed_shelves, current_library_name):
-#     ''' Generates a Context() with all the right hooks '''
-#     context = TheContext(db_view, subscribed_shelves, current_library_name)
-#     return context
+    pass 
 
 
 class TheContext(Context):
@@ -109,7 +91,10 @@ class TheContextLibrary(MCDPLibrary):
             raise_desc(DPSemanticError, msg)
         else:
             data = things[thing_name]
-            realpath = 'XXX (cannot get realpath)'
+            spec = specs[spec_name]
+            basename  = thing_name + '.' + spec.extension
+            realpath = '%s in library %r in shelf %r in repo %r' % (basename, self.library_name,
+                                                                    self.shelf_name, self.repo_name) 
             return dict(data=data, realpath=realpath)
     
     def clone(self):

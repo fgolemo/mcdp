@@ -1,9 +1,12 @@
+from contracts import contract
 from contracts.utils import raise_wrapped
+
+from mcdp.constants import MCDPConstants
 from mcdp_report.gg_ndp import gvgen_from_ndp
+from mcdp_report.image_source import NoImages
 
 from .figure_interface import MakeFigures
 from .formatters import MakeFigures_Formatter, TextFormatter, GGFormatter
-from mcdp.constants import MCDPConstants
 
 
 __all__ = [
@@ -11,10 +14,14 @@ __all__ = [
 ]
 
 class MakeFiguresNDP(MakeFigures):
-    def __init__(self, ndp, library=None, yourname=None):
+    
+    @contract(image_source='None|isinstance(ImagesSource)')
+    def __init__(self, ndp, image_source=None, yourname=None):
         self.ndp = ndp
         self.yourname = yourname
-        self.library = library
+        if image_source is None:
+            image_source = NoImages()
+        self.image_source = image_source
         
         aliases = {
             'ndp_graph_enclosed': 'ndp_graph_enclosed_LR',
@@ -72,10 +79,9 @@ class MakeFiguresNDP(MakeFigures):
             BridgeFormatter(**params2)
         
         MakeFigures.__init__(self, aliases=aliases, figure2function=figure2function)
-        
-    def get_library(self):
-        """ Might return None """
-        return self.library
+    
+    def get_image_source(self):
+        return self.image_source
     
     def get_ndp(self):
         return self.ndp
@@ -91,8 +97,10 @@ class BridgeFormatter(MakeFigures_Formatter):
             msg = 'Could not instance %s with params %s' %\
                 (constructor, kwargs)
             raise_wrapped(TypeError, e, msg)
+            
     def available_formats(self):
         return self.dpf.available_formats()
+    
     def get(self, mf, formats):
         ndp = mf.get_ndp()
         dp = ndp.get_dp()
@@ -116,12 +124,10 @@ class Normal(GGFormatter):
         
     def get_gg(self, mf):
         ndp = mf.get_ndp()
-        library = mf.get_library()
+        image_source = mf.get_image_source()
         yourname = mf.get_yourname()
         
-        images_paths = library.get_images_paths() if library else []
-
-        gg = gvgen_from_ndp(ndp, self. style, library=library, images_paths=images_paths,
+        gg = gvgen_from_ndp(ndp=ndp, style=self.style, image_source=image_source,
                             yourname=yourname, direction=self.direction,
                             skip_initial=True)
         return gg
@@ -157,15 +163,13 @@ class Enclosed(GGFormatter):
         ndp = mf.get_ndp()
         
         ndp2 = templatize_children_for_figures(ndp, enclosed=self.enclosed)
-        
-        library = mf.get_library()
-        images_paths = library.get_images_paths() if library is not None else []
-        
+         
+        image_source = mf.get_image_source()
         # we actually don't want the name on top
         yourname = None  # name
         
         gg = gvgen_from_ndp(ndp2, style=self.style, direction=self.direction,
-                            images_paths=images_paths, library=library,  yourname=yourname,
+                            image_source=image_source, yourname=yourname,
                             skip_initial=self.skip_initial)
         
         return gg
@@ -179,7 +183,7 @@ class Templatized(GGFormatter):
          
     def get_gg(self, mf):
         ndp = mf.get_ndp()
-        library =mf.get_library()
+        image_source = mf.get_image_source()
         
         yourname = None 
         if self.labeled:
@@ -187,12 +191,10 @@ class Templatized(GGFormatter):
                 yourname = getattr(ndp,MCDPConstants.ATTR_LOAD_NAME)
 
         from mocdp.comp.composite_templatize import ndp_templatize
-        ndp = ndp_templatize(ndp, mark_as_template=False)
-        
-        images_paths = library.get_images_paths() if library else []
+        ndp = ndp_templatize(ndp, mark_as_template=False) 
     
-        gg = gvgen_from_ndp(ndp, self.style, library=library, yourname=yourname,
-                            images_paths=images_paths, direction=self.direction,
+        gg = gvgen_from_ndp(ndp=ndp, style=self.style, yourname=yourname,
+                            image_source=image_source, direction=self.direction,
                             skip_initial=True)
         return gg
 
@@ -204,12 +206,11 @@ class Expand(GGFormatter):
 
     def get_gg(self, mf):
         """ This expands the children, forces the enclosure """
-        library = mf.get_library()
-        images_paths = library.get_images_paths() if library is not None else []
+        image_source = mf.get_image_source()
         ndp = mf.get_ndp()
         yourname = None  # name
-        gg = gvgen_from_ndp(ndp, style=self.style, library=library,  direction=self.direction,
-                            images_paths=images_paths, yourname=yourname,
+        gg = gvgen_from_ndp(ndp, style=self.style,   direction=self.direction,
+                            image_source=image_source, yourname=yourname,
                             skip_initial=True)
         return gg
     

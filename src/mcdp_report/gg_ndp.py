@@ -21,6 +21,8 @@ from mocdp.comp.context import (get_name_for_fun_node, get_name_for_res_node,
 from mocdp.comp.interfaces import NamedDP
 from mcdp.exceptions import mcdp_dev_warning, DPInternalError
 from mocdp.ndp import NamedDPCoproduct
+from abc import ABCMeta, abstractmethod
+from mcdp_report.image_source import NoImages
 
 
 STYLE_GREENRED = 'greenred'
@@ -67,13 +69,17 @@ class RecursiveEdgeLabeling(PlottingInfo):
     def get_rname_label(self, ndp_name, rname):
         return self.f.get_rname_label(self._name(ndp_name), rname)
 
-
-@contract(ndp=NamedDP, direction='str', yourname='str|None')
-def gvgen_from_ndp(ndp, style='default', direction='LR', images_paths=[], yourname=None,
-                   plotting_info=None, skip_initial=True, library=None):
+@contract(ndp=NamedDP, direction='str', yourname='str|None',
+          # image_source='None|isinstance(ImageSource)'
+          )
+def gvgen_from_ndp(ndp, style='default', direction='LR', images_paths=None, yourname=None,
+                   plotting_info=None, skip_initial=True, image_source=None):
+    if images_paths is not None:
+        raise Exception('Deprecated')
     if plotting_info is None:
         plotting_info = PlottingInfo()
-
+    if image_source is None:
+        image_source = NoImages()
     """
         plotting_info(ndp_name=('name', 'sub'), fname=None, rname='r1')
         plotting_info(ndp_name=('name', 'sub'), fname='f1', rname=None)
@@ -126,8 +132,8 @@ def gvgen_from_ndp(ndp, style='default', direction='LR', images_paths=[], yourna
 
 
     from .gdc import GraphDrawingContext
-    gdc = GraphDrawingContext(gg=gg, parent=None, library=library,
-                              yourname=yourname, images_paths=images_paths,
+    gdc = GraphDrawingContext(gg=gg, parent=None,
+                              yourname=yourname, image_source=image_source,
                               skip_initial=skip_initial)
     gdc.set_style(style)
 

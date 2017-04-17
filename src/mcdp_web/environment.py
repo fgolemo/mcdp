@@ -1,7 +1,7 @@
 from mcdp.constants import MCDPConstants
+from mcdp.logs import logger
 
 from .resource_tree import ResourceRepo, get_from_context, ResourceLibrary, ResourceShelf, ResourceThings, ResourceThing, ResourceThingView
-from mcdp.logs import logger
 
 
 def cr2e(f):
@@ -28,8 +28,7 @@ class Environment(object):
             self.repo = None
         else:
             self.repo_name = rrepo.name
-            self.repo =  repos[self.repo_name]
-
+            self.repo = repos[self.repo_name]
 
         rshelf = get_from_context(ResourceShelf, context)
         if rshelf is None:
@@ -65,6 +64,7 @@ class Environment(object):
             things = self.library.things.child(self.spec_name)
             logger.debug('thing_name: %s' % self.thing_name)
             self.thing = things[self.thing_name]
+            
             
         rview = get_from_context(ResourceThingView, context)
         self.view_name = rview.name if rview is not None else None

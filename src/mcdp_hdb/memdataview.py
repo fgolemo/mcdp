@@ -213,7 +213,7 @@ class ViewContext0(ViewMount):
     def __getattr__(self, name):
         try:
             return object.__getattribute__(self, name)
-        except AttributeError as e:
+        except AttributeError as _e:
 #             logger.debug('Could not get %r: %s: %s ' % (name, id(self), e))
             pass  
         

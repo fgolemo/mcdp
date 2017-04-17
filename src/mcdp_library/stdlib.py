@@ -13,7 +13,7 @@ TestLibrary = namedtuple('TestLibrary', 'bigpath librarian short path ')
 @memoize_simple
 def get_test_librarian():
     package = dir_from_package_name('mcdp_data')
-    folder = os.path.join(package, 'libraries')
+    folder = os.path.join(package, 'bundled.mcdp_repo')
 
     if not os.path.exists(folder):
         raise_desc(ValueError, 'Test folders not found.' , folder=folder)

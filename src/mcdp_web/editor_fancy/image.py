@@ -8,14 +8,14 @@ from mocdp.comp.template_for_nameddp import TemplateForNamedDP
 from mcdp.exceptions import mcdp_dev_warning, DPNotImplementedError
 
 
-def get_png_data_model(library, name, ndp, data_format): 
-    mf = MakeFiguresNDP(ndp=ndp, library=library, yourname=name)
+def get_png_data_model(image_source, name, ndp, data_format): 
+    mf = MakeFiguresNDP(ndp=ndp, image_source=image_source, yourname=name)
     f = 'fancy_editor' 
     res = mf.get_figure(f, data_format)
     return res
 
-def get_png_data_syntax_model(library, name, ndp, data_format):
-    mf = MakeFiguresNDP(ndp=ndp, library=library, yourname=name)
+def get_png_data_syntax_model(image_source, name, ndp, data_format):
+    mf = MakeFiguresNDP(ndp=ndp, image_source=image_source, yourname=name)
     f = 'ndp_graph_enclosed_TB' 
     res = mf.get_figure(f, data_format)
     return res
@@ -26,7 +26,7 @@ def ndp_template_enclosed(library, name, x, data_format):
     return ndp_template_graph_enclosed(library, x, style=STYLE_GREENREDSYM, yourname=name,
                                        data_format=data_format, direction='TB', enclosed=True)
 
-def ndp_template_graph_enclosed(library, template, style, yourname, data_format, direction, enclosed):
+def ndp_template_graph_enclosed(library, template, style, yourname, data_format, direction, enclosed, image_source):
     assert isinstance(template, TemplateForNamedDP)
     mcdp_dev_warning('Wrong - need assume ndp const')
 
@@ -37,9 +37,8 @@ def ndp_template_graph_enclosed(library, template, style, yourname, data_format,
     if enclosed:
         setattr(ndp, '_hack_force_enclose', True)
 
-    images_paths = library.get_images_paths()
     gg = gvgen_from_ndp(ndp, style=style, direction=direction,
-                        images_paths=images_paths, yourname=yourname)
+                        image_source=image_source, yourname=yourname)
     return gg_get_format(gg, data_format)
     
 def get_png_data_poset(library, name, x, data_format):
