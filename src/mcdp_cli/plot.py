@@ -22,6 +22,7 @@ from system_cmd import CmdException, system_cmd_result
 
 from .utils_mkdir import mkdirs_thread_safe
 from mcdp_docs.minimal_doc import get_minimal_document
+from mcdp_report.image_source import ImagesFromPaths
 
 
 def get_ndp(data):
@@ -251,7 +252,9 @@ class MFCall():
     def __call__(self, data):
         ndp = get_ndp(data)
         library = data['library']
-        mf = MakeFiguresNDP(ndp=ndp, library=library, yourname=None)
+        paths  = library.get_images_paths()
+        image_source=  ImagesFromPaths(paths)
+        mf = MakeFiguresNDP(ndp=ndp, image_source=image_source, yourname=None)
          
         formats = mf.available_formats(self.name)
         res = mf.get_figure(self.name, formats)

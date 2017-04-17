@@ -63,11 +63,12 @@ def check_generate_view_syntax(filename, source, libname):  # @UnusedVariable
     class EnvironmentMockup(object):
         def __init__(self):
             self.library_name = libname
-            self.thing_name = thing_name
             self.spec = spec
             self.library = library
             self.session = SessionMockup()
             self.repo_name = 'repo1'
             self.shelf_name = 'shelf1'
+            self.thing_name = thing_name
+            self.thing = source
     e = EnvironmentMockup()
     _res = generate_view_syntax(e, make_relative)
