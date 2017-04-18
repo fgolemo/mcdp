@@ -15,7 +15,6 @@ __all__ = [
 class LibraryView():
     pass 
 
-
 class TheContext(Context):
     
     def __init__(self, db_view, subscribed_shelves, current_library_name):
@@ -29,15 +28,23 @@ class TheContext(Context):
         self.load_template_hooks = [self.load_template]
         self.load_library_hooks = [self.load_library]
 
-    def load_library(self, library_name, context=None):
+    def load_library(self, library_name, context=None):  # @UnusedVariable
         repos = self.db_view.repos
+        all_shelves = set()
+        all_libraries = set()
         for repo_name, repo in repos.items():
+            all_shelves.update(repo.shelves)
+            for shelf_name, shelf in repo.shelves.items():
+                all_libraries.update(shelf.libraries)
             for shelf_name in self.subscribed_shelves:
                 if shelf_name in repo.shelves:
                     shelf = repo.shelves[shelf_name]
                     if library_name in shelf.libraries:
                         return self.make_library(repo_name, shelf_name, library_name)
         msg = 'Could not find library %r.' % library_name
+        msg += '\n Subscribed shelves: %s.' % format_list(sorted(self.subscribed_shelves))
+        msg += '\n All shelves: %s.' % format_list(sorted(all_shelves))
+        msg += '\n All libraries: %s.' % format_list(sorted(all_libraries))
         raise ValueError(msg)
     
     @contract(returns=MCDPLibrary)

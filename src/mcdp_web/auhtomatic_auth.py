@@ -11,9 +11,7 @@ from pyramid.security import remember
 from system_cmd import system_cmd_result
 
 from mcdp import logger
-from mcdp_user_db import UserInfo
 from mcdp_utils_misc import memoize_simple
-from mcdp_utils_misc.my_yaml import yaml_dump
 from mcdp_hdb_mcdp.main_db_schema import DB
 from mcdp_user_db.user import User
 from contracts.utils import check_isinstance

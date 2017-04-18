@@ -48,9 +48,11 @@ def check_editor_response(filename, source, libname):  # @UnusedVariable
             msg = 'Failed'
             raise_desc(ValueError, msg, source=source, res=res)
 
-
 @for_all_source_all
 def check_generate_view_syntax(filename, source, libname):  # @UnusedVariable
+    from mcdp_library.stdlib import get_test_db
+    db_view = get_test_db()
+    
     library = get_test_library(libname)
     spec = filename2spec(filename)
     thing_name, _ext = os.path.splitext(os.path.basename(filename))
@@ -60,6 +62,9 @@ def check_generate_view_syntax(filename, source, libname):  # @UnusedVariable
             pass
         def get_repo_shelf_for_libname(self, libname):  # @UnusedVariable
             return 'repo1', 'shelf1'
+        def get_subscribed_shelves(self):
+            return list(db_view.repos['bundled'].shelves)
+        
     class EnvironmentMockup(object):
         def __init__(self):
             self.library_name = libname
@@ -70,5 +75,6 @@ def check_generate_view_syntax(filename, source, libname):  # @UnusedVariable
             self.shelf_name = 'shelf1'
             self.thing_name = thing_name
             self.thing = source
+            self.db_view = db_view
     e = EnvironmentMockup()
     _res = generate_view_syntax(e, make_relative)

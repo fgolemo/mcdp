@@ -3,11 +3,11 @@ from pyramid.httpexceptions import HTTPFound
 from pyramid.security import remember, forget
 
 from mcdp import logger
-
-from .resource_tree import ResourceLogout, ResourceLogin, context_display_in_detail
-from .environment import cr2e
-from .utils0 import add_std_vars_context
 from mcdp_web.environment import Environment
+
+from .environment import cr2e
+from .resource_tree import ResourceLogout, ResourceLogin, context_display_in_detail
+from .utils0 import add_std_vars_context
 
 
 URL_LOGIN = '/login/'

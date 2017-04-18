@@ -12,7 +12,7 @@ __all__ = [
 @contextmanager
 def timeit(desc, minimum=None, logger=None):
     logger = logger or logger_performance
-    logger.debug('timeit %s ...' % desc)
+#     logger.debug('timeit %s ...' % desc)
     t0 = time.clock()
     yield
     t1 = time.clock()
@@ -20,7 +20,7 @@ def timeit(desc, minimum=None, logger=None):
     if minimum is not None:
         if delta < minimum:
             return
-    logger.debug('timeit result: %.2f s (>= %s)' % (delta, minimum))
+    logger.debug('timeit result: %.2f s (>= %s) for %s' % (delta, minimum, desc))
 
 @contextmanager
 def timeit_wall(desc, minimum=None, logger=None):

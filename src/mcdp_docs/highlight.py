@@ -612,7 +612,7 @@ def make_figures(library, soup, raise_error_dp, raise_error_others, realpath, ge
         go(selector, callback)
 
 
-    mf = MakeFiguresPoset(None)
+    mf = MakeFiguresPoset(None, None)
     available_poset = set(mf.available()) | set(mf.aliases)
     for which in available_poset:
         def callback(tag0):

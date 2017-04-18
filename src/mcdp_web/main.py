@@ -25,12 +25,9 @@ from mcdp import MCDPConstants
 from mcdp import logger
 from mcdp.exceptions import DPSemanticError, DPSyntaxError
 from mcdp_docs import render_complete
-from mcdp_hdb.disk_struct import ProxyDirectory
-from mcdp_hdb.pipes import apply_changes_to_disk_and_repo
+from mcdp_hdb_mcdp.host_instance import HostInstance
 from mcdp_library import MCDPLibrary
-from mcdp_repo import MCDPGitRepo, MCDPythonRepo
-from mcdp_utils_misc import create_tmpdir, duration_compact, dir_from_package_name, format_list
-from mcdp_utils_misc import yaml_dump
+from mcdp_utils_misc import duration_compact, dir_from_package_name, format_list, yaml_load
 
 from .auhtomatic_auth import get_authomatic_config_, view_authomatic_
 from .auhtomatic_auth import view_confirm_bind_,\
@@ -62,8 +59,6 @@ from .utils.response import response_data
 from .utils0 import add_other_fields, add_std_vars_context
 from .utils0 import add_std_vars_context_no_redir
 from .visualization.app_visualization import AppVisualization
-from mcdp_utils_misc.my_yaml import yaml_load
-from mcdp_hdb_mcdp.host_instance import HostInstance
 
 
 Privileges = MCDPConstants.Privileges

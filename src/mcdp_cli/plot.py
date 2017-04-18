@@ -334,7 +334,8 @@ def write_results(res, model_name, outdir):
 
 def do_plots_poset(model_name, library, plots):
     poset = library.load_poset(model_name)
-    mf = MakeFiguresPoset(poset, library=library)
+    image_source = ImagesFromPaths(library.get_images_paths())
+    mf = MakeFiguresPoset(poset, image_source=image_source)
 
     possible = list(mf.available())
     plots = expand_string(plots, list(possible))

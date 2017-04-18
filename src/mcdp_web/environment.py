@@ -20,7 +20,8 @@ class Environment(object):
 
         app = WebApp.singleton
         self.app = app
-        repos = app.hi.db_view.repos
+        self.db_view = app.hi.db_view
+        repos = self.db_view.repos
         self.session = app.get_session(request)
         rrepo = get_from_context(ResourceRepo, context)
         if rrepo is None:

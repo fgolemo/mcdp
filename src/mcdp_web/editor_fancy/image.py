@@ -41,10 +41,10 @@ def ndp_template_graph_enclosed(library, template, style, yourname, data_format,
                         image_source=image_source, yourname=yourname)
     return gg_get_format(gg, data_format)
     
-def get_png_data_poset(library, name, x, data_format):
+def get_png_data_poset(image_source, name, x, data_format):
     _ = name 
     if isinstance(x, FinitePoset):
-        mf = MakeFiguresPoset(x, library=library)
+        mf = MakeFiguresPoset(x, image_source=image_source)
         f = 'hasse_icons' 
         res = mf.get_figure(f, data_format)
         return res
