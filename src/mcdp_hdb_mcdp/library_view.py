@@ -15,6 +15,7 @@ __all__ = [
 class LibraryView():
     pass 
 
+
 class TheContext(Context):
     
     def __init__(self, db_view, subscribed_shelves, current_library_name):
