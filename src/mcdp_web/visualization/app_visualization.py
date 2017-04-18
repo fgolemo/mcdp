@@ -135,7 +135,7 @@ def generate_view_syntax(e, make_relative):
                                                      e.thing_name, thing, Tmp.refined, 
                                                      make_relative)
         except (DPSemanticError, DPNotImplementedError) as exc:
-            
+            print exc
             from mcdp_web.editor_fancy.app_editor_fancy_generic import html_mark
             highlight = html_mark(highlight, exc.where, "semantic_error")
 

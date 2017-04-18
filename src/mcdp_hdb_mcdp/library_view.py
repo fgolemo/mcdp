@@ -95,7 +95,7 @@ class TheContextLibrary(MCDPLibrary):
                         (spec_name, format_list(sorted(available))))
             else:
                 msg += " None of those found."
-                
+            raise ValueError(msg)
             raise_desc(DPSemanticError, msg)
         else:
             data = things[thing_name]
