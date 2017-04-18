@@ -163,9 +163,9 @@ def test_imp_dict_1(id_ndp, ndp):
 
         gv = GetValues(ndp=ndp, imp_dict=imp_dict, nu=None, nl=None)
 
-        images_paths = []  # library.get_images_paths()
+#         images_paths = []  # library.get_images_paths()
         from mcdp_report.gdc import STYLE_GREENREDSYM
-        gg = gvgen_from_ndp(ndp=ndp, style=STYLE_GREENREDSYM, images_paths=images_paths,
+        gg = gvgen_from_ndp(ndp=ndp, style=STYLE_GREENREDSYM,
                             plotting_info=gv)
 
         from reprep import Report
