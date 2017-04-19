@@ -1,0 +1,76 @@
+{% extends "desc_page.jinja2" %}
+{% block title %}
+    {% if navigation.repo_name %}
+        Repo {{navigation.repo_name}}
+    {% else %}
+        Shelves list for all repositories.
+    {% endif %}
+{% endblock %}
+{% block desc_page_title %}
+    {% if navigation.repo_name %}
+        {{links.repo(navigation.repo_name)}}
+    {% else %}
+        Shelves list for all repositories.
+    {% endif %}
+{% endblock %}
+{% block desc_page_desc %}
+{% if navigation.repo_name %}
+    <!-- These are the shelves available in repository <code>{{navigation.repo_name}}</code>. -->
+    {{navigation.repo.get_desc_short()}}
+
+{% else %}
+    These are all the shelves available across all repositories.
+{% endif %}
+{% endblock %}
+{% block head_extra %}
+    <style>{% include 'shelves_index.css' %}</style>
+    <script>{% include 'shelves_index.js' %}</script>
+{% endblock %}
+{% block desc_page_content %}
+
+
+{% from 'list_libraries_for_shelf.jinja2' import list_libraries_for_shelf with context %}
+{% from 'shelf_row.jinja2' import shelf_row with context %}
+{% from 'shelf_rows.jinja2' import shelf_rows with context %}
+
+{% if navigation.repo_name %}
+    <p>These are the shelves available in this repository:</p>
+{% endif %}
+<table class="shelves_list" cellspacing="0" cellpadding="0">
+    <!-- <thead>
+        <tr>
+            <th>Shelf name</th>
+            <th>Permissions</th>
+            <th>description</th>
+            <th colspan=2>status</th>
+        </tr>
+    </thead> -->
+
+    {% if navigation.repo_name %}
+            {{shelf_rows(navigation.repo_name, navigation.repos[navigation.repo_name])}}
+    {% else %}
+        {% for repo_name, repo in navigation.repos.items() %}
+            <tr class='repo'><td  colspan=5>{{links.repo(repo_name)}}</td></tr>
+            {{shelf_rows(repo_name, repo)}}
+        {% endfor %}
+    {% endif %}
+</table>
+
+<style>
+tr.repo:not(:first-child) {
+    margin-top: 2em;
+}
+    tr.repo  {
+        display:block;
+        color:black;
+        margin-left: -2em;
+    }
+</style>
+
+<p class='tip' id='shelf-organization'>
+    MCDP models are organized in <em>shelves</em>.
+    These are all the <em>shelves</em> available to you. If you wish to use the libraries
+    in a particular shelf, you need to activate it here first.
+</p>
+
+{% endblock %}

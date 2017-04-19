@@ -23,7 +23,7 @@ class Eval(QuickAppBase):
                            help='Library directories containing models, separated by :.')
 
     def go(self):
-        from mocdp import logger
+        from mcdp import logger
         logger.setLevel(logging.DEBUG)
 
 

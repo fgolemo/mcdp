@@ -4,8 +4,9 @@
 
 <style type='text/css'>
 
-	#select_view { width: 18em; }
-	#select_model { width: 18em; }
+	/*#select_view { width: 18em; }
+	#select_model { width: 18em; }*/
+	/*#back_to_shelf, #select_shelf { width: 18em;}*/
 
 	#back_to_library, #select_view, #select_model-button {
 		/*height: 1.5em !important;*/
@@ -13,19 +14,20 @@
 	}
 
 	#select_view, #select_model {
-		display: none;
+		/*display: none;*/
 	}
-	.hot_select { visibility: hidden;}
-	
+	/*.hot_select { visibility: hidden;}*/
+
 	table#maintable {
 		position: fixed;
 		z-index: 100;
 		top: 0; left: 0;
 	}
 	#aftertable {
-		margin-top: 2em; 
+		margin-top: 2em;
 	}
-	
+
+
 </style>
 
 
@@ -34,82 +36,138 @@
 	<td>
 		{% include 'menu.jinja2' %}
 	</td>
-	<td>
+	<td style=''>
 
-	{% if not navigation['current_thing'] %}
-	  <select id='select_library' class='hot_select'>
-	  	<option value="#"  selected = 1>📖&nbsp; Other libraries&hellip;</option>
+		{% if navigation.repo_name %}
+		<a id='repos_list' style='visibility: hidden'
+		href="{{root}}/repos/">repos</a>
+		<script type='text/javascript'>
+		$(document).ready(function() {
+			$("#repos_list").button();
+			$("#repos_list").css('visibility', 'visible');
+		});
+		</script>
+		{% endif %}
 
-		<!-- {% for li in navigation['libraries'] %}
-	    <option value="{{li['url']}}" {% if li['current'] %} selected = 1 {% endif %}>
-	    	{{li['name']}}
-	    </option>
-	    {% endfor %} -->
+		{% if navigation.shelf_name %}
+		<!-- / -->
+		<a id='shelves_list' style='visibility: hidden'
+		href="{{root}}/repos/{{navigation.repo_name}}/shelves/">
+			{{icon_repo|safe}} {{navigation.repo_name}}</a>
+		<script type='text/javascript'>
+		$(document).ready(function() {
+			$("#shelves_list").button();
+			$("#shelves_list").css('visibility', 'visible');
+		});
+		</script>
+		{% endif %}
 
-		{% for sup, sup_libraries in navigation['libraries_indexed'] %}
-		    {% for li in sup_libraries %}
-		    <option name='{{li['name']}}' value="{{li['url']}}">
-		    	<!-- note the span has no effect inside option -->
-				<!--{% if li['current'] %} selected = 1 {% endif %}-->
-		    	📖&nbsp; {{sup}} / {{li['name']}}
-		    </option>
-		    {% endfor %}
+		{% if navigation.library_name %}
+		<!-- /  -->
+		<a id='back_to_shelf' style='visibility: hidden'
+		href="{{shelf_url(navigation.repo_name, navigation.shelf_name)}}/">
+			<!-- <span class='unicode-icons'>⟲</span> -->
+			 <span class="shelf_name">
+				{{icon_shelf|safe}} {{navigation.shelf_name}}
+			 </span>
+		</a>
+		<script type='text/javascript'>
+		$(document).ready(function() {
+			$("#back_to_shelf").button();
+			$("#back_to_shelf").css('visibility', 'visible');
+		});
+		</script>
+		{% endif %}
 
+	{% if navigation.shelf_name and not navigation.library_name %}
+	<select id='select_shelf' class='hot_select'>
+		<option value="#"  selected = 1>{{icon_shelf|safe}}&nbsp;{{navigation.shelf_name}}</option>
+
+		{% for shelf_name in navigation.repos[navigation.repo_name].shelves if shelf_name != navigation.shelf_name %}
+			<option name='{{shelf_name}}' value="{{shelf_url(navigation.repo_name, shelf_name)}}">
+				{{icon_shelf|safe}}&nbsp;{{shelf_name}}
+			</option>
 		{% endfor %}
 
 	  </select>
-	 {% else %}
-	 	<a id='back_to_library' style='visibility: hidden'
-		href="{{root}}/libraries/{{navigation['current_library']}}/">
-	 		<span class='unicode-icons'>⟲</span> Library
+	{% endif %}
+
+
+
+	 {% if navigation.library_name and not navigation.thing_name %}
+ 	  <select id='select_library' class='hot_select'>
+ 	  	<option value="#"  selected = 1>{{icon_library|safe}}&nbsp;{{navigation.library_name}}</option>
+
+ 		{% for library_name in navigation.shelf.libraries %}
+ 		    <option name='library_name'
+				value="{{library_url(library_name)}}/">
+ 		    	{{icon_library|safe}}&nbsp; {{library_name}}
+ 		    </option>
+ 		{% endfor %}
+
+ 	  </select>
+
+	  	    <!-- Also add the same but with hidden links -->
+	  		{% for li in navigation['libraries'] %}
+	  	        <a class='hidden libraries' style='display:none' href="{{li['url']}}"></a>
+	  	    {% endfor %}
+ 	 {% endif %}
+
+	 {% if navigation.library_name and navigation.thing_name %}
+	 	<!-- /  -->
+		<a id='back_to_library' style='visibility: hidden'
+		href="{{library_url(navigation.library_name)}}/">
+	 		<!-- <span class='unicode-icons'>⟲</span> -->
 	 		 <span class="library_name">
-	 		 	{{navigation['current_library']}}
+	 		 	{{icon_library|safe}} {{navigation.library_name}}
 	 		 </span>
 	 	</a>
 	 	<script type='text/javascript'>
 	 	$(document).ready(function() {
-	    	$("#back_to_library").button();
+			$("#back_to_library").button();
 	    	$("#back_to_library").css('visibility', 'visible');
 		});
 		</script>
 	 {% endif %}
 
-	    <!-- Also add the same but with hidden links -->
-		{% for li in navigation['libraries'] %}
-	        <a style='display:none' href="{{li['url']}}"></a>
-	    {% endfor %}
 
 	  </td>
 	  <td>
 
+		  {% if navigation.library_name %}
+	  <!-- /  -->
 	  <select id='select_model' class='hot_select'>
-	  	{% if not navigation['current_model'] and not navigation['current_template']
-	  		and not navigation['current_poset'] %}
+	  	{% if  navigation.spec_name != 'models' and  navigation.spec_name  != 'templates'
+	  		and navigation.spec_name != 'posets' %}
 
 	  		<option value="#"  selected = 1>🔎&nbsp; MCDPs/posets/&hellip; </option>
 
 	  	{% endif %}
 
-	    {% for mi in navigation['models'] + navigation['templates'] + navigation['posets'] + navigation['values'] %}
-	    <option value="{{mi['url']}}" {% if mi['current'] %} selected = 1 {% endif %}>
-	    	{% if mi in navigation['models']    %}&#10213;&nbsp;{% endif %}
-	    	{% if mi in navigation['templates'] %}&#x2661;&nbsp;{% endif %} <!-- ⢶ -->
-	    	{% if mi in navigation['posets']    %}&#x28B6;&nbsp;{% endif %} <!-- ♡ -->
-	    	{% if mi in navigation['values']    %}&#x2723;&nbsp;{% endif %} <!-- ✣ -->
-	    	{{mi['name']}}
-	    </option>
-	    {% endfor %}
+
+		    {% for mi in navigation['models'] + navigation['templates'] + navigation['posets'] + navigation['values'] %}
+		    <option value="{{mi['url']}}" {% if mi['current'] %} selected = 1 {% endif %}>
+				{% if mi in navigation['models']    %}{{icon_models|safe}}&nbsp;{% endif %}
+		    	{% if mi in navigation['templates'] %}{{icon_templates|safe}};&nbsp;{% endif %} <!-- ⢶ -->
+		    	{% if mi in navigation['posets']    %}{{icon_posets|safe}}&nbsp;{% endif %} <!-- ♡ -->
+		    	{% if mi in navigation['values']    %}{{icon_values|safe}}&nbsp;{% endif %} <!-- ✣ -->
+		    	{{mi['name']}}
+		    </option>
+		    {% endfor %}
+
 	  </select>
 
 	    <!-- Also add the same but with hidden links -->
 		{% for mi in navigation['models'] %}
 	        <a style='display:none' href="{{mi['url']}}"></a>
 	    {% endfor %}
+
+		{%endif%}
 	  </td>
 
 	  <td>
 
-	  {% if navigation['current_model'] %}
+	  {% if navigation.spec_name == 'models' %}
 
 		  <select id='select_view' class='hot_select'>
 		    {% for vi in navigation['views'] %}
@@ -122,7 +180,7 @@
 
 			{# Also add the same but with hidden links #}
 			{% for vi in navigation['views'] %}
-			    <a style='display:none' href="{{vi['url']}}""></a>
+			    <a style='display:none' href="{{vi.url}}"></a>
 			{% endfor %}
 
 	  {% endif %}
@@ -134,19 +192,18 @@
 <div id='aftertable'/>
 
 
-
-
 <script type = "text/javascript">
 	$(document).ready(function() {
+		$('.hot_select').selectmenu({change: handle});
+		/*$('.hot_select').show();*/
+		// $('.hot_select').css('visibility', 'visible');
 
 		function handle(event, ui) {
 		 console.log('change');
 		  window.location = $(this).val();
 		}
 
-		$('.hot_select').selectmenu({change: handle});
-		$('.hot_select').css('visibility', 'visible');
-		/*$('.hot_select').show();*/
+
 	});
 </script>
 

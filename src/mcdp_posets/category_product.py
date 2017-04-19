@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
 from contracts.utils import raise_wrapped
-from mocdp import ATTRIBUTE_NDP_RECURSIVE_NAME
-from mocdp.exceptions import do_extra_checks
+from mcdp.development import do_extra_checks
 
 from .poset import Poset
 from .poset_product import PosetProduct
 from .space import Space  # @UnusedImport
 from .space_product import SpaceProduct
+from mcdp.constants import MCDPConstants
 
 
 __all__ = [
@@ -32,7 +32,7 @@ def get_product_compact(*spaces):
     return S, pack, unpack
 
 def get_subs(x):
-    if hasattr(x,  ATTRIBUTE_NDP_RECURSIVE_NAME):
+    if hasattr(x,  MCDPConstants.ATTRIBUTE_NDP_RECURSIVE_NAME):
         # do not break the spaces that have a name
         return (x,)
     if isinstance(x, SpaceProduct):
@@ -60,7 +60,7 @@ def _prod_make_state(elements, spaces):
     assert isinstance(spaces, tuple), spaces
 
     def get_state(X, x):
-        if hasattr(X, ATTRIBUTE_NDP_RECURSIVE_NAME):
+        if hasattr(X, MCDPConstants.ATTRIBUTE_NDP_RECURSIVE_NAME):
             # do not break the spaces that have a name
             return (x,)
         if isinstance(X, SpaceProduct):

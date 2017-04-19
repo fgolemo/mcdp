@@ -3,9 +3,9 @@ from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped, indent
 from mcdp_dp import CoProductDPLabels
 from mcdp_posets import NotEqual
-from mocdp import ATTRIBUTE_NDP_RECURSIVE_NAME, ATTR_LOAD_NAME
 from mocdp.comp.interfaces import NamedDP
 from mocdp.comp.wrap import SimpleWrap
+from mcdp.constants import MCDPConstants
 
 
 __all__ = [
@@ -77,9 +77,10 @@ class NamedDPCoproduct(NamedDP):
             assert dp2.get_res_space() == dp.get_res_space(), (dp, dp2)
             res = dp2
 
-        if hasattr(self, ATTRIBUTE_NDP_RECURSIVE_NAME):
-            x = getattr(self, ATTRIBUTE_NDP_RECURSIVE_NAME)
-            setattr(res, ATTRIBUTE_NDP_RECURSIVE_NAME, x)
+        att = MCDPConstants.ATTRIBUTE_NDP_RECURSIVE_NAME
+        if hasattr(self, att):
+            x = getattr(self, att)
+            setattr(res, att, x)
 
         return res
 
@@ -102,11 +103,11 @@ class NamedDPCoproduct(NamedDP):
     def __repr__(self):
         s = 'NamedDPCoproduct'
 
-        if hasattr(self, ATTR_LOAD_NAME):
-            s += '\n (loaded as %r)' % getattr(self, ATTR_LOAD_NAME)
+        if hasattr(self, MCDPConstants.ATTR_LOAD_NAME):
+            s += '\n (loaded as %r)' % getattr(self,  MCDPConstants.ATTR_LOAD_NAME)
 
-        if hasattr(self, ATTRIBUTE_NDP_RECURSIVE_NAME):
-            s += '\n (labeled as %s)' % getattr(self, ATTRIBUTE_NDP_RECURSIVE_NAME).__str__()
+        if hasattr(self,  MCDPConstants.ATTRIBUTE_NDP_RECURSIVE_NAME):
+            s += '\n (labeled as %s)' % getattr(self,  MCDPConstants.ATTRIBUTE_NDP_RECURSIVE_NAME).__str__()
 
         for f in self.get_fnames():
             s += '\n provides %s  [%s]' % (f, self.get_ftype(f))

@@ -1,0 +1,13 @@
+{% extends "desc_page.jinja2" %}
+
+{% block desc_page_title %}
+    Oops!
+{% endblock %}
+
+{% block desc_page_content %}
+<p class='error'>{{error|safe}}</p>
+<style>
+p.error {
+    color: darkred;
+}
+{% endblock %}

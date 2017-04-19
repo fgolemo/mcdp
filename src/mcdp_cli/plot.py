@@ -6,6 +6,8 @@ from contracts import contract
 from contracts.enabling import disable_all
 from contracts.utils import raise_desc
 from decent_params import UserError
+from mcdp import logger
+from mcdp.exceptions import mcdp_dev_warning, DPSemanticError
 from mcdp_cli.utils_wildcard import expand_string
 from mcdp_figures import MakeFiguresNDP, MakeFiguresPoset
 from mcdp_lang.parse_interface import parse_ndp_refine
@@ -14,14 +16,13 @@ from mcdp_library import Librarian
 from mcdp_report.dp_graph_tree_imp import dp_graph_tree
 from mcdp_report.gg_utils import gg_get_formats
 from mcdp_web.editor_fancy.app_editor_fancy_generic import html_mark
-from mcdp_web.renderdoc.highlight import get_minimal_document
-from mocdp import logger
 from mocdp.comp.recursive_name_labeling import get_labelled_version
-from mocdp.exceptions import mcdp_dev_warning, DPSemanticError
 from quickapp import QuickAppBase
 from system_cmd import CmdException, system_cmd_result
 
 from .utils_mkdir import mkdirs_thread_safe
+from mcdp_docs.minimal_doc import get_minimal_document
+from mcdp_report.image_source import ImagesFromPaths
 
 
 def get_ndp(data):
@@ -112,7 +113,8 @@ def syntax_pdf(data):
     def ignore_line(lineno):
         return lineno  in lines_to_hide
     contents = ast_to_html(s,  
-                       ignore_line=ignore_line, parse_expr=Syntax.ndpt_dp_rvalue,
+                       ignore_line=ignore_line, 
+                       parse_expr=Syntax.ndpt_dp_rvalue,
                        )
     html = get_minimal_document(contents)
 
@@ -250,7 +252,9 @@ class MFCall():
     def __call__(self, data):
         ndp = get_ndp(data)
         library = data['library']
-        mf = MakeFiguresNDP(ndp=ndp, library=library, yourname=None)
+        paths  = library.get_images_paths()
+        image_source=  ImagesFromPaths(paths)
+        mf = MakeFiguresNDP(ndp=ndp, image_source=image_source, yourname=None)
          
         formats = mf.available_formats(self.name)
         res = mf.get_figure(self.name, formats)
@@ -330,7 +334,8 @@ def write_results(res, model_name, outdir):
 
 def do_plots_poset(model_name, library, plots):
     poset = library.load_poset(model_name)
-    mf = MakeFiguresPoset(poset, library=library)
+    image_source = ImagesFromPaths(library.get_images_paths())
+    mf = MakeFiguresPoset(poset, image_source=image_source)
 
     possible = list(mf.available())
     plots = expand_string(plots, list(possible))

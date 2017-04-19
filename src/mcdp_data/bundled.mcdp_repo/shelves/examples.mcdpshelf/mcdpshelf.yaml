@@ -1,0 +1,13 @@
+
+authors: []
+dependencies: []
+
+desc_short: Some other examples
+desc_long:
+
+acl: [
+    [Allow, Everyone, discover],
+    [Allow, Authenticated, subscribe],
+    [Allow, Everyone, read],
+    [Allow, "group:admin", all],
+]

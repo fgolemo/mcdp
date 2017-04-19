@@ -1,7 +1,4 @@
-#!/usr/bin/env node
 // console.log('Loading libraries..');
-require('MathJax-node')
-
 var mjAPI = require("MathJax-node/lib/mj-page.js");
 var jsdom = require("jsdom").jsdom;
 var fs = require('fs');

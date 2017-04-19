@@ -1,10 +1,10 @@
 import os
 
 from contracts.utils import check_isinstance, raise_desc
+
 from mcdp_library_tests.tests import get_test_library
 from mcdp_tests.generation import for_all_source_all
-from mcdp_web.editor_fancy.app_editor_fancy_generic import \
-    process_parse_request, specs
+from mcdp_web.editor_fancy.app_editor_fancy_generic import process_parse_request, specs
 from mcdp_web.visualization.app_visualization import generate_view_syntax
 
 
@@ -13,12 +13,9 @@ def filename2spec(filename): # TODO: move to specs
     
     _, dot_extension = os.path.splitext(filename)
     extension = dot_extension[1:]
-    extension2spec= {
-        'mcdp': specs['models'],
-        'mcdp_template': specs['templates'],
-        'mcdp_value': specs['values'],
-        'mcdp_poset': specs['posets'],
-    }
+    extension2spec = {}
+    for _, spec in specs.items():
+        extension2spec[spec.extension] = spec
     spec = extension2spec[extension]
     return spec
 
@@ -34,7 +31,8 @@ def check_editor_response(filename, source, libname):  # @UnusedVariable
    
     key = ()
     cache = {}
-    res = process_parse_request(library, string, spec, key, cache)
+    make_relative = lambda x: x
+    res = process_parse_request(library, string, spec, key, cache, make_relative)
     
     if res['ok']:
         
@@ -50,12 +48,33 @@ def check_editor_response(filename, source, libname):  # @UnusedVariable
             msg = 'Failed'
             raise_desc(ValueError, msg, source=source, res=res)
 
-
 @for_all_source_all
 def check_generate_view_syntax(filename, source, libname):  # @UnusedVariable
+    from mcdp_library.stdlib import get_test_db
+    db_view = get_test_db()
+    
     library = get_test_library(libname)
     spec = filename2spec(filename)
-    
-    name, _ext = os.path.splitext(os.path.basename(filename))
+    thing_name, _ext = os.path.splitext(os.path.basename(filename))
     make_relative = lambda x: x
-    res = generate_view_syntax(libname, library, name,  spec, make_relative)
+    class SessionMockup(object):
+        def __init__(self):
+            pass
+        def get_repo_shelf_for_libname(self, libname):  # @UnusedVariable
+            return 'repo1', 'shelf1'
+        def get_subscribed_shelves(self):
+            return list(db_view.repos['bundled'].shelves)
+        
+    class EnvironmentMockup(object):
+        def __init__(self):
+            self.library_name = libname
+            self.spec = spec
+            self.library = library
+            self.session = SessionMockup()
+            self.repo_name = 'repo1'
+            self.shelf_name = 'shelf1'
+            self.thing_name = thing_name
+            self.thing = source
+            self.db_view = db_view
+    e = EnvironmentMockup()
+    _res = generate_view_syntax(e, make_relative)

@@ -3,17 +3,19 @@ import os
 
 from contracts.utils import raise_desc, raise_wrapped
 from decent_params.utils import UserError
+from reprep import Report
+
 from mcdp_dp.dp_transformations import get_dp_bounds
 from mcdp_dp.tracer import Tracer
 from mcdp_library import Librarian
 from mcdp_posets import (NotLeq, UpperSets,
-    express_value_in_isomorphic_space, get_types_universe)
-from mcdp_posets.uppersets import LowerSets
+                         express_value_in_isomorphic_space, get_types_universe)
+from mcdp_posets import LowerSets
 from mocdp.comp.recursive_name_labeling import (get_imp_as_recursive_dict,
-    get_labelled_version, ndp_make)
-from reprep import Report
+                                                get_labelled_version, ndp_make)
 
 from .utils_mkdir import mkdirs_thread_safe
+from mcdp_report.image_source import ImagesFromPaths
 
 
 # from mcdp_dp.solver_iterative import solver_iterative
@@ -180,6 +182,7 @@ def solve_main(logger, config_dirs, maindir, cache_dir, model_name, lower, upper
 
                 imp_dict = get_imp_as_recursive_dict(M, m)
                 images_paths = library.get_images_paths()
+                image_source = ImagesFromPaths(images_paths)
                 gv = GetValues(ndp=ndp, imp_dict=imp_dict, nu=upper, nl=1)
 
                 setattr(ndp, '_hack_force_enclose', True)
@@ -187,7 +190,7 @@ def solve_main(logger, config_dirs, maindir, cache_dir, model_name, lower, upper
                 with report_solutions.subsection('sol-%s-%s' % (i, j)) as rr:
                     # Left right
                     gg = gvgen_from_ndp(ndp=ndp, style=STYLE_GREENREDSYM,
-                                    images_paths=images_paths,
+                                    image_source=image_source,
                                     plotting_info=gv, direction='LR')
 
                     gg_figure(rr, 'figure', gg, do_png=True, do_pdf=True,
@@ -231,7 +234,10 @@ def solve_meat_solve_ftor(trace, ndp, dp, fg, intervals, max_steps, exp_advanced
             rnames = ndp.get_rnames()
             x = ", ".join(rnames)
             # todo: add better formatting
-            trace.log('Minimal resources needed: %s = %s' % (x, UR.format(res)))
+            if res.minimals:
+                trace.log('Minimal resources needed: %s = %s' % (x, UR.format(res)))
+            else:
+                trace.log('This problem is unfeasible.')
 #         else:
 #             try:
 #                 trace = generic_solve(dp, f=fg, max_steps=max_steps)

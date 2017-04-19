@@ -1,0 +1,17 @@
+mcdp {
+    gears = instance `Gears 
+    transmission = instance `Transmission
+    motor = instance `mechanisms.Motor
+ 
+    provides force using gears  
+    velocity provided by gears ≽ 3 mm/s # what is this depending on?
+    velocity required by gears ≼ velocity_o provided by transmission
+    torque required by gears ≼ torque_o provided by transmission
+    velocity_i required by transmission ≼ velocity provided by motor
+    torque_i required by transmission ≼ torque provided by motor
+    torque required by gears ≼ torque_o provided by transmission
+   
+    requires mass = ∑ mass required by *
+    requires budget = ∑ budget required by *
+    requires electric_power for motor
+}

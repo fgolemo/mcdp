@@ -1,0 +1,52 @@
+mcdp {
+
+  provides mtbf [s]
+  requires power [W]
+  requires budget [USD]
+
+
+  ip = instance `image_processing
+
+  strategy = instance catalogue {
+    provides mtbf [s]
+    requires processing_frequency [Hz]
+    s | 1 minute | 10 Hz
+  }
+
+  strategy.mtbf >= mtbf
+
+
+
+  sensor1 = mcdp {
+    requires power [W]
+    requires budget [$]
+    provides spatial_resolution [pixels/deg]
+    provides temporal_resolution [Hz]
+    power >= 10W
+    budget >= 50 USD
+    spatial_resolution <= 50 pixels/deg
+    temporal_resolution <= 30 Hz
+  }
+
+ sensor2 = mcdp {
+    requires power [W]
+    requires budget [$]
+    provides spatial_resolution [pixels/deg]
+    provides temporal_resolution [Hz]
+    power >= 20W
+    budget >= 100 USD
+    spatial_resolution <= 50 pixels/deg
+    temporal_resolution <= 60 Hz
+  }
+  sensor = instance choose(s1:sensor1, s2: sensor2)
+
+  sensor.spatial_resolution >= 1 pixels/ deg
+  sensor.temporal_resolution >= strategy.processing_frequency
+  ip.fps >= strategy.processing_frequency
+
+  power >= watts required by ip + power required by sensor
+  budget >= budget required by sensor
+
+
+
+}

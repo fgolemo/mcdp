@@ -6,7 +6,7 @@ from mcdp_maps.max1map import Max1dualMap, Min1Map, Min1dualMap, MaxR1DPMap,\
 from mcdp_maps.repr_map import repr_map_joinn
 from mcdp_posets import MapNotDefinedHere, Poset, PosetProduct, NotBounded
 from mcdp_posets.poset import is_top, is_bottom
-from mocdp.exceptions import mcdp_dev_warning
+from mcdp.exceptions import mcdp_dev_warning
 
 from .dp_flatten import Mux
 from .dp_flatten import MuxMap

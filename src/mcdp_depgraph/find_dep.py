@@ -1,17 +1,18 @@
 # -*- coding: utf-8 -*-
-# from collections import namedtuple
-
 from contracts import contract
 from contracts.utils import raise_desc
+
+from mcdp.constants import MCDPConstants
+from mcdp.exceptions import DPSemanticError
 from mcdp_lang.namedtuple_tricks import (
     isnamedtupleinstance, isnamedtuplewhere)
 from mcdp_lang.parse_actions import parse_wrap
 from mcdp_lang.parts import CDPLanguage
 from mcdp_lang.syntax import Syntax
-from mcdp_library import Librarian, MCDPLibrary
-from mocdp.exceptions import DPSemanticError
-from mocdp.memoize_simple_imp import memoize_simple
+from mcdp_library import Librarian
+from mcdp_utils_misc import memoize_simple
 import networkx as nx
+from mcdp_library.specs_def import SPEC_MODELS
 
 
 @contract(config_dirs='list(str)', maindir='str', seeds='None|seq(str)')
@@ -34,7 +35,7 @@ def find_dependencies(config_dirs, maindir, seeds):
         seeds = []
         for libname in libnames:
             library = librarian.load_library(libname)
-            ndps = library.list_ndps()
+            ndps = library.list_spec(SPEC_MODELS)
             
             for name in ndps:
                 seeds.append('%s.%s' % (libname, name))
@@ -76,9 +77,9 @@ class EntryPoset(Entry):
 
 
 types = [
-    (EntryPoset, MCDPLibrary.ext_posets),
-    (EntryTemplate, MCDPLibrary.ext_templates),
-    (EntryNDP, MCDPLibrary.ext_ndps),
+    (EntryPoset, MCDPConstants.ext_posets),
+    (EntryTemplate, MCDPConstants.ext_templates),
+    (EntryNDP, MCDPConstants.ext_ndps),
 ]
 
 class FindDependencies():
@@ -152,13 +153,13 @@ class FindDependencies():
         assert isinstance(s, Entry), s
         if isinstance(s, EntryNDP):
             parse_expr = Syntax.ndpt_dp_rvalue
-            ext = MCDPLibrary.ext_ndps
+            ext = MCDPConstants.ext_ndps
         elif isinstance(s, EntryTemplate):
             parse_expr = Syntax.template
-            ext = MCDPLibrary.ext_templates
+            ext = MCDPConstants.ext_templates
         elif isinstance(s, EntryPoset):
             parse_expr = Syntax.space
-            ext = MCDPLibrary.ext_posets
+            ext = MCDPConstants.ext_posets
         else:
             raise NotImplementedError(s.__repr__())
 

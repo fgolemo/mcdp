@@ -7,7 +7,7 @@ __all__ = [
 ]
 
 
-class CDPLanguage():
+class CDPLanguage(object):
 
     # any type of the kind  <name>(op1, ..., opn) 
     # min(), max(), etc.
@@ -185,6 +185,8 @@ class CDPLanguage():
     CatalogueTable = namedtuplewhere('CatalogueTable', 'rows')
     FromCatalogue = namedtuplewhere('FromCatalogue', 'keyword funres table')
 
+    CatalogueEntryConstant = namedtuplewhere('CatalogueEntryConstant', 'constant')
+    CatalogueEntryConstantUncertain = namedtuplewhere('CatalogueEntryConstantUncertain', 'constant_uncertain')
     CatalogueFunc = namedtuplewhere('CatalogueFun', 'ops')
     CatalogueRes = namedtuplewhere('CatalogueRes', 'ops')
     CatalogueRowMapsfromto = namedtuplewhere('CatalogueRowMapsfromto', 
@@ -207,9 +209,11 @@ class CDPLanguage():
     eq = namedtuplewhere('eq', 'glyph')
     plus = namedtuplewhere('plus', 'glyph')
     minus = namedtuplewhere('minus', 'glyph')
+    plus_or_minus = namedtuplewhere('plus_or_minus', 'glyph')
     exponent = namedtuplewhere('exponent', 'glyph')
     times = namedtuplewhere('times', 'glyph')
     bar = namedtuplewhere('bar', 'glyph')
+    sum = namedtuplewhere('sum', 'glyph')
     coprod = namedtuplewhere('coprod', 'glyph')
     DotPrep = namedtuplewhere('DotPrep', 'glyph')
     comma = namedtuplewhere('comma', 'glyph')
@@ -219,6 +223,8 @@ class CDPLanguage():
     RBRACKET  = namedtuplewhere('RBRACKET', 'glyph') 
     LPAR  = namedtuplewhere('LPAR', 'glyph') 
     RPAR  = namedtuplewhere('RPAR', 'glyph')
+    percent = namedtuplewhere('percent', 'glyph')
+    asterisk = namedtuplewhere('asterisk', 'glyph')
     
     MAPSFROM  = namedtuplewhere('MAPSFROM', 'glyph')
     MAPSTO  = namedtuplewhere('MAPSTO', 'glyph')
@@ -466,4 +472,26 @@ class CDPLanguage():
     CommentCon = namedtuplewhere('CommentCon', 'comment_string')
     CommentRes = namedtuplewhere('CommentRes', 'comment_string')
     CommentVar = namedtuplewhere('CommentVar', 'comment_string')
+    
+    SpecialConstant = namedtuplewhere('SpecialConstant', 'constant_name')
+    
+    BetweenKeyword = namedtuplewhere('BetweenKeyword', 'keyword')
+    BetweenAndKeyword = namedtuplewhere('BetweenAndKeyword', 'keyword')
+    
+    ConstantBetween = namedtuplewhere('ConstantBetween', 'between lower and_keyword upper')
+    RValueBetween = namedtuplewhere('RValueBetween', 'between lower and_keyword upper')
+    FValueBetween = namedtuplewhere('FValueBetween', 'between lower and_keyword upper')
+    
+    ConstantPlusOrMinus = namedtuplewhere('ConstantPlusOrMinus', 'median pm extent')
+    RValuePlusOrMinus = namedtuplewhere('RValuePlusOrMinus', 'median pm extent')
+    FValuePlusOrMinus = namedtuplewhere('FValuePlusOrMinus', 'median pm extent')
+    
+    ConstantPlusOrMinusPercent = namedtuplewhere('ConstantPlusOrMinusPercent', 'median pm perc percent')
+    RValuePlusOrMinusPercent = namedtuplewhere('RValuePlusOrMinusPercent', 'median pm perc percent')
+    FValuePlusOrMinusPercent = namedtuplewhere('FValuePlusOrMinusPercent', 'median pm perc percent')
+    
+    SumResources = namedtuplewhere('SumResources', 'sum rname required_by asterisk')
+    SumFunctions = namedtuplewhere('SumFunctions', 'sum fname provided_by asterisk')
+    
+
     

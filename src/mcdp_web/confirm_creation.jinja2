@@ -1,0 +1,51 @@
+{% extends "procedure_steps.jinja2" %}
+{% from 'user_name_and_picture.jinja2' import user_name_and_picture_userinfo with context %}
+{% block procedure_title %}
+    Confirm user creation?
+{% endblock %}
+
+{% block procedure_content %}
+
+<p> You are one step away from user creation!</p>
+
+
+<table id='found'>
+    <tr>
+        <td>Account</td>
+        <td>
+              <code>{{candidate_user.info.username}}</code>
+        </td>
+    </tr>
+
+    <tr>
+        <td>Name</td>
+        <td>
+               {{user_name_and_picture_userinfo(candidate_user.info, link=False)}}
+        </td>
+    </tr>
+
+    <tr>
+        <td> Contact e-mail </td>
+        <td>
+               <code>{{candidate_user.info.email}}</code>
+        </td>
+    </tr>
+</table>
+
+<p id='buttons'>
+<a href='{{root}}/confirm_creation_create/' class='procedure_button'>Create new account</a>
+
+<a href='{{root}}/login/' class='procedure_button'>Cancel</a>
+</p>
+
+<style>
+#found { margin-top: 2em;}
+#found td { padding: 0.6em 2em;}
+#newone { padding-left: 4em; }
+#buttons {
+    /*text-align: center; */
+    margin-top: 2em;}
+
+</style>
+
+{% endblock %}

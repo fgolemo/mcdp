@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped, check_isinstance
+from mcdp.exceptions import DPSemanticError, DPNotImplementedError, DPInternalError
 from mcdp_dp import PlusValueDP, UncertainGate
 from mcdp_dp.dp_approximation import makeLinearCeilDP, makeLinearFloor0DP
 from mcdp_posets import (NotLeq, express_value_in_isomorphic_space,
@@ -8,7 +9,6 @@ from mcdp_posets import (NotLeq, express_value_in_isomorphic_space,
 from mcdp_posets import RcompUnits
 from mocdp.comp.context import (CResource, ValueWithUnits, get_name_for_fun_node,
     ModelBuildingContext)
-from mocdp.exceptions import DPSemanticError, DPNotImplementedError
 
 from .eval_constant_imp import eval_constant
 from .eval_warnings import warn_language, MCDPWarnings
@@ -21,7 +21,7 @@ from .parts import CDPLanguage
 CDP = CDPLanguage
 
 
-class DoesNotEvalToResource(DPSemanticError):
+class DoesNotEvalToResource(DPInternalError):
     """ also called "rvalue" """
     
 
@@ -41,13 +41,17 @@ def eval_rvalue(rvalue, context):
         
     constants = (CDP.Collection, CDP.SimpleValue, CDP.SpaceCustomValue,
                  CDP.Top, CDP.Bottom, CDP.Maximals, CDP.Minimals,
-                 CDP.NatConstant, CDP.RcompConstant)
+                 CDP.NatConstant, CDP.RcompConstant, CDP.SpecialConstant)
 
     if isinstance(rvalue, constants):
         res = eval_constant(rvalue, context)
         assert isinstance(res, ValueWithUnits)
         return get_valuewithunits_as_resource(res, context)
 
+    if isinstance(rvalue, CDP.Ellipsis):
+        msg = 'Incomplete model (ellipsis)'
+        raise_desc(DPSemanticError, msg)
+        
     from .eval_resources_imp_power import eval_rvalue_Power
     from .eval_math import eval_rvalue_divide
     from .eval_math import eval_rvalue_MultN
@@ -58,7 +62,11 @@ def eval_rvalue(rvalue, context):
     from .eval_resources_imp_tupleindex import eval_rvalue_resource_label_index
     from .eval_resources_imp_unary import  eval_rvalue_generic_operation
     from .eval_math import eval_rvalue_RValueMinusN
-
+    from .eval_uncertainty import eval_rvalue_RValuePlusOrMinus
+    from .eval_uncertainty import eval_rvalue_RValueBetween
+    from .eval_uncertainty import eval_rvalue_RValuePlusOrMinusPercent
+    
+    
     cases = {
         CDP.Resource: eval_rvalue_Resource,
         CDP.Power: eval_rvalue_Power,
@@ -82,7 +90,11 @@ def eval_rvalue(rvalue, context):
         CDP.ActualVarRef: eval_rvalue_ActualVarRef,
         CDP.ConstantRef: eval_rvalue_ConstantRef,
         CDP.DerivResourceRef: eval_rvalue_DerivResourceRef,
+        CDP.RValueBetween: eval_rvalue_RValueBetween,
+        CDP.RValuePlusOrMinus: eval_rvalue_RValuePlusOrMinus,
+        CDP.RValuePlusOrMinusPercent: eval_rvalue_RValuePlusOrMinusPercent,
         
+        CDP.SumResources: eval_rvalue_SumResources,
     }
 
     for klass, hook in cases.items():
@@ -94,6 +106,32 @@ def eval_rvalue(rvalue, context):
         rvalue = recursive_print(rvalue)
         raise_desc(DoesNotEvalToResource, msg, rvalue=rvalue)
  
+def iterate_normal_ndps(context):
+    for n, ndp in context.names.items():
+        normal = not context.is_new_function(n) and not context.is_new_resource(n)
+        if normal:
+            yield n, ndp
+            
+def eval_rvalue_SumResources(rvalue, context):
+    check_isinstance(rvalue, CDP.SumResources)
+    rname = rvalue.rname.value
+    
+    cresources = []
+    for n, ndp in iterate_normal_ndps(context):
+        if rname in ndp.get_rnames():
+            cr = CResource(n, rname)
+            cresources.append(cr)
+            
+    if not cresources:
+        msg = 'Cannot find any sub-design problem with resource "%s".' % rname
+        raise DPSemanticError(msg, where=rvalue.rname.where)
+
+    from mcdp_lang.eval_math import eval_PlusN_
+    if len(cresources) == 1:
+        return cresources[0]
+    else:
+        return eval_PlusN_(constants=[], resources=cresources, context=context)
+
 def eval_rvalue_Resource(rvalue, context):
     if isinstance(rvalue, CDP.Resource):
         return context.make_resource(dp=rvalue.dp.value, s=rvalue.s.value)
@@ -271,6 +309,5 @@ def eval_rvalue_anyofres(r, context):
 
     dp = ConstantMinimals(R=P, values=minimals)
     return create_operation(context, dp=dp, resources=[],
-                               name_prefix='_anyof', op_prefix='_',
-                                res_prefix='_result')
+                               name_prefix='_anyof')
 

@@ -5,19 +5,21 @@ import tempfile
 
 from contracts.enabling import all_disabled
 from contracts.utils import raise_desc, raise_wrapped
-from mcdp.utils.timing import timeit
-from mcdp_library import MCDPLibrary
+
+from mcdp import MCDPConstants, logger
+from mcdp.exceptions import DPSemanticError, DPNotImplementedError
+from mcdp_library.specs_def import SPEC_VALUES, SPEC_TEMPLATES, SPEC_MODELS,\
+    SPEC_POSETS, SPEC_PRIMITIVEDPS
 from mcdp_library.stdlib import get_test_librarian
 from mcdp_tests import get_test_index
 from mcdp_tests.generation import for_all_source_mcdp,\
     for_all_source_mcdp_template, for_all_source_mcdp_poset,\
     for_all_source_mcdp_value, for_all_source_all
-from mocdp import logger, get_mcdp_tmp_dir
+from mcdp_utils_misc import get_mcdp_tmp_dir, memoize_simple, timeit
 from mocdp.comp.context import Context
-from mocdp.exceptions import DPSemanticError, DPNotImplementedError
-from mocdp.memoize_simple_imp import memoize_simple  # XXX: move sooner
 
 
+# XXX: move sooner
 __all__ = [
     'define_tests_for_mcdplibs',
 ]
@@ -89,7 +91,7 @@ def enumerate_test_libraries():
 
 @memoize_simple
 def get_test_library(libname):
-    assert isinstance(libname, str) and not 'mcdplib' in libname
+    assert isinstance(libname, str) and not MCDPConstants.library_extension in libname
     librarian = get_test_librarian()
     library = librarian.load_library(libname)
     
@@ -165,7 +167,7 @@ def mcdplib_test_setup_nameddps(context, libname):
     """
     from mcdp_tests import load_tests_modules
     l = get_test_library(libname)
-    models = l.get_models()
+    models = l.list_spec(SPEC_MODELS)
 
     from mcdp_tests.generation import for_all_nameddps, for_all_nameddps_dyn
     load_tests_modules()
@@ -178,12 +180,12 @@ def mcdplib_test_setup_nameddps(context, libname):
               for_all_nameddps_dyn.registered)
 
     for model_name in models:
-        f = l._get_file_data(model_name + '.' + MCDPLibrary.ext_ndps)
+        f = l._get_file_data(model_name + '.' + MCDPConstants.ext_ndps)
 
         source = f['data']
 
         if gives_syntax_error(source):
-            #print('Skipping because syntax error')
+            print('Skipping because syntax error')
             # TODO: actually check syntax error
             pass
         else:
@@ -220,10 +222,9 @@ def mcdplib_test_setup_nameddps(context, libname):
                      
     
 def accepts_arg(f, name):
-    """ True if it supports the "library" argument """
+    """ True if the function f supports the "name" argument """
     import inspect
     args = inspect.getargspec(f)
-    # print args
     return name in args.args
 
 def mcdplib_test_setup_sources(context, libname):
@@ -326,7 +327,7 @@ def mcdplib_test_setup_value(context, libname):
 
     l = get_test_library(libname)
 
-    values = l.list_values()
+    values = l.list_spec(SPEC_VALUES)
 
     from mcdp_tests.generation import for_all_values
     load_tests_modules()
@@ -352,7 +353,7 @@ def mcdplib_test_setup_posets(context, libname):
 
     l = get_test_library(libname)
 
-    posets = l.list_posets()
+    posets = l.list_spec(SPEC_POSETS)
 
     from mcdp_tests.generation import for_all_posets
     load_tests_modules()
@@ -373,7 +374,7 @@ def mcdplib_test_setup_posets(context, libname):
 def mcdplib_test_setup_primitivedps(context, libname):
     from mcdp_tests import load_tests_modules
     l = get_test_library(libname)
-    dps = l.list_primitivedps()
+    dps = l.list_spec(SPEC_PRIMITIVEDPS)
 
     from mcdp_tests.generation import for_all_dps
     load_tests_modules()
@@ -393,7 +394,7 @@ def mcdplib_test_setup_primitivedps(context, libname):
 def mcdplib_test_setup_template(context, libname):
     from mcdp_tests import load_tests_modules
     l = get_test_library(libname)
-    templates = l.list_templates()
+    templates = l.list_spec(SPEC_TEMPLATES)
 
     from mcdp_tests.generation import for_all_templates
     load_tests_modules()
@@ -419,30 +420,30 @@ def _load_primitivedp(libname, model_name):
     with timeit(model_name, minimum=min_time_warn):
         return l.load_primitivedp(model_name, context)
 
-def _load_template(libname, model_name):
+def _load_template(libname, thing_name):
     context = Context()
     l = get_test_library(libname)
-    with timeit(model_name, minimum=min_time_warn):
-        return l.load_template(model_name, context)
+    with timeit(thing_name, minimum=min_time_warn):
+        return l.load_spec(SPEC_TEMPLATES, thing_name, context)
 
-def _load_value(libname, name):
+def _load_value(libname, thing_name):
     l = get_test_library(libname)
     context = Context()
-    with timeit(name, minimum=min_time_warn):
-        vu = l.load_constant(name, context)
+    with timeit(thing_name, minimum=min_time_warn):
+        vu = l.load_constant(thing_name, context)
     return vu
 
-def _load_poset(libname, model_name):
+def _load_poset(libname, thing_name):
     l = get_test_library(libname)
     context = Context()
-    with timeit(model_name, minimum=min_time_warn):
-        return l.load_poset(model_name, context)
+    with timeit(thing_name, minimum=min_time_warn):
+        return l.load_poset(thing_name, context)
 
-def _load_ndp(libname, model_name):
+def _load_ndp(libname, thing_name):
     l = get_test_library(libname)
     context = Context() 
-    with timeit(model_name, minimum=min_time_warn):
-        return l.load_ndp(model_name, context)
+    with timeit(thing_name, minimum=min_time_warn):
+        return l.load_ndp(thing_name, context)
     
 #
 # @contextmanager

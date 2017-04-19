@@ -2,7 +2,7 @@
 from comptests.registrar import comptest, run_module_tests, comptest_fails
 from mcdp_lang_tests.utils2 import eval_rvalue_as_constant_same_exactly
 from mcdp_lang.parse_interface import parse_ndp, parse_poset
-from mocdp.exceptions import DPSemanticError
+from mcdp.exceptions import DPSemanticError
 from contracts.utils import raise_wrapped
 from mcdp_lang.syntax import Syntax
 from mcdp_lang_tests.utils import parse_wrap_check

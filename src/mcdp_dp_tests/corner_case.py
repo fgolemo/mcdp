@@ -2,31 +2,23 @@
 from nose.tools import assert_raises, assert_equal
 
 from comptests.registrar import comptest, run_module_tests, comptest_fails
-from mcdp_dp import JoinNDP, MeetNDP
-from mcdp_dp.dp_dummy import Template
-from mcdp_dp.dp_inv_mult import InvMult2Nat
-from mcdp_dp.dp_inv_plus import InvPlus2, InvPlus2Nat
-from mcdp_dp.dp_series import Series
-from mcdp_dp.primitive import NotSolvableNeedsApprox
+from contracts import ContractNotRespected
+from mcdp import MCDPConstants
+from mcdp.exceptions import DPInternalError, DPSemanticError
+from mcdp_dp import InvMult2Nat, InvPlus2, InvPlus2Nat, JoinNDP, MeetNDP, NotSolvableNeedsApprox, Series, Template
 from mcdp_lang.parse_actions import parse_wrap
-from mcdp_lang.parse_interface import parse_poset, parse_template, parse_ndp, \
-    parse_ndp_refine
+from mcdp_lang.parse_interface import parse_poset, parse_template, parse_ndp, parse_ndp_refine
 from mcdp_lang.suggestions import apply_suggestions, get_suggestions
 from mcdp_lang.syntax import Syntax
 from mcdp_maps import ProductNNatMap
 from mcdp_posets import Nat
 from mcdp_posets_tests.utils import assert_belongs, assert_does_not_belong
 from mcdp_report.html import ast_to_html
-
+from mcdp_utils_xml import project_html
 from mcdp_web.editor_fancy.app_editor_fancy_generic import html_mark
-from mocdp import MCDPConstants
-from mocdp.comp.composite_makecanonical import connect_resources_to_outside, \
-    connect_functions_to_outside
+from mocdp.comp.composite_makecanonical import connect_resources_to_outside, connect_functions_to_outside
 from mocdp.comp.context import Context
 from mocdp.comp.wrap import dpwrap
-from mocdp.exceptions import DPInternalError, DPSemanticError
-from contracts import ContractNotRespected
-from mcdp_web.renderdoc.xmlutils import project_html
 
 
 @comptest
@@ -239,7 +231,7 @@ def check_repeated_poset():
         }
     """
     
-    # mocdp.exceptions.DPSemanticError: Repeated element 'a'.
+    # mcdp.exceptions.DPSemanticError: Repeated element 'a'.
     assert_raises(DPSemanticError, parse_poset, s)
     
 @comptest
@@ -267,7 +259,7 @@ mcdp {
                         encapsulate_in_precode=False,
                         postprocess=postprocess)
     
-    for where, replacement in suggestions:
+    for where, replacement in suggestions:  # @UnusedVariable
         #print('suggestion: %r' % replacement)
         html = html_mark(html, where, "suggestion")
         
@@ -318,7 +310,7 @@ def check_addition_incompatible():
     }"""
     assert_raises(DPSemanticError, parse_ndp, s)
 
-@comptest_fails
+@comptest
 def check_addition_incompatible2():
     s="""mcdp {
       requires r [g]
@@ -340,7 +332,7 @@ def check_addition_incompatible3():
     }"""
     assert_raises(DPSemanticError, parse_ndp, s)
  
-@comptest_fails
+@comptest
 def check_addition_incompatible2_dual():
     s="""mcdp {
       requires r [g]

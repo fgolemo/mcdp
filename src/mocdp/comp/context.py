@@ -3,14 +3,16 @@ from collections import namedtuple
 
 from contracts import contract
 from contracts.utils import check_isinstance, raise_desc
+
+from mcdp import logger
+from mcdp.exceptions import DPInternalError, DPSemanticError, mcdp_dev_warning
 from mcdp_dp import FunctionNode, PrimitiveDP, ResourceNode
-from mcdp_posets import FinitePoset , NotBounded, Poset, Space, PosetProductWithLabels
-from mcdp_posets.types_universe import express_value_in_isomorphic_space
-from mocdp import logger
+from mcdp_posets import FinitePoset, NotBounded, Poset, Space, PosetProductWithLabels
+from mcdp_posets import express_value_in_isomorphic_space
 from mocdp.comp.interfaces import NamedDP
 from mocdp.comp.template_for_nameddp import TemplateForNamedDP
 from mocdp.comp.wrap import dpwrap
-from mocdp.exceptions import DPInternalError, DPSemanticError, mcdp_dev_warning
+from mcdp_utils_misc import format_list
 
 
 _ = logger
@@ -37,7 +39,7 @@ class Connection(Connection0):
 
 
 
-class ValueWithUnits():
+class ValueWithUnits(object):
     """ "unit" should have been "space" """
     @contract(unit=Space)
     def __init__(self, value, unit):
@@ -96,7 +98,7 @@ class NoSuchMCDPType(Exception):
 
 
 
-class Context():
+class Context(object):
 
     def __init__(self):
         self.names = {}  # name -> ndp
@@ -338,6 +340,7 @@ class Context():
         self.rnames.append(rname)
         return name
 
+
     def iterate_new_functions(self):
         for fname in self.fnames:
             name = get_name_for_fun_node(fname)
@@ -397,12 +400,12 @@ class Context():
 
         rnames = ndp1.get_rnames()
         if not c.s1 in rnames:
-            msg = "Resource %r does not exist (known: %s)" % (c.s1, ", ".join(rnames))
+            msg = "Resource %r does not exist (known: %s)" % (c.s1, format_list(rnames))
             raise_desc(DPSemanticError, msg, known=rnames)
 
         fnames = ndp2.get_fnames()
         if not c.s2 in fnames:
-            msg = "Function %r does not exist (known: %s)" % (c.s2, ", ".join(fnames))
+            msg = "Function %r does not exist (known: %s)" % (c.s2,format_list(fnames))
             raise_desc(DPSemanticError, msg, known=fnames)
 
 
@@ -645,9 +648,3 @@ class Context():
      
 ModelBuildingContext = Context
 
-def format_list(l):
-    """ Returns a nicely formatted list. """
-    if not l:
-        return '(empty)'
-    else:
-        return ", ".join(_.__repr__() for _ in l)

@@ -1,26 +1,70 @@
 		<meta charset="utf-8">
 		<!-- JQuery, locally served -->
-		<script type = "text/javascript" src = "{{root}}/static/jquery.min.js"></script>
-		<script type = "text/javascript" src = "{{root}}/static/jquery.imageZoom.js"></script>
-		<link   rel="stylesheet"         href = "{{root}}/static/jquery-ui/jquery-ui.min.css"/>
-		<script type = "text/javascript" src = "{{root}}/static/jquery-ui/jquery-ui.min.js"></script>
+		<link rel="stylesheet" type="text/css"  href="{{static}}/css/compiled/v_mcdpweb.css"/>
+
+		<script type = "text/javascript" src = "{{static}}/jquery.min.js"></script>
+		<script type = "text/javascript" src = "{{static}}/jquery.imageZoom.js"></script>
+		<link   rel="stylesheet"         href = "{{static}}/jquery-ui/jquery-ui.min.css"/>
+		<script type = "text/javascript" src = "{{static}}/jquery-ui/jquery-ui.min.js"></script>
+		<script type = "text/javascript" src = "{{static}}/javascript/js.cookie.js"></script>
 
 		<!-- My library of Javascript code. -->
-		<script type = "text/javascript" src = "{{root}}/static/javascript/ajax1.js"></script>
-		<script type = "text/javascript" src = "{{root}}/static/javascript/oninputchange.js"></script>
-		<script type = "text/javascript" src = "{{root}}/static/javascript/editor.js"></script>
-		<script type = "text/javascript" src = "{{root}}/static/javascript/sha1.js"></script>
-<script>
-  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+		<script type = "text/javascript" src = "{{static}}/javascript/ajax1.js"></script>
+		<script type = "text/javascript" src = "{{static}}/javascript/oninputchange.js"></script>
+		<script type = "text/javascript" src = "{{static}}/javascript/editor.js"></script>
+		<script type = "text/javascript" src = "{{static}}/javascript/sha1.js"></script>
+		<script type = "text/javascript" src = "{{static}}/javascript/tips.js"></script>
 
-  ga('create', 'UA-91396137-1', 'auto');
-  ga('send', 'pageview');
+		<style>
+		.hide { display: none;}
+		</style>
+		<script>
+		    $('html').addClass('hide');
+		    $(window).load(function(){
+		        $('html').removeClass('hide');
+				// console.log('show body');
+		    });
+		</script>
 
-</script>
+		<!--<script>
+		  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+		  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+		  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+		  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
 
-		<link rel="stylesheet" type="text/css"  href="{{root}}/static/css/compiled/v_mcdpweb.css"/>
+		  ga('create', 'UA-91396137-1', 'auto');
+		  ga('send', 'pageview');
+	  </script>-->
 
-		<link rel='icon'  type="image/png"  href='{{root}}/static/favicon.png' />
+
+		<link rel='icon'  type="image/png"  href='{{static}}/favicon.png' />
+
+<style>
+/* This needs to be here after jquery ui has loaded */
+.ui-widget {
+    font-size: 80%;
+
+}
+
+.ui-button {
+    padding: 3px !important;
+}
+.ui-menu-item {
+	/*padding: 0px !important;
+	margin: 0px !important;*/
+}
+.ui-menu-item-wrapper {
+	/*padding: 0px !important;
+	margin: 0px !important;
+	color: red !important;*/
+}
+.ui-state-active {
+	font-weight: normal !important;
+	background-color: inherit !important;
+	border: inherit !important;
+}
+.ui-menu .ui-menu {
+	{# width: 20em; #}
+}
+
+</style>

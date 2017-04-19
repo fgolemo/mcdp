@@ -3,7 +3,7 @@ from contracts.utils import raise_desc
 from mcdp_dp import NotSolvableNeedsApprox, ApproximableDP
 from mcdp_maps import SumNIntMap, SumNNatsMap, SumNMap, SumNRcompMap
 from mcdp_posets import Int, is_top
-from mocdp.exceptions import DPNotImplementedError, mcdp_dev_warning
+from mcdp.exceptions import DPNotImplementedError, mcdp_dev_warning
 
 from .dp_generic_unary import WrapAMap
 from .repr_strings import repr_hd_map_sumn

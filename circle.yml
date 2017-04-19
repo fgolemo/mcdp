@@ -1,4 +1,4 @@
-dependencies: 
+dependencies:
   pre:
     - mkdir ~/.fonts
     - wget -OSTIX.zip https://sourceforge.net/projects/stixfonts/files/Past%20Releases/STIXv1.1.0.zip/download
@@ -10,6 +10,7 @@ dependencies:
     - curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash
     - sudo add-apt-repository -y ppa:lyx-devel/release
     - sudo apt-get update
+    #- sudo apt-cache policy nodejs
     - sudo apt-get -qq -y install build-essential nodejs
     - echo "Current directory:"
     - pwd
@@ -20,9 +21,12 @@ dependencies:
     - sudo apt-get -qq install -y graphviz python-numpy python-yaml python-dev python-setproctitle python-psutil python-lxml python-PIL python-matplotlib python-yaml python-pip python-tk idle python-pmw python-imaging
     # no sudo here:
     - pip install numpy lxml matplotlib pillow junit_xml
-    - sudo apt-get install lyx
-    - lyx --version
 
+    # only needed for manual
+    #- sudo apt-get install lyx
+    # - lyx --version
+    - nodejs --version
+    - make css
 
 test:
   override:
@@ -52,14 +56,14 @@ test:
             MPLBACKEND: agg
     - "./misc/collect-test-artifacts.sh ${CIRCLE_ARTIFACTS} ${CIRCLE_TEST_REPORTS} ":
         parallel: true
-    - "./misc/upload-to-frankfurt.sh":
-        parallel: true
+    # - "./misc/upload-to-frankfurt.sh":
+    #     parallel: true
 
-  post: # done after all containers have finished
-    - "./misc/collect-test-artifacts.sh ${CIRCLE_ARTIFACTS} ${CIRCLE_TEST_REPORTS} ":
-        parallel: true
-    - "./misc/upload-to-frankfurt.sh ":
-        parallel: true
+  # post: # done after all containers have finished
+  #   - "./misc/collect-test-artifacts.sh ${CIRCLE_ARTIFACTS} ${CIRCLE_TEST_REPORTS} ":
+  #       parallel: true
+  #   - "./misc/upload-to-frankfurt.sh ":
+  #       parallel: true
 
 # general:
 #     artifacts:

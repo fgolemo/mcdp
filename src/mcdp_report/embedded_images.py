@@ -6,12 +6,12 @@ import re
 
 from bs4 import BeautifulSoup
 from bs4.element import Tag
-
 from contracts import contract
 from contracts.utils import check_isinstance
-from mcdp.utils.string_utils import get_md5
-from mcdp_web.renderdoc.highlight import add_style
-from mocdp import logger
+
+from mcdp import logger
+from mcdp_utils_misc import get_md5
+from mcdp_utils_xml import add_style, add_class
 
 from .pdf_conversion import png_from_pdf
 
@@ -284,16 +284,15 @@ def embed_pdf_images(soup, resolve, density):
     """ 
         Converts PDFs to PNGs and embeds them
         resolve: filename --> string
-    """
-    for tag in soup.select('img[src$=pdf], img[src$=PDF]'):
-        embed_pdf_image(tag, resolve, density)
+    """  
+    for tag in soup.select('img'):
+        if tag.has_attr('src') and tag['src'].lower().endswith('pdf'):
+            embed_pdf_image(tag, resolve, density)
          
 def embed_pdf_image(tag, resolve, density):
     assert tag.name == 'img'
     assert tag.has_attr('src')
-    # load pdf data
-    from mcdp_web.renderdoc.highlight import add_class # XXX
-    
+    # load pdf data    
     data_pdf = resolve(tag['src'])
     if data_pdf is None:
         add_class(tag, 'missing-image')
@@ -339,7 +338,7 @@ def embed_pdf_image(tag, resolve, density):
 
 def get_pixel_width_height_of_png(data_png):
     from PIL import Image
-    im = Image.open(cStringIO.StringIO(data_png))
+    im = Image.open(cStringIO.StringIO(data_png))  # @UndefinedVariable
     width_px, height_px = im.size # (wid
     return width_px, height_px 
         
@@ -360,7 +359,6 @@ def parse_includegraphics_option_string(latex_options):
     return props
     
     
-
 def get_length_in_inches(s):
     """ "1cm" = 0.393 """
 #     s = s.replace('\\columnwidth', '8.')

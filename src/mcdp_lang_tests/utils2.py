@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from mcdp_lang.eval_lfunction_imp import eval_lfunction
 from mcdp_lang.eval_resources_imp import eval_rvalue
 from mcdp_lang.parse_actions import parse_wrap
 from mcdp_lang.parse_interface import parse_constant
@@ -6,7 +7,7 @@ from mcdp_lang.syntax import Syntax
 from mcdp_posets import express_value_in_isomorphic_space
 from mocdp.comp.context import Context
 from mocdp.comp.context_eval_as_constant import (can_resource_be_constant,
-    eval_constant_resource)
+                                                 eval_constant_resource)
 
 
 def parse_as_rvalue(s):
@@ -16,6 +17,12 @@ def parse_as_rvalue(s):
     r = eval_rvalue(parsed, context)
     return r, context
 
+def parse_as_fvalue(s):
+    """ returns fvalue, context """
+    parsed = parse_wrap(Syntax.fvalue, s)[0]
+    context = Context()
+    r = eval_lfunction(parsed, context)
+    return r, context
 
 def eval_rvalue_as_constant(s):
     """ Parses as an rvalue (resource) and evaluates as a constant value.

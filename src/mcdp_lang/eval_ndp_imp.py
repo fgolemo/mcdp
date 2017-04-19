@@ -3,12 +3,10 @@ from contextlib import contextmanager
 import sys
 
 from contracts import contract
-from contracts.utils import raise_desc, raise_wrapped, check_isinstance
+from contracts.utils import raise_desc, raise_wrapped, check_isinstance, indent
 from mcdp_dp import (CatalogueDP, Conversion, JoinNDP, MeetNDualDP, get_conversion, make_series, VariableNode,
                      ConstantMinimals, LimitMaximals, OpaqueDP, FunctionNode, ResourceNode)
-from mcdp_posets import (
-    FiniteCollectionAsSpace, NotEqual, NotLeq, PosetProduct, get_types_universe)
-from mocdp import ATTRIBUTE_NDP_MAKE_FUNCTION
+from mcdp_posets import FiniteCollectionAsSpace, NotEqual, NotLeq, PosetProduct, get_types_universe
 from mocdp.comp import (CompositeNamedDP, Connection, NamedDP, NotConnected,
                         SimpleWrap, dpwrap)
 from mocdp.comp.composite_makecanonical import cndp_makecanonical
@@ -19,9 +17,9 @@ from mocdp.comp.context import (CFunction, CResource, NoSuchMCDPType,
 from mocdp.comp.ignore_some_imp import ignore_some
 from mocdp.comp.make_approximation_imp import make_approximation
 from mocdp.comp.template_deriv import cndp_eversion
-from mocdp.exceptions import (DPInternalError, DPSemanticError,
+from mcdp.exceptions import (DPInternalError, DPSemanticError,
                               DPSemanticErrorNotConnected, MCDPExceptionWithWhere, mcdp_dev_warning,
-                              )
+                              DPNotImplementedError, DPSyntaxError)
 from mocdp.ndp.named_coproduct import NamedDPCoproduct
 
 from .eval_codespec_imp_utils_instantiate import ImportFailure, import_name
@@ -38,6 +36,7 @@ from .parse_actions import (add_where_information, decorate_add_where, raise_wit
 from .parts import CDPLanguage
 from .utils_lists import get_odd_ops, unwrap_list
 import warnings
+from mcdp.constants import MCDPConstants
 
 
 CDP = CDPLanguage
@@ -153,15 +152,16 @@ def eval_ndp_addmake(r, context):
 
     function = ImportedFunction(function_name)
     
-    if not hasattr(ndp, ATTRIBUTE_NDP_MAKE_FUNCTION):
-        setattr(ndp, ATTRIBUTE_NDP_MAKE_FUNCTION, [])
+    att = MCDPConstants.ATTRIBUTE_NDP_MAKE_FUNCTION
+    if not hasattr(ndp, att):
+        setattr(ndp, att, [])
 
-    res = getattr(ndp, ATTRIBUTE_NDP_MAKE_FUNCTION)
+    res = getattr(ndp, att)
     res.append((what, function))
     return ndp
 
 
-class ImportedFunction():
+class ImportedFunction(object):
     def __init__(self, function_name):
         self.function_name = function_name
         self.sys_path = sys.path
@@ -232,29 +232,37 @@ def eval_ndp_load(r, context):
     arg = r.load_arg
     check_isinstance(arg, (CDP.NDPName, CDP.NDPNameWithLibrary))
 
-    if isinstance(arg, CDP.NDPNameWithLibrary):
-        check_isinstance(arg.library, CDP.LibraryName), arg
-        check_isinstance(arg.name, CDP.NDPName), arg
-        libname = arg.library.value
-        name = arg.name.value
-        library = context.load_library(libname)
-         
-        context2 = context.child()
-        res = library.load_ndp(name, context2)
-
-        msg = 'While loading MCDP %r from library %r:' % (name, libname)
-        warnings_copy_from_child_make_nested2(context, context2, r.where, msg)
-        return res
-
-    if isinstance(arg, CDP.NDPName):
-        name = arg.value
-
-        context2 = context.child()
-        ndp = context2.load_ndp(name)
-        msg = 'While loading MCDP %r:' % (name)
-        warnings_copy_from_child_make_nested2(context, context2, r.where, msg)
-        return ndp
-
+    try:
+        if isinstance(arg, CDP.NDPNameWithLibrary):
+            check_isinstance(arg.library, CDP.LibraryName), arg
+            check_isinstance(arg.name, CDP.NDPName), arg
+            libname = arg.library.value
+            name = arg.name.value
+            library = context.load_library(libname)
+             
+            context2 = context.child()
+            res = library.load_ndp(name, context2)
+    
+            msg = 'While loading MCDP %r from library %r:' % (name, libname)
+            warnings_copy_from_child_make_nested2(context, context2, r.where, msg)
+            return res
+    
+        if isinstance(arg, CDP.NDPName):
+            name = arg.value
+    
+            context2 = context.child()
+            res = context2.load_ndp(name)
+            msg = 'While loading MCDP %r:' % (name)
+            warnings_copy_from_child_make_nested2(context, context2, r.where, msg)
+            return res
+    except DPSyntaxError as e:
+        msg = 'Syntax error while loading %s:' % (name)
+        s = str(e)
+        print s
+        msg += '\n\n' + indent(str(e), '   ')
+        raise DPSemanticError(msg, where=arg.where)
+        #raise_wrapped(DPSemanticError, e, msg, compact=True)
+        
     if True: # pragma: no cover
         msg = 'Unknown construct.'
         raise_desc(DPInternalError, msg, r=r)
@@ -517,8 +525,13 @@ def eval_ndp_catalogue2(r, context):
         fs = get_odd_ops(unwrap_list(row.functions.ops))
         rs = get_odd_ops(unwrap_list(row.resources.ops))
         
-        fs_evaluated = [eval_constant(_, context) for _ in fs]
-        rs_evaluated = [eval_constant(_, context) for _ in rs]
+        for _ in list(fs) + list(rs):
+            if isinstance(_, CDP.CatalogueEntryConstantUncertain):
+                msg = 'Uncertain catalogue not implemented'
+                raise DPNotImplementedError(msg, where=_.where)
+        
+        fs_evaluated = [eval_constant(_.constant, context) for _ in fs]
+        rs_evaluated = [eval_constant(_.constant, context) for _ in rs]
 
         if len(Fs) == 0:
             # expect <>
@@ -625,11 +638,19 @@ def eval_ndp_catalogue3(r, context):
         row.leftright
         check_isinstance(row.resources, CDP.CatalogueRes)
         
+        
+        
         fs = get_odd_ops(unwrap_list(row.functions.ops))
         rs = get_odd_ops(unwrap_list(row.resources.ops))
         
-        fs_evaluated = [eval_constant(_, context) for _ in fs]
-        rs_evaluated = [eval_constant(_, context) for _ in rs]
+        
+        for _ in list(fs) + list(rs):
+            if isinstance(_, CDP.CatalogueEntryConstantUncertain):
+                msg = 'Uncertain catalogue not implemented'
+                raise DPNotImplementedError(msg, where=_.where)
+        
+        fs_evaluated = [eval_constant(_.constant, context) for _ in fs]
+        rs_evaluated = [eval_constant(_.constant, context) for _ in rs]
 
         if len(Fs) == 0:
             # expect <>

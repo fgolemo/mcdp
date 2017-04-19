@@ -18,8 +18,8 @@ import re
 from contracts import contract
 from contracts.utils import check_isinstance, raise_desc
 from mcdp_lang_utils import Where
-from mocdp import MCDPConstants
-from mocdp.exceptions import DPInternalError
+from mcdp import MCDPConstants
+from mcdp.exceptions import DPInternalError
 
 from .dealing_with_special_letters import greek_letters_utf8, subscripts_utf8, ends_with_divider, starts_with_divider, digit2superscript
 from .parts import CDPLanguage

@@ -4,10 +4,11 @@ from comptests.registrar import comptest
 from mcdp_figures import MakeFiguresNDP
 from mcdp_lang.parse_interface import parse_ndp
 from mcdp_tests.generation import for_all_nameddps_dyn
-from mocdp import MCDPConstants
-from mocdp.exceptions import DPSemanticError
+from mcdp import MCDPConstants
+from mcdp.exceptions import DPSemanticError
 from reprep import Report
 from reprep.datanode import DataNode
+from mcdp_report.image_source import ImagesFromPaths
 
 
 @comptest
@@ -32,7 +33,7 @@ def toss_coin(h, prob_success):
 
 @for_all_nameddps_dyn
 def allformats(context, id_ndp, ndp, libname):
-    mf = MakeFiguresNDP(ndp=ndp, library=None, yourname=None)
+    mf = MakeFiguresNDP(ndp=ndp, image_source=None, yourname=None)
     for name in mf.available():
         
         do_it = libname in ['basic', 'libtemplates', 'solver'] or \
@@ -50,7 +51,8 @@ def allformats_report(id_ndp, ndp, libname, which):
     r = Report(id_ndp + '-' + which)
     from mcdp_library_tests.tests import get_test_library
     library = get_test_library(libname)
-    mf = MakeFiguresNDP(ndp=ndp, library=library, yourname=id_ndp)
+    image_source = ImagesFromPaths(library.get_images_paths())
+    mf = MakeFiguresNDP(ndp=ndp, image_source=image_source, yourname=id_ndp)
     formats = mf.available_formats(which)
     try:
         res = mf.get_figure(which, formats)

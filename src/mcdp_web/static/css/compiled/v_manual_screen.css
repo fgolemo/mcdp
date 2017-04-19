@@ -122,7 +122,6 @@ video {
   padding: 0;
   border: 0;
   font-size: 100%;
-  font: inherit;
   vertical-align: baseline;
 }
 /* HTML5 display-role reset for older browsers */
@@ -217,6 +216,11 @@ blockquote {
 em {
   font-style: italic;
 }
+h1.draft,
+h2.draft,
+h3.draft {
+  color: red !important;
+}
 .figcontent {
   margin: 0;
   padding: 0;
@@ -267,19 +271,19 @@ ul.toc code:last-of-type::after {
   font-weight: normal;
   font-family: serif;
 }
+.chapter_toc {
+  display: none;
+}
 .toc a {
   text-decoration: none;
 }
 /************ TOC ***************/
+ul.toc {
+  column-gap: 20px;
+}
 @media screen {
-  ul.toc {
-    column-count: 2;
-    column-gap: 20px;
-    /*max-height: 30em;*/
-  }
   ul#main_toc > li > ul > li {
     padding-top: 2pt;
-    /*color: red;*/
   }
   ul#main_toc > li > ul > li > ul {
     margin-top: 1pt;
@@ -288,10 +292,6 @@ ul.toc code:last-of-type::after {
 }
 @media print {
   /** two-column format */
-  ul.toc {
-    column-count: 2;
-    column-gap: 20px;
-  }
   /** add page numbers for the first two */
   ul#main_toc > li > a::after {
     content: leader('.') target-counter(attr(href), page);
@@ -404,7 +404,7 @@ span.PlaceholderLabel {
   font-family: "Cambria Math" !important;
 }
 body {
-  font-family: STIX, Times, monospace;
+  font-family: STIX, STIXMath, monospace;
   font-variant: prince-opentype(kern, liga, dlig, clig, calt);
   font-kerning: normal;
 }
@@ -416,28 +416,32 @@ code {
   font-family: monospace, Cambria, "Cambria Math";
 }
 @font-face {
+  font-family: STIXMath;
+  src: local("Stix Two Math");
+}
+@font-face {
   font-family: STIX;
   font-style: normal;
   font-weight: normal;
-  src: local("STIX General");
+  src: local("STIX Two Text");
 }
 @font-face {
   font-family: STIX;
   font-style: normal;
   font-weight: bold;
-  src: local("STIX General Bold");
+  src: local("STIX Two Text Bold");
 }
 @font-face {
   font-family: STIX;
   font-style: italic;
   font-weight: normal;
-  src: local("STIX General Italic");
+  src: local("STIX Two Text Italic");
 }
 @font-face {
   font-family: STIX;
   font-style: italic;
   font-weight: bold;
-  src: local("STIX General Bold Italic");
+  src: local("STIX Two Text Bold Italic");
 }
 body {
   /*padding-left: 3em;*/
@@ -606,7 +610,7 @@ span.RcompConstant {
   color: #cc6600;
 }
 span.RcompUnit {
-  color: #cc6600 ;
+  color: #cc6600;
 }
 span.MCDPKeyword,
 span.SubKeyword,
@@ -651,6 +655,7 @@ span.plus,
 span.times,
 span.exponent,
 span.product,
+span.sum,
 span.OpenBraceKeyword,
 span.CloseBraceKeyword,
 span.comma,
@@ -694,6 +699,9 @@ span.LBRACE,
 span.RBRACE,
 span.LBRACKET,
 span.RBRACKET,
+span.plus_or_minus,
+span.percent,
+span.LEFTRIGHTARROW,
 span.AssertEqualKeyword,
 span.AssertLEQKeyword,
 span.AssertGEQKeyword,
@@ -701,7 +709,9 @@ span.AssertLTKeyword,
 span.AssertGTKeyword,
 span.AssertNonemptyKeyword,
 span.AssertEmptyKeyword,
-span.ConstantKeyword {
+span.ConstantKeyword,
+span.BetweenKeyword,
+span.BetweenAndKeyword {
   font-weight: bold;
   color: #00a;
 }
@@ -724,6 +734,12 @@ span.SetNameRValue > span.RName {
   color: darkred;
 }
 span.SetNameFValue > span.FName {
+  color: darkgreen;
+}
+span.SumResources > span.RName {
+  color: darkred;
+}
+span.SumFunctions > span.FName {
   color: darkgreen;
 }
 span.DerivFunctionName {
@@ -849,6 +865,10 @@ span.geq {
   font-family: "FreeSerif";
   font-weight: normal !important;
 }
+span.sum {
+  font-family: "FreeSerif";
+  font-weight: bold;
+}
 span.semantic_error {
   background-color: pink;
 }
@@ -893,7 +913,7 @@ code.RName {
   color: darkred;
 }
 span.ImpName {
-  color: #cc7a00;
+  color: darkorange;
 }
 code.fvalue span.ValueExpr,
 code.fvalue span.RcompUnit {
@@ -914,15 +934,17 @@ code.rvalue span.RcompUnit {
 }
 p,
 div.latex_env,
-div.minipage {
-  line-height: 1.15;
+div.minipage,
+li,
+table {
+  line-height: 1.18;
 }
 p {
   margin-bottom: 3pt;
   margin-top: 3pt;
 }
 figcaption {
-  line-height: 1.15;
+  line-height: 1.18;
 }
 blockquote {
   margin-left: 3em;
@@ -1612,7 +1634,7 @@ cite {
   display: block;
   font-style: normal;
   font-size: smaller;
-  line-height: 1.38;
+  line-height: 1.416;
 }
 cite + cite {
   padding-bottom: 0.5em;

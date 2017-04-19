@@ -2,174 +2,88 @@
 
 from collections import namedtuple
 
-from bs4.element import Declaration, ProcessingInstruction, Doctype, Comment,\
-    Tag
-
+from bs4.element import Declaration, ProcessingInstruction, Doctype, Comment, Tag
 from contracts.utils import check_isinstance, indent
+from pyramid.httpexceptions import HTTPFound
+
+from mcdp.exceptions import DPSyntaxError, DPSemanticError, DPNotImplementedError, DPInternalError
 from mcdp_lang.namedtuple_tricks import recursive_print
 from mcdp_lang.parts import CDPLanguage
 from mcdp_lang.utils_lists import unwrap_list
 from mcdp_report.html import ast_to_html
-from mcdp_web.editor_fancy.app_editor_fancy_generic import specs
-from mcdp_web.renderdoc.highlight import add_style
-from mcdp_web.renderdoc.xmlutils import to_html_stripping_fragment, bs
-from mcdp_web.utils0 import add_std_vars, add_other_fields
-from mcdp_web.visualization.add_html_links_imp import add_html_links
+from mcdp_utils_xml import add_style, to_html_stripping_fragment, bs
+from mcdp_web.environment import cr2e
+from mcdp_web.resource_tree import ResourceThingViewSyntax, ResourceThingViewNDPGraph,\
+    ResourceThingViewDPTree, ResourceThingViewDPGraph, ResourceThingViewNDPRepr,\
+    ResourceThingViews
+from mcdp_web.sessions import NoSuchLibrary
+from mcdp_web.utils0 import add_other_fields, add_std_vars_context
 from mocdp.comp.context import Context
-from mocdp.exceptions import DPSyntaxError, DPSemanticError,\
-    DPNotImplementedError, DPInternalError
+
+from .add_html_links_imp import add_html_links
+from mcdp_web.context_from_env import library_from_env, image_source_from_env
 
 
-class AppVisualization():
+class AppVisualization(object):
 
     def __init__(self):
         pass
 
-    def config(self, config):
-        
-        renderer = 'visualization/syntax.jinja2'
-        generate_view = self.generate_view
-#         generate_graph = self.generate_graph
-        
-        for s in specs:
-            url = ('/libraries/{library}/%s/{%s}/views/syntax/' % 
-                   (specs[s].url_part, specs[s].url_variable))
-            route = 'visualization_%s_syntax' % s
+    def config(self, config): 
+        config.add_view(self.view_syntax, context=ResourceThingViewSyntax, renderer='visualization/syntax.jinja2')
+        config.add_view(self.redirect_things_to_syntax, context=ResourceThingViews)
             
-            config.add_route(route, url)    
-            
-            class G():
-                def __init__(self, spec):
-                    self.spec = spec
-
-                def __call__(self, request):
-                    return generate_view(request, self.spec)
-
-            # scoping bug!                    
-            #view = lambda request: self.generate_view(request, specs[s])
-            config.add_view(G(specs[s]), route_name=route, renderer=renderer)
-            
-            graph_route = 'visualization_%s_graph' % s
-            graph_url = url + 'graph.{data_format}'
-            config.add_route(graph_route, graph_url)    
-
-# 
-#             class H():
-#                 def __init__(self, spec):
-#                     self.spec = spec
-# 
-#                 def __call__(self, request):
-#                     return generate_graph(request, self.spec)
-# 
-#             
-#             config.add_view(H(specs[s]), route_name=graph_route, renderer=renderer)
-
-
         # these are images view for which the only change is the jinja2 template
-        image_views = [
-            'dp_graph', 
-            'dp_tree', 
-            'ndp_graph',
-        ]
-        for image_view in image_views:
-            route = 'model_%s' % image_view
-            url = self.get_lmv_url2('{library}', '{model_name}', image_view, None)
-            renderer = 'visualization/model_%s.jinja2' % image_view
-            config.add_route(route, url)
-            config.add_view(self.view_model_info, route_name=route, renderer=renderer)
- 
+        config.add_view(self.view_dummy, context=ResourceThingViewDPGraph, renderer='visualization/model_dp_graph.jinja2')
+        config.add_view(self.view_dummy, context=ResourceThingViewDPTree, renderer='visualization/model_dp_tree.jinja2')
+        config.add_view(self.view_dummy, context=ResourceThingViewNDPGraph, renderer='visualization/model_ndp_graph.jinja2')
+        config.add_view(self.view_model_ndp_repr, context=ResourceThingViewNDPRepr, renderer='visualization/model_generic_text_content.jinja2')
 
-        config.add_route('model_ndp_repr',
-                         self.get_lmv_url2('{library}', '{model_name}', 'ndp_repr', None))
-        config.add_view(self.view_model_ndp_repr, route_name='model_ndp_repr',
-                        renderer='visualization/model_generic_text_content.jinja2')
-
-
-    @add_std_vars
-    def view_model_info(self, request):
-        return {
-            'model_name': self.get_model_name(request),
-            'views': self._get_views(),
-            'navigation': self.get_navigation_links(request),
-        }
- 
-    @add_std_vars
-    def view_model_ndp_repr(self, request):
-        model_name = str(request.matchdict['model_name'])  # unicode
-
-        ndp = self.get_library(request).load_ndp(model_name)
-        ndp_string = ndp.__repr__()
-        ndp_string = ndp_string.decode("utf8")
-
-        return {
-            'model_name': model_name,
-            'content': ndp_string,
-            'navigation': self.get_navigation_links(request),
-        }
- 
-  
-#     def generate_graph(self, request, spec):
-#         def go():
-#             with timeit_wall('generate_graph', 1.0):
-#                 library = self.get_library(request)
-#                 widget_name = self.get_widget_name(request, spec)
-#                 l = self.get_library(request)
-#                 data_format = str(request.matchdict['data_format'])  # unicode
-# 
-#                 context = l._generate_context_with_hooks()
-#                 thing = spec.load(l, widget_name, context=context)
-#     
-#                 with timeit_wall('graph_generic - get_png_data', 1.0):
-#                     data = spec.get_png_data_syntax(library, widget_name, thing, 
-#                                              data_format=data_format)
-#                     
-#                 from mcdp_web.images.images import get_mime_for_format
-#                 mime = get_mime_for_format(data_format)
-#                 return response_data(request, data, mime)
-#         return self.png_error_catch2(request, go)
-    
-    def generate_view(self, request, spec):
-        name = str(request.matchdict[spec.url_variable])  # unicode
-        library = self.get_library(request)
-        make_relative = lambda _: self.make_relative(request, _)
-        library_name = self.get_current_library_name(request)
-
-        res = generate_view_syntax(library_name, library, name,  spec, make_relative)
-        add_other_fields(self, res, request)
+    @add_std_vars_context
+    @cr2e
+    def redirect_things_to_syntax(self, e):
+        ''' Redirect
+                libraries/basic/models/test2/views/ ->
+                libraries/basic/models/test2/views/syntax/
+        '''
+        url = e.request.url
+        assert url.endswith('/')
+        url2 = url+'syntax/'
+        raise HTTPFound(url2)
         
-        navigation = self.get_navigation_links(request)
+    @add_std_vars_context
+    @cr2e
+    def view_model_ndp_repr(self, e):
+        res = {}
         
-        res['navigation'] = navigation
-        
-        url_edit0 = ("/libraries/%s/%s/%s/views/edit_fancy/" %  
-                    (navigation['current_library'], spec.url_part, name))
+        try:
+            ndp = e.library.load_ndp(e.thing_name)
+            ndp_string = ndp.__repr__()
+            ndp_string = ndp_string.decode("utf8")
+            res['content'] = ndp_string
+            
+        except (DPSyntaxError, DPSemanticError, DPNotImplementedError) as exc:
+            self.note_exception(exc, request=e.request, context=e.context)
+            s = str(exc)
+            res['error'] = s.decode('utf8')
+        return res
+
+    @add_std_vars_context
+    @cr2e
+    def view_syntax(self, e):
+        make_relative = lambda _: self.make_relative(e.request, _)
+        res = generate_view_syntax(e,  make_relative)
+        add_other_fields(self, res, e.request, e.context)
+        url_edit0 = ("/repos/%s/shelves/%s/libraries/%s/%s/%s/views/edit_fancy/" %  
+                    (e.repo_name, e.shelf_name, e.library_name, e.spec.url_part, e.thing_name))
         res['url_edit'] = make_relative(url_edit0)
-        
         return res
     
-def generate_view_syntax(library_name, library, name,  spec, make_relative):
-    ext = spec.extension
-    expr = spec.parse_expr
-    parse_refine = spec.parse_refine
-
-    filename = '%s.%s' % (name, ext)
-    f = library._get_file_data(filename)
-    source_code = f['data']
-    realpath = f['realpath']
-#     
-#     md1 = '%s.%s' % (name, MCDPLibrary.ext_explanation1)
-#     if library.file_exists(md1):
-#         fd = library._get_file_data(md1)
-#         html1 = self.render_markdown(fd['data'])
-#     else:
-#         html1 = None
-# 
-#     md2 = '%s.%s' % (name, MCDPLibrary.ext_explanation2)
-#     if library.file_exists(md2):
-#         fd = library._get_file_data(md2)
-#         html2 = self.render_markdown(fd['data'])
-#     else:
-#         html2 = None
+    
+def generate_view_syntax(e, make_relative):
+    expr = e.spec.parse_expr
+    parse_refine = e.spec.parse_refine
+    source_code = e.thing
         
     context = Context()
     class Tmp:
@@ -189,40 +103,52 @@ def generate_view_syntax(library_name, library, name,  spec, make_relative):
                                 parse_expr=expr,
                                 postprocess=postprocess)
         
-        def get_link(specname, libname, thingname):
-            spec = specs[specname]
-            url0 =  ("/libraries/%s/%s/%s/views/syntax/" %  
-                        (libname, spec.url_part, thingname))
+        def get_link_library(libname):
+            try:
+                rname, sname = e.session.get_repo_shelf_for_libname(libname)
+            except NoSuchLibrary:
+                raise
+            url0 =  "/repos/%s/shelves/%s/libraries/%s/" % (rname, sname, libname)
             return make_relative(url0)
             
-        highlight = add_html_links(highlight, library_name, get_link)
+        def get_link(specname, libname, thingname):
+            return get_link_library(libname) + '%s/%s/views/syntax/' % (specname, thingname)
+        
+        highlight = add_html_links(highlight, e.library_name, get_link, get_link_library)
         parses = True 
         error = ''
-    except (DPSyntaxError, DPNotImplementedError ) as e:
+    except (DPSyntaxError, DPNotImplementedError ) as exc:
         highlight = '<pre class="source_code_with_error">%s</pre>' % source_code
-        error = e.__str__()
+        error = exc.__str__()
         parses = False
-        
      
     
     if parses:
-        context = library._generate_context_with_hooks()
+        mcdp_library = library_from_env(e)
+        image_source = image_source_from_env(e)
+
         try:
-            thing = spec.load(library, name, context=context)    
-            svg_data = get_svg_for_visualization(library, library_name, spec, 
-                                                     name, thing, Tmp.refined, 
-                                                     make_relative)
-        except (DPSemanticError, DPNotImplementedError) as e:
-            error = e.__str__()
+            thing = e.spec.load(mcdp_library, e.thing_name, context=context)
+                
+            svg_data = get_svg_for_visualization(e, image_source, e.library_name, e.spec, 
+                                                     e.thing_name, thing, Tmp.refined, 
+                                                     make_relative, library=mcdp_library)
+        except (DPSemanticError, DPNotImplementedError) as exc:
+            print exc
+            from mcdp_web.editor_fancy.app_editor_fancy_generic import html_mark
+            highlight = html_mark(highlight, exc.where, "semantic_error")
+
+            error = exc.error
             svg_data = None
     else:
         svg_data = None
         
+    check_isinstance(highlight, str)
     res= {
         'source_code': source_code,
         'error': unicode(error, 'utf-8'),
-        'highlight': highlight,
-        'realpath': realpath,
+        'highlight': unicode(highlight, 'utf-8'),
+#         'realpath': realpath,
         'current_view': 'syntax', 
         'explanation1_html': None,
         'explanation2_html': None,
@@ -268,9 +194,11 @@ def add_html_links_to_svg(svg, link_for_dpname):
                 
         
 # with timeit_wall('graph_generic - get_png_data', 1.0):
-def get_svg_for_visualization(library, library_name, spec, name, thing, refined, make_relative):
+def get_svg_for_visualization(e, image_source, library_name, spec, name, thing, refined, make_relative, library):
 
-    svg_data0 = spec.get_png_data_syntax(library, name, thing, data_format='svg')
+    svg_data0 = spec.get_png_data_syntax(image_source=image_source, name=name, thing=thing, data_format='svg',
+                                         library=library)
+    
     fragment = bs(svg_data0)
     if fragment.svg is None:
         msg = 'Cannot interpret fragment.'
@@ -292,15 +220,13 @@ def get_svg_for_visualization(library, library_name, spec, name, thing, refined,
         table = identifier2ndp(refined)
     else:
         table = {}
-        
-#         print table
+         
     def link_for_dp_name(identifier0):
         identifier = identifier0 # todo translate
         if identifier in table:
             a = table[identifier]
             libname = a.libname if a.libname is not None else library_name
-#                 href = self.get_lmv_url(libname, a.name, 'syntax')
-            href0 = '/libraries/%s/models/%s/views/syntax/' % (libname, a.name)
+            href0 = '/repos/%s/shelves/%s/libraries/%s/models/%s/views/syntax/' % (e.repo_name, e.shelf_name, libname, a.name)
             return make_relative(href0)
         else:
             return None

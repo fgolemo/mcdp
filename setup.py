@@ -15,7 +15,7 @@ def get_version(filename):
         raise ValueError(filename)
     return version
 
-version = get_version(filename='src/mocdp/__init__.py')
+version = get_version(filename='src/mcdp/branch_info.py')
 
 name = 'PyMCDP'
 
@@ -67,6 +67,11 @@ setup(name=name,
         'bcrypt',
         'waitress',
         'lxml',
+        'junit_xml',
+        'gitpython',
+        'authomatic',
+        'webtest',
+        'ruamel.yaml',
       ],
       # This avoids creating the egg file, which is a zip file, which makes our data
       # inaccessible by dir_from_package_name()

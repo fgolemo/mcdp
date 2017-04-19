@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
+from contracts.utils import indent
 from nose.tools import assert_equal
 
 from comptests.registrar import comptest, run_module_tests
+from mcdp_lang.dealing_with_special_letters import ends_with_divider,\
+    starts_with_divider
+from mcdp_lang.namedtuple_tricks import recursive_print
 from mcdp_lang.parse_actions import parse_wrap
 from mcdp_lang.parse_interface import parse_ndp_refine
 from mcdp_lang.parts import CDPLanguage
@@ -10,10 +14,6 @@ from mcdp_lang.suggestions import get_suggestions, apply_suggestions,\
 from mcdp_lang.syntax import Syntax
 from mcdp_report.out_mcdpl import ast_to_mcdpl
 from mocdp.comp.context import Context
-from contracts.utils import indent
-from mcdp_lang.dealing_with_special_letters import ends_with_divider,\
-    starts_with_divider
-from mcdp_lang.namedtuple_tricks import recursive_print
 
 
 CDP = CDPLanguage

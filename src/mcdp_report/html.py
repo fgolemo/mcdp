@@ -11,8 +11,8 @@ from mcdp_lang.parts import CDPLanguage
 from mcdp_lang.refinement import namedtuple_visitor_ext
 from mcdp_lang.syntax import Syntax
 from mcdp_lang.utils_lists import is_a_special_list
-from mocdp import MCDPConstants
-from mocdp.exceptions import DPSyntaxError, DPInternalError
+from mcdp import MCDPConstants
+from mcdp.exceptions import DPSyntaxError, DPInternalError
 
 
 unparsable_marker = '#@'
@@ -352,7 +352,7 @@ def iterate_notwhere(x):
 
     
 def get_css_filename(basename):
-    from mcdp_library.utils.dir_from_package_nam import dir_from_package_name
+    from mcdp_utils_misc.dir_from_package_nam import dir_from_package_name
     package = dir_from_package_name('mcdp_web')
     fn = os.path.join(package, 'static', 'css', basename + '.css')
     if not os.path.exists(fn):

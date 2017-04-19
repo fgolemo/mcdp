@@ -9,7 +9,7 @@ from mcdp_report.gg_ndp import format_unit
 import numpy as np
 
 
-class SolverState():
+class SolverState(object):
 
     def __init__(self, ndp):
         self.fun = []
@@ -42,6 +42,8 @@ class SolverState():
             raise ValueError("Not valid: %s" % f)
 
         for k, v in f.items():
+            
+            k = k.encode('utf8') # XXX do before
             i = fnames.index(k)
             F = self.ndp.get_ftype(k)
             fv[i] = permissive_parse(F, v)
@@ -61,7 +63,7 @@ class SolverState():
             raise_wrapped(ValueError, e, "Point does not belong.", compact=True)
         self.fun.append(fv)
 
-        from mocdp import logger
+        from mcdp import logger
         trace = Tracer(logger=logger)
         print('solving... %s' % F.format(fv))
         ures = self.dp.solve_trace(fv, trace)

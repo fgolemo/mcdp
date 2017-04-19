@@ -8,30 +8,23 @@ import sys
 from contracts import contract
 from contracts.utils import (check_isinstance, format_obs, raise_desc,
                              raise_wrapped)
-from mcdp_dp import PrimitiveDP
+
+from mcdp import logger, MCDPConstants
+from mcdp.exceptions import DPSemanticError, MCDPExceptionWithWhere
 from mcdp_lang import parse_ndp, parse_poset
-from mcdp_posets import Poset
-from mocdp import ATTR_LOAD_LIBNAME, ATTR_LOAD_NAME, logger, ATTR_LOAD_REALPATH, \
-    get_mcdp_tmp_dir, MCDPConstants
-from mocdp.comp.context import Context, ValueWithUnits
-from mocdp.comp.interfaces import NamedDP
-from mocdp.comp.template_for_nameddp import TemplateForNamedDP
-from mocdp.exceptions import DPSemanticError, mcdp_dev_warning, MCDPExceptionWithWhere
+from mcdp_utils_misc import assert_good_plain_identifier, format_list, get_mcdp_tmp_dir, memo_disk_cache2, locate_files
+from mocdp.comp.context import Context
 
-from .utils import memo_disk_cache2
-from .utils.locate_files_imp import locate_files
-
-
-mcdp_dev_warning('move away')
-log_duplicates = False
 
 __all__ = [
-    'MCDPLibrary',
-    'ATTR_LOAD_NAME',
+    'MCDPLibrary', 
 ]
 
 
-class MCDPLibrary():
+# class LibraryIsReadOnly(Exception):
+#     pass
+
+class MCDPLibrary(object):
     """
     
         to document:
@@ -45,19 +38,11 @@ class MCDPLibrary():
     """
 
     # These are all the extensions that we care about
-    ext_ndps = 'mcdp'
-    ext_posets = 'mcdp_poset'
-    ext_values = 'mcdp_value'
-    ext_templates = 'mcdp_template'
-    ext_primitivedps = 'mcdp_primitivedp'
-    ext_explanation1 = 'expl1.md'  # before the model
-    ext_explanation2 = 'expl2.md'  # after the model
-    ext_doc_md = 'md'  # library document
-
+    
     # all the files we look for
-    all_extensions = (ext_ndps, ext_posets, ext_values, ext_templates, ext_primitivedps,
-                      ext_explanation1, ext_explanation2, ext_doc_md) + MCDPConstants.exts_images
-
+    all_extensions = MCDPConstants.all_extensions
+    
+    
     def __init__(self, cache_dir=None, file_to_contents=None, search_dirs=None,
                  load_library_hooks=None):
         """ 
@@ -135,34 +120,44 @@ class MCDPLibrary():
             if os.path.exists(self.cache_dir):
                 shutil.rmtree(self.cache_dir)
 
-    @contract(returns=NamedDP)
     def load_ndp(self, id_ndp, context=None):
-        return self._load_generic(id_ndp, MCDPLibrary.ext_ndps,
-                                  MCDPLibrary.parse_ndp, context)
+        from .specs_def import SPEC_MODELS
+        return self.load_spec(SPEC_MODELS, id_ndp, context)
 
-    @contract(returns=Poset)
     def load_poset(self, id_poset, context=None):
-        return self._load_generic(id_poset, MCDPLibrary.ext_posets,
-                                  MCDPLibrary.parse_poset, context)
+        from .specs_def import SPEC_POSETS
+        return self.load_spec(SPEC_POSETS, id_poset, context)
 
-    @contract(returns=ValueWithUnits)
-    def load_constant(self, id_poset, context=None):
-        return self._load_generic(id_poset, MCDPLibrary.ext_values,
-                                  MCDPLibrary.parse_constant, context)
-
-    @contract(returns=PrimitiveDP)
+    def load_constant(self, id_value, context=None):
+        from .specs_def import SPEC_VALUES
+        return self.load_spec(SPEC_VALUES, id_value, context)
+        
     def load_primitivedp(self, id_primitivedp, context=None):
-        return self._load_generic(id_primitivedp, MCDPLibrary.ext_primitivedps,
-                                  MCDPLibrary.parse_primitivedp, context)
+        from .specs_def import SPEC_PRIMITIVEDPS
+        return self.load_spec(SPEC_PRIMITIVEDPS, id_primitivedp, context)
 
-    @contract(returns=TemplateForNamedDP)
-    def load_template(self, id_ndp, context=None):
-        return self._load_generic(id_ndp, MCDPLibrary.ext_templates,
-                                  MCDPLibrary.parse_template, context)
+    def load_template(self, id_template, context=None):
+        from .specs_def import SPEC_TEMPLATES
+        return self.load_spec(SPEC_TEMPLATES, id_template, context)
 
+    def load_spec(self, spec_name, thing_name, context=None):
+        from mcdp_library.specs_def import specs
+        spec = specs[spec_name]
+        res = self._load_generic(thing_name, spec_name, spec.parse, context)
+        check_isinstance(res, spec.klass)
+        return res
 
-    @contract(name=str, extension=str)
-    def _load_generic(self, name, extension, parsing_function, context):
+    def _load_spec_data(self, spec_name, thing_name):
+        from mcdp_library.specs_def import specs
+        spec = specs[spec_name]
+        filename = '%s.%s' % (thing_name, spec.extension)
+        f = self._get_file_data(filename)
+        data = f['data']
+        realpath = f['realpath']
+        return dict(data=data, realpath=realpath)
+        
+    @contract(name=str)
+    def _load_generic(self, name, spec_name, parsing_function, context):
         """
             parsing_function takes string, context 
         """
@@ -170,11 +165,12 @@ class MCDPLibrary():
             context = Context()
         if not isinstance(name, str):
             msg = 'Expected a string for the name.'
-            raise_desc(ValueError, msg, name=name)
-        filename = '%s.%s' % (name, extension)
-        f = self._get_file_data(filename)
-        data = f['data']
-        realpath = f['realpath']
+            raise_desc(ValueError, msg, name=name) 
+        
+        x =  self._load_spec_data(spec_name, name)
+        data = x['data']
+        realpath = x['realpath']
+        
 
         current_generation = 3
         
@@ -185,7 +181,7 @@ class MCDPLibrary():
             context_mine = Context()
             res = parsing_function(l, data, realpath, context=context_mine)
 
-            setattr(res, ATTR_LOAD_NAME, name)
+            setattr(res, MCDPConstants.ATTR_LOAD_NAME, name)
             return dict(res=res, 
                         context_warnings=context_mine.warnings,
                         generation=current_generation)
@@ -218,7 +214,7 @@ class MCDPLibrary():
             logger.debug('actual_load(): parsed %r with %d warnings %s' %
                           (name, len(context_warnings), cached))
             
-        class JustAHack:
+        class JustAHack(object):
             warnings = context_warnings
             
         msg = 'While loading %r.' % name
@@ -250,13 +246,13 @@ class MCDPLibrary():
     def parse_template(self, string, realpath=None, context=None):
         from mcdp_lang.parse_interface import parse_template
         template = self._parse_with_hooks(parse_template, string, realpath, context)
-        if hasattr(template, ATTR_LOAD_LIBNAME):
-            _prev = getattr(template, ATTR_LOAD_LIBNAME)
+        if hasattr(template,  MCDPConstants.ATTR_LOAD_LIBNAME):
+            _prev = getattr(template,  MCDPConstants.ATTR_LOAD_LIBNAME)
             # print('library %r gets something from %r' % (self.library_name, _prev))
         else:
             # print('parsed original template at %s' % self.library_name)
-            setattr(template, ATTR_LOAD_LIBNAME, self.library_name)
-            setattr(template, ATTR_LOAD_REALPATH, realpath)
+            setattr(template,  MCDPConstants.ATTR_LOAD_LIBNAME, self.library_name)
+            setattr(template,  MCDPConstants.ATTR_LOAD_REALPATH, realpath)
         return template
 
     @contextmanager
@@ -323,42 +319,35 @@ class MCDPLibrary():
 
         msg = 'Could not load library %r.' % id_library
         msg += "\n---\n".join([str(_) for _ in errors])
-        raise_desc(DPSemanticError, msg)
+        raise_desc(DPSemanticError, msg) 
 
-    @contract(returns='set(str)')
-    def list_ndps(self):
-        """ Returns all models defined in this library with .mcdp files. """
-        return self._list_with_extension(MCDPLibrary.ext_ndps)
-
-    get_models = list_ndps
-
-    @contract(returns='set(str)')
-    def list_posets(self):
-        """ Returns all models defined in this library with .mcdp files. """
-        return self._list_with_extension(MCDPLibrary.ext_posets)
-
-    @contract(returns='set(str)')
-    def list_primitivedps(self):
-        """ Returns all models defined in this library with .mcdp files. """
-        return self._list_with_extension(MCDPLibrary.ext_primitivedps)
-
-    @contract(returns='set(str)')
-    def list_templates(self):
-        """ Returns all models defined in this library with .mcdp files. """
-        return self._list_with_extension(MCDPLibrary.ext_templates)
-
-    @contract(returns='set(str)')
-    def list_values(self):
-        return self._list_with_extension(MCDPLibrary.ext_values)
-
+    def list_spec(self, spec_name):
+        ''' Lists files of the given spec. '''
+        from .specs_def import specs
+        if not spec_name in specs:
+            msg = 'Invalid spec name "%s".' % spec_name
+            raise ValueError(msg)
+        extension = specs[spec_name].extension
+        return self._list_with_extension(extension)
+    
     @contract(ext=str)
     def _list_with_extension(self, ext):
-        r = []
+        ''' Lists all files with a certain extension. 
+        
+            The basename should be a plain identifier.
+            
+            Images are allowed to have '-' in them.
+        '''
+        r = [] 
+        
         for x in self.file_to_contents:
             assert isinstance(x, str), x.__repr__()
             p = '.' + ext
             if x.endswith(p):
                 fn = x.replace(p, '')
+                
+                if not ext in MCDPConstants.exts_images:
+                    assert_good_plain_identifier(fn)
                 assert isinstance(fn, str), (x, p, fn)
                 r.append(fn)
         res = set(r)
@@ -386,9 +375,8 @@ class MCDPLibrary():
                                key=lambda x: x.lower())
 
             if available:
-                available = ", ".join(available)
                 msg += (" Available files with %r extension: %s." %
-                        (ext, available))
+                        (ext, format_list(sorted(available))))
             else:
                 msg += " No files with extension %r found." % ext
                 
@@ -414,22 +402,43 @@ class MCDPLibrary():
     @contract(d=str)
     def _add_search_dir(self, d):
         """ Adds the directory to the search directory list. """
-        pattern = ['*.%s' % ext for ext in MCDPLibrary.all_extensions]
+        pattern = ['*.' + ext for ext in MCDPLibrary.all_extensions]
             
         files_mcdp = locate_files(directory=d, pattern=pattern,
                                   followlinks=True)
         for f in files_mcdp:
             assert isinstance(f, str)
+            if os.path.islink(f):
+                if not os.path.exists(f):
+                    msg = 'Ignoring broken link %s' % f
+                    logger.warning(msg)
+                    continue 
             self._update_file(f, from_search_dir=d)
+
 
     @contract(f=str)
     def _update_file_from_editor(self, f):
         return self._update_file(f, from_search_dir='mcdp-web')
     
+    def delete_file(self, basename):
+        ''' Deletes a file '''
+        if not basename in self.file_to_contents:
+            msg = 'Filename %r does not exist in this library.' % basename
+            raise ValueError(msg)
+        realpath = self.file_to_contents[basename]['realpath']
+        if not os.path.exists(realpath):
+            msg = 'Filename %r -> %r already deleted.' % (basename, realpath)
+            logger.warning(msg)
+        os.unlink(realpath)
+    
     @contract(f=str)
     def _update_file(self, f, from_search_dir=None):
         """ from_search_dir: from whence we arrived at this file. """
-        assert os.path.exists(f)
+        if not os.path.exists(f):
+            msg = 'File does not exist:'
+            msg += '\n filename: %s' % f
+            msg += '\n from_search_dir: %s' % from_search_dir
+            raise ValueError(msg)
         basename = os.path.basename(f)
         check_isinstance(basename, str)
         # This will fail because then in pyparsing everything is unicode
@@ -462,7 +471,7 @@ class MCDPLibrary():
                 else:
                     msg = 'Found duplicated file %r.' % basename
                     if not strict:
-                        if log_duplicates:
+                        if MCDPConstants.log_duplicates:
                             logger.warning(msg + "\n" +
                                            format_obs(dict(path1=realpath1,
                                                       path2=res['realpath'])))
@@ -473,46 +482,30 @@ class MCDPLibrary():
 
         assert isinstance(basename, str), basename
 
-        self.file_to_contents[basename] = res
-
-    def write_to_model(self, name, data):
-        basename = '%s.%s' % (name, MCDPLibrary.ext_ndps)
-        self._write_generic(basename, data)
-
-    def write_to_template(self, name, data):
-        basename = '%s.%s' % (name, MCDPLibrary.ext_templates)
-        self._write_generic(basename, data)
-
-    def write_to_constant(self, name, data):
-        basename = '%s.%s' % (name, MCDPLibrary.ext_values)
-        self._write_generic(basename, data)
-
-    def write_to_primitivedp(self, name, data):
-        basename = '%s.%s' % (name, MCDPLibrary.ext_primitivedps)
-        self._write_generic(basename, data)
-
-    def write_to_poset(self, name, data):
-        basename = '%s.%s' % (name, MCDPLibrary.ext_posets)
-        self._write_generic(basename, data)
+        self.file_to_contents[basename] = res 
+        
+#     def write_spec(self, spec_name, name, data):
+#         from mcdp_library.specs_def import specs
+#         spec = specs[spec_name]
+#         basename = name + '.' + spec.extension
+#         self._write_generic(basename, data)
 
     def set_read_only(self, read_only=True):
-        """ Sets the library to read-only. Any write operation will 
-            create an error. """
+        ''' Sets the library to read-only. Any write operation will 
+            create an error. '''
         self.read_only = read_only
         
-    def _write_generic(self, basename, data):
-        if self.read_only:
-            raise LibraryIsReadOnly()
-        
-        d = self._get_file_data(basename)
-        realpath = d['realpath']
-        logger.info('writing to %r' % realpath)
-        with open(realpath, 'w') as f:
-            f.write(data)
-        # reload
-        self._update_file_from_editor(realpath)
+#     def _write_generic(self, basename, data):
+#         if self.read_only:
+#             raise LibraryIsReadOnly()
+#         
+#         d = self._get_file_data(basename)
+#         realpath = d['realpath']
+#         logger.info('writing to %r' % realpath)
+#         with open(realpath, 'w') as f:
+#             f.write(data)
+#         # reload
+#         self._update_file_from_editor(realpath)
 
 
-class LibraryIsReadOnly(Exception):
-    pass
 

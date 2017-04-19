@@ -9,20 +9,21 @@ from mcdp_dp import (CatalogueDP, CoProductDP, NotFeasible, Template, Constant,
 from mcdp_lang.eval_warnings import MCDPWarnings
 from mcdp_lang.parse_actions import parse_wrap
 from mcdp_lang.parse_interface import parse_ndp, parse_poset, parse_constant
-from mcdp_lang.pyparsing_bundled import Literal
+from mcdp_lang.pyparsing_bundled import Literal, Keyword
 from mcdp_lang.syntax import Syntax, SyntaxIdentifiers
 from mcdp_lang.syntax_codespec import SyntaxCodeSpec
+from mcdp_lang.syntax_utils import L
 from mcdp_lang_tests.utils import (assert_parsable_to_connected_ndp, assert_semantic_error,
                                    parse_wrap_check)
 from mcdp_lang_tests.utils import assert_parse_ndp_semantic_error
 from mcdp_posets import LowerSets, Rcomp, UpperSet, UpperSets, PosetProduct, get_product_compact
 from mcdp_posets import Nat
 from mcdp_posets.rcomp_units import R_dimensionless
-from mocdp import ATTRIBUTE_NDP_RECURSIVE_NAME
 from mocdp.comp.context import ModelBuildingContext, Context
 from mocdp.comp.recursive_name_labeling import get_names_used
-from mocdp.exceptions import DPNotImplementedError, DPSemanticError,\
+from mcdp.exceptions import DPNotImplementedError, DPSemanticError,\
     DPSyntaxError
+from mcdp.constants import MCDPConstants
 
 
 @comptest
@@ -399,16 +400,16 @@ def check_get_names_used1():
 # . L . . . . . . . . . \ ProductN(R[N]×R[N] -> R[N²]) named: ('actuation', '_prod1') I = PosetProduct(R[N],R[N])
 # . L . . . . . . . . . \ GenericUnary(<mcdp_lang.misc_math.MultValue instance at 0x10d8dcbd8>) named: ('actuation', '_mult1
 # ') I = R[N²]
-
+    att =  MCDPConstants.ATTRIBUTE_NDP_RECURSIVE_NAME
     S1 = parse_poset('N')
-    setattr(S1, ATTRIBUTE_NDP_RECURSIVE_NAME, ('S1',))
+    setattr(S1, att, ('S1',))
     S2 = parse_poset('kg')
-    setattr(S2, ATTRIBUTE_NDP_RECURSIVE_NAME, ('S2',))
+    setattr(S2, att, ('S2',))
     S12 = PosetProduct((S1, S2))
     names = get_names_used(S12)
     assert names == [('S1',), ('S2',)], names
     P = parse_poset('J x W')
-    setattr(P, ATTRIBUTE_NDP_RECURSIVE_NAME, ('prod',))
+    setattr(P, att, ('prod',))
 
     S, _pack, _unpack = get_product_compact(P, S12)
     print S.__repr__()
@@ -1140,7 +1141,7 @@ def check_lang89s(): # TODO: rename
     }
     """
     ndp = parse_ndp(s)
-    dp = ndp.get_dp()
+    ndp.get_dp()
     #print dp.repr_long()
     
 @comptest
@@ -1335,7 +1336,7 @@ def check_lang97(): # TODO: rename
       requires x
     }
     """
-    dp = parse_ndp(s).get_dp()
+    parse_ndp(s).get_dp()
 #     print dp.repr_long() 
     
     s = """
@@ -1359,7 +1360,7 @@ def check_lang98(): # TODO: rename
       provides x
     }
     """
-    dp = parse_ndp(s).get_dp()
+    parse_ndp(s).get_dp()
 #     print dp.repr_long() 
     
     s = """
@@ -1369,7 +1370,7 @@ def check_lang98(): # TODO: rename
       provides x, y
     }
     """
-    dp = parse_ndp(s).get_dp()
+    parse_ndp(s).get_dp()
 #     print dp.repr_long() 
 
     s = """
@@ -1378,7 +1379,7 @@ def check_lang98(): # TODO: rename
       requires x
     }
     """
-    dp = parse_ndp(s).get_dp()
+    parse_ndp(s).get_dp()
 #     print dp.repr_long() 
     
     s = """
@@ -1388,7 +1389,7 @@ def check_lang98(): # TODO: rename
       requires x, y
     }
     """
-    dp = parse_ndp(s).get_dp()
+    parse_ndp(s).get_dp()
 #     print dp.repr_long() 
 
     
@@ -1404,7 +1405,7 @@ def check_lang99(): # TODO: rename
       provides f
     }
     """
-    dp = parse_ndp(s).get_dp()
+    parse_ndp(s).get_dp()
 #     print dp.repr_long() 
 
     s = """
@@ -1414,7 +1415,7 @@ def check_lang99(): # TODO: rename
       provides f
     }
     """
-    dp = parse_ndp(s).get_dp()
+    parse_ndp(s).get_dp()
 #     print dp.repr_long() 
 
     s = """
@@ -1424,7 +1425,7 @@ def check_lang99(): # TODO: rename
       requires r
     }
     """
-    dp = parse_ndp(s).get_dp()
+    parse_ndp(s).get_dp()
 #     print dp.repr_long()
      
 
@@ -1894,20 +1895,40 @@ def constant_inverse_ok():
 def constant_inverse():
     s = """ 1 / 2 """
     val = parse_constant(s)
-    print val
+    print(val)
     
-@comptest_fails
 def expect_sem_error():
     s = "1 g + 10 k"
     assert_raises(DPSemanticError, parse_constant, s)
-    
-    
     
 @comptest_fails
 def math_constants3():
     parse_constant('pi^2')
     pow(3.14,2)
-        
+
+@comptest
+def units_pixels():
+    # so 'pi' is forbidden as a keyword
+    assert_raises(DPSyntaxError, parse_wrap, Keyword('pi'), 'pixels')
+    parse_wrap(SyntaxIdentifiers.not_keyword + L('pixels'), 'pixels')
+    parse_wrap(Syntax.pint_unit_simple, 'pixels')
+    parse_wrap(Syntax.space_pint_unit, 'pixels')
+    parse_wrap(Syntax.space_pint_unit, 'pixels/deg')
+    parse_poset('pixels/deg')
+    parse_poset('pixel/deg')
+    parse_constant(' 1.0 pixels/deg')   
+    
+    
+@comptest
+def units_episodes():
+    parse_poset('episodes/day')
+    parse_poset('episode/day')
+
+@comptest
+def use_e_as_poset_element():
+    parse_poset('poset{ a<=b<=e }')
+
+     
 if __name__=='__main__':
     run_module_tests()
 

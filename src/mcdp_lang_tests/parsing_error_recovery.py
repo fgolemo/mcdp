@@ -105,10 +105,10 @@ def parsing_error_recov05():
 }""".strip()
 
     html = ast_to_html_(s)
-    print html
+    print(html)
     from xml.etree import ElementTree as ET
     x = ET.fromstring(html)
-    print x
+    print(x)
 
 
 @comptest

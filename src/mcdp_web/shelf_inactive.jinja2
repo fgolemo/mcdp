@@ -1,0 +1,15 @@
+{% extends "base_page.jinja2" %}
+{% block title %}
+    Shelf inactive
+{% endblock %}
+{% block head_extra %}
+    <style type='text/css'>{% include 'index.css' %}</style>
+    <script>{% include 'index.js' %}</script>
+{% endblock %}
+{% block content %}
+
+<p>The shelf {{navigation.shelf_name}} is inactive, so you cannot access its contents.</p>
+{% set shelf_url_ = shelf_url(navigation.repo_name, navigation.shelf_name) %}
+<p><a href="{{shelf_url_}}/:subscribe/">Activate shelf</a></p>
+
+{% endblock %}

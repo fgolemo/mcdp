@@ -4,7 +4,7 @@ import itertools
 
 from contracts import contract
 from contracts.utils import raise_desc
-from mocdp.exceptions import mcdp_dev_warning, do_extra_checks
+from mcdp.development import mcdp_dev_warning, do_extra_checks
 
 from .frozendict import frozendict2
 from .nat import NatTop, Nat_add, Nat
@@ -19,7 +19,7 @@ __all__ = [
     'Multisets',
 ]
 
-class Multiset():
+class Multiset(object):
     
     @contract(elements='dict(*:($NatTop|(int,>=1)))', S=Poset)
     def __init__(self, elements, S):

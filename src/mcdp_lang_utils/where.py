@@ -87,14 +87,22 @@ class Where(object):
 # mark = 'here or nearby'
 def format_where(w, context_before=3, mark=None, arrow=True, 
                  use_unicode=True, no_mark_arrow_if_longer_than=3):
+    
+    # hack for tabs 
+#     w = Where(w.string, w.col, w.col_end)
+#     if '\t' in w.string:
+#         w.string = w.string.replace('\t', '@') 
+
     s = ''
     if w.filename:
         s += 'In file %r:\n' % w.filename
+    
+    
     lines = w.string.split('\n')
     start = max(0, w.line - context_before)
     pattern = 'line %2d |'
     i = 0
-    maxi = i  + 1
+    maxi = i + 1
     assert 0 <= w.line < len(lines), (w.character, w.line,  w.string.__repr__())
     
     # skip only initial empty lines - if one was written do not skip
@@ -102,6 +110,7 @@ def format_where(w, context_before=3, mark=None, arrow=True,
     for i in range(start, w.line + 1):
         # suppress empty lines
         if one_written or lines[i].strip():
+            lines[i] = lines[i].replace('\t', '@')
             s += ("%s%s\n" % (pattern % (i+1), lines[i]))
             one_written = True
         
@@ -113,12 +122,18 @@ def format_where(w, context_before=3, mark=None, arrow=True,
     space_before = Where(w.string, char0, char0_end)
     
     nindent = printable_length_where(space_before)
-    space = ' ' * fill + ' ' * nindent
+    S = ' '
+#     print('space_before = %r, nindent = %r' % (space_before, nindent))
+     
+    #s += '\n' + '~' * fill + '\n'
+    space = S * fill + S * nindent
+#     print 'column %s, len(space) = %s\n' % (w.col, len(space))
+#     s += len(space) * '1' + '\n'
     if w.col_end is not None:
         if w.line == w.line_end:
             num_highlight = printable_length_where(w)
             s += space + '~' * num_highlight + '\n'
-            space += ' ' * (num_highlight/2)
+            space += S * (num_highlight/2)
         else:
             # cannot highlight if on different lines
             num_highlight = None

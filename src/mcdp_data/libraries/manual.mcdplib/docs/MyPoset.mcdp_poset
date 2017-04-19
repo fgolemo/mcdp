@@ -1,8 +1,0 @@
-poset {
-    a b c d e
-
-    a ≼ b
-    c ≼ d
-    e ≼ d
-    e ≼ b
-}

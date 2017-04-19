@@ -3,10 +3,11 @@ from abc import ABCMeta, abstractmethod
 
 from contracts import contract
 from contracts.utils import raise_wrapped
+
+from mcdp.exceptions import DPInternalError, mcdp_dev_warning
 from mcdp_posets import PosetProduct
 from mcdp_posets.uppersets import upperset_product, lowerset_product
-from mocdp.exceptions import DPInternalError, mcdp_dev_warning
-from multi_index.get_it_test import compose_indices
+from mcdp_utils_indexing.get_it_test import compose_indices
 
 from .dp_constant import Constant, ConstantMinimals
 from .dp_flatten import Mux
@@ -23,7 +24,7 @@ __all__ = [
     'make_parallel',
 ]
 
-class ParSimplificationRule():
+class ParSimplificationRule(object):
     __metaclass__ = ABCMeta
 
     @abstractmethod

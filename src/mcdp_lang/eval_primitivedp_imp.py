@@ -3,7 +3,7 @@ from contracts import contract
 from contracts.utils import raise_desc
 from mcdp_dp import PrimitiveDP
 from mcdp_lang.parse_actions import decorate_add_where
-from mocdp.exceptions import DPInternalError
+from mcdp.exceptions import DPInternalError
 
 from .namedtuple_tricks import recursive_print
 from .parts import CDPLanguage

@@ -1,0 +1,20 @@
+{% extends "base_page.jinja2" %}
+{% block title %}
+    Tree
+{% endblock %}
+{% block content %}
+
+
+    {% include 'user.jinja2' %}
+    {% include 'model_views_navigation.jinja2' %}
+
+    <style>
+    p.one {
+        margin: 0;
+    }
+    </style>
+        {% for page, level in pages %}
+        <p class='one' style='padding-left: {{level}}em'> <a href="{{root}}/{{page}}">{{page}}</a></p>
+        {% endfor %}
+
+{% endblock %}

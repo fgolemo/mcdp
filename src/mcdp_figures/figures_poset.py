@@ -1,11 +1,13 @@
 from contracts import contract
 from contracts.utils import check_isinstance
+
 from mcdp_posets import FinitePoset
 from mcdp_posets.find_poset_minima.baseline_n2 import poset_minima
 from mcdp_report.gdc import choose_best_icon
 
 from .figure_interface import MakeFigures
 from .formatters import GGFormatter
+from mcdp_report.image_source import NoImages
 
 
 __all__ = [
@@ -15,9 +17,11 @@ __all__ = [
 
 class MakeFiguresPoset(MakeFigures):
     
-    def __init__(self, poset, library=None):
+    def __init__(self, poset, image_source):
         self.poset = poset
-        self.library = library
+        if image_source is None:
+            image_source = NoImages()
+        self.image_source = image_source
         
         aliases = {
             
@@ -33,9 +37,8 @@ class MakeFiguresPoset(MakeFigures):
     def get_poset(self):
         return self.poset
 
-    def get_library(self):
-        return self.library
-
+    def get_image_source(self):
+        return self.image_source
             
     
 
@@ -51,19 +54,19 @@ class PosetHasse(GGFormatter):
         if not isinstance(poset, FinitePoset):
             return ValueError('not available')
          
-        library = mf.get_library()
-        images_paths = library.get_images_paths() if library is not None else []
+#         library = mf.get_library()
+        image_source = mf.get_image_source()
+#         images_paths = library.get_images_paths() if library is not None else []
         import mcdp_report.my_gvgen as gvgen
         gg = gvgen.GvGen(options="rankdir=%s" % self.direction)
         
         e2n = {}
         for e in poset.elements:
             iconoptions = [e]
-            icon = choose_best_icon(iconoptions, images_paths)
+            icon = choose_best_icon(iconoptions, image_source)
             if icon is not None:
-                tmppath = '.'
                 from mcdp_report.gdc import resize_icon
-                resized = resize_icon(icon, tmppath, 100)
+                resized = resize_icon(icon, 100)
 
                 label = ("<TABLE CELLBORDER='0' BORDER='0'><TR><TD>%s</TD></TR>"
                 "<TR><TD><IMG SRC='%s' SCALE='TRUE'/></TD></TR></TABLE>")

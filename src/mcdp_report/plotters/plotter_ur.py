@@ -8,8 +8,8 @@ from mcdp_posets.rcomp import RcompBase
 from mcdp_report.axis_algebra import enlarge
 from mcdp_report.drawing import plot_upset_R2
 from mcdp_report.plotters.interface import Plotter, NotPlottable
-from mocdp import logger
-from mocdp.exceptions import mcdp_dev_warning
+from mcdp import logger
+from mcdp.exceptions import mcdp_dev_warning
 
 
 class PlotterUR(Plotter):

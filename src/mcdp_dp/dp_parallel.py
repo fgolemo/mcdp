@@ -5,7 +5,7 @@ from contracts.utils import indent, raise_wrapped
 from mcdp_posets import (NotBelongs, PosetProduct,
     lowerset_product, upperset_product)
 from mcdp_posets.uppersets import lowerset_product_good
-from mocdp.exceptions import do_extra_checks
+from mcdp.development import do_extra_checks
 
 from .dp_series import get_product_compact
 from .primitive import PrimitiveDP

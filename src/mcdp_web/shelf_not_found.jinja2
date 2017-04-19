@@ -1,0 +1,10 @@
+{% extends "base_page.jinja2" %}
+{% block title %}
+    Shelf not found
+{% endblock %}
+{% block content %}
+    <p>
+        Shelf {{context.name}} not found
+        in repo {{navigation.repo_name}}.
+    </p>
+{% endblock %}

@@ -6,16 +6,13 @@ import time
 
 from dateutil.parser import parse
 import pyramid
+from system_cmd import system_cmd_result
 
-from compmake.utils import duration_compact
-from system_cmd.meat import system_cmd_result
-
-import mocdp
-from mocdp.memoize_simple_imp import memoize_simple
 import mcdp
+from mcdp_utils_misc import duration_compact, memoize_simple
 
 
-class AppStatus():
+class AppStatus(object):
     """
        /status/status.json
     """
@@ -24,10 +21,8 @@ class AppStatus():
         pass
 
     def config(self, config):
-        base = '/status'
-
-        route = 'json'
-        config.add_route(route, base + '/status.json')
+        route = 'status_json'
+        config.add_route(route,'/status/status.json')
         config.add_view(self.view_status, route_name=route, renderer='jsonp',
                         permission=pyramid.security.NO_PERMISSION_REQUIRED)
 
@@ -40,7 +35,7 @@ class AppStatus():
         
         access = 'public' if self.options.allow_anonymous else 'private'
         res = {
-            'version': mocdp.__version__,
+            'version': mcdp.__version__,  # @UndefinedVariable
             'server-name': socket.gethostname(),
             'access': access,
             'geoip': geoip(),
@@ -88,39 +83,3 @@ def get_branch_date():
     stamp = time.mktime(t.timetuple())
     return stamp
 
-
-#         
-#         route = 'uptime'
-#         config.add_route(route, base + '/uptime.png')
-#         config.add_view(self.view_uptime, route_name=route)
-# 
-#         route = 'branch'
-#         config.add_route(route, base + '/branch-name.png')
-#         config.add_view(self.view_branch_name, route_name=route)
-# 
-#         route = 'branch-date'
-#         config.add_route(route, base + '/branch-date.png')
-#         config.add_view(self.view_branch_date, route_name=route)
-# 
-#     def format_string(self, request, s):
-#         fontsize = 20
-#         ratio = 2.5/4
-#         h = int(fontsize)
-#         w = int(fontsize * len(s) * ratio)
-#         size = (w, h)
-#         green = (0,255,0)
-#         black = (0,0,0)
-#         color = black
-#         return response_image(request, s, size, color, fontsize)
-#         
-#     def view_uptime(self, request):  # @UnusedVariable
-#         s = duration_compact(self.get_uptime_s())
-#         return self.format_string(request, s)
-#         
-#     def view_branch_name(self, request):  # @UnusedVariable
-#         s = get_branch_name()
-#         return self.format_string(request, s)
-#     
-#     def view_branch_date(self, request):  # @UnusedVariable
-#         s = get_branch_date()
-#         return self.format_string(request, s)

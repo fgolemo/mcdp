@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 from contracts import contract
-from mocdp.exceptions import mcdp_dev_warning
+from mcdp.exceptions import mcdp_dev_warning
 from mcdp_posets.rcomp import finfo
 
 

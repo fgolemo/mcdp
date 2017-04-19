@@ -1,23 +1,23 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
-from mcdp_lang_utils import format_where
-
 from contracts.utils import raise_desc, raise_wrapped, check_isinstance, indent
+
+from mcdp import MCDPConstants
+from mcdp.exceptions import DPInternalError, DPSemanticError,\
+    DPNotImplementedError
 from mcdp_dp import (MinusValueNatDP, MinusValueRcompDP, MinusValueDP,
                      MultValueDP, MultValueNatDP, PlusValueRcompDP, PlusValueDP,
                      PlusValueNatDP, ProductNDP, SumNNatDP, ProductNNatDP,
                      SumNRcompDP, SumNDP, SumNIntDP, ProductNRcompDP)
 from mcdp_lang.misc_math import ConstantsNotCompatibleForAddition
+from mcdp_lang_utils import format_where
 from mcdp_maps.SumN_xxx_Map import sum_dimensionality_works
 from mcdp_posets import (Int, Nat, RbicompUnits, RcompUnits,
                          express_value_in_isomorphic_space, get_types_universe, mult_table, Rcomp)
 from mcdp_posets import is_top
 from mcdp_posets.rcomp_units import (RbicompUnits_subtract, RbicompUnits_reflect,
                                      R_dimensionless)
-from mocdp import MCDPConstants
 from mocdp.comp.context import CResource, ValueWithUnits
-from mocdp.exceptions import DPInternalError, DPSemanticError,\
-    DPNotImplementedError
 
 from .eval_constant_imp import NotConstant
 from .eval_resources_imp import eval_rvalue
@@ -226,7 +226,8 @@ def eval_MultN(x, context, wants_constant):
         except NotConstant as e:
             if wants_constant:
                 msg = 'Product not constant because one op is not constant.'
-                raise_wrapped(NotConstant, e, msg, op=op)
+                raise_wrapped(NotConstant, e, msg, #op=op, 
+                              compact=True)
             x = eval_rvalue(op, context)
             assert isinstance(x, CResource)
             resources.append(x)
@@ -313,10 +314,10 @@ def get_mult_op(context, r, c):
         R = c.unit
         unit, value = c.unit, c.value
         dp = MultValueDP(F, R, unit=unit, value=value)
-    elif isinstance(rtype, RcompUnits) and isinstance(c.unit, Nat):
+    elif isinstance(rtype, RcompUnits) and isinstance(c.unit, (Nat, Rcomp)):
         F = rtype
         R = F
-        unit, value = R_dimensionless, c.cast_to(R_dimensionless)
+        unit, value = R_dimensionless, c.cast_value(R_dimensionless)
         dp = MultValueDP(F=F, R=F, unit=unit, value=value)
     elif isinstance(rtype, Rcomp) and isinstance(c.unit, Rcomp):
         msg = 'Multiplication not implemented with Rcomp().'
@@ -360,12 +361,12 @@ def eval_PlusN_sort_ops(ops, context, wants_constant):
                 neg_constants.append(x)
             else:
                 msg = 'Cannot use the type %s in a sum.' % x.unit
-                raise_desc(DPInternalError, msg, x=x)
+                raise_desc(DPInternalError, msg, x=x, compact=True)
                 
         except NotConstant as e:
             if wants_constant:
                 msg = 'Sum not constant because one op is not constant.'
-                raise_wrapped(NotConstant, e, msg, op=op)
+                raise_wrapped(NotConstant, e, msg, op=op, compact=True)
             x = eval_rvalue(op, context)
             assert isinstance(x, CResource)
             resources.append(x)
@@ -420,39 +421,41 @@ def eval_PlusN(x, context, wants_constant):
                     
         dp = MinusValueDP(F=F, c_value=valuepos2, c_space=c_space)
 
-        r2 = create_operation(context, dp, resources=[res],
-                              name_prefix='_minus', op_prefix='_x',
-                              res_prefix='_y')
+        r2 = create_operation(context, dp, resources=[res])
         return r2
 
 def eval_PlusN_(constants, resources, context):
     from .misc_math import plus_constantsN
-    # it's a constant value
-    if len(resources) == 0:
-        try:
+    
+    try:
+        # it's a constant value
+        if len(resources) == 0:
+#             try:
             return plus_constantsN(constants)
-        except ConstantsNotCompatibleForAddition as e:
-            raise_desc(DPSemanticError, str(e))
-
-    elif len(resources) == 1:
-        if len(constants) > 0:
-            c = plus_constantsN(constants)
-            return get_plus_op(context, r=resources[0], c=c)
-        else:
-            return resources[0]
-    else:
-        # there are some resources
-        r =  eval_PlusN_ops(resources, context) 
-        if not constants:
-            return r
-        else:
-            try:
+#             except ConstantsNotCompatibleForAddition as e:
+#                 raise_desc(DPSemanticError, str(e))
+    
+        elif len(resources) == 1:
+            if len(constants) > 0:
                 c = plus_constantsN(constants)
-            except ConstantsNotCompatibleForAddition as e:
-                raise_desc(DPSemanticError, str(e))
-
-            return get_plus_op(context, r=r, c=c)
-
+                return get_plus_op(context, r=resources[0], c=c)
+            else:
+                return resources[0]
+        else:
+            # there are some resources
+            r =  eval_PlusN_ops(resources, context) 
+            if not constants:
+                return r
+            else:
+#                 try:
+                c = plus_constantsN(constants)
+#                 except ConstantsNotCompatibleForAddition as e:
+#                     raise_wrapped(DPSemanticError, e, compact=True)
+    
+                return get_plus_op(context, r=r, c=c)
+    except ConstantsNotCompatibleForAddition as e:
+        msg = 'Incompatible units for addition'
+        raise_wrapped(DPSemanticError, e, msg, compact=True)
 
 def eval_PlusN_ops(resources, context):
     if MCDPConstants.force_plus_two_resources:
@@ -509,7 +512,7 @@ def eval_PlusN_ops_multi(resources, context):
         dp = SumNRcompDP(len(resources))
     else:
         msg = 'Cannot find sum operator for combination of types.'
-        raise_desc(DPInternalError, msg, resources_types=resources_types)
+        raise_desc(DPNotImplementedError, msg, resources_types=resources_types)
 
     r = create_operation(context, dp, resources,
                          name_prefix='_sum', op_prefix='_term',

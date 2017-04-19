@@ -1,0 +1,30 @@
+{% extends "desc_page.jinja2" %}
+{% block title %}
+    Repositories
+{% endblock %}
+{% block desc_page_title %}
+    Repositories
+{% endblock %}
+{% block desc_page_desc %}
+    This is the list of available repositories.
+{% endblock %}
+{% block desc_page_content %}
+    <table id='repo_list'>
+
+        {% for repo_name, repo in navigation.repos.items() %}
+        <tr>
+            <td>
+                {{links.repo(repo_name)}}
+            </td>
+            <td>
+                {{repo.get_desc_short()}}
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    <style>
+    table#repo_list td {
+        padding: 0.5em;
+    }
+    </style>
+{% endblock %}

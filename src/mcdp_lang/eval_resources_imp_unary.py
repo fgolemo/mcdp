@@ -15,7 +15,7 @@ from .utils_lists import unwrap_list
 from mcdp_posets import Nat, Rcomp, RcompUnits
 from mcdp_posets import NotLeq, get_types_universe
 from mocdp.comp.context import ValueWithUnits
-from mocdp.exceptions import DPSemanticError
+from mcdp.exceptions import DPSemanticError
 
 from .helpers import create_operation
 from .parts import CDPLanguage
@@ -24,7 +24,7 @@ from .parts import CDPLanguage
 CDP = CDPLanguage
 
  
-class RuleInterface():
+class RuleInterface(object):
     __metaclass__ = ABCMeta
     
     @abstractmethod
@@ -194,7 +194,7 @@ class RuleSquareRcompunits(OneRGiveMeADP):
 class OpSpecDoesntMatch(Exception):
     pass
 
-class OpSpecInterface():
+class OpSpecInterface(object):
     
     @abstractmethod
     def applies(self, rtype, is_constant, symbols):

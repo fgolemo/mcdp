@@ -8,12 +8,12 @@ from mcdp_dp import (Constant, ConstantMinimals, Limit, LimitMaximals,
 from mcdp_posets import NotLeq, Poset, get_types_universe
 from mocdp.comp import Connection, dpwrap
 from mocdp.comp.context import CResource, ValueWithUnits
-from mocdp.exceptions import DPSemanticError, DPInternalError, mcdp_dev_warning
+from mcdp.exceptions import DPSemanticError, DPInternalError, mcdp_dev_warning
 
 
-# from mocdp import logger
+# from mcdp import logger
 @contract(resources='seq')
-def create_operation(context, dp, resources, name_prefix, op_prefix=None, res_prefix=None):
+def create_operation(context, dp, resources, name_prefix=None, op_prefix=None, res_prefix=None):
     """
     
     This is useful to create operations that take possibly many inputs
@@ -30,6 +30,8 @@ def create_operation(context, dp, resources, name_prefix, op_prefix=None, res_pr
                              res_prefix='_result')
     
     """
+    if name_prefix is None:
+        name_prefix = '_%s' % type(dp).__name__
     # new name for the ndp
     name = context.new_name(name_prefix)
     if op_prefix is None:
@@ -81,8 +83,10 @@ def create_operation(context, dp, resources, name_prefix, op_prefix=None, res_pr
     return res
 
 
-def create_operation_lf(context, dp, functions, name_prefix, 
+def create_operation_lf(context, dp, functions, name_prefix=None, 
                         op_prefix='_op', res_prefix='_res', allow_conversion=True):
+    if name_prefix is None:
+        name_prefix = '_%s' % type(dp).__name__ 
     name = context.new_name(name_prefix)
     name_result = context.new_res_name(res_prefix)
     

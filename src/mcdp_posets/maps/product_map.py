@@ -2,7 +2,7 @@
 from contracts import contract
 from mcdp_posets import Map, PosetProduct
 from mcdp_posets import SpaceProduct
-from mocdp.exceptions import mcdp_dev_warning
+from mcdp.exceptions import mcdp_dev_warning
 
 
 __all__ = [

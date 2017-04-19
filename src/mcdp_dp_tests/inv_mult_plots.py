@@ -630,7 +630,7 @@ mcdp {
 #     UR = UpperSets(R)
 #     print dp.repr_long()
 #     f0 = ()
-#     from mocdp import logger
+#     from mcdp import logger
 #     trace1 = Tracer(logger=logger)
 #     res1 = dp.solve_trace(f0, trace1)
 #     UR.belongs(res1)

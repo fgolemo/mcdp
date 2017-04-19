@@ -1,11 +1,12 @@
 #!/bin/bash
 set -euox pipefail
 IFS=$'\n\t'
+ini=$1.ini
 
 while :
 do
     git pull
-    pserve needs_authentication.ini
+    pserve ${ini}
 done
 
 

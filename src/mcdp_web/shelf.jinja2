@@ -1,0 +1,97 @@
+{% extends "desc_page.jinja2" %}
+{% block head_extra %}
+    <style>{% include 'shelves_index.css' %}</style>
+    <script>{% include 'shelves_index.js' %}</script>
+{% endblock %}
+{% block title %}
+Shelf {{navigation.shelf_name}}
+{% endblock %}
+{% block desc_page_title %}
+
+{{links.shelf(navigation.repo_name, navigation.shelf_name)}}
+
+
+{% endblock %}
+{% block desc_page_desc %}
+    {% if navigation.shelf.get_authors() %}
+    <p id='authors'>
+        {% if navigation.shelf.get_authors() %}
+        Created by
+        {% for author in navigation.shelf.get_authors()%}
+        {{ user_name_and_picture(author) }}{% if not loop.last %}, {%endif%}
+        {% endfor %}.
+        {% endif %}
+    </p>
+    <style>
+    p#authors {
+        font-weight: normal;
+    }
+    </style>
+    {% endif %}
+
+
+{% set repo_name = navigation.repo_name %}
+{% set shelf_name = navigation.shelf_name %}
+{% if shelf.get_desc_short() %}
+    <div id='desc_short'>{{shelf.get_desc_short()}}</div>
+{% endif %}
+    {% if desc_long %}
+    <div id='desc_long'>{{desc_long|safe}}</div>
+    {% endif %}
+    <style>
+    #desc_long,#desc_short {
+        border-radius: 10px;
+        background-color: #fee;
+        padding: 10px;
+        margin-top: 1em;
+        margin-bottom: 1em;
+    }
+    </style>
+
+    <p>Your permissions:
+        <span title="admin">{% if shelf_can_admin(repo_name, shelf_name) %}🔐 <em>admin</em>
+            <!-- <span class='tip hidden'>This means read only</span> -->
+            {%endif%}</span>
+        <span title="read">{% if shelf_can_read(repo_name, shelf_name) %}👀 <em>read</em>{%endif%}</span>
+        <span title="write">{% if shelf_can_write(repo_name, shelf_name) %}✐ <em>write</em>{%endif%}</span>
+    </p>
+
+
+
+   {% if shelf_can_subscribe(repo_name, shelf_name) %}
+
+   <div>
+       {% if shelf_name in navigation.shelves_used %}
+           <span class='active'>This shelf is currently <strong>active</strong> in your account.</span>
+       {% else %}
+           <span class='inactive'>This shelf is currently <strong>inactive</strong> your account.</span>
+       {% endif %}
+       {{links.shelf_activation_button(repo_name, shelf_name)}}
+   </div>
+   {% else %}
+   {% endif %}
+{% endblock %}
+
+{% block desc_page_content %}
+
+
+    {% from 'add_library_button.jinja2' import add_library_button with context %}
+    {% from 'list_libraries_for_shelf.jinja2' import list_libraries_for_shelf with context %}
+    {% from 'user_name_and_picture.jinja2' import user_name_and_picture with context %}
+    {% from 'shelf_row.jinja2' import shelf_row with context %}
+
+    {% if shelf.libraries %}
+        <p>These are the libraries available in this shelf:</p>
+        <div style='column-width: 15em'>
+            {{list_libraries_for_shelf(navigation.repo_name, sname)}}
+        </div>
+
+    {% else %}
+    <p>This bundle contains no libraries yet.</p>
+
+    {% endif %}
+
+
+    <p>{{add_library_button(navigation.repo_name, sname)}}</p>
+
+{% endblock %}

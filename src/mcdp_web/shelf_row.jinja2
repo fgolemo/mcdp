@@ -1,0 +1,77 @@
+{% macro shelf_row(repo_name, shelf_name, shelf) %}
+{% set shelf_used = shelf_name in navigation.shelves_used %}
+<tr class={% if shelf_used %}"used"{%else%}"unused"{%endif%}>
+<td>
+
+{{links.shelf(repo_name, shelf_name)}}
+
+    </td>
+ <td class="permissions">
+     <span title="admin">{% if shelf_can_admin(repo_name, shelf_name) %}🔐{%endif%}</span>
+     <span title="read">{% if shelf_can_read(repo_name, shelf_name) %}👀{%endif%}</span>
+     <span title="write">{% if shelf_can_write(repo_name, shelf_name) %}✐{%endif%}</span>
+ </td>
+<td>{{shelf.get_desc_short()}}</td>
+
+{% if shelf_can_subscribe(repo_name, shelf_name) %}
+    <td>
+    {% if shelf_name in navigation.shelves_used %}
+        <span class='active'>active</span>
+    {% else %}
+        <span class='inactive'>inactive</span>
+    {% endif %}
+    </td>
+
+    <td>
+    {{links.shelf_activation_button(repo_name, shelf_name)}}
+    </td>
+{% else %}
+<td colspan=2>
+{% if not shelf_subscribed(repo_name, shelf_name) and not shelf_can_subscribe(repo_name, shelf_name) %}
+    <!-- cannot subscribe -->
+{% endif %}
+</td>
+{% endif %}
+
+
+{% if shelf_can_read(repo_name, shelf_name) %}
+<td>
+    <a class"button" id="button-{{shelf_name}}" href="#">details&hellip;</a>
+</td>
+{% else %}
+<td></td>
+{% endif %}
+
+</tr>
+<style>
+.active {
+    color: darkgreen;
+}
+
+.inactive {
+    color: darkred;
+}
+
+tr.used {}
+
+tr.unused {
+    /*background-color: #eee;*/
+    color: gray;
+}
+
+.shelves_list {
+    width: 100%;
+}
+
+.shelves_list th {
+    text-align: center;
+}
+
+td.permissions {
+    text-align:center;
+
+    padding-left: 0.4em;
+    padding-right: 0.4em;
+}
+</style>
+{% endmacro %}

@@ -1,19 +1,21 @@
 # -*- coding: utf-8 -*-
+import math
+
 from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped, check_isinstance
+
+from mcdp.development import mcdp_dev_warning, do_extra_checks
+from mcdp.exceptions import (DPInternalError, DPSemanticError)
 from mcdp_posets import (FiniteCollection, FiniteCollectionsInclusion, Int, Nat,
                          NotBelongs, NotLeq, PosetProduct, Rcomp, Space, UpperSet, UpperSets,
                          get_types_universe, poset_minima)
 from mcdp_posets import FiniteCollectionAsSpace, LowerSets, LowerSet, RbicompUnits, RcompUnits
 from mocdp.comp.context import ValueWithUnits
-from mocdp.exceptions import (DPInternalError, DPSemanticError, mcdp_dev_warning,
-                              do_extra_checks)
 
 from .eval_constant_asserts import (eval_assert_empty, eval_assert_equal,
                                     eval_assert_geq, eval_assert_gt, eval_assert_leq, eval_assert_lt,
                                     eval_assert_nonempty)
 from .misc_math import inv_constant
-from .namedtuple_tricks import recursive_print
 from .parse_actions import decorate_add_where
 from .parts import CDPLanguage
 from .utils_lists import get_odd_ops, unwrap_list
@@ -72,6 +74,7 @@ def eval_constant(op, context):
         
         CDP.RcompConstant: eval_constant_RcompConstant,
         CDP.ConstantDivision: eval_constant_ConstantDivision,
+        CDP.SpecialConstant: eval_constant_SpecialConstant,
     }
     
     for klass, hook in cases.items():
@@ -79,10 +82,22 @@ def eval_constant(op, context):
             return hook(op, context)
 
     if True: # pragma: no cover    
-        msg = 'eval_constant(): Cannot evaluate this as constant.'
-        op = recursive_print(op)
-        raise_desc(NotConstant, msg, op=op)
+        msg = 'Cannot evaluate this as constant.'
+        raise_desc(NotConstant, msg) 
 
+def eval_constant_SpecialConstant(r, context):  # @UnusedVariable
+    check_isinstance(r, CDP.SpecialConstant)
+    constants = {
+        'pi': ValueWithUnits(math.pi, Rcomp()),    
+        'e': ValueWithUnits(math.pi, Rcomp()),
+    }
+    constants['π'] = constants['pi']
+
+    if not r.constant_name in constants:
+        msg = 'Could not find constant "%s".' % (r.constant_name)
+        raise_desc(DPInternalError, msg)
+
+    return constants[r.constant_name]
 
 def eval_constant_ConstantRef(rvalue, context):
     check_isinstance(rvalue, CDP.ConstantRef)

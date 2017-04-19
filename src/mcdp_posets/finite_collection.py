@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
-from mocdp.exceptions import do_extra_checks
+from mcdp.development import do_extra_checks
 
 from .space import NotBelongs, Space
 
@@ -9,7 +9,7 @@ __all__ = [
     'FiniteCollection',
 ]
 
-class FiniteCollection():
+class FiniteCollection(object):
     """ This is used as a value, whose Space is FinitecollectionsInclusion """
     
     @contract(elements='set|list', S=Space)

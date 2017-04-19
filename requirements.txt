@@ -5,22 +5,30 @@ pint
 watchdog
 pyramid
 pyramid_jinja2
+pyramid_debugtoolbar
 bs4
 nose
 reprep
 
-PyContracts
-#-e git+https://github.com/AndreaCensi/contracts.git@mcdp#egg=PyContracts
 
+bcrypt
 markdown
 junit_xml
 lxml
 bcrypt
+waitress
+ruamel.yaml
 
+gitpython
+webtest
+
+PyContracts
 decentlogs
+
 -e git+https://github.com/AndreaCensi/compmake.git@mcdp#egg=compmake
 -e git+https://github.com/AndreaCensi/quickapp.git@mcdp#egg=quickapp
 -e git+https://github.com/AndreaCensi/conf_tools.git@mcdp#egg=ConfTools
 -e git+https://github.com/AndreaCensi/comptests.git@mcdp#egg=comptests
+
 #numpy
 #matplotlib

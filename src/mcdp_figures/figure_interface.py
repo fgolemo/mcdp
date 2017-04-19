@@ -4,7 +4,7 @@ from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped, check_isinstance
 
 
-class MakeFigures():
+class MakeFigures(object):
     
     def __init__(self, aliases, figure2function):
         self.aliases = aliases

@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
+from nose.tools import assert_equal
+
 from comptests.registrar import comptest
 from mcdp_lang.parse_actions import parse_wrap
 from mcdp_lang.syntax import Syntax
-from mcdp_report.html import print_html_inner, ATTR_WHERE_CHAR, \
-    ATTR_WHERE_CHAR_END
-from nose.tools import assert_equal
+from mcdp_report.html import print_html_inner, ATTR_WHERE_CHAR, ATTR_WHERE_CHAR_END
 
 
 @comptest
@@ -19,8 +19,6 @@ def test_escaping1():
     se = se.replace('where_character', ATTR_WHERE_CHAR)
     
     assert_equal(se, s)
-
-
 
 
 @comptest

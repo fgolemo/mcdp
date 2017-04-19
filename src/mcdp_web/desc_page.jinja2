@@ -1,0 +1,60 @@
+{% extends "base_page.jinja2" %}
+
+    {% from 'user_name_and_picture.jinja2' import user_name_and_picture, user_picture, user_name with context %}
+
+{% block content %}
+
+    {% include 'user.jinja2' %}
+    {% include 'model_views_navigation.jinja2' %}
+
+<style>
+#desc_page {
+    padding-left: 6em;
+    padding-right: 6em;
+}
+#desc_page_title_desc {
+    /*background-color: #eee;*/
+}
+#desc_page_title {
+    display: inline-block;
+    background-color: #eef;
+    padding: 0.5em;
+                /*margin-top: 2em;*/
+                margin-bottom: 0.5em;
+    font-weight: bold;
+    font-size: larger;
+    border-radius: 5px;
+}
+#desc_page_desc {
+    background-color: #eef;
+    padding: 0.5em;
+        margin-top: 0.5em;
+        margin-bottom: 1em;
+}
+#desc_page_content {
+    margin-left: 2em;
+}
+p {
+    margin-top: 0.3em;
+    margin-bottom: 0.3em;
+}
+</style>
+
+    <div id='desc_page'>
+        <div id='desc_page_title_desc'>
+
+    <div id='desc_page_title'>
+        {% block desc_page_title %}{% endblock %}
+    </div>
+    {% if self.desc_page_desc() %}
+    <div id='desc_page_desc'>
+        {% block desc_page_desc %}{% endblock %}
+    </div>
+    {% endif %}
+</div>
+    <div id='desc_page_content'>
+        {% block desc_page_content %}{% endblock %}
+    </div>
+    </div>
+
+{% endblock %}

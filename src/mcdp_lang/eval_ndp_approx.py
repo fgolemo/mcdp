@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from mocdp.comp.wrap import SimpleWrap
-from mocdp.exceptions import mcdp_dev_warning
+from mcdp.exceptions import mcdp_dev_warning
 
 
 def eval_ndp_approx_lower(r, context):

@@ -7,7 +7,7 @@ from contracts import contract
 class NotPlottable(Exception):
     pass
 
-class Plotter():
+class Plotter(object):
     __metaclass__ = ABCMeta
 
     @abstractmethod

@@ -5,18 +5,20 @@ import sys
 
 from bs4 import BeautifulSoup
 from bs4.element import Comment, Tag, NavigableString
-
 from contracts import contract
-from mcdp_docs.manual_constants import MCDPManualConstants
-from mcdp_docs.read_bibtex import get_bibliography
-from mcdp_web.renderdoc.highlight import add_class
-from mocdp import logger
+
+from mcdp.logs import logger
+from mcdp_utils_xml import add_class
+
+from .macros import replace_macros
+from .manual_constants import MCDPManualConstants
+from .read_bibtex import get_bibliography
 
 
 def get_manual_css_frag():
     """ Returns fragment of doc with CSS, either inline or linked,
         depending on MCDPConstants.manual_link_css_instead_of_including. """
-    from mocdp import MCDPConstants 
+    from mcdp import MCDPConstants 
     
     link_css = MCDPConstants.manual_link_css_instead_of_including
     
@@ -33,10 +35,8 @@ def get_manual_css_frag():
         assert False
             
 @contract(files_contents='list( tuple( tuple(str,str), str) )', returns='str')
-def manual_join(files_contents):
-    from mcdp_web.renderdoc.main import replace_macros
-    from mcdp_web.renderdoc.xmlutils import bs
-
+def manual_join(files_contents, bibfile, stylesheet, remove=None):
+    from mcdp_utils_xml import bs
     
     fn = MCDPManualConstants.main_template
     if not os.path.exists(fn):
@@ -53,11 +53,19 @@ def manual_join(files_contents):
     assert head is not None
     for x in get_manual_css_frag().contents:
         head.append(x.__copy__())
+        
+    if stylesheet is not None:
+        link = Tag(name='link')
+        link['rel'] = 'stylesheet'
+        link['type'] = 'text/css'
+        from mcdp_report.html import get_css_filename
+        link['href'] = get_css_filename('compiled/%s' % stylesheet)
+        head.append(link) 
 
     body = d.find('body')
     for (_libname, docname), data in files_contents:
         logger.debug('docname %r -> %s KB' % (docname, len(data)/1024))
-        from mcdp_web.renderdoc.latex_preprocess import assert_not_inside
+        from mcdp_docs.latex.latex_preprocess import assert_not_inside
         assert_not_inside(data, 'DOCTYPE')
         frag = bs(data) 
         body.append(NavigableString('\n\n'))
@@ -70,6 +78,32 @@ def manual_join(files_contents):
         body.append(Comment('End of document dump of %r' % docname))
         body.append(NavigableString('\n\n'))
 
+
+
+
+    logger.info('external bib')
+    if not os.path.exists(bibfile):
+        logger.error('Cannot find bib file %s' % bibfile)
+    else:
+        bibliography_entries = get_bibliography(bibfile)
+        bibliography_entries['id'] = 'bibliography_entries'
+        body.append(bibliography_entries)
+        bibhere = d.find('div', id='put-bibliography-here')
+        do_bib(d, bibhere)
+
+    logger.info('reorganizing contents in <sections>')    
+    body2 = reorganize_contents(d.find('body'))
+    body.replace_with(body2)
+    
+    ### Removing
+    if remove is not None:
+        nremoved = 0
+        for x in body.select(remove):
+            nremoved += 1
+            x.extract()
+        logger.info('Removed %d elements of selector %r' % (nremoved, remove))
+    
+    ###
     logger.info('adding toc')
     toc = generate_doc(body)
     toc_ul = bs(toc).ul
@@ -77,22 +111,14 @@ def manual_join(files_contents):
     assert toc_ul.name == 'ul'
     toc_ul['class'] = 'toc'
     toc_ul['id'] = 'main_toc'
-    toc_place = d.select('div#toc')[0]
-    
-    #print('toc element: %s' % str(toc))
-    toc_place.replaceWith(toc_ul)
-
-
-    logger.info('external bib')
-    bibliography_entries = get_bibliography()
-    bibliography_entries['id'] = 'bibliography_entries'
-    body.append(bibliography_entries)
-    bibhere = d.find('div', id='put-bibliography-here')
-    do_bib(d, bibhere)
-
-    logger.info('reorganizing contents in <sections>')    
-    body2 = reorganize_contents(d.find('body'))
-    body.replace_with(body2)
+    toc_selector = 'div#toc'
+    tocs = list(d.select(toc_selector))
+    if not tocs:
+        msg = 'Cannot find any element of type %r to put TOC inside.' % toc_selector
+        logger.warning(msg)
+    else:
+        toc_place = tocs[0]
+        toc_place.replaceWith(toc_ul)
     
     logger.info('checking errors')
     check_various_errors(d)
@@ -104,8 +130,6 @@ def manual_join(files_contents):
     warn_for_duplicated_ids(d)
     logger.info('converting to string')
     res = str(d) # do not use to_html_stripping_fragment - this is a complete doc
-    logger.info('replacing macros')
-    res = replace_macros(res)
     logger.info('done - %d bytes' % len(res))
     return res
 
@@ -197,13 +221,8 @@ def reorganize_contents(body0):
             h1
         
     """ 
-    def is_chapter_marker(x):
-        return isinstance(x, Tag) and x.name == 'h1' and (not 'part' in x.attrs.get('id',''))
-    
-    def is_part_marker(x):
-        return isinstance(x, Tag) and x.name == 'h1' and 'part' in x.attrs.get('id','')
 
-    def make_sections(body, is_marker, preserve = lambda _: False, element_name='section'):
+    def make_sections(body, is_marker, preserve = lambda _: False, element_name='section', copy=True):
         sections = []
         current_section = Tag(name=element_name)
         current_section['id'] = 'before-any-match-of-%s' % is_marker.__name__
@@ -215,6 +234,8 @@ def reorganize_contents(body0):
                     sections.append(current_section)
                 current_section = Tag(name=element_name)
                 current_section['id'] = x.attrs.get('id', 'unnamed-h1') + ':' + element_name
+                print('marker %s' % current_section['id'])
+                current_section['class'] = x.attrs.get('class', '')
                 #print('%s/section %s %s' % (is_marker.__name__, x.attrs.get('id','unnamed'), current_section['id']))
                 current_section.append(x.__copy__())
             elif preserve(x):
@@ -223,13 +244,15 @@ def reorganize_contents(body0):
                 #print('%s/preserve %s' % (preserve.__name__, current_section['id']))
                 sections.append(x.__copy__())
                 current_section = Tag(name=element_name)
-            else:
-                current_section.append(x.__copy__())
+            else:    
+                #x2 = x.__copy__() if copy else x
+                x2 = x.__copy__() if copy else x.extract()
+                current_section.append(x2)
         sections.append(current_section)     # XXX
         new_body = Tag(name=body.name)
-        if len(sections) < 3:
-            msg = 'Only %d sections found (%s).' % (len(sections), is_marker.__name__)
-            raise ValueError(msg)
+#         if len(sections) < 3:
+#             msg = 'Only %d sections found (%s).' % (len(sections), is_marker.__name__)
+#             raise ValueError(msg)
         
         logger.info('make_sections: %s found using marker %s' % (len(sections), is_marker.__name__))
         for i, s in enumerate(sections):
@@ -242,10 +265,28 @@ def reorganize_contents(body0):
             new_body.append('\n')
         return new_body
     
-    body1 = make_sections(body0, is_chapter_marker, is_part_marker)
-    body2 = make_sections(body1, is_part_marker)
+    def is_section_marker(x):
+        return isinstance(x, Tag) and x.name == 'h2'
+
+    def is_chapter_marker(x):
+        return isinstance(x, Tag) and x.name == 'h1' and (not 'part' in x.attrs.get('id',''))
+    
+    def is_part_marker(x):
+        return isinstance(x, Tag) and x.name == 'h1' and 'part' in x.attrs.get('id','')
+
+    def is_chapter_or_part_marker(x):
+        return is_chapter_marker(x) or is_part_marker(x)
+    
+    #body = make_sections(body0, is_section_marker, is_chapter_or_part_marker)
+    body = make_sections(body0, is_chapter_marker, is_part_marker)
+    body = make_sections(body, is_part_marker)
+    
+    def is_h2(x):
+        return isinstance(x, Tag) and x.name == 'h2'
+     
+    body = make_sections(body, is_h2)
             
-    return body2
+    return body
     
     
     
@@ -273,7 +314,7 @@ def generate_doc(soup):
 
     header_id = 1
 
-    class Item():
+    class Item(object):
         def __init__(self, tag, depth, name, _id, items):
             self.tag = tag
             self.name = name
@@ -327,10 +368,15 @@ def generate_doc(soup):
         def __str__(self, root=False):
             s = u''
             if not root:
+                use_name = self.name
+#                 if '<'in self.name:
+#                     print 'name: (%s)' % self.name
+#                     use_name = 'name of link'
+#                 
                 s += (u"""<a class="toc_link" href="#%s">
                             <span class="toc_number">%s –</span> 
                             <span class="toc_name">%s</span></a>""" % 
-                            (self.id, self.number, self.name))
+                            (self.id, self.number, use_name))
             if self.items:
                 s += '<ul>'
                 for item in self.items:
@@ -361,14 +407,15 @@ def generate_doc(soup):
         if ID is None: 
             header['id'] = '%s:%s' % (default_prefix, header_id)
         else:
-            if prefix is None: 
-                #msg = 'Invalid ID %r for tag %r, muststart with %r.' % (cur, header.name, prefix)
-                #raise_desc(ValueError, msg, tag=str(header))
-                msg = ('Adding prefix %r to current id %r for %s.' % 
-                       (default_prefix, ID, header.name))
-                #logger.debug(msg)
-                header.insert_before(Comment('Warning: ' + msg))
-                header['id'] = default_prefix + ':' + ID
+            if prefix is None:
+                if ID != 'booktitle': 
+                    #msg = 'Invalid ID %r for tag %r, muststart with %r.' % (cur, header.name, prefix)
+                    #raise_desc(ValueError, msg, tag=str(header))
+                    msg = ('Adding prefix %r to current id %r for %s.' % 
+                           (default_prefix, ID, header.name))
+                    #logger.debug(msg)
+                    header.insert_before(Comment('Warning: ' + msg))
+                    header['id'] = default_prefix + ':' + ID
             else:
                 if prefix not in allowed_prefixes:
                     msg = ('The prefix %r is not allowed for %s (ID=%r)' % 
@@ -379,11 +426,12 @@ def generate_doc(soup):
         depth = int(header.name[1])
 
         using = header.decode_contents(formatter=formatter)
+        item = Item(header, depth, using, header['id'], [])
+
         using =  using[:35]
         m = 'header %s %s   %-50s    %s  ' % (' '*2*depth,  header.name, header['id'],  using)
         m = m + ' ' * (120-len(m))
         print(m)
-        item = Item(header, depth, using, header['id'], [])
         
         while(stack[-1].depth >= depth):
             stack.pop()
@@ -396,7 +444,7 @@ def generate_doc(soup):
     print('numbering items')
     root.number_items(prefix='', level=0)
 
-    from mcdp_web.renderdoc.xmlutils import bs
+    from mcdp_utils_xml import bs
 
     print('toc iterating')
     # iterate over chapters (below each h1)

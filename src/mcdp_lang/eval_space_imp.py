@@ -9,7 +9,7 @@ from mcdp_posets import (
     UpperSets)
 from mcdp_posets import Rcomp
 from mocdp.comp.context import ValueWithUnits
-from mocdp.exceptions import DPInternalError, DPSemanticError
+from mcdp.exceptions import DPInternalError, DPSemanticError
 
 from .namedtuple_tricks import recursive_print
 from .parse_actions import decorate_add_where

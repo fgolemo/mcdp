@@ -2,8 +2,8 @@
 from contracts import contract
 from mcdp_posets import UpperSet
 from mcdp_posets.rcomp import finfo
-from mocdp import logger
-from mocdp.exceptions import mcdp_dev_warning
+from mcdp import logger
+from mcdp.exceptions import mcdp_dev_warning
 import numpy as np 
 
 from .axis_algebra import enlarge_x, enlarge_y

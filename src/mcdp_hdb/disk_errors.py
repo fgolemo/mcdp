@@ -1,0 +1,3 @@
+
+class InvalidDiskOperation(Exception):
+    pass

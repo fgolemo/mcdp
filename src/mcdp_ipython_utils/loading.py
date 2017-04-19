@@ -106,7 +106,7 @@ def friendly_solve(ndp, query, result_like='dict(str:str)', upper=None, lower=No
     F = dp.get_fun_space()
     F.belongs(value)
 
-    from mocdp import logger
+    from mcdp import logger
     trace = Tracer(logger=logger)
     res = dp.solve_trace(value, trace)
     R = dp.get_res_space()

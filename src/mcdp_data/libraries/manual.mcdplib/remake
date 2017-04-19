@@ -1,9 +1,0 @@
-#!/bin/bash
-set -e
-set -x
-docname=${*%.*}
-echo Docname: ${docname}
-
-compmake out-mcdp-render-manual -c "config echo 1; clean ${docname}; parmake"
-
-make prince

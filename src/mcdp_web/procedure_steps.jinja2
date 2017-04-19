@@ -1,0 +1,38 @@
+{% extends "base_page.jinja2" %}
+
+{% block title %}
+    {% block procedure_title %}{%endblock%}
+{% endblock %}
+
+{% block content %}
+
+<div id='parent'>
+<div id='center'>
+    <h1>{{self.procedure_title()}}</h1>
+
+    {% block procedure_content %}{%endblock%}
+</div>
+</div>
+
+<style>
+/*#parent {
+    display: flex;
+  flex-direction: column;
+  justify-content: center;
+}*/
+p {
+    margin-top:1em;
+}
+#center {
+    padding-top: 5em;
+    background-color: #eee;
+    width: 40em;
+    margin: auto;
+  position: absolute;
+  top: 0; left: 0; bottom: 0; right: 0;
+}
+</style>
+<script>
+$('.procedure_button').button();
+</script>
+{% endblock %}

@@ -1,11 +1,20 @@
 var saved_text = {{source_code_json | safe}};
+var white_background = '{{static}}/white.png';
+var title_s = "{{navigation.thing_name}}";
+var title_u = "*{{navigation.thing_name}}";
+var icon_s = '{{static}}/favicon_editor_{{url_part}}_saved.png';
+var icon_u = '{{static}}/favicon_editor_{{url_part}}_unsaved.png';
+var format = "{{format}}";
+
 var last_text_sent_to_server = null;
 var last_rendered_text = null;
 var timeoutID = null;
 var parsing_wait_ms = 800;
-
 var string_with_suggestions = null;
 var display_timeout = 2000;
+var saved = true;
+var bg_color_parsing =  '#fee';
+var red_dot = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg=='
 
 function nodefault(event) {
     event.preventDefault();
@@ -26,12 +35,13 @@ function editor_init1() {
 
     text0 = current_text()
     console.log('asking server');
+    image_set_temporary();
     try_to_parse(text0);
-    update_image();
 
     $('#allcontents').css('visibility', 'visible');
 }
 
+$(document).ready(editor_init1);
 
 function editor_keydown(e) {
     function indentation_at_last_line(pos0) {
@@ -43,10 +53,16 @@ function editor_keydown(e) {
     }
     pos = getCaretCharacterOffsetWithin($("#editor").get(0));
 
+    /*ctrl+s or command+s*/
+    if ((e.metaKey || e.ctrlKey) && e.keyCode == 83) {
+        e.preventDefault();
+        click_button_save();
+    }
+
     //detect 'tab' key
     if (e.keyCode == 9) {
-        //add tab
-        document.execCommand('insertHTML', false, ' '.repeat(4)); // 4 tabs
+        //add tab with 4 spaces
+        document.execCommand('insertHTML', false, ' '.repeat(4));
         //prevent focusing on next element
         e.preventDefault();
     }
@@ -62,6 +78,7 @@ function editor_keydown(e) {
 
         e.preventDefault();
     }
+    /*
     if (e.keyCode == 219) { // open brace
         nspaces = 4 + indentation_at_last_line(pos);
         indentation = ' '.repeat(nspaces);
@@ -72,12 +89,8 @@ function editor_keydown(e) {
     if (e.keyCode == 221) { // close brace
         document.execCommand('insertHTML', false, "}");
         e.preventDefault();
-    }
+    }*/
 }
-
-
-$(document).ready(editor_init1);
-
 
 
 function current_text() {
@@ -87,11 +100,6 @@ function current_text() {
 
 function update_save_button_color() {
     text = current_text();
-
-    title_s = "{{navigation['current_thing']}}";
-    title_u = "*{{navigation['current_thing']}}";
-    icon_s = '{{root}}/static/favicon_editor_{{url_part}}_saved.png';
-    icon_u = '{{root}}/static/favicon_editor_{{url_part}}_unsaved.png';
 
     if (text == saved_text) {
         $('button#save').css('color', '');
@@ -128,7 +136,6 @@ function keyup() {
     /* We do not ask for parsing every time a key is pressed */
     text = current_text();
 
-
     // do not do it twice
     if (text == last_rendered_text)
         return;
@@ -142,10 +149,9 @@ function keyup() {
     string_with_suggestions = null;
     $('#apply_suggestions').hide();
 
-    // and we wait that the user stops editing
-    if (timeoutID != null) {
+    // and we wait that the user stops editing for parsing_wait_ms
+    if (timeoutID != null)
         window.clearTimeout(timeoutID);
-    }
 
     timeoutID = window.setTimeout(try_to_parse_it, parsing_wait_ms);
 }
@@ -158,21 +164,22 @@ function text_has_changed() {
     $('#syntax_error').html('');
     $('#language_warnings').html('');
 
-    current = $("a#graph img").attr("src");
-    desired = '{{root}}/static/white.png';
-    if (current != desired) {
-        $("a#graph img").attr("src", desired);
-        //$("a#graph").attr('href', desired);
-    }
+    image_update_to(white_background);
     saved = false;
 }
 
+function image_update_to(src) {
+    current = $("a#graph img").attr("src");
+    if (current != src)
+        $("a#graph img").attr("src", src);
+
+}
 
 function try_to_parse_it() {
     text = current_text();
     //console.log('asking server to parse ' + text);
+    image_set_temporary();
     try_to_parse(text);
-    update_image();
 }
 
 function on_comm_failure(error) {
@@ -254,20 +261,11 @@ function multiple_selection() {
 }
 
 function try_to_parse(s) {
-    //console.log(JSON.stringify(s));
-
     function on_proc_failure(res) {
-        //console.log('on_proc_failure ' + ('highlight' in res) + res['highlight'])
-        //console.log('res: ' + (JSON.stringify(res)))
-        // console.log(res['error']);
         $('#syntax_error').html(res['error']);
         $('#syntax_error').show();
         $('#language_warnings').html(); /* XXX */
-
-        //$('#syntax_error').show();
-        $('#around_editor').css('background-color', '#fee');
-        //$('button#save').text('Save (even though there are errors)');
-        //$('button#save').enable();
+        $('#around_editor').css('background-color', bg_color_parsing);
 
         if ('highlight' in res) {
             res_text = res['request']['text']
@@ -294,6 +292,8 @@ function try_to_parse(s) {
         if (multiple_selection())
             return;
 
+        image_set_text(res_text);
+
         string_with_suggestions = res['string_with_suggestions']
         if (null != string_with_suggestions) {
             if (string_with_suggestions != res_text) {
@@ -312,17 +312,11 @@ function try_to_parse(s) {
             $('#language_warnings').html(res['language_warnings']);
         }
 
-        //$('button#save').text('Save');
-        //$('button#save').enable();
-
-        // console.log('Received highlight  ' + res['highlight']);
         update_text_with_highlight(res_text, res['highlight']);
     }
 
     last_text_sent_to_server = s;
-    ajax_send("ajax_parse", {
-            'text': s
-        },
+    ajax_send("ajax_parse", {'text': s},
         on_comm_failure, on_proc_failure, on_success);
 }
 
@@ -348,8 +342,10 @@ function click_button_close(res) {
     window.location = url;
 }
 
+status_saving = '&#8987; saving... ';
+status_done = '&#x2705; success.';
 function click_button_save() {
-    $('#save_status').html('saving...');
+    $('#save_status').html(status_saving);
     data = {
         'text': current_text()
     };
@@ -360,7 +356,7 @@ function click_button_save() {
 }
 
 function click_button_save_success(res) {
-    show_status('#save_status', 'success');
+    show_status('#save_status', status_done);
     console.log()
     console.log('success');
     console.log(JSON.stringify(res));
@@ -376,8 +372,6 @@ function click_button_save_failure(res) {
     console.log(res);
 }
 
-
-
 function show_status(selector, msg) {
     $(selector).html(msg);
     window.setTimeout(function() {
@@ -386,33 +380,22 @@ function show_status(selector, msg) {
         display_timeout);
 }
 
-function update_image() {
-    text = current_text();
+function image_set_temporary() {
+    image_update_to(white_background);
+    // image_update_to(red_dot);
+}
+
+function image_set_text(text) {
     hash = hex_sha1(text);
-    url = "graph.{{format}}?" + hash;
-    // $("a#graph").attr("href", url);
-    $("a#graph img").prop('src', 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==');
+    url = "graph."+hash+"." + format;
     $("a#graph img").prop("src", url);
-    //$("a#graph").attr("href", url);
-    //$('a#graph').imageZoom();
 }
 
 function click_apply_suggestions() {
     if (string_with_suggestions != null) {
-        //          pos = getCaretCharacterOffsetWithin($("#editor").get(0));
-        // if (pos == null){
-        //     console.log('Cannot get element cursor.');
-        //     pos = 0;
-        // }
         try_to_parse(string_with_suggestions);
-        // s = '<pre><code>' + string_with_suggestions + '</code></pre>';
-        // update_text(s, pos);
     }
 }
-
-
-
-var saved = true;
 
 function confirmExit() {
     if (!saved) {
@@ -420,10 +403,3 @@ function confirmExit() {
     }
 }
 window.onbeforeunload = confirmExit;
-
-$(window).keydown(function(e) {
-    if ((e.metaKey || e.ctrlKey) && e.keyCode == 83) { /*ctrl+s or command+s*/
-        e.preventDefault();
-        click_button_save();
-    }
-});

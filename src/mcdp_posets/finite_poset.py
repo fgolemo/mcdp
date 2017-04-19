@@ -3,7 +3,7 @@ from networkx.algorithms.dag import ancestors, descendants
 
 from contracts import contract
 from contracts.utils import raise_desc, check_isinstance
-from mocdp.exceptions import do_extra_checks
+from mcdp.development import do_extra_checks
 
 from .finite_collection_as_space import FiniteCollectionAsSpace
 from .poset import NotBounded, NotJoinable, NotLeq, NotMeetable, Poset

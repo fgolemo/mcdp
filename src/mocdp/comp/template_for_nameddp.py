@@ -4,17 +4,17 @@ import sys
 from contracts import contract
 from contracts.utils import check_isinstance, raise_desc, raise_wrapped
 from mcdp_posets import NotLeq, get_types_universe
-from mocdp import ATTR_LOAD_LIBNAME, ATTR_LOAD_REALPATH
 from mocdp.comp.interfaces import NamedDP
-from mocdp.exceptions import DPSemanticError, mcdp_dev_warning, \
+from mcdp.exceptions import DPSemanticError, mcdp_dev_warning, \
     MCDPExceptionWithWhere
+from mcdp.constants import MCDPConstants
 
 
 __all__ = [
     'TemplateForNamedDP'
 ]
 
-class TemplateForNamedDP():
+class TemplateForNamedDP(object):
 
     @contract(parameters='dict(str:isinstance(NamedDP))')
     def __init__(self, parameters, template_code):
@@ -35,7 +35,7 @@ class TemplateForNamedDP():
         try:
             return self.specialize_(parameter_assignment, context)
         except MCDPExceptionWithWhere as e:
-            realpath = getattr(self, ATTR_LOAD_REALPATH)
+            realpath = getattr(self, MCDPConstants.ATTR_LOAD_REALPATH)
             if realpath is not None and e.where.filename is None:
                 e = e.with_filename(realpath)
                 raise type(e), e.args, sys.exc_info()[2]
@@ -63,8 +63,8 @@ class TemplateForNamedDP():
                               proposed=describe_interface(proposed),
                               compact=True)
         
-        if hasattr(self, ATTR_LOAD_LIBNAME):
-            libname = getattr(self, ATTR_LOAD_LIBNAME)
+        if hasattr(self, MCDPConstants.ATTR_LOAD_LIBNAME):
+            libname = getattr(self, MCDPConstants.ATTR_LOAD_LIBNAME)
             if libname is None:
                 mcdp_dev_warning('Tmp fix: can this ever be none?')
                 c = context.child()

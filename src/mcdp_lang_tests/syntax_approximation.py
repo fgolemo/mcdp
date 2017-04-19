@@ -2,10 +2,10 @@
 from nose.tools import assert_equal
 
 from comptests.registrar import comptest
+from mcdp.exceptions import DPSemanticError, DPSyntaxError
 from mcdp_dp.dp_transformations import get_dp_bounds
 from mcdp_lang.parse_interface import parse_ndp
 from mcdp_lang.syntax import Syntax
-from mocdp.exceptions import DPSemanticError, DPSyntaxError
 
 from .utils import parse_wrap_check
 
@@ -108,24 +108,4 @@ def check_approx_res5():
     print resu
     assert resl.minimals == set([0.01])
     assert resu.minimals == set([0.02])
-
-
-@comptest
-def check_approx_res6():
-    pass
-
-
-@comptest
-def check_approx_res7():
-    pass
-
-
-@comptest
-def check_approx_res8():
-    pass
-
-
-@comptest
-def check_approx_res9():
-    pass
 

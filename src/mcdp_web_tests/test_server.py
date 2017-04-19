@@ -1,15 +1,17 @@
 # -*- coding: utf-8 -*-
-from contracts.enabling import all_disabled
-from contracts.utils import raise_desc
-from multiprocessing.process import Process
-from urllib2 import HTTPError
 import json
+from multiprocessing.process import Process
 import os
 import random
 import subprocess
 import tempfile
 import time
+from urllib2 import HTTPError
 import urllib2
+
+from contracts.enabling import all_disabled
+from contracts.utils import raise_desc
+
 
 def test_mcdpweb_server(dirname):
     port = random.randint(11000, 15000)

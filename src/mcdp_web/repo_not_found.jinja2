@@ -1,0 +1,10 @@
+{% extends "base_page.jinja2" %}
+{% block title %}
+    Repo not found
+{% endblock %}
+{% block content %}
+    <p>
+        Repository <q><code>{{context.orig_key_not_found}}</code></q> not found; 
+        therefore, I cannot render <code>{{context.get_url_relative_to_not_found()}}</code>.
+    </p>
+{% endblock %}

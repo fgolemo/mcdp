@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
+from contracts.utils import indent
 from nose.tools import assert_equal, assert_raises
 
 from comptests.registrar import comptest, run_module_tests, comptest_fails
-from contracts.utils import indent
+from mcdp.exceptions import DPSemanticError
 from mcdp_lang import parse_ndp
 from mcdp_lang.dealing_with_special_letters import greek_letters, subscripts
 from mcdp_lang.eval_space_imp import eval_space
@@ -13,9 +14,8 @@ from mcdp_lang.syntax import Syntax
 from mcdp_lang_tests.utils import parse_wrap_check, TestFailed
 from mcdp_lang_tests.utils2 import eval_rvalue_as_constant
 from mcdp_report.out_mcdpl import extract_ws
-from mocdp import MCDPConstants
+from mcdp_utils_misc import make_chars_visible
 from mocdp.comp.context import Context
-from mocdp.exceptions import DPSemanticError
 
 
 @comptest
@@ -121,23 +121,6 @@ def assert_equal_string(s2, s2_expected, original=None):
         msg += '\n\n'+indent(make_chars_visible(s2_expected), l2) 
         raise ValueError(msg)
     
-    
-def indent_plus_invisibles(x, c='  |'):
-    return indent(make_chars_visible(x),c)
-    
-def make_chars_visible(x):
-    """ Replaces whitespaces ' ' and '\t' with '␣' and '⇥' """
-    x = x.replace(' ', '␣')
-    if MCDPConstants.tabsize == 4:
-        tab = '├──┤'
-    else:
-        tab = '⇥'
-        
-    x = x.replace('\t', tab)
-#     nl = '␤\n'
-    nl = '⏎\n'
-    x = x.replace('\n', nl)
-    return x
 
 @comptest
 def check_spaces7():

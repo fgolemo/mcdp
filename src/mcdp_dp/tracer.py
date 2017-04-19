@@ -5,13 +5,13 @@ from contracts import contract
 from contracts.utils import indent, raise_desc
 
 
-class TracerEvent():
+class TracerEvent(object):
 
     def format(self):
         raise NotImplementedError()
 
 
-class Tracer():
+class Tracer(object):
     """ 
     
         This is a support class for logging the trace of a recursive

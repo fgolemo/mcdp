@@ -2,7 +2,7 @@
 from contracts import contract
 from contracts.utils import check_isinstance
 from mcdp_posets import Coproduct1, Coproduct1Labels
-from mocdp.exceptions import do_extra_checks
+from mcdp.development import do_extra_checks
 
 from .dp_coproduct import CoProductDP
 from .primitive import NotFeasible

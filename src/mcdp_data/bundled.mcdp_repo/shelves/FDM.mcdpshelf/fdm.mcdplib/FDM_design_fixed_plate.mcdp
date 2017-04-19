@@ -1,0 +1,33 @@
+mcdp {
+    '''
+    This is a design in which the plate is fixed and an XYZ mechanism
+    moves the extruder. 
+    '''
+    implements `PartProducerInterface
+
+    extruder = instance `Extruder
+    min_workspace = provided part_length
+
+    part_volume = (provided part_length)³
+    part_volume provided by extruder ≽ part_volume
+    service_temperature provided by extruder ≽ provided service_temperature
+    part_resolution provided by extruder ≽ provided part_resolution
+
+    # XYZ moves around the extruder
+    XYZ = instance `mechanisms.XYZ_concrete
+
+    workspace provided by XYZ ≽ min_workspace
+    precision provided by XYZ ≽ provided part_resolution
+    payload_mass provided by XYZ ≽ mass required by extruder
+    velocity provided by XYZ ≽ 2mm/s
+    acceleration provided by XYZ ≽ 0 m/s²
+    # the extruder does not exert force on the part (to check)
+    force provided by XYZ ≽ 0 N
+
+    required budget_per_part ≽ budget_per_part required by extruder
+    required time_per_part ≽ time required by extruder
+
+    required mass ≽ ∑ mass required by *
+    required initial_investment ≽ ∑ budget required by *
+    required electric_power ≽ ∑ electric_power required by *
+}

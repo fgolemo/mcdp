@@ -3,35 +3,44 @@ import functools
 import math
 import sys
 
+from pint import UndefinedUnitError  # @UnresolvedImport
+from pint import UnitRegistry  # @UnresolvedImport
+
 from contracts import contract
 from contracts.utils import check_isinstance, raise_wrapped, raise_desc
-from mocdp import ATTRIBUTE_NDP_RECURSIVE_NAME
-from mocdp.exceptions import DPSyntaxError, do_extra_checks, mcdp_dev_warning, \
+from mcdp.exceptions import DPSyntaxError, \
     DPSemanticError
-from mocdp.memoize_simple_imp import memoize_simple
-from pint import UnitRegistry  # @UnresolvedImport
-from pint import UndefinedUnitError  # @UnresolvedImport
+from mcdp_utils_misc.memoize_simple_imp import memoize_simple
 
 from .any import Any, BottomCompletion, TopCompletion
 from .poset import is_top, is_bottom
 from .rcomp import RcompBase, Rbicomp
 from .space import Map
+from mcdp.development import do_extra_checks, mcdp_dev_warning
+from mcdp.constants import MCDPConstants
 
 
+# str -> conversion to dollars
+currencies = {
+    'CHF': 1.03, # in dollars
+    'EUR': 1.14,
+    'SGD': 0.70,
+    'JPY': 0.0088,
+    'GBP': 1.24,
+}
 
 class MyUnitRegistry(UnitRegistry):
     def __init__(self, *args, **kwargs):
         UnitRegistry.__init__(self, *args, **kwargs)
         self.define(' dollars = [cost] = USD')
+ 
         self.define(' flops = [flops]')
-        self.define(' pixels = [pixels]')
-        self.define(' episodes = [episodes]')
-        self.define(' CHF = 1.03 dollars')
-        self.define(' EUR = 1.14 dollars')
-        self.define(' SGD = 0.70 dollars')
-        self.define(' JPY = 0.0088 dollars')
-        self.define(' GBP = 1.24 dollars')
+        self.define(' pixels = [pixels] = pixel')
+        self.define(' episodes = [episodes] = episode')
         
+        for currency, value in currencies.items():
+            self.define(' %s = %s dollars' % (currency, value))
+            
         
 
 
@@ -89,7 +98,7 @@ class RcompUnits(RcompBase):
             'units_formatted': self.units_formatted,
         }
 
-        att = ATTRIBUTE_NDP_RECURSIVE_NAME
+        att =MCDPConstants.ATTRIBUTE_NDP_RECURSIVE_NAME
         if hasattr(self, att):
             state[att] = getattr(self, att)
         return state
@@ -101,7 +110,7 @@ class RcompUnits(RcompBase):
         self.units = parse_pint(self.string)
         self.units_formatted = x['units_formatted']
 
-        att = ATTRIBUTE_NDP_RECURSIVE_NAME
+        att = MCDPConstants.ATTRIBUTE_NDP_RECURSIVE_NAME
         if att in x:
             setattr(self, att, x[att])
 
@@ -177,9 +186,9 @@ class RbicompUnits(Rbicomp):
             'units_formatted': self.units_formatted,
         }
 
-        if hasattr(self, ATTRIBUTE_NDP_RECURSIVE_NAME):
-            state[ATTRIBUTE_NDP_RECURSIVE_NAME] = \
-                getattr(self, ATTRIBUTE_NDP_RECURSIVE_NAME)
+        att = MCDPConstants.ATTRIBUTE_NDP_RECURSIVE_NAME
+        if hasattr(self, att):
+            state[att] = getattr(self, att)
         return state
 
     def __setstate__(self, x):
@@ -190,9 +199,9 @@ class RbicompUnits(Rbicomp):
         self.units = parse_pint(self.string)
         self.units_formatted = x['units_formatted']
 
-        if ATTRIBUTE_NDP_RECURSIVE_NAME in x:
-            setattr(self, ATTRIBUTE_NDP_RECURSIVE_NAME, 
-                    x[ATTRIBUTE_NDP_RECURSIVE_NAME])
+        att = MCDPConstants.ATTRIBUTE_NDP_RECURSIVE_NAME
+        if att in x:
+            setattr(self, att, x[att])
 
     def __eq__(self, other):
         if isinstance(other, RbicompUnits):

@@ -3,12 +3,20 @@ import itertools
 
 from pyramid.httpexceptions import HTTPSeeOther  # @UnresolvedImport
 
-from mcdp_web.solver.app_solver_state import SolverState, get_decisions_for_axes
+from mcdp_web.environment import cr2e
+from mcdp_web.resource_tree import\
+    ResourceThingViewSolver0AxisAxis,\
+    ResourceThingViewSolver0, ResourceThingViewSolver0AxisAxis_addpoint,\
+    ResourceThingViewSolver0AxisAxis_getdatasets,\
+    ResourceThingViewSolver0AxisAxis_reset,\
+    get_from_context
 from mcdp_web.utils.ajax_errors import ajax_error_catch
-from mcdp_web.utils0 import add_std_vars
+from mcdp_web.utils0 import add_std_vars_context
+
+from .app_solver_state import SolverState, get_decisions_for_axes
 
 
-class AppSolver():
+class AppSolver(object):
     """
         /libraries/{}/models/{}/views/solver/   - redirects to one with the right amount of axis
     
@@ -25,70 +33,55 @@ class AppSolver():
 
     def __init__(self):
         self.solver_states = {}
+ 
+    @cr2e
+    def get_solver_state(self, e):
+        if not e.thing_name in self.solver_states:
+            self.reset(e)
+        return self.solver_states[e.thing_name]
 
-    def get_model_name(self, request):
-        return str(request.matchdict['model_name'])  # unicode
+    def reset(self, e):
+        self.ndp = e.library.load_ndp(e.thing_name)
+        self.solver_states[e.thing_name] = SolverState(self.ndp)
 
-    def get_solver_state(self, request):
-        model_name = self.get_model_name(request)
-        if not model_name in self.solver_states:
-            self.reset(request)
-        return self.solver_states[model_name]
+    def config(self, config): 
+        config.add_view(self.view_solver_base, context=ResourceThingViewSolver0,
+                        renderer='solver/solver_message.jinja2')
 
-    def reset(self, request):
-        model_name = self.get_model_name(request)
-        self.ndp = self.get_library(request).load_ndp(model_name)
-        self.solver_states[model_name] = SolverState(self.ndp)
-
-    def config(self, config):
-        config.add_route('solver_base',
-                         '/libraries/{library}/models/{model_name}/views/solver/')
-        config.add_view(self.view_solver_base,
-                        route_name='solver_base', renderer='solver/solver_message.jinja2')
-
-        base = '/libraries/{library}/models/{model_name}/views/solver/{fun_axes}/{res_axes}/'
-
-        config.add_route('solver', base)
         config.add_view(self.view_solver,
-                        route_name='solver', renderer='solver/solver.jinja2')
-
-        config.add_route('solver_addpoint', base + 'addpoint')
+                        context=ResourceThingViewSolver0AxisAxis, 
+                        renderer='solver/solver.jinja2')
+ 
         config.add_view(self.ajax_solver_addpoint,
-                        route_name='solver_addpoint', renderer='json')
-
-        config.add_route('solver_getdatasets', base + 'getdatasets')
+                        context=ResourceThingViewSolver0AxisAxis_addpoint,
+                        renderer='json')
+ 
         config.add_view(self.ajax_solver_getdatasets,
-                        route_name='solver_getdatasets', renderer='json')
-
-        config.add_route('solver_reset', base + 'reset')
+                        context=ResourceThingViewSolver0AxisAxis_getdatasets, renderer='json')
+ 
         config.add_view(self.ajax_solver_reset,
-                        route_name='solver_reset', renderer='json')
-
-#         config.add_route('solver_image2', '/solver/{model_name}/compact_graph')
-#         config.add_view(self.image, route_name='solver_image2')
-
-    def parse_params(self, request):
-        model_name = self.get_model_name(request)
-        library = self.get_current_library_name(request)
-
-        fun_axes = map(int, request.matchdict['fun_axes'].split(','))
-        res_axes = map(int, request.matchdict['res_axes'].split(','))
-        return {'model_name': model_name,
+                        context=ResourceThingViewSolver0AxisAxis_reset, 
+                        renderer='json')
+ 
+    @cr2e
+    def parse_params(self, e): 
+        aa = get_from_context(ResourceThingViewSolver0AxisAxis, e.context)
+        fun_axes = map(int, aa.fun_axes.split(','))
+        res_axes = map(int, aa.res_axes.split(','))
+        return {'model_name': e.thing_name,
                 'fun_axes': fun_axes,
                 'res_axes': res_axes,
-                'library': library}
+                'library': e.library_name}
 
-    @add_std_vars
-    def view_solver_base(self, request):
-        model_name = self.get_model_name(request)
-        library = self.get_current_library_name(request)
-
-        solver_state = self.get_solver_state(request)
+    @add_std_vars_context
+    @cr2e
+    def view_solver_base(self, e): 
+        solver_state = self.get_solver_state(e)
         ndp = solver_state.ndp
         nf = len(ndp.get_fnames())
         nr = len(ndp.get_rnames())
 
-        base = '/libraries/%s/models/%s/views/solver/' % (library, model_name)
+        base = '/shelves/%s/libraries/%s/models/%s/views/solver/' % (e.shelf_name, e.library_name, e.model_name)
         if nf >= 2 and nr >= 2:
             url = base + '0,1/0,1/'
             raise HTTPSeeOther(url)
@@ -108,13 +101,13 @@ class AppSolver():
             # message = message.decode('utf-8')
             return {'title': title,
                     'message': message,
-                    'navigation': self.get_navigation_links(request)}
+                    }
 
-    @add_std_vars
-    def view_solver(self, request):
-        print('View solver')
-        params = self.parse_params(request)
-        solver_state = self.get_solver_state(request)
+    @add_std_vars_context
+    @cr2e
+    def view_solver(self, e):  # @UnusedVariable
+        params = self.parse_params(e)
+        solver_state = self.get_solver_state(e)
 
         ndp = solver_state.ndp
         fnames = ndp.get_fnames()
@@ -137,14 +130,14 @@ class AppSolver():
                 'fun_names_other': fun_names_other,
                 'res_alternatives': res_alternatives,
                 'fun_alternatives': fun_alternatives,
-                'current_url': request.path,
+                'current_url': e.request.path,
                 'params': params,
-                'navigation': self.get_navigation_links(request)}
+                }
         return res
 
-    def return_new_data(self, request):
-        solver_state = self.get_solver_state(request)
-        params = self.parse_params(request)
+    def return_new_data(self, e):
+        solver_state = self.get_solver_state(e)
+        params = self.parse_params(e)
         
         fun_axes = params['fun_axes']
         res_axes = params['res_axes']
@@ -154,29 +147,29 @@ class AppSolver():
         data = solver_state.get_data_for_js(fun_axes, res_axes)
         res.update(**data)
         return res
-
-    def ajax_solver_getdatasets(self, request):
+    @cr2e
+    def ajax_solver_getdatasets(self, e):
         def go():
-            return self.return_new_data(request)
-        return ajax_error_catch(go)
+            return self.return_new_data(e)
+        return ajax_error_catch(go, environment=e)
 
-    def ajax_solver_addpoint(self, request):        
+    @cr2e
+    def ajax_solver_addpoint(self, e):        
         def go():
-            solver_state = self.get_solver_state(request)
-            f = request.json_body['f']
+            solver_state = self.get_solver_state(e)
+            f = e.request.json_body['f']
     
             solver_state.new_point(f)
-            return self.return_new_data(request)    
-        return ajax_error_catch(go)
-
-    def ajax_solver_reset(self, request):
+            return self.return_new_data(e)    
+        return ajax_error_catch(go, environment=e)
+    
+    @cr2e
+    def ajax_solver_reset(self, e):
         def go():
-            self.reset(request)
-            return self.return_new_data(request)
-        return ajax_error_catch(go)
-
-
-
+            self.reset(e)
+            return self.return_new_data(e)
+        return ajax_error_catch(go, environment=e)
+    
 def create_alternative_urls(params, ndp):
     library = params['library']
     model_name = params['model_name']

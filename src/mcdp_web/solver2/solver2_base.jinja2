@@ -81,7 +81,9 @@ http://127.0.0.1:8080/libraries/basic/models/prod2r/views/solver2/#eyJhcmVhX0YiO
 
   <div id='query_box'>
       <p id='par_image'>
-  <img src='compact_graph.svg' id='compact_graph'/>
+  <img src='../images/ndp_graph_templatized.svg' id='compact_graph'/>
+
+
 </p>
   <table id='params'>
   <tr>
@@ -134,7 +136,7 @@ http://127.0.0.1:8080/libraries/basic/models/prod2r/views/solver2/#eyJhcmVhX0YiO
       <input type="radio" name="query-type" id="solveforx_checkbox" >
     </fieldset>
     <br/>
-    <img id='problem_icon' src='{{root}}/static/white_small.png'/>
+    <img id='problem_icon' src='{{static}}/white_small.png'/>
     </td>
   </tr>
   <tr id='row-fun'>
@@ -211,7 +213,7 @@ http://127.0.0.1:8080/libraries/basic/models/prod2r/views/solver2/#eyJhcmVhX0YiO
   <pre class='output_error' id='output_error'></pre>
   <pre class='output_success' id='output_result'></pre>
 
-  <img id='output_img' src="{{root}}/static/white.png" style='width: 20em; height: 20em'/>
+  <img id='output_img' src="{{static}}/white.png" style='width: 20em; height: 20em'/>
 
   <p>{{space_description}}</p>
 
@@ -273,8 +275,8 @@ function ajax_success(data) {
     	console.log(error);
 
     	S('#output_error').html(error);
-      // S('#output_img').attr("src",'{{root}}/static/error.png');
-      S('#output_img').attr("src",'{{root}}/static/white_small.png');
+      // S('#output_img').attr("src",'{{static}}/error.png');
+      S('#output_img').attr("src",'{{static}}/white_small.png');
 	}
 }
 
@@ -299,7 +301,7 @@ function evaluate() {
     if(ui_state['rtof_checkbox'] && areaR.length == 0)
       return;
 
-    S('#output_img').attr("src",'{{root}}/static/evaluating.gif');
+    S('#output_img').attr("src",'{{static}}/evaluating.gif');
 
 
     payload = {'ui_state': ui_state};
@@ -435,7 +437,7 @@ function set_state_from_hash() {
     for(p of problems) {
         cb = '#' + p + '_checkbox';
         if (S(cb).is(':checked')) {
-            image = '{{root}}/static/' + p + '.png';
+            image = '{{static}}/' + p + '.png';
             S('#problem_icon').attr("src", image);
         }
     }

@@ -1,0 +1,47 @@
+{% macro repo(repo_name) %}
+    {% if repo_name is undefined %}
+    {% set repo_name = navigation.repo_name %}
+    {% endif %}
+    <a href='{{root}}/repos/{{repo_name}}/'>{{icon_repo|safe}}&nbsp;Repository&nbsp;<code>{{repo_name}}</code>
+    </a>
+{% endmacro %}
+
+{% macro shelf(repo_name, shelf_name) %}
+    {% if repo_name is undefined %}
+    {% set repo_name = navigation.repo_name %}
+    {% endif %}
+    {% set url = shelf_url(repo_name, shelf_name) %}
+
+    {%if shelf_subscribed(repo_name, shelf_name)%}
+    <a href='{{url}}/'>{{icon_shelf|safe}}&nbsp;Shelf&nbsp;<code>{{shelf_name}}</code></a>
+    {% else %}
+    {{icon_shelf|safe}}&nbsp;Shelf&nbsp;<code>{{shelf_name}}
+    {% endif %}
+{% endmacro %}
+
+{% macro library(repo_name, shelf_name, library_name) %}
+    {% set url = library_url2(repo_name, shelf_name, library_name) %}
+
+    <a href='{{url}}/'>
+        {{icon_library|safe}}&nbsp;Library&nbsp;<code>{{library_name}}</code>
+    </a>
+{% endmacro %}
+
+
+{% macro shelf_activation_button(repo_name, shelf_name) %}
+    {% set shelf_url_ =  shelf_url(repo_name, shelf_name) %}
+    {% if shelf_name in navigation.shelves_used %}
+        <form class='shelf_activation' action="{{shelf_url_}}/:unsubscribe/" method="post">
+            <input type="submit" class='inactive' value="deactivate"/>
+        </form>
+    {% else %}
+        <form  class='shelf_activation'  action="{{shelf_url_}}/:subscribe/" method="post">
+            <input type="submit" class='active' value="activate"/>
+        </form>
+    {% endif %}
+    <style>
+    form.shelf_activation {
+        display: inline-block;
+    }
+    </style>
+{% endmacro %}

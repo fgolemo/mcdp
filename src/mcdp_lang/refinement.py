@@ -2,8 +2,8 @@
 from mcdp_lang_utils import Where
 from contracts.utils import check_isinstance
 from mcdp_lang.utils_lists import get_odd_ops
-from mocdp import logger
-from mocdp.exceptions import (DPInternalError, DPSemanticError, DPSyntaxError,
+from mcdp import logger
+from mcdp.exceptions import (DPInternalError, DPSemanticError, DPSyntaxError,
 )
 
 from .eval_warnings import MCDPWarnings, warn_language
@@ -68,7 +68,7 @@ def infer_debug(s):
     # print(s)
     pass
     
-class SemanticInformationForEntity():
+class SemanticInformationForEntity(object):
     def __init__(self, element_defined, where_used=[]):
         element_defined.where
         #check_isinstance(where_defined, Where)
@@ -79,7 +79,7 @@ class SemanticInformationForEntity():
         check_isinstance(where, Where)
         self.where_used.append(where)
         
-class SemanticInformation():
+class SemanticInformation(object):
     def __init__(self):
         # maps str to SemanticInformationForEntity
         self.resources = {}  

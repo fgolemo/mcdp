@@ -3,11 +3,12 @@ import os
 
 from contracts import contract
 from contracts.utils import raise_desc, check_isinstance
-from mocdp.exceptions import DPSemanticError
+
+from mcdp import MCDPConstants, logger
+from mcdp.exceptions import DPSemanticError
+from mcdp_utils_misc import assert_good_plain_identifier, dir_from_package_name, locate_files, format_list
 
 from .library import MCDPLibrary
-from .utils import locate_files
-from mocdp import MCDPConstants, logger
 
 
 __all__ = [
@@ -15,7 +16,7 @@ __all__ = [
 ]
 
 
-class Librarian():
+class Librarian(object):
     
     """ 
         Indexes several libraries. 
@@ -37,11 +38,15 @@ class Librarian():
     
     @contract(dirname=str, returns='None')
     def find_libraries(self, dirname):
-
-        if dirname.endswith('.mcdplib'):
+        if is_python_module_name(dirname):
+            package = dir_from_package_name(dirname)
+            logger.info('%s -> %s' % (dirname, package))
+            dirname = package
+            
+        if dirname.endswith('.' + MCDPConstants.library_extension):
             libraries = [dirname]
         else:
-            libraries = locate_files(dirname, "*.mcdplib",
+            libraries = locate_files(dirname, "*." + MCDPConstants.library_extension,
                                  followlinks=False,
                                  include_directories=True,
                                  include_files=False)
@@ -50,30 +55,16 @@ class Librarian():
                 libraries = [dirname]
         
         for path in libraries:
-            short, data = self._load_entry(path)
-            if short in self.libraries:
-                entry = self.libraries[short]
-                if entry['path'] != path:
-                    msg = 'I already know library "%s".\n' % short
-                    msg += 'Current entry path:  %s\n' % path
-                    msg += 'Previous entry path: %s\n' % entry['path']
-                    raise_desc(ValueError, msg)
-                else:
-                    logger.debug('Reached "%s" twice' % path)
-            self.libraries[short] = data
+            self.add_lib_by_path(path)
             
         # get all the images
         allimages = {} # base.ext -> same struct as l.file_to_contents
         for short, data in self.libraries.items():
             l = data['library']
             for ext in MCDPConstants.exts_images:
-                basenames = l._list_with_extension(ext)
-#                 print('basenames: for %s are  %s' % (ext, basenames))
+                basenames = l._list_with_extension(ext) 
                 for b in basenames:
-                    b_ext = b + '.' + ext
-#                     print('b_Ext: %s b_Ext in ftc: %s' % (b_ext, b_ext in l.file_to_contents))
-#                     if not b_ext in l.file_to_contents:
-#                         print 'avialable: %s' % sorted(l.file_to_contents)
+                    b_ext = b + '.' + ext 
                     allimages[b_ext] = l.file_to_contents[b_ext]
                     
         for short, data in self.libraries.items():
@@ -82,10 +73,26 @@ class Librarian():
                 if not basename in l.file_to_contents:
                     l.file_to_contents[basename] = d
 
+    def add_lib_by_path(self, path):
+        short, data = self._load_entry(path)
+        if short in self.libraries:
+            entry = self.libraries[short]
+            if entry['path'] != data['path']:
+                msg = 'I already know library "%s".\n' % short
+                msg += 'Current entry path:  %s\n' % data['path']
+                msg += 'Previous entry path: %s\n' % entry['path']
+                raise_desc(ValueError, msg)
+            else:
+                msg = 'Reached library "%s" twice (path = %s).' % (short, path)
+                logger.debug(msg)
+        self.libraries[short] = data
+        
     @contract(dirname=str, returns='tuple(str, dict)')
     def _load_entry(self, dirname):
         if dirname == '.':
             dirname = os.path.realpath(dirname)
+            
+        dirname = os.path.realpath(dirname)
         library_name = os.path.splitext(os.path.basename(dirname))[0]
         library_name = library_name.replace('.', '_')
 
@@ -102,8 +109,8 @@ class Librarian():
         check_isinstance(libname, str)
         """ hook to pass to MCDPLibrary instances to find their sisters. """
         if not libname in self.libraries:
-            s = ", ".join(sorted(self.libraries))
-            msg = 'Cannot find library %r. Available: %s.' % (libname, s)
+            msg = ('Cannot find library "%s". Available: %s.' % 
+                   (libname, format_list(sorted(self.libraries))))
             raise_desc(DPSemanticError, msg)
         l = self.libraries[libname]['library']
         return l
@@ -126,3 +133,27 @@ class Librarian():
         _short, data = self._load_entry(dirname)
         data['library'].library_name = _short
         return data['library']
+
+@contract(returns='dict(str:str)')
+def find_libraries(d0):
+    '''
+        Finds <name>.mcdplib.
+        returns dict ID -> path
+    '''
+    dirs = locate_files(d0, "*." + MCDPConstants.library_extension,
+                                 followlinks=False,
+                                 include_directories=True,
+                                 include_files=False)
+    res = {}
+    for dirname in dirs:
+        if dirname == '.':
+            dirname = os.path.realpath(dirname)
+        library_name = os.path.splitext(os.path.basename(dirname))[0]
+        assert_good_plain_identifier(library_name, 'libraries') 
+        res[library_name] = dirname
+    return res
+
+def is_python_module_name(x):
+    from pkgutil import iter_modules
+    return x in (name for loader, name, ispkg in iter_modules())
+    

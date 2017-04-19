@@ -1,7 +1,7 @@
 from contracts import contract
 
 
-class ParsingElement():
+class ParsingElement(object):
     def __init__(self, name):
         self.name = name
     def get(self):
@@ -9,6 +9,7 @@ class ParsingElement():
         return getattr(Syntax, self.name) # bug
     def __repr__(self):
         return 'ParsingElement(%s)' % self.name
+
 
 @contract(returns=ParsingElement)
 def find_parsing_element(x):

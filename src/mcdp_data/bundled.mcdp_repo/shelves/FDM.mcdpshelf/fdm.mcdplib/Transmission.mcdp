@@ -1,0 +1,12 @@
+mcdp { 
+    provides torque_o [N*m]
+    provides velocity_o [rad/s]
+    requires torque_i [N*m]
+    requires velocity_i [rad/s] 
+    ratio = 0.5 dimensionless 
+    c = 0.99 dimensionless
+    required velocity_i ≽ provided velocity_o / ratio
+    required torque_i ≽ provided torque_o · ratio · c 
+    requires mass = 20 g
+    requires budget = 1 USD
+}

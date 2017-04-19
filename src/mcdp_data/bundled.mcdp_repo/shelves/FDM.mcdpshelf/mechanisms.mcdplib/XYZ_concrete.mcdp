@@ -1,0 +1,27 @@
+mcdp {
+    # We implent XYZ by having a XY mechanism to which we attach a prismatic joint
+    implements `XYZInterface
+    
+    XY = instance `XY_concrete
+    workspace provided by XY ≽ provided workspace
+    precision provided by XY ≽ provided precision
+    velocity provided by XY ≽ provided velocity
+    acceleration provided by XY ≽ provided acceleration
+    force provided by XY ≽ provided force
+    
+    Z = instance `Joint
+    payload_mass provided by Z ≽ provided payload_mass
+    velocity provided by Z ≽ provided velocity
+    acceleration provided by Z ≽ provided acceleration
+    precision provided by Z ≽ provided precision
+    force provided by Z ≽ provided force
+    workspace provided by Z ≽ provided workspace
+    
+    # Now XY must carry both Z and the payload
+    total_payload_mass = mass required by Z + provided payload_mass
+    payload_mass provided by XY ≽ total_payload_mass
+    
+    required electric_power ≽ ∑ electric_power required by *
+    required mass ≽ ∑ mass required by *
+    required budget ≽ ∑ budget required by *
+}

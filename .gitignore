@@ -1,3 +1,5 @@
+Icon?
+node_modules
 *.egg-info
 out-*
 out
@@ -42,3 +44,11 @@ out_coverage
 tmp*
 src/mcdp_data/libraries/manual.mcdplib/attic/
 mcdp-users-db
+src/mcdp_data/libraries/manual.mcdplib/docs/part3-reference/06_lang_d2_uncertainty.html
+src/mcdp_data/libraries/manual.mcdplib/docs/part3-reference/06_lang_d2_uncertainty.pdf
+src/mcdp_data/libraries/unittests/documents.mcdplib/test_split_tag.html
+attic
+mcdp-user-db
+ghostdriver.log
+geckodriver.log
+config

@@ -1,24 +1,19 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
 from contracts.utils import raise_desc, check_isinstance, raise_wrapped, indent
+from mcdp.exceptions import (DPInternalError, DPNotImplementedError,
+                             DPSemanticError, mcdp_dev_warning)
 from mcdp_dp import (InvMult2, InvPlus2, InvPlus2Nat, InvMult2Nat,
                      InvMultValueNatDP, PlusValueNatDP,
-                     PlusValueRcompDP, PlusValueDP)
-from mcdp_dp.dp_minus import MinusValueDP, MinusValueRcompDP, MinusValueNatDP
-from mcdp_dp.dp_multvalue import InvMultValueDP
-from mcdp_posets import (Nat, RcompUnits, get_types_universe, mult_table,
-    poset_maxima)
-from mcdp_posets import Rcomp
-from mcdp_posets.rcomp_units import RbicompUnits
-from mocdp.comp.context import CFunction, get_name_for_res_node, ValueWithUnits, \
-    ModelBuildingContext
-from mocdp.exceptions import (DPInternalError, DPNotImplementedError,
-    DPSemanticError, mcdp_dev_warning)
+                     PlusValueRcompDP, PlusValueDP, InvMultValueDP,  MinusValueDP, MinusValueRcompDP, MinusValueNatDP)
+from mcdp_posets import (Nat, RcompUnits, get_types_universe, mult_table, poset_maxima, RbicompUnits, Rcomp)
+from mocdp.comp.context import CFunction, get_name_for_res_node, ValueWithUnits, ModelBuildingContext
 
 from .eval_constant_imp import NotConstant
 from .eval_resources_imp_unary import eval_lfunction_genericoperationfun
 from .eval_warnings import MCDPWarnings, warn_language
 from .helpers import create_operation_lf, get_valuewithunits_as_function
+from .misc_math import ConstantsNotCompatibleForAddition
 from .misc_math import plus_constantsN
 from .namedtuple_tricks import recursive_print
 from .parse_actions import decorate_add_where
@@ -32,15 +27,13 @@ __all__ = [
     'eval_lfunction',
 ]
 
-
-def eval_lfunction_Function(lf, context):
-    return context.make_function(dp=lf.dp.value, s=lf.s.value)
+class DoesNotEvalToFunction(DPInternalError):
+    """ also called "rvalue" """
 
 @decorate_add_where
 @contract(returns=CFunction)
 def eval_lfunction(lf, context):
     check_isinstance(context, ModelBuildingContext)
-    
 
     if isinstance(lf, (CDP.NewFunction, CDP.DerivResourceRef)):
         msg = 'The functionality %r cannot be used on this side of the constraint.'
@@ -48,7 +41,8 @@ def eval_lfunction(lf, context):
 
     constants = (CDP.Collection, CDP.SimpleValue, CDP.SpaceCustomValue,
                  CDP.Top, CDP.Bottom, CDP.Minimals, CDP.Maximals, 
-                 CDP.NatConstant, CDP.RcompConstant, CDP.ConstantDivision)
+                 CDP.NatConstant, CDP.RcompConstant, CDP.ConstantDivision,
+                 CDP.SpecialConstant)
         
     if isinstance(lf, constants):
         from mcdp_lang.eval_constant_imp import eval_constant
@@ -61,11 +55,13 @@ def eval_lfunction(lf, context):
     from .eval_lfunction_imp_label_index import eval_lfunction_label_index
     from .eval_lfunction_imp_label_index import eval_lfunction_tupleindexfun
     
+    from mcdp_lang.eval_uncertainty import eval_lfunction_FValueBetween
+    from mcdp_lang.eval_uncertainty import eval_lfunction_FValuePlusOrMinus
+    from mcdp_lang.eval_uncertainty import eval_lfunction_FValuePlusOrMinusPercent
     cases = {
         CDP.Function: eval_lfunction_Function,
         CDP.NewResource: eval_lfunction_newresource,
         CDP.MakeTuple: eval_MakeTuple_as_lfunction,
-        CDP.UncertainFun: eval_lfunction_Uncertain,
         CDP.DisambiguationFun: eval_lfunction_disambiguation,
         CDP.FunctionLabelIndex: eval_lfunction_label_index,
         CDP.TupleIndexFun: eval_lfunction_tupleindexfun,
@@ -78,6 +74,14 @@ def eval_lfunction(lf, context):
         CDP.FValueMinusN: eval_lfunction_FValueMinusN,
         CDP.GenericOperationFun: eval_lfunction_genericoperationfun,
         CDP.ConstantRef: eval_lfunction_ConstantRef,
+        
+        
+        CDP.UncertainFun: eval_lfunction_Uncertain,
+        CDP.FValueBetween: eval_lfunction_FValueBetween,
+        CDP.FValuePlusOrMinus: eval_lfunction_FValuePlusOrMinus,
+        CDP.FValuePlusOrMinusPercent: eval_lfunction_FValuePlusOrMinusPercent,
+        
+        CDP.SumFunctions: eval_fvalue_SumFunctions,
     }
 
     for klass, hook in cases.items():
@@ -88,8 +92,33 @@ def eval_lfunction(lf, context):
         r = recursive_print(lf)
         msg = 'eval_lfunction(): cannot evaluate this as a function:'
         msg += '\n' + indent(r, '  ')
-        raise_desc(DPInternalError, msg) 
+        raise_desc(DoesNotEvalToFunction, msg) 
             
+            
+def eval_fvalue_SumFunctions(lf, context):
+    from mcdp_lang.eval_resources_imp import iterate_normal_ndps
+    check_isinstance(lf, CDP.SumFunctions)
+    fname = lf.fname.value
+    
+    cfunctions = []
+    for n, ndp in iterate_normal_ndps(context):
+        if fname in ndp.get_fnames():
+            cr = CFunction(n, fname)
+            cfunctions.append(cr)
+
+
+    if not cfunctions:
+        msg = 'Cannot find any sub-design problem with functionality "%s".' % fname
+        raise DPSemanticError(msg, where=lf.fname.where)
+    
+    if len(cfunctions) == 1:
+        return cfunctions[0]
+    else:
+        return eval_lfunction_invplus_ops(fs=cfunctions, context=context)
+
+def eval_lfunction_Function(lf, context):
+    return context.make_function(dp=lf.dp.value, s=lf.s.value)
+
 def eval_lfunction_anyoffun(lf, context):
     from .eval_constant_imp import eval_constant
     from mcdp_posets import FiniteCollectionsInclusion
@@ -112,8 +141,7 @@ def eval_lfunction_anyoffun(lf, context):
         raise_desc(DPSemanticError, msg, elements=elements, maximals=maximals)
 
     dp = LimitMaximals(values=maximals, F=P)
-    return create_operation_lf(context, dp=dp, functions=[],
-                               name_prefix='_anyof')
+    return create_operation_lf(context, dp=dp, functions=[])
 
 
 def eval_lfunction_disambiguation(lf, context):
@@ -234,7 +262,7 @@ def eval_lfunction_invplus_sort_ops(ops, context, wants_constant):
         except NotConstant as e:
             if wants_constant:
                 msg = 'Sum not constant because one op is not constant.'
-                raise_wrapped(NotConstant, e, msg, op=op)
+                raise_wrapped(NotConstant, e, msg, op=op, compact=True)
             x = eval_lfunction(op, context)
             assert isinstance(x, CFunction)
             functions.append(x)
@@ -253,25 +281,28 @@ def eval_lfunction_invplus(lf, context):
     
     constants = pos_constants
     
-    if len(functions) == 0:
-        c = plus_constantsN(constants)
-        return get_valuewithunits_as_function(c, context)
-
-    elif len(functions) == 1:
-        if len(constants) > 0:
+    try:
+        if len(functions) == 0:
             c = plus_constantsN(constants)
-            return get_invplus_op(context, functions[0], c)
+            return get_valuewithunits_as_function(c, context)
+    
+        elif len(functions) == 1:
+            if len(constants) > 0:
+                c = plus_constantsN(constants)
+                return get_invplus_op(context, functions[0], c)
+            else:
+                return functions[0]
         else:
-            return functions[0]
-    else:
-        # there are some functions
-        r =  eval_lfunction_invplus_ops(functions, context) 
-        if not constants:
-            return r
-        else:
-            c = plus_constantsN(constants)
-            return get_invplus_op(context, r, c)
-
+            # there are some functions
+            r =  eval_lfunction_invplus_ops(functions, context) 
+            if not constants:
+                return r
+            else:
+                c = plus_constantsN(constants)
+                return get_invplus_op(context, r, c)
+    except ConstantsNotCompatibleForAddition as e:
+        msg = 'Incompatible units for addition.'
+        raise_wrapped(DPSemanticError, e, msg, compact=True)
 
 @contract(lf=CFunction, c=ValueWithUnits, returns=CFunction)
 def get_invplus_op(context, lf, c):
@@ -363,7 +394,8 @@ def eval_lfunction_invmult_sort_ops(ops, context, wants_constant):
         
         if wants_constant:
             msg = 'Product not constant because one op is not constant.'
-            raise_wrapped(NotConstant, e, msg, op=op)
+            raise_wrapped(NotConstant, e, msg, # op=op, 
+                          compact=True)
         x = eval_lfunction(op, context)
         assert isinstance(x, CFunction)
         functions.append(x)

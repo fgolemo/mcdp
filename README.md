@@ -1,6 +1,6 @@
+<!--
 
-
-<table> 
+<table>
 <tr>
 <td>Production server (EU)</td>
 <td><a href="https://circleci.com/gh/AndreaCensi/mcdp/tree/inst00"><img src="https://circleci.com/gh/AndreaCensi/mcdp/tree/inst00.png?style=shield&amp;circle-token=f59172bb200232cffc45e43473c4eaf5c2b3e776"/></a>
@@ -21,16 +21,16 @@
 <td><a href="https://circleci.com/gh/AndreaCensi/mcdp/tree/last"><img src="https://circleci.com/gh/AndreaCensi/mcdp/tree/last.png?style=shield&amp;circle-token=f59172bb200232cffc45e43473c4eaf5c2b3e776"/></a>
 </td>
 </tr>
-</table>
+</table> -->
 
 
 **PyMCDP** is a Python interpreter and solver for Monotone Co-Design Problems.
-It is currently in beta-testing. Please email censi@mit.edu if you wish to help.
 
-Please see <http://mcdp.mit.edu> for an introduction (or see [the manual][manual]).
+Please see the website <http://co-design.science> and in particular [the manual (PDF)][manual], which contains up-to-date installation instructions.
 
-[manual]: http://mcdp.mit.edu/media/pymcdp-manual.html
+[manual]: http://co-design.science/media/manual.pdf
 
+<!--
 *Below, an example of a graphical representation of an MCDP (left)
 along with the MCDPL snippet that describes it (right)*
 
@@ -150,8 +150,6 @@ will produce these graphs:
         </td>
     </tr>
     <tr><td>Verbose graph</td><td><a href="web/co-design.science/media/battery-out_expected3/battery-ndp_graph_enclosed_LR.png"><img src="web/co-design.science/media/battery-out_expected3/battery-ndp_graph_enclosed_LR.png"/></a></td></tr>
-<!--     <tr><td>Cleaned-up graph</td><td ><a href="web/co-design.science/media/battery-out_expected3/battery-clean.png">
-    <img src="web/co-design.science/media/battery-out_expected3/battery-clean.png" height="300px"/></a></td></tr> -->
     <tr><td>Tree representation</td><td><img src="web/co-design.science/media/battery-out_expected3/battery-dp_graph_tree.png"/></td></tr>
     </tr>
 </table>
@@ -188,4 +186,4 @@ of monotone problems.)
 
 <h2>More information</h2>
 
-For more information, please see <http://mcdp.mit.edu>.
+For more information, please see <http://co-design.science>. -->

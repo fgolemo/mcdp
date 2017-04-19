@@ -28,7 +28,130 @@
 
 
 
-*/span.Unit,
+*//* http://meyerweb.com/eric/tools/css/reset/
+   v2.0 | 20110126
+   License: none (public domain)
+*/
+html,
+body,
+div,
+span,
+applet,
+object,
+iframe,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+blockquote,
+pre,
+a,
+abbr,
+acronym,
+address,
+big,
+cite,
+code,
+del,
+dfn,
+em,
+img,
+ins,
+kbd,
+q,
+s,
+samp,
+small,
+strike,
+strong,
+sub,
+sup,
+tt,
+var,
+b,
+u,
+i,
+dl,
+dt,
+dd,
+ol,
+ul,
+li,
+fieldset,
+form,
+label,
+legend,
+table,
+caption,
+tbody,
+tfoot,
+thead,
+tr,
+th,
+td,
+article,
+aside,
+canvas,
+details,
+embed,
+figure,
+figcaption,
+footer,
+header,
+hgroup,
+menu,
+nav,
+output,
+ruby,
+section,
+summary,
+time,
+mark,
+audio,
+video {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  vertical-align: baseline;
+}
+/* HTML5 display-role reset for older browsers */
+article,
+aside,
+details,
+figcaption,
+figure,
+footer,
+header,
+hgroup,
+menu,
+nav,
+section {
+  display: block;
+}
+blockquote,
+q {
+  quotes: none;
+}
+blockquote::before,
+blockquote::after,
+q::before,
+q::after {
+  content: '';
+  content: none;
+}
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+h1.draft,
+h2.draft,
+h3.draft {
+  color: red !important;
+}
+span.Unit,
 span.Nat,
 span.Int,
 span.Rcomp {
@@ -41,7 +164,7 @@ span.RcompConstant {
   color: #cc6600;
 }
 span.RcompUnit {
-  color: #cc6600 ;
+  color: #cc6600;
 }
 span.MCDPKeyword,
 span.SubKeyword,
@@ -86,6 +209,7 @@ span.plus,
 span.times,
 span.exponent,
 span.product,
+span.sum,
 span.OpenBraceKeyword,
 span.CloseBraceKeyword,
 span.comma,
@@ -129,6 +253,9 @@ span.LBRACE,
 span.RBRACE,
 span.LBRACKET,
 span.RBRACKET,
+span.plus_or_minus,
+span.percent,
+span.LEFTRIGHTARROW,
 span.AssertEqualKeyword,
 span.AssertLEQKeyword,
 span.AssertGEQKeyword,
@@ -136,7 +263,9 @@ span.AssertLTKeyword,
 span.AssertGTKeyword,
 span.AssertNonemptyKeyword,
 span.AssertEmptyKeyword,
-span.ConstantKeyword {
+span.ConstantKeyword,
+span.BetweenKeyword,
+span.BetweenAndKeyword {
   font-weight: bold;
   color: #00a;
 }
@@ -159,6 +288,12 @@ span.SetNameRValue > span.RName {
   color: darkred;
 }
 span.SetNameFValue > span.FName {
+  color: darkgreen;
+}
+span.SumResources > span.RName {
+  color: darkred;
+}
+span.SumFunctions > span.FName {
   color: darkgreen;
 }
 span.DerivFunctionName {
@@ -284,6 +419,10 @@ span.geq {
   font-family: "FreeSerif";
   font-weight: normal !important;
 }
+span.sum {
+  font-family: "FreeSerif";
+  font-weight: bold;
+}
 span.semantic_error {
   background-color: pink;
 }
@@ -328,7 +467,7 @@ code.RName {
   color: darkred;
 }
 span.ImpName {
-  color: #cc7a00;
+  color: darkorange;
 }
 code.fvalue span.ValueExpr,
 code.fvalue span.RcompUnit {
@@ -348,16 +487,12 @@ code.rvalue span.RcompUnit {
   color: darkred !important;
 }
 body {
-  font-size: 100%;
-}
-.ui-button {
-  padding: 3px !important;
-}
-.ui-widget {
-  font-size: 80%;
+  background-color: white;
+  font-family: "Input Serif";
+  font-family: "PT Sans";
+  font-family: "Trebuchet MS", Tahoma, Verdana, Arial, sans-serif;
 }
 .unicode-icons {
-  font-size: 50%;
   margin-bottom: -5px;
   margin-top: -5px;
   margin-right: 0.5em;
@@ -365,12 +500,21 @@ body {
 a {
   text-decoration: none;
 }
-a:hover {
-  background-color: #fff8c7;
-  color: blue;
-}
 pre code {
   font-family: "Anka/Coder Narrow", "Lucida Console", monospace;
+}
+.tip {
+  display: none;
+}
+.tip {
+  border-radius: 5px;
+  padding: 5px;
+  background: #73AD21;
+  color: white;
+  max-width: 20em;
+}
+ul {
+  padding-left: 2em;
 }
 /*
 

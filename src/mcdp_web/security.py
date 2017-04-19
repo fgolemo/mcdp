@@ -1,150 +1,138 @@
-import os
-
 import pyramid
 from pyramid.httpexceptions import HTTPFound
 from pyramid.security import remember, forget
 
-from mocdp import logger
-from collections import namedtuple
-import yaml
+from mcdp import logger
+from mcdp_web.environment import Environment
 
+from .environment import cr2e
+from .resource_tree import ResourceLogout, ResourceLogin, context_display_in_detail
+from .utils0 import add_std_vars_context
 
-USERS = {}
-
-GROUPS = {'editor': ['group:editors']}
-
-UserInfo = namedtuple('UserInfo', 
-                      ['username', 
-                       'name',
-                       'password',
-                       'email',
-                       'gravatar64',
-                       'gravatar32',
-                       ])
-
-def load_users(userdir):
-    if not os.path.exists(userdir):
-        msg = 'Directory %s does not exist' % userdir
-        Exception(msg)
-    for user in os.listdir(userdir):
-        if user.startswith('.'):
-            continue
-        info = os.path.join(userdir, user, 'user.yaml')
-        if not os.path.exists(info):
-            msg = 'Info file %s does not exist.'  % info
-            raise Exception(msg)
-        data = open(info).read()
-        s = yaml.load(data)
-        
-        res = {}
-        res['username'] = user
-        res['name'] = s['name']
-        res['password'] = s['password']
-        res['email'] = s['email']
-#         default = "https://www.example.com/default.jpg"
-        
-        res['gravatar64'] = gravatar(s['email'], size=64)
-        res['gravatar32'] = gravatar(s['email'], size=32)
-        struct = UserInfo(**res)
-        USERS[user] = struct
-        
-    print USERS
-        
-def gravatar(email, size, default=None):
-    # import code for encoding urls and generating md5 hashes
-    import urllib, hashlib
-    gravatar_url = "https://www.gravatar.com/avatar/" + hashlib.md5(email.lower()).hexdigest() + "?"
-    p = {}
-    p['s'] = str(size)
-    if default:
-        p['d'] = default
-    gravatar_url += urllib.urlencode(p)
-    return gravatar_url
 
 URL_LOGIN = '/login/'
+URL_LOGOUT = '/logout'
 
-class AppLogin():
+class AppLogin(object):
     def config(self, config):
-        config.add_route('login', URL_LOGIN)
-        config.add_view(self.login, route_name='login', renderer='login.jinja2',
+        config.add_view(self.login, context=ResourceLogin, renderer='login.jinja2',
                         permission=pyramid.security.NO_PERMISSION_REQUIRED)
 
-        config.add_route('logout', '/logout')
-        config.add_view(self.logout, route_name='logout', renderer='logout.jinja2',
+        config.add_view(self.logout, context=ResourceLogout, renderer='logout.jinja2',
                          permission=pyramid.security.NO_PERMISSION_REQUIRED)
 
         config.add_forbidden_view(self.view_forbidden, renderer='forbidden.jinja2')
-        
-        load_users(self.options.users)
-        
+
     def view_forbidden(self, request):
-        logger.error(request.url)
-        logger.error(request.referrer)
-        logger.error(request.exception.message)
-        logger.error(request.exception.result)
+        # if using as argument, context is the HTTPForbidden exception
+        context = request.context
+        e = Environment(context, request)
+        
+        logger.error('forbidden url: %s' % request.url)
+        logger.error('forbidden referrer: %s' % request.referrer)
+        logger.error('forbidden exception: %s' % request.exception.message)
+        logger.error('forbidden result: %s' % request.exception.result)
         request.response.status = 403
+        config = self.get_authomatic_config()
+        config['next_location'] = request.url
         res = {}
         res['request_exception_message'] = request.exception.message
         res['request_exception_result'] = request.exception.result
-        
         # path_qs The path of the request, without host but with query string
         res['came_from'] = request.path_qs
         res['referrer'] = request.referrer
         res['login_form'] = self.make_relative(request, URL_LOGIN)
-        res['root'] =  self.get_root_relative_to_here(request)
-        res['message'] = ''
-        res['error'] = 'You need to login to access this resource.'
-        print res
+        res['url_logout'] = self.make_relative(request, URL_LOGOUT)
+        res['root'] =   e.root
+        res['static'] = e.root + '/static'
+        # XXX DRY
+        providers = self.get_authomatic_config()
+        other_logins = {}
+        for x in providers:
+            other_logins[x] = e.root + '/authomatic/' + x
+        res['other_logins'] = other_logins
+
+        if context is not None:
+            res['context_detail'] =  context_display_in_detail(context)
+            logger.error(res['context_detail'])
+        else:
+            res['context_detail'] =  'no context provided'
+        
+        if e.username is not None:
+            #res['error'] = ''
+            res['user'] = e.user
+        else:
+            res['error'] = 'You need to login to access this resource.'
+            res['user'] = None
         return res
 
-
-    def login(self, request): 
-#         referrer = request.url
-#         if referrer == login_url:
-#             referrer = '/'  # never use login form itself as came_from
-#         if not 'came_from' in request.params:
-#             came_from = request.referrer
-#         else:
-        came_from = request.params['came_from']
-        print('came_from: %r' % came_from)
+    @add_std_vars_context
+    @cr2e
+    def login(self, e):  # @UnusedVariable
+        
+        user_db = self.hi.db_view.user_db
+                    
+                    
+        came_from = e.request.params.get('came_from', None)
+        if came_from is not None:
+            logger.info('came_from from params: %s' % came_from)
+        else:
+            came_from = e.request.referrer
+            if came_from is not None:
+                logger.info('came_from from referrer: %s' % came_from)
+            else:
+                msg = 'Cannot get referrer or "came_from" - using root'
+                logger.info(msg)
+                came_from = self.get_root_relative_to_here(e.request)
         message = ''
         error = ''
-        if 'form.submitted' in request.params:
-            login = request.params['login']
-            password = request.params['password']
-            if not login in USERS:
+        if 'form.submitted' in e.request.params:
+            login = e.request.params['login']
+            password = e.request.params['password']
+
+            
+            if not login in user_db:
                 error = 'Could not find user name "%s".' % login
             else:
-                password_expected = USERS[login].password
-                #if check_password(password, hashed):
-                if password == password_expected:
-                    headers = remember(request, login)
+                if user_db.authenticate(login, password):
+                    headers = remember(e.request, login)
                     logger.info('successfully authenticated user %s' % login)
-                    return HTTPFound(location=came_from, headers=headers)
+                    raise HTTPFound(location=came_from, headers=headers)
                 else:
                     error = 'Password does not match.'
         else: 
             login = None
-            
-        login_form = self.make_relative(request, URL_LOGIN)
-        if came_from.startswith('/'):
-            came_from = self.make_relative(request, came_from)
+             
+
         res = dict(
             name='Login',
             message=message,
             error=error,
-            login_form=login_form,
+            login_form= e.root + URL_LOGIN,
             came_from=came_from,
         )
         if login is not None:
             res['login'] = login
-        res['root'] =  self.get_root_relative_to_here(request)
         return res
 
     def logout(self, request):
+        logger.info('logging out')
         headers = forget(request)
+        logger.debug('headers: %s' % headers)
         came_from = request.referrer
-        return HTTPFound(location=came_from, headers=headers)
+        if came_from is None:
+            came_from = self.get_root_relative_to_here(request)
+        raise HTTPFound(location=came_from, headers=headers)
+
+def groupfinder(userid, request):  # @UnusedVariable
+    from mcdp_web.main import WebApp
+    app = WebApp.singleton
+    user_db = app.hi.db_view.user_db
+    if not userid in user_db:
+        msg = 'The user is authenticated as "%s" but no such user in DB.' % userid
+        logger.error(msg)
+        userid = None # anonymous 
+    return ['group:%s' % _ for _ in user_db[userid].groups]  
 # 
 # def hash_password(pw):
 #     pwhash = bcrypt.hashpw(pw.encode('utf8'), bcrypt.gensalt())
@@ -154,11 +142,4 @@ class AppLogin():
 #     expected_hash = hashed_pw.encode('utf8')
 #     return bcrypt.checkpw(pw.encode('utf8'), expected_hash)
 
-
-
-
-def groupfinder(userid, request):  # @UnusedVariable
-    if userid in USERS:
-        return GROUPS.get(userid, [])
-    
     

@@ -1,33 +1,21 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-# $Id$
 """
-GvGen - Generate dot file to be processed by graphviz
-Copyright (c) 2012 Sebastien Tricaud <sebastien at honeynet org>
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, version 2 of the License.
+Heavily modified by Andrea Censi for PyMCDP.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 """
 
 from sys import stdout
 from StringIO import StringIO
 
-gvgen_version = "1.0"
+gvgen_version = "2.0"
 
 debug = 0
 debug_tree_unroll = 0
 
-class GvGen():
+class GvGen(object):
     """
     Graphviz dot language Generation Class
     For example of usage, please see the __main__ function

@@ -1,0 +1,37 @@
+{% macro list_libraries_by_shelf(repo_name) %}
+{%  from 'add_library_button.jinja2' import add_library_button with context %}
+{%  from 'list_libraries_for_shelf.jinja2' import list_libraries_for_shelf with context %}
+<style>
+{# ul.shelves_list
+{
+    list-style: none;
+    padding: 0;
+}
+ul.shelves_list > li > *:first-child:before {
+    content: '{{icon_shelf_css|safe}}';
+    margin-right: 0.5em;
+} #}
+
+</style>
+<ul class='shelves_list'>
+    {% for shelf_name, shelf in navigation.repos[repo_name].shelves.items() %}
+        <li>
+
+            {{links.shelf(repo_name, shelf_name)}}
+
+        {# <a href='{{shelf_url(repo_name, shelf_name)}}'><code>{{shelf_name}}</code></a> #}
+
+            {% if shelf.libraries %}
+                {{list_libraries_for_shelf(repo_name, shelf_name)}}
+            {% else %}
+            <p>(No libraries)</p>
+            {% endif %}
+
+            {% if shelf_can_write(repo_name, shelf_name) %}
+            <p>{{add_library_button(repo_name, shelf_name)}}</p>
+            {%endif%}
+
+        </li>
+    {% endfor %}
+</ul>
+{% endmacro %}

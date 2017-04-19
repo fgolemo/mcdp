@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from mcdp_lang.parts import CDPLanguage
 from mcdp_lang.utils_lists import is_a_special_list
-from mocdp.exceptions import mcdp_dev_warning
+from mcdp.exceptions import mcdp_dev_warning
 
 
 __all__ = ['ast_to_mcdpl']

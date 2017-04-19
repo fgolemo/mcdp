@@ -5,11 +5,14 @@ import os
 from contracts.enabling import disable_all
 from contracts.utils import raise_desc
 from decent_params import UserError
-from mcdp_library import Librarian, MCDPLibrary
-from mocdp import logger
 from quickapp import QuickAppBase
-from system_cmd.interface import system_cmd_show
+from system_cmd import system_cmd_show
+
+from mcdp import MCDPConstants, logger, mcdp_dev_warning
+from mcdp_library import Librarian
 from mcdp_report.html import get_css_filename
+
+from .minimal_doc import get_minimal_document
 
 
 class Render(QuickAppBase):
@@ -75,7 +78,7 @@ class Render(QuickAppBase):
                 docname0 = os.path.split(docname)[-1]
                 logger.info("Using %r rather than %r" % (docname0, docname))
                 docname = docname0
-            suffix =  '.' + MCDPLibrary.ext_doc_md
+            suffix =  '.' + MCDPConstants.ext_doc_md
             if docname.endswith(suffix):
                 docname = docname.replace(suffix, '')
             basename = docname + suffix
@@ -99,20 +102,23 @@ def run_prince(html_filename):
     cwd = '.'
     cmd = ['prince', 
            '-o', pdf, 
-           html_filename]
-#     try:
+           html_filename] 
     system_cmd_show(cwd, cmd)
     
     cwd = os.getcwd()
     rel = os.path.relpath(pdf, cwd)
-    logger.info('Written %s' % rel)
-#     finally:
-#         if os.path.exists(pdf):
-#             os.unlink(pdf)
-#     
+    logger.info('Written %s' % rel) 
+    
+    
 def render(library, docname, data, realpath, out_dir, generate_pdf, stylesheet):
-    from mcdp_web.renderdoc.highlight import get_minimal_document
-    from mcdp_web.renderdoc.main import render_complete
+    
+    if MCDPConstants.pdf_to_png_dpi < 300:
+        msg =( 'Note that pdf_to_png_dpi is set to %d, which is not suitable for printing'
+               % MCDPConstants.pdf_to_png_dpi)
+        mcdp_dev_warning(msg)
+
+
+    from mcdp_docs.pipeline import render_complete
 
     out = os.path.join(out_dir, docname + '.html')
     
@@ -121,6 +127,7 @@ def render(library, docname, data, realpath, out_dir, generate_pdf, stylesheet):
                                     generate_pdf=generate_pdf)
 
     title = docname
+    
     doc = get_minimal_document(html_contents, title=title, stylesheet=stylesheet,
                                add_markdown_css=True, add_manual_css=True)
 

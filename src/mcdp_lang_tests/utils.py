@@ -9,7 +9,7 @@ from mcdp_lang.parse_actions import parse_wrap, parse_wrap_filename
 from mcdp_lang.parse_interface import parse_ndp, parse_ndp_filename
 from mocdp.comp.interfaces import NamedDP
 from mocdp.comp.wrap import SimpleWrap
-from mocdp.exceptions import DPSemanticError, DPSyntaxError, DPNotImplementedError
+from mcdp.exceptions import DPSemanticError, DPSyntaxError, DPNotImplementedError
 from mcdp_lang.find_parsing_el import ParsingElement, find_parsing_element
 
 

@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
-from comptests.registrar import comptest
 from contracts.utils import raise_desc, indent
+
+from comptests.registrar import comptest, run_module_tests, comptest_fails
+from mcdp_docs.mark.markdown_transform import censor_markdown_code_blocks
+from mcdp_docs.minimal_doc import get_minimal_document
+from mcdp_docs.pipeline import render_complete
+from mcdp_docs.prerender_math import TAG_DOLLAR
 from mcdp_library.library import MCDPLibrary
-from mcdp_web.renderdoc.highlight import get_minimal_document
-from mcdp_web.renderdoc.main import render_complete
-from mcdp_web.renderdoc.markdown_transform import censor_markdown_code_blocks
-from mcdp_lang_tests.syntax_spaces import indent_plus_invisibles
+from mcdp_utils_misc.string_repr import indent_plus_invisibles
 
 
 def tryit(s, write_to=None, forbid=[]):
@@ -27,7 +29,7 @@ def tryit(s, write_to=None, forbid=[]):
      'warn_centering': not 'centering' in s2,
      'warn_tabular': not 'tabular' in s2,
      'funny': not '&amp;#96;' in s2,
-     'dollarfix': not 'DOLLAR' in s2,
+     'dollarfix': not TAG_DOLLAR in s2,
 #     assert not '&#96;' in s2
 #     assert not '&amp;' in s2
 
@@ -146,7 +148,7 @@ That is, $F=\mathbb{R}_{+}^{[\text{J}]}$ and $R=\mathbb{R}_{+}^{[\text{g}]}$.
 
 and $c=d_e$ and ``code_b`` and <code>a_b</code>. 
 """
-    s2 = tryit(s, write_to="f3.html", forbid=['<em'])
+    tryit(s, write_to="f3.html", forbid=['<em'])
 #     print s2
     
     
@@ -161,7 +163,7 @@ Try:
 $$%s$$
 
 """ % (m, m)
-    s2 = tryit(s, write_to="f4.html",
+    tryit(s, write_to="f4.html",
                forbid=['<em'])
     
 @comptest
@@ -175,7 +177,7 @@ is the maximum cardinality of a chain in~$\\posA$.
 \\end{defn}
 
 """
-    s2 = tryit(s, write_to="f52.html")
+    tryit(s, write_to="f52.html")
 
 @comptest
 def conv_f5():
@@ -190,8 +192,7 @@ This is code: ``two``
 Should be fine <strong>&#96;bold</strong> and <strong>`brave</strong>.
 
 """
-    s2 = tryit(s, write_to="f5.html",
-               forbid=['&gt;'])
+    tryit(s, write_to="f5.html", forbid=['&gt;'])
     
 
 @comptest
@@ -431,8 +432,47 @@ plus completeness is sufficient to ensure existence.
     
     assert not 'censored-code' in s
 
+
+
+@comptest
+def no_dollar():
+    # four spaces in the first line
+    s = r"""
+    
+<col2>
+    <span>&#36;</span> <span>alphanumeric</span>
+    <code>a₆</code> <code>a_6</code>
+    <code>&#36;</code> <code>USD</code>
+    <code>×</code> <code>x</code>
+</col2>
+
+"""
+    s2 = tryit(s)
+    
+#     print('original:')
+#     print indent_plus_invisibles(s)
+#     print('later:')
+#     print indent_plus_invisibles(s2)
+#     
+    assert not 'DOLLAR' in s2
+    
+
+@comptest_fails
+def splittag():
+    # four spaces in the first line
+    s = r"""
+        
+Please send any comments, suggestions, or bug reports to <a
+href="mailto:censi@mit.edu">censi@mit.edu</a>.
+
+"""
+    s2 = tryit(s) 
+    print s2
+    
+    sub = r"""<p>Please send any comments, suggestions, or bug reports to <a href="mailto:censi@mit.edu">censi@mit.edu.</p>"""
+    assert sub in s2
     
 if __name__ == '__main__': 
-    another2()
-#     run_module_tests()
+#     another2()
+    run_module_tests()
     

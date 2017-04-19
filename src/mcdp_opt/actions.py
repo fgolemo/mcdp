@@ -3,12 +3,13 @@ from abc import ABCMeta, abstractmethod
 
 from contracts import contract
 from contracts.utils import check_isinstance, raise_desc
+
 from mcdp_opt.context_utils import clone_context
 from mcdp_posets.uppersets import upperset_product_multi, upperset_project
 from mocdp.comp.context import CFunction, CResource, Connection
 
 
-class Action():
+class Action(object):
 
     __metaclass__ = ABCMeta
 

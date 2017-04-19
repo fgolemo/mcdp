@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import os
-if 'raise_if_test_included' in os.environ:
-    raise Exception()
 
 """
     
@@ -16,10 +14,10 @@ if 'raise_if_test_included' in os.environ:
     
     These two make sure that you can parse and NDP, and if it is connected or not:
     
-    assert_parsable_to_connected_ndp
-    assert_parsable_to_unconnected_ndp
-    assert_parse_ndp_semantic_error(string, contains)
-    
+        assert_parsable_to_connected_ndp
+        assert_parsable_to_unconnected_ndp
+        assert_parse_ndp_semantic_error(string, contains)
+        
     Also useful:
         
         eval_rvalue_as_constant
@@ -78,3 +76,6 @@ from .special_letters import *
 from .detection_unused_constants import *
 from .corrections import *
 from .constants import *
+from .syntax_new_uncertainty import *
+
+from .syntax_sum import *

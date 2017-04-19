@@ -1,26 +1,32 @@
-
 body {
-    font-size: 100%;
+    background-color: white;
+    // font-family: "Lucida Grande", "Tahoma";
+    // font-family: "Georgia";
+    font-family: "Input Serif";
+    font-family: "PT Sans";
+    font-family:"Trebuchet MS",Tahoma,Verdana,Arial,sans-serif;
+    // font-size: 10pt;
+    // font-size: 100%;
 }
-.ui-button { padding: 3px !important; }
-.ui-widget { font-size: 80%; } // was 1.1 em
+
+// was 1.1 em
 // because bold
 
 .unicode-icons {
-    font-size: 50%;
+    // font-size: 50%;
     margin-bottom: -5px;
     margin-top: -5px;
     margin-right: 0.5em;
 }
-
+//
 a {
     text-decoration: none;
 }
-a:hover {
-    background-color: #fff8c7;
-    color: blue;
-}
 
+a:hover {
+    // background-color: #fff8c7;
+    // color: blue;
+}
 //
 // @font-face {
 //     font-family: monospace;
@@ -33,3 +39,17 @@ pre code {
     // Lucida Console is a good font for Windows (other is courier)
     font-family: "Anka/Coder Narrow", "Lucida Console", monospace;
 }
+
+.tip { display: none; }
+.tip {
+    border-radius: 5px;
+    padding: 5px;
+    background: #73AD21;
+    color: white;
+    max-width: 20em;
+}
+.tip button {
+    // float: right;
+}
+
+ul { padding-left: 2em; }

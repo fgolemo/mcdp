@@ -1,18 +1,21 @@
 # -*- coding: utf-8 -*-
+import codecs
+from contextlib import contextmanager
 import os
 import shutil
 import tempfile
 
-from mcdp_library import MCDPLibrary
+from contracts.utils import check_isinstance
+
+from mcdp import MCDPConstants
+from mcdp import logger
+from mcdp.exceptions import mcdp_dev_warning, DPSyntaxError
+from mcdp_docs.minimal_doc import get_minimal_document
+from mcdp_docs.pipeline import render_complete
 from mcdp_library.library_utils import list_library_files
 from mcdp_library_tests.tests import enumerate_test_libraries, get_test_library
-from mcdp_web.renderdoc.highlight import get_minimal_document
-from mcdp_web.renderdoc.main import render_complete
+from mcdp_utils_misc.fileutils import get_mcdp_tmp_dir
 from mcdp_web_tests.test_server import test_mcdpweb_server
-from mocdp import get_mcdp_tmp_dir, logger
-from mocdp.exceptions import mcdp_dev_warning, DPSyntaxError
-from contracts.utils import check_isinstance
-from contextlib import contextmanager
 
 
 def define_tests_mcdp_web(context):
@@ -35,7 +38,7 @@ def define_tests_mcdp_web(context):
 def define_tests_rendering(context, libname):
     library = get_test_library(libname)
     
-    ext = MCDPLibrary.ext_doc_md
+    ext = MCDPConstants.ext_doc_md
     for docname, realpath in list_library_files(library, ext):
         job_id = 'render-%s' % docname
         context.comp(check_rendering, libname=libname, filename=realpath, job_id=job_id)
@@ -45,7 +48,6 @@ def read_file_encoded_as_utf8(filename):
     s = u.encode('utf-8')
     return s
 
-import codecs
     
 def write_file_encoded_as_utf8(filename, data):
     check_isinstance(data, str)

@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
 import cgi
 
-from mcdp_web.utils0 import add_std_vars
+from mcdp_web.environment import cr2e
+from mcdp_web.resource_tree import ResourceLibraryInteractiveValue, ResourceLibraryInteractiveValueParse
+from mcdp_web.utils.ajax_errors import ajax_error_catch
+from mcdp_web.utils0 import add_std_vars_context
 
 
-class AppInteractive():
+class AppInteractive(object):
     """
         /libraries/{library}/interactive/mcdp_value/
         /libraries/{library}/interactive/mcdp_value/parse
@@ -17,33 +20,29 @@ class AppInteractive():
         pass
 
     def config(self, config):
-        base = '/libraries/{library}/interactive/'
-
-        config.add_route('mcdp_value', base + 'mcdp_value/')
-        config.add_view(self.view_mcdp_value, route_name='mcdp_value', 
+        config.add_view(self.view_mcdp_value, context=ResourceLibraryInteractiveValue, 
                         renderer='interactive/interactive_mcdp_value.jinja2')
-        config.add_route('mcdp_value_parse', base + 'mcdp_value/parse')
-        config.add_view(self.view_mcdp_value_parse, route_name='mcdp_value_parse',
+        config.add_view(self.view_mcdp_value_parse, 
+                        context=ResourceLibraryInteractiveValueParse,
                         renderer='json')
 
-    @add_std_vars
-    def view_mcdp_value(self, request):  # @UnusedVariable
+    @add_std_vars_context
+    def view_mcdp_value(self, context, request):  # @UnusedVariable
         return {}
+    @cr2e
+    def view_mcdp_value_parse(self, e):
+        
 
-    def view_mcdp_value_parse(self, request):
-        from mcdp_web.solver.app_solver import ajax_error_catch
-
-        string = request.json_body['string']
+        string = e.request.json_body['string']
         assert isinstance(string, unicode)
         string = string.encode('utf-8')
 
         def go():
-            return self.parse(request, string)
-        return ajax_error_catch(go)
+            return self.parse(e, string)
+        return ajax_error_catch(go, environment=e)
 
-    def parse(self, request, string):
-        l = self.get_library(request)
-        result = l.parse_constant(string)
+    def parse(self, e, string): 
+        result = e.library.parse_constant(string)
 
         space = result.unit
         value = result.value
