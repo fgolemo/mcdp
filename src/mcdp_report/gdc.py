@@ -258,6 +258,7 @@ def choose_best_icon(iconoptions, image_source):
     ''' Returns the name of a file, or None. '''
 #     logger.debug('Looking for %s in %s.' % (str(iconoptions), imagepaths))
     exts = MCDPConstants.exts_for_icons
+    errors = []
     for option in iconoptions:
         if option is None:
             continue
@@ -265,8 +266,8 @@ def choose_best_icon(iconoptions, image_source):
         for ext in exts:
             try: 
                 data = image_source.get_image(option, ext)
-            except KeyError:
-                pass
+            except KeyError as e:
+                errors.append(e)
             else:
                 temp_file = NamedTemporaryFile(suffix='.'+ext,delete=False)
                 with open(temp_file.name, 'wb') as f:

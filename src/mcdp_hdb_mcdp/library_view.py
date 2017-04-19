@@ -4,8 +4,9 @@ from mocdp.comp.context import Context
 from contracts import contract
 from mcdp_utils_misc.string_utils import format_list
 from mcdp.exceptions import DPSemanticError
-from contracts.utils import raise_desc
+from contracts.utils import raise_desc, raise_wrapped
 from mcdp_library.specs_def import specs
+from mcdp.logs import logger
 
 
 __all__ = [
@@ -86,7 +87,10 @@ class TheContextLibrary(MCDPLibrary):
         shelf = self.the_context.db_view.repos[self.repo_name].shelves[self.shelf_name]
         library = shelf.libraries[self.library_name]
         things = library.things.child(spec_name)
-        if not thing_name in things:
+        
+        try:
+            match = get_soft_match(thing_name, list(things))
+        except KeyError as e:
             msg = 'Could not find %r in %s.' % (thing_name, spec_name)
             available = sorted(things)
 
@@ -95,12 +99,17 @@ class TheContextLibrary(MCDPLibrary):
                         (spec_name, format_list(sorted(available))))
             else:
                 msg += " None of those found."
-            raise ValueError(msg)
-            raise_desc(DPSemanticError, msg)
+            
+            raise_wrapped(DPSemanticError, e, msg, compact=True)
         else:
-            data = things[thing_name]
+            
+            if match != thing_name:
+                logger.warning('Soft matching %r to %r (deprecated)' % (match, thing_name))
+                # TODO: add warning 
+                
+            data = things[match]
             spec = specs[spec_name]
-            basename  = thing_name + '.' + spec.extension
+            basename  = match + '.' + spec.extension
             realpath = '%s in library %r in shelf %r in repo %r' % (basename, self.library_name,
                                                                     self.shelf_name, self.repo_name) 
             return dict(data=data, realpath=realpath)
@@ -111,4 +120,18 @@ class TheContextLibrary(MCDPLibrary):
     @contextmanager
     def _sys_path_adjust(self):
         yield
-        
+
+def get_soft_match(x, options):
+    ''' Get a soft match or raise KeyError '''
+    options = list(options)
+    res = []
+    for o in options:
+        if x.lower() == o.lower():
+            res.append(o)
+    if not res:
+        msg = 'Could not find any soft match for "%s" in %s.' % (o, format_list(options))
+        raise KeyError(msg)
+    if len(res) > 1:
+        msg = 'Too many matches %s for "%s" in %s.' % (format_list(res), o, format_list(options))
+        raise KeyError(msg)
+    return res[0]

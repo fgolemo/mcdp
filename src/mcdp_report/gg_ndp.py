@@ -174,7 +174,11 @@ def gvgen_from_ndp(ndp, style='default', direction='LR', images_paths=None, your
 
     gg.styleAppend("sum", "shape", "box")
     gg.styleAppend("sum", "style", "rounded")
-    gg.styleAppend('sum', 'image', gdc.get_icon(['sum']))
+    sum_icon = gdc.get_icon(['sum'])
+    if sum_icon is None:
+        msg = 'Could not find icon for sum.'
+        raise Exception(msg)
+    gg.styleAppend('sum', 'image', sum_icon)
     gg.styleAppend('sum', 'imagescale', 'true')
     gg.styleAppend('sum', 'fixedsize', 'true')
 
