@@ -8,23 +8,24 @@ from mocdp.comp.template_for_nameddp import TemplateForNamedDP
 from mcdp.exceptions import mcdp_dev_warning, DPNotImplementedError
 
 
-def get_png_data_model(image_source, name, ndp, data_format): 
-    mf = MakeFiguresNDP(ndp=ndp, image_source=image_source, yourname=name)
+def get_png_data_model(image_source, name, thing, data_format, library):  # @UnusedVariable
+    mf = MakeFiguresNDP(ndp=thing, image_source=image_source, yourname=name)
     f = 'fancy_editor' 
     res = mf.get_figure(f, data_format)
     return res
 
-def get_png_data_syntax_model(image_source, name, ndp, data_format):
-    mf = MakeFiguresNDP(ndp=ndp, image_source=image_source, yourname=name)
+def get_png_data_syntax_model(image_source, name, thing, data_format, library):  # @UnusedVariable
+    mf = MakeFiguresNDP(ndp=thing, image_source=image_source, yourname=name)
     f = 'ndp_graph_enclosed_TB' 
     res = mf.get_figure(f, data_format)
     return res
 
-def ndp_template_enclosed(library, name, x, data_format):
+# Note this needs also library
+def ndp_template_enclosed(image_source, name, thing, data_format, library):
     from mcdp_report.gdc import STYLE_GREENREDSYM
 
-    return ndp_template_graph_enclosed(library, x, style=STYLE_GREENREDSYM, yourname=name,
-                                       data_format=data_format, direction='TB', enclosed=True)
+    return ndp_template_graph_enclosed(image_source=image_source, template=thing, style=STYLE_GREENREDSYM, yourname=name,
+                                       data_format=data_format, direction='TB', enclosed=True, library=library)
 
 def ndp_template_graph_enclosed(library, template, style, yourname, data_format, direction, enclosed, image_source):
     assert isinstance(template, TemplateForNamedDP)
@@ -41,15 +42,15 @@ def ndp_template_graph_enclosed(library, template, style, yourname, data_format,
                         image_source=image_source, yourname=yourname)
     return gg_get_format(gg, data_format)
     
-def get_png_data_poset(image_source, name, x, data_format):
+def get_png_data_poset(image_source, name, thing, data_format, library):
     _ = name 
-    if isinstance(x, FinitePoset):
-        mf = MakeFiguresPoset(x, image_source=image_source)
+    if isinstance(thing, FinitePoset):
+        mf = MakeFiguresPoset(thing, image_source=image_source)
         f = 'hasse_icons' 
         res = mf.get_figure(f, data_format)
         return res
     else:
-        return image_from_string(str(x), data_format) 
+        return image_from_string(str(thing), data_format) 
         
 def create_svg_with_string(x):
     svg="""<svg height="30" width="200">
@@ -65,5 +66,5 @@ def image_from_string(s, data_format):
     else:
         raise DPNotImplementedError(data_format)
     
-def get_png_data_unavailable(library, name, x, data_format):  # @UnusedVariable
-    return image_from_string(str(x), data_format) 
+def get_png_data_unavailable(image_source, name, thing, data_format, library):  # @UnusedVariable
+    return image_from_string(str(thing), data_format) 

@@ -851,10 +851,11 @@ class WebApp(AppVisualization, AppStatus,
     @cr2e
     def view_thing_delete(self, e):
         name = e.thing_name
-        basename = "%s.%s" % (name, e.spec.extension)
-        logger.error('Deleting %s' % basename)
-        filename = e.library.delete_file(basename)
-        e.session.notify_deleted_file(e.shelf_name, e.library_name, filename)
+#         basename = "%s.%s" % (name, e.spec.extension)
+        logger.error('Deleting %s' % name)
+        del e.things[name]
+#         filename = e.library.delete_file(basename)
+#         e.session.notify_deleted_file(e.shelf_name, e.library_name, filename)
         raise HTTPFound(e.request.referrer)
 
 

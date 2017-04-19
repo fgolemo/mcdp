@@ -52,10 +52,12 @@ class Environment(object):
         if rspec is None:
             self.spec_name = None
             self.spec = None
+            self.things = None
         else:
             self.spec_name = rspec.specname
             self.spec = specs[self.spec_name]
-
+            self.things = self.library.things.child(self.spec_name)
+        
         rthing = get_from_context(ResourceThing, context)
         if rthing is None:
             self.thing_name = None

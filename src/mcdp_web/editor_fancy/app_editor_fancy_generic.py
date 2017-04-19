@@ -2,7 +2,6 @@
 import cgi
 from collections import defaultdict
 import json
-import os
 
 from contracts.utils import check_isinstance
 from pyramid.httpexceptions import HTTPFound
@@ -53,15 +52,12 @@ class AppEditorFancyGeneric(object):
         def go():
             db_view = e.app.hi.db_view
             library = db_view.repos[e.repo_name].shelves[e.shelf_name].libraries[e.library_name]
-#             things = library.things[e.spec_name]
             things = library.things.child(e.spec_name)
-            things[e.thing_name] = string
-#             e.library.write_spec(e.spec_name, e.thing_name, string)
-#             print('committing repo on save %s' % e.repo)
-#             e.repo.commit(e.user)
+            things[e.thing_name] = string 
             return {'ok': True, 'saved_string': string}
     
         return ajax_error_catch(go, environment=e)
+    
     @cr2e
     def ajax_parse(self, e):
         string = get_text_from_request2(e.request)
@@ -82,7 +78,6 @@ class AppEditorFancyGeneric(object):
             return res
 
         return ajax_error_catch(go, environment=e)
-
 
     @add_std_vars_context
     @cr2e
@@ -110,6 +105,7 @@ class AppEditorFancyGeneric(object):
         
         def go():
             image_source = image_source_from_env(e)
+            library = library_from_env(e)
             
             with timeit_wall('graph_generic', 1.0):
                 key = (e.library_name, e.spec.url_part, e.thing_name, text_hash)
@@ -125,11 +121,11 @@ class AppEditorFancyGeneric(object):
                         return response_image(e.request, 'Could not parse.')
     
                 with timeit_wall('graph_generic - get_png_data', 1.0):
-#                     def get_png_data_model(image_source, name, ndp, data_format):
-                    data = e.spec.get_png_data(image_source,
-                                               e.thing_name, 
-                                               thing, 
-                                               data_format)
+                    data = e.spec.get_png_data(image_source=image_source,
+                                               name=e.thing_name, 
+                                               thing=thing, 
+                                               data_format=data_format,
+                                               library=library)
                 mime = get_mime_for_format(data_format)
                 return response_data(e.request, data, mime)
         return self.png_error_catch2(e.request, go)
@@ -142,31 +138,17 @@ class AppEditorFancyGeneric(object):
         basename = '%s.%s' % (new_thing_name, e.spec.extension)
         url_edit = '../%s/views/edit_fancy/' % new_thing_name
     
-        if e.library.file_exists(basename):
+        if new_thing_name in e.things:
             error = 'File %r already exists.' % basename
             template = 'editor_fancy/error_model_exists_generic.jinja2'
             res = {'error': error, 'url_edit': url_edit,
-                      'widget_name': new_thing_name, 'root': e.root}
+                      'widget_name': new_thing_name, 'root': e.root,
+                      'static': 'XXX'} # XXX
             e.request.response.status = 409 # Conflict
             return render_to_response(template, res, request=e.request, response=e.request.response)
-    
-        else:
-            path = e.session.librarian.libraries[e.library_name]['path']
+        else: 
             source = e.spec.minimal_source_code
-            filename = os.path.join(path, 'created', basename)
-    
-            d = os.path.dirname(filename)
-            if not os.path.exists(d):
-                os.makedirs(d)
-    
-            logger.info('Writing to file %r.' % filename)
-            with open(filename, 'w') as f:
-                f.write(source)
-    
-            e.library._update_file_from_editor(filename)
-            print('committing %s' % e.repo)
-            e.repo.commit(e.user)
-    
+            e.things[new_thing_name] = source 
             raise HTTPFound(url_edit)
 
 

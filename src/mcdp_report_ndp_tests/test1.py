@@ -23,6 +23,8 @@ from mcdp.exceptions import DPInternalError
 from mcdp_utils_misc.memoize_simple_imp import memoize_simple
 from mocdp.ndp.named_coproduct import NamedDPCoproduct
 from reprep import Report
+from mcdp_report.image_source import ImagesFromPaths
+from mcdp.logs import logger
 
 
 class ValueMissing(Exception):
@@ -291,13 +293,14 @@ def plot_different_solutions(libname, ndpname, query, out, upper=None):
 
         for j, m in enumerate(ms):
             imp_dict = get_imp_as_recursive_dict(M, m)
-            print imp_dict
+            logger.info(imp_dict)
 
             images_paths = library.get_images_paths()
+            image_source = ImagesFromPaths(images_paths)
             gv = GetValues(ndp=ndp, imp_dict=imp_dict, nu=upper, nl=1)
 
             gg = gvgen_from_ndp(ndp=ndp, style=STYLE_GREENREDSYM,
-                                images_paths=images_paths,
+                                image_source=image_source,
                                 plotting_info=gv)
 
             with report.subsection('%s-%s' % (ri, j)) as rr:

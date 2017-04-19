@@ -21,7 +21,6 @@ from mcdp_web.utils0 import add_other_fields, add_std_vars_context
 from mocdp.comp.context import Context
 
 from .add_html_links_imp import add_html_links
-from mcdp_hdb_mcdp.library_view import TheContext
 from mcdp_web.context_from_env import library_from_env, image_source_from_env
 
 
@@ -133,7 +132,7 @@ def generate_view_syntax(e, make_relative):
                 
             svg_data = get_svg_for_visualization(e, image_source, e.library_name, e.spec, 
                                                      e.thing_name, thing, Tmp.refined, 
-                                                     make_relative)
+                                                     make_relative, library=mcdp_library)
         except (DPSemanticError, DPNotImplementedError) as exc:
             print exc
             from mcdp_web.editor_fancy.app_editor_fancy_generic import html_mark
@@ -195,9 +194,10 @@ def add_html_links_to_svg(svg, link_for_dpname):
                 
         
 # with timeit_wall('graph_generic - get_png_data', 1.0):
-def get_svg_for_visualization(e, image_source, library_name, spec, name, thing, refined, make_relative):
+def get_svg_for_visualization(e, image_source, library_name, spec, name, thing, refined, make_relative, library):
 
-    svg_data0 = spec.get_png_data_syntax(image_source, name, thing, data_format='svg')
+    svg_data0 = spec.get_png_data_syntax(image_source=image_source, name=name, thing=thing, data_format='svg',
+                                         library=library)
     
     fragment = bs(svg_data0)
     if fragment.svg is None:
