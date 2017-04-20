@@ -173,7 +173,7 @@ def gvgen_from_ndp(ndp, style='default', direction='LR', images_paths=None, your
 
     gg.styleAppend("sum", "shape", "box")
     gg.styleAppend("sum", "style", "rounded")
-    sum_icon = gdc.get_icon(['sum_____'], raise_if_not_found=True)
+    sum_icon = gdc.get_icon(['sum'], raise_if_not_found=True)
     gg.styleAppend('sum', 'image', sum_icon)
     gg.styleAppend('sum', 'imagescale', 'true')
     gg.styleAppend('sum', 'fixedsize', 'true')
