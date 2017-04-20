@@ -7,7 +7,7 @@ from mcdp_report.gdc import choose_best_icon
 
 from .figure_interface import MakeFigures
 from .formatters import GGFormatter
-from mcdp_report.image_source import NoImages
+from mcdp_report.image_source import NoImages, NoImageFound
 
 
 __all__ = [
@@ -63,17 +63,18 @@ class PosetHasse(GGFormatter):
         e2n = {}
         for e in poset.elements:
             iconoptions = [e]
-            icon = choose_best_icon(iconoptions, image_source)
-            if icon is not None:
+            try:
+                icon = choose_best_icon(iconoptions, image_source)
+            except NoImageFound:
+                label = e
+            else:
                 from mcdp_report.gdc import resize_icon
                 resized = resize_icon(icon, 100)
 
                 label = ("<TABLE CELLBORDER='0' BORDER='0'><TR><TD>%s</TD></TR>"
                 "<TR><TD><IMG SRC='%s' SCALE='TRUE'/></TD></TR></TABLE>")
                 label = label % (e, resized)
-
-            else:
-                label = e
+                
             
             n = gg.newItem(label)
             e2n[e] = n

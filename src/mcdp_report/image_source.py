@@ -5,6 +5,9 @@ import os
 from contracts import contract
 from contracts.utils import indent
 
+class NoImageFound(Exception):
+    pass
+
 class ImagesSource(object):
     __metaclass__ = ABCMeta
     
@@ -16,13 +19,13 @@ class ImagesSource(object):
         
             data_format: one of jpg,png,pdf,svg
             
-            Raise KeyError if such image is not found. 
+            Raise NoImageFound if such image is not found. 
         '''
         
 class NoImages(ImagesSource):
     def get_image(self, name, data_format):
         msg = 'NoImages: not found %s %s' % (name, data_format)
-        raise KeyError(msg)
+        raise NoImageFound(msg)
             
 class ImagesFromPaths(ImagesSource):
     @contract(paths='seq(str)')
@@ -36,7 +39,9 @@ class ImagesFromPaths(ImagesSource):
             if os.path.exists(fn):
                 return open(fn).read()
         msg = 'Could not find %s.%s in %d paths.' % (name, data_format, len(self.paths))
-        raise KeyError(msg)
+        for p in self.paths:
+            msg += '\n path: %s' % p
+        raise NoImageFound(msg)
 
 class ImagesFromDB(ImagesSource):
     
@@ -73,7 +78,7 @@ class ImagesFromDB(ImagesSource):
                         if data is not None:
                             return data
         msg = 'Could not find image %s %s' % (name, data_format)
-        raise KeyError(msg)
+        raise NoImageFound(msg)
         
 class TryMany(ImagesSource):
     
@@ -85,11 +90,11 @@ class TryMany(ImagesSource):
         for source in self.sources:
             try:
                 return source.get_image(name, data_format)
-            except KeyError as e:
+            except NoImageFound as e:
                 errors.append(e)
         msg = 'Could not find %s.%s in %d sources.' % (name, data_format, len(self.sources))
         for i, e in enumerate(errors):
             msg += '\n' + indent(str(e), '%d> ' % i) 
-        raise KeyError(msg)
+        raise NoImageFound(msg)
         
         
