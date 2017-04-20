@@ -4,6 +4,9 @@ import os
 
 from contracts import contract
 from contracts.utils import indent
+from mcdp_utils_misc.memoize_simple_imp import memoize_simple
+from mcdp_utils_misc.locate_files_imp import locate_files
+from mcdp.logs import logger
 
 class NoImageFound(Exception):
     pass
@@ -35,13 +38,38 @@ class ImagesFromPaths(ImagesSource):
     def get_image(self, name, data_format):
         extension = data_format
         for p in self.paths:
-            fn = os.path.join(p, '%s.%s' % (name, extension))
-            if os.path.exists(fn):
-                return open(fn).read()
+            for fn in _list_files_with_extension(p, extension):
+                bn = os.path.basename(fn)
+                x = os.path.splitext(bn)[0]
+                
+                if x.lower() == name.lower():
+                    if x != name:
+                        msg = 'Using file "%s" for image "%s", even though case does not match.' % (bn, name)
+                        _warn_once(msg)
+                    
+                    if os.path.exists(fn):
+                        return open(fn).read()
+                    else:
+                        # warn broken link
+                        msg = 'Filename does not exist (broken link?): %s' % fn
+                        logger.debug(msg)
+                         
         msg = 'Could not find %s.%s in %d paths.' % (name, data_format, len(self.paths))
         for p in self.paths:
             msg += '\n path: %s' % p
         raise NoImageFound(msg)
+
+@memoize_simple
+def _warn_once(msg):
+    logger.warning(msg)
+    
+@memoize_simple
+def _list_files_with_extension(dirname, extension):
+    ''' List all files in the given directory with an extension.
+        The result is cached. '''
+    pattern = '*.%s' % extension
+    res = list(locate_files(dirname, pattern))
+    return res
 
 class ImagesFromDB(ImagesSource):
     
