@@ -43,6 +43,7 @@ def decorator_check_exception_where_is_string(f):
                     msg += '\n' + indent(traceback.format_exc(e), 'e > ')
                     raise DPInternalError(msg)
             raise
+    return parse
 
 @decorator_check_exception_where_is_string
 def parse_ndp(string, context=None):

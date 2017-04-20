@@ -10,7 +10,8 @@ from contracts.utils import (check_isinstance, format_obs, raise_desc,
                              raise_wrapped)
 
 from mcdp import logger, MCDPConstants
-from mcdp.exceptions import DPSemanticError, MCDPExceptionWithWhere
+from mcdp.exceptions import DPSemanticError, MCDPExceptionWithWhere,\
+    DPInternalError
 from mcdp_lang import parse_ndp, parse_poset
 from mcdp_utils_misc import assert_good_plain_identifier, format_list, get_mcdp_tmp_dir, memo_disk_cache2, locate_files
 from mocdp.comp.context import Context
@@ -143,7 +144,11 @@ class MCDPLibrary(object):
     def load_spec(self, spec_name, thing_name, context=None):
         from mcdp_library.specs_def import specs
         spec = specs[spec_name]
-        res = self._load_generic(thing_name, spec_name, spec.parse, context)
+        parsing_function = spec.parse
+        if parsing_function is None:
+            msg = 'Cannot parse %s because the parsing function is not given.' % spec_name
+            raise DPInternalError(msg)
+        res = self._load_generic(thing_name, spec_name, parsing_function, context)
         check_isinstance(res, spec.klass)
         return res
 
@@ -269,7 +274,8 @@ class MCDPLibrary(object):
             sys.path = previous
 
     def _parse_with_hooks(self, parse_ndp_like, string, realpath, context):
-        
+        assert parse_ndp_like is not None
+            
         with self._sys_path_adjust(): 
             context_mine = self._generate_context_with_hooks()
             try:
