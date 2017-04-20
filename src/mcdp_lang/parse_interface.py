@@ -1,16 +1,19 @@
 # -*- coding: utf-8 -*-
 """ Contains the main parsing interface """
 import sys
+import traceback
 
 from contracts import contract
+from contracts.utils import check_isinstance, indent
+
+from mcdp import logger
+from mcdp.exceptions import MCDPExceptionWithWhere, DPInternalError,\
+    DPSemanticError
 from mcdp_dp import PrimitiveDP
 from mcdp_posets import Poset
-from mcdp import logger
-from mcdp.exceptions import MCDPExceptionWithWhere
 
 from .parse_actions import parse_wrap
 from .refinement import apply_refinement
-from contracts.utils import check_isinstance
 
 
 __all__ = [
@@ -22,6 +25,26 @@ __all__ = [
     'parse_template',
 ]
 
+def decorator_check_exception_where_is_string(f):
+    ''' Checks that if a DPSemanticError is thrown, it
+        has a reference to the current string being parsed.
+        
+        f(string, context)
+    '''
+    def parse(string, context):
+        try:
+            return f(string, context)
+        except DPSemanticError as e:
+            if e.where is not None:
+                if e.where.string != string:
+                    msg = 'I expected this error to refer to somewhere in this string.'
+                    msg += '\n string: %r' % string
+                    msg += '\n e.where.string: %r' % e.where.string
+                    msg += '\n' + indent(traceback.format_exc(e), 'e > ')
+                    raise DPInternalError(msg)
+            raise
+
+@decorator_check_exception_where_is_string
 def parse_ndp(string, context=None):
     from mocdp.comp.context import Context
     from .syntax import Syntax
@@ -75,17 +98,19 @@ def parse_ndp_filename(filename, context=None):
             raise
 
 @contract(returns=Poset)
+@decorator_check_exception_where_is_string
 def parse_poset(string, context=None):
     from mocdp.comp.context import Context
     from .syntax import Syntax
 
     v = parse_wrap(Syntax.space, string)[0]
-
+    
     if context is None:
         context = Context()
-
+    
     v2 = parse_poset_refine(v, context)
     res = parse_poset_eval(v2, context)
+    
     return res 
 
 def parse_poset_eval(x, context):
@@ -95,6 +120,7 @@ def parse_poset_eval(x, context):
     return res
 
 @contract(returns=PrimitiveDP)
+@decorator_check_exception_where_is_string
 def parse_primitivedp(string, context=None):
     from mocdp.comp.context import Context
     from mcdp_lang.syntax import Syntax
@@ -115,6 +141,7 @@ def parse_primitivedp_eval(x, context):
     return res
 
 @contract(returns='isinstance(ValueWithUnits)')
+@decorator_check_exception_where_is_string
 def parse_constant(string, context=None):
     from mcdp_lang.syntax import Syntax
     from mocdp.comp.context import Context
@@ -140,6 +167,7 @@ def parse_constant_eval(x, context):
     return result
     
 @contract(returns='isinstance(TemplateForNamedDP)')
+@decorator_check_exception_where_is_string
 def parse_template(string, context=None):
     from mcdp_lang.syntax import Syntax
     from mocdp.comp.context import Context
