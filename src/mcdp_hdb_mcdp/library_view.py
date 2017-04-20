@@ -7,6 +7,7 @@ from mcdp.exceptions import DPSemanticError
 from contracts.utils import raise_desc, raise_wrapped
 from mcdp_library.specs_def import specs
 from mcdp.logs import logger
+from mcdp.constants import MCDPConstants
 
 
 __all__ = [
@@ -104,7 +105,11 @@ class TheContextLibrary(MCDPLibrary):
         else:
             
             if match != thing_name:
-                logger.warning('Soft matching %r to %r (deprecated)' % (match, thing_name))
+                if MCDPConstants.allow_soft_matching:
+                    logger.warning('Soft matching %r to %r (deprecated)' % (match, thing_name))
+                else:
+                    msg = 'Found case in which the user relies on soft matching (%r to refer to %r).' % (thing_name, match)
+                    raise DPSemanticError(msg)
                 # TODO: add warning 
                 
             data = things[match]

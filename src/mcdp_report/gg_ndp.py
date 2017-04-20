@@ -20,8 +20,7 @@ from mocdp.comp.context import (get_name_for_fun_node, get_name_for_res_node,
                                 is_fun_node_name, is_res_node_name)
 from mocdp.comp.interfaces import NamedDP
 from mcdp.exceptions import mcdp_dev_warning, DPInternalError
-from mocdp.ndp import NamedDPCoproduct
-from abc import ABCMeta, abstractmethod
+from mocdp.ndp import NamedDPCoproduct 
 from mcdp_report.image_source import NoImages
 
 

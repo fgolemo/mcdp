@@ -3,7 +3,7 @@
 from collections import namedtuple
 
 from bs4.element import Declaration, ProcessingInstruction, Doctype, Comment, Tag
-from contracts.utils import check_isinstance, indent
+from contracts.utils import check_isinstance, indent, raise_wrapped
 from pyramid.httpexceptions import HTTPFound
 
 from mcdp.exceptions import DPSyntaxError, DPSemanticError, DPNotImplementedError, DPInternalError
@@ -22,6 +22,9 @@ from mocdp.comp.context import Context
 
 from .add_html_links_imp import add_html_links
 from mcdp_web.context_from_env import library_from_env, image_source_from_env
+from mcdp_web.editor_fancy.html_mark_imp import NoLocationFound
+from mcdp.logs import logger
+import traceback
 
 
 class AppVisualization(object):
@@ -134,10 +137,21 @@ def generate_view_syntax(e, make_relative):
                                                      e.thing_name, thing, Tmp.refined, 
                                                      make_relative, library=mcdp_library)
         except (DPSemanticError, DPNotImplementedError) as exc:
-            print exc
+            logger.error(exc)
             from mcdp_web.editor_fancy.app_editor_fancy_generic import html_mark
-            highlight = html_mark(highlight, exc.where, "semantic_error")
-
+            
+            if exc.where.string != source_code:
+                msg = 'This exception refers to another file.'
+                msg += '\n source_code: %r' % source_code
+                msg += '\n exception.where.string: %r' % exc.where.string
+                msg += '\n' + indent(traceback.format_exc(exc), 'exc > ')
+                raise DPInternalError(msg)
+            try:
+                highlight = html_mark(highlight, exc.where, "semantic_error")
+            except NoLocationFound as e:
+                msg = 'While trying to annotate the exception:'
+                msg += '\n' + indent(exc, 'exc > ')
+                raise_wrapped(NoLocationFound, e, msg)
             error = exc.error
             svg_data = None
     else:

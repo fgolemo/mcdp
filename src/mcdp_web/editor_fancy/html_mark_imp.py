@@ -1,16 +1,21 @@
 from bs4 import BeautifulSoup
 from contracts import contract
-from contracts.utils import check_isinstance, raise_desc
+from contracts.utils import check_isinstance, raise_desc, indent
 
 from mcdp.exceptions import DPInternalError
 from mcdp_report.html import ATTR_WHERE_CHAR, ATTR_WHERE_CHAR_END
 
+class NoLocationFound(DPInternalError):
+    pass
 
 @contract(html=bytes, returns=bytes)
 def html_mark(html, where, add_class, tooltip=None):
-    """ Takes a utf-8 encoded string and returns another html string. 
+    """ 
+        Takes a utf-8 encoded string and returns another html string. 
     
         The tooltip functionality is disabled for now.
+        
+        Raise NoLocationFound if the location is not found.
     """
     check_isinstance(html, bytes)
     
@@ -35,8 +40,8 @@ def html_mark(html, where, add_class, tooltip=None):
         msg = 'Cannot find any html element for this location:\n\n%s' % where
         msg += '\nwhere start: %s end: %s' % (where.character, where.character_end)
         msg += '\nwhere.string = %r' % where.string
-        msg += '\n' + html.__repr__()
-        raise_desc(DPInternalError, msg)
+        msg += '\n' + indent(html.__repr__(), 'html ')
+        raise_desc(NoLocationFound, msg)
         
     # find the smallest one
     def e_size(e):
