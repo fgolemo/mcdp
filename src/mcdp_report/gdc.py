@@ -3,7 +3,7 @@ from contextlib import contextmanager
 import os
 from tempfile import mkdtemp, NamedTemporaryFile
 
-from contracts.utils import check_isinstance
+from contracts.utils import check_isinstance, indent
 from system_cmd import CmdException, system_cmd_result
 
 from mcdp import MCDPConstants
@@ -12,7 +12,8 @@ from mcdp_utils_misc import dir_from_package_name, get_mcdp_tmp_dir, locate_file
 
 from .utils import safe_makedirs
 from contracts import contract
-from mcdp_report.image_source import ImagesSource, ImagesFromPaths, TryMany
+from mcdp_report.image_source import ImagesSource, ImagesFromPaths, TryMany,\
+    NoImageFound
 
 
 __all__ = [
@@ -161,7 +162,8 @@ class GraphDrawingContext(object):
             raise ValueError('Icons path does not exist: %r' % imagepath)
         return imagepath
     
-    def get_icon(self, options): 
+    @contract(options='seq(str)')
+    def get_icon(self, options, raise_if_not_found=False): 
         imagepaths = []
         imagepaths.append(self._get_default_imagepath())
 
@@ -175,7 +177,12 @@ class GraphDrawingContext(object):
         sources.append(ImagesFromPaths(imagepaths))
         image_source = TryMany(sources) 
 
-        best = choose_best_icon(options, image_source)
+        try:
+            best = choose_best_icon(options, image_source)
+        except NoImageFound:
+            if raise_if_not_found:
+                raise 
+            return None
         resized = resize_icon(best, MCDPConstants.gdc_image_size_pixels)
         return resized
 
@@ -255,9 +262,10 @@ def get_images(dirname, exts=None):
 
 @contract(image_source=ImagesSource)
 def choose_best_icon(iconoptions, image_source):
-    ''' Returns the name of a file, or None. '''
+    ''' Returns the name of a file, or raise exception KeyError. '''
 #     logger.debug('Looking for %s in %s.' % (str(iconoptions), imagepaths))
     exts = MCDPConstants.exts_for_icons
+    iconoptions = [_ for _ in iconoptions if _ is not None]
     errors = []
     for option in iconoptions:
         if option is None:
@@ -266,15 +274,20 @@ def choose_best_icon(iconoptions, image_source):
         for ext in exts:
             try: 
                 data = image_source.get_image(option, ext)
-            except KeyError as e:
+            except NoImageFound as e:
                 errors.append(e)
             else:
                 temp_file = NamedTemporaryFile(suffix='.'+ext,delete=False)
                 with open(temp_file.name, 'wb') as f:
                     f.write(data)
                 return temp_file.name  
-    return None
-
+    if len(errors) == 1:
+        raise errors[0]
+    else:
+        msg = 'Could not find any match for options %r' % iconoptions
+        for option, e in zip(iconoptions, errors):
+            msg += '\n' + indent(str(e), ' %s > ' % option)
+        raise NoImageFound(msg)
 
 def resize_icon(filename, size):
     check_isinstance(filename, str)
