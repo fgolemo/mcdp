@@ -22,6 +22,7 @@ from .utils import isnamedtupleinstance, parse_action
 from .utils_lists import make_list, unwrap_list
 from .find_parsing_el import find_parsing_element
 from mcdp.development import mcdp_dev_warning, do_extra_checks
+from mcdp_lang_utils.where import format_where
 
 
 CDP = CDPLanguage
@@ -35,10 +36,12 @@ def copy_expr_remove_action(expr):
 @decorator
 def decorate_add_where(f, *args, **kwargs):
     where = args[0].where
+    
+#     logger.debug('decorate_add_where where.string = %r' % where.string)
     try:
         return f(*args, **kwargs)
     except MCDPExceptionWithWhere as e:
-        _, _, tb = sys.exc_info()
+        _, _, tb = sys.exc_info() 
         raise_with_info(e, where, tb)
     except Exception as e:
         msg = 'Unexpected exception while executing %s.' % f.__name__
@@ -82,11 +85,17 @@ def nice_stack(tb):
 def raise_with_info(e, where, tb):
     check_isinstance(e, MCDPExceptionWithWhere)
     existing = getattr(e, 'where', None)
-    if existing: 
-        raise
-    use_where = existing if existing is not None else where
-    error = e.error
+#     if existing is not None: 
+#         raise
+#     use_where = existing if existing is not None else where
+    use_where = where
     
+    if existing is None:
+#         logger.debug('Where=None for %s' % e)
+        error = e.error 
+    else:
+        error = e.error + '\n' + format_where(existing)
+#         logger.debug('raise_with_info: seen %r ' % existing)
     stack = nice_stack(tb)
     
     args = (error, use_where, stack)
