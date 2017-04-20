@@ -52,8 +52,10 @@ def check_editor_response(filename, source, libname):  # @UnusedVariable
 def check_generate_view_syntax(filename, source, libname):  # @UnusedVariable
     from mcdp_library.stdlib import get_test_db
     db_view = get_test_db()
-    
+    assert len(db_view.repos) == 1
+    repo_name = list(db_view.repos)[0]
     library = get_test_library(libname)
+    
     spec = filename2spec(filename)
     thing_name, _ext = os.path.splitext(os.path.basename(filename))
     make_relative = lambda x: x
@@ -61,18 +63,23 @@ def check_generate_view_syntax(filename, source, libname):  # @UnusedVariable
         def __init__(self):
             pass
         def get_repo_shelf_for_libname(self, libname):  # @UnusedVariable
-            return 'repo1', 'shelf1'
+            for shelf_name,shelf in db_view.repos[repo_name].shelves.items():
+                if libname in shelf.libraries:
+                    return repo_name, shelf_name
+            msg = 'Could not find repo,shelf for library %r.' % libname
+            raise Exception(msg)
         def get_subscribed_shelves(self):
-            return list(db_view.repos['bundled'].shelves)
-        
+            return list(db_view.repos[repo_name].shelves)
+    session = SessionMockup()
+    repo_name, shelf_name = session.get_repo_shelf_for_libname(libname)
     class EnvironmentMockup(object):
         def __init__(self):
             self.library_name = libname
             self.spec = spec
             self.library = library
-            self.session = SessionMockup()
-            self.repo_name = 'repo1'
-            self.shelf_name = 'shelf1'
+            self.session = session
+            self.repo_name = repo_name
+            self.shelf_name = shelf_name
             self.thing_name = thing_name
             self.thing = source
             self.db_view = db_view
