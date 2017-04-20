@@ -87,11 +87,16 @@ class ImagesFromDB(ImagesSource):
         shelf = repo.shelves[self.current_shelf_name]
         library = shelf.libraries[self.current_library_name]
         images = library.images
-        if name in images:
-            image = images[name]
-            data = getattr(image, data_format)
-            if data is not None:
-                return data
+        for candidate in images:
+            if candidate.lower() == name.lower():
+                if candidate != name:
+                    msg = 'Using image "%s" for "%s" even though the name does not match.'
+                    _warn_once(msg)
+        
+                image = images[candidate]
+                data = getattr(image, data_format)
+                if data is not None:
+                    return data
         
         # now try all of them
         for _repo_name, repo in repos.items():
