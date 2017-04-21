@@ -31,7 +31,7 @@ def decorator_check_exception_where_is_string(f):
         
         f(string, context)
     '''
-    def parse(string, context):
+    def parse(string, context=None):
         try:
             return f(string, context)
         except DPSemanticError as e:
