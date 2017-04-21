@@ -18,7 +18,7 @@ def figint01():
         
         }
     """)
-    mf = MakeFiguresNDP(ndp=ndp, library=None, yourname=None)
+    mf = MakeFiguresNDP(ndp=ndp, image_source=None, yourname=None)
 
     for name in mf.available():
         formats = mf.available_formats(name)

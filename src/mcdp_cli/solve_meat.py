@@ -198,7 +198,7 @@ def solve_main(logger, config_dirs, maindir, cache_dir, model_name, lower, upper
 
                     # Top-bottom
                     gg = gvgen_from_ndp(ndp=ndp, style=STYLE_GREENREDSYM,
-                                    images_paths=images_paths,
+                                    image_source=image_source,
                                     plotting_info=gv, direction='TB')
 
                     gg_figure(rr, 'figure2', gg, do_png=True, do_pdf=True,
