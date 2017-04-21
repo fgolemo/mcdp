@@ -59,7 +59,7 @@ class Librarian(object):
             
         # get all the images
         allimages = {} # base.ext -> same struct as l.file_to_contents
-        for short, data in self.libraries.items():
+        for _short, data in self.libraries.items():
             l = data['library']
             for ext in MCDPConstants.exts_images:
                 basenames = l._list_with_extension(ext) 
@@ -67,7 +67,7 @@ class Librarian(object):
                     b_ext = b + '.' + ext 
                     allimages[b_ext] = l.file_to_contents[b_ext]
                     
-        for short, data in self.libraries.items():
+        for _short, data in self.libraries.items():
             l = data['library']
             for basename, d in allimages.items():
                 if not basename in l.file_to_contents:
