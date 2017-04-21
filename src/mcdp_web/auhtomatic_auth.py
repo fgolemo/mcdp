@@ -151,15 +151,15 @@ def handle_auth_success(self, e, provider_name, result, next_location):
     #         - else, we ask the user if they want to create an account.
     #           
     
-    
-    # Get tue candidate user 
-    u = get_candidate_user(self.user_db, result, provider_name)
+    user_db = self.db_view.user_db
+    # Get the candidate user 
+    u = get_candidate_user(user_db, result, provider_name)
     check_isinstance(u, User)
     # we should already have an id
     assert  u.info.authentication_ids[0].provider == provider_name
     unique_id = u.info.authentication_ids[0].id 
     
-    best = self.user_db.match_by_id(provider_name, unique_id)
+    best = user_db.match_by_id(provider_name, unique_id)
     
     currently_logged_in = e.username is not None
     if currently_logged_in:
@@ -192,7 +192,7 @@ def handle_auth_success(self, e, provider_name, result, next_location):
             # not logged in, and the user does not exist already
             
             # check if there are other accounts with same email or same name
-            soft_match = self.user_db.best_match(None, u.info.name, u.info.email)
+            soft_match = user_db.best_match(None, u.info.name, u.info.email)
             
             if soft_match is not None:
                 # we should present a page in which we confirm whether this is correct
@@ -234,7 +234,8 @@ def view_confirm_bind_bind_(self, e):
         if getattr(u0, x) is None:
             setattr(u0, x, getattr(u, x))
     
-    self.user_db.users[u0.username] = u0
+    user_db = self.db_view.user_db
+    user_db.users[u0.username] = u0
 #     self.user_db.save_user(u0.username)
     
     res = {
@@ -271,7 +272,8 @@ def view_confirm_creation_create_(self, e):
         msg = "Page has expired."
         return self.show_error(e, msg)
     e.session.candidate_user = u
-    self.user_db.create_new_user(u.info.username, u)
+    user_db = self.db_view.user_db
+    user_db.create_new_user(u.info.username, u)
     success_auth(self, e.request, u.info.username, next_location)
     return {}
 
@@ -376,7 +378,7 @@ def get_candidate_user(user_db, result, provider_name):
     return user
 
 def success_auth(self, request, username, next_location):
-    if not username in self.user_db:
+    if not username in self.db_view.user_db:
         msg = 'Could not find user %r' % username
         raise Exception(msg)
     logger.info('successfully authenticated user %s' % username)
