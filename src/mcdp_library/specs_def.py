@@ -9,7 +9,7 @@ from mcdp_lang.parse_interface import (parse_ndp_eval, parse_ndp_refine,
                                        parse_primitivedp_refine, parse_primitivedp_eval)
 from mcdp_lang.syntax import Syntax
 from mcdp_library import MCDPLibrary
-from mcdp_posets.poset import Poset
+from mcdp_posets import Poset
 from mocdp.comp.context import ValueWithUnits
 from mocdp.comp.interfaces import NamedDP
 from mocdp.comp.template_for_nameddp import TemplateForNamedDP
@@ -19,15 +19,19 @@ from mocdp.comp.template_for_nameddp import TemplateForNamedDP
 def get_png_data_unavailable(*args, **kwargs):
     from mcdp_web.editor_fancy.image import get_png_data_unavailable
     return get_png_data_unavailable(*args, **kwargs)
+
 def get_png_data_model(*args, **kwargs):
     from mcdp_web.editor_fancy.image import get_png_data_model
     return get_png_data_model(*args, **kwargs)
+
 def ndp_template_enclosed(*args, **kwargs):
     from mcdp_web.editor_fancy.image import ndp_template_enclosed
     return ndp_template_enclosed(*args, **kwargs)
+
 def get_png_data_poset(*args, **kwargs):
     from mcdp_web.editor_fancy.image import get_png_data_poset
     return get_png_data_poset(*args, **kwargs)
+
 def get_png_data_syntax_model(*args, **kwargs):
     from mcdp_web.editor_fancy.image import get_png_data_syntax_model
     return get_png_data_syntax_model(*args, **kwargs)

@@ -3,15 +3,13 @@ import os
 from contracts import contract
 from contracts.utils import raise_wrapped, raise_desc
 
-
 from mcdp import MCDPConstants
 from mcdp.exceptions import FormatException
 from mcdp.logs import logger
 from mcdp_library.libraries import find_libraries
-from mcdp_utils_misc import indent_plus_invisibles, read_file_encoded_as_utf8, locate_files
+from mcdp_utils_misc import indent_plus_invisibles, read_file_encoded_as_utf8, locate_files, yaml_load
 
 from .access import acl_from_yaml
-from mcdp_utils_misc.my_yaml import yaml_load
 
 
 class Shelf(object):

@@ -17,7 +17,7 @@ tcs.update(testcases_arrays())
 tcs.update(testcases_minilibrary())
 tcs.update(testcases_arrays_inside_yaml())
 
-class (object):
+class X(object):
     def __init__(self, k, tc):
         self.k = k
         self.tc = tc
