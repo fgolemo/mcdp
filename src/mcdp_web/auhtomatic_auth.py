@@ -151,7 +151,7 @@ def handle_auth_success(self, e, provider_name, result, next_location):
     #         - else, we ask the user if they want to create an account.
     #           
     
-    user_db = self.db_view.user_db
+    user_db = self.hi.db_view.user_db
     # Get the candidate user 
     u = get_candidate_user(user_db, result, provider_name)
     check_isinstance(u, User)
@@ -166,15 +166,17 @@ def handle_auth_success(self, e, provider_name, result, next_location):
     
         # if we match with 
         if best is not None:
+            best_username = best.info.username
+
             # if we match to current account
-            if best.username ==  e.username:
+            if best_username ==  e.username:
                 # do nothing
                 logger.info('We are already authenticated to same account.')
                 raise HTTPFound(location=next_location)
             else:
                 # W
-                logger.info('Switching user to %r.' % best.username)
-                success_auth(self, e.request, best.username, next_location)
+                logger.info('Switching user to %r.' % best_username)
+                success_auth(self, e.request, best_username, next_location)
         else:
             # no match
             e.session.candidate_user = u
@@ -186,8 +188,10 @@ def handle_auth_success(self, e, provider_name, result, next_location):
     if not currently_logged_in:
         # not logged in
         if best is not None:
+            best_username = best.info.username
+
             # user already exists: login 
-            success_auth(self, e.request, best.username, next_location)
+            success_auth(self, e.request, best_username, next_location)
         else:
             # not logged in, and the user does not exist already
             
@@ -234,7 +238,7 @@ def view_confirm_bind_bind_(self, e):
         if getattr(u0, x) is None:
             setattr(u0, x, getattr(u, x))
     
-    user_db = self.db_view.user_db
+    user_db = self.hi.db_view.user_db
     user_db.users[u0.username] = u0
 #     self.user_db.save_user(u0.username)
     
@@ -272,7 +276,7 @@ def view_confirm_creation_create_(self, e):
         msg = "Page has expired."
         return self.show_error(e, msg)
     e.session.candidate_user = u
-    user_db = self.db_view.user_db
+    user_db = self.hi.db_view.user_db
     user_db.create_new_user(u.info.username, u)
     success_auth(self, e.request, u.info.username, next_location)
     return {}
@@ -345,7 +349,7 @@ def get_candidate_user(user_db, result, provider_name):
                                    'id': unique_id, 'password': None}]
     logger.info('Reading picture %s' % picture)
     if picture is None:
-        res['picture'] = None
+        jpg = None
     else:
         try:
             local_filename = 'pic.jpg'
@@ -378,7 +382,7 @@ def get_candidate_user(user_db, result, provider_name):
     return user
 
 def success_auth(self, request, username, next_location):
-    if not username in self.db_view.user_db:
+    if not username in self.hi.db_view.user_db:
         msg = 'Could not find user %r' % username
         raise Exception(msg)
     logger.info('successfully authenticated user %s' % username)

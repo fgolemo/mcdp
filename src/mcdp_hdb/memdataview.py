@@ -163,11 +163,16 @@ class ViewContext0(ViewMount):
         
     @contract(returns=ViewBase)
     def child(self, name):
-        if name in self.children_already_provided:
-            return self.children_already_provided[name]
-        
         if name in self.mount_points:
             return self.mount_points[name]
+
+        if name in self.children_already_provided:
+            c = self.children_already_provided[name]
+            # but note that the data might have been changed
+            # so we need to update it
+            c._data  = self._data[name]
+            return c
+        
         child_schema = self._schema.get_descendant((name,))
         child_data = self._data[name]
         v = self._create_view_instance(child_schema, child_data, name)        
@@ -214,7 +219,6 @@ class ViewContext0(ViewMount):
         try:
             return object.__getattribute__(self, name)
         except AttributeError as _e:
-#             logger.debug('Could not get %r: %s: %s ' % (name, id(self), e))
             pass  
         
         child = self.child(name)
@@ -222,29 +226,7 @@ class ViewContext0(ViewMount):
         if is_simple_data(child._schema):
             return child._data
         else:
-            return child
-#         
-#         if name in self.mount_points:
-#             return self.mount_points[name]
-#         # XXX this is very similar to child()
-#         if not name in self._schema.children:
-#             msg = 'Cannot get attribute %r: available %s' % (name, format_list(self._schema.children))
-#             raise_desc(ValueError, msg) #, self=str(self))
-#         child_schema= self._schema.children[name]
-#         assert name in self._data
-#         child_data = self._data[name]
-#         if is_simple_data(child_schema):
-#             # check access
-#             try:
-#                 v = self._create_view_instance(child_schema, child_data, name)
-#             except NotValid as e:
-#                 msg = 'Could not create view instance for __getattr__(%r):' % name
-#                 raise_wrapped(NotValid, e, msg, compact=True) 
-#             v.check_can_read()
-#             # just return the value
-#             return child_data
-#         else:
-#             return self._create_view_instance(child_schema, child_data, name)
+            return child 
 
     def __setattr__(self, leaf, value):
         if leaf.startswith('_'):

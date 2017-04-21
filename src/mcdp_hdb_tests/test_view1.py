@@ -68,6 +68,7 @@ def test_view1a():
     u = users['andrea'] 
     assert_equal(u.name, 'Andrea')
     u.name = 'not Andrea'
+    print(yaml_dump(u._data))
     assert_equal(u.name, 'not Andrea')
     assert_equal(u.get_complete_address(), 'not Andrea <info@co-design.science>')
     try:
