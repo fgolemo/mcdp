@@ -4,6 +4,7 @@ from comptests.registrar import run_module_tests, comptest
 from mcdp_shelf.access import ACLRule
 from mcdp_hdb import InsufficientPrivileges, ViewManager
 from contextlib import contextmanager
+from mcdp_tests import logger
 
 @comptest
 def test_privilege1():
@@ -35,7 +36,7 @@ def test_privilege1():
     # only the user and admins can modify his entry
     schema_user.add_acl_rules([admin_can_modify, admin_can_read, self_can_modify, self_can_read])
     
-    print db_schema
+    #print db_schema
     db0 = {
         'users': { 
             'andrea': {
@@ -58,12 +59,20 @@ def test_privilege1():
     view_admin = view_manager.view(db0, 'user:admin1', ['user:admin1', 'group:admin', AUTHENTICATED, EVERYONE])
 
     # andrea is able to read his email
-    print('andrea can see ' + view_andrea.child('users').child('andrea').email)
+    logger.info('andrea can see ' + view_andrea.child('users').child('andrea').email)
+    user = view_pinco.child('users').child('andrea')
     # pinco can read andrea's name
-    view_pinco.child('users').child('andrea').name
+    user.name
     # pinco cannot read andrea's email
+    email = user.child('email')
+    
+    assert not email._schema.get_acl().allowed_('read', ['user:pinco', ])
     with expect_permissions_error():
-        print('! pinco can see ' + view_pinco.child('users').child('andrea').email)
+        print(user._principals)
+        logger.debug(user)
+        andrea_s_email = user.email
+        logger.debug(andrea_s_email)
+        logger.info('! pinco can see ' + andrea_s_email)
     # pinco cannot change andrea's name
     with expect_permissions_error():
         view_pinco.child('users').child('andrea').name = 'invalid'

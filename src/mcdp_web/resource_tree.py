@@ -6,6 +6,7 @@ from pyramid.security import Allow, Authenticated, Everyone
 from mcdp import MCDPConstants
 from mcdp.logs import logger_web_resource_tree as logger
 
+
 Privileges = MCDPConstants.Privileges
 
 class Resource(object):

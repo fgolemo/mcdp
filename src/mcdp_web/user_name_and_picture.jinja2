@@ -45,9 +45,10 @@
 {% macro user_name_and_picture_userinfo(a_user, link=True) %}
     <span class='user_name_and_picture'>
 
-        {% if a_user.username in user_db %}
-    {{user_picture_userinfo(a_user)}}
+    {% if a_user.username in user_db %}
+        {{user_picture_userinfo(a_user)}}
     {% endif %}
+    
     {{user_name_userinfo(a_user, link=link)}}
     </span>
 {% endmacro %}

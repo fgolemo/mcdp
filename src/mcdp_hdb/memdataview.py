@@ -9,12 +9,11 @@ from contracts.utils import raise_desc, raise_wrapped, indent, check_isinstance
 from mcdp import MCDPConstants
 from mcdp import logger
 from mcdp_hdb.schema import NotValid
-from mcdp_utils_misc import format_list
+from mcdp_utils_misc import format_list, memoize_simple
 
 from .memdataview_exceptions import InsufficientPrivileges, InvalidOperation, EntryNotFound
 from .memdataview_utils import special_string_interpret
 from .schema import SchemaBase, SchemaSimple
-from mcdp_utils_misc.memoize_simple_imp import memoize_simple
 
 
 __all__ = [
@@ -224,6 +223,7 @@ class ViewContext0(ViewMount):
         child = self.child(name)
         
         if is_simple_data(child._schema):
+            child.check_can_read()
             return child._data
         else:
             return child 
