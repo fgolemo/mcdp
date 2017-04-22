@@ -9,6 +9,7 @@ from pyramid.security import Allow, Everyone
 
 from comptests.registrar import run_module_tests, comptest
 from mcdp import MCDPConstants
+from mcdp.logs import logger
 from mcdp_docs.preliminary_checks import assert_not_contains
 from mcdp_library_tests.create_mockups import write_hierarchy
 from mcdp_shelf.access import Privileges
@@ -19,7 +20,6 @@ from mcdp_web.confi import parse_mcdpweb_params_from_dict
 from mcdp_web.main import WebApp
 from mcdp_web.resource_tree import MCDPResourceRoot
 from mcdp_web_tests.spider import Spider
-from mcdp.logs import logger
 
 
 # do not make relative to start using python
@@ -101,6 +101,15 @@ class FunctionalTests(unittest.TestCase):
             options = parse_mcdpweb_params_from_dict(settings)
             wa = WebApp(options, settings)
             app = wa.get_app()
+            
+            all_shelves = set()
+            db_view = wa.hi.db_view
+            for repo in db_view.repos.values():
+                for shelf in repo.shelves:
+                    all_shelves.add(shelf)
+                    
+            db_view.user_db['anonymous'].subscriptions = list(all_shelves)
+            
             self.testapp = TestApp(app)
 
     def get_maybe_follow(self, url0):

@@ -5,12 +5,13 @@ import urlparse
 from contracts.utils import check_isinstance, indent, raise_desc
 from pyramid.httpexceptions import HTTPException, HTTPFound
 from pyramid.response import Response
+from pyramid.security import forget
 
 from mcdp import MCDPConstants,  logger, __version__
-
 from mcdp_utils_misc import duration_compact,  format_list
-from pyramid.security import forget 
-Privileges=MCDPConstants.Privileges
+
+
+Privileges = MCDPConstants.Privileges
 
 
 def add_other_fields(self, res, request, context):
@@ -24,8 +25,7 @@ def add_other_fields(self, res, request, context):
     res['root'] = self.get_root_relative_to_here(request)
 
     def _has_library_doc(document):
-        filename = '%s.%s' % (document, MCDPConstants.ext_doc_md)
-        return e.library.file_exists(filename)
+        return document in e.library.documents 
 
     # template functions
     res['render_library_doc'] = lambda docname: self._render_library_doc(

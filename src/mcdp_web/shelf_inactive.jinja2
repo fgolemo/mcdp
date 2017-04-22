@@ -7,6 +7,7 @@
     <script>{% include 'index.js' %}</script>
 {% endblock %}
 {% block content %}
+{% include 'user.jinja2' %}
 
 <p>The shelf {{navigation.shelf_name}} is inactive, so you cannot access its contents.</p>
 {% set shelf_url_ = shelf_url(navigation.repo_name, navigation.shelf_name) %}

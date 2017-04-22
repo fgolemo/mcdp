@@ -68,7 +68,6 @@ class Spider(object):
                 msg += '\n' + str(s)
                 raise DPInternalError(msg)
 
-        
         if url2 != url:
             self.visited[url] = 'redirect to %s' % url2
             logger.debug('redirected %s -> %s' % (url, url2))
@@ -76,7 +75,7 @@ class Spider(object):
         self.visited[url2] = res
         
         if res.content_type == 'text/html':
-            
+            #print res.html
             urls = list(find_links(res.html, url2))
             logger.debug('read %s %s: %d links' % (url2, res.status, len(urls)))
             for u in urls:

@@ -356,8 +356,8 @@ class ResourceLibrary(Resource):
 
         if key.endswith('.html'):
             docname = os.path.splitext(key)[0]
-            filename = '%s.%s' % (docname, MCDPConstants.ext_doc_md)
-            if not library.file_exists(filename):
+#             filename = '%s.%s' % (docname, MCDPConstants.ext_doc_md)
+            if not docname in library.documents:
                 return ResourceLibraryDocNotFound(docname)
 
             return ResourceLibraryDocRender(docname)

@@ -59,6 +59,9 @@ from .utils.response import response_data
 from .utils0 import add_other_fields, add_std_vars_context
 from .utils0 import add_std_vars_context_no_redir
 from .visualization.app_visualization import AppVisualization
+from mcdp_web.environment import Environment
+from contracts import contract
+from mcdp_web.context_from_env import library_from_env
 
 
 Privileges = MCDPConstants.Privileges
@@ -467,19 +470,23 @@ class WebApp(AppVisualization, AppStatus,
         res['print'] = bool(e.request.params.get('print', False))
         return res
 
+    @contract(e=Environment, document=str)
     def _render_library_doc(self, e, document):
         strict = int(e.request.params.get('strict', '0'))
-        filename = '%s.%s' % (document, MCDPConstants.ext_doc_md)
-            
-        f = e.library._get_file_data(filename)
+#         filename = '%s.%s' % (document, MCDPConstants.ext_doc_md)
+#             
+        data_str = e.library.documents[document]
+        realpath = 'Document "%s"' %document
+#         f = e.library._get_file_data(filename)
         
-        realpath = f['realpath']
+#         realpath = f['realpath']
         # read unicode
-        import codecs 
-        data_unicode = codecs.open(realpath, encoding='utf-8').read()
-        data_str = data_unicode.encode('utf-8')
+#         import codecs 
+#         data_unicode = codecs.open(realpath, encoding='utf-8').read()
+#         data_str = data_unicode.encode('utf-8')
         raise_errors = bool(strict)
-        html = render_complete(library=e.library, s=data_str, 
+        library = library_from_env(e)
+        html = render_complete(library=library, s=data_str, 
                                realpath=realpath, raise_errors=raise_errors)
         return html
 
