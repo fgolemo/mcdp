@@ -1,0 +1,4 @@
+- [Allow, Everyone, discover]
+- [Allow, Authenticated, subscribe]
+- [Allow, Everyone, read]
+- [Allow, group:admin, all]

@@ -106,7 +106,7 @@ class ViewBase(object):
         self.check_privilege(privilege)
         
     @contract(returns=ACL)
-    def _get_acl_complete(self):
+    def get_acl(self):
         ''' Returns the ACL by looking at two things:
             1) the ACL in the schema
             2) the ACL in the data, by looking for a field 
@@ -124,7 +124,7 @@ class ViewBase(object):
         
     def check_privilege(self, privilege):
         ''' Raises exception InsufficientPrivileges ''' 
-        acl = self._get_acl_complete()
+        acl = self.get_acl()
         acl = interpret_special_rules(acl, path=self._prefix)
             
         principals = self._principals

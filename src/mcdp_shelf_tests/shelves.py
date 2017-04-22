@@ -123,7 +123,6 @@ setup_permissions_data = {
 }
 
 
-
 @comptest
 def shelves02():
     shelves_schema = DB.shelves
@@ -137,7 +136,7 @@ def shelves02():
     assert len(shelves) == 3, shelves    
     
     print(andrea_subscription)
-    acl =  andrea_subscription._get_acl_complete()
+    acl =  andrea_subscription.get_acl()
     logger.info(acl)
     assert acl.allowed('discover', 'john', groups=[])
     assert  not acl.allowed('read', 'john', groups=[])

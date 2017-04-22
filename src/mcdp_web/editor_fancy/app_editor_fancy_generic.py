@@ -187,9 +187,11 @@ def process_parse_request(library, string, spec, key, cache, make_relative):
                 x = Tmp.string_nospaces_parse_tree_interpreted
                 generate_unconnected_warnings(thing, context0, x)
                             
+        except DPInternalError:
+            raise
         except DPSyntaxError as e:
             return format_syntax_error2(parse_expr, string, e)
-        except (DPSemanticError, DPInternalError) as e:
+        except DPSemanticError as e:
             highlight_marked = html_mark(highlight, e.where, "semantic_error")
             
             cache[key] = None  # meaning we failed

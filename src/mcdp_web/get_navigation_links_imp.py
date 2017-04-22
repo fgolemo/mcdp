@@ -1,10 +1,10 @@
-
-
 from mcdp.constants import MCDPConstants
 from mcdp.logs import logger
 from mcdp_library.specs_def import SPEC_VALUES, SPEC_POSETS, SPEC_TEMPLATES, SPEC_MODELS
 from mcdp_utils_misc import natural_sorted
-Privileges=MCDPConstants.Privileges
+
+
+Privileges = MCDPConstants.Privileges
 
 def get_navigation_links_context(e):
     """ Pass this as "navigation" to the page. """

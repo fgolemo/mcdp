@@ -10,7 +10,7 @@ from comptests.registrar import run_module_tests, comptest
 from mcdp import MCDPConstants
 from mcdp_docs.preliminary_checks import assert_not_contains
 from mcdp_library_tests.create_mockups import write_hierarchy
-# from mcdp_repo.repo_interface import repo_commit_all_changes
+
 from mcdp_utils_misc import dir_from_package_name, tmpdir
 from mcdp_web.confi import parse_mcdpweb_params_from_dict
 from mcdp_web.main import WebApp

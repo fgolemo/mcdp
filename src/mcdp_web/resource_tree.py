@@ -217,7 +217,7 @@ class ResourceShelves(Resource):
         session = self.get_session()
         user = session.get_user()
         repo = self.get_repo()
-        shelves = repo.get_shelves()
+        shelves = repo.shelves
 
         if not key in shelves:
             return ResourceShelfNotFound(key)
@@ -232,7 +232,7 @@ class ResourceShelves(Resource):
         user = session.get_user()
         repo = self.get_repo()
 
-        shelves = repo.get_shelves()
+        shelves = repo.shelves
         for id_shelf, shelf in shelves.items():
             if shelf.get_acl().allowed2(Privileges.READ, user):
                 yield id_shelf
@@ -573,7 +573,7 @@ def context_get_repo(context):
 def context_get_shelf(context):
     repo = context_get_repo(context)
     shelf_name = context_get_shelf_name(context)
-    shelf = repo.get_shelves()[shelf_name]
+    shelf = repo.shelves[shelf_name]
     return shelf
 
 def context_get_library(context):

@@ -110,7 +110,7 @@ def data_diff(schema, data1, data2, prefix=()):
     
     elif isinstance(schema, (SchemaString, SchemaDate, SchemaBytes)):
         msg = 'I was not expecting to be called for %s' % schema
-        assert False
+        raise ValueError(msg)
     else:
         assert False 
 

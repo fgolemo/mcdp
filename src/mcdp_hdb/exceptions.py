@@ -1,4 +1,6 @@
 
+class HDBInternalError(Exception):
+    pass
     
 class NotKey(Exception):
     pass

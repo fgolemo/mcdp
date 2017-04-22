@@ -7,7 +7,7 @@ from mcdp_utils_misc import yaml_dump
 from .memdata_events import event_interpret_
 from .memdataview_manager import ViewManager
 
-def assert_data_equal(schema, data1, data2):
+def assert_data_equal(schema, data1, data2):  # @UnusedVariable
     ''' 
         Checks that two datas are the same, by checking the hashcode. 
         Raises ValueError.

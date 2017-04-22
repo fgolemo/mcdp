@@ -259,7 +259,7 @@ class ProxyFile(object):
         with open(fn, 'w') as f:
             f.write(self.contents)
             
-    def tree(self, n=0):
+    def tree(self, n=0):  # @UnusedVariable
         contents = self.contents
         if len(contents) < 30:
             return 'ProxyFile(%r)' % contents

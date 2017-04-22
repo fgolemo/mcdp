@@ -92,7 +92,9 @@ def view_authomatic_(self, config, e):
     response = Response()
     provider_name = e.context.name
     logger.info('using provider %r' % provider_name)
-    
+    if not provider_name in config:
+        msg = 'I got to the URL for provider %r even though it is not in the config.' % provider_name
+        raise ValueError(msg)
     authomatic = Authomatic(config=config, secret='some random secret string')
     url_base_public = self.options.url_base_public
     url_base_internal = self.options.url_base_internal

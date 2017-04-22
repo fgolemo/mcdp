@@ -25,11 +25,11 @@ class Shelf(object):
     def get_authors(self):
         return list(self.info.authors)
 
-    @contract(returns='str')
+    @contract(returns='str|None')
     def get_desc_short(self):
         return self.info.desc_short
 
-    @contract(returns='str')
+    @contract(returns='str|None')
     def get_desc_long(self):
         return self.info.desc_long 
 # 

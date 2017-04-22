@@ -59,6 +59,7 @@ def check_generate_view_syntax(filename, source, libname):  # @UnusedVariable
     spec = filename2spec(filename)
     thing_name, _ext = os.path.splitext(os.path.basename(filename))
     make_relative = lambda x: x
+    
     class SessionMockup(object):
         def __init__(self):
             pass
@@ -70,8 +71,10 @@ def check_generate_view_syntax(filename, source, libname):  # @UnusedVariable
             raise Exception(msg)
         def get_subscribed_shelves(self):
             return list(db_view.repos[repo_name].shelves)
+        
     session = SessionMockup()
     repo_name, shelf_name = session.get_repo_shelf_for_libname(libname)
+    
     class EnvironmentMockup(object):
         def __init__(self):
             self.library_name = libname
@@ -83,5 +86,6 @@ def check_generate_view_syntax(filename, source, libname):  # @UnusedVariable
             self.thing_name = thing_name
             self.thing = source
             self.db_view = db_view
+            
     e = EnvironmentMockup()
     _res = generate_view_syntax(e, make_relative)

@@ -9,6 +9,7 @@ from mcdp_utils_misc import yaml_dump
 from .memdataview import ViewContext0, ViewHash0, ViewList0, ViewString, ViewDate
 from .memdataview_utils import host_name
 from .schema import SchemaBase, SchemaContext, SchemaString, SchemaHash, SchemaList,  SchemaDate, SchemaBytes
+from mcdp.logs import logger
 
 
 __all__ = [
@@ -77,7 +78,8 @@ class ViewManager(object):
             msg += '\n' + indent(yaml_dump(data), 'data: ')
             raise_wrapped(NotValid, e, msg, compact=True) 
         if s in self.s2baseclass:
-            class Base(self.s2baseclass[s]):
+            use = self.s2baseclass[s]
+            class Base(use):
                 pass
         else:
             class Base(object):

@@ -197,7 +197,7 @@ def apply_disk_event_to_filesystem(wd, disk_event, repo=None):
     
     def descendants_tracked(dirname):
         ''' Yields absolute, relative (to dirname) '''
-        def tracked(absolute_fn):
+        def tracked(absolute_fn):  # @UnusedVariable
             return True # XXX
         for root, _, files in os.walk(dirname, followlinks=False):
             for f in files:

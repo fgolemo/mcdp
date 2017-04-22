@@ -8,7 +8,7 @@ from mcdp_hdb.gitrepo_map import gitrep_from_diskrep, diskrep_from_gitrep
 from mcdp_utils_misc.my_yaml import yaml_dump
 
 
-def check_translation_diskrep_to_gitrep(disk_rep0, disk_events, disk_rep1, out):
+def check_translation_diskrep_to_gitrep(disk_rep0, disk_events, disk_rep1, out):  # @UnusedVariable
     if not disk_events:
         raise ValueError('no disk events')
     repo = gitrep_from_diskrep(disk_rep0)
@@ -25,32 +25,16 @@ def check_translation_diskrep_to_gitrep(disk_rep0, disk_events, disk_rep1, out):
         
         if repo.untracked_files:
             logger.debug('adding untracked file %r' % repo.untracked_files) 
-            repo.index.add(repo.untracked_files)
-        
-#         diff_index = repo.index.diff(None) 
-#         for d in diff_index.iter_change_type('A'):
-#             repo.index.add([d.b_path])
-#         for d in diff_index.iter_change_type('M'):
-#             repo.index.add([d.b_path])
-#         for d in diff_index.iter_change_type('D'):
-#             repo.index.remove([d.b_path])
-#         for d in diff_index.iter_change_type('R'): # rename
-#             repo.index.rename(d.a_path, d.b_path)
+            repo.index.add(repo.untracked_files) 
             
         message = yaml_dump(disk_event)
         actor = disk_event['who']['actor']
         system = disk_event['who']['host']['hostname']
         author = Actor(actor, None)
-        committer = Actor(system, None)
-#         logger.debug('2) all added')
-#         system_cmd_show(wd, ['git', 'status'])
+        committer = Actor(system, None) 
         commit = repo.index.commit(message, author=author, committer=committer)
-        commits.append(commit)
-#         logger.debug('3) after commit')
-#         system_cmd_show(wd, ['git', 'status'])
+        commits.append(commit) 
     
     res = {}
     res['repo'] = repo
-    return res
-    logger.info('done for wd %s' % wd)
-
+    return res 
