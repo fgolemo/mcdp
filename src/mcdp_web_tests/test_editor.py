@@ -86,6 +86,6 @@ def check_generate_view_syntax(filename, source, libname):  # @UnusedVariable
             self.thing_name = thing_name
             self.thing = source
             self.db_view = db_view
-            
+             
     e = EnvironmentMockup()
     _res = generate_view_syntax(e, make_relative)

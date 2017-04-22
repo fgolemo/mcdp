@@ -8,7 +8,8 @@ from pyramid.httpexceptions import HTTPFound
 from pyramid.renderers import render_to_response
 
 from mcdp import MCDPConstants, logger
-from mcdp.exceptions import DPInternalError, DPSemanticError, DPSyntaxError
+from mcdp.exceptions import DPInternalError, DPSemanticError, DPSyntaxError,\
+    DPNotImplementedError
 from mcdp_lang.suggestions import get_suggestions, apply_suggestions
 from mcdp_library.specs_def import specs
 from mcdp_report.html import ast_to_html
@@ -187,18 +188,17 @@ def process_parse_request(library, string, spec, key, cache, make_relative):
                 x = Tmp.string_nospaces_parse_tree_interpreted
                 generate_unconnected_warnings(thing, context0, x)
                             
-        except DPInternalError:
-            raise
         except DPSyntaxError as e:
             return format_syntax_error2(parse_expr, string, e)
-        except DPSemanticError as e:
+        except (DPSemanticError, DPNotImplementedError) as e:
             highlight_marked = html_mark(highlight, e.where, "semantic_error")
             
             cache[key] = None  # meaning we failed
-            res = format_exception_for_ajax_response(e, 
-                                quiet=(DPSemanticError, DPInternalError))
+            res = format_exception_for_ajax_response(e, quiet=(DPSemanticError, DPInternalError))
             res['highlight'] = highlight_marked
             return res
+        except DPInternalError:
+            raise
         
         cache[key] = thing
     except:
