@@ -5,21 +5,21 @@ import urlparse
 
 from contracts.utils import raise_desc, indent
 from git import Repo
+from pyramid.security import Allow, Everyone
 
 from comptests.registrar import run_module_tests, comptest
 from mcdp import MCDPConstants
 from mcdp_docs.preliminary_checks import assert_not_contains
 from mcdp_library_tests.create_mockups import write_hierarchy
-
+from mcdp_shelf.access import Privileges
 from mcdp_utils_misc import dir_from_package_name, tmpdir
-from mcdp_web.confi import parse_mcdpweb_params_from_dict
-from mcdp_web.main import WebApp
-from mcdp_web_tests.spider import Spider
 from mcdp_utils_misc.mis import repo_commit_all_changes
 from mcdp_utils_xml.project_text import project_html
+from mcdp_web.confi import parse_mcdpweb_params_from_dict
+from mcdp_web.main import WebApp
 from mcdp_web.resource_tree import MCDPResourceRoot
-from mcdp_shelf.access import Privileges
-from pyramid.security import Allow, Everyone
+from mcdp_web_tests.spider import Spider
+from mcdp.logs import logger
 
 
 # do not make relative to start using python
@@ -173,7 +173,6 @@ class FunctionalTests(unittest.TestCase):
             if 'solver' in parsed.path:
                 return True
             
-            
             for x in exclude:
                 if x in parsed.path: return True
             
@@ -190,6 +189,9 @@ class FunctionalTests(unittest.TestCase):
         except KeyboardInterrupt:
             pass
         spider.log_summary()
+        if spider.skipped:
+            for url in sorted(spider.skipped):
+                logger.warn('Skipped %s' % url)
         if spider.failed or spider.not_found:
             msg = ''
             if spider.not_found:

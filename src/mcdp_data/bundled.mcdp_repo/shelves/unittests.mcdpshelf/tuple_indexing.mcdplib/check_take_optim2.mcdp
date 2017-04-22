@@ -1,9 +1,8 @@
 mcdp {
-        requires r [s x J] 
+    requires r [s × J] 
         
-        provides f1 [s]
+    provides f1 [s]
         
-        provided f1 <= take(required r, 0)
-        take(required r, 1) >= 0 J
-
+    provided f1 ≼ take(required r, 0)
+    take(required r, 1) ≽ 0 J
 }

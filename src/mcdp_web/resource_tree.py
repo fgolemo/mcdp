@@ -387,15 +387,15 @@ class ResourceLibraryInteractiveValueParse(Resource): pass
 class ResourceLibraryRefresh(Resource): pass
 
 class ResourceThings(Resource):
+    
     def __init__(self, specname):
         Resource.__init__(self, specname)
         self.specname = self.name
 
     def __iter__(self):
-        library = context_get_library(self)
-        spec = context_get_spec(self)
-        x = library._list_with_extension(spec.extension)
-        return x.__iter__()
+        things = context_get_things(self)
+        for x in things:
+            yield x
 
     def getitem(self, key):
         if key == 'new': return ResourceThingsNewBase()
@@ -593,6 +593,12 @@ def context_get_library(context):
     shelf = context_get_shelf(context)
     library = shelf.libraries[library_name]
     return library
+
+def context_get_things(context):
+    library = context_get_library(context)
+    specname = get_from_context(ResourceThings, context).specname
+    things  = library.things.child(specname)
+    return things
 
 def context_get_library_name(context):
     library_name = get_from_context(ResourceLibrary, context).name

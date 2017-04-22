@@ -260,7 +260,8 @@ def disk_events_from_list_remove(disk_map, view, _id, who, name, value):
     for index, v in enumerate(data):
         if v == value:
             return disk_events_from_list_delete(disk_map, view, _id, who, name, index)
-    msg = 'There is no value %s in the list' % value
+    msg = 'There is no value %s in the list.' % value
+    msg += '\n values: %s' % format_list(data) 
     raise InvalidOperation(msg)
 
 def disk_events_from_dict_setitem(disk_map, view, _id, who, name, key, value):
