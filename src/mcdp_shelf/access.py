@@ -58,8 +58,9 @@ class ACLRule(object):
                 (self.allow_or_deny, self.privilege, self.to_whom))
 
 class ACL(object):
+    
     def __init__(self, rules):
-        self.rules = rules
+        self.rules = tuple(rules)
         
     def as_pyramid_acl(self):
         root_rule = (Allow, MCDPConstants.ROOT, tuple(Privileges.ALL_PRIVILEGES))
@@ -122,13 +123,7 @@ def acl_from_yaml(x):
     for y in x:
         allow_or_deny = y[0]
         to_whom = y[1]
-        privilege = y[2] 
-#         if privilege == Privileges.SPECIAL_ALL_WILDCARD:
-#             for p in Privileges.ALL_PRIVILEGES:
-#                 if p == Privileges.SPECIAL_ALL_WILDCARD: continue
-#                 r = ACLRule(allow_or_deny, to_whom, p)
-#                 rules.append(r)
-#         else:
+        privilege = y[2]  
         r = ACLRule(allow_or_deny, to_whom, privilege)
         rules.append(r)
     return ACL(rules) 

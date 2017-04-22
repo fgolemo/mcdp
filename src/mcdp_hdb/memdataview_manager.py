@@ -4,7 +4,7 @@ from contracts.utils import raise_wrapped, indent
 from mcdp import MCDPConstants
 from mcdp_hdb.memdataview import ViewBytes
 from mcdp_hdb.schema import NotValid
-from mcdp_utils_misc.my_yaml import yaml_dump
+from mcdp_utils_misc import yaml_dump
 
 from .memdataview import ViewContext0, ViewHash0, ViewList0, ViewString, ViewDate
 from .memdataview_utils import host_name

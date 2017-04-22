@@ -1,16 +1,18 @@
 # -*- coding: utf-8 -*-
 from mcdp import MCDPConstants
 from mcdp_hdb import Schema, SchemaString, SchemaList, SchemaHash, DiskMap, ViewManager
-from mcdp_hdb_mcdp.RepoView import RepoView
-from mcdp_hdb_mcdp.library_view import LibraryView
+from mcdp_hdb_mcdp import repo_view
 from mcdp_library.specs_def import specs
 from mcdp_shelf.shelves import Shelf
 from mcdp_user_db.user import UserInfo, User
 from mcdp_user_db.userdb import UserDB
 
+from .library_view import LibraryView
+
 
 class DB(object):
     
+    acl = SchemaList(SchemaList(SchemaString()))
     db = Schema()
     library = Schema()
     image = Schema()
@@ -26,13 +28,13 @@ class DB(object):
             things.hash(spec_name, thing)
 
     shelf = Schema()
+    shelf._add_child('acl', acl)
+
     with shelf.context_e('info') as shelf_info:
         shelf_info.string('desc_short',  can_be_none=True)
         shelf_info.string('desc_long',  can_be_none=True)
         shelf_info.list("authors", SchemaString())
         shelf_info.list("dependencies", SchemaString())
-        acl_entry = SchemaList(SchemaString())
-        shelf_info.list('acl', acl_entry)
     
     shelf.hash('libraries', library)
     shelves = SchemaHash(shelf)
@@ -71,7 +73,7 @@ class DB(object):
     dm.hint_directory(shelves, pattern='%.mcdpshelf')
     dm.hint_directory(repo, translations={'info':'mcdprepo.yaml'})
     dm.hint_file_yaml(repo['info'])
-    dm.hint_directory(shelf, translations={'info':'mcdpshelf.yaml', 'libraries':None})
+    dm.hint_directory(shelf, translations={'info':'mcdpshelf.yaml', 'libraries':None, 'acl': 'acl.yaml'})
     dm.hint_file_yaml(shelf['info'])
     dm.hint_directory(shelf['libraries'], pattern='%.mcdplib')
     dm.hint_directory(users, pattern='%.mcdp_user') 
@@ -91,7 +93,7 @@ class DB(object):
 
     view_manager = ViewManager(db)
     view_manager.set_view_class(user, User)
-    view_manager.set_view_class(repo, RepoView)
+    view_manager.set_view_class(repo, repo_view)
     view_manager.set_view_class(shelf, Shelf)
     view_manager.set_view_class(user_info, UserInfo)
     view_manager.set_view_class(user_db, UserDB)

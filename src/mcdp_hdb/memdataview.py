@@ -9,6 +9,8 @@ from contracts.utils import raise_desc, raise_wrapped, indent, check_isinstance
 from mcdp import MCDPConstants
 from mcdp import logger
 from mcdp_hdb.schema import NotValid
+from mcdp_shelf import ACL
+from mcdp_shelf.access import acl_from_yaml
 from mcdp_utils_misc import format_list, memoize_simple
 
 from .memdataview_exceptions import InsufficientPrivileges, InvalidOperation, EntryNotFound
@@ -71,15 +73,20 @@ class ViewBase(object):
         for n in list(names):
             if n.endswith('0'):
                 names.remove(n)
-        remove = ['ViewBase','Base','object']
+        remove = ['ViewBase','Base','object', 'ViewMount']
         for r in remove:
             if r in names:
                 names.remove(r)
-        return '%s[%s]' % ("/".join(names), self._data)
+        s = '%s[%s]' % ("/".join(names), self._data)
+        assert not 'Mount' in s
+        return s
 
     def set_root(self):
         ''' Give this view all permissions '''
-        self._principals = [MCDPConstants.ROOT]
+        self.set_principals([MCDPConstants.ROOT])
+        
+    def set_principals(self, principals):
+        self._principals = principals
 
     @contract(s=SchemaBase)
     def _create_view_instance(self, s, data, url):
@@ -98,16 +105,28 @@ class ViewBase(object):
         privilege = MCDPConstants.Privileges.WRITE
         self.check_privilege(privilege)
         
+    @contract(returns=ACL)
+    def _get_acl_complete(self):
+        ''' Returns the ACL by looking at two things:
+            1) the ACL in the schema
+            2) the ACL in the data, by looking for a field 
+                called 'acl'
+                
+            (eventually will look also at parent data)
+        '''
+        acl_schema = self._schema.get_acl()
+        rules = acl_schema.rules 
+        if isinstance(self, ViewContext0) and 'acl' in self._data:
+            acl_data = acl_from_yaml(self._data['acl'])
+            rules = acl_data.rules + rules
+        acl = ACL(rules)
+        return acl
+        
     def check_privilege(self, privilege):
         ''' Raises exception InsufficientPrivileges ''' 
-        acl = self._schema.get_acl()
-        # interpret special rules 
-        acl.rules = deepcopy(acl.rules)
-        for r in acl.rules:
-            if r.to_whom.startswith('special:'):
-                rest = r.to_whom[r.to_whom.index(':')+1:]
-                r.to_whom = special_string_interpret(rest, self._prefix)
-    
+        acl = self._get_acl_complete()
+        acl = interpret_special_rules(acl, path=self._prefix)
+            
         principals = self._principals
         ok = acl.allowed_(privilege, principals)
         if not ok:
@@ -140,6 +159,17 @@ class ViewBase(object):
     def _notify(self, event):
         if self._notify_callback is not None:
             self._notify_callback.__call__(event)
+
+@contract(acl=ACL, path='seq(str)', returns=ACL)
+def interpret_special_rules(acl, path):
+    acl = deepcopy(acl)
+    # interpret special rules 
+    acl.rules = deepcopy(acl.rules)
+    for r in acl.rules:
+        if r.to_whom.startswith('special:'):
+            rest = r.to_whom[r.to_whom.index(':')+1:]
+            r.to_whom = special_string_interpret(rest, path)
+    return acl
 
 class ViewMount(ViewBase):
     ''' Types of views that support mount points '''
@@ -197,7 +227,7 @@ class ViewContext0(ViewMount):
         for n in list(names):
             if n.endswith('0'):
                 names.remove(n)
-        remove = ['ViewBase','Base','object']
+        remove = ['ViewBase','Base','object', 'ViewMount']
         for r in remove:
             if r in names:
                 names.remove(r)
