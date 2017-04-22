@@ -9,7 +9,6 @@ from mcdp_utils_misc import yaml_dump
 from .memdataview import ViewContext0, ViewHash0, ViewList0, ViewString, ViewDate
 from .memdataview_utils import host_name
 from .schema import SchemaBase, SchemaContext, SchemaString, SchemaHash, SchemaList,  SchemaDate, SchemaBytes
-from mcdp.logs import logger
 
 
 __all__ = [

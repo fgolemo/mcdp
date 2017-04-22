@@ -4,6 +4,7 @@ import datetime
 from authomatic import Authomatic
 from authomatic.adapters import WebObAdapter
 from authomatic.providers import oauth2
+from contracts.utils import check_isinstance
 import git.cmd  # @UnusedImport
 from pyramid.httpexceptions import HTTPFound
 from pyramid.response import Response
@@ -11,10 +12,9 @@ from pyramid.security import remember
 from system_cmd import system_cmd_result
 
 from mcdp import logger
-from mcdp_utils_misc import memoize_simple
 from mcdp_hdb_mcdp.main_db_schema import DB
 from mcdp_user_db.user import User
-from contracts.utils import check_isinstance
+from mcdp_utils_misc import memoize_simple
 
 
 @memoize_simple

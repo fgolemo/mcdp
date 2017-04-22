@@ -128,7 +128,10 @@ class HostInstance(object):
             db_view.repos[repo_name]
         username_anonymous = 'anonymous'
         if not username_anonymous in db_view.user_db.users:
-            user = DB.user.generate_empty(info=dict(name='Anonymous', username=username_anonymous))
+            subscriptions = []
+            for repo_name, repo in db_view.repos.items():
+                subscriptions.extend(sorted(repo.shelves))
+            user = DB.user.generate_empty(info=dict(name='Anonymous', username=username_anonymous, subscriptions=subscriptions))
             db_view.user_db.users[username_anonymous] = user
         
 class PushCallback(object):

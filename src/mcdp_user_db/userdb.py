@@ -58,7 +58,7 @@ class UserDB(object):
     def exists(self, login):
         return login in self
     
-    @contract(returns=bool)
+    @contract(returns=bool, login=str)
     def authenticate(self, login, password):
         user_info = self.users[login].info
         for p in user_info.authentication_ids:

@@ -187,7 +187,7 @@ def process_parse_request(library, string, spec, key, cache, make_relative):
             if isinstance(thing, NamedDP):
                 x = Tmp.string_nospaces_parse_tree_interpreted
                 generate_unconnected_warnings(thing, context0, x)
-                            
+
         except DPSyntaxError as e:
             return format_syntax_error2(parse_expr, string, e)
         except (DPSemanticError, DPNotImplementedError) as e:

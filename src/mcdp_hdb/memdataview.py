@@ -32,6 +32,7 @@ class ViewBase(object):
 
          
     @abstractmethod
+    @contract(key=str)
     def child(self, key):
         ''' '''
         
@@ -88,7 +89,7 @@ class ViewBase(object):
     def set_principals(self, principals):
         self._principals = principals
 
-    @contract(s=SchemaBase)
+    @contract(s=SchemaBase, url=str)
     def _create_view_instance(self, s, data, url):
         v = self._view_manager.create_view_instance(s, data)
         v._prefix = self._prefix + (url,)
@@ -181,22 +182,40 @@ class ViewMount(ViewBase):
 
     def mount_init(self):
         ''' initializes mount points '''
-#         logger.debug('mount_init() for %s' % id(self))
+        # logger.debug('mount_init() for %s' % id(self))
         object.__setattr__(self, 'mount_points', {})
         
 class ViewContext0(ViewMount):  
 
     def init_context(self):
+#         logger.debug('init_context() for %s' % id(self))
         self.mount_init()
+#         object.__setattr__(self, 'mount_points', {})
         object.__setattr__(self, 'children_already_provided', {})
         
-    @contract(returns=ViewBase)
+#     def __deepcopy__(self):
+#         raise Exception('cannot deepcopy')
+    @contract(returns=ViewBase, name=str)
     def child(self, name):
-        if name in self.mount_points:
-            return self.mount_points[name]
+        try:
+            children_already_provided = object.__getattribute__(self, 'children_already_provided')
+        except AttributeError:
+            object.__setattr__(self, 'children_already_provided', {})
+            self.mount_init()
 
-        if name in self.children_already_provided:
-            c = self.children_already_provided[name]
+            
+        try:
+            children_already_provided = object.__getattribute__(self, 'children_already_provided')
+            mount_points = object.__getattribute__(self, 'mount_points')
+        except AttributeError as e:
+            msg = 'Could not get basic attrs for %s: %s' % (id(self), e)
+            raise_wrapped(AttributeError, e, msg)
+            
+        if name in mount_points:
+            return mount_points[name]
+        
+        if name in children_already_provided:
+            c = children_already_provided[name]
             # but note that the data might have been changed
             # so we need to update it
             c._data  = self._data[name]
@@ -248,6 +267,7 @@ class ViewContext0(ViewMount):
         try:
             return object.__getattribute__(self, name)
         except AttributeError as _e:
+            #print _e
             pass  
         
         child = self.child(name)
@@ -259,7 +279,7 @@ class ViewContext0(ViewMount):
             return child 
 
     def __setattr__(self, leaf, value):
-        if leaf.startswith('_'):
+        if leaf.startswith('_') or leaf in ['mount_points', 'children_already_provided']:
             return object.__setattr__(self, leaf, value)
         v = self.child(leaf)
         v.check_can_write()
@@ -281,6 +301,7 @@ class ViewContext0(ViewMount):
                                    **self._get_event_kwargs())
             self._notify(event)
     
+            logger.debug('setting leaf %s = %s' % (leaf, value))
             self._data[leaf] = value
         
     
@@ -469,7 +490,7 @@ class ViewList0(ViewBase):
         except IndexError as e:
             msg = 'Could not use index %d' % i
             raise_wrapped(EntryNotFound, e, msg)
-        return self._create_view_instance(prototype, d, i)   
+        return self._create_view_instance(prototype, d, str(i))   
     
     def __getitem__(self, i):
         prototype = self._schema.prototype

@@ -12,7 +12,7 @@ Privileges = MCDPConstants.Privileges
 class Resource(object):
 
     def __init__(self, name=None):
-        if isinstance(name,unicode):
+        if isinstance(name, unicode):
             name = name.encode('utf-8')
         self.name = name
 
@@ -39,6 +39,8 @@ class Resource(object):
             return '%s(%s)' % (type(self).__name__, self.name)
 
     def __getitem__(self, key):
+        if isinstance(key, unicode):
+            key = key.encode('utf8')
 #         if key in ['login']:
 #             return None
         r = self.getitem(key)
@@ -111,21 +113,25 @@ def context_display_in_detail(context):
 
 
 class MCDPResourceRoot(Resource):
-
+    __acl__ = [
+        (Allow, Authenticated, Privileges.VIEW_USER_LIST),
+        (Allow, Authenticated, Privileges.VIEW_USER_PROFILE_PUBLIC),
+    ]
     def __init__(self, request):  # @UnusedVariable
         self.name = 'root'
         self.request = request
         from mcdp_web.main import WebApp
         options = WebApp.singleton.options    # @UndefinedVariable
-        self.__acl__ = [
-            (Allow, Authenticated, Privileges.VIEW_USER_LIST),
-            (Allow, Authenticated, Privileges.VIEW_USER_PROFILE_PUBLIC),
-        ]
+        
         if options.allow_anonymous:
-            self.__acl__.append((Allow, Everyone, Privileges.ACCESS))
+            x = (Allow, Everyone, Privileges.ACCESS)
+            if not x in MCDPResourceRoot.__acl__: 
+                MCDPResourceRoot.__acl__.append(x)
             #logger.info('Allowing everyone to access')
         else:
-            self.__acl__.append((Allow, Authenticated, Privileges.ACCESS))
+            x = (Allow, Authenticated, Privileges.ACCESS)
+            if not x in MCDPResourceRoot.__acl__: 
+                MCDPResourceRoot.__acl__.append(x)
             #logger.info('Allowing authenticated to access')
 
     def get_subs(self):
@@ -530,6 +536,8 @@ class ResourceThingViewImagesOne(Resource):
 class ResourceRobots(Resource): pass
 class ResourceAuthomatic(Resource):
     def get_subs(self):
+        session = self.get_session()
+        config = session.app.get_authomatic_config()
         subs =  {
             'github': ResourceAuthomaticProvider('github'),
             'facebook': ResourceAuthomaticProvider('facebook'),
@@ -537,6 +545,10 @@ class ResourceAuthomatic(Resource):
             'linkedin': ResourceAuthomaticProvider('linkedin'),
             'amazon': ResourceAuthomaticProvider('amazon'),
         }
+        for k in list(subs):
+            if not k in config:
+                del subs[k]
+            
         return subs
 
 class ResourceAuthomaticProvider(Resource): pass

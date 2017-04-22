@@ -16,6 +16,10 @@ from mcdp_web.confi import parse_mcdpweb_params_from_dict
 from mcdp_web.main import WebApp
 from mcdp_web_tests.spider import Spider
 from mcdp_utils_misc.mis import repo_commit_all_changes
+from mcdp_utils_xml.project_text import project_html
+from mcdp_web.resource_tree import MCDPResourceRoot
+from mcdp_shelf.access import Privileges
+from pyramid.security import Allow, Everyone
 
 
 # do not make relative to start using python
@@ -108,6 +112,10 @@ class FunctionalTests(unittest.TestCase):
         return url0, res
  
     def runTest(self):
+        # turn off access control for user list
+        MCDPResourceRoot.__acl__.append((Allow, Everyone, Privileges.ACCESS))
+        MCDPResourceRoot.__acl__.append((Allow, Everyone, Privileges.VIEW_USER_LIST))
+        MCDPResourceRoot.__acl__.append((Allow, Everyone, Privileges.VIEW_USER_PROFILE_PUBLIC))
         if MCDPConstants.test_spider_exclude_images:
             exclude = ['png','pdf','dot','svg','txt']
         else:
@@ -146,6 +154,15 @@ class FunctionalTests(unittest.TestCase):
         assert_not_contains(res.body, 'function shelf')
          
         def ignore(url, parsed):  # @UnusedVariable
+            if url == 'http://localhost/authomatic':
+                return True 
+            if 'confirm' in url:
+                return True
+            # > - http://localhost/confirm_creation_similar
+            # > - http://localhost/confirm_bind
+            # > - http://localhost/confirm_creation_create
+            # > - http://localhost/confirm_bind_bind
+            # > - http://localhost/confirm_creation
             if ':' in parsed.path:
                 return True
             if 'exit' in parsed.path: # skip actions
@@ -173,12 +190,27 @@ class FunctionalTests(unittest.TestCase):
         except KeyboardInterrupt:
             pass
         spider.log_summary()
-        if spider.failed:
-            msg = 'Could not get some URLs:\n'
-            for f, e in spider.failed.items():
-                msg += '\n URL: ' + f
-                msg += '\n referrers: \n' + "\n  - ".join(spider.referrers[f]) 
-                msg += '\n' + indent(str(e), '  > ')
+        if spider.failed or spider.not_found:
+            msg = ''
+            if spider.not_found:
+                msg += 'These URLs not found:'
+                for f, e in spider.not_found.items():
+                    msg += '\n- %s' % f
+                
+            if spider.failed:
+                msg += '\nErrors for these URLs:'
+                for f, e in spider.failed.items():
+                    msg += '\n- %s' % f
+                    
+                if False:
+                    for f, e in spider.failed.items():
+                        msg += '\n URL: ' + f
+                        msg += '\n referrers: \n' + "\n  - ".join(spider.referrers[f])
+                        
+                        body = e[e.index('<html'):]
+                        s = project_html(body) 
+                        msg += '\n' + indent(s, '  > ')
+    #                 msg += '\n' + indent(str(e), '  > ')
 #                 msg += '\n'.join('- %s' % _ for _ in sorted(spider.failed))
             raise_desc(Exception, msg)
 

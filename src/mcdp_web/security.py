@@ -87,8 +87,8 @@ class AppLogin(object):
         message = ''
         error = ''
         if 'form.submitted' in e.request.params:
-            login = e.request.params['login']
-            password = e.request.params['password']
+            login = e.request.params['login'].encode('utf8')
+            password = e.request.params['password'].encode('utf8')
 
             
             if not login in user_db:
