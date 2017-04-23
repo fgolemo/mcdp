@@ -218,8 +218,8 @@ def event_dict_rename_interpret(view, name, key, key2):
                (key, key2, format_list(v._data)))
         raise InvalidOperation(msg)
     v._data[key2] = v._data.pop(key)
-
-@contract(_id=str, event_name=str, who="assert_valid_who")
+  
+@contract(_id=str, event_name=str, who="None|assert_valid_who")
 def event_make(_id, event_name, who, arguments):
     assert event_name in DataEvents.all_events
     d = OrderedDict()

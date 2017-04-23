@@ -5,21 +5,17 @@ from contracts import contract
 from contracts.utils import raise_wrapped, indent, check_isinstance
 
 from mcdp import logger
+from mcdp.exceptions import DPInternalError
 from mcdp_utils_misc import format_list, yaml_dump
 
-from .disk_events import disk_event_disk_event_group
-from .disk_events import disk_event_file_modify, disk_event_dir_delete, disk_event_file_create, disk_event_dir_create, disk_event_file_delete, disk_event_file_rename, disk_event_dir_rename
-from .disk_map import HintFileYAML
+from .disk_events import disk_event_disk_event_group, disk_event_file_modify, disk_event_dir_delete, disk_event_file_create, disk_event_dir_create, disk_event_file_delete, disk_event_file_rename, disk_event_dir_rename
+from .disk_map import DiskMap, HintFileYAML
 from .disk_struct import ProxyDirectory, ProxyFile
 from .hints import HintDir
-from .memdata_events import DataEvents, get_view_node
-from .memdataview import InvalidOperation
+from .memdata_events import DataEvents, get_view_node, event_interpret_
+from .memdataview import InvalidOperation, ViewBase
 from .memdataview_manager import ViewManager
 from .schema import SchemaHash, SchemaContext, SchemaList, SchemaBase
-from mcdp_hdb.memdata_events import event_list_append, event_interpret_
-from mcdp.exceptions import DPInternalError
-from mcdp_hdb.memdataview import ViewBase
-
 
 
 @contract(returns='list(dict)', schema=SchemaBase)
@@ -64,7 +60,7 @@ def disk_events_from_data_event(disk_map, schema, data_rep, data_event):
     else:
         raise NotImplementedError(operation)
 
-@contract(view=ViewBase, p='seq(str)', schema=SchemaBase)
+@contract(disk_map=DiskMap, view=ViewBase, p='seq(str)')
 def disk_events_from_data_event_inside_yaml(disk_map, data_event, view, p):
     # we now know that we are inside a YAML
     # Just checking though:
@@ -101,6 +97,7 @@ def disk_events_from_data_event_inside_yaml(disk_map, data_event, view, p):
     return [disk_event]
 
 
+
 @contract(returns='tuple(bool, *)')
 def change_was_inside_YAML(view, data_event, disk_map):
     ''' Checks whether the change was inside a YAML file. '''
@@ -118,45 +115,45 @@ def change_was_inside_YAML(view, data_event, disk_map):
     else:
         return False, None
 
-    
-def disk_events_from_leaf_set_in_yaml(disk_map, view, _id, who, name, leaf, value, parent_with_yaml):
-    p_schema = view._schema.get_descendant(parent_with_yaml)
-    p_hint = disk_map.get_hint(p_schema)
-    check_isinstance(p_hint, HintFileYAML)
-    
-    relative_url = name[len(parent_with_yaml):]
-    msg = 'Inside yaml:  set %s.%s = %s' % (relative_url, leaf, value)
-    logger.info(msg)
-    
-    parent_of_yaml = parent_with_yaml[:-1]
-    parent_of_yaml_schema = view._schema.get_descendant(parent_of_yaml)
-    parent_of_yaml_hint = disk_map.get_hint(parent_of_yaml_schema)
-    dirname = disk_map.dirname_from_data_url_(view._schema, parent_of_yaml)
-    filename = parent_of_yaml_hint.filename_for_key(parent_with_yaml[-1])
-    
-    # this is the current data to go in yaml
-    data_view = get_view_node(view, parent_with_yaml)
-    # make a copy
-    data_view._data = deepcopy(data_view._data)
-    # now make the change
-    _data= get_view_node(data_view, relative_url)._data
-    _data[leaf] = value
-    fh = disk_map.create_hierarchy_(p_schema, data_view._data)
-    check_isinstance(fh, ProxyFile)
-    contents = fh.contents
-    disk_event = disk_event_file_modify(_id, who, dirname, filename, contents)
-    return [disk_event]
- 
+#     
+# def disk_events_from_leaf_set_in_yaml(disk_map, view, _id, who, name, leaf, value, parent_with_yaml):
+#     p_schema = view._schema.get_descendant(parent_with_yaml)
+#     p_hint = disk_map.get_hint(p_schema)
+#     check_isinstance(p_hint, HintFileYAML)
+#     
+#     relative_url = name[len(parent_with_yaml):]
+#     msg = 'Inside yaml:  set %s.%s = %s' % (relative_url, leaf, value)
+#     logger.info(msg)
+#     
+#     parent_of_yaml = parent_with_yaml[:-1]
+#     parent_of_yaml_schema = view._schema.get_descendant(parent_of_yaml)
+#     parent_of_yaml_hint = disk_map.get_hint(parent_of_yaml_schema)
+#     dirname = disk_map.dirname_from_data_url_(view._schema, parent_of_yaml)
+#     filename = parent_of_yaml_hint.filename_for_key(parent_with_yaml[-1])
+#     
+#     # this is the current data to go in yaml
+#     data_view = get_view_node(view, parent_with_yaml)
+#     # make a copy
+#     data_view._data = deepcopy(data_view._data)
+#     # now make the change
+#     _data= get_view_node(data_view, relative_url)._data
+#     _data[leaf] = value
+#     fh = disk_map.create_hierarchy_(p_schema, data_view._data)
+#     check_isinstance(fh, ProxyFile)
+#     contents = fh.contents
+#     disk_event = disk_event_file_modify(_id, who, dirname, filename, contents)
+#     return [disk_event]
+#  
 
 def disk_events_from_leaf_set(disk_map, view, _id, who, name, leaf, value):
     # check if it is contained in any dir that has HintFileYAML
 #     logger.debug('leaf_set %s . %s = %s' % (parent, name, value))
-    for i in range(len(name)+1):
-        p = name[:i]
-        p_schema = view._schema.get_descendant(p)
-        p_hint = disk_map.get_hint(p_schema)
-        if isinstance(p_hint, HintFileYAML):
-            return disk_events_from_leaf_set_in_yaml(disk_map, view, _id, who, name, leaf, value, p)
+#     for i in range(len(name)+1):
+#         p = name[:i]
+#         p_schema = view._schema.get_descendant(p)
+#         p_hint = disk_map.get_hint(p_schema)
+#         if isinstance(p_hint, HintFileYAML):
+#             return disk_events_from_leaf_set_in_yaml(disk_map, view, _id, who, name, leaf, value, p)
     
     view_parent = get_view_node(view, name)
     schema_parent = view_parent._schema
@@ -199,46 +196,43 @@ def iterate_prefix(disk_map, view, name):
         parent_schema = view._schema.get_descendant(prefix[:-1])
         parent_hint = disk_map.get_hint(parent_schema)
         yield PP(schema=schema, hint=hint, prefix=prefix, parent_hint=parent_hint, parent_schema=parent_schema)
-
-def is_inside_yaml(disk_map, view, name):
-    ''' Checks if we are inside a YAML file '''
-    for pp in iterate_prefix(disk_map, view, name):
-        if isinstance(pp.hint, HintFileYAML):
-            return pp
-    else:
-        return None
+# 
+# def is_inside_yaml(disk_map, view, name):
+#     ''' Checks if we are inside a YAML file '''
+#     for pp in iterate_prefix(disk_map, view, name):
+#         if isinstance(pp.hint, HintFileYAML):
+#             return pp
+#     else:
+#         return None
 
 def disk_events_from_list_append(disk_map, view, _id, who, name, value):
     logger.debug('list append to %s for value %s' % (name, value))
-    pp = is_inside_yaml(disk_map, view, name)
-    if pp is not None:
-        logger.debug('we are inside YAML --  append to %s for value %s' % (name, value))
-        # copy the entire data:
-        logger.debug('pp.prefix = %s' % str(pp.prefix))
-        data_relative_to_yaml = name[len(pp.prefix):]
-        logger.debug('relative to prefix: %s' % data_relative_to_yaml)
-        data_at_yaml = view.get_descendant(pp.prefix)
-        data_at_yaml_copy = data_at_yaml.deepcopy()
-        data_at_yaml_copy.set_root()
-#         logger.debug('data at YAML:\n%s' % yaml_dump(data_at_yaml_copy._data))
-        # apply the event
-        name2 = name[len(pp.prefix):]
-        event2 = event_list_append(name=name2, value=value, _id='None', who=None)
-        event_interpret_(data_at_yaml_copy, event2)
-        fh = disk_map.create_hierarchy_(pp.schema, data_at_yaml_copy._data)
-        check_isinstance(fh, ProxyFile)
-        contents = fh.contents
-        dirname = disk_map.dirname_from_data_url_(view._schema, pp.prefix[:-1])
-        
-        filename = pp.parent_hint.filename_for_key(pp.prefix[-1]) 
-        disk_event = disk_event_file_modify(_id, who, dirname, filename, contents)
-        logger.info('name %s -> dirname = %s, filename = %s' % (name, dirname, filename))
-        return [disk_event]
-        
-        
-        
-    # First, check if we are inside a YAML file
-    
+#     pp = is_inside_yaml(disk_map, view, name)
+#     if pp is not None:
+#         logger.debug('we are inside YAML --  append to %s for value %s' % (name, value))
+#         # copy the entire data:
+#         logger.debug('pp.prefix = %s' % str(pp.prefix))
+#         data_relative_to_yaml = name[len(pp.prefix):]
+#         logger.debug('relative to prefix: %s' % data_relative_to_yaml)
+#         data_at_yaml = view.get_descendant(pp.prefix)
+#         data_at_yaml_copy = data_at_yaml.deepcopy()
+#         data_at_yaml_copy.set_root()
+# #         logger.debug('data at YAML:\n%s' % yaml_dump(data_at_yaml_copy._data))
+#         # apply the event
+#         name2 = name[len(pp.prefix):]
+#         event2 = event_list_append(name=name2, value=value, _id='None', who=None)
+#         event_interpret_(data_at_yaml_copy, event2)
+#         fh = disk_map.create_hierarchy_(pp.schema, data_at_yaml_copy._data)
+#         check_isinstance(fh, ProxyFile)
+#         contents = fh.contents
+#         dirname = disk_map.dirname_from_data_url_(view._schema, pp.prefix[:-1])
+#         
+#         filename = pp.parent_hint.filename_for_key(pp.prefix[-1]) 
+#         disk_event = disk_event_file_modify(_id, who, dirname, filename, contents)
+#         logger.info('name %s -> dirname = %s, filename = %s' % (name, dirname, filename))
+#         return [disk_event]
+#         
+         
     view_parent = get_view_node(view, name)
     schema_parent = view_parent._schema
     check_isinstance(schema_parent, SchemaList)
