@@ -36,6 +36,10 @@ class HintDir(object):
             return self.pattern.replace('%', key)
 
     def key_from_filename(self, filename):
+        if filename in self.translations.values():
+            for key, v in self.translations.items():
+                if v == filename:
+                    return key
         pattern = self.pattern
         if not '%' in pattern:
             msg = 'Cannot get key from filename.'

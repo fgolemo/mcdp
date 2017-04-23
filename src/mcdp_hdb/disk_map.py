@@ -103,71 +103,93 @@ class DiskMap(object):
         
     @contract(dirname='tuple,seq(str)')
     def data_url_from_dirname_(self, schema, dirname):
-        if not dirname:
-            return ()
-        # We know we will only get Context, List and Hash
-        check_isinstance(schema, (SchemaHash, SchemaList, SchemaContext))
-        # things that are serialized using hintdir
-        hint = self.get_hint(schema)
-        check_isinstance(hint, HintDir)
-        
-        first = dirname[0]
-        rest = dirname[1:]
-        first_translated = hint.key_from_filename(first)
-        
-        if isinstance(schema, SchemaHash):
-            rest_translated = self.data_url_from_dirname_(schema.prototype, rest)
-            return (first_translated,) + rest_translated
-        elif isinstance(schema, SchemaList):
-            rest_translated = self.data_url_from_dirname_(schema.prototype, rest)
-            return (first_translated,) + rest_translated
-        elif isinstance(schema, SchemaContext):
-            # all right, what could happen here is that we have one or more children
-            # whose file translation is None. What to do?
-            
-            # Let's first look at how many children have translation "None".
-            children_with_none = [k for k in schema.children if hint.translations.get(k, 'ok') is None]
-            if len(children_with_none) > 1:
-#                 msg = 'This is a situation in which there are more than one child that have no translation.'
-#                 msg += ' These are children_with_none = %s' % children_with_none
-#                 msg += ' first = %s rest = %s first_translated %s' % (first, rest, first_translated)
-#                 logger.debug(msg)
-                successful = {}
-                for maybe_child in children_with_none:
-                    schema_child = schema.children[maybe_child]
-                    try:
-                        rest_translated = self.data_url_from_dirname_(schema_child, dirname)
-                    except NotKey:
-                        continue
-                    successful[maybe_child] = rest_translated
-                if not successful:
-                    msg = 'Could not translate rest = %s '% str(rest)
-                    raise ValueError(msg)
-                if len(successful) > 1: 
-                    msg = 'Too many ways to translate rest = %s : %s'% (str(rest), successful)
-                    raise ValueError(msg)
-                child_succeded = list(successful)[0]
-                rest_translated = successful[child_succeded]
-                res = (child_succeded,) + rest_translated
-#                 logger.debug('special: Result is dirname %r -> res %r' % (dirname, res))
-                return res
-            elif len(children_with_none) == 0:
-                # easy case: 
-                schema_child = schema.children[first_translated]
-                rest_translated = self.data_url_from_dirname_(schema_child, rest)
-                return (first_translated,) + rest_translated
+        try:
+            if not dirname:
+                return ()
+            # We know we will only get Context, List and Hash
+            check_isinstance(schema, (SchemaHash, SchemaList, SchemaContext))
+            # things that are serialized using hintdir
+            hint = self.get_hint(schema)
+            first = dirname[0]
+            rest = dirname[1:]
+            if isinstance(hint, HintExtensions):
+                basename, ext = os.path.splitext(first)
+                if ext is not None:
+                    ext = ext[-1]
+                    if ext in hint.extensions:
+                        return (basename, ext)
+                msg = '%r does not have an extension in %r' %  (first, hint.extensions)
+                raise NotKey(msg)
             else:
-                child_with_none = children_with_none[0]
-                logger.debug('We found one descendant with translation None: %r' % child_with_none)
-                schema_child = schema.children[child_with_none]
-                warnings.warn('I think it should be rest but who knows')
-                # rest_translated = self.data_url_from_dirname_(schema_child, rest)
-                rest_translated = self.data_url_from_dirname_(schema_child, dirname)
-                res = (child_with_none,) + rest_translated
-                logger.debug('Result is dirname %r -> res %r' % (dirname, res))
-                return res
-            
-         
+                check_isinstance(hint, HintDir)
+                
+                first_translated = hint.key_from_filename(first)
+                print('first_translated: %s' % first_translated) 
+                
+                if isinstance(schema, SchemaHash):
+                    rest_translated = self.data_url_from_dirname_(schema.prototype, rest)
+                    return (first_translated,) + rest_translated
+                elif isinstance(schema, SchemaList):
+                    rest_translated = self.data_url_from_dirname_(schema.prototype, rest)
+                    return (first_translated,) + rest_translated
+                elif isinstance(schema, SchemaContext):
+                    # all right, what could happen here is that we have one or more children
+                    # whose file translation is None. What to do?
+                    
+                    # first, if 'first' is an explicit translation, then we are done
+                    translations = [k for k, v in hint.translations.items() if first == v]
+                    if translations:
+                        assert len(translations) == 1, translations
+                        use = translations[0]
+                        child = schema.children[use]
+                        logger.info('I know translation of first = %s to be %s' % (first, use))
+                        rest_translated = self.data_url_from_dirname_(child, rest)
+                        return (first_translated,) + rest_translated
+                    
+                    # Let's first look at how many children have translation "None".
+                    children_with_none = [k for k in schema.children if hint.translations.get(k, 'ok') is None]
+                    if len(children_with_none) > 1:
+        #                 msg = 'This is a situation in which there are more than one child that have no translation.'
+        #                 msg += ' These are children_with_none = %s' % children_with_none
+        #                 msg += ' first = %s rest = %s first_translated %s' % (first, rest, first_translated)
+        #                 logger.debug(msg)
+                        successful = {}
+                        for maybe_child in children_with_none:
+                            schema_child = schema.children[maybe_child]
+                            try:
+                                rest_translated = self.data_url_from_dirname_(schema_child, dirname)
+                            except NotKey:
+                                continue
+                            successful[maybe_child] = rest_translated
+                        if not successful:
+                            msg = 'Could not translate rest = %s '% str(rest)
+                            raise ValueError(msg)
+                        if len(successful) > 1: 
+                            msg = 'Too many ways to translate rest = %s : %s'% (str(rest), successful)
+                            raise ValueError(msg)
+                        child_succeded = list(successful)[0]
+                        rest_translated = successful[child_succeded]
+                        res = (child_succeded,) + rest_translated
+                        return res
+                    elif len(children_with_none) == 0:
+                        # easy case: 
+                        schema_child = schema.children[first_translated]
+                        rest_translated = self.data_url_from_dirname_(schema_child, rest)
+                        return (first_translated,) + rest_translated
+                    else:
+                        child_with_none = children_with_none[0]
+                        logger.debug('We found one descendant with translation None: %r' % child_with_none)
+                        schema_child = schema.children[child_with_none]
+                        warnings.warn('I think it should be rest but who knows')
+                        # rest_translated = self.data_url_from_dirname_(schema_child, rest)
+                        rest_translated = self.data_url_from_dirname_(schema_child, dirname)
+                        res = (child_with_none,) + rest_translated
+                        logger.debug('Result is dirname %r -> res %r' % (dirname, res))
+                        return res
+        except ValueError as e:
+            msg = 'Could not get data_url_from_dirname_(%s, %s):' % (type(schema), dirname)
+            raise_wrapped(ValueError, e, msg, compact=False)
+             
         
     @contract(fh='isinstance(ProxyDirectory)|isinstance(ProxyFile)')
     def interpret_hierarchy_(self, schema, fh):

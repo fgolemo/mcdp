@@ -3,6 +3,9 @@ from contracts import contract
 from .memdata_events import event_leaf_set, event_dict_setitem, event_dict_delitem, event_list_append, event_list_delete, event_list_insert
 from .schema import SchemaContext, SchemaHash, SchemaList, SchemaBytes, SchemaDate, SchemaString, SchemaSimple
 from .schema import data_hash_code
+from mcdp.logs import logger
+from mcdp_utils_misc.my_yaml import yaml_dump
+from contracts.utils import indent
 
 
 @contract(returns='list(dict)')
@@ -21,6 +24,8 @@ def data_diff(schema, data1, data2, prefix=()):
             else:
                 e = data_diff(schema_child, data1[k], data2[k], prefix=prefix+(k,))
                 events.extend(e)
+        if events:
+            logger.info('Found:\n'+indent(yaml_dump(events), ' > '))
         return events
     
     elif isinstance(schema, SchemaHash):
@@ -112,9 +117,5 @@ def data_diff(schema, data1, data2, prefix=()):
         msg = 'I was not expecting to be called for %s' % schema
         raise ValueError(msg)
     else:
-        assert False 
+        assert False, schema
 
-def detect_list_changes(l1, l2, equality):
-    '''
-        Finds a list of changes 
-    '''

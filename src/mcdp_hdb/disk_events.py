@@ -69,8 +69,12 @@ def disk_event_dir_create_interpret(disk_rep, dirname, name):
     d = get_dir(disk_rep, dirname)
     if name in d:
         msg = 'Cannot create directory "%s" that already exists' % name
-        raise InvalidDiskOperation(msg)
-    d[name] = ProxyDirectory()
+        if True:
+            logger.warn(msg)
+        else:
+            raise InvalidDiskOperation(msg)
+    else:
+        d[name] = ProxyDirectory()
 
 @ff
 @contract(dirname='valid_dirname')

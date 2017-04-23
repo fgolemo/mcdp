@@ -2,7 +2,7 @@ from collections import OrderedDict
 from copy import deepcopy
 
 from contracts import contract
-from contracts.utils import check_isinstance, indent, raise_wrapped
+from contracts.utils import check_isinstance, indent, raise_wrapped, raise_desc
 
 from mcdp import MCDPConstants
 from mcdp.logs import logger
@@ -10,7 +10,7 @@ from mcdp_utils_misc import format_list, yaml_dump
 
 from .memdataview import ViewBase
 from .memdataview_exceptions import InvalidOperation
-from mcdp_hdb.who import assert_valid_who
+from mcdp_hdb.schema import SchemaSimple
 
 
 class DataEvents(object):
@@ -68,16 +68,20 @@ def event_leaf_set(name, leaf, value, **kwargs):
     return event_make(event_name=DataEvents.leaf_set, arguments=arguments, **kwargs)
 
 def event_leaf_set_interpret(view, name, leaf, value):
-    v = get_view_node(view, name)
+    v = view.get_descendant(name)
     from mcdp_hdb.memdataview import ViewContext0
     check_isinstance(v, ViewContext0)
     vc = v.child(leaf)
     vc._schema.validate(value)
     vc.check_can_write()
+    if not isinstance(vc._schema, SchemaSimple):
+        msg = 'leaf_set can be done only for SchemaSimple'
+        raise_desc(InvalidOperation, msg, name=name, leaf=leaf, value=value)
+        
+    logger.debug('vc type is %s, %s' % (type(vc), vc))
     vc.set(value)
     
-def get_the_list(view, name):
-    # v = get_view_node(view, name)
+def get_the_list(view, name): 
     v = view.get_descendant(name)
     from mcdp_hdb.memdataview import ViewList0
     check_isinstance(v, ViewList0)

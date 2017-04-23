@@ -8,7 +8,7 @@ from contracts.utils import raise_desc, raise_wrapped, indent, check_isinstance
 
 from mcdp import MCDPConstants
 from mcdp import logger
-from mcdp_hdb.schema import NotValid
+from mcdp_hdb.schema import NotValid, SchemaContext
 from mcdp_shelf import ACL
 from mcdp_shelf.access import acl_from_yaml
 from mcdp_utils_misc import format_list, memoize_simple
@@ -16,6 +16,7 @@ from mcdp_utils_misc import format_list, memoize_simple
 from .memdataview_exceptions import InsufficientPrivileges, InvalidOperation, EntryNotFound
 from .memdataview_utils import special_string_interpret
 from .schema import SchemaBase, SchemaSimple
+
 
 
 __all__ = [
@@ -298,17 +299,25 @@ class ViewContext0(ViewMount):
             raise_wrapped(NotValid, e, msg, compact=True)
             
         from .memdata_events import event_leaf_set
+        from mcdp_hdb.memdata_events import event_struct_set
 
         if self._data[leaf] == value:
             pass
         else:
-            event = event_leaf_set(name=self._prefix,
-                                   leaf=leaf, 
-                                   value=value, 
-                                   **self._get_event_kwargs())
+            if is_simple_data(v._schema):
+                event = event_leaf_set(name=self._prefix,
+                                       leaf=leaf, 
+                                       value=value, 
+                                       **self._get_event_kwargs())
+            elif isinstance(v._schema, SchemaContext):
+                name = self._prefix + (leaf,)
+                
+                event = event_struct_set(name=name, value=value, **self._get_event_kwargs())
+            
             self._notify(event)
-    
+            
             logger.debug('setting leaf %s = %s' % (leaf, value))
+            logger.debug('setting leaf schema = %s ' % (v._schema))
             self._data[leaf] = value
         
     
