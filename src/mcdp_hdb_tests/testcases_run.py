@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from contracts import contract
 
 from comptests.registrar import comptest, run_module_tests
@@ -17,16 +18,16 @@ tcs.update(testcases_arrays())
 tcs.update(testcases_minilibrary())
 tcs.update(testcases_arrays_inside_yaml())
 
-class X(object):
+class HDBTestCaseWrapper(object):
     def __init__(self, k, tc):
         self.k = k
         self.tc = tc
-        self.__name__ = k
+        self.__name__ = 'hdb_testcase-' + k
     def __call__(self):
         return run_for_test_case(self.k, self.tc)
 
 for k, tc in tcs.items():
-    comptest(X(k, tc))
+    comptest(HDBTestCaseWrapper(k, tc))
     
 @contract(tc=DataTestCase)
 def run_for_test_case(name, tc):
