@@ -218,20 +218,27 @@ def apply_disk_event_to_filesystem(wd, disk_event, repo=None):
         os.rename(p1, p2)
         if repo_index:
             for _, rel in descendants_tracked(p1):
-                fn1 = path_relative_to_repo(os.path.join(p1, rel))
-                fn2 = path_relative_to_repo(os.path.join(p2, rel))
-                repo_index.move(fn1, fn2)
+#                 fn1 = path_relative_to_repo(os.path.join(p1, rel))
+#                 fn2 = path_relative_to_repo(os.path.join(p2, rel))
+                f1 = os.path.join(p1, rel)
+                f2 = os.path.join(p2, rel)
+                repo_index.move([f1, f2])
         
     def file_rename(dirname, name, name2):
         p1 = as_path(dirname, name)
         p2 = as_path(dirname, name2)
-        os.rename(p1, p2)
         if repo_index:
-            fn1 = path_relative_to_repo(p1)
-            fn2 = path_relative_to_repo(p2)
-            logger.debug('fn1: %s' % fn1)
-            logger.debug('fn2: %s' % fn2)
-            repo_index.move(fn1, fn2)
+#             fn1 = path_relative_to_repo(p1)
+#             fn2 = path_relative_to_repo(p2)
+#             logger.debug('fn1: %s' % fn1)
+#             logger.debug('fn2: %s' % fn2)
+#             # repo_index.move(fn1, fn2)
+#             logger.debug('working dir: %s' % repo.working_dir)
+#             logger.debug('p1: %s' % p1)
+#             logger.debug('p2: %s' % p2)
+            repo_index.move([p1, p2])
+        else:
+            os.rename(p1, p2)
         
     def dir_delete(dirname, name):
         p = as_path(dirname, name)
@@ -289,6 +296,7 @@ def apply_disk_event_to_filesystem(wd, disk_event, repo=None):
     except Exception as e:
         msg = 'Could not apply this event to filesystem: \n'
         msg += indent(yaml_dump(disk_event), 'disk_event: ')
+        msg += '\nwd: %s' % wd
         from mcdp_hdb.memdataview import InvalidOperation
         raise_wrapped(InvalidOperation, e, msg)
 

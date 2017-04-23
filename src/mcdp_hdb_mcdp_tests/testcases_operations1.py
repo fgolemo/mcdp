@@ -45,7 +45,7 @@ def testcases_CommonOperations1():
    
     disk_maps= {'regular': DB.dm}
     
-    prefix = 'array_inside_yaml'
+    prefix = 'commonops1'
     
     res = get_combinations(db_schema, db0, prefix, operation_sequences, disk_maps)
     return res
