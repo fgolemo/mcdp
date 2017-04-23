@@ -2,6 +2,7 @@ from contracts import contract
 
 from mcdp_hdb_mcdp.main_db_schema import DB
 from mcdp_hdb_tests.testcases import get_combinations
+from mcdp_hdb_mcdp_tests.dbs import testdb1
 
 
 @contract(returns='dict(str:isinstance(DataTestCase))')    
@@ -9,17 +10,7 @@ def testcases_CommonOperations1():
     
     db_schema = DB.db
     
-    db0 = {
-        'repos': {},
-        'user_db' : {
-            'users': {
-                'andrea': {
-                    'name': 'Andrea',
-                    'groups': ['one', 'two'],
-                }
-            }
-        }
-    }
+    db0 = testdb1()
 
     db_schema.validate(db0)
     
@@ -31,17 +22,20 @@ def testcases_CommonOperations1():
     @add_seq
     def seq_set(view):
         user_db = view.user_db
-        user_db.users['andrea'].name = 'new name'
+        user = user_db.users['andrea'] 
+        user.info.name = 'new name'
         
     @add_seq
     def seq_append(view):
         user_db = view.user_db
-        user_db.users['andrea'].groups.append('newgroup')
+        user = user_db.users['andrea']
+        user.info.groups.append('newgroup')
      
     @add_seq
     def seq_delete1(view):
         user_db = view.user_db
-        user_db.users['andrea'].groups.remove('one')
+        user = user_db.users['andrea']
+        user.info.groups.remove('FDM')
    
     disk_maps= {'regular': DB.dm}
     
