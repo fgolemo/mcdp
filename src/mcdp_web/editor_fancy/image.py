@@ -42,7 +42,7 @@ def ndp_template_graph_enclosed(library, template, style, yourname, data_format,
                         image_source=image_source, yourname=yourname)
     return gg_get_format(gg, data_format)
     
-def get_png_data_poset(image_source, name, thing, data_format, library):
+def get_png_data_poset(image_source, name, thing, data_format, library):  # @UnusedVariable
     _ = name 
     if isinstance(thing, FinitePoset):
         mf = MakeFiguresPoset(thing, image_source=image_source)

@@ -288,10 +288,15 @@ def testcases_arrays_inside_yaml():
     @add_seq
     def seq_set(view):
         view.users['andrea'].name = 'new name'
+        
     @add_seq
     def seq_append(view):
         view.users['andrea'].groups.append('newgroup')
-        
+     
+    @add_seq
+    def seq_delete1(view):
+        view.users['andrea'].groups.remove('one')
+   
     dm = DiskMap()
     dm.hint_file_yaml(user)
     disk_maps= {}

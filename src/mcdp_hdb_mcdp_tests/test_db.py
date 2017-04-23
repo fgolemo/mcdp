@@ -1,13 +1,9 @@
-import os
-import shutil
 import sys
 
 from contracts.utils import indent
-import yaml
 
 from mcdp.logs import logger
-from mcdp_hdb import ProxyDirectory
-from mcdp_hdb import disk_events_from_data_event
+from mcdp_hdb import ProxyDirectory, disk_events_from_data_event
 from mcdp_hdb_mcdp.main_db_schema import DB
 from mcdp_utils_misc import yaml_dump
 
@@ -72,7 +68,7 @@ if __name__ == '__main__':
                                                  schema=user_db_view._schema, 
                                                  data_rep=user_db_view._data, 
                                                  data_event=data_event)
-        print yaml_dump(disk_event)
+        logger.info(yaml_dump(disk_event))
          
     
      

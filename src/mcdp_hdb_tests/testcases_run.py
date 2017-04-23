@@ -48,9 +48,9 @@ def run_for_test_case(name, tc):
     r1 = check_translation_diskrep_to_memdata(schema, disk_rep0, disk_events, disk_rep, disk_map, 
                                          out=out_diskrep_to_memdata)
     
-    data_rep0_2 = r1['data_rep0']
-    data_rep1_2 = r1['data_rep']
-    data_events_2 = r1['data_events']
+    _data_rep0_2 = r1['data_rep0']
+    _data_rep1_2 = r1['data_rep']
+    _data_events_2 = r1['data_events']
     
     r2 = check_translation_diskrep_to_gitrep(disk_rep0, disk_events, disk_rep,
                                               out=out_diskrep_to_memdata)
