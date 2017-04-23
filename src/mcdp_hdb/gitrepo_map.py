@@ -4,9 +4,10 @@ from contracts import contract
 from git import Repo
 from git.util import Actor
 
+from mcdp_utils_misc import create_tmpdir
+
 from .disk_struct import ProxyDirectory, ProxyFile
 from .memdataview_utils import host_name
-from mcdp_utils_misc import create_tmpdir
 
 
 def create_empty_dir_from_schema(dirname, schema, disk_map):
@@ -74,11 +75,7 @@ def gitrep_from_diskrep(disk_rep, where=None, branch=None):
     
     if repo.untracked_files: 
         repo.index.add(repo.untracked_files)
-    
-#     modified_files = repo.index.diff(None)
-#     for m in modified_files:
-#         repo.index.add([m.b_path])
-#         
+     
     
     message = "gitrep_from_diskrep(%s)" % where
     repo.index.commit(message, author=author, committer=author)

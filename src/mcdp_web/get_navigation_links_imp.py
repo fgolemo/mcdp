@@ -1,5 +1,4 @@
 from mcdp.constants import MCDPConstants
-from mcdp.logs import logger
 from mcdp_library.specs_def import SPEC_VALUES, SPEC_POSETS, SPEC_TEMPLATES, SPEC_MODELS
 from mcdp_utils_misc import natural_sorted
 
@@ -13,11 +12,11 @@ def get_navigation_links_context(e):
     else:
         shelf_write_permission = False
         
-    if e.library is not None:
-        if not e.library_name in e.session.libraries:
-            msg = 'The library %r is not available. Maybe a permission issue?' % e.library_name
-            msg += '\n context: %s' % e.context.show_ancestors()
-            logger.error(msg) 
+#     if e.library is not None:
+#         if not e.library_name in e.session.libraries:
+#             msg = 'The library %r is not available. Maybe a permission issue?' % e.library_name
+#             msg += '\n context: %s' % e.context.show_ancestors()
+#             logger.error(msg) 
 
     d = {}
     
