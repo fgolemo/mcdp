@@ -44,10 +44,10 @@ def load_tests_modules():
         import mcdp_docs_tests
         import mcdp_report_ndp_tests
         import mcdp_repo_tests
-
         from mocdp.comp.flattening import tests  # @Reimport
         import mcdp_comp_tests
         import mcdp_hdb_tests
+        import mcdp_hdb_mcdp_tests
 
         vname = MCDPConstants.ENV_TEST_SKIP_MCDPOPT
         if vname in os.environ:
