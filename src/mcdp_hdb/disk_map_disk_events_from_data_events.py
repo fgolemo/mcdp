@@ -17,10 +17,24 @@ from .memdataview import InvalidOperation
 from .memdataview_manager import ViewManager
 from .schema import SchemaHash, SchemaContext, SchemaList, SchemaBase
 from mcdp_hdb.memdata_events import event_list_append, event_interpret_
+from mcdp.exceptions import DPInternalError
+from mcdp_hdb.memdataview import ViewBase
+
 
 
 @contract(returns='list(dict)', schema=SchemaBase)
 def disk_events_from_data_event(disk_map, schema, data_rep, data_event):
+    viewmanager = ViewManager(schema) 
+    view = viewmanager.create_view_instance(schema, data_rep)
+    view._schema.validate(data_rep  )
+
+    # As a preliminary check, we check whether this change happened 
+    # inside a YAML representation.
+    inside_yaml, name_of_yaml = change_was_inside_YAML(view=view, data_event=data_event, disk_map=disk_map)
+    # If yes, then the result will be a file_modify event for the YAML file.
+    if inside_yaml:
+        return disk_events_from_data_event_inside_yaml(disk_map, data_event, view, p=name_of_yaml)
+    
     handlers = {
         DataEvents.leaf_set: disk_events_from_leaf_set,
         DataEvents.dict_setitem: disk_events_from_dict_setitem,
@@ -31,9 +45,6 @@ def disk_events_from_data_event(disk_map, schema, data_rep, data_event):
         DataEvents.list_insert: disk_events_from_list_insert,
         DataEvents.list_remove: disk_events_from_list_remove,
     }
-    viewmanager = ViewManager(schema) 
-    view = viewmanager.create_view_instance(schema, data_rep)
-    view._schema.validate(data_rep  )
     operation = data_event['operation']
     if operation in handlers:
         f = handlers[operation]
@@ -52,6 +63,61 @@ def disk_events_from_data_event(disk_map, schema, data_rep, data_event):
             raise_wrapped(Exception, e, msg)
     else:
         raise NotImplementedError(operation)
+
+@contract(view=ViewBase, p='seq(str)', schema=SchemaBase)
+def disk_events_from_data_event_inside_yaml(disk_map, data_event, view, p):
+    # we now know that we are inside a YAML
+    # Just checking though:
+    p_schema = view._schema.get_descendant(p)
+    p_hint = disk_map.get_hint(p_schema)
+    assert isinstance(p_hint, HintFileYAML)
+    
+    # make the data_event relative
+    relative_data_event = deepcopy(data_event)
+    name = data_event['arguments']['name']
+    relative_name = name[len(p):]
+    relative_data_event['arguments']['name'] = relative_name
+    
+    parent_of_yaml = p[:-1]
+    parent_of_yaml_schema = view._schema.get_descendant(parent_of_yaml)
+    parent_of_yaml_hint = disk_map.get_hint(parent_of_yaml_schema)
+    dirname = disk_map.dirname_from_data_url_(view._schema, parent_of_yaml)
+    filename = parent_of_yaml_hint.filename_for_key(p[-1])
+    
+    # this is the current data to go in yaml
+    relative_data_view = view.get_descendant(p)
+    # make a copy of the data
+    relative_data_view._data = deepcopy(relative_data_view._data)
+    # now make the change by applying the relative_data_event
+    relative_data_view.set_root()
+    event_interpret_(relative_data_view, relative_data_event)
+    # now create the YAML file
+    fh = disk_map.create_hierarchy_(p_schema, relative_data_view._data)
+    check_isinstance(fh, ProxyFile)
+    contents = fh.contents
+    _id = relative_data_event['id'] + '-tran'
+    who = relative_data_event['who']
+    disk_event = disk_event_file_modify(_id, who, dirname, filename, contents)
+    return [disk_event]
+
+
+@contract(returns='tuple(bool, *)')
+def change_was_inside_YAML(view, data_event, disk_map):
+    ''' Checks whether the change was inside a YAML file. '''
+    if not 'name' in data_event['arguments']:
+        msg = 'Expected all events to have a "name" argument.'
+        raise DPInternalError(msg)
+    name = data_event['arguments']["name"]
+    
+    for i in range(len(name)+1):
+        p = name[:i]
+        p_schema = view._schema.get_descendant(p)
+        p_hint = disk_map.get_hint(p_schema)
+        if isinstance(p_hint, HintFileYAML):
+            return True, p
+    else:
+        return False, None
+
     
 def disk_events_from_leaf_set_in_yaml(disk_map, view, _id, who, name, leaf, value, parent_with_yaml):
     p_schema = view._schema.get_descendant(parent_with_yaml)

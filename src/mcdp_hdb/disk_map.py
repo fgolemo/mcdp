@@ -81,17 +81,19 @@ class DiskMap(object):
         if isinstance(schema, SchemaHash):
             rest_translated = self.dirname_from_data_url_(schema.prototype, rest)
         
-        if isinstance(schema, SchemaList):
+        elif isinstance(schema, SchemaList):
             rest_translated = self.dirname_from_data_url_(schema.prototype, rest)
         
-        if isinstance(schema, SchemaContext):
+        elif isinstance(schema, SchemaContext):
             if not first in schema.children:
                 msg = ('Could not translate data url %r because could not find child %r: found %s' %
                        (data_url, first, format_list(schema.children)))
                 raise_desc(ValueError, msg, schema=str(schema))
             schema_child = schema.children[first]
             rest_translated = self.dirname_from_data_url_(schema_child, rest)
-           
+        else:
+            raise NotImplementedError(schema) 
+             
         if first_translated is not None: 
             res = (first_translated,) + rest_translated
         else:

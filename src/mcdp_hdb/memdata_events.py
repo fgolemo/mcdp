@@ -14,6 +14,7 @@ from mcdp_hdb.who import assert_valid_who
 
 
 class DataEvents(object):
+    # All events have a 'name' field
     # For simple values: int, string, float, date
     leaf_set = 'leaf_set' # leaf_set <name> <leaf> <value> 
     struct_set = 'struct_set' # struct_set <name> <struct-value>
