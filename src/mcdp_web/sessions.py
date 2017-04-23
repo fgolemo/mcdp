@@ -83,11 +83,7 @@ class Session(object):
     def notify_created_library(self, shelf_name, library_name):  # @UnusedVariable
         ''' Called when we just created the library. '''
         self.get_shelf(shelf_name).update_libraries()
-        self.recompute_available()
-        
-    def notify_deleted_file(self, shelf_name, library_name, filename):  # @UnusedVariable
-        self.get_shelf(shelf_name).update_libraries()
-        self.recompute_available()
+        self.recompute_available() 
 
     @contract(returns='seq(str)')
     def get_subscribed_shelves(self):
@@ -97,7 +93,7 @@ class Session(object):
         # all the ones we can discover
         repos = self.app.hi.db_view.repos
         for repo_name, repo in repos.items():
-            for shelf_name, shelf in repo.get_shelves().items():
+            for shelf_name, shelf in repo.shelves.items():
                 self.shelves_all[shelf_name] = shelf
         # shelf:repo/shelfname
         # library:repo/shelf/library
@@ -139,14 +135,14 @@ class Session(object):
         self.shelfname2reponame = {}
         repos = self.app.hi.db_view.repos
         for repo_name, repo in repos.items():
-            for shelf_name, shelf in repo.get_shelves().items():
+            for shelf_name, shelf in repo.shelves.items():
                 if shelf_name in self.shelfname2reponame:
                     o = self.shelfname2reponame[shelf_name]
                     msg = ('Two repos with same shelf %r: %r and %r.' % 
                            (shelf_name, repo_name, o))
                     
                     for r in [o, repo_name]:
-                        msg += '\n Shelves for %r: %s' % (r, format_list(sorted(self.repos[r].get_shelves())))
+                        msg += '\n Shelves for %r: %s' % (r, format_list(sorted(self.repos[r].shelves)))
                     
                     raise ValueError(msg)
                 self.shelfname2reponame[shelf_name] = repo_name

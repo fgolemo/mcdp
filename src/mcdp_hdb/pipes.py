@@ -1,7 +1,7 @@
 import os
 
 from contracts import contract
-from contracts.utils import indent
+from contracts.utils import indent, raise_wrapped
 from git.repo.base import Repo
 from git.util import Actor
 
@@ -13,6 +13,7 @@ from .disk_struct import ProxyDirectory
 from .gitrepo_map import diskrep_from_gitrep
 from .memdataview import ViewMount
 from .memdataview_utils import host_name
+from mcdp_hdb.exceptions import HDBInternalError
 
 
 @contract(view0=ViewMount, child_name=str, disk_map=DiskMap, repo=Repo)
@@ -47,7 +48,13 @@ def mount_directory(view0, child_name, disk_map, dirname):
     data = disk_map.interpret_hierarchy_(child_schema, disk_rep)
     # now create a view for this
     view_manager = view0._view_manager
-    view = view_manager.create_view_instance(child_schema, data)
+    try:
+        view = view_manager.create_view_instance(child_schema, data)
+    except TypeError as e:
+        msg = 'Cannot mount_directory'
+        msg += '\n' + indent(child_schema, 'child schema > ')
+#         msg += '\n' + indent(yaml_dump(data), 'child data > ')
+        raise_wrapped(HDBInternalError, e, msg)
     view._who = view0._who
     view.set_root() # XXX
     apply_changes_to_disk(disk_map=disk_map, view=view, dirname=dirname)
@@ -144,14 +151,14 @@ class WriteToRepoCallback(object):
         if who is not None:
             actor = who['actor']
             host = who['host']
-            inst_name = who['inst_name']
+            instance = who['instance']
         else:
             actor = 'system'
             host = host_name()
-            inst_name = 'unspecified'
+            instance = 'unspecified'
             
-        author = Actor(actor, '%s@%s' % (actor, inst_name))
-        committer = Actor(inst_name, '%s@%s' % (inst_name, host))
+        author = Actor(actor, '%s@%s' % (actor, instance))
+        committer = Actor(instance, '%s@%s' % (instance, host))
         _commit = self.repo.index.commit(message, author=author, committer=committer)
         
         

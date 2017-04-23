@@ -6,12 +6,13 @@ from pyramid.security import Allow, Authenticated, Everyone
 from mcdp import MCDPConstants
 from mcdp.logs import logger_web_resource_tree as logger
 
+
 Privileges = MCDPConstants.Privileges
 
 class Resource(object):
 
     def __init__(self, name=None):
-        if isinstance(name,unicode):
+        if isinstance(name, unicode):
             name = name.encode('utf-8')
         self.name = name
 
@@ -38,6 +39,8 @@ class Resource(object):
             return '%s(%s)' % (type(self).__name__, self.name)
 
     def __getitem__(self, key):
+        if isinstance(key, unicode):
+            key = key.encode('utf8')
 #         if key in ['login']:
 #             return None
         r = self.getitem(key)
@@ -110,21 +113,25 @@ def context_display_in_detail(context):
 
 
 class MCDPResourceRoot(Resource):
-
+    __acl__ = [
+        (Allow, Authenticated, Privileges.VIEW_USER_LIST),
+        (Allow, Authenticated, Privileges.VIEW_USER_PROFILE_PUBLIC),
+    ]
     def __init__(self, request):  # @UnusedVariable
         self.name = 'root'
         self.request = request
         from mcdp_web.main import WebApp
         options = WebApp.singleton.options    # @UndefinedVariable
-        self.__acl__ = [
-            (Allow, Authenticated, Privileges.VIEW_USER_LIST),
-            (Allow, Authenticated, Privileges.VIEW_USER_PROFILE_PUBLIC),
-        ]
+        
         if options.allow_anonymous:
-            self.__acl__.append((Allow, Everyone, Privileges.ACCESS))
+            x = (Allow, Everyone, Privileges.ACCESS)
+            if not x in MCDPResourceRoot.__acl__: 
+                MCDPResourceRoot.__acl__.append(x)
             #logger.info('Allowing everyone to access')
         else:
-            self.__acl__.append((Allow, Authenticated, Privileges.ACCESS))
+            x = (Allow, Authenticated, Privileges.ACCESS)
+            if not x in MCDPResourceRoot.__acl__: 
+                MCDPResourceRoot.__acl__.append(x)
             #logger.info('Allowing authenticated to access')
 
     def get_subs(self):
@@ -216,7 +223,7 @@ class ResourceShelves(Resource):
         session = self.get_session()
         user = session.get_user()
         repo = self.get_repo()
-        shelves = repo.get_shelves()
+        shelves = repo.shelves
 
         if not key in shelves:
             return ResourceShelfNotFound(key)
@@ -231,7 +238,7 @@ class ResourceShelves(Resource):
         user = session.get_user()
         repo = self.get_repo()
 
-        shelves = repo.get_shelves()
+        shelves = repo.shelves
         for id_shelf, shelf in shelves.items():
             if shelf.get_acl().allowed2(Privileges.READ, user):
                 yield id_shelf
@@ -349,8 +356,8 @@ class ResourceLibrary(Resource):
 
         if key.endswith('.html'):
             docname = os.path.splitext(key)[0]
-            filename = '%s.%s' % (docname, MCDPConstants.ext_doc_md)
-            if not library.file_exists(filename):
+#             filename = '%s.%s' % (docname, MCDPConstants.ext_doc_md)
+            if not docname in library.documents:
                 return ResourceLibraryDocNotFound(docname)
 
             return ResourceLibraryDocRender(docname)
@@ -380,15 +387,15 @@ class ResourceLibraryInteractiveValueParse(Resource): pass
 class ResourceLibraryRefresh(Resource): pass
 
 class ResourceThings(Resource):
+    
     def __init__(self, specname):
         Resource.__init__(self, specname)
         self.specname = self.name
 
     def __iter__(self):
-        library = context_get_library(self)
-        spec = context_get_spec(self)
-        x = library._list_with_extension(spec.extension)
-        return x.__iter__()
+        things = context_get_things(self)
+        for x in things:
+            yield x
 
     def getitem(self, key):
         if key == 'new': return ResourceThingsNewBase()
@@ -529,6 +536,8 @@ class ResourceThingViewImagesOne(Resource):
 class ResourceRobots(Resource): pass
 class ResourceAuthomatic(Resource):
     def get_subs(self):
+        session = self.get_session()
+        config = session.app.get_authomatic_config()
         subs =  {
             'github': ResourceAuthomaticProvider('github'),
             'facebook': ResourceAuthomaticProvider('facebook'),
@@ -536,6 +545,10 @@ class ResourceAuthomatic(Resource):
             'linkedin': ResourceAuthomaticProvider('linkedin'),
             'amazon': ResourceAuthomaticProvider('amazon'),
         }
+        for k in list(subs):
+            if not k in config:
+                del subs[k]
+            
         return subs
 
 class ResourceAuthomaticProvider(Resource): pass
@@ -572,7 +585,7 @@ def context_get_repo(context):
 def context_get_shelf(context):
     repo = context_get_repo(context)
     shelf_name = context_get_shelf_name(context)
-    shelf = repo.get_shelves()[shelf_name]
+    shelf = repo.shelves[shelf_name]
     return shelf
 
 def context_get_library(context):
@@ -580,6 +593,12 @@ def context_get_library(context):
     shelf = context_get_shelf(context)
     library = shelf.libraries[library_name]
     return library
+
+def context_get_things(context):
+    library = context_get_library(context)
+    specname = get_from_context(ResourceThings, context).specname
+    things  = library.things.child(specname)
+    return things
 
 def context_get_library_name(context):
     library_name = get_from_context(ResourceLibrary, context).name

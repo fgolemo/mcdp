@@ -1,12 +1,4 @@
 desc_short: Tests for the HEPA project
 
-acl: [
-    [Allow, "group:admin", all],
-
-    [Allow, Everyone, discover],
-    [Allow, Authenticated, subscribe],
-    [Allow, Everyone, read],
-]
-
 authors: []
 dependencies: []

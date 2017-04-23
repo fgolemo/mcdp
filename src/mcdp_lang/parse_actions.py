@@ -88,13 +88,15 @@ def raise_with_info(e, where, tb):
 #     if existing is not None: 
 #         raise
 #     use_where = existing if existing is not None else where
-    use_where = where
-    
-    if existing is None:
-#         logger.debug('Where=None for %s' % e)
+    if existing is not None and existing.string == where.string:
+        use_where = existing
         error = e.error 
     else:
-        error = e.error + '\n' + format_where(existing)
+        use_where = where
+        if existing is not None:
+            error = e.error + '\n' + format_where(existing)
+        else:
+            error = e.error
 #         logger.debug('raise_with_info: seen %r ' % existing)
     stack = nice_stack(tb)
     

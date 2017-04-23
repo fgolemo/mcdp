@@ -162,7 +162,7 @@ class GraphDrawingContext(object):
             raise ValueError('Icons path does not exist: %r' % imagepath)
         return imagepath
     
-    @contract(options='seq(str)')
+    @contract(options='seq(str|None)')
     def get_icon(self, options, raise_if_not_found=False): 
         imagepaths = []
         imagepaths.append(self._get_default_imagepath())

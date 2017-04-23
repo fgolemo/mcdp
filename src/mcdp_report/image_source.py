@@ -4,9 +4,10 @@ import os
 
 from contracts import contract
 from contracts.utils import indent
-from mcdp_utils_misc.memoize_simple_imp import memoize_simple
-from mcdp_utils_misc.locate_files_imp import locate_files
+
 from mcdp.logs import logger
+from mcdp_utils_misc import memoize_simple, locate_files
+
 
 class NoImageFound(Exception):
     pass
@@ -90,7 +91,7 @@ class ImagesFromDB(ImagesSource):
         for candidate in images:
             if candidate.lower() == name.lower():
                 if candidate != name:
-                    msg = 'Using image "%s" for "%s" even though the name does not match.'
+                    msg = 'Using image "%s" for "%s" even though the name does not match.' % (candidate, name)
                     _warn_once(msg)
         
                 image = images[candidate]

@@ -59,6 +59,9 @@ from .utils.response import response_data
 from .utils0 import add_other_fields, add_std_vars_context
 from .utils0 import add_std_vars_context_no_redir
 from .visualization.app_visualization import AppVisualization
+from mcdp_web.environment import Environment
+from contracts import contract
+from mcdp_web.context_from_env import library_from_env
 
 
 Privileges = MCDPConstants.Privileges
@@ -141,98 +144,17 @@ class WebApp(AppVisualization, AppStatus,
         config_repos = yaml_load(self.options.repos_yaml)
         logger.info('Config:\n'+ indent(self.options.repos_yaml, '>'))
         logger.info(config_repos)
-        inst_name = self.options.inst_name
+        instance = self.options.instance
         root= 'out/root'
         
         config_repos['local']['bundled'] = os.path.join(dir_from_package_name('mcdp_data'), 'bundled.mcdp_repo')
         
-        self.hi = HostInstance(inst_name=inst_name, 
+        self.hi = HostInstance(instance=instance, 
                                upstream='master', 
                                root=root, 
                                repo_git=config_repos['remote'], 
                                repo_local=config_repos['local'])
-#         
-#         if self.options.users is None:
-#             logger.info('No user directory passed (%s). Creating user dir.' % self.options.users)
-#             self.options.users = create_tmpdir('tmp-user-db')
-#             db = {
-#                 'anonymous.mcdp_user': {
-#                     'user.yaml' : '''
-#                         name: Anonimo
-#                     '''
-#                 },
-#                 'admin.mcdp_user': {
-#                     'user.yaml' : '''
-#                         name: Administrator
-#                         groups:
-#                         - admin
-#                         authentication_ids:
-#                         - provider: password
-#                           password: admin
-#                     '''
-#                 }
-#             }
-#             if not os.path.exists(self.options.users):
-#                 os.makedirs(self.options.users)
-#             logger.info('Temporary user dir is %s' % self.options.users) 
-#             write_hierarchy(self.options.users, db)
-#         
-#         
-# 
-#         self.repos = {}
-#         REPO_BUNDLED = 'bundled'
-#         REPO_USERS = 'global'
-#         if self.options.load_mcdp_data:
-#             desc_short = 'Contains models bundled with the code.'
-#             if os.path.exists('.git'):
-#                 logger.info('Loading mcdp_data repo as MCDPGitRepo')
-#                 b = MCDPGitRepo(where='.', desc_short=desc_short)
-#             else:
-#                 logger.info('Loading mcdp_data repo as MCDPythonRepo')
-#                 b = MCDPythonRepo('mcdp_data', desc_short=desc_short)
-#                     
-#             self.repos[REPO_BUNDLED]  = b
-#         else:
-#             logger.info('Not loading mcdp_data')
-#         from mcdp_hdb_mcdp.main_db_schema import DB
-#         if self.options.users is not None:
-#             logger.info('Loading user db from %s' % self.options.users)
-#             dm = DB.dm
-#             hierarchy = ProxyDirectory.from_disk(self.options.users)
-# #             logger.info('These are the files found:\n%s' % indent(hierarchy.tree(), '  '))
-#             user_db_schema = DB.user_db
-#             user_db_data = dm.interpret_hierarchy_(user_db_schema, hierarchy)
-#             
-# #             logger.debug('user_db schema: \n' + str(user_db_schema) )
-# #             logger.debug('user_db:\n' + indent(yaml_dump(user_db_data), ' > '))
-#             
-#             DB.user_db.validate(user_db_data)
-#             
-#             user_db_view = DB.view_manager.create_view_instance(user_db_schema, user_db_data)
-#             user_db_view.set_root() 
-#             apply_changes_to_disk_and_repo(dm, user_db_view, self.options.users)
-#             self.user_db = user_db_view
-#             logger.info('Loaded %s users' % len(self.user_db.users))
-#             for username, user in self.user_db.users.items():
-#                 user.info.username = username
-#             desc_short = 'Global database of shared models.'
-#             is_git = os.path.exists(os.path.join(self.options.users, '.git'))
-#             if is_git:
-#                 self.repos[REPO_USERS] = MCDPGitRepo(where=self.options.users, desc_short=desc_short)
-# 
-#         shelf2repo = {}
-#         for id_repo, repo in self.repos.items():
-#             shelves = repo.get_shelves()
-#             
-#             logger.info('repo %s: %s' % (id_repo, sorted(shelves)))
-#             
-#             for shelf_name in shelves:
-#                 if shelf_name in shelf2repo:
-#                     msg = 'Shelf %r in %r and %r' % (shelf_name, id_repo, shelf2repo[shelf_name])
-#                     raise ValueError(msg)
-#                 shelf2repo[shelf_name] = id_repo
-# 
-#             self.all_shelves.update(shelves) 
+
         
     def add_model_view(self, name, desc):
         self.views[name] = dict(desc=desc, order=len(self.views))
@@ -548,19 +470,23 @@ class WebApp(AppVisualization, AppStatus,
         res['print'] = bool(e.request.params.get('print', False))
         return res
 
+    @contract(e=Environment, document=str)
     def _render_library_doc(self, e, document):
         strict = int(e.request.params.get('strict', '0'))
-        filename = '%s.%s' % (document, MCDPConstants.ext_doc_md)
-            
-        f = e.library._get_file_data(filename)
+#         filename = '%s.%s' % (document, MCDPConstants.ext_doc_md)
+#             
+        data_str = e.library.documents[document]
+        realpath = 'Document "%s"' %document
+#         f = e.library._get_file_data(filename)
         
-        realpath = f['realpath']
+#         realpath = f['realpath']
         # read unicode
-        import codecs 
-        data_unicode = codecs.open(realpath, encoding='utf-8').read()
-        data_str = data_unicode.encode('utf-8')
+#         import codecs 
+#         data_unicode = codecs.open(realpath, encoding='utf-8').read()
+#         data_str = data_unicode.encode('utf-8')
         raise_errors = bool(strict)
-        html = render_complete(library=e.library, s=data_str, 
+        library = library_from_env(e)
+        html = render_complete(library=library, s=data_str, 
                                realpath=realpath, raise_errors=raise_errors)
         return html
 

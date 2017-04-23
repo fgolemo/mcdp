@@ -6,10 +6,7 @@ import os
 import numpy
 
 from mcdp import MCDPConstants
-
-
-if 'raise_if_test_included' in os.environ:
-    raise Exception()
+import warnings
 
 logging.basicConfig()
 logger = logging.getLogger(__name__)
@@ -47,16 +44,19 @@ def load_tests_modules():
         import mcdp_docs_tests
         import mcdp_report_ndp_tests
         import mcdp_repo_tests
-
         from mocdp.comp.flattening import tests  # @Reimport
         import mcdp_comp_tests
         import mcdp_hdb_tests
+        import mcdp_hdb_mcdp_tests
 
         vname = MCDPConstants.ENV_TEST_SKIP_MCDPOPT
         if vname in os.environ:
             logger.info('skipping mcdp_opt_tests')
         else:
-            import mcdp_opt_tests
+            if True:
+                warnings.warn('removed mcdp_opt_tests for now')
+            else:
+                import mcdp_opt_tests
 
 
 def jobs_comptests(context):

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from contracts import contract
 
 from comptests.registrar import comptest, run_module_tests
@@ -17,16 +18,16 @@ tcs.update(testcases_arrays())
 tcs.update(testcases_minilibrary())
 tcs.update(testcases_arrays_inside_yaml())
 
-class X(object):
+class HDBTestCaseWrapper(object):
     def __init__(self, k, tc):
         self.k = k
         self.tc = tc
-        self.__name__ = k
+        self.__name__ = 'hdb_testcase-' + k
     def __call__(self):
         return run_for_test_case(self.k, self.tc)
 
 for k, tc in tcs.items():
-    comptest(X(k, tc))
+    comptest(HDBTestCaseWrapper(k, tc))
     
 @contract(tc=DataTestCase)
 def run_for_test_case(name, tc):
@@ -48,9 +49,9 @@ def run_for_test_case(name, tc):
     r1 = check_translation_diskrep_to_memdata(schema, disk_rep0, disk_events, disk_rep, disk_map, 
                                          out=out_diskrep_to_memdata)
     
-    data_rep0_2 = r1['data_rep0']
-    data_rep1_2 = r1['data_rep']
-    data_events_2 = r1['data_events']
+    _data_rep0_2 = r1['data_rep0']
+    _data_rep1_2 = r1['data_rep']
+    _data_events_2 = r1['data_events']
     
     r2 = check_translation_diskrep_to_gitrep(disk_rep0, disk_events, disk_rep,
                                               out=out_diskrep_to_memdata)

@@ -60,7 +60,8 @@ class AppVisualization(object):
         res = {}
         
         try:
-            ndp = e.library.load_ndp(e.thing_name)
+            library = library_from_env(e)
+            ndp = library.load_ndp(e.thing_name)
             ndp_string = ndp.__repr__()
             ndp_string = ndp_string.decode("utf8")
             res['content'] = ndp_string

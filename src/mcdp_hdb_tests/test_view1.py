@@ -68,6 +68,7 @@ def test_view1a():
     u = users['andrea'] 
     assert_equal(u.name, 'Andrea')
     u.name = 'not Andrea'
+    print(yaml_dump(u._data))
     assert_equal(u.name, 'not Andrea')
     assert_equal(u.get_complete_address(), 'not Andrea <info@co-design.science>')
     try:
@@ -107,12 +108,12 @@ def test_view1a():
     
     users.rename('pinco', 'pallo')
     all_users = set(users)
-    print all_users
+    logger.info(all_users)
     assert_equal(all_users, set(['pallo','andrea']))
 
     l('db', yaml_dump(db))
      
-    print yaml_dump(events)
+    logger.info(yaml_dump(events))
     db2 = replay_events(viewmanager, db0, events) 
     
     l('db2', yaml_dump(db2))

@@ -1,6 +1,6 @@
 {% macro list_libraries_for_shelf(repo_name, shelf_name) %}
 
-    {% set shelf = navigation.repos[repo_name].get_shelves()[shelf_name] %}
+    {% set shelf = navigation.repos[repo_name].shelves[shelf_name] %}
     {% set shelf_url_ = shelf_url(repo_name, shelf_name) %}
 
 <style>

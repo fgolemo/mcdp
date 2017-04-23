@@ -13,7 +13,7 @@ def describe_mcdpweb_params(dp):
     dp.add_string('libraries', short='-d',default=None, 
                   help='Library directories containing models.') 
                   
-    dp.add_string('inst_name', default='local')
+    dp.add_string('instance', default='local')
     default = """
 {}
     """

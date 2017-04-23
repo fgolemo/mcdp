@@ -56,7 +56,7 @@ def replace_markdown_line_by_line(s, line_transform=None, code_transform=None, i
                 line_out.append(l2)
                 
     def eat_tag(line_in, line_out):
-        first_line = l = line_in[0]
+        _first_line = l = line_in[0]
         approximate_line = len(line_out)
         assert l.startswith('<')
         tagname = ''

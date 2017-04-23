@@ -14,8 +14,8 @@ from mcdp_library.specs_def import specs
 
 class Instance(object):
     
-    def __init__(self, inst_name, upstream, root, repo_git, repo_local):
-        self.hi = HostInstance(inst_name=inst_name, upstream=upstream, root=root, repo_git=repo_git, repo_local=repo_local)
+    def __init__(self, instance, upstream, root, repo_git, repo_local):
+        self.hi = HostInstance(instance=instance, upstream=upstream, root=root, repo_git=repo_git, repo_local=repo_local)
         
     def create_user(self, username):
         db_view = self.hi.db_view
@@ -78,7 +78,7 @@ class ComplicatedTestCase(object):
     
     def instance_clone(self, hostname, use_common_user_db):
         root = os.path.join(self.root, hostname)
-        inst_name = hostname
+        instance = hostname
         # add one local repository
         repo_local = {}
         repo_local['my_local'] = os.path.join(root, 'my_local')
@@ -87,7 +87,7 @@ class ComplicatedTestCase(object):
         # this forces the instance to create its own
         if not use_common_user_db:
             repo_git.pop('user_db')
-        i = Instance(inst_name=inst_name, upstream=self.upstream, root=root, repo_git=repo_git, repo_local=repo_local)
+        i = Instance(instance=instance, upstream=self.upstream, root=root, repo_git=repo_git, repo_local=repo_local)
         self.instances[hostname] = i
 
 @comptest

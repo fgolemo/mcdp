@@ -9,12 +9,13 @@ from contracts.utils import raise_desc, raise_wrapped, indent, check_isinstance
 from mcdp import MCDPConstants
 from mcdp import logger
 from mcdp_hdb.schema import NotValid
-from mcdp_utils_misc import format_list
+from mcdp_shelf import ACL
+from mcdp_shelf.access import acl_from_yaml
+from mcdp_utils_misc import format_list, memoize_simple
 
 from .memdataview_exceptions import InsufficientPrivileges, InvalidOperation, EntryNotFound
 from .memdataview_utils import special_string_interpret
 from .schema import SchemaBase, SchemaSimple
-from mcdp_utils_misc.memoize_simple_imp import memoize_simple
 
 
 __all__ = [
@@ -31,6 +32,7 @@ class ViewBase(object):
 
          
     @abstractmethod
+    @contract(key=str)
     def child(self, key):
         ''' '''
         
@@ -72,17 +74,22 @@ class ViewBase(object):
         for n in list(names):
             if n.endswith('0'):
                 names.remove(n)
-        remove = ['ViewBase','Base','object']
+        remove = ['ViewBase','Base','object', 'ViewMount']
         for r in remove:
             if r in names:
                 names.remove(r)
-        return '%s[%s]' % ("/".join(names), self._data)
+        s = '%s[%s]' % ("/".join(names), self._data)
+        assert not 'Mount' in s
+        return s
 
     def set_root(self):
         ''' Give this view all permissions '''
-        self._principals = [MCDPConstants.ROOT]
+        self.set_principals([MCDPConstants.ROOT])
+        
+    def set_principals(self, principals):
+        self._principals = principals
 
-    @contract(s=SchemaBase)
+    @contract(s=SchemaBase, url=str)
     def _create_view_instance(self, s, data, url):
         v = self._view_manager.create_view_instance(s, data)
         v._prefix = self._prefix + (url,)
@@ -99,16 +106,28 @@ class ViewBase(object):
         privilege = MCDPConstants.Privileges.WRITE
         self.check_privilege(privilege)
         
+    @contract(returns=ACL)
+    def get_acl(self):
+        ''' Returns the ACL by looking at two things:
+            1) the ACL in the schema
+            2) the ACL in the data, by looking for a field 
+                called 'acl'
+                
+            (eventually will look also at parent data)
+        '''
+        acl_schema = self._schema.get_acl()
+        rules = acl_schema.rules 
+        if isinstance(self, ViewContext0) and 'acl' in self._data:
+            acl_data = acl_from_yaml(self._data['acl'])
+            rules = acl_data.rules + rules
+        acl = ACL(rules)
+        return acl
+        
     def check_privilege(self, privilege):
         ''' Raises exception InsufficientPrivileges ''' 
-        acl = self._schema.get_acl()
-        # interpret special rules 
-        acl.rules = deepcopy(acl.rules)
-        for r in acl.rules:
-            if r.to_whom.startswith('special:'):
-                rest = r.to_whom[r.to_whom.index(':')+1:]
-                r.to_whom = special_string_interpret(rest, self._prefix)
-    
+        acl = self.get_acl()
+        acl = interpret_special_rules(acl, path=self._prefix)
+            
         principals = self._principals
         ok = acl.allowed_(privilege, principals)
         if not ok:
@@ -142,6 +161,17 @@ class ViewBase(object):
         if self._notify_callback is not None:
             self._notify_callback.__call__(event)
 
+@contract(acl=ACL, path='seq(str)', returns=ACL)
+def interpret_special_rules(acl, path):
+    acl = deepcopy(acl)
+    # interpret special rules 
+    acl.rules = deepcopy(acl.rules)
+    for r in acl.rules:
+        if r.to_whom.startswith('special:'):
+            rest = r.to_whom[r.to_whom.index(':')+1:]
+            r.to_whom = special_string_interpret(rest, path)
+    return acl
+
 class ViewMount(ViewBase):
     ''' Types of views that support mount points '''
     
@@ -152,22 +182,45 @@ class ViewMount(ViewBase):
 
     def mount_init(self):
         ''' initializes mount points '''
-#         logger.debug('mount_init() for %s' % id(self))
+        # logger.debug('mount_init() for %s' % id(self))
         object.__setattr__(self, 'mount_points', {})
         
 class ViewContext0(ViewMount):  
 
     def init_context(self):
+#         logger.debug('init_context() for %s' % id(self))
         self.mount_init()
+#         object.__setattr__(self, 'mount_points', {})
         object.__setattr__(self, 'children_already_provided', {})
         
-    @contract(returns=ViewBase)
+#     def __deepcopy__(self):
+#         raise Exception('cannot deepcopy')
+    @contract(returns=ViewBase, name=str)
     def child(self, name):
-        if name in self.children_already_provided:
-            return self.children_already_provided[name]
+        try:
+            children_already_provided = object.__getattribute__(self, 'children_already_provided')
+        except AttributeError:
+            object.__setattr__(self, 'children_already_provided', {})
+            self.mount_init()
+
+            
+        try:
+            children_already_provided = object.__getattribute__(self, 'children_already_provided')
+            mount_points = object.__getattribute__(self, 'mount_points')
+        except AttributeError as e:
+            msg = 'Could not get basic attrs for %s: %s' % (id(self), e)
+            raise_wrapped(AttributeError, e, msg)
+            
+        if name in mount_points:
+            return mount_points[name]
         
-        if name in self.mount_points:
-            return self.mount_points[name]
+        if name in children_already_provided:
+            c = children_already_provided[name]
+            # but note that the data might have been changed
+            # so we need to update it
+            c._data  = self._data[name]
+            return c
+        
         child_schema = self._schema.get_descendant((name,))
         child_data = self._data[name]
         v = self._create_view_instance(child_schema, child_data, name)        
@@ -193,7 +246,7 @@ class ViewContext0(ViewMount):
         for n in list(names):
             if n.endswith('0'):
                 names.remove(n)
-        remove = ['ViewBase','Base','object']
+        remove = ['ViewBase','Base','object', 'ViewMount']
         for r in remove:
             if r in names:
                 names.remove(r)
@@ -214,40 +267,19 @@ class ViewContext0(ViewMount):
         try:
             return object.__getattribute__(self, name)
         except AttributeError as _e:
-#             logger.debug('Could not get %r: %s: %s ' % (name, id(self), e))
+            #print _e
             pass  
         
         child = self.child(name)
         
         if is_simple_data(child._schema):
+            child.check_can_read()
             return child._data
         else:
-            return child
-#         
-#         if name in self.mount_points:
-#             return self.mount_points[name]
-#         # XXX this is very similar to child()
-#         if not name in self._schema.children:
-#             msg = 'Cannot get attribute %r: available %s' % (name, format_list(self._schema.children))
-#             raise_desc(ValueError, msg) #, self=str(self))
-#         child_schema= self._schema.children[name]
-#         assert name in self._data
-#         child_data = self._data[name]
-#         if is_simple_data(child_schema):
-#             # check access
-#             try:
-#                 v = self._create_view_instance(child_schema, child_data, name)
-#             except NotValid as e:
-#                 msg = 'Could not create view instance for __getattr__(%r):' % name
-#                 raise_wrapped(NotValid, e, msg, compact=True) 
-#             v.check_can_read()
-#             # just return the value
-#             return child_data
-#         else:
-#             return self._create_view_instance(child_schema, child_data, name)
+            return child 
 
     def __setattr__(self, leaf, value):
-        if leaf.startswith('_'):
+        if leaf.startswith('_') or leaf in ['mount_points', 'children_already_provided']:
             return object.__setattr__(self, leaf, value)
         v = self.child(leaf)
         v.check_can_write()
@@ -269,6 +301,7 @@ class ViewContext0(ViewMount):
                                    **self._get_event_kwargs())
             self._notify(event)
     
+            logger.debug('setting leaf %s = %s' % (leaf, value))
             self._data[leaf] = value
         
     
@@ -457,7 +490,7 @@ class ViewList0(ViewBase):
         except IndexError as e:
             msg = 'Could not use index %d' % i
             raise_wrapped(EntryNotFound, e, msg)
-        return self._create_view_instance(prototype, d, i)   
+        return self._create_view_instance(prototype, d, str(i))   
     
     def __getitem__(self, i):
         prototype = self._schema.prototype

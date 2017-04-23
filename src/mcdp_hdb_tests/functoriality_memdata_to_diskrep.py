@@ -8,12 +8,7 @@ from contracts.utils import indent
 
 from comptests.registrar import run_module_tests
 from mcdp import logger
-from mcdp_hdb import ViewManager
-from mcdp_hdb import data_hash_code
-from mcdp_hdb import disk_event_interpret
-from mcdp_hdb import disk_events_from_data_event, IncorrectFormat, data_events_from_disk_event_queue
-from mcdp_hdb import event_intepret
-from mcdp_hdb import assert_equal_disk_rep
+from mcdp_hdb import ViewManager, data_hash_code, disk_event_interpret, disk_events_from_data_event, IncorrectFormat, data_events_from_disk_event_queue, event_intepret, assert_equal_disk_rep
 from mcdp_hdb.diskrep_utils import assert_disk_events_consistent
 from mcdp_hdb.memdata_utils import assert_data_events_consistent
 from mcdp_utils_misc import yaml_dump

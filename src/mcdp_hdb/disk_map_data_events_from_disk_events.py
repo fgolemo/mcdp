@@ -66,7 +66,7 @@ def data_events_from_disk_event_queue(disk_map, schema, disk_rep, disk_events_qu
         raise NotImplementedError(operation)
     
     
-def data_events_from_disk_event_group(schema, disk_map, disk_rep, disk_events_queue, _id, who, events):
+def data_events_from_disk_event_group(schema, disk_map, disk_rep, disk_events_queue, _id, who, events):  # @UnusedVariable
     if not events:
         msg = 'Group with no events?'
         raise ValueError(msg)
@@ -118,7 +118,7 @@ def a_is_prefix_of_b(l1, l2):
             return False
     return True
     
-def data_events_from_dir_rename(schema, disk_map, disk_rep, disk_events_queue, _id, who, dirname, name, name2):
+def data_events_from_dir_rename(schema, disk_map, disk_rep, disk_events_queue, _id, who, dirname, name, name2):  # @UnusedVariable
     parent, schema_parent, hint = get_parent_data(schema, disk_map, dirname, name)
     
     disk_rep = deepcopy(disk_rep)
@@ -132,7 +132,7 @@ def data_events_from_dir_rename(schema, disk_map, disk_rep, disk_events_queue, _
     msg = 'Not implemented %s with %s' % (schema_parent, hint)
     raise NotImplementedError(msg)
 
-def data_events_from_dir_delete(schema, disk_map, disk_rep, disk_events_queue, _id, who, dirname, name):
+def data_events_from_dir_delete(schema, disk_map, disk_rep, disk_events_queue, _id, who, dirname, name):  # @UnusedVariable
     parent, schema_parent, hint = get_parent_data(schema, disk_map, dirname, name)
     
     disk_rep = deepcopy(disk_rep) 
@@ -144,7 +144,7 @@ def data_events_from_dir_delete(schema, disk_map, disk_rep, disk_events_queue, _
     msg = 'Not implemented %s with %s' % (schema_parent, hint)
     raise NotImplementedError(msg)
 
-def data_events_from_file_create(schema, disk_map, disk_rep, disk_events_queue, _id, who, dirname, name, contents):
+def data_events_from_file_create(schema, disk_map, disk_rep, disk_events_queue, _id, who, dirname, name, contents):  # @UnusedVariable
     parent, schema_parent, hint = get_parent_data(schema, disk_map, dirname, name)
     if isinstance(schema_parent, SchemaHash):
         if isinstance(hint, HintDir):
@@ -165,7 +165,8 @@ def data_events_from_file_create(schema, disk_map, disk_rep, disk_events_queue, 
             # logger.debug('data_events_from_file_create dirname %r name %r contents = %r' % (dirname, name, contents))
                
             key = hint.key_from_filename(name)
-            index = int(key)
+            # XXX: not used?
+            # index = int(key)
             
             # if it is the last, then it is an append
             is_last = True # XXX
@@ -180,7 +181,7 @@ def data_events_from_file_create(schema, disk_map, disk_rep, disk_events_queue, 
     msg = 'Not implemented %s with %s' % (type(schema_parent), hint)
     raise NotImplementedError(msg)
 
-def data_events_from_file_modify(schema, disk_map, disk_rep, disk_events_queue, _id, who, dirname, name, contents):
+def data_events_from_file_modify(schema, disk_map, disk_rep, disk_events_queue, _id, who, dirname, name, contents):  # @UnusedVariable
     parent, schema_parent, hint = get_parent_data(schema, disk_map, dirname, name)
     if isinstance(schema_parent, SchemaContext):
         if isinstance(hint, HintDir):
@@ -249,7 +250,7 @@ def get_parent_data(schema, disk_map, dirname, name):
     hint = disk_map.get_hint(schema_parent)
     return parent, schema_parent, hint
     
-def data_events_from_file_rename(schema, disk_map, disk_rep, disk_events_queue, _id, who, dirname, name, name2):
+def data_events_from_file_rename(schema, disk_map, disk_rep, disk_events_queue, _id, who, dirname, name, name2):  # @UnusedVariable
     parent, schema_parent, hint = get_parent_data(schema, disk_map, dirname, name)
     
     if isinstance(schema_parent, SchemaHash):
@@ -284,7 +285,7 @@ def data_events_from_file_rename(schema, disk_map, disk_rep, disk_events_queue, 
     raise NotImplementedError(msg)
 
 @contract(schema=SchemaBase)
-def data_events_from_file_delete(schema, disk_map, disk_rep, disk_events_queue, _id, who, dirname, name):
+def data_events_from_file_delete(schema, disk_map, disk_rep, disk_events_queue, _id, who, dirname, name):  # @UnusedVariable
     parent, schema_parent, hint = get_parent_data(schema, disk_map, dirname, name)
 
     if isinstance(schema_parent, SchemaHash):
@@ -301,4 +302,4 @@ def data_events_from_file_delete(schema, disk_map, disk_rep, disk_events_queue, 
 
     msg = 'Not implemented %s with %s' % (type(schema_parent), hint)
     raise NotImplementedError(msg)
-     
+

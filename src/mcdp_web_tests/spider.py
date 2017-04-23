@@ -5,6 +5,7 @@ import urlparse
 from webtest.app import AppError
 
 import xml.sax.saxutils as saxutils
+from mcdp.exceptions import DPInternalError
 
 
 logger = logging.getLogger('mcdp.spider')
@@ -51,18 +52,22 @@ class Spider(object):
         
         try:
             url2, res = self.get_maybe_follow(url)
-        except (AppError) as e:
-            
+        except AppError as e:
             s = unicode(e).encode('utf8')
             s = saxutils.unescape(s)
-            if '500' in e:
+            if '500' in s:
                 self.failed[url] = s
                 logger.error('failed %s' % url)
-            else:
+                return
+            elif '404' in s:
                 self.not_found[url] = s
                 logger.error('not found %s' % url)
-            return
-        
+                return
+            else:
+                msg = 'Cannot classify this as 404 or 500:'
+                msg += '\n' + str(s)
+                raise DPInternalError(msg)
+
         if url2 != url:
             self.visited[url] = 'redirect to %s' % url2
             logger.debug('redirected %s -> %s' % (url, url2))
@@ -70,7 +75,7 @@ class Spider(object):
         self.visited[url2] = res
         
         if res.content_type == 'text/html':
-            
+            #print res.html
             urls = list(find_links(res.html, url2))
             logger.debug('read %s %s: %d links' % (url2, res.status, len(urls)))
             for u in urls:
@@ -94,10 +99,18 @@ class Spider(object):
         logger.info('Skipped: %d' % len(self.skipped))
         if self.failed:
             logger.error('Failed: %d' % len(self.failed))
+        else:
+            logger.info('No failures')
+        if self.not_found:
+            logger.error('Not found: %d' % len(self.not_found))
+        else:
+            logger.info('No 404s.')
         for url in sorted(self.visited):
-            logger.info('visisted %s' % url)
+            logger.info('visited %s' % url)
         # for url in sorted(self.skipped):
         # logger.debug('skipped %s' % url)
+        for url in sorted(self.not_found):
+            logger.error('not found %s' % url)
         for url in sorted(self.failed):
             logger.error('failed %s' % url)
             for r in self.referrers[url]:

@@ -20,7 +20,7 @@ from mocdp.comp.context import (get_name_for_fun_node, get_name_for_res_node,
                                 is_fun_node_name, is_res_node_name)
 from mocdp.comp.interfaces import NamedDP
 from mcdp.exceptions import mcdp_dev_warning, DPInternalError
-from mocdp.ndp import NamedDPCoproduct 
+from mocdp.ndp import NamedDPCoproduct
 from mcdp_report.image_source import NoImages
 
 
@@ -29,6 +29,7 @@ STYLE_GREENREDSYM = 'greenredsym'
 
 COLOR_DARKGREEN = 'darkgreen'
 COLOR_DARKRED = 'red'
+
 
 class PlottingInfo(object):
 
@@ -68,6 +69,7 @@ class RecursiveEdgeLabeling(PlottingInfo):
     def get_rname_label(self, ndp_name, rname):
         return self.f.get_rname_label(self._name(ndp_name), rname)
 
+
 @contract(ndp=NamedDP, direction='str', yourname='str|None',
           # image_source='None|isinstance(ImageSource)'
           )
@@ -84,14 +86,14 @@ def gvgen_from_ndp(ndp, style='default', direction='LR', images_paths=None, your
         plotting_info(ndp_name=('name', 'sub'), fname='f1', rname=None)
 
     """
-#     
+#
 #     if hasattr(ndp, MCDPConstants.ATTR_LOAD_LIBNAME):
 #         use = getattr(ndp, MCDPConstants.ATTR_LOAD_LIBNAME)
 #         print('using library %r' % use)
 #         library = library.load_library(use)
 #     else:
 #         print('No ATTR_LOAD_LIBNAME')
-    
+
     assert isinstance(ndp, NamedDP)
     assert isinstance(direction, str), direction.__repr__()
     assert isinstance(yourname, (NoneType, str)), yourname.__repr__()
@@ -106,15 +108,13 @@ def gvgen_from_ndp(ndp, style='default', direction='LR', images_paths=None, your
 #     marginy = 0.03 * 1.2*  rel_to_8
 #     gg.styleDefaultAppend('margin', "%f,%f" % (marginx , marginy ))
 #     0.11,0.055.
-    gg.styleDefaultAppend("width", 0.2 * rel_to_8) # minimum width of node
-    gg.styleDefaultAppend("height", 0.2 * rel_to_8) # minimum width of node
+    gg.styleDefaultAppend("width", 0.2 * rel_to_8)  # minimum width of node
+    gg.styleDefaultAppend("height", 0.2 * rel_to_8)  # minimum width of node
     gg.styleDefaultAppend("penwidth", 0.7 * rel_to_8)
     gg.styleDefaultLinksAppend('fontsize', MCDPConstants.diagrams_fontsize)
     gg.styleDefaultLinksAppend('penwidth', 1.0 * rel_to_8)
     gg.styleDefaultLinksAppend('arrowsize', rel_to_8 * 0.3)
 #     gg.styleDefaultLinksAppend('constraint', "false")
-
-
 
     # if True, create clusters for functions and resources
     do_cluster_res_fun = False
@@ -128,7 +128,6 @@ def gvgen_from_ndp(ndp, style='default', direction='LR', images_paths=None, your
         cluster_resources = gg.newItem("")
     else:
         cluster_resources = None
-
 
     from .gdc import GraphDrawingContext
     gdc = GraphDrawingContext(gg=gg, parent=None,
@@ -166,7 +165,6 @@ def gvgen_from_ndp(ndp, style='default', direction='LR', images_paths=None, your
     gg.styleAppend("unconnected_link", "color", unconnected_color)
     gg.styleAppend("unconnected_link", "fontcolor", unconnected_color)
 
-    
     gg.styleAppend("container", "shape", "box")
     gg.styleAppend("container", "style", "rounded")
 #     gg.styleDefaultAppend('margin', "%f,%f" % (marginx * rel_to_8 * 3, marginy * rel_to_8 * 3))
@@ -178,7 +176,6 @@ def gvgen_from_ndp(ndp, style='default', direction='LR', images_paths=None, your
     gg.styleAppend('sum', 'imagescale', 'true')
     gg.styleAppend('sum', 'fixedsize', 'true')
 
-
     gg.styleAppend("leq", "shape", "plaintext")
     gg.styleAppend('leq', 'image', gdc.get_icon(['leq']))
     gg.styleAppend('leq', 'imagescale', 'true')
@@ -188,7 +185,6 @@ def gvgen_from_ndp(ndp, style='default', direction='LR', images_paths=None, your
     gg.styleAppend('unconnected', 'shape', 'point')
     gg.styleAppend('unconnected', 'width', '0.1')
     gg.styleAppend('unconnected', 'color', 'red')
-
 
     gg.styleAppend('splitter', 'fillcolor', 'black')
     gg.styleAppend('splitter_link', 'dir', 'none')
@@ -204,9 +200,7 @@ def gvgen_from_ndp(ndp, style='default', direction='LR', images_paths=None, your
     gg.styleAppend("coproduct_function", "width", psize * rel_to_8)
     gg.styleAppend("coproduct_link", "style", "dashed")
 
-
     functions, resources = create(gdc, ndp, plotting_info)
-
 
     for fname, n in functions.items():
         F = ndp.get_ftype(fname)
@@ -216,7 +210,8 @@ def gvgen_from_ndp(ndp, style='default', direction='LR', images_paths=None, your
         gg.styleApply("external", x)
 
         l_label = plotting_info.get_fname_label(ndp_name=(), fname=fname)
-        if not l_label: l_label = ""
+        if not l_label:
+            l_label = ""
 
         l = gg.newLink(x, n, l_label)
 #         if False:
@@ -226,7 +221,6 @@ def gvgen_from_ndp(ndp, style='default', direction='LR', images_paths=None, your
         gdc.decorate_arrow_function(l)
         gdc.decorate_function_name(x)
 
-
     for rname, n in resources.items():
         R = ndp.get_rtype(rname)
         label = get_signal_label(get_suggested_identifier(rname), R)
@@ -235,7 +229,8 @@ def gvgen_from_ndp(ndp, style='default', direction='LR', images_paths=None, your
         gg.styleApply("external", x)
 
         l_label = plotting_info.get_rname_label(ndp_name=(), rname=rname)
-        if not l_label: l_label = ""
+        if not l_label:
+            l_label = ""
 
         l = gg.newLink(n, x, l_label)
         gdc.decorate_arrow_resource(l)
@@ -243,7 +238,6 @@ def gvgen_from_ndp(ndp, style='default', direction='LR', images_paths=None, your
 #         if False:
 #             gg.propertyAppend(l, "headport", "w")
 #             gg.propertyAppend(l, "tailport", "e")
-
 
     if cluster_functions is not None:
         gg.styleApply("external_cluster_functions", cluster_functions)
@@ -303,10 +297,10 @@ def create(gdc, ndp, plotting_info):
 
 def is_simple(ndp):
     return isinstance(ndp, SimpleWrap) and isinstance(ndp.dp,
-     (MeetNDP, JoinNDP, Identity,
-      SumNDP,
-      SumNRcompDP,
-      ProductNDP, InvPlus2, InvMult2))
+                                                      (MeetNDP, JoinNDP, Identity,
+                                                       SumNDP,
+                                                       SumNRcompDP,
+                                                       ProductNDP, InvPlus2, InvMult2))
 
 
 def create_simplewrap(gdc, ndp, plotting_info):  # @UnusedVariable
@@ -369,7 +363,8 @@ def create_simplewrap(gdc, ndp, plotting_info):  # @UnusedVariable
     simple = (MeetNDP, JoinNDP, IdentityDP, WrapAMap, MeetNDualDP)
     only_string = not is_special and isinstance(ndp.dp, simple)
 
-    load_name = getattr(ndp, MCDPConstants.ATTR_LOAD_NAME, '(ATTR_LOAD_NAME unavailable)')
+    load_name = getattr(
+        ndp, MCDPConstants.ATTR_LOAD_NAME, '(ATTR_LOAD_NAME unavailable)')
 
     iconoptions = [
         gdc.yourname,
@@ -384,7 +379,7 @@ def create_simplewrap(gdc, ndp, plotting_info):  # @UnusedVariable
 #     print('type %s' % type(ndp).__name__)
 #     print('only_string: %r' % only_string)
 #     print('is special: %r' % is_special)
-    if is_special and 'default.png' in best_icon: # pragma: no cover
+    if is_special and 'default.png' in best_icon:  # pragma: no cover
         raise_desc(DPInternalError, 'Could not find icon for special',
                    iconoptions=iconoptions, is_special=is_special, best_icon=best_icon,
                    only_string=only_string)
@@ -392,7 +387,6 @@ def create_simplewrap(gdc, ndp, plotting_info):  # @UnusedVariable
     if only_string:
 
         label = type(ndp.dp).__name__
-
 
         if isinstance(ndp.dp, WrapAMap):
             label = ndp.dp.diagram_label()
@@ -409,10 +403,10 @@ def create_simplewrap(gdc, ndp, plotting_info):  # @UnusedVariable
             gdc.styleAppend(sname, 'imagescale', 'true')
             gdc.styleAppend(sname, 'fixedsize', 'true')
 
-            rel_to_8 = MCDPConstants.diagrams_fontsize/ 8
-            diagrams_smallimagesize = MCDPConstants.diagrams_smallimagesize_rel * rel_to_8
+            rel_to_8 = MCDPConstants.diagrams_fontsize / 8
+            diagrams_smallimagesize = MCDPConstants.diagrams_smallimagesize_rel * \
+                rel_to_8
             #diagrams_leqimagesize = 0.2 * rel_to_8
-
 
             gdc.styleAppend(sname, 'height', diagrams_smallimagesize)
             gdc.styleAppend(sname, "shape", "none")
@@ -438,14 +432,15 @@ def create_simplewrap(gdc, ndp, plotting_info):  # @UnusedVariable
 #                 label = ("<TABLE CELLBORDER='0' BORDER='0'><TR><TD>%s</TD></TR>"
 #                 "<TR><TD'><IMG SRC='%s' SCALE='TRUE'/></TD></TR></TABLE>")
                 # these work as max size
-                rel_to_8 = MCDPConstants.diagrams_fontsize/ 8
-                diagrams_bigimagesize = MCDPConstants.diagrams_bigimagesize_rel * rel_to_8 # points
+                rel_to_8 = MCDPConstants.diagrams_fontsize / 8
+                diagrams_bigimagesize = MCDPConstants.diagrams_bigimagesize_rel * \
+                    rel_to_8  # points
 
                 width = diagrams_bigimagesize
                 ratio = 0.8
                 height = diagrams_bigimagesize * ratio
                 label = ("<TABLE CELLBORDER='0' BORDER='0'><TR><TD>%s</TD></TR>"
-                "<TR><TD fixedsize='true' width='%d' height='%d'><IMG SRC='%s'/></TD></TR></TABLE>")
+                         "<TR><TD fixedsize='true' width='%d' height='%d'><IMG SRC='%s'/></TD></TR></TABLE>")
 
                 if shortlabel is None:
                     shortlabel = ''
@@ -488,7 +483,6 @@ def create_simplewrap(gdc, ndp, plotting_info):  # @UnusedVariable
         label = make_short_label(label)
         sname = 'limit'
 
-
     if isinstance(ndp.dp, (FunctionNode)):
         label = get_suggested_identifier(ndp.dp.fname)
     if isinstance(ndp.dp, (ResourceNode)):
@@ -497,7 +491,6 @@ def create_simplewrap(gdc, ndp, plotting_info):  # @UnusedVariable
 #     if label[:2] != '<T':
 #         # Only available in svg or cairo renderer
 #         label = '<I>%s</I>' % label
-
 
     node = gdc.newItem(label)
 
@@ -520,8 +513,8 @@ def create_simplewrap(gdc, ndp, plotting_info):  # @UnusedVariable
 
     return functions, resources
 
-def format_unit(R):
 
+def format_unit(R):
 
     if R == BottomCompletion(TopCompletion(Any())):
         return '[*]'
@@ -540,6 +533,7 @@ def format_unit(R):
         return '[`%s]' % n
     else:
         return '[%s]' % str(R)
+
 
 @contract(ndp=NamedDPCoproduct)
 def create_coproduct(gdc0, ndp, plotting_info):
@@ -572,7 +566,8 @@ def create_coproduct(gdc0, ndp, plotting_info):
     for i, ndpi in enumerate(ndp.ndps):
         altname = altnames[i]
 
-        should_I = plotting_info.should_I_expand(ndp_name=(), alternative=altname)
+        should_I = plotting_info.should_I_expand(
+            ndp_name=(), alternative=altname)
         if not should_I:
             # print('Not expanding alternative %s' % altname)
             continue
@@ -587,23 +582,26 @@ def create_coproduct(gdc0, ndp, plotting_info):
 
         with gdc0.child_context_yield(parent=gdc0.parent, yourname=header) as gdci:
             plotting_info2 = RecursiveEdgeLabeling(plotting_info=plotting_info,
-                                                            append_ndp_name=altname)
+                                                   append_ndp_name=altname)
             funi, resi = create(gdci, ndpi, plotting_info=plotting_info2)
 
             for fn, fni in zip(ndp.get_fnames(), ndpi.get_fnames()):
 
-                l_label = plotting_info2.get_fname_label(ndp_name=(), fname=fni)
+                l_label = plotting_info2.get_fname_label(
+                    ndp_name=(), fname=fni)
                 l = gdc0.newLink(functions[fn], funi[fni], l_label)
                 gdci.decorate_arrow_function(l)  # XXX?
                 gdci.styleApply('coproduct_link', l)
 
             for rn, rni in zip(ndp.get_rnames(), ndpi.get_rnames()):
-                l_label = plotting_info2.get_rname_label(ndp_name=(), rname=rni)
+                l_label = plotting_info2.get_rname_label(
+                    ndp_name=(), rname=rni)
                 l = gdc0.newLink(resi[rni], resources[rn], l_label)
                 gdci.decorate_arrow_resource(l)  # XXX?
                 gdci.styleApply('coproduct_link', l)
 
     return functions, resources
+
 
 def create_composite(gdc0, ndp, plotting_info):
     try:
@@ -614,6 +612,7 @@ def create_composite(gdc0, ndp, plotting_info):
         logger.error(e)
         logger.error('I will try again without the SKIP_INITIAL parameter.')
         return create_composite_(gdc0, ndp, plotting_info=plotting_info, SKIP_INITIAL=False)
+
 
 def create_composite_(gdc0, ndp, plotting_info, SKIP_INITIAL):
 
@@ -645,13 +644,13 @@ def create_composite_(gdc0, ndp, plotting_info, SKIP_INITIAL):
             if SKIP_INITIAL:
                 if is_function_with_one_connection_that_is_not_a_res_one(ndp, name):
                     # print('Skipping extra node for is_function_with_one_connection %r' % name)
-    #                 warnings.warn('hack')
+                    #                 warnings.warn('hack')
                     continue
 
             if SKIP_INITIAL:
                 if is_resource_with_one_connection_that_is_not_a_fun_one(ndp, name):
                     # print('skipping extra node for %r' % name)
-    #                 warnings.warn('hack')
+                    #                 warnings.warn('hack')
                     continue
 
             if False:
@@ -698,7 +697,6 @@ def create_composite_(gdc0, ndp, plotting_info, SKIP_INITIAL):
                     gdc.decorate_arrow_resource(l)
                     names2resources[name][rn] = split
 
-
         ignore_connections = set()
         if SKIP_INITIAL:
             for name, value in ndp.context.names.items():
@@ -708,7 +706,7 @@ def create_composite_(gdc0, ndp, plotting_info, SKIP_INITIAL):
 
                     if not only_one.dp2 in names2functions:
                         msg = ('Cannot find function node ref for %r' % only_one.dp2
-                                         + ' while drawing one connection %s' % str(only_one))
+                               + ' while drawing one connection %s' % str(only_one))
     #                     warnings.warn('giving up')
     #                     continue
                         raise_desc(ValueError, msg, names=list(ndp.context.names),
@@ -725,8 +723,8 @@ def create_composite_(gdc0, ndp, plotting_info, SKIP_INITIAL):
                     ignore_connections.add(only_one)
 
                     if not only_one.dp1 in names2resources:
-    #                     warnings.warn('giving up')
-    #                     continue
+                        #                     warnings.warn('giving up')
+                        #                     continue
 
                         raise ValueError('Cannot find function node ref for %r' % only_one.dp1
                                          + ' while drawing one connection %s' % str(only_one))
@@ -735,7 +733,6 @@ def create_composite_(gdc0, ndp, plotting_info, SKIP_INITIAL):
                     names2resources[name][only_one.s2] = node
                     # XXX: not really sure
                     names2functions[name][only_one.s2] = node
-
 
         for c in ndp.context.connections:
             if c in ignore_connections:
@@ -761,20 +758,21 @@ def create_composite_(gdc0, ndp, plotting_info, SKIP_INITIAL):
 
             if skip:
                 label = get_signal_label(c.s1, ub)
-                l1 = gdc.newLink(n_b, n_a , label=label)
+                l1 = gdc.newLink(n_b, n_a, label=label)
 
             else:
                 box = gdc.newItem('')  # '≼') # LEQ
-                rel_to_8 = MCDPConstants.diagrams_fontsize/ 8
-                diagrams_leqimagesize = MCDPConstants.diagrams_leqimagesize_rel * rel_to_8
+                rel_to_8 = MCDPConstants.diagrams_fontsize / 8
+                diagrams_leqimagesize = MCDPConstants.diagrams_leqimagesize_rel * \
+                    rel_to_8
 
                 gdc.gg.propertyAppend(box, 'height', diagrams_leqimagesize)
                 gdc.styleApply("leq", box)
 
                 l1_label = get_signal_label(c.s2, ua)
 
-
-                dec = plotting_info.get_fname_label(ndp_name=(c.dp2,), fname=c.s2)
+                dec = plotting_info.get_fname_label(
+                    ndp_name=(c.dp2,), fname=c.s2)
                 if dec is not None:
                     l1_label = get_signal_label_namepart(c.s2) + '\n' + dec
 
@@ -782,7 +780,7 @@ def create_composite_(gdc0, ndp, plotting_info, SKIP_INITIAL):
                     l1_label = 'required ' + l1_label
 
 #                 print('Creating label with %r %s' % l1_label)
-                l1 = gdc.newLink(box, n_a , label=l1_label)
+                l1 = gdc.newLink(box, n_a, label=l1_label)
 
 #                 if False:
 #                     gdc.gg.propertyAppend(l1, "headport", "w")
@@ -792,11 +790,12 @@ def create_composite_(gdc0, ndp, plotting_info, SKIP_INITIAL):
                 if isinstance(ndp_first, SimpleWrap) and isinstance(ndp_first.dp, FunctionNode):
                     l2_label = 'provided ' + l2_label
 
-                dec = plotting_info.get_rname_label(ndp_name=(c.dp1,), rname=c.s1)
+                dec = plotting_info.get_rname_label(
+                    ndp_name=(c.dp1,), rname=c.s1)
                 if dec is not None:
                     l2_label = get_signal_label_namepart(c.s1) + '\n' + dec
                 l2 = gdc.newLink(n_b, box, label=l2_label)
-                
+
 
 #                 if False:
 #                     gdc.gg.propertyAppend(l2, "tailport", "e")
@@ -820,7 +819,6 @@ def create_composite_(gdc0, ndp, plotting_info, SKIP_INITIAL):
 
                 gdc.decorate_arrow_function(l1)
                 gdc.decorate_arrow_resource(l2)
-
 
         unconnected_fun, unconnected_res = get_missing_connections(ndp.context)
         for (dp, fn) in unconnected_fun:
@@ -894,6 +892,7 @@ def get_signal_label_namepart(name):
     name = get_suggested_identifier(name)
     return name
 
+
 def get_signal_label(name0, unit):
     check_isinstance(name0, str)
     check_isinstance(unit, Poset)
@@ -901,7 +900,7 @@ def get_signal_label(name0, unit):
 
     s2 = format_unit(unit)
     if name:
-#         return name + ' ' + s2
+        #         return name + ' ' + s2
         twolines = len(unicode(name, 'utf-8')) > 6
         if twolines:
             return name + '\n' + s2
@@ -909,7 +908,6 @@ def get_signal_label(name0, unit):
             return name + ' ' + s2
     else:
         return s2
-
 
 
 def get_connections_to_function(ndp, name):
@@ -921,6 +919,7 @@ def get_connections_to_function(ndp, name):
     # print('Connection to %r: %r' % (name, res))
     return res
 
+
 def get_connections_to_resource(ndp, name):
     assert ndp.context.is_new_resource(name)
     res = []
@@ -931,18 +930,24 @@ def get_connections_to_resource(ndp, name):
     return res
 
 # it is connected to only one
+
+
 def is_function_with_one_connection(ndp, name):
     return (ndp.context.is_new_function(name)
             and len(get_connections_to_function(ndp, name)) == 1)
 
 # it is connected to only one
+
+
 def is_resource_with_one_connection(ndp, name):
     return (ndp.context.is_new_resource(name)
             and len(get_connections_to_resource(ndp, name)) == 1)
 
+
 def is_function_with_no_connections(ndp, name):
     return (ndp.context.is_new_function(name)
             and len(get_connections_to_function(ndp, name)) == 0)
+
 
 def is_resource_with_no_connections(ndp, name):
     return (ndp.context.is_new_resource(name)
@@ -957,11 +962,13 @@ def get_connections_to_dp_resource(ndp, name, rn):
             res.append(c)
     return res
 
+
 def resource_has_more_than_one_connected(ndp, name, rn):
     res = get_connections_to_dp_resource(ndp, name, rn)
     # print(ndp.context.connections)
     # print('number connected to %s.%s: %s' % (name, rn, len(res)))
     return len(res) > 1
+
 
 def is_function_with_one_connection_that_is_not_a_res_one(ndp, name):
     if is_function_with_one_connection(ndp, name):
@@ -972,6 +979,7 @@ def is_function_with_one_connection_that_is_not_a_res_one(ndp, name):
         return True
     else:
         return False
+
 
 def is_resource_with_one_connection_that_is_not_a_fun_one(ndp, name):
     if is_resource_with_one_connection(ndp, name):

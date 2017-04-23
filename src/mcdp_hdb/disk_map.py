@@ -187,6 +187,8 @@ class DiskMap(object):
             if isinstance(schema, SchemaList):
                 if isinstance(hint, HintDir):
                     return interpret_SchemaList_SER_DIR(self, schema, fh) 
+                if isinstance(hint, HintFileYAML):
+                    return read_SchemaList_SER_FILE_YAML(self, schema, fh)
 
             if isinstance(schema, SchemaBytes):
                 if isinstance(hint, HintFile):
@@ -260,6 +262,9 @@ def write_SchemaList_SER_DIR(self, schema, data):
 
 
 def interpret_SchemaList_SER_DIR(self, schema, fh):
+    if not isinstance(fh, ProxyDirectory):
+        msg = 'I expected a directory, not a file.'
+        raise_desc(ValueError, msg, schema=schema, fh=fh)
     check_isinstance(schema, SchemaList)
     found = []
     for filename in fh:
@@ -446,7 +451,14 @@ def read_SchemaContext_SER_FILE_YAML(self, schema, f):
     # now we need to iterate and fill the missing keys
     res = fill_in_none(schema, data)
     schema.validate(res)
-#     logger.info('OK validation for \n %s' % yaml_dump(res))
+    return res 
+
+@contract(f=ProxyFile)
+def read_SchemaList_SER_FILE_YAML(self, schema, f):
+    data = yaml_load(f.contents)
+    # now we need to iterate and fill the missing keys
+    res = fill_in_none(schema, data)
+    schema.validate(res)
     return res 
 
 def read_SchemaContext_SER_DIR(self, schema, fh):

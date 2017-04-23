@@ -4,7 +4,7 @@ from contracts.utils import raise_wrapped, indent
 from mcdp import MCDPConstants
 from mcdp_hdb.memdataview import ViewBytes
 from mcdp_hdb.schema import NotValid
-from mcdp_utils_misc.my_yaml import yaml_dump
+from mcdp_utils_misc import yaml_dump
 
 from .memdataview import ViewContext0, ViewHash0, ViewList0, ViewString, ViewDate
 from .memdataview_utils import host_name
@@ -47,7 +47,7 @@ class ViewManager(object):
     def set_view_class(self, s, baseclass):
         self.s2baseclass[s] = baseclass
 
-    def view(self, data, actor=None, principals=None, host=None, inst_name=None):
+    def view(self, data, actor=None, principals=None, host=None, instance=None):
         v = self.create_view_instance(self.schema, data)
         if actor is None:
             actor = 'system'
@@ -55,7 +55,7 @@ class ViewManager(object):
             principals = [MCDPConstants.ROOT]
         if host is None:
             host = host_name()
-        v._who = {'host': host, 'actor': actor, 'inst_name': inst_name} #, 'principals': principals}
+        v._who = {'host': host, 'actor': actor, 'instance': instance} #, 'principals': principals}
         v._principals = principals
     
         # create notify callback that saves everything to a .events
@@ -77,7 +77,8 @@ class ViewManager(object):
             msg += '\n' + indent(yaml_dump(data), 'data: ')
             raise_wrapped(NotValid, e, msg, compact=True) 
         if s in self.s2baseclass:
-            class Base(self.s2baseclass[s]):
+            use = self.s2baseclass[s]
+            class Base(use):
                 pass
         else:
             class Base(object):
