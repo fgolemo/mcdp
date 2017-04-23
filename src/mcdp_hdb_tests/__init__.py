@@ -8,5 +8,4 @@ from .test_yaml_repr import *
 from .functoriality_memdata_to_diskrep import *
 from .functoriality_gitrepo_to_diskrep import *
 from .functoriality_diskrep_to_gitrep import *
-from .testcases import *
 from .testcases_run import *

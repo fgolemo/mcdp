@@ -8,7 +8,7 @@ from contracts.utils import raise_desc, raise_wrapped, indent, check_isinstance
 
 from mcdp import MCDPConstants
 from mcdp import logger
-from mcdp_hdb.schema import NotValid
+from mcdp_hdb.schema import NotValid, SchemaContext
 from mcdp_shelf import ACL
 from mcdp_shelf.access import acl_from_yaml
 from mcdp_utils_misc import format_list, memoize_simple
@@ -16,6 +16,7 @@ from mcdp_utils_misc import format_list, memoize_simple
 from .memdataview_exceptions import InsufficientPrivileges, InvalidOperation, EntryNotFound
 from .memdataview_utils import special_string_interpret
 from .schema import SchemaBase, SchemaSimple
+
 
 
 __all__ = [
@@ -27,7 +28,13 @@ __all__ = [
 ]
 
 class ViewBase(object):
+    '''
     
+        Implementation notes:
+        
+        First generate the event using _notify, and only then modify the structure.
+        Notify() will need access to the current state. 
+    '''
     __metaclass__ = ABCMeta
 
          
@@ -229,13 +236,14 @@ class ViewContext0(ViewMount):
                 if self._data[name] == value:
                     return
                 else:
-                    self._data[name] = value
-                    
                     from .memdata_events import event_leaf_set
                     event = event_leaf_set(name=self._prefix,
                                            leaf=name, value=value,
                                             **self._get_event_kwargs())
                     self._notify(event)
+
+                    self._data[name] = value
+                    
                     
             v._set_callback = set_callback
         self.children_already_provided[name] = v
@@ -291,17 +299,25 @@ class ViewContext0(ViewMount):
             raise_wrapped(NotValid, e, msg, compact=True)
             
         from .memdata_events import event_leaf_set
+        from mcdp_hdb.memdata_events import event_struct_set
 
         if self._data[leaf] == value:
             pass
         else:
-            event = event_leaf_set(name=self._prefix,
-                                   leaf=leaf, 
-                                   value=value, 
-                                   **self._get_event_kwargs())
+            if is_simple_data(v._schema):
+                event = event_leaf_set(name=self._prefix,
+                                       leaf=leaf, 
+                                       value=value, 
+                                       **self._get_event_kwargs())
+            elif isinstance(v._schema, SchemaContext):
+                name = self._prefix + (leaf,)
+                
+                event = event_struct_set(name=name, value=value, **self._get_event_kwargs())
+            
             self._notify(event)
-    
+            
             logger.debug('setting leaf %s = %s' % (leaf, value))
+            logger.debug('setting leaf schema = %s ' % (v._schema))
             self._data[leaf] = value
         
     
@@ -507,8 +523,6 @@ class ViewList0(ViewBase):
     def __setitem__(self, i, value):
         prototype = self._schema.prototype
         prototype.validate(value)
-        self._data.__setitem__(i, value) 
-
         from .memdata_events import event_list_setitem
         event = event_list_setitem(name=self._prefix,
                                    index=i,
@@ -516,11 +530,12 @@ class ViewList0(ViewBase):
                                    **self._get_event_kwargs())
         self._notify(event)
         
+        self._data.__setitem__(i, value) 
+
 
         
     def insert(self, i, value):
         self._schema.prototype.validate(value) 
-        self._data.insert(i, value) 
 
         from .memdata_events import event_list_insert
         event = event_list_insert(name=self._prefix,
@@ -528,38 +543,40 @@ class ViewList0(ViewBase):
                                    value=value, 
                                    **self._get_event_kwargs())
         self._notify(event)
+
+        self._data.insert(i, value) 
         
     def remove(self, value):
         if not value in self._data:
             msg = 'The list does not contain %r: available %s' % (value, format_list(self._data))
             raise ValueError(msg)
-        self._data.remove(value)
         from .memdata_events import event_list_remove
         event = event_list_remove(name=self._prefix,
                                    value=value, 
                                    **self._get_event_kwargs())
         self._notify(event)
         
+        self._data.remove(value)
          
     def delete(self, i):
         # todo: check i 
         if not( 0 <= i < len(self._data)):
             msg ='Invalid index %d for list of length %d.' % (i, len(self._data))
             raise ValueError(msg)
-        self._data.pop(i) 
         
         from .memdata_events import event_list_delete
         event = event_list_delete(name=self._prefix,
                                    index=i, 
                                    **self._get_event_kwargs())
         self._notify(event)
+        self._data.pop(i) 
         
     def append(self, value):
         self._schema.prototype.validate(value) 
-        self._data.append(value) 
-          
+#         logger.info('After appending %s, the list is %s' ( value, self._data))
         from .memdata_events import event_list_append
         event = event_list_append(name=self._prefix,
                                    value=value, 
                                    **self._get_event_kwargs())
         self._notify(event)
+        self._data.append(value) 

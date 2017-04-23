@@ -22,21 +22,38 @@ def create_empty_repo_from_schema(dirname, schema, disk_map, branch=None):
     repo = gitrep_from_diskrep(disk_rep, dirname, branch=branch)
     return repo
 
+DUMMY_FILE = '.gitignore'
+DUMMY_FILE_CONTENTS = 'ignore'
+
 @contract(disk_rep=ProxyDirectory, returns=ProxyDirectory)
 def get_disk_rep_with_added_files(disk_rep):
     ''' Returns a new disk_rep where empty directories
-        have a file called '.gitignore'. 
+        have a file called DUMMY_FILE containing DUMMY_FILE_CONTENTS.
     '''
-    DUMMY_FILE = '.gitignore'
     def map_d(d):
         d = deepcopy(d)
         if not d._files and not d._directories:
-            d[DUMMY_FILE] = ProxyFile('ignore')
+            d[DUMMY_FILE] = ProxyFile(DUMMY_FILE_CONTENTS)
         for d2n, d2 in d._directories.items():
             d._directories[d2n] = map_d(d2) 
         return d
     return map_d(disk_rep)
 
+@contract(disk_rep=ProxyDirectory, returns=ProxyDirectory)
+def get_disk_rep_with_added_files_inverse(disk_rep):
+    ''' Inverse of get_disk_rep_with_added_files():
+        removes DUMMY_FILES. '''
+    
+    d0 = deepcopy(disk_rep)
+    def remove_it(d):
+        if DUMMY_FILE in d:
+            d.file_delete(DUMMY_FILE)
+        for dd in d.get_directories().values():
+            remove_it(dd)
+    remove_it(d0)
+    return d0
+    
+    
 @contract(disk_rep=ProxyDirectory)
 def gitrep_from_diskrep(disk_rep, where=None, branch=None):
     ''' Creates a repository with the contents. '''
@@ -75,5 +92,6 @@ def diskrep_from_gitrep(repo):
         raise ValueError(msg)
 
     diskrep = ProxyDirectory.from_disk(working_tree_dir)
+    diskrep = get_disk_rep_with_added_files_inverse(diskrep)
     return diskrep
 

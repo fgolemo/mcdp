@@ -17,6 +17,7 @@ from .memdata_events import event_list_append, event_list_delete, event_list_ins
 from .memdata_utils import assert_data_events_consistent
 from .schema import SchemaHash, SchemaContext, SchemaList, SchemaBase
 from .memdata_events import  event_add_prefix
+from mcdp_hdb.schema import SchemaSimple
 
 
 @contract(returns='tuple(list(dict), list(dict))')
@@ -186,11 +187,24 @@ def data_events_from_file_modify(schema, disk_map, disk_rep, disk_events_queue, 
     if isinstance(schema_parent, SchemaContext):
         if isinstance(hint, HintDir):
             key = hint.key_from_filename(name)
+            logger.debug('name = %s became key = %s from %s' % (name, key, hint))
             schema_child = schema_parent.get_descendant((key,))
             value = disk_map.interpret_hierarchy_(schema_child, ProxyFile(contents))
-            e = event_leaf_set(name=parent, leaf=key, value=value, _id=_id, who=who)
-            consumed = []
-            return [e], consumed
+            if isinstance(schema_child, SchemaSimple):
+                e = event_leaf_set(name=parent, leaf=key, value=value, _id=_id, who=who)
+                consumed = []
+                return [e], consumed
+            else:
+                current_file = disk_rep.get_descendant(dirname)[name]
+                data1 = disk_map.interpret_hierarchy_(schema_child, current_file)
+                diff = data_diff(schema_child, data1, value)
+                assert_data_events_consistent(schema_child, data1, diff, value) 
+                 
+                prefix = parent + (key,)
+                diff2 = [event_add_prefix(prefix, d) for d in diff]
+#                 logger.info('diff2 from YAML case:\n'+indent(diff2, ' diff2 from YAML case > ')) 
+                return diff2, []
+            
 
     logger.debug('dirname %r -> parent %r' % (dirname, parent))
         
@@ -214,18 +228,7 @@ def data_events_from_file_modify(schema, disk_map, disk_rep, disk_events_queue, 
                 data1 = disk_map.interpret_hierarchy_(prototype, current_file)
                 diff = data_diff(prototype, data1, data2)
                 assert_data_events_consistent(prototype, data1, diff, data2) 
-                
-#                 def add_prefix(e):
-#                     e2 = deepcopy(e) 
-#                     if 'parent' in e2['arguments']:
-#                         prev = e2['arguments']['parent']
-#                         
-#                         logger.info('parent %s key %s prev %s' % (parent, key, prev))
-#                         new = parent + (key,) + prev
-#                         logger.info('add_prefix %s %s' % (prev, new))
-#                         e2['arguments']['parent'] = new 
-#                     return e2
-                
+                 
                 prefix = parent + (key,)
                 diff2 = [event_add_prefix(prefix, d) for d in diff]
                 logger.info('diff2:\n'+indent(diff2, '> ')) 
