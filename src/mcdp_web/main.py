@@ -144,12 +144,12 @@ class WebApp(AppVisualization, AppStatus,
         config_repos = yaml_load(self.options.repos_yaml)
         logger.info('Config:\n'+ indent(self.options.repos_yaml, '>'))
         logger.info(config_repos)
-        inst_name = self.options.inst_name
+        instance = self.options.instance
         root= 'out/root'
         
         config_repos['local']['bundled'] = os.path.join(dir_from_package_name('mcdp_data'), 'bundled.mcdp_repo')
         
-        self.hi = HostInstance(inst_name=inst_name, 
+        self.hi = HostInstance(instance=instance, 
                                upstream='master', 
                                root=root, 
                                repo_git=config_repos['remote'], 

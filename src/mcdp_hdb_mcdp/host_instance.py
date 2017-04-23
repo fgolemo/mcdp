@@ -17,8 +17,8 @@ from .main_db_schema import DB
 class HostInstance(object):
     ''' A MCDP server that participaxtes in the network '''
     
-    @contract(root=str, inst_name=str, upstream=str, repo_git='dict(str:str)', repo_local='dict(str:str)')
-    def __init__(self, inst_name, upstream, root, repo_git, repo_local):
+    @contract(root=str, instance=str, upstream=str, repo_git='dict(str:str)', repo_local='dict(str:str)')
+    def __init__(self, instance, upstream, root, repo_git, repo_local):
         '''
             root: where to put our temporary files
             repo_git: name -> remote git url
@@ -29,7 +29,7 @@ class HostInstance(object):
             If no 'user_db' is passed, then we create an empty one inside root. 
         '''
         self.repos = {}
-        self.who = {'host': host_name(), 'actor': 'system', 'inst_name': inst_name} 
+        self.who = {'host': host_name(), 'actor': 'system', 'instance': instance} 
         
         for name, dirname in repo_local.items():
             if not os.path.exists(dirname):
@@ -49,23 +49,23 @@ class HostInstance(object):
                 msg = 'Cannot track remote branch %r because it does not exist.' % upstream
                 raise Exception(msg)
             
-            # Do we already have a branch inst_name in the remote repo?
-            if inst_name in origin.refs:
+            # Do we already have a branch instance in the remote repo?
+            if instance in origin.refs:
                 # if so, check out
-                logger.info('Checking out remote %r' % inst_name)
-                head = repo.create_head(inst_name, origin.refs[inst_name])
-                head.set_tracking_branch(origin.refs[inst_name])
+                logger.info('Checking out remote %r' % instance)
+                head = repo.create_head(instance, origin.refs[instance])
+                head.set_tracking_branch(origin.refs[instance])
                 head.checkout()
             else:
                 # we create it from the upstream branch
-                logger.info('Creating local %s from remote %r' % (inst_name, upstream))
-                head = repo.create_head(inst_name, origin.refs[upstream])
+                logger.info('Creating local %s from remote %r' % (instance, upstream))
+                head = repo.create_head(instance, origin.refs[upstream])
                 head.checkout()
-                logger.info('Pushing local %s' % (inst_name))
-#                 origin.create_ref(inst_name)
-#                 head.set_tracking_branch(origin.refs[inst_name])
+                logger.info('Pushing local %s' % (instance))
+#                 origin.create_ref(instance)
+#                 head.set_tracking_branch(origin.refs[instance])
 #                 origin.push()
-                repo.git.push('-u', 'origin', inst_name) 
+                repo.git.push('-u', 'origin', instance) 
                  
             self.repos[repo_name] = repo
 

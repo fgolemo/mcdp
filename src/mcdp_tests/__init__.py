@@ -6,10 +6,7 @@ import os
 import numpy
 
 from mcdp import MCDPConstants
-
-
-if 'raise_if_test_included' in os.environ:
-    raise Exception()
+import warnings
 
 logging.basicConfig()
 logger = logging.getLogger(__name__)
@@ -56,7 +53,10 @@ def load_tests_modules():
         if vname in os.environ:
             logger.info('skipping mcdp_opt_tests')
         else:
-            import mcdp_opt_tests
+            if True:
+                warnings.warn('removed mcdp_opt_tests for now')
+            else:
+                import mcdp_opt_tests
 
 
 def jobs_comptests(context):

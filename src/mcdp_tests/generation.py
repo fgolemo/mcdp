@@ -33,6 +33,3 @@ def primitive_dp_test(id_dp, dp):
         logger.error('__repr__():\n%s' % dp.__repr__())
         logger.error('repr_long():\n%s' % dp.repr_long())
         raise
-    
-    
-

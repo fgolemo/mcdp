@@ -47,7 +47,7 @@ class ViewManager(object):
     def set_view_class(self, s, baseclass):
         self.s2baseclass[s] = baseclass
 
-    def view(self, data, actor=None, principals=None, host=None, inst_name=None):
+    def view(self, data, actor=None, principals=None, host=None, instance=None):
         v = self.create_view_instance(self.schema, data)
         if actor is None:
             actor = 'system'
@@ -55,7 +55,7 @@ class ViewManager(object):
             principals = [MCDPConstants.ROOT]
         if host is None:
             host = host_name()
-        v._who = {'host': host, 'actor': actor, 'inst_name': inst_name} #, 'principals': principals}
+        v._who = {'host': host, 'actor': actor, 'instance': instance} #, 'principals': principals}
         v._principals = principals
     
         # create notify callback that saves everything to a .events

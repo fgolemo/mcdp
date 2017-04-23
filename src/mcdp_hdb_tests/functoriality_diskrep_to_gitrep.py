@@ -28,10 +28,13 @@ def check_translation_diskrep_to_gitrep(disk_rep0, disk_events, disk_rep1, out):
             repo.index.add(repo.untracked_files) 
             
         message = yaml_dump(disk_event)
-        actor = disk_event['who']['actor']
-        system = disk_event['who']['host']['hostname']
-        author = Actor(actor, None)
-        committer = Actor(system, None) 
+        who = disk_event['who']
+        logger.info('who: %s' % who)
+        actor = who['actor']
+        instance = who.get('instance', None)
+        host = who.get('host', None)
+        author = Actor(actor, instance)
+        committer = Actor(instance, host) 
         commit = repo.index.commit(message, author=author, committer=committer)
         commits.append(commit) 
     

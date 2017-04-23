@@ -151,14 +151,14 @@ class WriteToRepoCallback(object):
         if who is not None:
             actor = who['actor']
             host = who['host']
-            inst_name = who['inst_name']
+            instance = who['instance']
         else:
             actor = 'system'
             host = host_name()
-            inst_name = 'unspecified'
+            instance = 'unspecified'
             
-        author = Actor(actor, '%s@%s' % (actor, inst_name))
-        committer = Actor(inst_name, '%s@%s' % (inst_name, host))
+        author = Actor(actor, '%s@%s' % (actor, instance))
+        committer = Actor(instance, '%s@%s' % (instance, host))
         _commit = self.repo.index.commit(message, author=author, committer=committer)
         
         

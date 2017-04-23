@@ -4,12 +4,13 @@ from copy import deepcopy
 from contracts import contract
 from contracts.utils import check_isinstance, indent, raise_wrapped
 
+from mcdp import MCDPConstants
 from mcdp.logs import logger
 from mcdp_utils_misc import format_list, yaml_dump
 
 from .memdataview import ViewBase
 from .memdataview_exceptions import InvalidOperation
-from mcdp import MCDPConstants
+from mcdp_hdb.who import assert_valid_who
 
 
 class DataEvents(object):
@@ -217,7 +218,7 @@ def event_dict_rename_interpret(view, name, key, key2):
         raise InvalidOperation(msg)
     v._data[key2] = v._data.pop(key)
 
-@contract(_id=str, event_name=str)
+@contract(_id=str, event_name=str, who="assert_valid_who")
 def event_make(_id, event_name, who, arguments):
     assert event_name in DataEvents.all_events
     d = OrderedDict()

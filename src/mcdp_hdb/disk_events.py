@@ -26,7 +26,7 @@ class DiskEvents(object):
                   file_create, file_modify, file_delete, file_rename, disk_event_group] 
 
 def ff(f):
-    @contract(_id=str)
+    @contract(_id=str, who='assert_valid_who')
     def f2(_id, who, *args, **kwargs):
         check_isinstance(_id, str)
         logger.debug('Calling %s with args = %s kwargs = %s' % (f, args, kwargs))
@@ -174,15 +174,13 @@ def disk_event_interpret(disk_rep, disk_event):
         msg += indent((disk_rep.tree()), ' disk_rep: ')
         from mcdp_hdb.memdataview import InvalidOperation
         raise_wrapped(InvalidOperation, e, msg)
-# 
-# class Changes(object):
-#     def __init__(self, removed, added, modified, renamed):
-#         pass
-        
+
+
 def apply_disk_event_to_filesystem(wd, disk_event, repo=None):
     '''
-        Applies the disk events to the filesystem and to the repository index,
-        if repo_index is not None
+        Applies the disk events to the filesystem.
+        
+        If repo is not None, it applies the changes to the index as well.
     '''  
     if repo:
         repo_index = repo.index
@@ -222,7 +220,7 @@ def apply_disk_event_to_filesystem(wd, disk_event, repo=None):
             for _, rel in descendants_tracked(p1):
                 fn1 = path_relative_to_repo(os.path.join(p1, rel))
                 fn2 = path_relative_to_repo(os.path.join(p2, rel))
-                repo_index.rename(fn1, fn2)
+                repo_index.move(fn1, fn2)
         
     def file_rename(dirname, name, name2):
         p1 = as_path(dirname, name)
@@ -231,7 +229,9 @@ def apply_disk_event_to_filesystem(wd, disk_event, repo=None):
         if repo_index:
             fn1 = path_relative_to_repo(p1)
             fn2 = path_relative_to_repo(p2)
-            repo_index.rename(fn1, fn2)
+            logger.debug('fn1: %s' % fn1)
+            logger.debug('fn2: %s' % fn2)
+            repo_index.move(fn1, fn2)
         
     def dir_delete(dirname, name):
         p = as_path(dirname, name)
@@ -262,7 +262,7 @@ def apply_disk_event_to_filesystem(wd, disk_event, repo=None):
         os.unlink(p)
         if repo_index:
             fn = path_relative_to_repo(p)
-            repo_index.delete([fn])
+            repo_index.remove([fn])
         
     def disk_event_group(events):
         for e in events:
