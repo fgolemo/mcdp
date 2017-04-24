@@ -62,6 +62,8 @@ from .visualization.app_visualization import AppVisualization
 from mcdp_web.environment import Environment
 from contracts import contract
 from mcdp_web.context_from_env import library_from_env
+from mcdp_web.resource_tree import ResourceDBView
+from mcdp_hdb.schema import SchemaContext, SchemaHash
 
 
 Privileges = MCDPConstants.Privileges
@@ -610,6 +612,7 @@ class WebApp(AppVisualization, AppStatus,
         config.add_view(self.view_confirm_creation_similar, http_cache=0, context=ResourceConfirmCreationSimilar, renderer='confirm_creation_similar.jinja2', permission=NO_PERMISSION_REQUIRED)
         config.add_view(self.view_confirm_creation, http_cache=0, context=ResourceConfirmCreation, renderer='confirm_creation.jinja2', permission=NO_PERMISSION_REQUIRED)
         config.add_view(self.view_confirm_creation_create, http_cache=0, context=ResourceConfirmCreationCreate, renderer='confirm_creation_create.jinja2', permission=NO_PERMISSION_REQUIRED)
+        config.add_view(self.view_db_view, http_cache=0, context=ResourceDBView, renderer='db_view.jinja2')
         
         config.add_view(serve_robots, context=ResourceRobots, permission=NO_PERMISSION_REQUIRED)
         config.add_notfound_view(self.view_not_found, renderer='404.jinja2')
@@ -689,7 +692,60 @@ class WebApp(AppVisualization, AppStatus,
             mime = get_mime_for_format(data_format)
             data = picture_data 
             return response_data(request=e.request, data=data, content_type=mime)
+    
+    @add_std_vars_context
+    @cr2e
+    def view_db_view(self, e):
+        root = self.get_root_relative_to_here(e.request)
+        name_string = e.request.params.get('name', '').encode('utf8')
+        if not name_string: # special case: empty string
+            name_seq = ()  
+        else:
+            name_seq = tuple(name_string.split(','))
         
+        db_view = e.session.app.hi.db_view
+        
+        view = db_view.get_descendant(name_seq)
+        schema = view._schema
+        if isinstance(schema, SchemaContext):
+            links = []
+            for k in schema.children:
+                n2 = name_seq + (k,)
+                url = root + '/db_view/?name=%s' % ",".join(n2) 
+                links.append((k, url))
+            content = ""
+            content += '<ul>'
+            for k, url in links:
+                content += '\n <li><a href="%s">%s</a></li>' % (url, k)
+            content += '\n</ul>'
+            error = None
+        elif isinstance(schema, SchemaHash):
+            
+            data = view._data
+            if not data:
+                content = '(empty)'
+            else:
+                links = []
+                for k in sorted(data):
+                    n2 = name_seq + (k,)
+                    url = root + '/db_view/?name=%s' % ",".join(n2) 
+                    links.append((k, url))
+                content = ""
+                content += '<ul>'
+                for k, url in links:
+                    content += '\n <li><a href="%s">%s</a></li>' % (url, k)
+                content += '\n</ul>'
+            error = None
+        else:
+            error = 'Unimplemented for %s' % type(view)
+            content = None 
+        
+        res = {}
+        res['name'] = name_seq
+        res['content'] = content
+        res['error'] = error
+        return res
+    
     @cr2e
     def view_thing(self, e):
         url = e.request.url

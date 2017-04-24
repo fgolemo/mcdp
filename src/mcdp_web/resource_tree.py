@@ -155,6 +155,7 @@ class MCDPResourceRoot(Resource):
             'confirm_creation_similar': ResourceConfirmCreationSimilar(),
             'confirm_creation': ResourceConfirmCreation(),
             'confirm_creation_create': ResourceConfirmCreationCreate(),
+            'db_view': ResourceDBView(),
         }
 
 class ResourceConfirmBind(Resource): pass
@@ -163,6 +164,8 @@ class ResourceConfirmCreationSimilar(Resource): pass
 class ResourceConfirmCreation(Resource): pass
 class ResourceConfirmCreationCreate(Resource): pass
 
+class ResourceDBView(Resource):
+    pass
 
 
 class ResourceAbout(Resource): pass

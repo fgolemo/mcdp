@@ -10,10 +10,11 @@ from mcdp_library import MCDPLibrary
 from mcdp_library.specs_def import specs
 from mcdp_utils_misc import format_list
 from mocdp.comp.context import Context
+from mcdp_utils_misc.memoize_simple_imp import memoize_simple
 
 
 __all__ = [
-    'LibraryView',
+#     'LibraryView',
 ]
 
 class LibraryView():
@@ -32,8 +33,10 @@ class TheContext(Context):
         self.load_primitivedp_hooks = [self.load_primitivedp]
         self.load_template_hooks = [self.load_template]
         self.load_library_hooks = [self.load_library]
-
+    
+    @memoize_simple
     def load_library(self, library_name, context=None):  # @UnusedVariable
+        logger.debug('load_library(%r)'  % library_name)
         repos = self.db_view.repos
         all_shelves = set()
         all_libraries = set()
@@ -52,8 +55,10 @@ class TheContext(Context):
         msg += '\n All libraries: %s.' % format_list(sorted(all_libraries))
         raise ValueError(msg)
     
+    @memoize_simple
     @contract(returns=MCDPLibrary)
     def make_library(self, repo_name, shelf_name, library_name): 
+        logger.debug('make_library(%r, %r, %r)'  % (repo_name, shelf_name, library_name))
         l = TheContextLibrary(self, repo_name, shelf_name, library_name)
         return l
     
@@ -61,10 +66,13 @@ class TheContext(Context):
         return self.load_library(self.current_library_name)
     
     def load_ndp(self, name, context=None):
+        logger.debug('load_ndp(%r)' % name)
         return self.get_library().load_ndp(name, context)
     
     def load_poset(self, name, context=None):
-        return self.get_library().load_poset(name, context)
+        logger.debug('load_poset(%r)' % name)
+        res = self.get_library().load_poset(name, context)
+        return res
     
     def load_primitivedp(self, name, context=None):
         return self.get_library().load_primitivedp(name, context)
@@ -82,6 +90,7 @@ class TheContextLibrary(MCDPLibrary):
         self.shelf_name = shelf_name
         self.library_name = library_name
         MCDPLibrary.__init__(self)
+        self.use_tmp_cache()
         
     def _generate_context_with_hooks(self):
         return self.the_context

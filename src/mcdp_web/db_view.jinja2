@@ -1,0 +1,25 @@
+{% extends "base_page.jinja2" %}
+{% block title %}
+    DB View
+{% endblock %}
+{% block head_extra %}
+
+{% endblock %}
+{% block content %}
+
+{% include 'user.jinja2' %}
+{% include 'prompt.jinja2' %}
+
+<h2>{{name}}</h2>
+
+{% if content %}
+    {{content|safe}}
+{% endif %}
+
+{% if error %}
+    <code>{{error}}</code>
+{% endif %}
+
+
+
+{% endblock %}
