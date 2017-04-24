@@ -90,6 +90,7 @@ class TheContextLibrary(MCDPLibrary):
         self.shelf_name = shelf_name
         self.library_name = library_name
         MCDPLibrary.__init__(self)
+        logger.warn('Cache activated but not sure the semantics is correct if things change.')
         self.use_tmp_cache()
         
     def _generate_context_with_hooks(self):
@@ -107,10 +108,10 @@ class TheContextLibrary(MCDPLibrary):
             available = sorted(things)
 
             if available:
-                msg += (" Available %s: %s." %
+                msg += ("\n Available %s: %s." %
                         (spec_name, format_list(sorted(available))))
             else:
-                msg += " None of those found."
+                msg += "\n None of those found."
             
             raise_wrapped(DPSemanticError, e, msg, compact=True)
         else:

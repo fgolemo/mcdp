@@ -900,14 +900,15 @@ def eval_statement_SetNameRValue(r, context):
             used_rvalue = True
             
         except DPSemanticError as e:
-            if 'not declared' in str(e) and alt is not None:
-                # XXX: this seems not to be used anymore
-                # after we implemented the interpretation at the syntax level
-                raise NotImplementedError
-                x = eval_lfunction(alt.right_side, context)
-                context.set_var2function(name, x)
-                used_rvalue = False
-            else:
+#             if 'not declared' in str(e) and alt is not None:
+#                 # XXX: this seems not to be used anymore
+#                 # after we implemented the interpretation at the syntax level
+#                 msg = 'This should not happen...'
+#                 raise_wrapped(DPNotImplementedError, e, msg)
+#                 x = eval_lfunction(alt.right_side, context)
+#                 context.set_var2function(name, x)
+#                 used_rvalue = False
+#             else:
                 raise
             
     if alt is not None:

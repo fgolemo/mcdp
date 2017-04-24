@@ -12,10 +12,18 @@ from mcdp_hdb.pipes import mount_git_repo, WriteToRepoCallback, mount_directory
 from mcdp_utils_misc import format_list
 
 from .main_db_schema import DB
-
+from mcdp_hdb.schema import Schema, SchemaString
 
 class HostInstance(object):
     ''' A MCDP server that participaxtes in the network '''
+
+#     hi_config = Schema()
+#     
+#     hi_config.string('root') # where to put temporary files
+#     hi_config.string('instance') # instance name
+#     hi_config.hash('repo_local', SchemaString()) # dirname for local repo
+#     hi_config.hash('repo_git', SchemaString()) # git url for local repo
+#      
     
     @contract(root=str, instance=str, upstream=str, repo_git='dict(str:str)', repo_local='dict(str:str)')
     def __init__(self, instance, upstream, root, repo_git, repo_local):

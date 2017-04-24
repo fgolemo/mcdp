@@ -18,7 +18,6 @@ from .memdataview_utils import special_string_interpret
 from .schema import SchemaBase, SchemaSimple
 
 
-
 __all__ = [
     'ViewBase',
     'ViewContext0',
