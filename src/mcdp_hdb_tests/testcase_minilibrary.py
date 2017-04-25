@@ -1,11 +1,7 @@
 # -*- coding: utf-8 -*-
-from copy import deepcopy
-
 from contracts import contract
 
-from mcdp_hdb import DiskMap, Schema, SchemaString, SchemaHash, ViewManager, assert_data_events_consistent
-
-from .testcases import DataTestCase
+from mcdp_hdb import DiskMap, Schema, SchemaString, SchemaHash
 from mcdp_hdb_tests.testcases import get_combinations
 
 
@@ -51,4 +47,3 @@ def add_seq(f):
 def seq_set(view):
     view.things.models['model2'] = 'mcdp { model2 }'
     del view.things.models['model1']
- 

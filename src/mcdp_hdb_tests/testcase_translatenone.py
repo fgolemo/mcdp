@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
-from copy import deepcopy
-
 from contracts import contract
 
-from mcdp_hdb import DiskMap, Schema, ViewManager, assert_data_events_consistent
-from mcdp_hdb_tests.testcases import DataTestCase, get_combinations
+from mcdp_hdb import DiskMap, Schema
+
+
+from mcdp_hdb_tests.testcases import get_combinations
 
 
 @contract(returns='dict(str:isinstance(DataTestCase))')    
