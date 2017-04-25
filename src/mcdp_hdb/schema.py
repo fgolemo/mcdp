@@ -277,7 +277,10 @@ class SchemaContext(SchemaRecursive):
             else:
                 if k in kwargs:
                     x = kwargs.pop(k)
-                    res[k] = c.generate_empty(**x)
+                    if isinstance(x, dict):
+                        res[k] = c.generate_empty(**x)
+                    else:
+                        res[k] = x
                 else:
                     res[k] = c.generate_empty()
         assert not kwargs     

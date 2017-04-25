@@ -18,7 +18,6 @@ from .memdataview_utils import special_string_interpret
 from .schema import SchemaBase, SchemaSimple
 
 
-
 __all__ = [
     'ViewBase',
     'ViewContext0',
@@ -313,7 +312,8 @@ class ViewContext0(ViewMount):
                 name = self._prefix + (leaf,)
                 
                 event = event_struct_set(name=name, value=value, **self._get_event_kwargs())
-            
+            else:
+                raise NotImplementedError(v._schema)
             self._notify(event)
             
             logger.debug('setting leaf %s = %s' % (leaf, value))

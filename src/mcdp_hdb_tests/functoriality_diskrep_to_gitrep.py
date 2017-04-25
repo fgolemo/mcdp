@@ -5,7 +5,7 @@ from mcdp.logs import logger
 from mcdp_hdb.disk_events import apply_disk_event_to_filesystem
 from mcdp_hdb.diskrep_utils import assert_diskreps_same
 from mcdp_hdb.gitrepo_map import gitrep_from_diskrep, diskrep_from_gitrep
-from mcdp_utils_misc.my_yaml import yaml_dump
+from mcdp_utils_misc import yaml_dump
 
 
 def check_translation_diskrep_to_gitrep(disk_rep0, disk_events, disk_rep1, out):  # @UnusedVariable

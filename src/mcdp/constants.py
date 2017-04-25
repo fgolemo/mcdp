@@ -207,5 +207,5 @@ class MCDPConstants(object):
         [ALLOW, EVERYONE, Privileges.ADMIN],
     ]
     
-    allow_soft_matching = True
+    allow_soft_matching = False
     

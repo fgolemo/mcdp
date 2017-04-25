@@ -13,16 +13,25 @@ __all__ = [
 class DataTestCase(object):
     
 
-    @contract(schema=SchemaBase, events=list, disk_map=DiskMap)
-    def __init__(self, schema, data1, events, data2, disk_map):   
+    @contract(schema=SchemaBase, disk_map=DiskMap)
+    def __init__(self, schema, data1, disk_map, run):   
         schema.validate(data1)
-        schema.validate(data2) 
-        assert_data_events_consistent(schema, data1, events, data2)
+#         schema.validate(data2) 
+#         assert_data_events_consistent(schema, data1, events, data2)
         self.data1 = data1
-        self.events = events
-        self.data2 = data2
+        self._run = run
         self.disk_map = disk_map
         self.schema = schema
+        
+    def run(self):
+        viewmanager = ViewManager(self.schema)
+        data2 = deepcopy(self.data1) 
+        view = viewmanager.view(data2) 
+        self._run(view)
+        events = view._events
+        self.events = events
+        self.data2 = data2
+        assert_data_events_consistent(self.schema, self.data1, events, self.data2)
         
     def get_data1(self):
         ''' Returns a copy of data1 (safe to modify) '''
@@ -63,15 +72,8 @@ def get_combinations(db_schema, db0, prefix, operation_sequences, disk_maps):
     res = {}
     
     for s in operation_sequences:
-        db = deepcopy(db0)
-        viewmanager = ViewManager(db_schema) 
-        view = viewmanager.view(db) 
-        s(view)
-        events = view._events
-        assert_data_events_consistent(db_schema, db0, events, db)
-        
         for id_dm, dm in disk_maps.items():
-            dtc = DataTestCase(db_schema, db0, events, db, dm)
+            dtc = DataTestCase(schema=db_schema, data1=db0,  disk_map=dm, run=s)
             k = '%s-%s-%s' % (prefix, s.__name__, id_dm)
             res[k] = dtc 
      

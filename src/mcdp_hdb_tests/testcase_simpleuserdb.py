@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
-from copy import deepcopy
 
 from contracts import contract
 
-from mcdp_hdb import DiskMap, Schema, SchemaString, ViewManager, assert_data_events_consistent
+from mcdp_hdb import DiskMap, Schema, SchemaString
+from mcdp_hdb_tests.testcases import get_combinations
+from copy import deepcopy
 
+U1 = 'andrea'
+U2 = 'pinco'
 
 @contract(returns='dict(str:isinstance(DataTestCase))')    
 def testcases_SimpleUserDB():
@@ -18,12 +21,12 @@ def testcases_SimpleUserDB():
     
     db0 = {
         'users': { 
-            'andrea': {
-                'name': 'Andrea', 
+            U1: {
+                'name': U1, 
                 'email': 'info@co-design.science',
                 'groups': ['group:admin', 'group:FDM'],
             },
-            'pinco': {
+            U2: {
                 'name': 'Pinco Pallo', 
                 'email': None,
                 'groups': ['group:FDM'],
@@ -31,26 +34,7 @@ def testcases_SimpleUserDB():
         }
     }
 
-    db_schema.validate(db0)
-    db = deepcopy(db0)
-    
-    viewmanager = ViewManager(db_schema) 
-    view = viewmanager.view(db) 
-
-    users = view.users
-    u = users['andrea'] 
-    u.name = 'not Andrea'
-    u.email = None    
-    users['another'] = {'name': 'Another', 'email': 'another@email.com', 'groups':['group:extra']}
-    del users['another']
-    users.rename('pinco', 'pallo') 
-    
-    events = view._events
-    
-    assert len(events) > 3, events
-    
-    assert_data_events_consistent(db_schema, db0, events, db)
-    
+    db_schema.validate(db0) 
     disk_map_with_hint = DiskMap()
     disk_map_with_hint.hint_directory(db_schema['users'], pattern='%.user')
     
@@ -62,10 +46,39 @@ def testcases_SimpleUserDB():
     disk_maps['with_hint'] = disk_map_with_hint
     disk_maps['files_are_yaml'] = disk_map_files_are_yaml
 
-    from mcdp_hdb_tests.testcases import DataTestCase
-        
-    res = {}
-    for k in disk_maps:
-        dm = disk_maps[k]
-        res[k] = DataTestCase(db_schema, db0, events, db, dm)
+    prefix='simpleuserdb'
+    seqs = [
+        seq1,
+        seq_set_list,
+        seq_set_hash,
+        seq_set_struct,
+    ]
+    res = get_combinations(db_schema, db0, prefix, seqs, disk_maps)
     return res
+
+
+def seq1(view):
+    users = view.users
+    u = users[U1] 
+    u.name = 'not Andrea'
+    u.email = None    
+    users['another'] = {'name': 'Another', 'email': 'another@email.com', 'groups':['group:extra']}
+    del users['another']
+    users.rename(U2, 'pallo') 
+    
+def seq_set_list(view):
+    users = view.users
+    u = users[U1]
+    u.groups = ['newgroup']
+
+def seq_set_hash(view):
+    users = view.users
+    users_data = deepcopy(users._data)
+    users_data[U1].name='new name'
+    view.users = users_data
+    
+def seq_set_struct(view):
+    users = view.users
+    users[U1] = users[U2]
+    
+    

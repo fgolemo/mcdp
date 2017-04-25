@@ -1,5 +1,6 @@
 from copy import deepcopy
 import os
+import shutil
 
 from contracts import contract
 from contracts.utils import indent
@@ -12,8 +13,7 @@ from mcdp_hdb.disk_events import disk_event_file_create, disk_event_file_delete,
     disk_event_file_modify, disk_event_file_rename, disk_event_dir_rename,\
     disk_event_interpret, disk_event_dir_create, disk_event_dir_delete
 from mcdp_hdb.disk_struct import ProxyDirectory, assert_equal_disk_rep
-from mcdp_utils_misc.my_yaml import yaml_dump
-import shutil
+from mcdp_utils_misc import yaml_dump
 
 
 @contract(repo=Repo)
