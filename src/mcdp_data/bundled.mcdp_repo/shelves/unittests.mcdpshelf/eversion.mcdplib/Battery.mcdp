@@ -1,0 +1,6 @@
+mcdp {
+    requires mass [kg]
+    provides capacity [J]
+    specific_energy = 0.1 J / kg
+    provided capacity ≼ required mass · specific_energy 
+}
