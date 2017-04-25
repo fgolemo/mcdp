@@ -1,8 +1,10 @@
+from copy import deepcopy
+
 from contracts import contract
 
 from mcdp_hdb_mcdp.main_db_schema import DB
-from mcdp_hdb_tests.testcases import get_combinations
 from mcdp_hdb_mcdp_tests.dbs import testdb1
+from mcdp_hdb_tests.testcases import get_combinations
 
 
 @contract(returns='dict(str:isinstance(DataTestCase))')    
@@ -50,5 +52,7 @@ def seq_set_list(view):
 @add_seq
 def seq_set_hash(view):
     user_db = view.user_db
-    users = user_db.users._data
+    users = deepcopy(user_db.users._data)
+    # need to change something
+    users['andrea'].name = 'new name'
     user_db.users = users
