@@ -1,0 +1,10 @@
+mcdp {
+    battery = instance `Battery
+    battery_dual = instance eversion(battery, `Battery2)
+    # provides x[ℕ]
+    # provides x[N]
+    # ≤ ≥  a ≼ b ≽
+    # erase these to show visualization bug
+    mass required by battery ≼ mass provided by battery_dual
+    capacity required by battery_dual  ≼  capacity provided by battery
+}
