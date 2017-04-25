@@ -1,20 +1,20 @@
 #!/usr/bin/env python
-from mcdp_utils_misc.fileutils import create_tmpdir
-from mcdp_hdb_mcdp.host_instance import HostInstance
-from quickapp.quick_app_base import QuickAppBase 
-from mcdp.logs import logger
-from mcdp_library.specs_def import specs
-from mcdp_hdb_mcdp.library_view import TheContext
-from mcdp.exceptions import MCDPException
-from quickapp.quick_app import QuickApp
 from collections import namedtuple
 from copy import deepcopy
 import os
-import traceback
 import shutil
-from contracts.utils import indent
 import time
-from mcdp_utils_misc.duration_hum import duration_compact
+
+from contracts.utils import indent
+from quickapp.quick_app import QuickApp
+
+from mcdp.exceptions import MCDPException
+from mcdp.logs import logger
+from .host_instance import HostInstance
+from .library_view import TheContext
+from mcdp_library.specs_def import specs
+from mcdp_utils_misc import create_tmpdir
+
 
 __all__ = [
     'load_all_main',
@@ -169,8 +169,8 @@ class EnvironmentMockup(object):
 def get_all_shelves(db_view):
     subscribed_shelves = list()
     
-    for repo_name, repo in db_view.repos.items():
-        for shelf_name, shelf in repo.shelves.items():
+    for _repo_name, repo in db_view.repos.items():
+        for shelf_name, _shelf in repo.shelves.items():
             subscribed_shelves.append(shelf_name)
     return subscribed_shelves
 
@@ -196,12 +196,12 @@ def iterate_all(db_view):
                     e.spec_name = spec_name
                     things = library.things.child(spec_name)
 #                     e.things = things
-                    for thing_name, code in things.items():
+                    for thing_name, _code in things.items():
                         e.thing_name = thing_name
                         e.id = '%s-%s-%s-%s-%s' % (repo_name, shelf_name, library_name, spec_name, thing_name)
                         yield deepcopy(e) 
     
-load_all_main = LoadAll.get_sys_main()
+mcdp_load_all_main = LoadAll.get_sys_main()
 
 if __name__ == '__main__':
-    load_all_main()
+    mcdp_load_all_main()

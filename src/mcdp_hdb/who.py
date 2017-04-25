@@ -1,7 +1,8 @@
+from contracts import new_contract
 from contracts.utils import check_isinstance, indent, raise_wrapped
 
 from mcdp_utils_misc.my_yaml import yaml_dump
-from contracts import new_contract
+
 
 __all__ = ['assert_valid_who']
 

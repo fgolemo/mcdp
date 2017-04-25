@@ -29,7 +29,8 @@ def should_do_basic_tests():
         should = True
     else: # the first of many
         should = (i == 0)
-        
+    
+    logger.debug('should_do_basic_tests i = %s n = %d should? %s' % (i, n, should))
     return should
 
 def load_tests_modules():

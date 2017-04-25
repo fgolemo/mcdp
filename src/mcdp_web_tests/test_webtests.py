@@ -193,8 +193,9 @@ class FunctionalTests(unittest.TestCase):
         spider.visit(ushelf + '/libraries/documents/test_subfigure.html')
         
         spider.visit('/tree')
+        max_fails=  1
         try:
-            spider.go(max_fails=10)
+            spider.go(max_fails=max_fails)
         except KeyboardInterrupt:
             pass
         spider.log_summary()
@@ -212,6 +213,7 @@ class FunctionalTests(unittest.TestCase):
                 msg += '\nErrors for these URLs:'
                 for f, e in spider.failed.items():
                     msg += '\n- %s' % f
+                    msg += '\n referrers: \n' + "\n  - ".join(spider.referrers[f])
                     
                 if False:
                     for f, e in spider.failed.items():

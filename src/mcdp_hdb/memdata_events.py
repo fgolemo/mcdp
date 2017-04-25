@@ -6,11 +6,11 @@ from contracts.utils import check_isinstance, indent, raise_wrapped, raise_desc
 
 from mcdp import MCDPConstants
 from mcdp.logs import logger
+from mcdp_hdb.schema import SchemaSimple
 from mcdp_utils_misc import format_list, yaml_dump
 
 from .memdataview import ViewBase
 from .memdataview_exceptions import InvalidOperation
-from mcdp_hdb.schema import SchemaSimple
 
 
 class DataEvents(object):
