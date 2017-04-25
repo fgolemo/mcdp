@@ -1,7 +1,0 @@
-template mcdp {
-    provides velocity [m/s]
-    requires computation [flops]
-    requires camera_framerate [Hz]
-    requires camera_resolution [pixels/deg]
-    requires camera_fov [deg]
-}

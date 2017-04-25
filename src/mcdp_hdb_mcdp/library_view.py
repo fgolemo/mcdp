@@ -1,7 +1,7 @@
 from contextlib import contextmanager
 
 from contracts import contract
-from contracts.utils import raise_wrapped
+from contracts.utils import raise_wrapped, raise_desc
 
 from mcdp import MCDPConstants
 from mcdp.exceptions import DPSemanticError
@@ -104,16 +104,16 @@ class TheContextLibrary(MCDPLibrary):
         try:
             match = get_soft_match(thing_name, list(things))
         except KeyError as e:
-            msg = 'Could not find %r in %s.' % (thing_name, spec_name)
+            msg = 'Soft match failed: Could not find %r in %s.' % (thing_name, spec_name)
             available = sorted(things)
 
             if available:
                 msg += ("\n Available %s: %s." %
                         (spec_name, format_list(sorted(available))))
             else:
-                msg += "\n None of those found."
+                msg += "\n None available."
             
-            raise_wrapped(DPSemanticError, e, msg, compact=True)
+            raise_desc(DPSemanticError, msg)
         else:
             
             if match != thing_name:
@@ -146,9 +146,9 @@ def get_soft_match(x, options):
         if x.lower() == o.lower():
             res.append(o)
     if not res:
-        msg = 'Could not find any soft match for "%s" in %s.' % (o, format_list(options))
+        msg = 'Could not find any soft match for "%s" in %s.' % (x, format_list(options))
         raise KeyError(msg)
     if len(res) > 1:
-        msg = 'Too many matches %s for "%s" in %s.' % (format_list(res), o, format_list(options))
+        msg = 'Too many matches (%s) for "%s" in %s.' % (format_list(res), x, format_list(options))
         raise KeyError(msg)
     return res[0]
