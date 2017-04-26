@@ -1,20 +1,18 @@
 # -*- coding: utf-8 -*-
 from contextlib import contextmanager
-from copy import deepcopy
-import os
-import shutil
-import sys
-
 from contracts import contract
 from contracts.utils import (check_isinstance, format_obs, raise_desc,
                              raise_wrapped)
-
+from copy import deepcopy
 from mcdp import logger, MCDPConstants
 from mcdp.exceptions import DPSemanticError, MCDPExceptionWithWhere,\
     DPInternalError
 from mcdp_lang import parse_ndp, parse_poset
 from mcdp_utils_misc import assert_good_plain_identifier, format_list, get_mcdp_tmp_dir, memo_disk_cache2, locate_files
 from mocdp.comp.context import Context
+import os
+import shutil
+import sys
 
 
 __all__ = [

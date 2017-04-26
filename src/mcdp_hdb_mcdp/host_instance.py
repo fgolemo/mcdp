@@ -12,7 +12,7 @@ from mcdp_hdb.pipes import mount_git_repo, WriteToRepoCallback, mount_directory
 from mcdp_utils_misc import format_list
 
 from .main_db_schema import DB
-from mcdp_hdb.schema import Schema, SchemaString
+
 
 class HostInstance(object):
     ''' A MCDP server that participaxtes in the network '''
