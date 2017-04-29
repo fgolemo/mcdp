@@ -1,22 +1,16 @@
 from mcdp.constants import MCDPConstants
-from mcdp_library.specs_def import SPEC_VALUES, SPEC_POSETS, SPEC_TEMPLATES, SPEC_MODELS
 from mcdp_utils_misc import natural_sorted
-
+from mcdp_library.specs_def import SPEC_MODELS, specs
 
 Privileges = MCDPConstants.Privileges
 
 def get_navigation_links_context(e):
     """ Pass this as "navigation" to the page. """
     if e.shelf is not None:
-        shelf_write_permission = e.shelf.get_acl().allowed2(Privileges.WRITE, e.user)
+        ui = e.user_struct.info
+        shelf_write_permission = e.shelf.get_acl().allowed2(Privileges.WRITE, ui)
     else:
         shelf_write_permission = False
-        
-#     if e.library is not None:
-#         if not e.library_name in e.session.libraries:
-#             msg = 'The library %r is not available. Maybe a permission issue?' % e.library_name
-#             msg += '\n context: %s' % e.context.show_ancestors()
-#             logger.error(msg) 
 
     d = {}
     
@@ -42,7 +36,7 @@ def get_navigation_links_context(e):
     if e.library is not None:
         
         VIEW_EDITOR = 'views/edit_fancy/'
-        VIEW_DELETE = ':delete'
+        VIEW_DELETE = ':delete' 
         VIEW_SYNTAX = 'views/syntax/'
         
         p = '/repos/{repo_name}/shelves/{shelf_name}/libraries/{library_name}/'
@@ -56,69 +50,73 @@ def get_navigation_links_context(e):
             desc = dict(id=id_doc,id_document=id_doc, name=id_doc, url=url, current=False)
             d['documents'].append(desc)
 
-        
-        d[SPEC_MODELS] = []
         def list_spec(specname):
             return list(e.library.things.child(specname))
+        
+        for spec_name in specs:
+                
+            values = list_spec(spec_name)
+            d[spec_name] = []
+            for _ in natural_sorted(values):
+                is_current = (e.spec_name == spec_name) and (e.thing_name == _)
+                
+                url0 =  library_url + spec_name + '/' + _ + '/'
+                url = url0 + VIEW_SYNTAX
+                url_edit = url0 + VIEW_EDITOR  
+                url_delete = url0 + VIEW_DELETE 
+                url_rename = 'javascript:rename_thing(%r,%r)' % (spec_name, _)  
+    
+#                 name = "Value: %s" % _
+                name = _
+                desc = dict(id=_, name=name, url=url, current=is_current, 
+                            url_edit=url_edit, url_delete=url_delete, url_rename=url_rename)
+                d[spec_name].append(desc)
+                
+#         d[SPEC_MODELS] = []
+#             
+#         models = list_spec(SPEC_MODELS)
+#         for _ in natural_sorted(models):
+#             is_current = (e.spec_name == SPEC_MODELS) and (e.thing_name == _)
+# 
+#             url0 =  library_url + SPEC_MODELS + '/' + _ + '/'
+#             url = url0 + VIEW_SYNTAX
+#             url_edit = url0 + VIEW_EDITOR  
+#             url_delete = url0 + VIEW_DELETE  
+#              
+#             name = "Model %s" % _
+#             desc = dict(id=_, id_ndp=_, name=name, url=url, url_edit=url_edit, 
+#                         url_delete=url_delete, current=is_current)
+#             d[SPEC_MODELS].append(desc) 
+#        
+#         templates = list_spec(SPEC_TEMPLATES)
+#         d[SPEC_TEMPLATES] = []
+#         for _ in natural_sorted(templates):
+#             is_current = (e.spec_name == SPEC_TEMPLATES) and (e.thing_name == _)
+# 
+#             url0 =  library_url + SPEC_TEMPLATES + '/' + _ + '/'
+#             url = url0 + VIEW_SYNTAX
+#             url_edit = url0 + VIEW_EDITOR  
+#             url_delete = url0 + VIEW_DELETE  
+#             
+#             name = "Template: %s" % _
+#             desc = dict(id=_, name=name, url=url, current=is_current, url_edit=url_edit, url_delete=url_delete)
+#             d[SPEC_TEMPLATES].append(desc)
+# 
+#         posets = list_spec(SPEC_POSETS)
+#         d[SPEC_POSETS] = []
+#         for _ in natural_sorted(posets):
+#             is_current = (e.spec_name == SPEC_POSETS) and (e.thing_name == _)
+#             
+#             url0 =  library_url + SPEC_POSETS + '/' + _ + '/'
+#             url = url0 + VIEW_SYNTAX
+#             url_edit = url0 + VIEW_EDITOR  
+#             url_delete = url0 + VIEW_DELETE  
+# 
+#             name = "Poset: %s" % _
+#             desc = dict(id=_, name=name, url=url, current=is_current, url_edit=url_edit, url_delete=url_delete)
+#             d[SPEC_POSETS].append(desc)
+
             
-        models = list_spec(SPEC_MODELS)
-        for _ in natural_sorted(models):
-            is_current = (e.spec_name == SPEC_MODELS) and (e.thing_name == _)
-
-            url0 =  library_url + SPEC_MODELS + '/' + _ + '/'
-            url = url0 + VIEW_SYNTAX
-            url_edit = url0 + VIEW_EDITOR  
-            url_delete = url0 + VIEW_DELETE  
-             
-            name = "Model %s" % _
-            desc = dict(id=_, id_ndp=_, name=name, url=url, url_edit=url_edit, 
-                        url_delete=url_delete, current=is_current)
-            d[SPEC_MODELS].append(desc) 
-       
-        templates = list_spec(SPEC_TEMPLATES)
-        d[SPEC_TEMPLATES] = []
-        for _ in natural_sorted(templates):
-            is_current = (e.spec_name == SPEC_TEMPLATES) and (e.thing_name == _)
-
-            url0 =  library_url + SPEC_TEMPLATES + '/' + _ + '/'
-            url = url0 + VIEW_SYNTAX
-            url_edit = url0 + VIEW_EDITOR  
-            url_delete = url0 + VIEW_DELETE  
-            
-            name = "Template: %s" % _
-            desc = dict(id=_, name=name, url=url, current=is_current, url_edit=url_edit, url_delete=url_delete)
-            d[SPEC_TEMPLATES].append(desc)
-
-        posets = list_spec(SPEC_POSETS)
-#         posets = e.library.list_spec(SPEC_POSETS)
-        d[SPEC_POSETS] = []
-        for _ in natural_sorted(posets):
-            is_current = (e.spec_name == SPEC_POSETS) and (e.thing_name == _)
-            
-            url0 =  library_url + SPEC_POSETS + '/' + _ + '/'
-            url = url0 + VIEW_SYNTAX
-            url_edit = url0 + VIEW_EDITOR  
-            url_delete = url0 + VIEW_DELETE  
-
-            name = "Poset: %s" % _
-            desc = dict(id=_, name=name, url=url, current=is_current, url_edit=url_edit, url_delete=url_delete)
-            d[SPEC_POSETS].append(desc)
-
-        values = list_spec(SPEC_VALUES)
-        d[SPEC_VALUES] = []
-        for _ in natural_sorted(values):
-            is_current = (e.spec_name == SPEC_VALUES) and (e.thing_name == _)
-            
-            url0 =  library_url + SPEC_VALUES + '/' + _ + '/'
-            url = url0 + VIEW_SYNTAX
-            url_edit = url0 + VIEW_EDITOR  
-            url_delete = url0 + VIEW_DELETE  
-
-            name = "Value: %s" % _
-            desc = dict(id=_, name=name, url=url, current=is_current, url_edit=url_edit, url_delete=url_delete)
-            d[SPEC_VALUES].append(desc)
-            
-
         d['views'] = []
         
         if e.spec_name == SPEC_MODELS and e.thing_name is not None:
@@ -149,13 +147,6 @@ def get_navigation_links_context(e):
         name = l
         desc = dict(id=l,name=name, url=url, current=is_current)
         libname2desc[l] =desc
-        d['libraries'].append(desc)
-# 
-#     indexed = e.session.get_libraries_indexed_by_shelf()
-#     indexed = [(sup, [libname2desc[_] for _ in l]) 
-#                for sup, l in indexed]
-#     
-#     
-#     d['libraries_indexed'] = indexed 
-#     
+        d['libraries'].append(desc) 
+
     return d

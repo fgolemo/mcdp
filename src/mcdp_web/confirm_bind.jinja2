@@ -6,7 +6,11 @@
 
 {% block procedure_content %}
 
-<p> You are already logged in as user  <code>{{user.username}}</code>. </p>
+    {{ assert_is_userstruct(user_struct) }}
+    {{ assert_is_userstruct(candidate_user) }}
+
+
+<p> You are already logged in as user  <code>{{user_struct.info.username}}</code>. </p>
 
 <p> You just authenticated with a new user profile. </p>
 
@@ -19,16 +23,16 @@
     <tbody>
         <tr>
            <td>
-               {{user_name_and_picture_userinfo(user)}}
+               {{user_name_and_picture_userinfo(user_struct.info)}}
            </td>
            <td>
                 <table>
                     <tr>
                         <td>Name</td>
-                        <td>{{user_name_and_picture_userinfo(candidate_user, link=False)}}</td>
+                        <td>{{user_name_and_picture_userinfo(candidate_user.info, link=False)}}</td>
                     </tr><tr>
                         <td>Email</td>
-                        <td>{{candidate_user.email}}</td>
+                        <td>{{candidate_user.info.email}}</td>
                     </tr>
                 </table>
 
@@ -46,7 +50,7 @@
 <ol>
     <li> Bind this authenatication to the previous user -
             you will be able to login using either services.</li>
-    <li> Log out from {{user.username}} and try again. </li>
+    <li> Log out from {{user_struct.info.username}} and try again. </li>
 </ol> -->
 
 <p>

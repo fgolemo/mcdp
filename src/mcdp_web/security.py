@@ -60,10 +60,10 @@ class AppLogin(object):
         
         if e.username is not None:
             #res['error'] = ''
-            res['user'] = e.user
+            res['user_struct'] = e.user
         else:
             res['error'] = 'You need to login to access this resource.'
-            res['user'] = None
+            res['user_struct'] = None
         return res
 
     @add_std_vars_context

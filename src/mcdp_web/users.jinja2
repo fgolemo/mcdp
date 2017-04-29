@@ -20,21 +20,23 @@
         </tr>
         </thead>
     <tbody>
-    {% for username, user_struct in user_db.users.items()  if username != 'anonymous' %}
-    {% set u = user_struct.info %}
-    <tr>
-    <td>{{user_picture(username)}}</td>
-    <td><a href="{{root}}/users/{{username}}/"><code>{{username}}</code></a></td>
-
-    <td>
-    {{user_name(username)}}
-    </td>
-    <td>
-    {% if u.affiliation %}
-     {{u.affiliation.decode('utf8')}} 
-    {% endif %}
-    </td>
-    </tr>
+    {% for username, x in user_db.users.items()  if username != 'anonymous' %}
+        {% set ui = x.info %}
+        <tr>
+            <td>{{user_picture(username)}}</td>
+            
+            <td><a href="{{root}}/users/{{username}}/"><code>{{username}}</code></a></td>
+        
+            <td>
+                {{user_name(username)}}
+            </td>
+            
+            <td>
+                {% if ui.affiliation %}
+                    {{ui.affiliation.decode('utf8')}} 
+                {% endif %}
+            </td>
+        </tr>
     {% endfor %}
 
     

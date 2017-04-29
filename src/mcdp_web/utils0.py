@@ -9,6 +9,8 @@ from pyramid.security import forget
 
 from mcdp import MCDPConstants, logger, __version__
 from mcdp_utils_misc import duration_compact,  format_list
+from mcdp_user_db.user import UserInfo, User 
+from contracts import contract
 
 
 Privileges = MCDPConstants.Privileges
@@ -39,9 +41,11 @@ def add_other_fields(self, res, request, context):
     session = self.get_session(request) 
     
     if e.username is not None:
-        res['user'] = e.user
+        res['user_info'] = e.user_info
+        res['user_struct'] = e.user_struct
     else:
-        res['user'] = None 
+        res['user_info'] = None 
+        res['user_struct'] = None
         
     app = self
     res['user_db'] = app.hi.db_view.user_db
@@ -54,7 +58,7 @@ def add_other_fields(self, res, request, context):
             msg += '\n available: ' + format_list(repo.shelves)
             raise ValueError(msg)
         acl = repo.shelves[sname].get_acl()
-        return acl.allowed2(privilege, e.user)
+        return acl.allowed2(privilege, e.user_info)
 
     def can_subscribe(repo_name, sname):
         return shelf_privilege(repo_name, sname, Privileges.SUBSCRIBE)
@@ -72,8 +76,8 @@ def add_other_fields(self, res, request, context):
         return shelf_privilege(repo_name, sname, Privileges.DISCOVER)
 
     def shelf_subscribed(repo_name, _):  # @UnusedVariable
-        return _ in e.user.subscriptions
-
+        return _ in e.user_info.subscriptions
+    
     res['shelf_can_read'] = can_read
     res['shelf_can_write'] = can_write
     res['shelf_can_subscribe'] = can_subscribe
@@ -139,13 +143,57 @@ def add_other_fields(self, res, request, context):
         return res['icon_%s' % spec_name]
     res['icon_spec'] = icon_spec
 
-    def get_user(username):
-        user = session.get_user(username)
-        return user.dict_for_page()
+#     def get_user(username):
+#         x = session.get_user_struct(username)
+#         return x.info.dict_for_page()
+    def get_userstruct(username):
+        return session.get_user_struct(username)
+   
+    res['get_userstruct'] = get_userstruct
 
-    res['get_user'] = get_user
+    add_jinja_tests(res)
+    
+def add_jinja_tests(res):
 
+    @contract(a_user=User)    
+    def is_current_user(a_user):
+        ''' return true if this is the current user '''
+        x = res['authenticated_userid']
+        return x and (x == a_user.info.username)
+    
+    @contract(ui=UserInfo)    
+    def is_current_user_ui(ui):
+        ''' return true if this is the current user '''
+#         the_user = res['user_struct']
+        x = res['authenticated_userid']
+        return x and (x ==  ui.username)
 
+    res['is_current_user_ui'] = is_current_user_ui
+    res['is_current_user'] = is_current_user
+    
+    def is_userstruct(what):
+        return isinstance(what, User) #and what._schema == DB.user
+    def is_userinfo(what):
+        return isinstance(what, UserInfo)
+    def assert_is_string(what):
+        check_isinstance(what, str)
+        return ''
+    def assert_is_userstruct(what):
+        if is_userinfo(what):
+            msg = 'This is a UserInfo, not a UserStruct'
+            raise Exception(msg)
+        check_isinstance(what, User)
+        return ''
+    def assert_is_userinfo(what):
+        if is_userstruct(what):
+            msg = 'This is a UserStruct, not a UserInfo'
+            raise Exception(msg) 
+        check_isinstance(what, UserInfo)
+        return ''
+    res['assert_is_string'] = assert_is_string
+    res['assert_is_userstruct'] = assert_is_userstruct
+    res['assert_is_userinfo'] = assert_is_userinfo
+    
 def add_std_vars_context(f):
     return add_std_vars_context_(f, redir=True)
 

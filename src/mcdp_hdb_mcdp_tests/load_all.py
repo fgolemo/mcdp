@@ -10,8 +10,3 @@ def load_all(context):
     mcdp_data = dir_from_package_name('mcdp_data')
     dirname = os.path.join(mcdp_data, 'bundled.mcdp_repo')
     define_load_all_jobs(context, dirname, outdir, name_filter=None, errors_only=False)
-
-# 
-#     
-# if __name__ == '__main__':
-#     run_module_tests()

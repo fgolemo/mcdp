@@ -58,12 +58,11 @@ class AppVisualization(object):
     @cr2e
     def view_model_ndp_repr(self, e):
         res = {}
-        
         try:
             library = library_from_env(e)
             ndp = library.load_ndp(e.thing_name)
             ndp_string = ndp.__repr__()
-            ndp_string = ndp_string.decode("utf8")
+            ndp_string = ndp_string.decode("utf8", 'ignore')
             res['content'] = ndp_string
             
         except (DPSyntaxError, DPSemanticError, DPNotImplementedError) as exc:
@@ -116,7 +115,27 @@ def generate_view_syntax(e, make_relative):
             return make_relative(url0)
             
         def get_link(specname, libname, thingname):
-            return get_link_library(libname) + '%s/%s/views/syntax/' % (specname, thingname)
+            # find library. Returns a string or raises error 
+            try:
+                rname, sname = e.session.get_repo_shelf_for_libname(libname)
+            except NoSuchLibrary:
+                msg = 'No such library %r' % libname
+                logger.debug(msg)
+                raise
+#                 return None
+            things = e.db_view.repos[rname].shelves[sname].libraries[libname].things.child(specname)
+            
+            if thingname in things:
+                
+            # check if the thing exists
+            
+                res = get_link_library(libname) + '%s/%s/views/syntax/' % (specname, thingname)
+                logger.debug(' link for %s = %s' % (thingname, res))
+                return res
+            else:
+                msg = 'No such thing %r' % thingname
+                logger.debug(msg)
+                raise NoSuchLibrary(msg) 
         
         highlight = add_html_links(highlight, e.library_name, get_link, get_link_library)
         parses = True 

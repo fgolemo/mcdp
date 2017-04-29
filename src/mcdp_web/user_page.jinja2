@@ -3,7 +3,7 @@
     {% set this_username = context.name %}
     {# assert this_username in user_db #}
     {% set u = user_db[this_username] %}
-    {% set this_is_you = user and (u['username'] == user['username']) %}
+    {% set this_is_you = user_struct and (u.username == user_info.username) %}
     {% set can_see_private = request.has_permission('view_user_profile_private', context) %}
     {% set can_see_internals = request.has_permission('view_user_profile_internal', context) %}
     {% set can_impersonate = request.has_permission('impersonate', context) %}
@@ -180,7 +180,7 @@
         </td>
     </tr>
     {% if this_is_you %}
-    {% set already = user.get_external_providers() %}
+    {% set already = u.get_external_providers() %}
     {% for provider in other_logins if provider not in already %}
     <tr><td></td><td>    {{login_button(provider, connect=True)}}</td></tr>
     {% endfor %}

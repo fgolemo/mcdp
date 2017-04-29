@@ -9,8 +9,8 @@
 
 
 
-{% if user %}
-    <p>{{user['name']}} does not have enough privileges to see this resource.</p>
+{% if user_struct %}
+    <p>{{user_struct.info.name}} does not have enough privileges to see this resource.</p>
     <p><a href="{{root}}/logout/">Try to log out</a> and log in as a different user.</p>
 
 {% else %}
@@ -27,7 +27,7 @@
 -->
 <div style='display:none'>
 <pre>{{context_detail}}</pre>
-<pre>{{user}}</pre>
+<pre>{{user_struct}}</pre>
 </div>
 </body>
 </html>

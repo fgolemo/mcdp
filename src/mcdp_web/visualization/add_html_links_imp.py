@@ -1,15 +1,15 @@
-from bs4.element import NavigableString, Tag
-
+from mcdp_library.specs_def import SPEC_MODELS, SPEC_POSETS, SPEC_TEMPLATES
 from mcdp_utils_xml import bs
+from mcdp_utils_xml.add_class_and_style import add_class
 from mcdp_utils_xml.parsing import to_html_stripping_fragment
 from mcdp_web.sessions import NoSuchLibrary
-from mcdp_utils_xml.add_class_and_style import add_class
-from mcdp_library.specs_def import SPEC_MODELS, SPEC_POSETS,\
-    SPEC_TEMPLATES
+
+from bs4.element import NavigableString, Tag
 
 
 def add_html_links(frag, library_name, get_link, get_link_library):
-    """ Adds links to models.
+    """ 
+        Adds links to models.
     
         get_link(specname, libname, thingname) -> url
         get_link_library(libname) -> url
