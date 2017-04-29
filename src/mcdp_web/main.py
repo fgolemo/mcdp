@@ -839,7 +839,7 @@ class WebApp(AppVisualization, AppStatus,
 #         filename = e.library.delete_file(basename)
 #         e.session.notify_deleted_file(e.shelf_name, e.library_name, filename)
         raise HTTPFound(e.request.referrer)
-
+ 
     @add_std_vars_context
     @cr2e
     def view_thing_rename(self, e):

@@ -64,7 +64,7 @@ def get_navigation_links_context(e):
             for _ in natural_sorted(values):
                 is_current = (e.spec_name == spec_name) and (e.thing_name == _)
                 
-                url0 =  library_url + SPEC_VALUES + '/' + _ + '/'
+                url0 =  library_url + spec_name + '/' + _ + '/'
                 url = url0 + VIEW_SYNTAX
                 url_edit = url0 + VIEW_EDITOR  
                 url_delete = url0 + VIEW_DELETE
