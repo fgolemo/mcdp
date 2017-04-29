@@ -26,3 +26,12 @@ $(document).ready(function() {
 });
 
 var all_images = [];
+
+
+// Renaming things
+function rename_thing(spec_name, thing_name) {
+    what = spec_name;
+    prompt = 'Rename "'+ thing_name + '"';
+    url_base = spec_name + '/' + thing_name + '/:rename?new_name='
+    prompt_user(what, url_base, prompt);
+}

@@ -72,9 +72,10 @@ class Environment(object):
         rview = get_from_context(ResourceThingView, context)
         self.view_name = rview.name if rview is not None else None
  
-        self.user = self.session.get_user()
+        self.user_struct = self.session.get_user_struct()
+        self.user_info = self.user_struct.info
         # use username instead of authenticated_id
-        self.username = None if self.user.username == MCDPConstants.USER_ANONYMOUS else self.user.username
+        self.username = None if self.user_info.username == MCDPConstants.USER_ANONYMOUS else self.user_info.username
         
         self.root = app.get_root_relative_to_here(request)
         

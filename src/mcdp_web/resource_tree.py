@@ -1,10 +1,9 @@
-import os
-
 from contracts.utils import indent
-from pyramid.security import Allow, Authenticated, Everyone
-
 from mcdp import MCDPConstants
 from mcdp.logs import logger_web_resource_tree as logger
+import os
+
+from pyramid.security import Allow, Authenticated, Everyone
 
 
 Privileges = MCDPConstants.Privileges
@@ -222,28 +221,29 @@ class ResourceShelves(Resource):
         repo_name = self.__parent__.name
         repo = repos[repo_name]
         return repo
+    
     def getitem(self, key):
         session = self.get_session()
-        user = session.get_user()
+        ui = session.get_user_struct().info
         repo = self.get_repo()
         shelves = repo.shelves
 
         if not key in shelves:
             return ResourceShelfNotFound(key)
         shelf = shelves[key]
-        if not shelf.get_acl().allowed2(Privileges.READ, user):
+        if not shelf.get_acl().allowed2(Privileges.READ, ui):
             return ResourceShelfForbidden(key)
 
         return ResourceShelf(key)
 
     def __iter__(self):
         session = self.get_session()
-        user = session.get_user()
+        ui = session.get_user_struct().info
         repo = self.get_repo()
 
         shelves = repo.shelves
         for id_shelf, shelf in shelves.items():
-            if shelf.get_acl().allowed2(Privileges.READ, user):
+            if shelf.get_acl().allowed2(Privileges.READ, ui):
                 yield id_shelf
 
 class ResourceShelfForbidden(ResourceEndOfTheLine): pass
@@ -423,10 +423,14 @@ class ResourceThing(Resource):
         subs =  {
             'views': ResourceThingViews(),
             ':delete': ResourceThingDelete(),
+            ':rename': ResourceThingRename(),
         }
         return subs.get(key, None)
 
 class ResourceThingDelete(Resource):
+    pass
+
+class ResourceThingRename(Resource):
     pass
 
 class ResourceThingViews(Resource):

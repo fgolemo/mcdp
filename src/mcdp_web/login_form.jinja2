@@ -18,7 +18,7 @@ font-size: smaller;
 
 <div id='outer-outer'>
 
-{% if not user   %}
+{% if not user_struct   %}
 
 <div id='outer'>
 
@@ -51,11 +51,11 @@ font-size: smaller;
 <p>Privacy policy: We do not read your data; only your basic profile (name and email). </p>
 
 {% else %}
-	<p> You are already logged in as <code>{{user.username}}</code>. </p>
+	<p> You are already logged in as <code>{{user_info.username}}</code>. </p>
 
 	<p> You can <a href="{{root}}/logout/">log out</a>. </p>
 
-	<p> You can also go to <a href="{{root}}/users/{{user.username}}/">your account page</a> and add more identities. </p>
+	<p> You can also go to <a href="{{root}}/users/{{user_info.username}}/">your account page</a> and add more identities. </p>
 
 {% endif %}
 </div>

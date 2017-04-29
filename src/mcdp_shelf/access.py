@@ -5,6 +5,7 @@ from pyramid.security import Allow, Authenticated, Everyone, Deny
 
 from mcdp.constants import MCDPConstants
 from mcdp.logs import logger_access, logger
+from mcdp_user_db.user import UserInfo
 
 Privileges = MCDPConstants.Privileges
 
@@ -66,9 +67,10 @@ class ACL(object):
         root_rule = (Allow, MCDPConstants.ROOT, tuple(Privileges.ALL_PRIVILEGES))
         rules = map(ACLRule.as_pyramid_acl, self.rules)
         return [root_rule] + rules
-        
-    def allowed2(self, privilege, user):
-        return self.allowed(privilege, user.username, user.groups)
+    
+    @contract(ui=UserInfo)
+    def allowed2(self, privilege, ui):
+        return self.allowed(privilege, ui.username, ui.groups)
     
     def allowed(self, privilege, username, groups):
         principals = []

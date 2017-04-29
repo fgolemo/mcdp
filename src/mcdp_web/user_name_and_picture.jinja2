@@ -1,5 +1,7 @@
-{% macro user_picture_userinfo(a_user) %}
-    <img id='gravatar2' src='{{root}}/users/{{a_user.username}}/small.jpg'/>
+{% macro user_picture_userinfo(ui) %}
+    {{ assert_is_userinfo(ui)   }}  
+ 
+    <img id='gravatar2' src='{{root}}/users/{{ui.username}}/small.jpg'/>
     <style>
     img#gravatar2 {
         width: 13pt;
@@ -10,6 +12,8 @@
 {% endmacro%}
 
 {% macro user_picture(username) %}
+    {{ assert_is_string(username)   }}
+
     <img id='gravatar2' src='{{root}}/users/{{username}}/small.jpg'/>
     <style>
     img#gravatar2 {
@@ -21,34 +25,39 @@
 {% endmacro%}
 
 {% macro user_name(username, link=true) %}
+    {{ assert_is_string(username) }}
     {{ user_name_userinfo(user_db[username], link)}}
 {% endmacro %}
 
-{% macro user_name_userinfo(a_user, link) %}
-    {% if user and user.username == a_user.username %}
-    {% set name = a_user.name + ' (you)' %}
+{% macro user_name_userinfo(ui, link) %}
+    {{ assert_is_userinfo(ui) }}
+    {% if is_current_user_ui(ui) %}
+    {% set name = ui.name + ' (you)' %}
     {%else%}
-    {% set name = a_user.name %}
+    {% set name = ui.name %}
     {%endif%}
     {% if link %}
-    <a href="{{root}}/users/{{a_user.username}}/">{{name}}</a>
+    <a href="{{root}}/users/{{ui.username}}/">{{name}}</a>
     {% else %}
     {{name}}
     {% endif %}
 {%endmacro%}
 
 {% macro user_name_and_picture(username) %}
-    {% set a_user = get_user(username) %}
-    {{user_name_and_picture_userinfo(a_user)}}
+    {{ assert_is_string(username) }}
+    {% set a_user = get_userstruct(username) %}
+    {{ assert_is_userstruct(a_user) }}
+    {{user_name_and_picture_userinfo(a_user.info)}}
 {% endmacro %}
 
-{% macro user_name_and_picture_userinfo(a_user, link=True) %}
+{% macro user_name_and_picture_userinfo(ui, link=True) %}
+    {{ assert_is_userinfo(ui) }}
     <span class='user_name_and_picture'>
 
-    {% if a_user.username in user_db %}
-        {{user_picture_userinfo(a_user)}}
+    {% if ui.username in user_db %}
+        {{user_picture_userinfo(ui)}}
     {% endif %}
     
-    {{user_name_userinfo(a_user, link=link)}}
+    {{user_name_userinfo(ui, link=link)}}
     </span>
 {% endmacro %}

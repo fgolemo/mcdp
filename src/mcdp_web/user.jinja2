@@ -1,9 +1,9 @@
 <div id='userbox'>
-{% if user is defined and user %}
+{% if user_struct is defined and user_struct %}
 
-<img id='gravatar' src='{{root}}/users/{{user.username}}/small.jpg'/>
-<a href="{{root}}/users/{{user.username}}/">
-{{user['name']}}
+<img id='gravatar' src='{{root}}/users/{{user_struct.info.username}}/small.jpg'/>
+<a href="{{root}}/users/{{user_struct.info.username}}/">
+{{user_struct.info.name}}
 </a>
  (<a href='{{root}}/logout/'>logout</a>)
 {% else %}

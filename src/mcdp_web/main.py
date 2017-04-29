@@ -39,7 +39,7 @@ from .environment import cr2e
 from .images.images import WebAppImages, get_mime_for_format
 from .interactive.app_interactive import AppInteractive
 from .qr.app_qr import AppQR
-from .resource_tree import MCDPResourceRoot, ResourceLibraries, ResourceLibrary,  ResourceLibraryRefresh, ResourceRefresh, ResourceExit, ResourceLibraryDocRender, ResourceLibraryAsset, ResourceRobots, ResourceShelves, ResourceShelvesShelfUnsubscribe, ResourceShelvesShelfSubscribe, ResourceExceptionsFormatted, ResourceExceptionsJSON, ResourceShelf, ResourceLibrariesNewLibname, Resource, context_display_in_detail, ResourceShelfInactive, ResourceThingDelete, ResourceChanges, ResourceTree, ResourceThing, ResourceRepos, ResourceRepo, ResourceThings, ResourceLibraryInteractive
+from .resource_tree import MCDPResourceRoot, ResourceLibraries, ResourceLibrary,  ResourceLibraryRefresh, ResourceRefresh, ResourceExit, ResourceLibraryDocRender, ResourceLibraryAsset, ResourceRobots, ResourceShelves, ResourceShelvesShelfUnsubscribe, ResourceShelvesShelfSubscribe, ResourceExceptionsFormatted, ResourceExceptionsJSON, ResourceShelf, ResourceLibrariesNewLibname, Resource, context_display_in_detail, ResourceShelfInactive, ResourceThingDelete, ResourceChanges, ResourceTree, ResourceThing, ResourceRepos, ResourceRepo, ResourceThings, ResourceLibraryInteractive, ResourceThingRename
 from .resource_tree import ResourceAllShelves, ResourceShelfForbidden,\
     ResourceShelfNotFound, ResourceRepoNotFound, ResourceLibraryAssetNotFound,\
     ResourceLibraryDocNotFound, ResourceNotFoundGeneric, ResourceAbout
@@ -230,10 +230,10 @@ class WebApp(AppVisualization, AppStatus,
     
     @add_std_vars_context 
     @cr2e
-    def view_shelves_subscribe(self, e):  
-        if not e.shelf_name in e.user.subscriptions:
-            e.user.subscriptions.append(e.shelf_name)
-#             e.session.save_user()
+    def view_shelves_subscribe(self, e):
+        ui = e.user_struct.info  
+        if not e.shelf_name in ui.subscriptions:
+            ui.subscriptions.append(e.shelf_name)
             e.session.recompute_available()
         raise HTTPFound(e.request.referrer)
     
@@ -273,11 +273,10 @@ class WebApp(AppVisualization, AppStatus,
          
     @cr2e
     def view_shelves_unsubscribe(self, e):
+        ui = e.user_struct.info  
         sname = e.context.name
-        #print('unsubscribe %r' % sname)
-        if sname in e.user.subscriptions:
-            e.user.subscriptions.remove(sname)
-#             e.session.save_user()
+        if sname in ui.subscriptions:
+            ui.subscriptions.remove(sname)
             e.session.recompute_available()
         raise HTTPFound(e.request.referrer)
 
@@ -604,6 +603,7 @@ class WebApp(AppVisualization, AppStatus,
         config.add_view(self.view_dummy, context=ResourceShelfInactive, renderer='shelf_inactive.jinja2')
         config.add_view(self.view_resource_not_found, context=ResourceRepoNotFound, renderer='repo_not_found.jinja2')
         config.add_view(self.view_thing_delete, context=ResourceThingDelete)
+        config.add_view(self.view_thing_rename, context=ResourceThingRename)
         config.add_view(self.view_thing, context=ResourceThing)
         config.add_view(self.view_picture, context=ResourceUserPicture)
         
@@ -838,6 +838,15 @@ class WebApp(AppVisualization, AppStatus,
         del e.things[name]
 #         filename = e.library.delete_file(basename)
 #         e.session.notify_deleted_file(e.shelf_name, e.library_name, filename)
+        raise HTTPFound(e.request.referrer)
+
+    @add_std_vars_context
+    @cr2e
+    def view_thing_rename(self, e):
+        name = e.thing_name
+        new_name = e.request.params.get('new_name', False).encode('utf8')
+        logger.error('Renaming %r to %r' % (name, new_name))
+        e.things.rename(name, new_name)
         raise HTTPFound(e.request.referrer)
 
 

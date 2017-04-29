@@ -48,11 +48,13 @@ class Session(object):
         from mcdp_web.main import WebApp
         return WebApp.singleton
     
-    @contract(returns='isinstance(UserInfo)')
-    def get_user(self, username=None):
-        ''' Returns a UserInfo struct. It is the user 'anonymous' if no login was given.
+#     @contract(returns='isinstance(UserInfo)')
+    def get_user_struct(self, username=None):
+        ''' 
         
-            self.request.authenticated_userid == None == get_user().username == 'anonymous'
+             It is the user 'anonymous' if no login was given.
+        
+            self.request.authenticated_userid == None == get_user().info.username == 'anonymous'
         '''
         app = self.app
         user_db = app.hi.db_view.user_db
@@ -66,18 +68,17 @@ class Session(object):
         if username is not None:
             username = username.encode('utf8')
             if username in user_db:
-                return user_db[username]
+                return user_db.users[username]
             else:
+                schema = DB.user
+                data = schema.generate_empty(info=dict(username=username, name=username))
                 
-                schema = DB.user.child('info')
-                user_info_data = schema.generate_empty(username=username, name=username)
-                
-                view = DB.view_manager.create_view_instance(schema, user_info_data)
+                view = DB.view_manager.create_view_instance(schema, data)
                 view.set_root()
                 return view 
         else:
             # username is None:
-            return user_db['anonymous']
+            return user_db.users[MCDPConstants.USER_ANONYMOUS]
      
         
     def notify_created_library(self, shelf_name, library_name):  # @UnusedVariable
@@ -101,9 +102,10 @@ class Session(object):
         
         # the ones that are actually in use
         self.shelves_used = OrderedDict()
-        user = self.get_user()
+        userstruct = self.get_user_struct()
+        ui = userstruct.info
         for sname, shelf in self.shelves_all.items():
-            if shelf.get_acl().allowed2(Privileges.DISCOVER, user):
+            if shelf.get_acl().allowed2(Privileges.DISCOVER, ui):
                 self.shelves_available[sname] = shelf
             else:
                 #print('hiding shelf %r from %r' % (sname, user))
@@ -111,19 +113,19 @@ class Session(object):
         
         #print('shelves all: %s' % list(self.shelves_all))
         #print('shelves available: %s' % list(self.shelves_available))
-
-        for sname in user.get_subscriptions():
+        
+        for sname in ui.get_subscriptions():
             if sname in self.shelves_available:
                 shelf = self.shelves_available[sname]
                 acl = shelf.get_acl()
-                if acl.allowed2(Privileges.READ, user):
+                if acl.allowed2(Privileges.READ, ui):
                     self.shelves_used[sname] = self.shelves_available[sname]
                 else:
-                    msg = 'User %r does not have %r for %r' % (user.username, Privileges.READ, sname)
+                    msg = 'User %r does not have %r for %r' % (ui.username, Privileges.READ, sname)
                     msg += '\n%s' % acl
                     logger.error(msg)
             else:
-                msg = 'Could not find shelf %r to which user %r is subscribed to.' % (sname, user.username)
+                msg = 'Could not find shelf %r to which user %r is subscribed to.' % (sname, ui.username)
                 msg += '\n Available: %s' % list(self.shelves_available)
                 logger.error(msg)
 

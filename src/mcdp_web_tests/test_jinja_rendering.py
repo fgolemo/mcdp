@@ -1,13 +1,17 @@
+from comptests.registrar import run_module_tests, comptest
 from contextlib import contextmanager
+from mcdp_hdb_mcdp_tests.dbs import testdb1
+from mcdp_tests import logger
+from mcdp_utils_misc import dir_from_package_name
+from mcdp_web.main import WebApp
+from mcdp_web.utils0 import add_jinja_tests
 import os
 
 from pyramid.paster import bootstrap
 from pyramid.renderers import render_to_response
 
-from comptests.registrar import run_module_tests, comptest
-from mcdp_tests import logger
-from mcdp_utils_misc import dir_from_package_name
 
+USER1 = 'uname1'
 
 def with_pyramid_environment(f):
     @contextmanager
@@ -15,6 +19,11 @@ def with_pyramid_environment(f):
         d = dir_from_package_name('mcdp_web_tests')
         ini = os.path.join(d, 'test1.ini')
         with bootstrap(ini) as env:
+            app = WebApp.singleton
+            db_view = app.hi.db_view 
+            db0 = testdb1()
+            db_view.user_db.users[USER1] = db0['user_db']['users']['andrea']
+            
             f(env)
         
     f2.__name__ = f.__name__
@@ -32,6 +41,7 @@ def get_template(name):
 def check_render(env, template, res):
     ''' Tries to render, and then checks if all parameters are necessary. '''
     request = env['request']
+    add_jinja_tests(res)
     
     # first try to render normally
     render_to_response(template, res, request=request)
@@ -98,8 +108,17 @@ def test_rendering_confirm_creation(env):
 def test_rendering_confirm_bind(env):
     logger.info('env: %s' % env)
     template = get_template('confirm_bind.jinja2')
+    app = WebApp.singleton # XXX
+    db_view = app.hi.db_view
+    uname = USER1
+    user = db_view.user_db.users[uname]
     res = {
+        'authenticated_userid': 'paul',
         'static': '', 
+        'root': '',
+        'user_struct': user,
+        'candidate_user': user,
+        'user_db' : db_view.user_db,
     } 
     check_render(env, template, res)    
 

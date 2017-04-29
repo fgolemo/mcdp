@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from collections import namedtuple
-from contracts import contract
+from contracts.utils import indent
 from copy import deepcopy
 from mcdp.exceptions import MCDPException, DPSyntaxError, DPSemanticError,\
     DPNotImplementedError
@@ -13,7 +13,7 @@ import os
 import shutil
 import time
 
-from contracts.utils import indent
+from contracts import contract
 from quickapp import QuickApp
 
 from .host_instance import HostInstance
@@ -72,12 +72,16 @@ def define_load_all_jobs(context, dirname, outdir, name_filter=None, errors_only
 
 
 def raise_if_any_error(results):
-    nerrors = 0
-    for r in results:
+    errors = []
+    for rid, (_, r) in results.items():
         if r.error_type is not None:
-            nerrors += 1
-    if nerrors:
-        msg = 'Found %s errors' % nerrors
+            f = r.error_string.split('\n')[0]
+            n = 150 - len(rid)
+            f = f [:n]
+            errors.append(rid + ' | ' + r.error_type[:4] + ' | ' +f)
+    if errors:
+        msg = 'Found %s errors.\n\n' % len(errors)
+        msg += "\n".join(sorted(errors))
         raise Exception(msg)
         
 def rmtree_only_contents(d):
@@ -188,11 +192,9 @@ def process(dirname, e):
         error = None
         error_string = None
         exc = None
-    except MCDPException as exc:
-#         logger.error('Exception: %s' % exc)
+    except MCDPException as exc: 
         error = type(exc).__name__
-        error_string = str(exc)
-        #traceback.format_exc(exc)
+        error_string = str(exc) 
     finally:
         cpu = time.clock() - t0
         
