@@ -47,7 +47,7 @@ class LoadAll(QuickApp):
         
         define_load_all_jobs(context, dirname=dirname, outdir=outdir, name_filter=_filter, errors_only=errors_only)
         
-@contract(filter='None|str', errors_only=bool, outdir=str, dirname=str)
+@contract(name_filte='None|str', errors_only=bool, outdir=str, dirname=str)
 def define_load_all_jobs(context, dirname, outdir, name_filter=None, errors_only=False):
     if not os.path.exists(outdir):
         os.makedirs(outdir)

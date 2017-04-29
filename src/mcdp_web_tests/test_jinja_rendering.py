@@ -29,6 +29,25 @@ def get_template(name):
         raise ValueError(msg)
     return fn
 
+def check_render(env, template, res):
+    ''' Tries to render, and then checks if all parameters are necessary. '''
+    request = env['request']
+    
+    # first try to render normally
+    render_to_response(template, res, request=request)
+    # Then try to see if other params are necessary
+    for k in res:
+        res2 = dict(**res)
+        del res2[k]
+        try:
+            render_to_response(template, res, request=request)
+        except:
+            pass
+        else:
+            msg = 'I expect that removing the parameter %r would make %r fail.' % (k, template)
+            raise Exception(msg)
+
+
 @comptest
 @with_pyramid_environment
 def test_rendering_jinja_env(env):
@@ -40,9 +59,39 @@ def test_rendering_jinja_env(env):
         'library_name': '',
         'widget_name': '',
     } 
-    request = env['request']
-    return render_to_response(template, res, request=request)    
+    check_render(env, template, res)
 
+
+@comptest
+@with_pyramid_environment
+def test_rendering_confirm_bind_bind(env):
+    logger.info('env: %s' % env)
+    template = get_template('confirm_bind_bind.jinja2')
+    res = {
+        'static': '',
+    } 
+    check_render(env, template, res)  
+
+@comptest
+@with_pyramid_environment
+def test_rendering_confirm_creation_similar(env):
+    logger.info('env: %s' % env)
+    template = get_template('confirm_creation_similar.jinja2')
+    res = {
+        'static': '',
+    } 
+    check_render(env, template, res) 
+
+@comptest
+@with_pyramid_environment
+def test_rendering_confirm_creation(env):
+    logger.info('env: %s' % env)
+    template = get_template('confirm_creation.jinja2')
+    res = {
+        'static': '',
+    } 
+    check_render(env, template, res) 
+    
 
 @comptest
 @with_pyramid_environment
@@ -50,13 +99,9 @@ def test_rendering_confirm_bind(env):
     logger.info('env: %s' % env)
     template = get_template('confirm_bind.jinja2')
     res = {
-        'static': '',
-        'url_edit': '',
-        'library_name': '',
-        'widget_name': '',
+        'static': '', 
     } 
-    request = env['request']
-    return render_to_response(template, res, request=request)    
+    check_render(env, template, res)    
 
         
 if __name__ == '__main__':
