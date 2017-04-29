@@ -1,0 +1,22 @@
+
+#prompt {
+    margin-top: 1em;
+    margin-left: 5em;
+}
+#prompt h2 {
+    margin-bottom: 1em;
+}
+
+.mylist { margin-top: 1.5em;}
+
+.tohide {
+    display: none;
+}
+
+#search-box {
+       min-width: 80%;
+       font-size: larger;
+    margin-top: 1em;
+}
+
+.highlight { font-weight: bold;}
