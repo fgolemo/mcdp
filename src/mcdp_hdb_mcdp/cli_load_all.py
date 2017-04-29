@@ -1,19 +1,20 @@
 #!/usr/bin/env python
 from collections import namedtuple
 from copy import deepcopy
+from mcdp.exceptions import MCDPException, DPSyntaxError, DPSemanticError
+from mcdp.logs import logger
+from mcdp_library.specs_def import specs
+from mcdp_library_tests.tests import gives_syntax_error, gives_semantic_error
+from mcdp_utils_misc import create_tmpdir
 import os
 import shutil
 import time
 
 from contracts.utils import indent
-from quickapp.quick_app import QuickApp
+from quickapp import QuickApp
 
-from mcdp.exceptions import MCDPException
-from mcdp.logs import logger
 from .host_instance import HostInstance
 from .library_view import TheContext
-from mcdp_library.specs_def import specs
-from mcdp_utils_misc import create_tmpdir
 
 
 __all__ = [
@@ -43,10 +44,9 @@ class LoadAll(QuickApp):
             os.makedirs(outdir)
         rmtree_only_contents(outdir)
         
-
         results = {}
         
-        for e in iterate_all(db_view):
+        for e in iterate_all(db_view): 
             if options.filter is not None:
                 # case insensitive
                 if not options.filter.lower() in e.id.lower():
@@ -55,6 +55,11 @@ class LoadAll(QuickApp):
             results[e.id] = (e, c)
 
         context.comp(summary, results, outdir, options.errors_only)
+        
+        if not results:
+            msg = 'Could not find anything to parse. (filter: %s)' % options.filter
+            raise Exception(msg)
+        
         
 def rmtree_only_contents(d):
     ''' Removes all the contents but not the directory itself. '''
@@ -144,18 +149,41 @@ def process(dirname, e):
     subscribed_shelves = get_all_shelves(db_view)
     e.context = TheContext(db_view, subscribed_shelves, e.library_name)
     e.mcdp_library = e.context.get_library()
+    
+    source = e.things[e.thing_name]
+    
+    t0 = time.clock()
     try:
         context = e.context.child()
-        t0 = time.clock()
         e.mcdp_library.load_spec(e.spec_name, e.thing_name, context=context)
-        cpu = time.clock() - t0
+        
         error = None
         error_string = None
+        exc = None
     except MCDPException as exc:
         error = type(exc).__name__
         error_string = str(exc)
-        cpu = None
         #traceback.format_exc(exc)
+    finally:
+        cpu = time.clock() - t0
+        
+    if gives_syntax_error(source):
+        if isinstance(exc, DPSyntaxError):
+            error = None
+            error_string = None
+        else:
+            error = 'Unexpected'
+            error_string = 'Expected DPSyntaxError error, got %s' % type(exc).__name__
+            error_string += '\n' + indent(error_string, 'obtained > ')
+    elif gives_semantic_error(source):
+        if isinstance(exc, DPSemanticError):
+            error = None
+            error_string = None
+        else:
+            error = 'Unexpected'
+            error_string = 'Expected DPSemanticError error, got %s' % type(exc).__name__
+            error_string += '\n' + indent(error_string, 'obtained > ')
+    
     if error:
         logger.error(e.id + ' ' + error)
     
@@ -175,30 +203,22 @@ def get_all_shelves(db_view):
     return subscribed_shelves
 
 def iterate_all(db_view):
-    ''' Yields a sequence of Environment. '''
-    e = EnvironmentMockup()
-#     subscribed_shelves = get_all_shelves(db_view)
-            
+    ''' Yields a sequence of EnvironmentMockup. '''
+    e = EnvironmentMockup() 
     for repo_name, repo in db_view.repos.items():
         e.repo_name = repo_name
                         
         for shelf_name, shelf in repo.shelves.items():
-            e.shelf_name = shelf_name
-#             e.shelf = shelf
+            e.shelf_name = shelf_name 
             for library_name, library in shelf.libraries.items():
-                e.library_name = library_name
-#                 e.library = library
-                
-#                 e.context = TheContext(db_view, subscribed_shelves, library_name)
-#                 e.mcdp_library = e.context.get_library()
-
+                e.library_name = library_name 
                 for spec_name in specs:
                     e.spec_name = spec_name
-                    things = library.things.child(spec_name)
-#                     e.things = things
+                    things = library.things.child(spec_name) 
                     for thing_name, _code in things.items():
                         e.thing_name = thing_name
-                        e.id = '%s-%s-%s-%s-%s' % (repo_name, shelf_name, library_name, spec_name, thing_name)
+                        e.id = '%s-%s-%s-%s-%s' % (repo_name, shelf_name, 
+                                                   library_name, spec_name, thing_name)
                         yield deepcopy(e) 
     
 mcdp_load_all_main = LoadAll.get_sys_main()
