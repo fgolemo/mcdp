@@ -35,17 +35,17 @@ def check_render(env, template, res):
     
     # first try to render normally
     render_to_response(template, res, request=request)
-    # Then try to see if other params are necessary
-    for k in res:
-        res2 = dict(**res)
-        del res2[k]
-        try:
-            render_to_response(template, res, request=request)
-        except:
-            pass
-        else:
-            msg = 'I expect that removing the parameter %r would make %r fail.' % (k, template)
-            raise Exception(msg)
+#     # Then try to see if other params are necessary
+#     for k in res:
+#         res2 = dict(**res)
+#         del res2[k]
+#         try:
+#             render_to_response(template, res, request=request)
+#         except:
+#             pass
+#         else:
+#             msg = 'I expect that removing the parameter %r would make %r fail.' % (k, template)
+#             raise Exception(msg)
 
 
 @comptest
