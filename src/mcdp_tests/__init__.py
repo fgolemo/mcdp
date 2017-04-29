@@ -67,13 +67,14 @@ def jobs_comptests(context):
     from mcdp_library_tests import define_tests_for_mcdplibs
     define_tests_for_mcdplibs(c2)
 
-    c2 = context.child('mcdpweb')
-    from mcdp_web_tests.test_md_rendering import define_tests_mcdp_web
-    define_tests_mcdp_web(c2)
 
     if should_do_basic_tests():
         from mcdp_lang_tests.examples import define_tests
         define_tests(context)
+
+        c2 = context.child('mcdpweb')
+        from mcdp_web_tests.test_md_rendering import define_tests_mcdp_web
+        define_tests_mcdp_web(c2)
 
     # instantiation
     from comptests import jobs_registrar

@@ -42,6 +42,22 @@ def test_rendering_jinja_env(env):
     } 
     request = env['request']
     return render_to_response(template, res, request=request)    
+
+
+@comptest
+@with_pyramid_environment
+def test_rendering_confirm_bind(env):
+    logger.info('env: %s' % env)
+    template = get_template('confirm_bind.jinja2')
+    res = {
+        'static': '',
+        'url_edit': '',
+        'library_name': '',
+        'widget_name': '',
+    } 
+    request = env['request']
+    return render_to_response(template, res, request=request)    
+
         
 if __name__ == '__main__':
     run_module_tests()

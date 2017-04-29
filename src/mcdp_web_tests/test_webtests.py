@@ -21,7 +21,6 @@ from mcdp_web.main import WebApp
 from mcdp_web.resource_tree import MCDPResourceRoot
 from mcdp_web_tests.spider import Spider
 
-
 # do not make relative to start using python
 def create_empty_repo(d, bname):
     repo0 = Repo.init(d)
