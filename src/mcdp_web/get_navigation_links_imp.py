@@ -1,7 +1,6 @@
 from mcdp.constants import MCDPConstants
-from mcdp_library.specs_def import SPEC_VALUES, SPEC_POSETS, SPEC_TEMPLATES, SPEC_MODELS,\
-    specs
 from mcdp_utils_misc import natural_sorted
+from mcdp_library.specs_def import SPEC_MODELS, specs
 
 
 Privileges = MCDPConstants.Privileges
@@ -38,8 +37,7 @@ def get_navigation_links_context(e):
     if e.library is not None:
         
         VIEW_EDITOR = 'views/edit_fancy/'
-        VIEW_DELETE = ':delete'
-        VIEW_RENAME = ':rename'
+        VIEW_DELETE = ':delete' 
         VIEW_SYNTAX = 'views/syntax/'
         
         p = '/repos/{repo_name}/shelves/{shelf_name}/libraries/{library_name}/'
@@ -67,8 +65,7 @@ def get_navigation_links_context(e):
                 url0 =  library_url + spec_name + '/' + _ + '/'
                 url = url0 + VIEW_SYNTAX
                 url_edit = url0 + VIEW_EDITOR  
-                url_delete = url0 + VIEW_DELETE
-#                 url_rename = url0 + VIEW_RENAME   
+                url_delete = url0 + VIEW_DELETE 
                 url_rename = 'javascript:rename_thing(%r,%r)' % (spec_name, _)  
     
 #                 name = "Value: %s" % _
