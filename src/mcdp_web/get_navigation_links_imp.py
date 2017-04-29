@@ -2,7 +2,6 @@ from mcdp.constants import MCDPConstants
 from mcdp_utils_misc import natural_sorted
 from mcdp_library.specs_def import SPEC_MODELS, specs
 
-
 Privileges = MCDPConstants.Privileges
 
 def get_navigation_links_context(e):
@@ -51,7 +50,6 @@ def get_navigation_links_context(e):
             desc = dict(id=id_doc,id_document=id_doc, name=id_doc, url=url, current=False)
             d['documents'].append(desc)
 
-
         def list_spec(specname):
             return list(e.library.things.child(specname))
         
@@ -69,7 +67,7 @@ def get_navigation_links_context(e):
                 url_rename = 'javascript:rename_thing(%r,%r)' % (spec_name, _)  
     
 #                 name = "Value: %s" % _
-                name = '-'
+                name = _
                 desc = dict(id=_, name=name, url=url, current=is_current, 
                             url_edit=url_edit, url_delete=url_delete, url_rename=url_rename)
                 d[spec_name].append(desc)
