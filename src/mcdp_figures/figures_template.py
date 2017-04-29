@@ -1,3 +1,5 @@
+from mcdp_report.image_source import ImagesFromPaths
+
 from .figure_interface import MakeFigures
 from .formatters import GGFormatter
 
@@ -73,8 +75,9 @@ class EnclosedTemplate(GGFormatter):
             setattr(ndp, '_hack_force_enclose', True)
     
         images_paths = library.get_images_paths()
+        image_source = ImagesFromPaths(images_paths)
         gg = gvgen_from_ndp(ndp, style=self.style, direction=self.direction,
-                            images_paths=images_paths, yourname=yourname,
+                            image_source=image_source, yourname=yourname,
                             skip_initial=True)
     
         return gg

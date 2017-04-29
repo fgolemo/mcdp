@@ -1,9 +1,7 @@
 from collections import namedtuple
-from copy import deepcopy
-
 from contracts import contract
 from contracts.utils import raise_wrapped, indent, check_isinstance
-
+from copy import deepcopy
 from mcdp import logger
 from mcdp.exceptions import DPInternalError
 from mcdp_utils_misc import format_list, yaml_dump
@@ -33,6 +31,7 @@ def disk_events_from_data_event(disk_map, schema, data_rep, data_event):
     
     handlers = {
         DataEvents.leaf_set: disk_events_from_leaf_set,
+        DataEvents.hash_set: disk_events_from_hash_set,
         DataEvents.dict_setitem: disk_events_from_dict_setitem,
         DataEvents.dict_delitem: disk_events_from_dict_delitem,
         DataEvents.dict_rename: disk_events_from_dict_rename,
@@ -115,46 +114,36 @@ def change_was_inside_YAML(view, data_event, disk_map):
     else:
         return False, None
 
-#     
-# def disk_events_from_leaf_set_in_yaml(disk_map, view, _id, who, name, leaf, value, parent_with_yaml):
-#     p_schema = view._schema.get_descendant(parent_with_yaml)
-#     p_hint = disk_map.get_hint(p_schema)
-#     check_isinstance(p_hint, HintFileYAML)
-#     
-#     relative_url = name[len(parent_with_yaml):]
-#     msg = 'Inside yaml:  set %s.%s = %s' % (relative_url, leaf, value)
-#     logger.info(msg)
-#     
-#     parent_of_yaml = parent_with_yaml[:-1]
-#     parent_of_yaml_schema = view._schema.get_descendant(parent_of_yaml)
-#     parent_of_yaml_hint = disk_map.get_hint(parent_of_yaml_schema)
-#     dirname = disk_map.dirname_from_data_url_(view._schema, parent_of_yaml)
-#     filename = parent_of_yaml_hint.filename_for_key(parent_with_yaml[-1])
-#     
-#     # this is the current data to go in yaml
-#     data_view = get_view_node(view, parent_with_yaml)
-#     # make a copy
-#     data_view._data = deepcopy(data_view._data)
-#     # now make the change
-#     _data= get_view_node(data_view, relative_url)._data
-#     _data[leaf] = value
-#     fh = disk_map.create_hierarchy_(p_schema, data_view._data)
-#     check_isinstance(fh, ProxyFile)
-#     contents = fh.contents
-#     disk_event = disk_event_file_modify(_id, who, dirname, filename, contents)
-#     return [disk_event]
-#  
+@contract(value=dict)
+def disk_events_from_hash_set(disk_map, view, _id, who, name, value):
+    v = view.get_descendant(name)
+    from .memdata_events import event_dict_setitem, event_dict_delitem
+    # let's break it down to delete keys and add keys
+    equiv_events = []
+    # let's work on a copy of the data
+    data = deepcopy(view._data)
+    # delete the ones that should not be there
+    for k in v:
+        if not k in value:
+            logger.debug('Deleting element k = %r' % k)
+            e = event_dict_delitem(name=name, key=k, _id=_id,  who=who)
+            # simulate
+            del data[k]
+            equiv_events.append(e)
+    # add the ones that
+    for k in value:
+        if (not k in v) or (v[k] != value[k]):
+            logger.debug('Setting element k = %r' % k)
+            e = event_dict_setitem(name=name, key=k, value=value[k], _id=_id, who=who)
+            data[k] = value
+            equiv_events.append(e)
+    de = []
+    for e in equiv_events:
+        des = disk_events_from_data_event(disk_map, view._schema, view._data, e)
+        de.extend(des)
+    return de
 
 def disk_events_from_leaf_set(disk_map, view, _id, who, name, leaf, value):
-    # check if it is contained in any dir that has HintFileYAML
-#     logger.debug('leaf_set %s . %s = %s' % (parent, name, value))
-#     for i in range(len(name)+1):
-#         p = name[:i]
-#         p_schema = view._schema.get_descendant(p)
-#         p_hint = disk_map.get_hint(p_schema)
-#         if isinstance(p_hint, HintFileYAML):
-#             return disk_events_from_leaf_set_in_yaml(disk_map, view, _id, who, name, leaf, value, p)
-    
     view_parent = get_view_node(view, name)
     schema_parent = view_parent._schema
     check_isinstance(schema_parent, SchemaContext)
@@ -196,43 +185,10 @@ def iterate_prefix(disk_map, view, name):
         parent_schema = view._schema.get_descendant(prefix[:-1])
         parent_hint = disk_map.get_hint(parent_schema)
         yield PP(schema=schema, hint=hint, prefix=prefix, parent_hint=parent_hint, parent_schema=parent_schema)
-# 
-# def is_inside_yaml(disk_map, view, name):
-#     ''' Checks if we are inside a YAML file '''
-#     for pp in iterate_prefix(disk_map, view, name):
-#         if isinstance(pp.hint, HintFileYAML):
-#             return pp
-#     else:
-#         return None
+ 
 
 def disk_events_from_list_append(disk_map, view, _id, who, name, value):
-    logger.debug('list append to %s for value %s' % (name, value))
-#     pp = is_inside_yaml(disk_map, view, name)
-#     if pp is not None:
-#         logger.debug('we are inside YAML --  append to %s for value %s' % (name, value))
-#         # copy the entire data:
-#         logger.debug('pp.prefix = %s' % str(pp.prefix))
-#         data_relative_to_yaml = name[len(pp.prefix):]
-#         logger.debug('relative to prefix: %s' % data_relative_to_yaml)
-#         data_at_yaml = view.get_descendant(pp.prefix)
-#         data_at_yaml_copy = data_at_yaml.deepcopy()
-#         data_at_yaml_copy.set_root()
-# #         logger.debug('data at YAML:\n%s' % yaml_dump(data_at_yaml_copy._data))
-#         # apply the event
-#         name2 = name[len(pp.prefix):]
-#         event2 = event_list_append(name=name2, value=value, _id='None', who=None)
-#         event_interpret_(data_at_yaml_copy, event2)
-#         fh = disk_map.create_hierarchy_(pp.schema, data_at_yaml_copy._data)
-#         check_isinstance(fh, ProxyFile)
-#         contents = fh.contents
-#         dirname = disk_map.dirname_from_data_url_(view._schema, pp.prefix[:-1])
-#         
-#         filename = pp.parent_hint.filename_for_key(pp.prefix[-1]) 
-#         disk_event = disk_event_file_modify(_id, who, dirname, filename, contents)
-#         logger.info('name %s -> dirname = %s, filename = %s' % (name, dirname, filename))
-#         return [disk_event]
-#         
-         
+    logger.debug('list append to %s for value %s' % (name, value)) 
     view_parent = get_view_node(view, name)
     schema_parent = view_parent._schema
     check_isinstance(schema_parent, SchemaList)
@@ -246,9 +202,13 @@ def disk_events_from_list_append(disk_map, view, _id, who, name, value):
             contents = sub.contents
             disk_event = disk_event_file_create(_id, who, dirname, filename, contents)
             return [disk_event]
-        else: 
+        elif isinstance(sub, ProxyDirectory):
+            # create hierarchy
+            events = list(disk_events_for_creating(_id, who, sub, tuple(dirname) + (filename,)))
+            e = disk_event_disk_event_group(_id, who, events=events)
+            return [e]
+        else:
             assert False 
-
     else:
         raise NotImplementedError(hint)
 
@@ -264,6 +224,7 @@ def disk_events_from_list_insert(disk_map, view, _id, who, name, index, value):
         # TODO: what about it is not a list of files, but directories?
 #         dirname = disk_map.dirname_from_data_url(name)
         dirname = disk_map.dirname_from_data_url_(view._schema, name)
+        sub = disk_map.create_hierarchy_(schema_parent.prototype, value)
         events = []
         # first rename everything to i+1
         to_rename = []
@@ -274,7 +235,10 @@ def disk_events_from_list_insert(disk_map, view, _id, who, name, index, value):
             i2 = i + 1
             filename1 = hint.filename_for_key(str(i))
             filename2 = hint.filename_for_key(str(i2))
-            dr = disk_event_file_rename(_id, who, dirname, filename1, filename2) 
+            if isinstance(sub, ProxyFile):
+                dr = disk_event_file_rename(_id, who, dirname, filename1, filename2)
+            else:
+                dr = disk_event_dir_rename(_id, who, dirname, filename1, filename2)
             events.append(dr)
 #         logger.debug('Renaming events:\n %s' % yaml_dump(events))
         # now create the file
@@ -284,8 +248,10 @@ def disk_events_from_list_insert(disk_map, view, _id, who, name, index, value):
             creation = disk_event_file_create(_id, who, dirname, filename, sub.contents)
             events.append(creation)
         else:
-            raise NotImplementedError()
-        
+            filename = hint.filename_for_key(str(index))
+            es = disk_events_for_creating(_id, who, sub, tuple(dirname) + (filename,))
+            events.extend(es)
+
         e = disk_event_disk_event_group(_id, who, events)
         return [e]
     else:
@@ -298,17 +264,32 @@ def disk_events_from_list_delete(disk_map, view, _id, who, name, index):
     hint = disk_map.get_hint(schema_parent)
     length = len(view_parent._data)
     if isinstance(hint, HintDir):
-        # TODO: what about it is not a list of files, but directories? 
         dirname = disk_map.dirname_from_data_url_(view._schema, name)
         filename = hint.filename_for_key(str(index))
-        disk_event = disk_event_file_delete(_id, who, dirname, filename)
-        events = [disk_event]
-        for i in range(index+1, length):
-            i2 = i - 1
-            filename1 = hint.filename_for_key(str(i))
-            filename2 = hint.filename_for_key(str(i2))
-            dr = disk_event_file_rename(_id, who, dirname, filename1, filename2) 
-            events.append(dr)
+        # TODO: what about it is not a list of files, but directories?
+        # are we generating folders or files?
+
+        sub = disk_map.create_hierarchy_(schema_parent.prototype, view_parent._data[index])
+        doing_files = isinstance(sub, ProxyFile)
+
+        if doing_files:
+            disk_event = disk_event_file_delete(_id, who, dirname, filename)
+            events = [disk_event]
+            for i in range(index+1, length):
+                i2 = i - 1
+                filename1 = hint.filename_for_key(str(i))
+                filename2 = hint.filename_for_key(str(i2))
+                dr = disk_event_file_rename(_id, who, dirname, filename1, filename2) 
+                events.append(dr)
+        else:
+            disk_event = disk_event_dir_delete(_id, who, dirname, filename)
+            events = [disk_event]
+            for i in range(index+1, length):
+                i2 = i - 1
+                filename1 = hint.filename_for_key(str(i))
+                filename2 = hint.filename_for_key(str(i2))
+                dr = disk_event_dir_rename(_id, who, dirname, filename1, filename2) 
+                events.append(dr)
         e = disk_event_disk_event_group(_id, who, events)
         return [e]
     else:

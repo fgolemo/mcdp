@@ -1,7 +1,7 @@
 from collections import OrderedDict
 from copy import deepcopy
 
-from contracts import contract
+from contracts import contract, new_contract
 from contracts.utils import check_isinstance, indent, raise_wrapped, raise_desc
 
 from mcdp import MCDPConstants
@@ -12,12 +12,20 @@ from mcdp_utils_misc import format_list, yaml_dump
 from .memdataview import ViewBase
 from .memdataview_exceptions import InvalidOperation
 
+@new_contract
+def valid_name(x):
+    ''' A valid name is a sequence of str or integer '''
+    check_isinstance(x, (tuple, list))
+    for _ in x:
+        check_isinstance(_, (str, int))
 
 class DataEvents(object):
     # All events have a 'name' field
     # For simple values: int, string, float, date
     leaf_set = 'leaf_set' # leaf_set <name> <leaf> <value> 
+    hash_set = 'hash_set' # hash_set <name> <struct-value>
     struct_set = 'struct_set' # struct_set <name> <struct-value>
+    list_set = 'list_set' # struct_set <name> <struct-value>
     increment = 'increment' # increment <name> <value>
     list_append = 'list_append' # list_append <name>[a list] <value>
     list_delete = 'list_delete' # list_delete <name>[a list] <index> # by index
@@ -29,11 +37,11 @@ class DataEvents(object):
     dict_setitem = 'dict_setitem' # dict_setitem <name> <key> <value>
     dict_delitem = 'dict_delitem' # dict_delitem <name> <key>
     dict_rename = 'dict_rename' # dict_rename <name> <key> <key2>
-    all_events = [leaf_set, 
+    all_events = [leaf_set, struct_set, list_set, hash_set,
                   struct_set, 
                   increment, 
                   list_append, list_insert, list_setitem, list_delete, list_remove,
-                  set_add, set_remove,
+                  set_add, set_remove, 
                   dict_setitem, dict_delitem, dict_rename]
 
 
@@ -54,7 +62,7 @@ def event_add_prefix(prefix, event):
 #     else:
 #     return add_prefix_to(prefix, event, 'name')
     
-@contract(name='seq(str)')
+@contract(name='valid_name')
 def get_view_node(view, name):
     v = view
     while len(name):
@@ -62,7 +70,7 @@ def get_view_node(view, name):
         name = name[1:]
     return v
 
-@contract(name='seq(str)', leaf=str)
+@contract(name='valid_name', leaf=str)
 def event_leaf_set(name, leaf, value, **kwargs):
     arguments = dict(name=name, leaf=leaf, value=value)
     return event_make(event_name=DataEvents.leaf_set, arguments=arguments, **kwargs)
@@ -87,34 +95,61 @@ def get_the_list(view, name):
     check_isinstance(v, ViewList0)
     return v
 
-@contract(name='seq(str)')
+@contract(name='valid_name')
+def event_list_set(name, value, **kwargs):
+    name = list(name)
+    arguments = dict(name=name, value=value)
+    return event_make(event_name=DataEvents.list_set, arguments=arguments, **kwargs)
+
+def event_list_set_interpret(view, name, value):
+    raise NotImplementedError()
+
+@contract(name='valid_name')
+def event_hash_set(name, value, **kwargs):
+    name = list(name)
+    arguments = dict(name=name, value=value)
+    return event_make(event_name=DataEvents.hash_set, arguments=arguments, **kwargs)
+
+def event_hash_set_interpret(view, name, value):
+    # remove all the extra keys
+    check_isinstance(value, dict)
+    v = view.get_descendant(name)
+    d = v._data
+    for k in v:
+        if not k in v:
+            del v[k]
+    for k in value:
+        d[k] = value[k]
+    
+
+@contract(name='valid_name')
 def event_struct_set(name, value, **kwargs):
     name = list(name)
     arguments = dict(name=name, value=value)
     return event_make(event_name=DataEvents.struct_set, arguments=arguments, **kwargs)
 
-def event_struct_set_interpret(view, arguments):
+def event_struct_set_interpret(view, name, value):
     raise NotImplementedError()
 
-@contract(name='seq(str)')
+@contract(name='valid_name')
 def event_increment(name, value, **kwargs):
     name = list(name)
     arguments = dict(name=name, value=value)
     return event_make(event_name=DataEvents.increment, arguments=arguments, **kwargs)
 
-def event_increment_interpret(view, arguments):
+def event_increment_interpret(view, name, value):
     raise NotImplementedError()
 
-@contract(name='seq(str)')
+@contract(name='valid_name')
 def event_set_add(name, value, **kwargs):
     name = list(name)
     arguments = dict(name=name, value=value)
     return event_make(event_name=DataEvents.set_add, arguments=arguments, **kwargs)
 
-def event_set_add_interpret(view, arguments):
+def event_set_add_interpret(view, name, value):
     raise NotImplementedError()
 
-@contract(name='seq(str)')
+@contract(name='valid_name')
 def event_set_remove(name, value, **kwargs):
     name = list(name)
     arguments = dict(name=name, value=value)
@@ -123,7 +158,7 @@ def event_set_remove(name, value, **kwargs):
 def event_set_remove_interpret(view, name, value):
     raise NotImplementedError()
 
-@contract(name='seq(str)')
+@contract(name='valid_name')
 def event_list_append(name, value, **kwargs):
     arguments = dict(name=name, value=value)
     return event_make(event_name=DataEvents.list_append, arguments=arguments, **kwargs)
@@ -133,7 +168,7 @@ def event_list_append_interpret(view, name, value):
     l.check_can_write()
     l.append(value)
 
-@contract(name='seq(str)')
+@contract(name='valid_name')
 def event_list_setitem(name, index, value, **kwargs):
     arguments = dict(name=name,index=index, value=value)
     return event_make(event_name=DataEvents.list_setitem, arguments=arguments, **kwargs)
@@ -143,7 +178,7 @@ def event_list_setitem_interpret(view, name, index, value):
     l.check_can_write()
     l[index] = value
     
-@contract(name='seq(str)')
+@contract(name='valid_name')
 def event_list_delete(name, index, **kwargs):
     name = list(name)
     arguments = dict(name=name, index=index)
@@ -154,7 +189,7 @@ def event_list_delete_interpret(view, name, index):
     l.check_can_write()
     l.delete(index)
 
-@contract(name='seq(str)')
+@contract(name='valid_name')
 def event_list_insert(name, index, value, **kwargs):
     name = list(name)
     arguments = dict(name=name, index=index, value=value)
@@ -165,7 +200,7 @@ def event_list_insert_interpret(view, name, index, value):
     l.check_can_write()
     l.insert(index, value)
 
-@contract(name='seq(str)')
+@contract(name='valid_name')
 def event_list_remove(name, value, **kwargs):
     name = list(name)
     arguments = dict(name=name, value=value)
@@ -176,7 +211,7 @@ def event_list_remove_interpret(view, name, value):
     l.check_can_write()
     l.remove(value)
 
-@contract(name='seq(str)')
+@contract(name='valid_name')
 def event_dict_setitem(name, key, value, **kwargs):
     name = list(name)
     arguments = dict(name=name, key=key, value=value)
@@ -250,6 +285,8 @@ def event_interpret_(view, event):
     fs = {
         DataEvents.leaf_set: event_leaf_set_interpret,
         DataEvents.struct_set: event_struct_set_interpret,
+        DataEvents.list_set: event_list_set_interpret,
+        DataEvents.hash_set: event_hash_set_interpret,
         DataEvents.increment: event_increment_interpret,
         DataEvents.list_append: event_list_append_interpret,
         DataEvents.list_remove: event_list_remove_interpret,

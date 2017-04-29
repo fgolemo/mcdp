@@ -7,7 +7,7 @@ from pyramid.httpexceptions import HTTPException, HTTPFound
 from pyramid.response import Response
 from pyramid.security import forget
 
-from mcdp import MCDPConstants,  logger, __version__
+from mcdp import MCDPConstants, logger, __version__
 from mcdp_utils_misc import duration_compact,  format_list
 
 
@@ -94,7 +94,6 @@ def add_other_fields(self, res, request, context):
     def library_url2(repo_name, shelf_name, library_name): 
         url = '{root}/repos/{repo_name}/shelves/{shelf_name}/libraries/{library_name}'
         return url.format(root=e.root,  repo_name=repo_name, shelf_name=shelf_name, library_name=library_name)
-
 
     def thing_url(t):
         url = '{root}/repos/{repo_name}/shelves/{shelf_name}/libraries/{library_name}/{spec_name}/%s' % t

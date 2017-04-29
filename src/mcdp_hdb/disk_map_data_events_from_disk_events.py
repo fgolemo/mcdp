@@ -71,8 +71,18 @@ def data_events_from_disk_event_group(schema, disk_map, disk_rep, disk_events_qu
     if not events:
         msg = 'Group with no events?'
         raise ValueError(msg)
-    es, _consumed = data_events_from_disk_event_queue(disk_map, schema, disk_rep, list(events))
-    return es, []
+    events0 = list(events)
+    
+    res = []
+    while events0:
+        es, _consumed = data_events_from_disk_event_queue(disk_map, schema, disk_rep, events0)
+        res.append(es)
+    
+    if len(res) == 1:
+        return res[0], []
+    else:
+        raise NotImplementedError()
+        return es, []   
     
 def data_events_from_dir_create(schema, disk_map, disk_rep, disk_events_queue, _id, who, dirname, name):
     parent, schema_parent, hint = get_parent_data(schema, disk_map, dirname, name)    
@@ -81,9 +91,10 @@ def data_events_from_dir_create(schema, disk_map, disk_rep, disk_events_queue, _
         if isinstance(hint, HintDir):
             key = hint.key_from_filename(name)
             schema_child = schema_parent.prototype
+            # XXX: this is the same as below
             # get more events that create file in this directory
             related_disk_events = get_disk_events_for_dir(dirname, disk_events_queue)
-            
+            logger.warning('Adding key %r, related disk events:\n%s' % (key, yaml_dump(related_disk_events)))
             disk_rep = deepcopy(disk_rep)
             disk_rep.get_descendant(dirname).dir_create(name)
             for re in related_disk_events:
@@ -93,6 +104,35 @@ def data_events_from_dir_create(schema, disk_map, disk_rep, disk_events_queue, _
 
             e = event_dict_setitem(name=parent, key=key, value=value, _id=_id, who=who)
             return [e], related_disk_events
+    elif isinstance(schema_parent, SchemaList):
+        # a new directory was created
+        key = hint.key_from_filename(name)
+        index = int(key)
+        prototype = schema_parent.prototype
+        logger.debug('Created key %r' % key)
+        # we expect many more events for the creation of this directory
+        # XXX: should be dirname + index???
+        related_disk_events = get_disk_events_for_dir(dirname, disk_events_queue) # XXX
+        logger.debug('Creating directory, related: \n %s'  % yaml_dump(related_disk_events))
+        # we apply all of them to a copy of the disk rep
+        # (XXX here we are copying the entire db)
+        disk_rep = deepcopy(disk_rep)
+        # create the dir
+        disk_rep.get_descendant(dirname).dir_create(name)
+        # apply the others
+        for re in related_disk_events:
+            disk_event_interpret(disk_rep, re)
+        # get the folder just created
+        disk_rep_child = disk_rep.get_descendant(dirname + (name,))
+        # interpret it
+        value = disk_map.interpret_hierarchy_(prototype, disk_rep_child)
+
+        # now we need to decide whether this is an append or an insert
+        is_append = True # FIXME
+        if is_append: # XXX
+            e = event_list_append(name=parent, value=value, _id=_id, who=who)
+        return [e], related_disk_events
+    
     msg = 'Not implemented\n %s\nwith\n%s' % (schema_parent, hint)
     raise NotImplementedError(msg)
 
@@ -130,18 +170,51 @@ def data_events_from_dir_rename(schema, disk_map, disk_rep, disk_events_queue, _
             key2 = hint.key_from_filename(name2)
             e = event_dict_rename(name=parent, key=key, key2=key2, _id=_id, who=who)
             return [e], []
+    if isinstance(schema_parent, SchemaList):
+        if isinstance(hint, HintDir):
+            key = hint.key_from_filename(name)
+            key2 = hint.key_from_filename(name2)
+            index = int(key)
+            index2 = int(key2)
+            logger.debug('renaming %s to %s' % (index, index2))
+            # this is now an operation with insert index
+            logger.debug('Next events:\n%s'%yaml_dump(disk_events_queue))
+            raise NotImplementedError()
+#             consumed = []
+#             while disk_events_queue:
+#                 nexte = disk_events_queue.pop(0)
+#                 consumed.append(nexte)
+#                 if nexte['operation'] == DataEvents.dir_create:
+#                     assert nexte['arguments']['name'] == name
+#                     contents = nexte['arguments']['contents']
+#                     kpkwdopk
+#                     value = disk_map.interpret_hierarchy_(schema_parent.prototype, ProxyFile(contents))
+#                     e = event_list_insert(_id=_id, who=who, name=parent, index=index, value=value)
+#                     return [e], consumed
+#             
+#             e = event_dict_rename(name=parent, key=key, key2=key2, _id=_id, who=who)
+#             return [e], []
+        
     msg = 'Not implemented %s with %s' % (schema_parent, hint)
     raise NotImplementedError(msg)
 
 def data_events_from_dir_delete(schema, disk_map, disk_rep, disk_events_queue, _id, who, dirname, name):  # @UnusedVariable
     parent, schema_parent, hint = get_parent_data(schema, disk_map, dirname, name)
     
-    disk_rep = deepcopy(disk_rep) 
+#     disk_rep = deepcopy(disk_rep) 
     if isinstance(schema_parent, SchemaHash):
         if isinstance(hint, HintDir):
             key = hint.key_from_filename(name)
+            logger.warning('delete key %r' % key)
             e = event_dict_delitem(name=parent, key=key, _id=_id, who=who)
             return [e], []
+    elif isinstance(schema_parent, SchemaList):
+        if isinstance(hint, HintDir):
+            key = hint.key_from_filename(name)
+            index = int(key)
+            e = event_list_delete(name=parent, index=index, _id=_id, who=who)
+            return [e], []
+        
     msg = 'Not implemented %s with %s' % (schema_parent, hint)
     raise NotImplementedError(msg)
 

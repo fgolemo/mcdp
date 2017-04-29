@@ -6,6 +6,10 @@ from mcdp_utils_misc.my_yaml import yaml_dump
 
 __all__ = ['assert_valid_who']
 
+UNKNOWN_HOST = 'unknown'
+UNKNOWN_INSTANCE = 'unknown'
+UNKNOWN_ACTOR = 'unknown'
+
 @new_contract
 def assert_valid_who(who):
     '''
@@ -32,6 +36,8 @@ def assert_valid_who(who):
         check_isinstance(actor, str)
         if actor == 'system':
             # ok
+            pass
+        elif actor in [UNKNOWN_ACTOR]:
             pass
         elif actor.startswith('user:'):
             # ok

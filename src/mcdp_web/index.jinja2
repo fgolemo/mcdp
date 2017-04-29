@@ -68,8 +68,6 @@
 {% endfor %}
 </ul> -->
 
-
-
 </div>
 
 <!--
@@ -82,11 +80,13 @@
 <li><a href="/docs/TODO/">TODO</a></li>
 </ul>
 -->
+{% if changes %}
 <h3>Last changes</h3>
 <div class='changes'>
 {%  from 'list_changes.jinja2' import list_changes with context %}
 {{list_changes(changes)}}
 </div>
+{% endif %}
 
 
 
