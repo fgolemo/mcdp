@@ -1,7 +1,16 @@
 # -*- coding: utf-8 -*-
 from ConfigParser import RawConfigParser
 from collections import OrderedDict
+from contracts.utils import indent, check_isinstance
 import datetime
+from mcdp import MCDPConstants
+from mcdp import logger
+from mcdp.exceptions import DPSemanticError, DPSyntaxError
+from mcdp_docs import render_complete
+from mcdp_hdb.schema import SchemaContext, SchemaHash
+from mcdp_hdb_mcdp.host_instance import HostInstance
+from mcdp_library import MCDPLibrary
+from mcdp_utils_misc import duration_compact, dir_from_package_name, format_list, yaml_load
 import os
 import sys
 import time
@@ -9,7 +18,7 @@ import traceback
 import urlparse
 from wsgiref.simple_server import make_server
 
-from contracts.utils import indent, check_isinstance
+from contracts import contract
 import git.cmd  # @UnusedImport
 from pyramid.authentication import AuthTktAuthenticationPolicy
 from pyramid.authorization import ACLAuthorizationPolicy
@@ -21,20 +30,13 @@ from pyramid.security import NO_PERMISSION_REQUIRED
 from pyramid.session import SignedCookieSessionFactory
 from quickapp import QuickAppBase
 
-from mcdp import MCDPConstants
-from mcdp import logger
-from mcdp.exceptions import DPSemanticError, DPSyntaxError
-from mcdp_docs import render_complete
-from mcdp_hdb_mcdp.host_instance import HostInstance
-from mcdp_library import MCDPLibrary
-from mcdp_utils_misc import duration_compact, dir_from_package_name, format_list, yaml_load
-
-from .auhtomatic_auth import get_authomatic_config_, view_authomatic_
-from .auhtomatic_auth import view_confirm_bind_,\
+from .auhtomatic_auth import get_authomatic_config_, view_authomatic_, view_confirm_bind_,\
     view_confirm_creation_similar_, view_confirm_creation_,\
     view_confirm_creation_create_, view_confirm_bind_bind_
 from .confi import describe_mcdpweb_params, parse_mcdpweb_params_from_dict
+from .context_from_env import library_from_env
 from .editor_fancy import AppEditorFancyGeneric
+from .environment import Environment
 from .environment import cr2e
 from .images.images import WebAppImages, get_mime_for_format
 from .interactive.app_interactive import AppInteractive
@@ -42,13 +44,12 @@ from .qr.app_qr import AppQR
 from .resource_tree import MCDPResourceRoot, ResourceLibraries, ResourceLibrary,  ResourceLibraryRefresh, ResourceRefresh, ResourceExit, ResourceLibraryDocRender, ResourceLibraryAsset, ResourceRobots, ResourceShelves, ResourceShelvesShelfUnsubscribe, ResourceShelvesShelfSubscribe, ResourceExceptionsFormatted, ResourceExceptionsJSON, ResourceShelf, ResourceLibrariesNewLibname, Resource, context_display_in_detail, ResourceShelfInactive, ResourceThingDelete, ResourceChanges, ResourceTree, ResourceThing, ResourceRepos, ResourceRepo, ResourceThings, ResourceLibraryInteractive, ResourceThingRename
 from .resource_tree import ResourceAllShelves, ResourceShelfForbidden,\
     ResourceShelfNotFound, ResourceRepoNotFound, ResourceLibraryAssetNotFound,\
-    ResourceLibraryDocNotFound, ResourceNotFoundGeneric, ResourceAbout
-from .resource_tree import ResourceAuthomaticProvider, ResourceListUsers,\
-    ResourceListUsersUser, ResourceUserPicture
-from .resource_tree import ResourceConfirmBind,\
+    ResourceLibraryDocNotFound, ResourceNotFoundGeneric, ResourceAbout, ResourceAuthomaticProvider, ResourceListUsers,\
+    ResourceListUsersUser, ResourceUserPicture,  ResourceConfirmBind,\
     ResourceConfirmCreationSimilar, ResourceConfirmCreation,\
-    ResourceConfirmCreationCreate, ResourceConfirmBindBind
-from .resource_tree import ResourceUserImpersonate
+    ResourceConfirmCreationCreate, ResourceConfirmBindBind, ResourceUserImpersonate, ResourceDBView, ResourceSearchPage,\
+    ResourceSearchPageQuery
+from .search import AppSearch
 from .security import AppLogin, groupfinder
 from .sessions import Session
 from .solver.app_solver import AppSolver
@@ -59,11 +60,6 @@ from .utils.response import response_data
 from .utils0 import add_other_fields, add_std_vars_context
 from .utils0 import add_std_vars_context_no_redir
 from .visualization.app_visualization import AppVisualization
-from mcdp_web.environment import Environment
-from contracts import contract
-from mcdp_web.context_from_env import library_from_env
-from mcdp_web.resource_tree import ResourceDBView
-from mcdp_hdb.schema import SchemaContext, SchemaHash
 
 
 Privileges = MCDPConstants.Privileges
@@ -84,7 +80,7 @@ git.cmd.log.disabled = True
 class WebApp(AppVisualization, AppStatus,
              AppQR, AppSolver, AppInteractive,
              AppSolver2, AppEditorFancyGeneric, WebAppImages,
-             AppLogin):
+             AppLogin, AppSearch):
     
     singleton = None
     
@@ -606,6 +602,9 @@ class WebApp(AppVisualization, AppStatus,
         config.add_view(self.view_thing_rename, context=ResourceThingRename)
         config.add_view(self.view_thing, context=ResourceThing)
         config.add_view(self.view_picture, context=ResourceUserPicture)
+
+        config.add_view(self.view_search, http_cache=0, context=ResourceSearchPage, renderer='search.jinja2')
+        config.add_view(self.view_search_query, http_cache=0, context=ResourceSearchPageQuery, renderer='json')
         
         config.add_view(self.view_confirm_bind, http_cache=0, context=ResourceConfirmBind, renderer='confirm_bind.jinja2', permission=NO_PERMISSION_REQUIRED)
         config.add_view(self.view_confirm_bind_bind, http_cache=0, context=ResourceConfirmBindBind, renderer='confirm_bind_bind.jinja2', permission=NO_PERMISSION_REQUIRED)

@@ -155,6 +155,7 @@ class MCDPResourceRoot(Resource):
             'confirm_creation': ResourceConfirmCreation(),
             'confirm_creation_create': ResourceConfirmCreationCreate(),
             'db_view': ResourceDBView(),
+            'search': ResourceSearchPage(),
         }
 
 class ResourceConfirmBind(Resource): pass
@@ -166,7 +167,15 @@ class ResourceConfirmCreationCreate(Resource): pass
 class ResourceDBView(Resource):
     pass
 
+class ResourceSearchPage(Resource):
+    def get_subs(self):
+        r = {}
+        r[':query'] = ResourceSearchPageQuery()
+        return r  
 
+class ResourceSearchPageQuery(): pass
+        
+         
 class ResourceAbout(Resource): pass
 class ResourceTree(Resource): pass
 
