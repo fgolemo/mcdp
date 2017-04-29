@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 from collections import namedtuple
+from contracts import contract
 from copy import deepcopy
 from mcdp.exceptions import MCDPException, DPSyntaxError, DPSemanticError,\
     DPNotImplementedError
@@ -17,7 +18,6 @@ from quickapp import QuickApp
 
 from .host_instance import HostInstance
 from .library_view import TheContext
-from contracts import contract
 
 
 __all__ = [
@@ -47,7 +47,7 @@ class LoadAll(QuickApp):
         
         define_load_all_jobs(context, dirname=dirname, outdir=outdir, name_filter=_filter, errors_only=errors_only)
         
-@contract(name_filte='None|str', errors_only=bool, outdir=str, dirname=str)
+@contract(name_filter='None|str', errors_only=bool, outdir=str, dirname=str)
 def define_load_all_jobs(context, dirname, outdir, name_filter=None, errors_only=False):
     if not os.path.exists(outdir):
         os.makedirs(outdir)
