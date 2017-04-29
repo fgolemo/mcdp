@@ -136,7 +136,7 @@ def check_translation_diskrep_to_memdata(schema, disk_rep0, disk_events, disk_re
         # tmp 
         if not evs:
             msg = 'The disk event resulted in 0 data events.'
-            msg += '\n' + indent(yaml_dump(disk_events[0]), ' disk_event ')
+            msg += '\n' + indent(yaml_dump(disk_events0[0]), ' disk_event ')
             raise Exception(msg)
         
         write_file(i, 'c-disk_event-consumed', yaml_dump(disk_events_consumed))
