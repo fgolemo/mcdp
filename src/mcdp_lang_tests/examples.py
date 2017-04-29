@@ -8,8 +8,7 @@ from mcdp_lang.syntax import Syntax
 from mcdp_lang_tests.utils import (assert_parsable_to_connected_ndp_fn,
     assert_parsable_to_unconnected_ndp_fn, assert_semantic_error_fn,
     assert_syntax_error_fn, assert_not_implemented_error_fn) 
-from mcdp_utils_misc import dir_from_package_name
-from mcdp_utils_misc.locate_files_imp import locate_files
+from mcdp_utils_misc import dir_from_package_name, locate_files
 
 
 def get_marked_tests(filename):
@@ -68,7 +67,6 @@ def test_one(test, filename):
 
 
 def test_report_dp1(filename, outdir, basename):
-
     ndp = parse_ndp_filename(filename)
     dp = ndp.get_dp()
     from mcdp_report.report import report_dp1
@@ -151,13 +149,13 @@ def define_tests(context):
             found.add(orig)
             return orig
 
-    if False:
-        folder = os.path.join(dir_from_package_name('mocdp'), '../../libraries')
-        examples2 = list(locate_files(folder, '*.mcdp'))
-        print('Other files found: %s' % examples2)
-        filenames.extend(examples2)
-    else:
-        examples2 = []
+#     if False:
+#         folder = os.path.join(dir_from_package_name('mocdp'), '../../libraries')
+#         examples2 = list(locate_files(folder, '*.mcdp'))
+#         print('Other files found: %s' % examples2)
+#         filenames.extend(examples2)
+#     else:
+    examples2 = []
 
     for f in filenames:
 
@@ -172,14 +170,4 @@ def define_tests(context):
         else:
             tests = get_marked_tests(f)
         define_test_for(context, f, basename, tests)
-
-#     filenames = []
-#     filenames.extend(locate_files(folder_notok, '*.mcdp'))
-
-#     context = context.child('notok')
-#     for f in filenames:
-#         basename = os.path.splitext(os.path.basename(f))[0]
-#         tests = get_marked_tests(f)
-#         define_test_for(context, f, basename, tests, known_failure=True)
-
-
+ 

@@ -27,10 +27,10 @@ mcdp {
   maintenance ≽ 1 []
   cost ≽ 100 &#36;
 
-  required mass ≽ 
+  required mass ≽
     Uncertain(provided capacity/120 Wh/kg ,
               provided capacity/100 Wh/kg )
-  
+
 }
 </pre>
 
@@ -39,19 +39,17 @@ and use it inside:
 
 <pre class='mcdp' id='AE1' label='AE1.mcdp'>
 specialize [
-  Battery: `BatteryUncertain, 
-  Actuation: `droneD_complete_v2.actuation,
+  Battery: `BatteryUncertain,
+  Actuation: `droneD_complete_v2.Actuation,
   PowerApprox: `PowerApprox
-] 
+]
 `ActuationEnergeticsTemplate
 </pre>
 
 <!-- <render class='ndp_graph_enclosed'>`AE1</render> -->
 
- 
+
 <!-- <pre class='print_mcdp'>approx_lower(5, `AE1)</pre> -->
 
 <pre class='print_value'>solve(⟨10 minutes, 0g, 0W, 500[], 0 m/s⟩,approx_lower(5, `AE1))</pre>
 <pre class='print_value'>solve(⟨10 minutes, 0g, 0W, 500[], 0 m/s⟩,approx_upper(5, `AE1))</pre>
-
-

@@ -11,11 +11,11 @@ from mcdp_library import Librarian
 from mcdp_posets import (NotLeq, UpperSets,
                          express_value_in_isomorphic_space, get_types_universe)
 from mcdp_posets import LowerSets
+from mcdp_report.image_source import ImagesFromPaths
 from mocdp.comp.recursive_name_labeling import (get_imp_as_recursive_dict,
                                                 get_labelled_version, ndp_make)
 
 from .utils_mkdir import mkdirs_thread_safe
-from mcdp_report.image_source import ImagesFromPaths
 
 
 # from mcdp_dp.solver_iterative import solver_iterative

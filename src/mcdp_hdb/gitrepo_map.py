@@ -75,8 +75,7 @@ def gitrep_from_diskrep(disk_rep, where=None, branch=None):
     
     if repo.untracked_files: 
         repo.index.add(repo.untracked_files)
-     
-    
+
     message = "gitrep_from_diskrep(%s)" % where
     repo.index.commit(message, author=author, committer=author)
     return repo

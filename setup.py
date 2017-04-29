@@ -1,5 +1,7 @@
-from setuptools import find_packages, setup
 import os
+
+from setuptools import find_packages, setup
+
 
 def get_version(filename):
     import ast
@@ -86,7 +88,7 @@ setup(name=name,
       ],
 
       tests_require=[
-#        'nose>=1.1.2,<2',
+        'nose>=1.1.2,<2',
         'comptests',
       ],
 
@@ -101,6 +103,7 @@ setup(name=name,
             'mcdp-render = mcdp_docs:mcdp_render_main',
             'mcdp-render-manual = mcdp_docs:mcdp_render_manual_main',
             'mcdp-depgraph = mcdp_depgraph:mcdp_depgraph_main',
+            'mcdp-load-all = mcdp_hdb_mcdp:mcdp_load_all_main',
         ]
       }
 )

@@ -1,13 +1,8 @@
 # -*- coding: utf-8 -*-
-import hashlib
-import os
-import sys
-import textwrap
-
 from bs4 import BeautifulSoup
 from bs4.element import NavigableString, Tag
 from contracts.utils import raise_desc, raise_wrapped, indent
-
+import hashlib
 from mcdp import logger, MCDPConstants
 from mcdp.development import mcdp_dev_warning
 from mcdp.exceptions import DPSemanticError, DPSyntaxError, DPInternalError
@@ -21,9 +16,13 @@ from mcdp_library.specs_def import SPEC_TEMPLATES
 from mcdp_report.html import ast_to_html
 from mcdp_utils_xml import add_class, create_img_png_base64, create_a_to_data, note_error, to_html_stripping_fragment, describe_tag, project_html
 from mocdp.comp.context import Context
+import os
+import sys
+import textwrap
 
 from .make_plots_imp import make_plots
 from .pdf_ops import crop_pdf, get_ast_as_pdf
+from mcdp_report.image_source import ImagesFromPaths
 
 
 def html_interpret(library, soup, raise_errors=False,
@@ -568,7 +567,8 @@ def make_figures(library, soup, raise_error_dp, raise_error_others, realpath, ge
             return div
         else:
             return tag_svg
-
+    
+    image_source = ImagesFromPaths(library.get_images_paths())
 
     mf = MakeFiguresNDP(None, None, None)
     available_ndp = set(mf.available()) | set(mf.aliases)
@@ -580,7 +580,7 @@ def make_figures(library, soup, raise_error_dp, raise_error_others, realpath, ge
             parse = lambda x: library.parse_ndp(x, realpath=realpath, context=context)
             ndp = load_or_parse_from_tag(tag0, load, parse)
 
-            mf = MakeFiguresNDP(ndp=ndp, library=library, yourname=None) # XXX
+            mf = MakeFiguresNDP(ndp=ndp, image_source=image_source, yourname=None) # XXX
             formats = ['svg']
             if generate_pdf:
                 formats.append('pdf')
@@ -621,7 +621,7 @@ def make_figures(library, soup, raise_error_dp, raise_error_others, realpath, ge
             parse = lambda x: library.parse_poset(x, realpath=realpath, context=context)
             poset = load_or_parse_from_tag(tag0, load, parse)
 
-            mf = MakeFiguresPoset(poset=poset, library=library)
+            mf = MakeFiguresPoset(poset=poset, image_source=image_source)
             formats = ['svg']
             if generate_pdf:
                 formats.append('pdf')

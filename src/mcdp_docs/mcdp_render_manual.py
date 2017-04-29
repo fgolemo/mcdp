@@ -55,7 +55,8 @@ class RenderManual(QuickApp):
         params.add_string('stylesheet', help='Stylesheet', default=None)
         params.add_flag('cache')
         params.add_flag('pdf', help='Generate PDF version of code and figures.')
-        params.add_string('remove', help='Remove the items with the given selector (so it does not mess indexing)')
+        params.add_string('remove', help='Remove the items with the given selector (so it does not mess indexing)',
+                          default=None)
         
     def define_jobs_context(self, context):
         logger.setLevel(logging.DEBUG)

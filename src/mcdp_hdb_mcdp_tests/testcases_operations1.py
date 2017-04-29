@@ -54,5 +54,7 @@ def seq_set_hash(view):
     user_db = view.user_db
     users = deepcopy(user_db.users._data)
     # need to change something
-    users['andrea'].name = 'new name'
+    users['andrea']['name'] = 'new name'
     user_db.users = users
+    
+    

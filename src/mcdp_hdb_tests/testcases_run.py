@@ -3,15 +3,16 @@ from contracts import contract
 
 from comptests.registrar import comptest, run_module_tests
 
-from .functoriality_diskrep_to_gitrep import check_translation_diskrep_to_gitrep
-from .functoriality_gitrepo_to_diskrep import check_translation_gitrep_to_diskrep
-from .functoriality_memdata_to_diskrep import check_translation_diskrep_to_memdata, check_translation_memdata_to_diskrep
-from .testcase_array_inside_yaml import testcases_arrays_inside_yaml
-from .testcase_arrays import testcases_arrays
-from .testcase_minilibrary import testcases_minilibrary
-from .testcase_simpleuserdb import testcases_SimpleUserDB
-from .testcase_translatenone import testcases_TranslateNone
-from .testcases import DataTestCase
+from mcdp_hdb_tests.functoriality_diskrep_to_gitrep import check_translation_diskrep_to_gitrep
+from mcdp_hdb_tests.functoriality_gitrepo_to_diskrep import check_translation_gitrep_to_diskrep
+from mcdp_hdb_tests.functoriality_memdata_to_diskrep import check_translation_diskrep_to_memdata, check_translation_memdata_to_diskrep
+from mcdp_hdb_tests.testcase_array_inside_yaml import testcases_arrays_inside_yaml
+from mcdp_hdb_tests.testcase_arrayplus import testcases_arrayplus
+from mcdp_hdb_tests.testcase_arrays import testcases_arrays
+from mcdp_hdb_tests.testcase_minilibrary import testcases_minilibrary
+from mcdp_hdb_tests.testcase_simpleuserdb import testcases_SimpleUserDB
+from mcdp_hdb_tests.testcase_translatenone import testcases_TranslateNone
+from mcdp_hdb_tests.testcases import DataTestCase
 
 
 tcs = {}
@@ -20,6 +21,7 @@ tcs.update(testcases_arrays())
 tcs.update(testcases_minilibrary())
 tcs.update(testcases_TranslateNone())
 tcs.update(testcases_SimpleUserDB())
+tcs.update(testcases_arrayplus())
 
 class HDBTestCaseWrapper(object):
     def __init__(self, k, tc):

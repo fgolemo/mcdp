@@ -14,6 +14,9 @@ from mcdp_hdb.disk_events import disk_event_file_create, disk_event_file_delete,
     disk_event_interpret, disk_event_dir_create, disk_event_dir_delete
 from mcdp_hdb.disk_struct import ProxyDirectory, assert_equal_disk_rep
 from mcdp_utils_misc import yaml_dump
+from git.objects.commit import Commit
+from git.util import Actor
+from mcdp_hdb.who import UNKNOWN_INSTANCE, UNKNOWN_HOST, UNKNOWN_ACTOR
 
 
 @contract(repo=Repo)
@@ -99,6 +102,37 @@ def disk_rep_from_git_tree(tree):
         
     return d
     
+@contract(returns='assert_valid_who', commit=Commit)
+def who_from_commit(commit):
+    author = commit.author
+    committer = commit.committer
+    assert isinstance(author, Actor)
+    assert isinstance(committer, Actor)
+    
+    print author.__repr__()
+    print committer.__repr__()
+
+    author_email = author.email
+    if '@' in author_email:
+        actor, instance = author.email.split('@')
+    else:
+        actor = author_email
+        if actor == 'local': # XXX
+            actor = UNKNOWN_ACTOR
+        instance = UNKNOWN_INSTANCE
+        
+    committer_email = committer.email
+    if '@' in committer_email:
+        host = committer_email.split('@')[-1]
+    else:
+        host = UNKNOWN_HOST
+    
+    who = {
+        'instance': instance.encode('utf8'),
+        'actor': actor.encode('utf8'),
+        'host': host.encode('utf8'),
+    }
+    return who
     
 def diskevents_from_diff(commit_a, commit_b):
     diff = commit_a.diff(commit_b)
@@ -114,7 +148,7 @@ def diskevents_from_diff(commit_a, commit_b):
         basename = os.path.basename(path)
         return dirname, basename
     _id= 'ID'
-    who = {}
+    who = who_from_commit(commit_b)
     events = []
     
     existing = set([_.path.encode('utf8') for _ in commit_a.tree.traverse()])

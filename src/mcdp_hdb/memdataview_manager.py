@@ -1,6 +1,5 @@
 from contracts import contract
 from contracts.utils import raise_wrapped, indent
-
 from mcdp import MCDPConstants
 from mcdp_hdb.memdataview import ViewBytes
 from mcdp_hdb.schema import NotValid
@@ -55,6 +54,8 @@ class ViewManager(object):
             principals = [MCDPConstants.ROOT]
         if host is None:
             host = host_name()
+        if instance is None:
+            instance = 'local'
         v._who = {'host': host, 'actor': actor, 'instance': instance} #, 'principals': principals}
         v._principals = principals
     

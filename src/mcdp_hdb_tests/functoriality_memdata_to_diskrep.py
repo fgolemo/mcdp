@@ -120,11 +120,15 @@ def check_translation_diskrep_to_memdata(schema, disk_rep0, disk_events, disk_re
         
         disk_events0 = deepcopy(disk_events)
         evs, disk_events_consumed = data_events_from_disk_event_queue(disk_map, schema, disk_rep, disk_events)
-        
+        logger.debug('This consumed %d events' % len(disk_events_consumed))
         logger.debug('This disk_event become this data_event:' +
                      '\n'+indent(yaml_dump(disk_events0), 'disk_events : ')+
                      '\n'+indent(yaml_dump(evs), 'data_events : '))
         
+        msg = 'Disk event:\n'+ indent(yaml_dump(disk_events_consumed), ' disk_events_consumed ')
+        msg += '\nData events:\n' + indent(yaml_dump(evs), ' events ')
+        logger.debug(msg)
+
         # tmp - interpret now 
         data0 = deepcopy(data_rep)
         for data_event in evs:
@@ -132,7 +136,7 @@ def check_translation_diskrep_to_memdata(schema, disk_rep0, disk_events, disk_re
         # tmp 
         if not evs:
             msg = 'The disk event resulted in 0 data events.'
-            msg += '\n' + indent(yaml_dump(disk_events[0]), ' disk_event ')
+            msg += '\n' + indent(yaml_dump(disk_events0[0]), ' disk_event ')
             raise Exception(msg)
         
         write_file(i, 'c-disk_event-consumed', yaml_dump(disk_events_consumed))
@@ -161,9 +165,6 @@ def check_translation_diskrep_to_memdata(schema, disk_rep0, disk_events, disk_re
         
         write_file(i, 'g-data_rep-with-evs-applied', yaml_dump(data_rep))
         
-        msg = 'Disk event:\n'+ indent(yaml_dump(disk_events_consumed), ' disk_events_consumed ')
-        msg += '\nData events:\n' + indent(yaml_dump(evs), ' events ')
-        logger.debug(msg)
         
         if data_rep_by_translation is not None:
             h1 = data_hash_code(data_rep_by_translation)

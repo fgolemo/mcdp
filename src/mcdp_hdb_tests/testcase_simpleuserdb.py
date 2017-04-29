@@ -74,7 +74,7 @@ def seq_set_list(view):
 def seq_set_hash(view):
     users = view.users
     users_data = deepcopy(users._data)
-    users_data[U1].name='new name'
+    users_data[U1]['name'] = 'new name'
     view.users = users_data
     
 def seq_set_struct(view):

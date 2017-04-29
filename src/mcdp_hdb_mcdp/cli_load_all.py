@@ -1,20 +1,24 @@
 #!/usr/bin/env python
-from mcdp_utils_misc.fileutils import create_tmpdir
-from mcdp_hdb_mcdp.host_instance import HostInstance
-from quickapp.quick_app_base import QuickAppBase 
-from mcdp.logs import logger
-from mcdp_library.specs_def import specs
-from mcdp_hdb_mcdp.library_view import TheContext
-from mcdp.exceptions import MCDPException
-from quickapp.quick_app import QuickApp
 from collections import namedtuple
 from copy import deepcopy
+from mcdp.exceptions import MCDPException, DPSyntaxError, DPSemanticError,\
+    DPNotImplementedError
+from mcdp.logs import logger
+from mcdp_library.specs_def import specs
+from mcdp_library_tests.tests import gives_syntax_error, gives_semantic_error,\
+    gives_not_implemented_error
+from mcdp_utils_misc import create_tmpdir
 import os
-import traceback
 import shutil
-from contracts.utils import indent
 import time
-from mcdp_utils_misc.duration_hum import duration_compact
+
+from contracts.utils import indent
+from quickapp import QuickApp
+
+from .host_instance import HostInstance
+from .library_view import TheContext
+from contracts import contract
+
 
 __all__ = [
     'load_all_main',
@@ -35,26 +39,46 @@ class LoadAll(QuickApp):
 
     def define_jobs_context(self, context):
         options = self.get_options()
+        
+        _filter = options.filter
+        errors_only = options.errors_only    
         dirname = options.dirname
-            
-        db_view = db_view_from_dirname(dirname)
         outdir = os.path.join(options.output, 'results')
-        if not os.path.exists(outdir):
-            os.makedirs(outdir)
-        rmtree_only_contents(outdir)
         
-
-        results = {}
+        define_load_all_jobs(context, dirname=dirname, outdir=outdir, name_filter=_filter, errors_only=errors_only)
         
-        for e in iterate_all(db_view):
-            if options.filter is not None:
-                # case insensitive
-                if not options.filter.lower() in e.id.lower():
-                    continue
-            c = context.comp(process, dirname, e, job_id = e.id)
-            results[e.id] = (e, c)
+@contract(name_filte='None|str', errors_only=bool, outdir=str, dirname=str)
+def define_load_all_jobs(context, dirname, outdir, name_filter=None, errors_only=False):
+    if not os.path.exists(outdir):
+        os.makedirs(outdir)
+    rmtree_only_contents(outdir)
 
-        context.comp(summary, results, outdir, options.errors_only)
+    results = {}
+    
+    db_view = db_view_from_dirname(dirname)
+    
+    for e in iterate_all(db_view): 
+        if name_filter is not None:
+            # case insensitive
+            if not name_filter.lower() in e.id.lower():
+                continue
+        c = context.comp(process, dirname, e, job_id = e.id)
+        results[e.id] = (e, c)
+    if not results:
+        msg = 'Could not find anything to parse. (filter: %s)' % name_filter
+        raise Exception(msg)
+    context.comp(summary, results, outdir, errors_only)
+    context.comp(raise_if_any_error, results)
+
+
+def raise_if_any_error(results):
+    nerrors = 0
+    for r in results:
+        if r.error_type is not None:
+            nerrors += 1
+    if nerrors:
+        msg = 'Found %s errors' % nerrors
+        raise Exception(msg)
         
 def rmtree_only_contents(d):
     ''' Removes all the contents but not the directory itself. '''
@@ -69,6 +93,7 @@ def rmtree_only_contents(d):
         except Exception as e:
             logger.error(e)
             
+            
 def db_view_from_dirname(dirname):
     instance = 'instance'
     upstream  = 'master'
@@ -81,20 +106,24 @@ def db_view_from_dirname(dirname):
     db_view.set_root()
     return db_view
 
+
 def summary(results, out, errors_only):
     s = ""
     shelf_name = None
     library_name = None
     spec_name = None
-    
+    nerrors = 0 
     from termcolor import colored 
     c1 = lambda s: colored(s, color='cyan')
     ce = lambda s: colored(s, color='red')
     cok = lambda s: colored(s, color='green')
-
-    
+    cyellow = lambda s: colored(s, color='yellow')
+    cpu = []
     for _ in sorted(results):
         e, result = results[_]
+        cpu.append(result.cpu)
+        if result.error_type is not None:
+            nerrors += 1
         if e.shelf_name != shelf_name:
             shelf_name = e.shelf_name
             s += c1('\n Shelf %s' % shelf_name)
@@ -112,12 +141,11 @@ def summary(results, out, errors_only):
                 if result.warnings:
                     warnings = result.warnings
                 else:
-                    warnings = ''
-#                 ok = duration_compact(result.cpu)
+                    warnings = '' 
                 ms = 1000 * result.cpu
                 ok = '%dms' % ms
                 if ms > 1000:
-                    ctime = ce
+                    ctime = cyellow
                 else:
                     ctime = lambda x:x
                 s += ctime('\n     %20s' % ok ) + '   ' + cok('%s   %s' % (e.thing_name, warnings))
@@ -129,12 +157,17 @@ def summary(results, out, errors_only):
             logger.info('wrote %s' % fn)
             
     s += '\n'
+    
+    s += '\nNumber of errors: %d' % nerrors
+    import numpy as np
+    s += '\nCPU median: %s ms' % (1000 * np.median(cpu)) 
     print(s)
     fn = os.path.join(out, 'stats.txt')
     with open(fn,'w') as f:
         f.write(s)
     logger.info('wrote %s' % fn)
-        
+
+
 def process(dirname, e):
     db_view = db_view_from_dirname(dirname)
     e.repo = db_view.repos[e.repo_name]
@@ -144,64 +177,94 @@ def process(dirname, e):
     subscribed_shelves = get_all_shelves(db_view)
     e.context = TheContext(db_view, subscribed_shelves, e.library_name)
     e.mcdp_library = e.context.get_library()
+    
+    source = e.things[e.thing_name]
+    
+    t0 = time.clock()
     try:
         context = e.context.child()
-        t0 = time.clock()
         e.mcdp_library.load_spec(e.spec_name, e.thing_name, context=context)
-        cpu = time.clock() - t0
+        
         error = None
         error_string = None
+        exc = None
     except MCDPException as exc:
+#         logger.error('Exception: %s' % exc)
         error = type(exc).__name__
         error_string = str(exc)
-        cpu = None
         #traceback.format_exc(exc)
+    finally:
+        cpu = time.clock() - t0
+        
+    if gives_syntax_error(source):
+        if isinstance(exc, DPSyntaxError):
+            error = None
+            error_string = None
+        else:
+            error = 'Unexpected'
+            error_string = 'Expected DPSyntaxError error, got %s' % type(exc).__name__
+            error_string += '\n' + indent(error_string, 'obtained > ')
+    elif gives_semantic_error(source):
+        if isinstance(exc, DPSemanticError):
+            error = None
+            error_string = None
+        else:
+            error = 'Unexpected'
+            error_string = 'Expected DPSemanticError error, got %s' % type(exc).__name__
+            error_string += '\n' + indent(error_string, 'obtained > ')
+    elif gives_not_implemented_error(source):
+        if isinstance(exc, DPNotImplementedError):
+            error = None
+            error_string = None
+        else:
+            error = 'Unexpected'
+            error_string = 'Expected DPNotImplementedError error, got %s' % type(exc).__name__
+            error_string += '\n' + indent(error_string, 'obtained > ')
+        
     if error:
         logger.error(e.id + ' ' + error)
     
     return Result(error_type=error, error_string=error_string, cpu=cpu, warnings=0)
 
+
 Result = namedtuple('Result', 'error_type error_string warnings cpu')
+
 
 class EnvironmentMockup(object):
     pass
 
+
 def get_all_shelves(db_view):
     subscribed_shelves = list()
     
-    for repo_name, repo in db_view.repos.items():
-        for shelf_name, shelf in repo.shelves.items():
+    for _repo_name, repo in db_view.repos.items():
+        for shelf_name, _shelf in repo.shelves.items():
             subscribed_shelves.append(shelf_name)
     return subscribed_shelves
 
+
 def iterate_all(db_view):
-    ''' Yields a sequence of Environment. '''
-    e = EnvironmentMockup()
-#     subscribed_shelves = get_all_shelves(db_view)
-            
+    ''' Yields a sequence of EnvironmentMockup. '''
+    e = EnvironmentMockup() 
     for repo_name, repo in db_view.repos.items():
         e.repo_name = repo_name
                         
         for shelf_name, shelf in repo.shelves.items():
-            e.shelf_name = shelf_name
-#             e.shelf = shelf
+            e.shelf_name = shelf_name 
             for library_name, library in shelf.libraries.items():
-                e.library_name = library_name
-#                 e.library = library
-                
-#                 e.context = TheContext(db_view, subscribed_shelves, library_name)
-#                 e.mcdp_library = e.context.get_library()
-
+                e.library_name = library_name 
                 for spec_name in specs:
                     e.spec_name = spec_name
-                    things = library.things.child(spec_name)
-#                     e.things = things
-                    for thing_name, code in things.items():
+                    things = library.things.child(spec_name) 
+                    for thing_name, _code in things.items():
                         e.thing_name = thing_name
-                        e.id = '%s-%s-%s-%s-%s' % (repo_name, shelf_name, library_name, spec_name, thing_name)
+                        e.id = '%s-%s-%s-%s-%s' % (repo_name, shelf_name, 
+                                                   library_name, spec_name, thing_name)
                         yield deepcopy(e) 
-    
-load_all_main = LoadAll.get_sys_main()
+
+
+mcdp_load_all_main = LoadAll.get_sys_main()
+
 
 if __name__ == '__main__':
-    load_all_main()
+    mcdp_load_all_main()
