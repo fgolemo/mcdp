@@ -6,6 +6,7 @@ from mcdp.exceptions import DPSyntaxError
 from mcdp_docs.latex.latex_preprocess import extract_maths
 from mcdp_docs.mark.markdown_transform import censor_markdown_code_blocks
 from mcdp_lang_utils import Where, location
+from contracts.utils import indent
 
 
 # from mcdp_docs.latex.latex_preprocess import extract_maths
@@ -108,7 +109,9 @@ def check_parsable(s):
     #     parser = ET.XMLParser()
     #     parser.entity["nbsp"] = unichr(160)
     s = '<add-wrap-for-xml-parser>'+s+'</add-wrap-for-xml-parser>'
-    # print indent(s, ' for xml')
+#     print indent(s, ' for xml')
+#     with open('rtmp.xml', 'w') as f:
+#         f.write(s)
     try:
         _ = ET.fromstring(s)
     except Exception as e:

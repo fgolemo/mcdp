@@ -15,7 +15,7 @@ mcdp {
 
     pisocketcom1 required by dc_hat ≼ pisocketcom provided by rpi
     ignore ethcom provided by rpi 
-    ethcom required by rpi ≼ ⊤ `EthCom
+    ethcom required by rpi ≼ ⊤ `ETHCom
     usbcom1 required by rpi ≼ ⊤ `USBCom 
 
 
@@ -44,5 +44,5 @@ mcdp {
     }
             
             requires budget ≽ budget required by add_budget
-            requires ac [`AC_charging]
+            requires ac [`AC_Charging]
         }

@@ -1,15 +1,8 @@
 # -*- coding: utf-8 -*-
 import math
-import os
-import tempfile
-
-from contracts.enabling import all_disabled
-from contracts.utils import raise_desc, raise_wrapped
-
 from mcdp import MCDPConstants, logger
 from mcdp.exceptions import DPSemanticError, DPNotImplementedError
-from mcdp_library.specs_def import SPEC_VALUES, SPEC_TEMPLATES, SPEC_MODELS,\
-    SPEC_POSETS, SPEC_PRIMITIVEDPS
+from mcdp_library.specs_def import specs
 from mcdp_library.stdlib import get_test_librarian
 from mcdp_tests import get_test_index
 from mcdp_tests.generation import for_all_source_mcdp,\
@@ -17,6 +10,11 @@ from mcdp_tests.generation import for_all_source_mcdp,\
     for_all_source_mcdp_value, for_all_source_all
 from mcdp_utils_misc import get_mcdp_tmp_dir, memoize_simple, timeit
 from mocdp.comp.context import Context
+import os
+import tempfile
+
+from contracts.enabling import all_disabled
+from contracts.utils import raise_desc, raise_wrapped
 
 
 # XXX: move sooner
@@ -116,12 +114,17 @@ def define_tests_for_mcdplibs(context):
         
         c2 = context.child(libname, extra_report_keys=dict(libname=libname))
 
-        c2.child('ndp').comp_dynamic(mcdplib_test_setup_nameddps, libname=libname)
-        c2.child('poset').comp_dynamic(mcdplib_test_setup_posets, libname=libname)
-        c2.child('primitivedp').comp_dynamic(mcdplib_test_setup_primitivedps, libname=libname)
-        c2.child('source_mcdp').comp_dynamic(mcdplib_test_setup_sources, libname=libname)
-        c2.child('value').comp_dynamic(mcdplib_test_setup_value, libname=libname)
-        c2.child('template').comp_dynamic(mcdplib_test_setup_template, libname=libname)
+
+        for spec_name in specs:
+            c3 = c2.child(spec_name)
+            c3.comp_dynamic(mcdplib_test_setup_spec, spec_name=spec_name, libname=libname)
+            
+#         c2.child('ndp').comp_dynamic(mcdplib_test_setup_nameddps, libname=libname)
+#         c2.child('poset').comp_dynamic(mcdplib_test_setup_posets, libname=libname)
+#         c2.child('primitivedp').comp_dynamic(mcdplib_test_setup_primitivedps, libname=libname)
+#         c2.child('source_mcdp').comp_dynamic(mcdplib_test_setup_sources, libname=libname)
+#         c2.child('value').comp_dynamic(mcdplib_test_setup_value, libname=libname)
+#         c2.child('template').comp_dynamic(mcdplib_test_setup_template, libname=libname)
 
         path = librarian.libraries[libname]['path']
         makefile = os.path.join(path, 'Makefile')
@@ -160,27 +163,92 @@ def mcdplib_run_make(mcdplib):
                       env=env)
 
 
-def mcdplib_test_setup_nameddps(context, libname):
+# def mcdplib_test_setup_nameddps(context, libname):
+#     """ 
+#         Loads all mcdp_lang_tests that were specified by comptests
+#         using the for_all_nameddps decorator. 
+#     """
+#     from mcdp_tests import load_tests_modules
+#     l = get_test_library(libname)
+#     models = l.list_spec(SPEC_MODELS)
+# 
+#     from mcdp_tests.generation import for_all_nameddps, for_all_nameddps_dyn
+#     load_tests_modules()
+# 
+#     if False:
+#         print('Found models: %r' % models)
+#         print('Found registered in for_all_nameddps_dyn: %r' % 
+#               for_all_nameddps.registered)
+#         print('Found registered in for_all_nameddps: %r' % 
+#               for_all_nameddps_dyn.registered)
+# 
+#     for model_name in models:
+#         f = l._get_file_data(model_name + '.' + MCDPConstants.ext_ndps)
+# 
+#         source = f['data']
+# 
+#         if gives_syntax_error(source):
+#             print('Skipping because syntax error')
+#             # TODO: actually check syntax error
+#             pass
+#         else:
+#             c = context.child(model_name, extra_report_keys=dict(id_ndp=model_name))
+# 
+#             if gives_not_implemented_error(source):
+#                 c.comp(mcdplib_assert_not_implemented_error_fn, libname, model_name,
+#                        job_id='assert_not_implemented_error')
+#             elif gives_semantic_error(source):
+#                 c.comp(mcdplib_assert_semantic_error_fn, libname, model_name,
+#                        job_id='assert_semantic_error')
+#             else:
+#                 ndp = c.comp(_load_ndp, libname, model_name, job_id='load')
+# 
+#                     
+#                 for ftest in for_all_nameddps.registered:
+#                     
+#                     if accepts_arg(ftest, 'libname'):
+#                         #print('using libname for %s' % ftest)
+#                         c.comp(ftest, model_name, ndp, libname=libname,
+#                                job_id=ftest.__name__)
+#                     else:
+#                         c.comp(ftest, model_name, ndp)
+#                         
+#                 for ftest in for_all_nameddps_dyn.registered:
+#                     
+#                     if accepts_arg(ftest, 'libname'):
+#                         #print('using libname for %s' % ftest)
+#                         c.comp_dynamic(ftest, model_name, ndp, libname=libname,
+#                                        job_id=ftest.__name__)
+#                     else:
+#                         c.comp_dynamic(ftest, model_name, ndp)
+#                         
+def mcdplib_test_setup_spec(context, spec_name, libname):
     """ 
         Loads all mcdp_lang_tests that were specified by comptests
         using the for_all_nameddps decorator. 
     """
     from mcdp_tests import load_tests_modules
     l = get_test_library(libname)
-    models = l.list_spec(SPEC_MODELS)
+    things = l.list_spec(spec_name)
 
-    from mcdp_tests.generation import for_all_nameddps, for_all_nameddps_dyn
+    from mcdp_tests.generation import test_accumulators, R, D
+    
+    regular = test_accumulators[spec_name][R]
+    dynamic = test_accumulators[spec_name][D]
+    
     load_tests_modules()
 
     if False:
-        print('Found models: %r' % models)
-        print('Found registered in for_all_nameddps_dyn: %r' % 
-              for_all_nameddps.registered)
-        print('Found registered in for_all_nameddps: %r' % 
-              for_all_nameddps_dyn.registered)
+        print('Found models: %r' % things)
+        print('Found registered: %r' % 
+              regular.registered)
+        print('Found registered: %r' % 
+              dynamic.registered)
 
-    for model_name in models:
-        f = l._get_file_data(model_name + '.' + MCDPConstants.ext_ndps)
+    extension = specs[spec_name].extension
+    
+    for thing_name in things:
+        f = l._get_file_data(thing_name + '.' + extension)
 
         source = f['data']
 
@@ -189,36 +257,35 @@ def mcdplib_test_setup_nameddps(context, libname):
             # TODO: actually check syntax error
             pass
         else:
-            c = context.child(model_name, extra_report_keys=dict(id_ndp=model_name))
+            extra_report_keys=dict(spec_name=spec_name, thing_name=thing_name)
+            c = context.child(thing_name, extra_report_keys=extra_report_keys)
 
             if gives_not_implemented_error(source):
-                c.comp(mcdplib_assert_not_implemented_error_fn, libname, model_name,
+                c.comp(mcdplib_assert_not_implemented_error_fn, libname, thing_name,
                        job_id='assert_not_implemented_error')
             elif gives_semantic_error(source):
-                c.comp(mcdplib_assert_semantic_error_fn, libname, model_name,
+                c.comp(mcdplib_assert_semantic_error_fn, libname, thing_name,
                        job_id='assert_semantic_error')
             else:
-                ndp = c.comp(_load_ndp, libname, model_name, job_id='load')
+                thing = c.comp(_load_spec, libname, spec_name, thing_name, job_id='load')
 
-                    
-                for ftest in for_all_nameddps.registered:
+                for ftest in regular.registered:
                     
                     if accepts_arg(ftest, 'libname'):
                         #print('using libname for %s' % ftest)
-                        c.comp(ftest, model_name, ndp, libname=libname,
+                        c.comp(ftest, thing_name, thing, libname=libname,
                                job_id=ftest.__name__)
                     else:
-                        c.comp(ftest, model_name, ndp)
+                        c.comp(ftest, thing_name, thing)
                         
-                for ftest in for_all_nameddps_dyn.registered:
+                for ftest in dynamic.registered:
                     
                     if accepts_arg(ftest, 'libname'):
                         #print('using libname for %s' % ftest)
-                        c.comp_dynamic(ftest, model_name, ndp, libname=libname,
+                        c.comp_dynamic(ftest, thing_name, thing, libname=libname,
                                        job_id=ftest.__name__)
                     else:
-                        c.comp_dynamic(ftest, model_name, ndp)
-                        
+                        c.comp_dynamic(ftest, thing_name, thing)
                      
     
 def accepts_arg(f, name):
@@ -321,129 +388,136 @@ def mcdplib_assert_semantic_error_fn(libname, model_name):
     else:
         msg = "Expected DPSemanticError, instead succesfull instantiation."
         raise_desc(Exception, msg, model_name=model_name, res=res.repr_long())
+# 
+# def mcdplib_test_setup_value(context, libname):
+#     from mcdp_tests import load_tests_modules
+# 
+#     l = get_test_library(libname)
+# 
+#     values = l.list_spec(SPEC_VALUES)
+# 
+#     from mcdp_tests.generation import for_all_values
+#     load_tests_modules()
+#     registered = for_all_values.registered
+# 
+#     #print('Found values: %r' % values)
+#     #print('Found registered: %r' % registered)
+# 
+#     for id_value in values:
+#         c = context.child(id_value)
+# 
+#         ndp = c.comp(_load_value, libname, id_value, job_id='load')
+# 
+#         for ftest in registered:
+#             c.comp(ftest, id_value, ndp)
 
-def mcdplib_test_setup_value(context, libname):
-    from mcdp_tests import load_tests_modules
+# def mcdplib_test_setup_posets(context, libname):
+#     """ 
+#         Loads all mcdp_lang_tests that were specified by comptests
+#         using the for_all_nameddps decorator. 
+#     """
+#     from mcdp_tests import load_tests_modules
+# 
+#     l = get_test_library(libname)
+# 
+#     posets = l.list_spec(SPEC_POSETS)
+# 
+#     from mcdp_tests.generation import for_all_posets
+#     load_tests_modules()
+#     registered = for_all_posets.registered
+# 
+#     #print('Found posets: %r' % posets)
+#     #print('Found registered: %r' % registered)
+# 
+#     for id_poset in posets:
+#         c = context.child(id_poset)
+# 
+#         ndp = c.comp(_load_poset, libname, id_poset, job_id='load')
+# 
+#         for ftest in registered:
+#             c.comp(ftest, id_poset, ndp)
 
-    l = get_test_library(libname)
+# 
+# def mcdplib_test_setup_primitivedps(context, libname):
+#     from mcdp_tests import load_tests_modules
+#     l = get_test_library(libname)
+#     dps = l.list_spec(SPEC_PRIMITIVEDPS)
+# 
+#     from mcdp_tests.generation import for_all_dps
+#     load_tests_modules()
+#     registered = for_all_dps.registered
+# 
+#     #print('Found: %r' % dps)
+#     #print('Registered: %r' % registered)
+# 
+#     for id_dp in dps:
+#         c = context.child(id_dp)
+# 
+#         ndp = c.comp(_load_primitivedp, libname, id_dp, job_id='load')
+# 
+#         for ftest in registered:
+#             c.comp(ftest, id_dp, ndp)
 
-    values = l.list_spec(SPEC_VALUES)
-
-    from mcdp_tests.generation import for_all_values
-    load_tests_modules()
-    registered = for_all_values.registered
-
-    #print('Found values: %r' % values)
-    #print('Found registered: %r' % registered)
-
-    for id_value in values:
-        c = context.child(id_value)
-
-        ndp = c.comp(_load_value, libname, id_value, job_id='load')
-
-        for ftest in registered:
-            c.comp(ftest, id_value, ndp)
-
-def mcdplib_test_setup_posets(context, libname):
-    """ 
-        Loads all mcdp_lang_tests that were specified by comptests
-        using the for_all_nameddps decorator. 
-    """
-    from mcdp_tests import load_tests_modules
-
-    l = get_test_library(libname)
-
-    posets = l.list_spec(SPEC_POSETS)
-
-    from mcdp_tests.generation import for_all_posets
-    load_tests_modules()
-    registered = for_all_posets.registered
-
-    #print('Found posets: %r' % posets)
-    #print('Found registered: %r' % registered)
-
-    for id_poset in posets:
-        c = context.child(id_poset)
-
-        ndp = c.comp(_load_poset, libname, id_poset, job_id='load')
-
-        for ftest in registered:
-            c.comp(ftest, id_poset, ndp)
-
-
-def mcdplib_test_setup_primitivedps(context, libname):
-    from mcdp_tests import load_tests_modules
-    l = get_test_library(libname)
-    dps = l.list_spec(SPEC_PRIMITIVEDPS)
-
-    from mcdp_tests.generation import for_all_dps
-    load_tests_modules()
-    registered = for_all_dps.registered
-
-    #print('Found: %r' % dps)
-    #print('Registered: %r' % registered)
-
-    for id_dp in dps:
-        c = context.child(id_dp)
-
-        ndp = c.comp(_load_primitivedp, libname, id_dp, job_id='load')
-
-        for ftest in registered:
-            c.comp(ftest, id_dp, ndp)
-
-def mcdplib_test_setup_template(context, libname):
-    from mcdp_tests import load_tests_modules
-    l = get_test_library(libname)
-    templates = l.list_spec(SPEC_TEMPLATES)
-
-    from mcdp_tests.generation import for_all_templates
-    load_tests_modules()
-    registered = for_all_templates.registered
-
-    #print('Found: %r' % templates)
-    #print('Registered: %r' % registered)
-
-    for id_template in templates:
-        c = context.child(id_template)
-
-        ndp = c.comp(_load_template, libname, id_template, job_id='load')
-
-        for ftest in registered:
-            c.comp(ftest, id_template, ndp)
-
-    
+# def mcdplib_test_setup_template(context, libname):
+#     from mcdp_tests import load_tests_modules
+#     l = get_test_library(libname)
+#     templates = l.list_spec(SPEC_TEMPLATES)
+# 
+#     from mcdp_tests.generation import for_all_templates
+#     load_tests_modules()
+#     registered = for_all_templates.registered
+# 
+#     #print('Found: %r' % templates)
+#     #print('Registered: %r' % registered)
+# 
+#     for id_template in templates:
+#         c = context.child(id_template)
+# 
+#         ndp = c.comp(_load_template, libname, id_template, job_id='load')
+# 
+#         for ftest in registered:
+#             c.comp(ftest, id_template, ndp)
+# 
+#     
 min_time_warn = 0.5
+# 
+# def _load_primitivedp(libname, model_name):
+#     context = Context()
+#     l = get_test_library(libname)
+#     with timeit(model_name, minimum=min_time_warn):
+#         return l.load_primitivedp(model_name, context)
+# 
+# def _load_template(libname, thing_name):
+#     context = Context()
+#     l = get_test_library(libname)
+#     with timeit(thing_name, minimum=min_time_warn):
+#         return l.load_spec(SPEC_TEMPLATES, thing_name, context)
+# 
+# def _load_value(libname, thing_name):
+#     l = get_test_library(libname)
+#     context = Context()
+#     with timeit(thing_name, minimum=min_time_warn):
+#         vu = l.load_constant(thing_name, context)
+#     return vu
+# 
+# def _load_poset(libname, thing_name):
+#     l = get_test_library(libname)
+#     context = Context()
+#     with timeit(thing_name, minimum=min_time_warn):
+#         return l.load_poset(thing_name, context)
+# 
+# def _load_ndp(libname, thing_name):
+#     l = get_test_library(libname)
+#     context = Context() 
+#     with timeit(thing_name, minimum=min_time_warn):
+#         return l.load_ndp(thing_name, context)
 
-def _load_primitivedp(libname, model_name):
-    context = Context()
-    l = get_test_library(libname)
-    with timeit(model_name, minimum=min_time_warn):
-        return l.load_primitivedp(model_name, context)
-
-def _load_template(libname, thing_name):
-    context = Context()
-    l = get_test_library(libname)
-    with timeit(thing_name, minimum=min_time_warn):
-        return l.load_spec(SPEC_TEMPLATES, thing_name, context)
-
-def _load_value(libname, thing_name):
-    l = get_test_library(libname)
-    context = Context()
-    with timeit(thing_name, minimum=min_time_warn):
-        vu = l.load_constant(thing_name, context)
-    return vu
-
-def _load_poset(libname, thing_name):
-    l = get_test_library(libname)
-    context = Context()
-    with timeit(thing_name, minimum=min_time_warn):
-        return l.load_poset(thing_name, context)
-
-def _load_ndp(libname, thing_name):
+def _load_spec(libname, spec_name, thing_name):
     l = get_test_library(libname)
     context = Context() 
     with timeit(thing_name, minimum=min_time_warn):
-        return l.load_ndp(thing_name, context)
+        return l.load_spec(spec_name, thing_name, context)
+    
     
 #
 # @contextmanager

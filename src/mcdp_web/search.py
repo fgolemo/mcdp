@@ -1,16 +1,13 @@
-from mcdp_web.utils0 import add_std_vars_context
-from mcdp_web.environment import cr2e
-
 from mcdp_hdb_mcdp.cli_load_all import iterate_all
-from mcdp.logs import logger
-from mcdp_utils_misc.my_yaml import yaml_dump
+from mcdp_web.environment import cr2e
+from mcdp_web.utils0 import add_std_vars_context
 
 
 class AppSearch():
     
     @add_std_vars_context
     @cr2e
-    def view_search(self, e):
+    def view_search(self, e):  # @UnusedVariable
         res = {
             
         }

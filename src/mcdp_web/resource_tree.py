@@ -314,7 +314,7 @@ class ResourceShelf(Resource):
             session = self.get_session()
             if not self.name in session.shelves_used:
                 msg = 'Cannot access libraries if not subscribed to shelf "%s".' % self.name
-                msg += ' user: %s' % self.get_session().get_user()
+                msg += ' user: %s' % self.get_session().get_user_struct()
                 logger.debug(msg)
                 return ResourceShelfInactive(self.name)
 

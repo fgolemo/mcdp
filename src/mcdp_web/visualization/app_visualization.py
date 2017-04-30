@@ -1,17 +1,15 @@
 # -*- coding: utf-8 -*-
 
 from collections import namedtuple
-
-from bs4.element import Declaration, ProcessingInstruction, Doctype, Comment, Tag
-from contracts.utils import check_isinstance, indent, raise_wrapped
-from pyramid.httpexceptions import HTTPFound
-
 from mcdp.exceptions import DPSyntaxError, DPSemanticError, DPNotImplementedError, DPInternalError
+from mcdp.logs import logger
 from mcdp_lang.namedtuple_tricks import recursive_print
 from mcdp_lang.parts import CDPLanguage
 from mcdp_lang.utils_lists import unwrap_list
 from mcdp_report.html import ast_to_html
 from mcdp_utils_xml import add_style, to_html_stripping_fragment, bs
+from mcdp_web.context_from_env import library_from_env, image_source_from_env
+from mcdp_web.editor_fancy.html_mark_imp import NoLocationFound
 from mcdp_web.environment import cr2e
 from mcdp_web.resource_tree import ResourceThingViewSyntax, ResourceThingViewNDPGraph,\
     ResourceThingViewDPTree, ResourceThingViewDPGraph, ResourceThingViewNDPRepr,\
@@ -19,12 +17,14 @@ from mcdp_web.resource_tree import ResourceThingViewSyntax, ResourceThingViewNDP
 from mcdp_web.sessions import NoSuchLibrary
 from mcdp_web.utils0 import add_other_fields, add_std_vars_context
 from mocdp.comp.context import Context
+import traceback
+
+from bs4.element import Declaration, ProcessingInstruction, Doctype, Comment, Tag
+from contracts.utils import check_isinstance, indent, raise_wrapped
+from pyramid.httpexceptions import HTTPFound
 
 from .add_html_links_imp import add_html_links
-from mcdp_web.context_from_env import library_from_env, image_source_from_env
-from mcdp_web.editor_fancy.html_mark_imp import NoLocationFound
-from mcdp.logs import logger
-import traceback
+from mcdp_lang_utils.where import format_where
 
 
 class AppVisualization(object):
@@ -172,7 +172,8 @@ def generate_view_syntax(e, make_relative):
                 msg = 'While trying to annotate the exception:'
                 msg += '\n' + indent(exc, 'exc > ')
                 raise_wrapped(NoLocationFound, e, msg)
-            error = exc.error
+            error = exc.error + "\n" + format_where(exc.where)
+            
             svg_data = None
     else:
         svg_data = None
