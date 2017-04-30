@@ -6,15 +6,15 @@ mcdp {
     battery = instance `Battery
     actuation = instance `Actuation
 
-    total_power = power required by actuation + extra_power
-    capacity provided by battery >= endurance * total_power
+    total_power = power required by actuation + provided extra_power
+    capacity provided by battery ≽ provided endurance · total_power
 
-    total_mass = mass required by battery  + extra_payload
+    total_mass = mass required by battery  + provided extra_payload
 
-    gravity = 9.81 m/s^2
-    weight = total_mass * gravity
+    gravity = 9.81 m/s²
+    weight = total_mass · gravity
 
-    lift provided by actuation >= weight
+    lift provided by actuation ≽ weight
 
     requires total_mass
 }
