@@ -173,7 +173,7 @@ class ResourceSearchPage(Resource):
         r[':query'] = ResourceSearchPageQuery()
         return r  
 
-class ResourceSearchPageQuery(): pass
+class ResourceSearchPageQuery(Resource): pass
         
          
 class ResourceAbout(Resource): pass
