@@ -6,6 +6,7 @@ import os
 from pyramid.security import Allow, Authenticated, Everyone
 
 
+
 Privileges = MCDPConstants.Privileges
 
 class Resource(object):
@@ -257,6 +258,7 @@ class ResourceShelves(Resource):
 
 class ResourceShelfForbidden(ResourceEndOfTheLine): pass
 class ResourceShelfNotFound(ResourceEndOfTheLine): pass
+class ResourceThingNotFound(ResourceEndOfTheLine): pass
 class ResourceLibraryDocNotFound(ResourceEndOfTheLine): pass
 class ResourceLibraryAssetNotFound(ResourceEndOfTheLine): pass
 
@@ -411,7 +413,22 @@ class ResourceThings(Resource):
 
     def getitem(self, key):
         if key == 'new': return ResourceThingsNewBase()
-        return ResourceThing(key)
+        
+        things = context_get_things(self)
+        if not key in things:
+            try:
+                from mcdp_hdb_mcdp.library_view import get_soft_match
+                key2 = get_soft_match(key, list(things))
+            except KeyError:
+                return ResourceThingNotFound(key)
+            else:
+                if MCDPConstants.allow_soft_matching:
+                    return ResourceThing(key2)
+                else:
+                    msg = 'Soft matching %s -> %s' % (key, key2)
+                    raise Exception(msg)
+        else:
+            return ResourceThing(key)
 
     def __repr__(self):
         return '%s(specname=%s)' % (type(self).__name__, self.specname)
