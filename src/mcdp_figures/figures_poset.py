@@ -27,7 +27,8 @@ class MakeFiguresPoset(MakeFigures):
             
         }
         
-        if isinstance(poset, FinitePoset):
+        # give complete list if poset is not given
+        if poset is None or isinstance(poset, FinitePoset):
             figure2function = {
                 'hasse': (PosetHasse, dict(direction='TB', icons=False)), 
                 'hasse_icons': (PosetHasse, dict(direction='TB', icons=True)),

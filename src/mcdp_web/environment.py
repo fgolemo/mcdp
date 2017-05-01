@@ -65,7 +65,6 @@ class Environment(object):
         else:
             self.thing_name = rthing.name
             things = self.library.things.child(self.spec_name)
-            logger.debug('thing_name: %s' % self.thing_name)
             self.thing = things[self.thing_name]
             
             
