@@ -1,4 +1,5 @@
 from abc import abstractmethod, ABCMeta
+from contracts.utils import check_isinstance
 
 
 class MakeFigures_Formatter(object):
@@ -45,7 +46,7 @@ class GGFormatter(MakeFigures_Formatter):
         
 #         with timeit_wall('GGFormatter - get_gg'):
         gg = self.get_gg(mf)
-            
+        
         if isinstance(formats, str):
             res, = gg_get_formats(gg, (formats,))
         else:

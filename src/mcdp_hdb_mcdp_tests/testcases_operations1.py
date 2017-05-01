@@ -15,7 +15,7 @@ def testcases_CommonOperations1():
     
     disk_maps= {'regular': DB.dm}
     
-    prefix = 'commonops1'
+    prefix = 'operations1'
     
     res = get_combinations(db_schema, db0, prefix, operation_sequences, disk_maps)
     return res

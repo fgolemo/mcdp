@@ -27,10 +27,14 @@ class MakeFiguresPoset(MakeFigures):
             
         }
         
-        figure2function = {
-            'hasse': (PosetHasse, dict(direction='TB', icons=False)), 
-            'hasse_icons': (PosetHasse, dict(direction='TB', icons=True)),
-        }
+        # give complete list if poset is not given
+        if poset is None or isinstance(poset, FinitePoset):
+            figure2function = {
+                'hasse': (PosetHasse, dict(direction='TB', icons=False)), 
+                'hasse_icons': (PosetHasse, dict(direction='TB', icons=True)),
+            }
+        else:
+            figure2function = {}
         
         MakeFigures.__init__(self, aliases=aliases, figure2function=figure2function)
     
@@ -52,7 +56,7 @@ class PosetHasse(GGFormatter):
     def get_gg(self, mf):
         poset = mf.get_poset()
         if not isinstance(poset, FinitePoset):
-            return ValueError('not available')
+            raise ValueError('Not available because this is not a finite poset')
          
 #         library = mf.get_library()
         image_source = mf.get_image_source()

@@ -144,7 +144,12 @@ class TheContextLibrary(MCDPLibrary):
                      spec_name=spec_name,
                      thing_name=name)
         host_cache = self.the_context.host_cache
-        return host_cache.load_spec(context=context, **params)
+        res =  host_cache.load_spec(context=context, **params)
+        # XXX this is mainly need for templates now
+        realpath = '%s/%s/%s/%s/%s' % (self.repo_name, self.shelf_name, self.library_name, spec_name, name)
+        setattr(res,  MCDPConstants.ATTR_LOAD_LIBNAME, self.library_name)
+        setattr(res,  MCDPConstants.ATTR_LOAD_REALPATH, realpath)
+        return res
     
     def clone(self):
         return self

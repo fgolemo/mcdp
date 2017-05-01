@@ -1,12 +1,3 @@
-import os
-import shutil
-import unittest
-import urlparse
-
-from contracts.utils import raise_desc, indent
-from git import Repo
-from pyramid.security import Allow, Everyone
-
 from comptests.registrar import run_module_tests, comptest
 from mcdp import MCDPConstants
 from mcdp.logs import logger
@@ -20,6 +11,15 @@ from mcdp_web.confi import parse_mcdpweb_params_from_dict
 from mcdp_web.main import WebApp
 from mcdp_web.resource_tree import MCDPResourceRoot
 from mcdp_web_tests.spider import Spider
+import os
+import shutil
+import unittest
+import urlparse
+
+from contracts.utils import raise_desc, indent
+from git import Repo
+from pyramid.security import Allow, Everyone
+
 
 # do not make relative to start using python
 def create_empty_repo(d, bname):
@@ -192,7 +192,7 @@ class FunctionalTests(unittest.TestCase):
         spider.visit(ushelf + '/libraries/documents/test_subfigure.html')
         
         spider.visit('/tree')
-        max_fails=  1
+        max_fails=  10
         try:
             spider.go(max_fails=max_fails)
         except KeyboardInterrupt:

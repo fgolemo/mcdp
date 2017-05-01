@@ -198,10 +198,15 @@ class WebApp(AppVisualization, AppStatus,
         root = MCDPResourceRoot(e.request)
         
         def get_pages(node, prefix):
-            
+            logger.info('get_pages(%s, %s)' % (node, prefix))
             for child in node:
                 yield "/".join(prefix + (child,))
-                for _ in get_pages(node[child], prefix + (child,)):
+                
+                c = node[child]
+                if c is None:
+                    msg = 'Found invalid child %r of %r' % (child, prefix)
+                    raise ValueError(msg)
+                for _ in get_pages(c, prefix + (child,)):
                     yield _
                     
         pages = list(get_pages(node=root, prefix=()))

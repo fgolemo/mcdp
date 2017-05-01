@@ -52,7 +52,7 @@ hdb_testcase-simpleuserdb-seq_set_struct-with_hint
 
 for k, tc in tcs.items():
     f = HDBTestCaseWrapper(k, tc)
-    if f in known_failures:
+    if f.__name__ in known_failures:
         comptest_fails(f)
     else:
         comptest(f)
