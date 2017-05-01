@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
-from contracts.utils import check_isinstance
 from mcdp.exceptions import mcdp_dev_warning
+
+from contracts.utils import check_isinstance
 
 from .dealing_with_special_letters import greek_letters, subscripts, subscripts_utf8, greek_letters_utf8
 from .parse_actions import (divide_parse_action,
@@ -16,7 +17,7 @@ from .pyparsing_bundled import (
     sglQuotedString, FollowedBy, QuotedString, ParseExpression)
 from .syntax_utils import (
     COMMA, L, O, S, SCOLON, SCOMMA, SLPAR, SRPAR, keyword, sp, spk)
-from .utils_lists import make_list 
+from .utils_lists import make_list
 
 
 ParserElement.enablePackrat()
@@ -345,8 +346,8 @@ class Syntax(object):
     pint_unit_simple.setWhitespaceChars(' ')
     pint_unit_connector = L('/') | L('*')
 
-    space_pint_unit = sp(((Keyword('1') | pint_unit_simple) + ZeroOrMore(pint_unit_connector + pint_unit_simple)),
-                         parse_pint_unit)
+    pint_unit = ((Keyword('1') | pint_unit_simple) + ZeroOrMore(pint_unit_connector + pint_unit_simple))
+    space_pint_unit = sp(pint_unit.copy(), parse_pint_unit)
 
     space_dimensionless = sp(Keyword('dimensionless'),
                              lambda _: CDP.RcompUnit('m/m'))

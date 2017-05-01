@@ -23,6 +23,43 @@ from .manual_join_imp import manual_join
 from mcdp import MCDPConstants
 
 
+class RenderManual(QuickApp):
+    """ Renders the PyMCDP manual """
+
+    def define_options(self, params):
+        params.add_string('src', help='Root directory with all contents')
+        params.add_string('output_file', help='Output file')
+        params.add_string('stylesheet', help='Stylesheet', default=None)
+        params.add_flag('cache')
+        params.add_flag('pdf', help='Generate PDF version of code and figures.')
+        params.add_string('remove', help='Remove the items with the given selector (so it does not mess indexing)',
+                          default=None)
+        
+    def define_jobs_context(self, context):
+        logger.setLevel(logging.DEBUG)
+
+        options = self.get_options()
+        src_dir = options.src
+        out_dir = options.output
+        generate_pdf = options.pdf
+        output_file = options.output_file
+        remove = options.remove
+        stylesheet = options.stylesheet
+
+        bibfile = os.path.join(src_dir, 'bibliography/bibliography.html')
+
+        if out_dir is None:
+            out_dir = os.path.join('out', 'mcdp_render_manual')
+
+        manual_jobs(context, 
+                    src_dir=src_dir, 
+                    output_file=output_file,
+                    generate_pdf=generate_pdf,
+                    bibfile=bibfile,
+                    stylesheet=stylesheet,
+                    remove=remove,
+                    )
+        
 def get_manual_contents(srcdir):
     root = os.getcwd()
     directory = os.path.join(root, srcdir)
@@ -46,74 +83,49 @@ def get_manual_contents(srcdir):
         docname, _extension = os.path.splitext(os.path.basename(f))
         yield 'manual', docname
 
-class RenderManual(QuickApp):
-    """ Renders the PyMCDP manual """
 
-    def define_options(self, params):
-        params.add_string('src', help='Root directory with all contents')
-        params.add_string('output_file', help='Output file')
-        params.add_string('stylesheet', help='Stylesheet', default=None)
-        params.add_flag('cache')
-        params.add_flag('pdf', help='Generate PDF version of code and figures.')
-        params.add_string('remove', help='Remove the items with the given selector (so it does not mess indexing)',
-                          default=None)
-        
-    def define_jobs_context(self, context):
-        logger.setLevel(logging.DEBUG)
+def manual_jobs(context, src_dir, output_file, generate_pdf, bibfile, stylesheet, 
+                remove=None, filter_soup=None):
+    manual_contents = list(get_manual_contents(src_dir))
 
-        options = self.get_options()
-        src_dir = options.src
-        out_dir = options.output
+    if not manual_contents:
+        msg = 'Could not find any file for composing the book.'
+        raise Exception(msg)
 
-        stylesheet = options.stylesheet
+    # check that all the docnames are unique
+    pnames = [_[1] for _ in manual_contents]
+    if len(pnames) != len(set(pnames)):
+        msg = 'Repeated names detected: %s' % pnames
+        raise ValueError(msg)
 
-        bibfile = os.path.join(src_dir, 'bibliography/bibliography.html')
+    local_files = list(locate_files(src_dir, '*.md'))
+    basename2filename = dict( (os.path.basename(_), _) for _ in local_files)
 
-        if out_dir is None:
-            out_dir = os.path.join('out', 'mcdp_render_manual')
+    files_contents = []
+    for i, (libname, docname) in enumerate(manual_contents):
+        logger.info('adding document %s - %s' % (libname, docname))
+        out_part_basename = '%02d%s' % (i, docname)
+        res = context.comp(render_book, libname, docname, generate_pdf,
+                           job_id=docname, main_file=output_file,
+                           out_part_basename=out_part_basename,
+                           filter_soup=filter_soup)
 
-        generate_pdf = options.pdf
-        files_contents = []
+        source = '%s.md' % docname
+        if source in basename2filename:
+            filenames = [basename2filename[source]]
+            erase_job_if_files_updated(context.cc, promise=res,
+                                       filenames=filenames)
+        else:
+            logger.debug('Could not find file %r for date check' % source)
 
-        manual_contents = list(get_manual_contents(src_dir))
+        files_contents.append(res)
 
-        if not manual_contents:
-            msg = 'Could not find any file for composing the book.'
-            raise Exception(msg)
+    d = context.comp(manual_join, src_dir=src_dir, files_contents=files_contents, 
+                     bibfile=bibfile, stylesheet=stylesheet, remove=remove)
+    context.comp(write, d, output_file)
 
-        # check that all the docnames are unique
-        pnames = [_[1] for _ in manual_contents]
-        if len(pnames) != len(set(pnames)):
-            msg = 'Repeated names detected: %s' % pnames
-            raise ValueError(msg)
-
-        local_files = list(locate_files(src_dir, '*.md'))
-        basename2filename = dict( (os.path.basename(_), _) for _ in local_files)
-
-        output_file = options.output_file
-
-        for i, (libname, docname) in enumerate(manual_contents):
-            logger.info('adding document %s - %s' % (libname, docname))
-            out_part_basename = '%02d%s' % (i, docname)
-            res = context.comp(render_book, libname, docname, generate_pdf,
-                               job_id=docname, main_file=output_file,
-                               out_part_basename=out_part_basename)
-
-            source = '%s.md' % docname
-            if source in basename2filename:
-                filenames = [basename2filename[source]]
-                erase_job_if_files_updated(context.cc, promise=res,
-                                           filenames=filenames)
-            else:
-                logger.debug('Could not find file %r for date check' % source)
-
-            files_contents.append(res)
-
-        d = context.comp(manual_join, files_contents, bibfile=bibfile, stylesheet=stylesheet,
-                         remove=options.remove)
-        context.comp(write, d, output_file)
-
-        context.comp(generate_metadata)
+    if os.path.exists(MCDPManualConstants.pdf_metadata_template):
+        context.comp(generate_metadata, src_dir)
 
 @contract(compmake_context=Context, promise=Promise, filenames='seq(str)')
 def erase_job_if_files_updated(compmake_context, promise, filenames):
@@ -169,7 +181,7 @@ def write(s, out):
     print('Written %s ' % out)
 
 
-def render_book(libname, docname, generate_pdf, main_file, out_part_basename):
+def render_book(libname, docname, generate_pdf, main_file, out_part_basename, filter_soup=None):
     from mcdp_docs.pipeline import render_complete
 
     librarian = get_test_librarian()
@@ -186,14 +198,20 @@ def render_book(libname, docname, generate_pdf, main_file, out_part_basename):
     realpath = f['realpath']
 
     html_contents = render_complete(library=l,
-                                    s=data, raise_errors=True, realpath=realpath,
-                                    generate_pdf=generate_pdf)
+                                    s=data, 
+                                    raise_errors=True, 
+                                    realpath=realpath,
+                                    generate_pdf=generate_pdf,
+                                    filter_soup=filter_soup)
 
     doc = get_minimal_document(html_contents,
                                add_markdown_css=True)
     dirname = main_file + '.parts'
     if not os.path.exists(dirname):
-        os.makedirs(dirname)
+        try:
+            os.makedirs(dirname)
+        except:
+            pass
     fn = os.path.join(dirname, '%s.html' % out_part_basename)
     with open(fn, 'w') as f:
         f.write(doc)

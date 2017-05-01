@@ -13,8 +13,8 @@ class ParsingElement(object):
 
 @contract(returns=ParsingElement)
 def find_parsing_element(x):
-    from .syntax_codespec import SyntaxCodeSpec
     from .syntax import Syntax, SyntaxBasics
+    from .syntax_codespec import SyntaxCodeSpec
 
     d = dict(**Syntax.__dict__)    # @UndefinedVariable
     d.update(**SyntaxCodeSpec.__dict__)  # @UndefinedVariable

@@ -42,8 +42,7 @@ def ast_to_text(s):
     
 @contract(s=str)
 def ast_to_html(s, 
-                parse_expr=None,
-                
+                parse_expr,
                 ignore_line=None,
                 add_line_gutter=True, 
                 encapsulate_in_precode=True, 
@@ -52,8 +51,8 @@ def ast_to_html(s,
         postprocess = function applied to parse tree
     """
     
-    if parse_expr is None:
-        raise Exception('Please add specific parse_expr (default=Syntax.ndpt_dp_rvalue)')
+#     if parse_expr is None:
+#         raise Exception('Please add specific parse_expr (default=Syntax.ndpt_dp_rvalue)')
         
     if ignore_line is None:
         ignore_line = lambda _lineno: False

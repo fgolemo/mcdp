@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-from contracts.utils import raise_desc, indent
-
 from comptests.registrar import comptest, run_module_tests, comptest_fails
 from mcdp_docs.mark.markdown_transform import censor_markdown_code_blocks
 from mcdp_docs.minimal_doc import get_minimal_document
@@ -8,6 +6,8 @@ from mcdp_docs.pipeline import render_complete
 from mcdp_docs.prerender_math import TAG_DOLLAR
 from mcdp_library.library import MCDPLibrary
 from mcdp_utils_misc.string_repr import indent_plus_invisibles
+
+from contracts.utils import raise_desc, indent
 
 
 def tryit(s, write_to=None, forbid=[]):

@@ -25,13 +25,15 @@ __all__ = [
 
 @contract(returns='str', s=str, library=MCDPLibrary, raise_errors=bool)
 def render_complete(library, s, raise_errors, realpath, generate_pdf=False,
-                    check_refs=False, do_math=True):
+                    check_refs=False, do_math=True, filter_soup=None):
     """
         Transforms markdown into html and then renders the mcdp snippets inside.
         
         s: a markdown string with embedded html snippets
         
         Returns an HTML string; not a complete document.
+        
+        filter_soup(library, soup)
     """
     from .latex.latex_preprocess import extract_maths, extract_tabular
     from .latex.latex_preprocess import latex_preprocessing
@@ -151,7 +153,8 @@ def render_complete(library, s, raise_errors, realpath, generate_pdf=False,
     from mcdp_docs.highlight import html_interpret
     html_interpret(library, soup, generate_pdf=generate_pdf,
                             raise_errors=raise_errors, realpath=realpath)
-    
+    if filter_soup is not None:
+        filter_soup(library=library, soup=soup)
     raise_missing_image_errors = False
     
     embed_images_from_library2(soup=soup, library=library, 
