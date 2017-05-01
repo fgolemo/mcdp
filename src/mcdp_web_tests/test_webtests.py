@@ -226,7 +226,7 @@ class FunctionalTests(unittest.TestCase):
 #                 msg += '\n'.join('- %s' % _ for _ in sorted(spider.failed))
             raise_desc(Exception, msg)
 
-@comptest
+
 def check_tree():
     ft = FunctionalTests()
     ft.setUp()
@@ -234,8 +234,8 @@ def check_tree():
 
 
 if __name__ == '__main__':
-    run_module_tests()
-    
+#     run_module_tests()
+    check_tree()
     
     
     
