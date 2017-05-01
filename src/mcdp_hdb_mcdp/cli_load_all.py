@@ -18,6 +18,7 @@ from quickapp import QuickApp
 
 from .host_instance import HostInstance
 from .library_view import TheContext
+from mcdp_hdb_mcdp.host_cache import HostCache
 
 
 __all__ = [
@@ -72,13 +73,35 @@ def define_load_all_jobs(context, dirname, outdir, name_filter=None, errors_only
 
 
 def raise_if_any_error(results):
-    errors = []
+    
+    errors = {}
+    
     for rid, (_, r) in results.items():
         if r.error_type is not None:
             f = r.error_string.split('\n')[0]
             n = 150 - len(rid)
             f = f [:n]
-            errors.append(rid + ' | ' + r.error_type[:4] + ' | ' +f)
+            errors[rid] = (rid + ' | ' + r.error_type[:4] + ' | ' +f)
+            
+    expected = [
+        'local-uav_energetics-pretty-models-batteries',
+        'local-uav_energetics-pretty-models-battery_squash',
+        
+        'local-unittests-loading_python-models-load1',
+        'local-unittests-loading_python-models-load1b',
+        'local-unittests-loading_python-posets-load2',
+        'local-unittests-loading_python-primitivedps-load_primitivedp',
+        'local-unittests-making-models-test1',
+    ]
+    
+    for e in expected:
+        if e in results:
+            if not e in errors:
+                msg = 'Expected a failure for %r' % e
+                raise Exception(msg)
+        if e in errors:
+            del errors[e]
+    
     if errors:
         msg = 'Found %s errors.\n\n' % len(errors)
         msg += "\n".join(sorted(errors))
@@ -174,12 +197,13 @@ def summary(results, out, errors_only):
 
 def process(dirname, e):
     db_view = db_view_from_dirname(dirname)
+    host_cache = HostCache(db_view)
     e.repo = db_view.repos[e.repo_name]
     e.shelf = e.repo.shelves[e.shelf_name]
     e.library = e.shelf.libraries[e.library_name]
     e.things = e.library.things.child(e.spec_name)
     subscribed_shelves = get_all_shelves(db_view)
-    e.context = TheContext(db_view, subscribed_shelves, e.library_name)
+    e.context = TheContext(host_cache, db_view, subscribed_shelves, e.library_name)
     e.mcdp_library = e.context.get_library()
     
     source = e.things[e.thing_name]

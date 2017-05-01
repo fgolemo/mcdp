@@ -173,7 +173,6 @@ class MCDPLibrary(object):
         x =  self._load_spec_data(spec_name, name)
         data = x['data']
         realpath = x['realpath']
-        
 
         current_generation = 3
         

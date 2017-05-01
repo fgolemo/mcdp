@@ -1,4 +1,4 @@
 assert_equal(
-    solve(<0s, 0kg, 0W>, `drone),
+    solve(⟨0s, 0kg, 0W⟩, `Drone),
     upperclosure {0.0 kg}
 ) 

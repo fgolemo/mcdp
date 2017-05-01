@@ -1,6 +1,6 @@
  # mcdp-plot --cache --plots ndp_graph_enclosed -D ../.. -d . duckiebot0
 
- mcdp {
+ mcdp { 
   dagu_chassis = instance `DaguChassis
   battery_ravpower = instance `BatteryRavpower
 
@@ -13,7 +13,7 @@
 
   gpiocom required by rpi ≼ com provided by pi_camera
 
-  cable = instance `USB_A_to_Micro_B_cable
+  cable = instance `USB_A_to_micro_B_cable
 
   USBMicroCharger = instance `USBMicroCharging
 
