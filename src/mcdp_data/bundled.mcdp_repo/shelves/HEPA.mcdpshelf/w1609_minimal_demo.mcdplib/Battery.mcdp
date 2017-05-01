@@ -1,0 +1,7 @@
+mcdp {
+    provides capacity [J]
+    requires mass [g]
+    specific_energy = 300 Wh / kg
+
+    required mass ≽ provided capacity / specific_energy
+} 

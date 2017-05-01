@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from collections import namedtuple
 
-from contracts.utils import indent
+from contracts.utils import indent, check_isinstance
 
 
 def isnamedtupleinstance(x):
@@ -19,9 +19,12 @@ def isnamedtuplewhere(x):
     d = x._asdict()
     return 'where' in d
 
-
 def namedtuplewhere(a, b):
-    fields = b.split(" ")
+    check_isinstance(b, (list, str))
+    if isinstance(b, list):
+        fields = b
+    else:
+        fields = b.split(" ")
     assert not 'where' in fields
     fields.append('where')
     base = namedtuple(a, fields)

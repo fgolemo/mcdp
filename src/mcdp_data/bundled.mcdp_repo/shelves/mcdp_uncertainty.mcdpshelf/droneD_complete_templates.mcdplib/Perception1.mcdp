@@ -1,0 +1,8 @@
+mcdp {
+    provides velocity [m/s]
+    requires power [W]
+
+    c = 1 W * s / m
+
+    required power >= c * provided velocity
+}
