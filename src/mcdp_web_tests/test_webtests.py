@@ -192,9 +192,10 @@ class FunctionalTests(unittest.TestCase):
         spider.visit(ushelf + '/libraries/documents/test_subfigure.html')
         
         spider.visit('/tree')
-        max_fails=  10
+        max_fails =  10
+        max_pages = 100
         try:
-            spider.go(max_fails=max_fails)
+            spider.go(max_fails=max_fails, max_pages=max_pages)
         except KeyboardInterrupt:
             pass
         spider.log_summary()

@@ -29,12 +29,18 @@ class Spider(object):
     def visit(self, url):
         self.queue.append(url)
                           
-    def go(self, max_fails=None):
+    def go(self, max_fails=None, max_pages=None):
         while self.queue:
             self.step()
             if max_fails is not None:
                 if len(self.failed) >= max_fails:
                     msg = 'Exiting because of max fails reached.'
+                    logger.debug(msg)
+                    break
+                
+            if max_pages is not None:
+                if len(self.visited) > max_pages:
+                    msg = 'Exiting because of max_pages = %d reached.' % max_pages
                     logger.debug(msg)
                     break
             
