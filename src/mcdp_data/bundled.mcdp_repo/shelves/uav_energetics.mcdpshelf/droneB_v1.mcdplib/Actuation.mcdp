@@ -1,0 +1,10 @@
+mcdp {
+	provides lift  [N]
+	requires power [W]
+	requires actuator_mass [g]
+	
+	c = 2 W/N^2
+	power >= (lift^2) * c
+
+	actuator_mass >= 50 g
+}
