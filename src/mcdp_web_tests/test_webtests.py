@@ -1,4 +1,4 @@
-from comptests.registrar import run_module_tests, comptest
+from comptests.registrar import run_module_tests, comptest, comptest_fails
 from mcdp import MCDPConstants
 from mcdp.logs import logger
 from mcdp_docs.preliminary_checks import assert_not_contains
@@ -226,7 +226,7 @@ class FunctionalTests(unittest.TestCase):
 #                 msg += '\n'.join('- %s' % _ for _ in sorted(spider.failed))
             raise_desc(Exception, msg)
 
-
+@comptest_fails
 def check_tree():
     ft = FunctionalTests()
     ft.setUp()
