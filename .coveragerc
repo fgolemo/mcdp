@@ -1,3 +1,7 @@
+[run]
+
+source = mcdp,mcdp_cli,mcdp_comp_tests,mcdp_data,mcdp_depgraph,mcdp_docs,mcdp_docs_tests,mcdp_dp,mcdp_dp_tests,mcdp_figures,mcdp_figures_tests,mcdp_hdb,mcdp_hdb_,mcdp,mcdp_hdb_,mcdp_tests,mcdp_hdb_tests,mcdp_ipython_utils,mcdp_lang,mcdp_lang_tests,mcdp_lang_utils,mcdp_library,mcdp_library_tests,mcdp_maps,mcdp_opt,mcdp_opt_tests,mcdp_posets,mcdp_posets_tests,mcdp_repo,mcdp_repo_tests,mcdp_report,mcdp_report_ndp_tests,mcdp_shelf,mcdp_shelf_tests,mcdp_tests,mcdp_user_db,mcdp_utils_gitrepo,mcdp_utils_indexing,mcdp_utils_misc,mcdp_utils_xml,mcdp_web,mcdp_web_test,mocdp,multi_index
+
 [report]
 # Regexes for lines to exclude from consideration
 exclude_lines =
