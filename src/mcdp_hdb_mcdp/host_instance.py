@@ -12,6 +12,7 @@ from mcdp_hdb.pipes import mount_git_repo, WriteToRepoCallback, mount_directory
 from mcdp_utils_misc import format_list
 
 from .main_db_schema import DB
+from mcdp_hdb_mcdp.host_cache import HostCache
 
 
 class HostInstance(object):
@@ -36,6 +37,7 @@ class HostInstance(object):
             
             If no 'user_db' is passed, then we create an empty one inside root. 
         '''
+        
         self.repos = {}
         self.who = {'host': host_name(), 'actor': 'system', 'instance': instance} 
         
@@ -69,10 +71,7 @@ class HostInstance(object):
                 logger.info('Creating local %s from remote %r' % (instance, upstream))
                 head = repo.create_head(instance, origin.refs[upstream])
                 head.checkout()
-                logger.info('Pushing local %s' % (instance))
-#                 origin.create_ref(instance)
-#                 head.set_tracking_branch(origin.refs[instance])
-#                 origin.push()
+                logger.info('Pushing local %s' % (instance)) 
                 repo.git.push('-u', 'origin', instance) 
                  
             self.repos[repo_name] = repo
@@ -88,6 +87,8 @@ class HostInstance(object):
             logger.info('* repo %r has shelves %s ' % (repo_name, format_list(repo.shelves)))
         logger.info('Set up users %s.' % format_list(self.db_view.user_db.users))
         
+        self.host_cache = HostCache(self.db_view)
+        
     def mount(self):
         db_schema = DB.db
         db_data = db_schema.generate_empty()
@@ -96,12 +97,7 @@ class HostInstance(object):
         db_view.set_root()
         self.db_view = db_view
         
-        disk_map = DB.dm
-#         mount_git_repo(disk_map=disk_map, view0=db_view, child_name='user_db', repo=self.repos['user_db'])
-#         user_db = db_view.user_db
-#         assert user_db._notify_callback is not None
-#         PushCallback.add_to(user_db)
-#         
+        disk_map = DB.dm 
         view_repos = db_view.child('repos')
         
         for repo_name, dirname in self.repo_local.items():

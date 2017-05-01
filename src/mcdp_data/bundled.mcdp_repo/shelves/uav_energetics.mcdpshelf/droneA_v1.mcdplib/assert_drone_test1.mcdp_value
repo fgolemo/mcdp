@@ -1,4 +1,4 @@
 assert_equal(
-    solve(0 J, `battery),
+    solve(0 J, `Battery),
     upperclosure { 0 kg}
 )

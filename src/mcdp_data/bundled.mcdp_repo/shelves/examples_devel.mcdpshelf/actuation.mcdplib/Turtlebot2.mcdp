@@ -6,34 +6,34 @@
 
 mcdp {
     create = instance `IRobotCreate
-    xtion = instance `ASUS_Xtion_Pro
+    xtion = instance `ASUS_Xtion_pro
 
     netbook = instance `HP_G4S65UT
     charger = instance `IRobotCreateCharger
 
-    usbcom required by create <= usbcom provided by netbook
-    usbcom required by netbook <= usbcom provided by xtion
-    in required by create <= out provided by charger
+    usbcom required by create ≼ usbcom provided by netbook  
+    usbcom required by netbook ≼ usbcom provided by xtion
+    in required by create ≼ out provided by charger
     ignore dc provided by create
 
     fit = instance template mcdp {
-      provides p1 [`Payload]
-      provides p2 [`Payload]
-      requires payload [`Payload]
+        provides p1 [`Payload]
+        provides p2 [`Payload]
+        requires payload [`Payload]
     }
 
-    fit.p1 >= netbook.payload
-    fit.p2 >= xtion.payload
+    p1 provided by fit ≽ payload required by netbook
+    p2 provided by fit ≽ payload required by xtion
 
-    create.payload >= fit.payload
+    payload provided by create ≽ payload required by fit
 
     requires budget [USD]
-    required budget >= (
+    required budget ≽ (
         budget required by create +
         budget required by xtion +
         budget required by netbook +
         budget required by charger
     )
     provides motion using create
-    requires charging >= in required by charger
+    requires charging = in required by charger
 }

@@ -4,7 +4,8 @@ from mcdp.exceptions import DPSemanticError
 from mcdp_figures import MakeFiguresNDP, MakeFiguresPoset
 from mcdp_lang.parse_interface import parse_ndp
 from mcdp_report.image_source import ImagesFromPaths
-from mcdp_tests.generation import for_all_nameddps_dyn, for_all_posets
+from mcdp_tests.generation import for_all_nameddps_dyn, for_all_posets,\
+    for_all_posets_dyn
 import random
 
 from reprep import Report
@@ -47,9 +48,9 @@ def allformats(context, id_ndp, ndp, libname):
                 context.add_report(r, 'allformats', id_ndp=id_ndp, which=name)
 
 
-@for_all_posets
+@for_all_posets_dyn
 def allformats_posets(context, id_poset, poset, libname):
-    mf = MakeFiguresPoset(poset=poset, image_source=None, yourname=None)
+    mf = MakeFiguresPoset(poset=poset, image_source=None)
     for name in mf.available():
         do_it = libname in ['basic', 'libtemplates', 'solver'] or \
             toss_coin(id_poset, MCDPConstants.test_fraction_of_allreports) 

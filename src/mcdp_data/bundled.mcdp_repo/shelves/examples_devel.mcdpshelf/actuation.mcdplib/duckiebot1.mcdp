@@ -8,7 +8,7 @@ mcdp {
   servo_hat = instance `AdafruitServoHat
   lsd_hat = instance `LSDHat
   duckie = instance `Duckie
-  cable = instance `USB_A_to_Micro_B_cable
+  cable = instance `USB_A_to_micro_B_cable  
 
   provides cuteness using duckie
 

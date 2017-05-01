@@ -1,34 +1,34 @@
 mcdp {  
-  provides endurance     [s] 
-  provides extra_payload [kg]
-  provides extra_power   [W]
-  provides num_missions [dimensionless]
+    provides endurance     [s] 
+    provides extra_payload [kg]
+    provides extra_power   [W]
+    provides num_missions [dimensionless]
  
-  battery = instance `batteries_v1.Batteries
-  actuation = instance `actuations_v2.Actuation
+    battery = instance `batteries_v1.batteries
+    actuation = instance `actuations_v2.actuation
 
-  total_power = power required by actuation + extra_power
-  capacity provided by battery >= endurance * total_power
+    total_power = power required by actuation + provided extra_power
+    capacity provided by battery ≽ provided endurance · total_power
  
-  total_mass = (
-      mass required by battery + 
-      actuator_mass required by actuation 
-      + extra_payload)
+    total_mass = (
+    mass required by battery + 
+    actuator_mass required by actuation 
+    + provided extra_payload)
 
-  gravity = 9.81 m/s^2
-  weight = total_mass * gravity
+    gravity = 9.81 m/s²
+    weight = total_mass · gravity
    
-  lift provided by actuation >= weight
+    lift provided by actuation ≽ weight
 
-  requires total_mass
+    requires total_mass
   
-  labor_cost = (10 $) * (maintenance required by battery)
+    labor_cost = (10 $) · (maintenance required by battery)
 
-  requires total_cost >= (
+    requires total_cost ≽ (
     cost required by actuation + 
     cost required by battery + 
     labor_cost)
   
-  missions provided by battery  >= provided num_missions
+    missions provided by battery  ≽ provided num_missions
 
 }
