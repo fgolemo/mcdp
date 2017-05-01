@@ -130,7 +130,7 @@ def generate_view_syntax(e, make_relative):
             # check if the thing exists
             
                 res = get_link_library(libname) + '%s/%s/views/syntax/' % (specname, thingname)
-                #logger.debug(' link for %s = %s' % (thingname, res))
+#                 logger.debug(' link for %s = %s' % (thingname, res))
                 return res
             else:
                 msg = 'No such thing %r' % thingname
