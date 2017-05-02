@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 from contextlib import contextmanager
-import sys
-
 from contracts import contract
-from contracts.utils import raise_desc, raise_wrapped, check_isinstance, indent
+from mcdp.constants import MCDPConstants
+from mcdp.exceptions import (DPInternalError, DPSemanticError,
+                             DPSemanticErrorNotConnected, MCDPExceptionWithWhere, mcdp_dev_warning,
+                             DPNotImplementedError, DPSyntaxError)
 from mcdp_dp import (CatalogueDP, Conversion, JoinNDP, MeetNDualDP, get_conversion, make_series, VariableNode,
                      ConstantMinimals, LimitMaximals, OpaqueDP, FunctionNode, ResourceNode)
 from mcdp_posets import FiniteCollectionAsSpace, NotEqual, NotLeq, PosetProduct, get_types_universe
@@ -17,10 +18,11 @@ from mocdp.comp.context import (CFunction, CResource, NoSuchMCDPType,
 from mocdp.comp.ignore_some_imp import ignore_some
 from mocdp.comp.make_approximation_imp import make_approximation
 from mocdp.comp.template_deriv import cndp_eversion
-from mcdp.exceptions import (DPInternalError, DPSemanticError,
-                              DPSemanticErrorNotConnected, MCDPExceptionWithWhere, mcdp_dev_warning,
-                              DPNotImplementedError, DPSyntaxError)
 from mocdp.ndp.named_coproduct import NamedDPCoproduct
+import sys
+import warnings
+
+from contracts.utils import raise_desc, raise_wrapped, check_isinstance, indent
 
 from .eval_codespec_imp_utils_instantiate import ImportFailure, import_name
 from .eval_constant_imp import eval_constant
@@ -35,8 +37,6 @@ from .parse_actions import (add_where_information, decorate_add_where, raise_wit
                             parse_wrap)
 from .parts import CDPLanguage
 from .utils_lists import get_odd_ops, unwrap_list
-import warnings
-from mcdp.constants import MCDPConstants
 
 
 CDP = CDPLanguage
@@ -844,7 +844,6 @@ def eval_statement_SetNameRValue(r, context):
     """
     from .eval_resources_imp import eval_rvalue
     from .eval_constant_imp import NotConstant
-    from .eval_lfunction_imp import eval_lfunction
     from .syntax import Syntax
         
     check_isinstance(r, CDP.SetNameRValue)
@@ -899,7 +898,7 @@ def eval_statement_SetNameRValue(r, context):
             context.set_var2resource(name, x)
             used_rvalue = True
             
-        except DPSemanticError as e:
+        except DPSemanticError: # as e:
 #             if 'not declared' in str(e) and alt is not None:
 #                 # XXX: this seems not to be used anymore
 #                 # after we implemented the interpretation at the syntax level
