@@ -1,8 +1,15 @@
 # -*- coding: utf-8 -*-
 from comptests.registrar import run_module_tests, comptest
-from mcdp_utils_xml.parsing import bs
+from mcdp_docs.manual_join_imp import manual_join
+from mcdp_docs.pipeline import render_complete
+from mcdp_docs.toc_number import number_styles, render_number
 from mcdp_docs.tocs import generate_toc
+from mcdp_library.library import MCDPLibrary
+from mcdp_tests import logger
+from mcdp_utils_xml.parsing import bs
+
 from contracts.utils import indent
+
 
 @comptest
 def test_toc():
@@ -27,15 +34,157 @@ def test_toc():
 </html>
     """
     soup = bs(s)
-    print soup
+    print(soup)
 #     body = soup.find('body')
-    toc = generate_toc(soup)
+    _toc = generate_toc(soup)
     s = str(soup)
     expected = ['sec:one', 'sub:two']
-    print indent(s, 'transformed > ')
+    print(indent(s, 'transformed > '))
     for e in expected:
         assert e in s
+
+@comptest
+def test_render_number():
+    styles = sorted(number_styles)
+    numbers = range(0, 55)
+    for s in styles:
+        r = [render_number(_, s) for _ in numbers]
+        print('%s: %s' % (s, r))
     
+@comptest
+def test_toc_numbers1():
+    s = r"""
+    
+<div id='toc'></div>
+
+# Part One {#part:one}
+
+# Chapter One
+
+## Sub One_point_One
+
+Referring to [](#fig:One) and [](#fig:Two) and [](#tab:One).
+
+Also referring only with numbers: 
+<a href="#fig:One" class='only_number'></a>,
+<a href="#fig:Two" class='only_number'></a>,
+<a href="#tab:One" class='only_number'></a>.
+
+<s figure-id="fig:One">Figure One</s>
+
+### Sub sub One_point_One_point_One
+#### Par a
+#### Par b
+
+
+## Sub One_point_Two
+
+Referring to subfigures [](#subfig:child1) and [](#subfig:child2).
+  
+<div figure-id="fig:parent">
+    <div figure-id="subfig:child1" figure-caption="child1">
+    child1
+    </div>
+    <div figure-id="subfig:child2" figure-caption="child2">
+    child2
+    </div>
+</div>
+
+
+<div figure-id="code:code1">
+    <pre><code>code1</code></pre>
+</div>
+
+## Sub with `code` in the <k>name</k>
+
+# Chapter Two 
+
+<s figure-id="fig:Two">Figure Two</s>
+
+<s figure-id="tab:One">Table One</s>
+
+## Sub Two_point_One
+
+# Part Two {#part:two}
+
+# Chapter Three
+
+\begin{definition}[DefinitionA]\label{def:A}Definition A\end{definition}
+\begin{defn}[DefinitionA2]\label{def:A2}Definition A2\end{defn}
+
+\begin{proposition}[PropositionB]\label{prop:B}Proposition B\end{proposition}
+
+\begin{problem}[ProblemC]\label{prob:C}Problem C\end{problem}
+
+\begin{example}[exampleD]\label{exa:D}...\end{example}
+\begin{remark}[remarkE]\label{rem:E}...\end{remark}
+\begin{lemma}[lammaF]\label{lem:F}...\end{lemma}
+\begin{theorem}[theoremG]\label{thm:G}...\end{theorem}
+\begin{thm}[theoremG2]\label{thm:G2}...\end{thm}
+
+Citing: 
+[](#def:A),
+[](#prop:B),
+[](#prob:C),
+[](#exa:D),
+[](#rem:E),
+[](#lem:F),
+[](#thm:G).
+
+Citing full name:
+<a href="#def:A" class="number_name"></a>,
+<a href="#prop:B" class="number_name"></a>,
+<a href="#prob:C" class="number_name"></a>,
+<a href="#exa:D" class="number_name"></a>,
+<a href="#rem:E" class="number_name"></a>,
+<a href="#lem:F" class="number_name"></a>,
+<a href="#thm:G" class="number_name"></a>.
+
+Citing only name:
+<a href="#def:A" class="only_name"></a>,
+<a href="#prop:B" class="only_name"></a>,
+<a href="#prob:C" class="only_name"></a>,
+<a href="#exa:D" class="only_name"></a>,
+<a href="#rem:E" class="only_name"></a>,
+<a href="#lem:F" class="only_name"></a>,
+<a href="#thm:G" class="only_name"></a>.
+
+
+Citing only number:
+<a href="#def:A" class="only_number"></a>,
+<a href="#prop:B" class="only_number"></a>,
+<a href="#prob:C" class="only_number"></a>,
+<a href="#exa:D" class="only_number"></a>,
+<a href="#rem:E" class="only_number"></a>,
+<a href="#lem:F" class="only_number"></a>,
+<a href="#thm:G" class="only_number"></a>.
+
+
+# Appendices {#part:appendices}
+
+# Appendix A {#app:A}
+# Appendix B {#app:B}
+## App sub B_point_One 
+### App subsub B_point_One_point_One
+
+    """
+    library = MCDPLibrary()
+    raise_errors = True
+    realpath = __name__
+    s = render_complete(library, s, raise_errors, realpath)
+    
+    template = """<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        </head><body></body></html>
+        """
+    files_contents = [(('a','b'), s)]
+    stylesheet = 'v_manual_blurb_ready'
+    res = manual_join(template=template, files_contents=files_contents, bibfile=None, stylesheet=stylesheet)
+
+#     print res
+    fn = 'test_toc_numbers1.html'
+    logger.info('written on %s' % fn)
+    with open(fn, 'w') as f:
+        f.write(res) 
 
 
 

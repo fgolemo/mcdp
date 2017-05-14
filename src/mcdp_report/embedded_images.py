@@ -292,6 +292,8 @@ def embed_pdf_images(soup, resolve, density):
 def embed_pdf_image(tag, resolve, density):
     assert tag.name == 'img'
     assert tag.has_attr('src')
+    #print('!!embedding %s' % str(tag))
+    #raise Exception(str(tag))
     # load pdf data    
     data_pdf = resolve(tag['src'])
     if data_pdf is None:
@@ -330,10 +332,12 @@ def embed_pdf_image(tag, resolve, density):
         use_width_in = width_in 
         use_height_in = height_in
 
-    add_style(tag, width='%sin' % use_width_in, height='%sin' % use_height_in)        
+    # Add it before so that we can override
+    add_style(tag, after=False, width='%sin' % use_width_in, height='%sin' % use_height_in)        
     tag['size_in_pixels'] = '%s, %s' % (width_px, height_px)
     # encode
     tag['src'] = data_encoded_for_src(data_png, 'png')
+    
         
 
 def get_pixel_width_height_of_png(data_png):

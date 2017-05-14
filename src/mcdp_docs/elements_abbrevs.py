@@ -1,5 +1,7 @@
-from bs4.element import Tag
 from mcdp_utils_xml.add_class_and_style import add_class
+
+from bs4.element import Tag, NavigableString
+
 
 def other_abbrevs(soup):
     """
@@ -13,6 +15,7 @@ def other_abbrevs(soup):
         
         <p>TODO:...</p> -> <div class="todo"><p><span>TODO:</span></p>
     """ 
+    
     
     translate = {
         'v': 'mcdp-value',
@@ -28,21 +31,57 @@ def other_abbrevs(soup):
         for e in soup.select(k):
             e.name = v
 
-    # fix todo
-    for p in list(soup.select('p')):
-        s = " ".join(p.strings) # note: strings
+    from mcdp_docs.task_markers import substitute_task_markers
+    substitute_task_markers(soup)
+    substitute_special_paragraphs(soup)
+    
+    
+def substitute_special_paragraphs(soup):
+    prefix2class = {
+        'TODO: ': 'todo',
+        'TOWRITE: ': 'special-par-towrite',  
+        'Task: ': 'special-par-task',
+        'Remark: ': 'special-par-remark',  
+        'Note: ': 'special-par-note',
+    } 
+    
+    for prefix, klass in prefix2class.items():
+        substitute_special_paragraph(soup, prefix, klass)
         
-        if s is not None:
-            TODO = 'TODO:'
-            if s.startswith(TODO):
-                without = s[len(TODO):]
-                p.string = without.strip()
-                div = Tag(name='div')
-                add_class(div, 'todo-wrap')
-                add_class(p, 'todo')
-                parent = p.parent
-                i = parent.index(p)
-                p.extract()
-                div.append(p)
-                parent.insert(i, div)
+def substitute_special_paragraph(soup, prefix, klass):
+    """ 
+        Looks for paragraphs that start with a simple string with the given prefix. 
+    
+        From:
+        
+            <p>prefix contents</p>
+            
+        Creates:
+        
+            <div class='klass-wrap'><p class='klass'>contents</p></div>
+    """
+    ps = list(soup.select('p'))
+    for p in ps:
+        # Get first child
+        c = p.contents[0]
+        if not isinstance(c, NavigableString):
+            continue
+
+        s = c.string
+        starts = s.lower().startswith(prefix.lower())
+        if not starts: 
+            continue
+
+        without = s[len(prefix):]
+        ns = NavigableString(without)
+        c.replaceWith(ns)
+    
+        div = Tag(name='div')
+        add_class(div, klass + '-wrap')
+        add_class(p, klass)
+        parent = p.parent
+        i = parent.index(p)
+        p.extract()
+        div.append(p)
+        parent.insert(i, div)
 

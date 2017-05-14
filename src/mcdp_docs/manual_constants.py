@@ -40,6 +40,11 @@ class MCDPManualConstants:
     
     macros['MCDPConstants'] = MCDPConstants.__dict__  # @UndefinedVariable
     
+    CLASS_ONLY_NUMBER = 'only_number'
+    CLASS_ONLY_NAME = 'only_name'
+    CLASS_NUMBER_NAME ='number_name'
+
+
 #     InfoBegin
 # InfoKey: dc:description
 # InfoValue: This is a description

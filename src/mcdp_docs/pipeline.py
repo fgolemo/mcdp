@@ -25,7 +25,8 @@ __all__ = [
 
 @contract(returns='str', s=str, library=MCDPLibrary, raise_errors=bool)
 def render_complete(library, s, raise_errors, realpath, generate_pdf=False,
-                    check_refs=False, do_math=True, filter_soup=None):
+                    check_refs=False, do_math=True, filter_soup=None,
+                    raise_missing_image_errors = False):
     """
         Transforms markdown into html and then renders the mcdp snippets inside.
         
@@ -155,7 +156,7 @@ def render_complete(library, s, raise_errors, realpath, generate_pdf=False,
                             raise_errors=raise_errors, realpath=realpath)
     if filter_soup is not None:
         filter_soup(library=library, soup=soup)
-    raise_missing_image_errors = False
+    
     
     embed_images_from_library2(soup=soup, library=library, 
                               raise_errors=raise_missing_image_errors)

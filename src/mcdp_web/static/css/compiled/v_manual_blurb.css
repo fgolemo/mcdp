@@ -301,44 +301,57 @@ ul.toc {
     content: leader('.') target-counter(attr(href), page);
   }
 }
+ul#main_toc .toc_ul-depth-4 {
+  display: none;
+}
+ul#main_toc .toc_link-depth-100 {
+  display: none;
+}
+ul#main_toc .toc_ul-depth-100 {
+  display: none;
+}
+ul#main_toc .toc_link-depth-4 {
+  color: blue;
+}
+ul#main_toc .toc_link-depth-4 .toc_what,
+ul#main_toc .toc_link-depth-4 .toc_number,
+ul#main_toc .toc_link-depth-4 .toc_sep {
+  display: none;
+  color: red;
+}
 ul#main_toc ul {
   margin-left: 0;
 }
 ul#main_toc ul ul {
   margin-left: 0;
 }
-ul#main_toc ul ul li {
+.toc_li-depth-3 {
   display: inline;
 }
-ul#main_toc ul ul li a {
+.toc_li-depth-3 a {
   color: gray !important;
 }
-ul#main_toc ul ul li a span.toc_number {
+.toc_li-depth-3 a span.toc_number {
   display: none;
 }
-ul#main_toc ul ul li a span.toc_name::before {
-  margin-right: 3pt;
-  content: '⟡';
-  /*◇';*/
-  font-family: 'Cambria' !important;
-  font-size: 6pt;
+.toc_li-depth-3 a span.toc_name::before {
   /*padding-bottom: 5pt !important;*/
   /*border: solid 1px red;*/
   /*margin-top: -20pt !important;*/
   /*display: inline;*/
 }
-ul#main_toc ul ul li:first-child a span.toc_name::before {
-  content: '';
-  margin: 0;
+.toc_li-depth-3 + .toc_li-depth-3::before {
+  margin-right: 1.6pt;
+  margin-left: 1.6pt;
+  content: '◇';
+  color: lightgrey !important;
+  font-size: 6pt;
 }
 /* first header down is highlighted */
 ul.chapter_toc > li > a {
   font-weight: bold;
 }
 /* below numbers are erased */
-ul.chapter_toc > li > ul > li > a.toc_link > span.toc_number {
-  display: none;
-}
 ul.chapter_toc > li > ul > li > a.toc_link > span.toc_name::before {
   content: '•';
   margin-right: 0.5em;
@@ -385,11 +398,6 @@ ul#main_toc > li > a[href^='#part:'] {
   font-weight: bold;
   text-align: center;
   color: black !important;
-}
-ul#main_toc > li > a[href^='#part:'] ::before {
-  content: 'Part ? – ';
-  content: 'Part ' target-counter(attr(href), part) ' – ';
-  font-weight: bold;
 }
 ul#main_toc > li > a[href^='#part:'] ::after {
   content: none !important;
@@ -1141,6 +1149,50 @@ p.todo::before {
   content: 'TODO: ';
   font-weight: bold;
 }
+p.special-par-note::before {
+  content: 'Note: ';
+  font-weight: bold;
+}
+p.special-par-task::before {
+  content: 'Task: ';
+  font-weight: bold;
+}
+.status-done::after,
+.status-inprogress::after,
+.status-todo::after {
+  display: inline-block;
+  font-size: 60%;
+  font-variant: small-caps;
+  font-family: monospace;
+  font-spacing: 1px;
+  padding: 1.4px;
+}
+.status-done::after {
+  content: 'DONE';
+  color: darkgreen;
+  border: solid 1px darkgreen;
+}
+.status-inprogress::after {
+  content: 'IN PROGRESS';
+  color: #cc6600;
+  border: solid 1px #cc6600;
+}
+.status-todo::after {
+  content: 'TODO';
+  color: purple;
+  border: solid 1px purple;
+}
+.status-XXX {
+  background-color: pink;
+}
+p.special-par-remark::before {
+  content: 'Remark: ';
+  font-weight: bold;
+}
+p.special-par-towrite::before {
+  content: 'To write: ';
+  font-weight: bold;
+}
 figure:not(.subfloat) {
   /*counter-increment: figure;*/
   counter-reset: subfloat;
@@ -1214,220 +1266,12 @@ figure.table figcaption {
   letter-spacing: 0.24pt;
   font-size: 10pt;
 }
-/*@num-eq: target-counter(attr(href), listing);
-@ref-eq: '(' @num-eq ')';
-*/
-figure[id^='tab:'] > figcaption:not(:empty)::before {
-  content: 'Table' '\0000a0' counter(table) '. ';
-}
-figure[id^='tab:'] > figcaption:empty::before {
-  content: 'Table' '\0000a0' counter(table);
-}
-figure[id^='fig:'] > figcaption:not(:empty) {
-  text-align: justify;
-}
-figure[id^='fig:'] > figcaption:not(:empty)::before {
-  content: 'Figure' '\0000a0' counter(figure) '. ';
-}
-figure[id^='fig:'] > figcaption:empty::before {
-  content: 'Figure' '\0000a0' counter(figure);
-}
-figure[id^='subfig:'] > figcaption:not(:empty)::before {
-  content: '(' counter(subfloat, lower-alpha) ')' '\0000a0';
-}
-figure[id^='subfig:'] > figcaption:empty::before {
-  content: '(' counter(subfloat, lower-alpha) ')';
-}
-figure[id^='subfig:'] > figcaption:empty {
-  text-align: center;
-}
-/* Empty caption */
-figcaption {
-  font-size: smaller;
-}
-a[href^='#code:']:empty.only-number::before {
-  content: '♦';
-  content: target-counter(attr(href), listing);
-}
-a[href^='#code:']:empty:not(.only-number)::before {
-  content: 'Listing' '\0000a0' '♦';
-  content: 'Listing' '\0000a0' target-counter(attr(href), listing);
-}
-a[href^='#fig:']:empty.only-number::before {
-  content: '♦';
-  content: target-counter(attr(href), figure);
-}
-a[href^='#fig:']:empty:not(.only-number)::before {
-  content: 'Figure' '\0000a0' '♦';
-  content: 'Fig.' '\0000a0' target-counter(attr(href), figure);
-}
-a[href^='#subfig:']:empty.only-number::before {
-  content: '♦';
-  content: target-counter(attr(href), figure) target-counter(attr(href), subfloat, lower-alpha);
-}
-a[href^='#subfig:']:empty:not(.only-number)::before {
-  content: 'Fig.' '\0000a0' '♦' '?';
-  content: 'Fig.' '\0000a0' target-counter(attr(href), figure) target-counter(attr(href), subfloat, lower-alpha);
-}
-a[href^='#exa:']:empty.only-number::before {
-  content: '♦';
-  content: target-counter(attr(href), example);
-}
-a[href^='#exa:']:empty:not(.only-number)::before {
-  content: 'Example' '\0000a0' '♦';
-  content: 'Example' '\0000a0' target-counter(attr(href), listing);
-}
-a[href^='#tab:']:empty:not(.only-number)::before {
-  content: 'Table♦';
-  content: 'Table\0000a0' target-counter(attr(href), table);
-}
-a[href^='#tab:']:empty.only-number::before {
-  content: '♦';
-  content: target-counter(attr(href), table);
-}
-a[href^='#rem:']:empty::before {
-  content: 'Remark.♦';
-  content: 'Remark\0000a0' target-counter(attr(href), remark);
-}
-a[href^='#lem:']:empty::before {
-  content: 'Lemma.♦';
-  content: 'Lemma\0000a0' target-counter(attr(href), lemma);
-}
-a[href^='#def:']:empty::before {
-  content: 'Def.♦';
-  content: 'Def.\0000a0' target-counter(attr(href), definition);
-}
-a[href^='#prop:']:empty::before {
-  content: 'Prop.♦';
-  content: 'Prop.\0000a0' target-counter(attr(href), proposition);
-}
-a[href^='#prob:']:empty::before {
-  content: 'Problem.♦';
-  content: 'Problem\0000a0' target-counter(attr(href), problem);
-}
-a[href^='#thm:']:empty:not(.only-number)::before {
-  content: 'Theorem♦';
-  content: 'Theorem\0000a0' target-counter(attr(href), theorem);
-}
-a[href^='#thm:']:empty.only-number::before {
-  content: '♦';
-  content: target-counter(attr(href), theorem);
-}
-a[href^='#sub:']:empty:not(.only-number)::before {
-  content: 'Subsection♦.♦';
-  content: 'Subsection\0000a0' target-counter(attr(href), section) '.' target-counter(attr(href), subsection);
-}
-a[href^='#sub:']:empty.only-number::before {
-  content: '♦.♦';
-  content: target-counter(attr(href), section) '.' target-counter(attr(href), subsection);
-}
-a[href^='#subsub:']:empty::before {
-  content: 'Section♦';
-  content: 'Section\0000a0' target-counter(attr(href), section) '.' target-counter(attr(href), subsection) '-' target-counter(attr(href), subsubsection, upper-alpha);
-}
-/** maybe chapter **/
-/** Very important - otherwise counters are local to divs,
-    and not robust to errors with divs */
-body {
-  counter-reset: part table listing bib section appendix subsection subsubsection figure example remark definition proposition lemma theorem problem ;
-}
-h1 {
-  counter-reset: subsection subsubsection;
-}
-h1:not([nonumber])[id^='part:'] {
-  counter-increment: part;
-}
-h1:not([nonumber])[id^='sec:'] {
-  counter-increment: section;
-}
-h1:not([nonumber])[id^='app:'] {
-  counter-increment: appendix;
-}
 h1 {
   margin-bottom: 2em;
-}
-/*h2 :not([nonumber]) */
-/*h2:not([nonumber]) { }*/
-/*border: solid;*/
-h2 {
-  counter-reset: subsubsection;
-}
-h2:not([nonumber]) {
-  counter-increment: subsection;
-}
-h3:not([nonumber]) {
-  counter-increment: subsubsection;
-}
-a[href^='#sec:']::before {
-  content: 'Chapter♦';
-  content: 'Chapter\0000a0' target-counter(attr(href), section);
-}
-ul.toc a[href^='#app:']::before {
-  /* mdash: — ndahs:  –; */
-  content: 'Appendix\0000a0' '♦' ' –';
-  content: 'Appendix\0000a0' target-counter(attr(href), appendix, upper-alpha) ' –';
-  font-weight: bold;
-}
-ul.toc a[href^='#sec:']::before {
-  /* mdash: — ndahs:  –; */
-  content: 'Chapter\0000a0' '♦' ' –';
-  content: 'Chapter\0000a0' target-counter(attr(href), section) ' –';
-  font-weight: bold;
-}
-h1:not([nonumber])[id^="app:"]::before {
-  content: 'Appendix\0000a0' counter(appendix, upper-alpha);
-  display: block;
-  font-variant: small-caps;
-  font-size: smaller;
-  margin-bottom: 0.5em;
-}
-h1:not([nonumber])[id^="sec:"]::before {
-  content: 'Chapter\0000a0' counter(section);
-  display: block;
-  font-variant: small-caps;
-  font-size: smaller;
-  margin-bottom: 0.5em;
-}
-.toc_number {
-  display: none;
 }
 h1[nonumber]::before {
   /*content: '(u)';*/
 }
-ul.toc a[href^='#sub:']::before {
-  content: '♦.♦' ' –';
-  content: target-counter(attr(href), section) '.' target-counter(attr(href), subsection) ' –';
-}
-h2:not([nonumber])[id^='sub:']::before {
-  content: counter(section) '.' counter(subsection) '. ';
-}
-h2:not([nonumber])[id^='appsub:']::before {
-  content: counter(appendix, upper-alpha) '.' counter(subsection) '. ';
-}
-ul.toc a[href^='#subsub:']::before {
-  display: none;
-  content: none;
-}
-h3:not([nonumber])::before {
-  /*content: counter(section) '.' counter(subsection) '-' counter(subsubsection, upper-alpha) '. ';*/
-  content: counter(subsubsection, lower-alpha) ') ';
-}
-/*
-
-h1:not([nonumber])::after {
-    content: '{css_computed:"' counter(section)'"}';
-    color: green;
-}
-h2:not([nonumber])::after {
-    content: '{css_computed:"' counter(section)'.'counter(subsection) '"}';
-    color: green;
-}
-h3:not([nonumber])::after {
-    color: green;
-    content: '{css_computed:"' counter(section)'.'counter(subsection)'-'counter(subsubsection, upper-alpha) '"}';
-}
-
-*/
 /*TODO: make preprocessing into code*/
 /*f,r { font-family: monospace; font-size: 80%;}*/
 .f {
@@ -1467,17 +1311,6 @@ div.fbox {
 div.center,
 div.centering {
   text-align: center;
-}
-a[href^='#bib:']:empty::before {
-  content: '[' '♦' ']';
-  content: '[' target-counter(attr(href), bib) ']';
-}
-a[href^='#bib:']:not(:empty)::before {
-  content: '[' '♦' ', ';
-  content: '[' target-counter(attr(href), bib) ', ';
-}
-a[href^='#bib:']:not(:empty)::after {
-  content: ']';
 }
 figure.table figcaption {
   padding-bottom: 0.3em;
@@ -1639,13 +1472,6 @@ cite {
 cite + cite {
   padding-bottom: 0.5em;
 }
-cite[id^='bib:'] {
-  counter-increment: bib;
-}
-cite[id^='bib:']::before {
-  content: '[' counter(bib) '] ';
-  font-style: normal;
-}
 /* abstract */
 cite blockquote {
   display: none;
@@ -1655,6 +1481,68 @@ section > svg {
 }
 #bibliography_entries {
   display: none;
+}
+h1:not([nonumber])[id^="app:"]::before {
+  content: 'Appendix\0000a0' attr(label-number);
+  display: block;
+  font-variant: small-caps;
+  font-size: smaller;
+  margin-bottom: 0.5em;
+}
+h1:not([nonumber])[id^="sec:"]::before {
+  content: 'Chapter\0000a0' attr(label-number);
+  display: block;
+  font-variant: small-caps;
+  font-size: smaller;
+  margin-bottom: 0.5em;
+}
+h1:not([nonumber])[id^="part:"]::before {
+  content: 'Part\0000a0' attr(label-number);
+  display: block;
+  font-variant: small-caps;
+  font-size: smaller;
+  margin-bottom: 0.5em;
+}
+h2:not([nonumber])[id^='sub:']::before {
+  content: attr(label-number) '. ';
+}
+h2:not([nonumber])[id^='appsub:']::before {
+  content: attr(label-number) '. ';
+}
+h3:not([nonumber])::before {
+  /*content: counter(section) '.' counter(subsection) '-' counter(subsubsection, upper-alpha) '. ';*/
+  content: attr(label-self);
+}
+/*@num-eq: target-counter(attr(href), listing);
+@ref-eq: '(' @num-eq ')';
+*/
+figure[id^='tab:'] > figcaption:not(:empty)::before {
+  content: 'Table' '\0000a0' counter(table) '. ';
+}
+figure[id^='tab:'] > figcaption:empty::before {
+  content: 'Table' '\0000a0' counter(table);
+}
+figure[id^='fig:'] > figcaption:not(:empty) {
+  text-align: justify;
+}
+figure[id^='fig:'] > figcaption:not(:empty)::before {
+  content: 'Figure' '\0000a0' attr(label-number) '. ';
+}
+figure[id^='fig:'] > figcaption:empty::before {
+  content: 'Figure' '\0000a0' attr(label-number);
+}
+figure[id^='subfig:'] > figcaption:not(:empty)::before {
+  content: attr(label-self) '\0000a0';
+}
+figure[id^='subfig:'] > figcaption:empty::before {
+  content: attr(label-self);
+}
+figure[id^='subfig:'] > figcaption:empty {
+  text-align: center;
+}
+/* Empty caption */
+figcaption {
+  font-size: smaller;
 }
 /* These are the fixes for printing / prince */
 body {

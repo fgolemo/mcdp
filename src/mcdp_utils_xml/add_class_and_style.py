@@ -1,5 +1,5 @@
 
-def add_style(tag, **kwargs):
+def add_style(tag, after=True, **kwargs):
     """    
         add_style(tag, width="2in")
     """
@@ -12,9 +12,14 @@ def add_style(tag, **kwargs):
         s = s1
     else:
         s0 = s0.rstrip();
-        if not s0.endswith(';'):
-            s0 += ';'
-        s = s0 + s1 
+        if after:
+            if not s0.endswith(';'):
+                s0 += ';'
+            s = s0 + s1
+        else:
+            if not s1.endswith(';'):
+                s1 += ';' 
+            s = s1 + s0
     tag['style'] = s
     
 def add_class(e, c):

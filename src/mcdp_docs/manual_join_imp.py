@@ -10,9 +10,10 @@ from bs4 import BeautifulSoup
 from bs4.element import Comment, Tag, NavigableString
 
 from .macros import replace_macros
-from .manual_constants import MCDPManualConstants
 from .read_bibtex import get_bibliography
 from .tocs import generate_toc
+from mcdp_docs.minimal_doc import add_extra_css
+from mcdp_docs.tocs import substituting_empty_links
 
 
 def get_manual_css_frag():
@@ -35,20 +36,13 @@ def get_manual_css_frag():
         assert False
             
 @contract(files_contents='list( tuple( tuple(str,str), str) )', returns='str')
-def manual_join(src_dir, files_contents, bibfile, stylesheet, remove=None):
+def manual_join(template, files_contents, bibfile, stylesheet, remove=None, extra_css=None):
     """
-        
+        extra_css: if not None, a string of more CSS to be added
         Remove: selector for elements to remove (e.g. ".draft").
-        
     """
     from mcdp_utils_xml import bs
-    
-    fn = os.path.join(src_dir, MCDPManualConstants.main_template)
-    if not os.path.exists(fn):
-        msg = 'Could not find template %s' % fn 
-        raise ValueError(msg)
-    
-    template = open(fn).read()
+   
     template = replace_macros(template)
     
     # cannot use bs because entire document
@@ -87,19 +81,21 @@ def manual_join(src_dir, files_contents, bibfile, stylesheet, remove=None):
 
 
     logger.info('external bib')
-    if not os.path.exists(bibfile):
-        logger.error('Cannot find bib file %s' % bibfile)
-    else:
-        bibliography_entries = get_bibliography(bibfile)
-        bibliography_entries['id'] = 'bibliography_entries'
-        body.append(bibliography_entries)
-        bibhere = d.find('div', id='put-bibliography-here')
-        do_bib(d, bibhere)
+    if bibfile is not None:
+        if not os.path.exists(bibfile):
+            logger.error('Cannot find bib file %s' % bibfile)
+        else:
+            bibliography_entries = get_bibliography(bibfile)
+            bibliography_entries['id'] = 'bibliography_entries'
+            body.append(bibliography_entries)
+            bibhere = d.find('div', id='put-bibliography-here')
+            do_bib(d, bibhere)
 
     logger.info('reorganizing contents in <sections>')    
     body2 = reorganize_contents(d.find('body'))
     body.replace_with(body2)
     
+        
     ### Removing
     if remove is not None:
         nremoved = 0
@@ -125,6 +121,9 @@ def manual_join(src_dir, files_contents, bibfile, stylesheet, remove=None):
         toc_place = tocs[0]
         toc_place.replaceWith(toc_ul)
     
+    logger.info('substituting empty links')
+    substituting_empty_links(d)
+    
     logger.info('checking errors')
     check_various_errors(d)
 
@@ -133,6 +132,12 @@ def manual_join(src_dir, files_contents, bibfile, stylesheet, remove=None):
     check_if_any_href_is_invalid(d) 
     
     warn_for_duplicated_ids(d)
+    
+    
+    if extra_css is not None:
+        logger.info('adding extra CSS')
+        add_extra_css(d, extra_css)
+        
     logger.info('converting to string')
     res = str(d) # do not use to_html_stripping_fragment - this is a complete doc
     logger.info('done - %d bytes' % len(res))

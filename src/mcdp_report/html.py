@@ -50,7 +50,7 @@ def ast_to_html(s,
     """
         postprocess = function applied to parse tree
     """
-    
+    check_isinstance(s, str)
 #     if parse_expr is None:
 #         raise Exception('Please add specific parse_expr (default=Syntax.ndpt_dp_rvalue)')
         

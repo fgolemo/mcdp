@@ -7,7 +7,7 @@ from decorator import decorator
 from nose.tools import assert_equal
 
 from contracts import contract
-from contracts.utils import raise_desc, raise_wrapped, check_isinstance
+from contracts.utils import raise_desc, raise_wrapped, check_isinstance, indent
 from mcdp_utils_misc.timing import timeit
 from mcdp_lang_utils import Where, line_and_col, location
 from mcdp import logger, MCDPConstants
@@ -110,7 +110,13 @@ def wheredecorator(b):
     def bb(tokens, loc, s):
         where = Where(s, loc)
         try:
-            res = b(tokens)
+            try:
+                res = b(tokens)
+            except TypeError as e:
+                ttokens = list(tokens)
+                s = "\n".join("- %s " % str(x) for x in ttokens)
+                msg = 'Cannot invoke %r\nwith %d tokens:\n%s.' % (b, len(ttokens), s)
+                raise_wrapped(TypeError, e, msg)
         except DPSyntaxError as e:
             if e.where is None:
                 e.where = where
@@ -141,7 +147,10 @@ def spa(x, b):
         # if we are here, then it means the parse was successful
         # we try again to get loc_end
         character_end = x.tryParse(s, loc)
-        
+
+        if isnamedtupleinstance(res):
+            if res.where is not None:
+                check_isinstance(res.where, Where)        
         if isnamedtupleinstance(res) and \
             (res.where is None or res.where.character_end is None):
             w2 = Where(s, character=loc, character_end=character_end)
@@ -333,6 +342,7 @@ def parse_wrap(expr, string):
         with timeit(w, MCDPConstants.parsing_too_slow_threshold):
             expr.parseWithTabs()
             
+            
             parsed = expr.parseString(string0, parseAll=True)  # [0]
             def transform(x, parents):  # @UnusedVariable
                 if x.where is None: # pragma: no cover
@@ -364,7 +374,16 @@ def parse_wrap(expr, string):
     except DPSemanticError as e:
         msg = 'This should not throw a DPSemanticError'
         raise_wrapped(DPInternalError, e, msg, exc=sys.exc_info()) 
-
+    except RuntimeError as e:
+        msg = 'RuntimeError %s while parsing string.' % (type(e).__name__)
+        msg += '\n' + indent(string, 'string: ')
+        compact = 'maximum recursion depth' in str(e)
+#         compact = False # XXX
+        raise_wrapped(DPInternalError, e, msg, compact=compact)
+    except BaseException as e:
+        msg = 'Unexpected exception %s while parsing string.' % (type(e).__name__)
+        msg += '\n' + indent(string, 'string: ')
+        raise_wrapped(DPInternalError, e, msg)
 
 def remove_comments(s):
     lines = s.split("\n")

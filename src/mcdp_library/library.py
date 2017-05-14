@@ -383,6 +383,8 @@ class MCDPLibrary(object):
             else:
                 msg += " No files with extension %r found." % ext
                 
+            msg += '\nSearch directories: %s' % self.search_dirs
+                
             raise_desc(DPSemanticError, msg)
         found = self.file_to_contents[match]
         return found

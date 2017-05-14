@@ -7,6 +7,7 @@ from mcdp_docs.latex.latex_preprocess import extract_maths
 from mcdp_docs.mark.markdown_transform import censor_markdown_code_blocks
 from mcdp_lang_utils import Where, location
 from contracts.utils import indent
+from mcdp_utils_misc.string_utils import format_list
 
 
 # from mcdp_docs.latex.latex_preprocess import extract_maths
@@ -36,14 +37,16 @@ def check_no_forbidden(s): # pragma: no cover
         where = Where(s, i)
         raise DPSyntaxError(msg, where=where)
     
-    forbidden = ['>=', '<=', 
-                 '>>'# added by mistake by Atom autocompletion
-                 ]
+    forbidden = {'>=': ['≥'], '<=': ['≤'],
+                 '>>': ['?']# added by mistake by Atom autocompletion
+                 }
     for f in forbidden:
         if f in s:
             msg = 'Found forbidden sequence %r. This will not end well.' % f
+            subs = forbidden[f]
+            msg += ' Try one of these substitutions: %s' % format_list(subs)
             c = s.index(f)
-            where = Where(s, c, c + len(f))
+            where = Where(s, c, c + len(f)) 
             raise DPSyntaxError(msg, where=where)
     
 def remove_comments(s):

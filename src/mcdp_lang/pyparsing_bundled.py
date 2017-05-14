@@ -1052,8 +1052,11 @@ class ParserElement(object):
 
     #~ @profile
     def _parseNoCache( self, instring, loc, doActions=True, callPreParse=True ):
+        
+#         print('Parsing %r with %s' % (instring[loc:], self))
         debugging = ( self.debug ) #and doActions )
 
+#         print ("Match",self,"at loc",loc,"(%d,%d)" % ( lineno(loc,instring), col(loc,instring) ))
         if debugging or self.failAction:
             #~ print ("Match",self,"at loc",loc,"(%d,%d)" % ( lineno(loc,instring), col(loc,instring) ))
             if (self.debugActions[0] ):
@@ -1117,10 +1120,10 @@ class ParserElement(object):
                                                   modal=self.modalResults )
 
         if debugging:
-            #~ print ("Matched",self,"->",retTokens.asList())
+            
             if (self.debugActions[1] ):
                 self.debugActions[1]( instring, tokensStart, loc, self, retTokens )
-
+        # print ("AC: Matched %s with tokens %s" % ( self,retTokens.asList()))
         return loc, retTokens
 
     def tryParse( self, instring, loc ):

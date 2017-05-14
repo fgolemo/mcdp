@@ -240,6 +240,7 @@ class WebApp(AppVisualization, AppStatus,
     
     @cr2e
     def view_shelf_library_new(self, e):
+        raise NotImplementedError("New library not implemented")
         new_library_name = e.context.name
         url_edit = get_url_library(e, e.shelf_name, new_library_name)
 

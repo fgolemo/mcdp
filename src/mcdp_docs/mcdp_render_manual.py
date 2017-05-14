@@ -4,23 +4,23 @@ import os
 import tempfile
 import time
 
-from contracts import contract
-from contracts.utils import check_isinstance
-from quickapp import QuickApp
-from reprep.utils import natsorted
-
 from compmake.context import Context
 from compmake.jobs.actions import mark_to_remake
 from compmake.jobs.storage import get_job_cache
 from compmake.structures import Promise
+from contracts import contract
+from contracts.utils import check_isinstance
+from mcdp import MCDPConstants
 from mcdp import logger
 from mcdp_docs.manual_constants import MCDPManualConstants
 from mcdp_docs.minimal_doc import get_minimal_document
+from mcdp_library.library import MCDPLibrary
 from mcdp_library.stdlib import get_test_librarian
 from mcdp_utils_misc import locate_files
+from quickapp import QuickApp
+from reprep.utils import natsorted
 
 from .manual_join_imp import manual_join
-from mcdp import MCDPConstants
 
 
 class RenderManual(QuickApp):
@@ -85,7 +85,7 @@ def get_manual_contents(srcdir):
 
 
 def manual_jobs(context, src_dir, output_file, generate_pdf, bibfile, stylesheet, 
-                remove=None, filter_soup=None):
+                remove=None, filter_soup=None, extra_css=None):
     manual_contents = list(get_manual_contents(src_dir))
 
     if not manual_contents:
@@ -102,13 +102,14 @@ def manual_jobs(context, src_dir, output_file, generate_pdf, bibfile, stylesheet
     basename2filename = dict( (os.path.basename(_), _) for _ in local_files)
 
     files_contents = []
-    for i, (libname, docname) in enumerate(manual_contents):
+    for i, (_, docname) in enumerate(manual_contents):
+        libname = 'unused'
         logger.info('adding document %s - %s' % (libname, docname))
         out_part_basename = '%02d%s' % (i, docname)
-        res = context.comp(render_book, libname, docname, generate_pdf,
+        res = context.comp(render_book, src_dir, docname, generate_pdf,
                            job_id=docname, main_file=output_file,
                            out_part_basename=out_part_basename,
-                           filter_soup=filter_soup)
+                           filter_soup=filter_soup, extra_css=extra_css)
 
         source = '%s.md' % docname
         if source in basename2filename:
@@ -120,14 +121,22 @@ def manual_jobs(context, src_dir, output_file, generate_pdf, bibfile, stylesheet
 
         files_contents.append(res)
 
-    d = context.comp(manual_join, src_dir=src_dir, files_contents=files_contents, 
+    fn = os.path.join(src_dir, MCDPManualConstants.main_template)
+    if not os.path.exists(fn):
+        msg = 'Could not find template %s' % fn 
+        raise ValueError(msg)
+    
+    template = open(fn).read()
+    
+
+    d = context.comp(manual_join, template=template, files_contents=files_contents, 
                      bibfile=bibfile, stylesheet=stylesheet, remove=remove)
     context.comp(write, d, output_file)
 
     if os.path.exists(MCDPManualConstants.pdf_metadata_template):
         context.comp(generate_metadata, src_dir)
 
-@contract(compmake_context=Context, promise=Promise, filenames='seq(str)')
+@contract(compmake_context=Context, promise=Promise, filenames='seq[>=1](str)')
 def erase_job_if_files_updated(compmake_context, promise, filenames):
     """ Invalidates the job if the filename is newer """
     check_isinstance(promise, Promise)
@@ -149,13 +158,14 @@ def erase_job_if_files_updated(compmake_context, promise, filenames):
     if cache.state == cache.DONE:
         done_at = cache.timestamp
         if done_at < last_update:
-            logger.info('Cleaning job %r because files updated %r' % (job_id, filenames))
+            show_filenames = filenames if len(filenames) < 3 else '(too long to show)' 
+            logger.info('Cleaning job %r because files updated %s' % (job_id, show_filenames))
             logger.info('  files last updated: %s' % friendly_age(last_update))
             logger.info('       job last done: %s' % friendly_age(done_at))
 
             mark_to_remake(job_id, db)
 
-def generate_metadata():
+def generate_metadata(src_dir):
     template = MCDPManualConstants.pdf_metadata_template
     if not os.path.exists(template):
         msg = 'Metadata template does not exist: %s' % template
@@ -163,7 +173,7 @@ def generate_metadata():
 
     out = MCDPManualConstants.pdf_metadata
     s = open(template).read()
-   
+
     from mcdp_docs.pipeline import replace_macros
 
     s = replace_macros(s)
@@ -181,23 +191,33 @@ def write(s, out):
     print('Written %s ' % out)
 
 
-def render_book(libname, docname, generate_pdf, main_file, out_part_basename, filter_soup=None):
+def render_book(src_dir, docname, generate_pdf, main_file, out_part_basename, filter_soup=None,
+                extra_css=None):
     from mcdp_docs.pipeline import render_complete
 
     librarian = get_test_librarian()
     librarian.find_libraries('.')
-    library = librarian.load_library('manual')
-
+        
+    load_library_hooks = [librarian.load_library]
+    library = MCDPLibrary(load_library_hooks=load_library_hooks)
+    library.add_search_dir(src_dir)
+# 
+#     data = dict(path=dirname, library=l)
+#     l.library_name = library_name
+#     
+#     library = librarian.load_library(libname)
+#     
+#     l = library.load_library(libname)
+    
     d = tempfile.mkdtemp()
     library.use_cache_dir(d)
 
-    l = library.load_library(libname)
     basename = docname + '.' + MCDPConstants.ext_doc_md
-    f = l._get_file_data(basename)
+    f = library._get_file_data(basename)
     data = f['data']
     realpath = f['realpath']
 
-    html_contents = render_complete(library=l,
+    html_contents = render_complete(library=library,
                                     s=data, 
                                     raise_errors=True, 
                                     realpath=realpath,
@@ -205,7 +225,7 @@ def render_book(libname, docname, generate_pdf, main_file, out_part_basename, fi
                                     filter_soup=filter_soup)
 
     doc = get_minimal_document(html_contents,
-                               add_markdown_css=True)
+                               add_markdown_css=True, extra_css=extra_css)
     dirname = main_file + '.parts'
     if not os.path.exists(dirname):
         try:
@@ -216,7 +236,7 @@ def render_book(libname, docname, generate_pdf, main_file, out_part_basename, fi
     with open(fn, 'w') as f:
         f.write(doc)
 
-    return ((libname, docname), html_contents)
+    return (('unused', docname), html_contents)
 
 
 

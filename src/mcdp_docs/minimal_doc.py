@@ -9,12 +9,13 @@ from mcdp_utils_xml import bs,\
 
 @contract(body_contents=str, returns=str)
 def get_minimal_document(body_contents, title=None,
-                         add_markdown_css=False, add_manual_css=False, stylesheet=None):
+                         add_markdown_css=False, add_manual_css=False, stylesheet=None, extra_css=None):
     """ Creates the minimal html document with MCDPL css.
     
         add_markdown_css: language + markdown
         add_manual_css: language + markdown + (manual*)
     
+        extra_css = additional CSS contents
      """
     check_html_fragment(body_contents)
     soup = bs("")
@@ -53,6 +54,10 @@ def get_minimal_document(body_contents, title=None,
     html.append(head)
     html.append(body)
     soup.append(html)
+    
+    if extra_css is not None:
+        add_extra_css(soup, extra_css)
+        
     s = to_html_stripping_fragment_document(soup)
     assert not 'DOCTYPE' in s
 #     s = html.prettify() # no: it removes empty text nodes
@@ -69,3 +74,14 @@ def get_minimal_document(body_contents, title=None,
     res = res.replace('<div><!DOCTYPE html>', '<div>')
         
     return res
+
+def add_extra_css(soup, css):
+    head = soup.find('head')
+    if head is None:
+        msg = 'Could not find head element.'
+        raise Exception(msg)
+    
+    style = Tag(name='style', attrs={'type':'text/css'})
+    style.string = css
+    head.append(style)
+    
