@@ -1,17 +1,14 @@
 # -*- coding: utf-8 -*-
 
-from mcdp.logs import logger
-from mcdp_docs.toc_number import render_number, number_styles
-
-from bs4.element import Comment, Tag
-from contracts.utils import indent
-
-
-from mcdp_utils_xml.note_errors_inline import note_error_msg
-from mcdp_utils_xml.add_class_and_style import add_class
-from mcdp_docs.manual_constants import MCDPManualConstants
 from collections import namedtuple
-from mcdp_utils_xml.parsing import bs
+from contracts.utils import indent
+from mcdp.logs import logger
+from mcdp_docs.manual_constants import MCDPManualConstants
+from mcdp_docs.toc_number import render_number, number_styles
+from mcdp_utils_xml import add_class, note_error_msg, bs
+
+from bs4.element import Comment, Tag, NavigableString
+
 
 figure_prefixes = ['fig','tab','subfig','code']
 cite_prefixes = ['bib']
@@ -121,7 +118,6 @@ def get_things_to_index(soup):
             yield h, 100, name
         else:
             pass
-        
 
 def generate_toc(soup):
     stack = [ Item(None, 0, 'root', 'root', []) ]
@@ -129,9 +125,6 @@ def generate_toc(soup):
     headers_depths = list(get_things_to_index(soup))
     #print('iterating headers')
     for header, depth, using in headers_depths:
-        
-       
-            
         item = Item(header, depth, using, header['id'], [])
 
 #         using =  using[:35]
@@ -147,13 +140,12 @@ def generate_toc(soup):
  
     root = stack[0]
 
-    print('numbering items')
+    logger.debug('numbering items')
     number_items2(root)
-    print(toc_summary(root)) 
+    logger.debug(toc_summary(root)) 
 
-    from mcdp_utils_xml import bs
 
-    print('toc iterating')
+    logger.debug('toc iterating')
     # iterate over chapters (below each h1)
     # XXX: this is parts
     for item in root.items:
@@ -166,7 +158,7 @@ def generate_toc(soup):
             # todo: add specific h1
             item.tag.insert_after(ul) # XXX: uses <fragment>
             
-    print('toc done iterating')
+    logger.debug('toc done iterating')
     return root.__str__(root=True)
 
 def toc_summary(root):
@@ -336,9 +328,7 @@ def substituting_empty_links(soup, raise_errors=False):
     logger.debug('substituting_empty_links')
     n = 0
     nerrors = 0
-    for a, element_id, element in get_links_to_fragment(soup):
-        empty = len(list(a.descendants)) == 0
-        if not empty: continue
+    for a, element_id, element in get_empty_links_to_fragment(soup):
 #             logger.debug('%s %s %s %s' % (a, element_id, element, empty))
         # a is empty
         n += 1
@@ -357,7 +347,6 @@ def substituting_empty_links(soup, raise_errors=False):
                 label_name = element.attrs[LABEL_NAME]
                 classes = a.attrs.get('class', [])
                 if 'toc_link' in classes:
-                    
                     s = Tag(name='span')
                     s.string = label_what
                     add_class(s, 'toc_what')
@@ -375,15 +364,19 @@ def substituting_empty_links(soup, raise_errors=False):
                     add_class(s, 'toc_sep')
                     a.append(s)
                     
-                    if '<' in label_name:
+                    if label_name is not None and '<' in label_name:
                         contents = bs(label_name)
+                        # sanitize the label name
+                        for br in contents.findAll('br'):
+                            br.replaceWith(NavigableString(' '))
+                        for a in contents.findAll('a'):
+                            a.extract()
                         a.append(contents)
                     else:
                         s = Tag(name='span')
                         if label_name is None:
                             s.string = '(unnamed)' # XXX
-                        else:
-                            
+                        else: 
                             s.string = label_name
                         add_class(s, 'toc_name')
                         a.append(s)
@@ -420,19 +413,32 @@ def substituting_empty_links(soup, raise_errors=False):
     logger.debug('substituting_empty_links: %d total, %d errors' % (n, nerrors))
     
     
-def get_links_to_fragment(soup):
+def get_empty_links_to_fragment(soup):
     """
         Find all links that have a reference to a fragment.
     """
 #     
 # s.findAll(lambda tag: tag.name == 'p' and tag.find(True) is None and 
 # (tag.string is None or tag.string.strip()=="")) 
+
+    logger.debug('building index')
+    # first find all elements by id
+    id2element = {}
+    for x in soup.descendants:
+        if isinstance(x, Tag) and  'id' in x.attrs:
+            id2element[x.attrs['id']] = x
+            
+    logger.debug('building index done')
+    
     for element in soup.find_all('a'):
+        empty = len(list(element.descendants)) == 0
+        if not empty: continue
+
         if not 'href' in element.attrs:
             continue
         href = element.attrs['href']
         if href.startswith('#'):
             eid = href[1:]
-            linked = soup.find(id=eid)
+            linked = id2element.get(eid, None)
             yield element, eid, linked
 

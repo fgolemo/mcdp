@@ -1078,9 +1078,6 @@ h3 {
 #toc-heading {
   font-variant: small-caps;
 }
-h1:not(#booktitle) ::before {
-  content: 'Chapter ';
-}
 /***** end headings *****/
 /******  latex ****/
 div.definition::before {
@@ -1413,7 +1410,7 @@ div[center] > * {
   /*border: solid 1px red;*/
 }
 div.float_top {
-  float: bottom;
+  float: top;
 }
 div.float_bottom {
   float: bottom;

@@ -2,21 +2,21 @@ from mcdp.logs import logger
 from bs4.element import Comment, Tag
 from mcdp_utils_xml.add_class_and_style import add_class
 
-def get_id2element(soup):
+def get_id2element(soup, att):
     id2element = {}
     duplicates = set()
     
     # ignore the maths
     ignore = set() 
-    for element in soup.select('svg [id]'): # node with ID below SVG
-        ignore.add(element['id'])
-    for element in soup.select('svg[id]'): # svg with ID
-        ignore.add(element['id'])
-    for element in soup.select('[id^="MathJax"]'): # stuff created by MathJax
-        ignore.add(element['id'])
+    for element in soup.select('svg [%s]' % att): # node with ID below SVG
+        ignore.add(element[att])
+    for element in soup.select('svg[%s]' % att): # svg with ID
+        ignore.add(element[att])
+    for element in soup.select('[%s^="MathJax"]' % att): # stuff created by MathJax
+        ignore.add(element[att])
         
-    for element in soup.select('[id]'):
-        ID = element['id']
+    for element in soup.select('[%s]' % att):
+        ID = element[att]
         if ID in ignore:
             continue
         if ID in id2element:
@@ -28,11 +28,11 @@ def get_id2element(soup):
                     w = Tag(name='span', attrs={'class':'duplicated-id'})
                     w.string = 'More than one element with id %r.' % ID
                     e0.insert_after(w)
-        id2element[element['id']] = element
+        id2element[element[att]] = element
         
     if duplicates:
         s = ", ".join(sorted(duplicates))
-        msg = '%d duplicated IDs found (not errored): %s' % (len(duplicates), s) 
+        msg = '%d duplicated %s found (not errored): %s' % (len(duplicates), att, s) 
         logger.error(msg)
     return id2element, duplicates
 
@@ -41,22 +41,30 @@ def check_if_any_href_is_invalid(soup):
     math_errors = []
     
     # let's first find all the IDs
-    id2element, duplicates = get_id2element(soup)
-    
-    for a in soup.select('a[href^="#"]'):
+    id2element, duplicates = get_id2element(soup, 'id')
+    name2element, _duplicates = get_id2element(soup, 'name')
+#     id2element.update(name2element)
+#     for a in soup.select('a[href^="#"]'):
+
+    for a in soup.select('[href^="#"]'):
         href = a['href']
         if a.has_attr('class') and  "mjx-svg-href" in a['class']:
-            msg = 'Invalid math reference (sorry, no details).'
+            msg = 'Invalid math reference (sorry, no details): href = %s .' % href
             logger.error(msg)
             a.insert_before(Comment('Error: %s' % msg))
             math_errors.append(msg)
             continue 
-
         assert href.startswith('#')
         ID = href[1:]
 #         not_found = []
+
         if not ID in id2element:
             # try to fix it
+#             
+#             # it there is named element
+#             if ID in name2element:
+#                 real_id = name2element[ID].attrs
+            
             # if there is already a prefix, remove it 
             if ':' in href:
                 i = href.index(':')
