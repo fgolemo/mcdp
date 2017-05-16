@@ -21,6 +21,8 @@ from quickapp import QuickApp
 from reprep.utils import natsorted
 
 from .manual_join_imp import manual_join
+from mcdp_utils_misc.string_utils import get_md5
+from mcdp_docs.github_edit_links import add_edit_links
 
 
 class RenderManual(QuickApp):
@@ -106,18 +108,30 @@ def manual_jobs(context, src_dir, output_file, generate_pdf, bibfile, stylesheet
         libname = 'unused'
         logger.info('adding document %s - %s' % (libname, docname))
         out_part_basename = '%02d%s' % (i, docname)
+        
+        # read the file to get hash
+        basename = '%s.md' % docname
+        fn = basename2filename[basename]
+        contents = open(fn).read()
+        contents_hash = get_md5(contents)[:8] 
+        # job will be automatically erased if the source changes
+        job_id = '%s-%s' % (docname,contents_hash)
         res = context.comp(render_book, src_dir, docname, generate_pdf,
-                           job_id=docname, main_file=output_file,
+                           
+                           main_file=output_file,
                            out_part_basename=out_part_basename,
-                           filter_soup=filter_soup, extra_css=extra_css)
+                           
+                           filter_soup=filter_soup, 
+                           extra_css=extra_css,
+                           job_id=job_id)
 
-        source = '%s.md' % docname
-        if source in basename2filename:
-            filenames = [basename2filename[source]]
-            erase_job_if_files_updated(context.cc, promise=res,
-                                       filenames=filenames)
-        else:
-            logger.debug('Could not find file %r for date check' % source)
+#         source = '%s.md' % docname
+#         if source in basename2filename:
+#             filenames = [basename2filename[source]]
+#             erase_job_if_files_updated(context.cc, promise=res,
+#                                        filenames=filenames)
+#         else:
+#             logger.debug('Could not find file %r for date check' % source)
 
         files_contents.append(res)
 
@@ -183,9 +197,10 @@ def generate_metadata(src_dir):
 
 def write(s, out):
     dn = os.path.dirname(out)
-    if not os.path.exists(dn):
-        print('creating directory %r for %r' % (dn, out))
-        os.makedirs(dn)
+    if dn != '':
+        if not os.path.exists(dn):
+            print('creating directory %r for %r' % (dn, out))
+            os.makedirs(dn)
     with open(out, 'w') as f:
         f.write(s)
     print('Written %s ' % out)
@@ -217,17 +232,23 @@ def render_book(src_dir, docname, generate_pdf, main_file, out_part_basename, fi
     data = f['data']
     realpath = f['realpath']
 
+
+    def filter_soup0(soup, library):
+        if filter_soup is not None:
+            filter_soup(soup=soup, library=library)
+        add_edit_links(soup, realpath)
+        
     html_contents = render_complete(library=library,
                                     s=data, 
                                     raise_errors=True, 
                                     realpath=realpath,
                                     generate_pdf=generate_pdf,
-                                    filter_soup=filter_soup)
+                                    filter_soup=filter_soup0)
 
     doc = get_minimal_document(html_contents,
                                add_markdown_css=True, extra_css=extra_css)
     dirname = main_file + '.parts'
-    if not os.path.exists(dirname):
+    if dirname and not os.path.exists(dirname):
         try:
             os.makedirs(dirname)
         except:
@@ -238,6 +259,6 @@ def render_book(src_dir, docname, generate_pdf, main_file, out_part_basename, fi
 
     return (('unused', docname), html_contents)
 
-
+    
 
 mcdp_render_manual_main = RenderManual.get_sys_main()

@@ -1541,6 +1541,11 @@ figure[id^='subfig:'] > figcaption:empty {
 figcaption {
   font-size: smaller;
 }
+.github-edit-link {
+  font-size: 8pt !important;
+  color: lightgrey !important;
+  float: right;
+}
 /* These are the fixes for printing / prince */
 body {
   page: normal;

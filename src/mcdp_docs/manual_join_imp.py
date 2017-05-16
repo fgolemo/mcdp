@@ -1,22 +1,21 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from contracts import contract
+from collections import OrderedDict
 from mcdp.logs import logger
+from mcdp_docs.minimal_doc import add_extra_css
+from mcdp_docs.tocs import substituting_empty_links
 from mcdp_utils_xml import add_class
 import os
 import sys
+import warnings
 
 from bs4 import BeautifulSoup
 from bs4.element import Comment, Tag, NavigableString
+from contracts import contract
 
 from .macros import replace_macros
 from .read_bibtex import get_bibliography
 from .tocs import generate_toc
-from mcdp_docs.minimal_doc import add_extra_css
-from mcdp_docs.tocs import substituting_empty_links
-import random
-from collections import OrderedDict
-import warnings
 
 
 def get_manual_css_frag():
@@ -155,15 +154,17 @@ def manual_join(template, files_contents, bibfile, stylesheet, remove=None, extr
         toc_place = tocs[0]
         toc_place.replaceWith(toc_ul)
 
-    logger.info('substituting empty links')
-    substituting_empty_links(d)
-
     logger.info('checking errors')
     check_various_errors(d)
 
     from mcdp_docs.check_missing_links import check_if_any_href_is_invalid
     logger.info('checking hrefs')
     check_if_any_href_is_invalid(d)
+
+    # Note that this should be done *after* check_if_any_href_is_invalid()
+    # because that one might fix some references
+    logger.info('substituting empty links')
+    substituting_empty_links(d)
 
     warn_for_duplicated_ids(d)
 

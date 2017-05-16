@@ -36,13 +36,15 @@ def get_id2element(soup, att):
         logger.error(msg)
     return id2element, duplicates
 
+
 def check_if_any_href_is_invalid(soup):
+    ''' Checks if references are invalid and tries to correct them. '''
     errors = []
     math_errors = []
     
     # let's first find all the IDs
     id2element, duplicates = get_id2element(soup, 'id')
-    name2element, _duplicates = get_id2element(soup, 'name')
+    _name2element, _duplicates = get_id2element(soup, 'name')
 #     id2element.update(name2element)
 #     for a in soup.select('a[href^="#"]'):
 

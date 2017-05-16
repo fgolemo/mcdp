@@ -6,3 +6,4 @@ if 'raise_if_test_included' in os.environ:
 from .transformations import *
 from .element_abbrevs_test import *
 from .book_toc import *
+from .github_link import *
