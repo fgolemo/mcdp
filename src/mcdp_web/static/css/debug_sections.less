@@ -1,0 +1,35 @@
+section {
+    border:solid 2px black;
+    padding: 1em;
+    margin: 1em;
+}
+section.draft {
+    background-color: pink;
+}
+h1[id^='part:'] { color: red;  font-size: 20px; }
+h1[id^='part:']::before { content: 'Part (part:): '}
+h1[id^='sec:'] { color: blue;  font-size: 18px; }
+h1[id^='sec:']::before { content: 'Section (sec:): '}
+h2[id^='sub:'] { color: darkgreen; font-size: 15px; }
+h2[id^='sub:']::before { content: 'Sub (sub:): '}
+h3, h4, h5 { font-size: 10px; }
+
+section[level="part"] {
+    border-left: solid 3px red;
+    // ::before { content: 'section level=part'};
+}
+section[level="sec"] {
+    border-left: solid 3px blue;
+    // ::before { content: 'section level=sec'};
+}
+section[level="sub"] {
+    border-left: solid 3px darkgreen;
+    // ::before { content: 'section level=sub'};
+}
+
+section.without-header-inside {
+    border-top: solid 3px grey;
+}
+section.with-header-inside {
+    border-top: solid 3px orange;
+}

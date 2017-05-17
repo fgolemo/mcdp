@@ -1,0 +1,28 @@
+@media screen {
+
+    @tocwidth: 25em;
+
+body {
+    padding-left: @tocwidth;
+}
+#tocdiv {
+    font-size: 8pt;
+    display: block;
+    width: @tocwidth;
+    left: 0;
+    top: 0;
+    position: absolute;
+
+    ul {
+    list-style-type: none;
+    }
+    ul ul.toc_what {
+        display: None;
+    }
+
+    a {
+        color: black;
+    }
+}
+
+}
