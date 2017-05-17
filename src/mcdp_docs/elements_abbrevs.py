@@ -63,7 +63,10 @@ def substitute_special_paragraph(soup, prefix, klass):
     ps = list(soup.select('p'))
     for p in ps:
         # Get first child
-        c = p.contents[0]
+        contents = list(p.contents)
+        if not contents:
+            continue
+        c = contents[0]
         if not isinstance(c, NavigableString):
             continue
 
