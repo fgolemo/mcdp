@@ -3,7 +3,7 @@ import shutil
 from tempfile import mkdtemp
 
 from contracts import contract
-from contracts.utils import raise_wrapped, indent
+from contracts.utils import raise_wrapped, indent, raise_desc
 from system_cmd import CmdException, system_cmd_result
 
 from mcdp import logger
@@ -200,7 +200,30 @@ def prerender_mathjax_(html):
             with open(f_out) as f:
                 data = f.read()
 
-            data = to_html_stripping_fragment(bs(data))
+            # Read the data 
+            soup = bs(data)
+            # find this and move it at the end
+            # <style id="MathJax_SVG_styles"
+            tag_style = soup.find(id='MathJax_SVG_styles')
+            if not tag_style:
+                msg = 'Expected to find style MathJax_SVG_styles'
+                raise_desc(Exception, msg, soup=str(soup))
+            # <svg style="display: none;"><defs id="MathJax_SVG_glyphs">
+            tag_svg_defs = soup.find('svg', style="display: none;")
+            if not tag_svg_defs:
+                msg = 'Expected to find tag <svg display=none>'
+                raise_desc(Exception, msg, soup=str(soup))
+            
+            other_tag = soup.find('div', style="display:none")
+            if not other_tag:
+                msg = 'Expected to find tag <div style="display:none">'
+                raise_desc(Exception, msg, soup=str(soup))
+                
+            #<div style="display:none">Because of mathjax bug</div>
+            soup.append(other_tag.extract()) 
+            soup.append(tag_svg_defs.extract()) 
+            soup.append(tag_style.extract()) 
+            data = to_html_stripping_fragment(soup)
 
             return data
         except CmdException as e: # pragma: no cover

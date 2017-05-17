@@ -78,19 +78,22 @@ def manual_join(template, files_contents, bibfile, stylesheet, remove=None, extr
     fix_duplicated_ids(basename2soup)
 
     body = d.find('body')
+    add_comments = False
     for docname, content in basename2soup.items():
         logger.debug('docname %r -> %s KB' % (docname, len(data) / 1024))
         from mcdp_docs.latex.latex_preprocess import assert_not_inside
         assert_not_inside(data, 'DOCTYPE')
-        body.append(NavigableString('\n\n'))
-        body.append(Comment('Beginning of document dump of %r' % docname))
-        body.append(NavigableString('\n\n'))
+        if add_comments:
+            body.append(NavigableString('\n\n'))
+            body.append(Comment('Beginning of document dump of %r' % docname))
+            body.append(NavigableString('\n\n'))
         for x in content:
             x2 = x.__copy__()  # not clone, not extract
             body.append(x2)
-        body.append(NavigableString('\n\n'))
-        body.append(Comment('End of document dump of %r' % docname))
-        body.append(NavigableString('\n\n'))
+        if add_comments:
+            body.append(NavigableString('\n\n'))
+            body.append(Comment('End of document dump of %r' % docname))
+            body.append(NavigableString('\n\n'))
 
     logger.info('external bib')
     if bibfile is not None:
@@ -294,7 +297,7 @@ def fix_duplicated_ids(basename2soup):
             a.attrs['href'] = '#' + new_id
 
 
-def reorganize_contents(body0):
+def reorganize_contents(body0, add_debug_comments=False):
     """ reorganizes contents 
 
         h1
@@ -308,35 +311,354 @@ def reorganize_contents(body0):
             h1
 
     """
+    reorganized = reorganize_by_parts(body0)
+    
+    # now dissolve all the elements of the type <div class='without-header-inside'>
+    options = ['without-header-inside', 'with-header-inside']
+    for x in reorganized.findAll('div', attrs={'class': 
+                                               lambda x: x is not None and x in options}):
+        dissolve(x) 
+     
+    return reorganized
 
-    def make_sections(body, is_marker, preserve=lambda _: False, element_name='section', copy=True):
+def dissolve(x):
+    print('dissolving')
+    index = x.parent.index(x)
+    for child in list(x.contents):
+        child.extract()
+        x.parent.insert(index, child)
+        index += 1
+#         x.insert_before(child)
+        
+    x.extract()
+        
+        
+    
+    
+def add_prev_next_links(filename2contents):
+    for filename, contents in filename2contents.items():
+        id_prev = contents.attrs['prev']
+        if id_prev is not None:
+            a = Tag(name='a')
+            a.attrs['href'] = '#' + id_prev
+            a.append('prev')
+            contents.insert(0, a)
+        
+        id_next = contents.attrs['next']
+        if id_next is not None:
+            a = Tag(name='a')
+            a.attrs['href'] = '#' + id_next
+            a.append('next')
+            contents.append(a)
+            
+def split_in_files(body, levels=['sec', 'part']):
+    """
+        Returns an ordered dictionary filename -> contents
+    """
+    file2contents = OrderedDict()
+    
+    # now find all the sections in order
+    sections = []
+    sections.append(body)
+    for section in body.select('section.with-header-inside'):
+        level = section.attrs['level']
+        if level in levels:
+            sections.append(section)
+    
+    for i, section in enumerate(sections):
+        if not 'id' in section.attrs:
+            section.attrs['id'] = 'page%d' % i
+            
+    filenames = []
+    for i, section in enumerate(sections):
+        if i < len(sections) - 1:
+            section.attrs['next'] = sections[i+1].attrs['id']
+        else:
+            section.attrs['next'] = None 
+        if i == 0:
+            section.attrs['prev'] = None
+        else: 
+            section.attrs['prev'] = sections[i-1].attrs['id']
+
+        id_ = section.attrs['id']
+        id_sanitized = id_.replace(':', '_').replace('-','_').replace('_section','')
+#         filename = '%03d_%s.html' % (i, id_sanitized)
+        filename = '%s.html' % (id_sanitized)
+        
+        filenames.append(filename)
+    
+    f0 = OrderedDict()
+    for filename, section in reversed(zip(filenames, sections)):
+        section.extract()
+        f0[filename] = section
+    
+    for k, v in reversed(f0.items()):    
+        file2contents[k] =v 
+#         
+    for filename, section in file2contents.items():
+        if len(list(section.descendants)) < 2: 
+            del file2contents[filename]
+
+    # rename the first to be called index.html
+    name_for_first = 'index.html'
+    first = list(file2contents)[0]
+    file2contents = OrderedDict([(name_for_first if k == first else k, v) for k, v in file2contents.items()]) 
+     
+
+    ids = []
+    for i, (filename, section) in enumerate(file2contents.items()):
+        ids.append(section.attrs['id'])
+        
+    for i, (filename, section) in enumerate(file2contents.items()):
+        if i < len(ids) - 1:
+            section.attrs['next'] = ids[i+1]
+        else:
+            section.attrs['next'] = None 
+        if i == 0:
+            section.attrs['prev'] = None
+        else: 
+            section.attrs['prev'] = ids[i-1]
+            
+    return file2contents
+
+def update_refs(filename2contents):
+    id2filename = {}
+    for filename, contents in filename2contents.items():
+        
+        for element in contents.findAll(id=True):
+            id_ = element.attrs['id']
+            if id_ in id2filename:
+                logger.error('double element with ID %s' % id_)
+            id2filename[id_] = filename
+        
+        # also don't forget the id for the entire section
+        if 'id' in contents.attrs:
+            id_ = contents.attrs['id']
+            id2filename[id_] = filename
+        
+#     logger.info(id2filename)
+    for filename, contents in filename2contents.items():
+        for a in contents.findAll( href=lambda x:  x is not None and x.startswith('#')):
+            href = a.attrs['href']
+            assert href[0] == '#'
+            id_ = href[1:] # Todo, parse out "?"
+            if id_ in id2filename:
+                new_href = '%s#%s' % (id2filename[id_], id_)
+                a.attrs['href'] = new_href
+            else:
+                logger.error('no elemement with ID %s' % id_)
+    
+def write_split_files(filename2contents, d):
+    if not os.path.exists(d):
+        os.makedirs(d)
+    for filename, contents in filename2contents.items():
+        fn = os.path.join(d, filename)
+        with open(fn, 'w') as f:
+            f.write(str(contents))
+        logger.info('written section to %s' % fn)
+                    
+def tag_like(t):
+    t2 = Tag(name=t.name)
+    for k,v in t.attrs.items():
+        t2.attrs[k] = v
+    return t2
+
+def reorganize_by_parts(body):
+    def is_part_marker(x):
+        return isinstance(x, Tag) and x.name == 'h1' and 'part' in x.attrs.get('id', '')
+    elements = body.contents
+    sections = make_sections2(elements, is_part_marker, attrs={'level': 'part-down'})
+    res = tag_like(body)
+
+    for header, section in sections:
+        if not header:
+            S = Tag(name='section')
+            S.attrs['level'] = 'part'
+            S.attrs['class'] = 'without-header-inside'
+            section2 = reorganize_by_chapters(section)
+            S.append(section2)
+            res.append(S)
+        else:
+            S = Tag(name='section')
+            S.attrs['level'] = 'part'
+            S.attrs['class'] = 'with-header-inside'
+            S.append(header) 
+            section2 = reorganize_by_chapters(section)
+            S.append(section2)
+            copy_attributes_from_header(S, header)
+            res.append(S)            
+    return res
+
+def reorganize_by_chapters(section):
+    def is_chapter_marker(x):
+        return isinstance(x, Tag) and x.name == 'h1' and (not 'part' in x.attrs.get('id', ''))
+    elements = section.contents
+    sections = make_sections2(elements, is_chapter_marker, attrs={'level': 'sec-down'})
+    res = tag_like(section)
+    for header, section in sections:
+        if not header:
+            
+            S = Tag(name='section')
+            S.attrs['level'] = 'sec'
+            S.attrs['class'] = 'without-header-inside'
+            section2 = reorganize_by_section(section)
+            S.append(section2)
+            res.append(S)
+
+        else:
+            S = Tag(name='section')
+            S.attrs['level'] = 'sec'
+            S.attrs['class'] = 'with-header-inside'
+            S.append(header) 
+            section2 = reorganize_by_section(section)
+            S.append(section2)
+            copy_attributes_from_header(S, header)
+            res.append(S)            
+    return res
+     
+def reorganize_by_section(section):
+    def is_section_marker(x):
+        return isinstance(x, Tag) and x.name == 'h2'
+    elements = section.contents
+    sections = make_sections2(elements, is_section_marker, attrs={'level': 'sub-down'})
+    res = tag_like(section)
+    for header, section in sections: 
+        if not header:
+            S = Tag(name='section')
+            S.attrs['level'] = 'sub'
+            S.attrs['class'] = 'without-header-inside'
+            S.append(section)
+            res.append(S)   
+        else:
+            S = Tag(name='section')
+            S.attrs['level'] = 'sub'
+            S.attrs['class'] = 'with-header-inside'
+            S.append(header) 
+            S.append(section)
+            copy_attributes_from_header(S, header)
+            res.append(S)     
+            
+    return res
+
+def copy_attributes_from_header(section, header):
+    assert section.name == 'section'
+    section.attrs['id'] = header.attrs.get('id', 'unnamed-h1') + ':section'
+    for c in header.attrs.get('class', []):
+        add_class(section, c) 
+
+
+def make_sections2(elements, is_marker, copy=True, element_name='div', attrs={},
+                   add_debug_comments=False):
+    sections = []
+    def make_new():
+        x = Tag(name=element_name)
+        for k, v in attrs.items():
+            x.attrs[k] = v
+        return x
+    
+    current_header = None
+    current_section = make_new()
+    
+    current_section['class'] = 'without-header-inside'
+
+    for x in elements:
+        if is_marker(x):
+            if contains_something_else_than_space(current_section):
+                sections.append((current_header, current_section))
+                
+            current_section = make_new()
+            logger.debug('marker %s' % x.attrs.get('id', 'unnamed'))
+            current_header = x.__copy__()
+#             current_section.append(x.__copy__())
+            current_section['class'] = 'with-header-inside'
+        else: 
+            x2 = x.__copy__() if copy else x.extract()
+            current_section.append(x2)
+            
+    if current_header or contains_something_else_than_space(current_section):
+        sections.append((current_header, current_section))
+
+    logger.info('make_sections: %s found using marker %s' %
+                (len(sections), is_marker.__name__))
+    return sections
+#     for i, s in enumerate(sections):
+# #         if add_debug_comments:
+# #             new_body.append('\n')
+# #             new_body.append(
+# #                 Comment('Start of %s section %d/%d' % (is_marker.__name__, i, len(sections))))
+# #         new_body.append('\n')
+#         new_body.append(s)
+# #         new_body.append('\n')
+# #         if add_debug_comments:
+# #             new_body.append(
+# #                 Comment('End of %s section %d/%d' % (is_marker.__name__, i, len(sections))))
+# #             new_body.append('\n')
+#     return new_body
+def contains_something_else_than_space(element):
+    for c in element.contents:
+        if not isinstance(c, NavigableString):
+            return True
+        if c.string.strip():
+            return True
+    return False
+
+def reorganize_contents_old(body0, add_debug_comments=False):
+    """ reorganizes contents 
+
+        h1
+        h2
+        h1
+
+        section
+            h1
+            h2
+        section 
+            h1
+
+    """
+    
+
+
+    def make_sections(body, is_marker, preserve=lambda _: False, element_name='section', copy=True, attrs={}):
         sections = []
-        current_section = Tag(name=element_name)
+        def make_new():
+            x = Tag(name=element_name)
+            for k, v in attrs.items():
+                x.attrs[k] = v
+            return x
+        
+        current_section = make_new()
         current_section['id'] = 'before-any-match-of-%s' % is_marker.__name__
-        sections.append(current_section)
+        current_section['class'] = 'without-header-inside'
+#         sections.append(current_section)
         for x in body.contents:
             if is_marker(x):
                 #print('starting %s' % str(x))
-                if len(list(current_section.contents)) > 0:
+                if contains_something_else_than_space(current_section):
                     sections.append(current_section)
-                current_section = Tag(name=element_name)
+                current_section = make_new()
                 current_section['id'] = x.attrs.get(
                     'id', 'unnamed-h1') + ':' + element_name
-                print('marker %s' % current_section['id'])
+                logger.debug('marker %s' % current_section['id'])
                 current_section['class'] = x.attrs.get('class', '')
                 #print('%s/section %s %s' % (is_marker.__name__, x.attrs.get('id','unnamed'), current_section['id']))
                 current_section.append(x.__copy__())
+                current_section['class'] = 'with-header-inside'
             elif preserve(x):
-                sections.append(current_section)
+                if contains_something_else_than_space(current_section):
+                    sections.append(current_section)
+
                 #current_section['id'] = x.attrs.get('id', 'unnamed-h1') + ':' + element_name
                 #print('%s/preserve %s' % (preserve.__name__, current_section['id']))
                 sections.append(x.__copy__())
-                current_section = Tag(name=element_name)
+                current_section = make_new()
+                current_section.attrs['comment'] = "Triggered by %r" % x
             else:
                 #x2 = x.__copy__() if copy else x
                 x2 = x.__copy__() if copy else x.extract()
                 current_section.append(x2)
-        sections.append(current_section)     # XXX
+        if contains_something_else_than_space(current_section):
+            sections.append(current_section)     # XXX
         new_body = Tag(name=body.name)
 #         if len(sections) < 3:
 #             msg = 'Only %d sections found (%s).' % (len(sections), is_marker.__name__)
@@ -345,15 +667,17 @@ def reorganize_contents(body0):
         logger.info('make_sections: %s found using marker %s' %
                     (len(sections), is_marker.__name__))
         for i, s in enumerate(sections):
-            new_body.append('\n')
-            new_body.append(
-                Comment('Start of %s section %d/%d' % (is_marker.__name__, i, len(sections))))
+            if add_debug_comments:
+                new_body.append('\n')
+                new_body.append(
+                    Comment('Start of %s section %d/%d' % (is_marker.__name__, i, len(sections))))
             new_body.append('\n')
             new_body.append(s)
             new_body.append('\n')
-            new_body.append(
-                Comment('End of %s section %d/%d' % (is_marker.__name__, i, len(sections))))
-            new_body.append('\n')
+            if add_debug_comments:
+                new_body.append(
+                    Comment('End of %s section %d/%d' % (is_marker.__name__, i, len(sections))))
+                new_body.append('\n')
         return new_body
 
     def is_section_marker(x):
@@ -368,14 +692,15 @@ def reorganize_contents(body0):
     def is_chapter_or_part_marker(x):
         return is_chapter_marker(x) or is_part_marker(x)
 
+    copy = True
     #body = make_sections(body0, is_section_marker, is_chapter_or_part_marker)
-    body = make_sections(body0, is_chapter_marker, is_part_marker)
-    body = make_sections(body, is_part_marker)
+    body = make_sections(body0, is_chapter_marker, is_part_marker, copy=copy, attrs={'level': 'sec'})
+    body = make_sections(body, is_part_marker, copy=copy, attrs={'level':'part'})
 
-    def is_h2(x):
-        return isinstance(x, Tag) and x.name == 'h2'
+#     def is_h2(x):
+#         return isinstance(x, Tag) and x.name == 'h2'
 
-    body = make_sections(body, is_h2)
+#     body = make_sections(body, is_h2)
 
     return body
 

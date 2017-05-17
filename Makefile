@@ -45,8 +45,10 @@ circle-3-of-4:
 circle: prepare_tests
 	echo Make: $(CIRCLE_NODE_INDEX) " of " $(CIRCLE_NODE_TOTAL)
 	DISABLE_CONTRACTS=1 \
+	# MCDP_TEST_LIBRARIES_EXCLUDE="mcdp_theory,droneD_complete_templates,manual" \
+	# 	comptests -o $(out) --nonose -c "rparmake n=2" $(package)
 	MCDP_TEST_LIBRARIES_EXCLUDE="mcdp_theory,droneD_complete_templates,manual" \
-		comptests -o $(out) --nonose -c "rparmake n=2" $(package)
+		comptests -o $(out) --nonose -c "rmake" $(package)
 	# ./misc/t ls failed
 	# ./misc/t parmake
 
