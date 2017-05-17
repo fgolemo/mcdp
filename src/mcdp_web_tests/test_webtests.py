@@ -235,8 +235,8 @@ def check_tree():
 
 
 if __name__ == '__main__':
-#     run_module_tests()
-    check_tree()
+    run_module_tests()
+#     check_tree()
     
     
     
