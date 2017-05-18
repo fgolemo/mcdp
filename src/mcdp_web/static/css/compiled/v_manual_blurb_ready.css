@@ -274,13 +274,18 @@ ul.toc code:last-of-type::after {
 .chapter_toc {
   display: none;
 }
+ul#main_toc,
+ul#main_toc ul,
+ul#main_toc li {
+  padding: 0;
+  margin: 0;
+  list-style-type: none;
+}
 .toc a {
+  color: black !important;
   text-decoration: none;
 }
 /************ TOC ***************/
-ul.toc {
-  column-gap: 20px;
-}
 @media screen {
   ul#main_toc > li > ul > li {
     padding-top: 2pt;
@@ -290,71 +295,32 @@ ul.toc {
     margin-bottom: 1pt;
   }
 }
-@media print {
-  /** two-column format */
-  /** add page numbers for the first two */
-  ul#main_toc > li > a::after {
-    content: leader('.') target-counter(attr(href), page);
-    font-weight: bold;
-  }
-  ul#main_toc > li > ul > li > a::after {
-    content: leader('.') target-counter(attr(href), page);
-  }
+.toc_a_for_part {
+  padding-top: 5px;
 }
-ul#main_toc .toc_ul-depth-4 {
-  display: none;
+.toc_a_for_sec,
+.toc_a_for_app {
+  padding-top: 4px;
 }
-ul#main_toc .toc_link-depth-100 {
-  display: none;
-}
-ul#main_toc .toc_ul-depth-100 {
-  display: none;
-}
-ul#main_toc .toc_link-depth-4 {
-  color: blue;
-}
-ul#main_toc .toc_link-depth-4 .toc_what,
-ul#main_toc .toc_link-depth-4 .toc_number,
-ul#main_toc .toc_link-depth-4 .toc_sep {
-  display: none;
-  color: red;
-}
-ul#main_toc ul {
-  margin-left: 0;
-}
-ul#main_toc ul ul {
-  margin-left: 0;
-}
-.toc_li-depth-3 {
-  display: inline;
-}
-.toc_li-depth-3 a {
-  color: gray !important;
-}
-.toc_li-depth-3 a span.toc_number {
-  display: none;
-}
-.toc_li-depth-3 a span.toc_name::before {
-  /*padding-bottom: 5pt !important;*/
-  /*border: solid 1px red;*/
-  /*margin-top: -20pt !important;*/
-  /*display: inline;*/
-}
-.toc_li-depth-3 + .toc_li-depth-3::before {
-  margin-right: 1.6pt;
-  margin-left: 1.6pt;
-  content: '◇';
-  color: lightgrey !important;
-  font-size: 6pt;
-}
-/* first header down is highlighted */
-ul.chapter_toc > li > a {
+.toc_a_for_sec .toc_what,
+.toc_a_for_app .toc_what,
+.toc_a_for_sec .toc_number,
+.toc_a_for_app .toc_number,
+.toc_a_for_sec .toc_name,
+.toc_a_for_app .toc_name {
   font-weight: bold;
 }
-/* below numbers are erased */
-ul.chapter_toc > li > ul > li > a.toc_link > span.toc_name::before {
-  content: '•';
-  margin-right: 0.5em;
+.toc_a_for_sub > .toc_what,
+.toc_a_for_appsub > .toc_what {
+  display: None;
+}
+/** two-column format */
+/** add page numbers for the first two */
+.toc_a_for_part::after,
+.toc_a_for_sec::after,
+.toc_a_for_sub::after {
+  content: leader('.') target-counter(attr(href), page);
+  font-weight: bold;
 }
 /* keywords appearing in headers */
 #maintoc code {
@@ -371,36 +337,17 @@ ul.toc li {
   padding: 0;
   margin: 0;
 }
-ul#main_toc > li {
-  padding-bottom: 1em;
-}
-ul#main_toc > li > ul {
-  padding-top: 4pt;
-}
-ul#main_toc > li > a span.toc_name {
-  font-weight: bold;
-}
-ul#main_toc > li > a > span.toc_number {
-  font-weight: bold;
-}
-ul#main_toc > li > a > span.toc_number ::before {
-  content: 'Chapter ';
-  font-weight: bold;
-}
 ul.toc,
 ul.toc li,
 ul.toc ul {
   margin: 0;
   padding: 0;
 }
-ul#main_toc > li > a[href^='#part:'] {
+.toc_a_for_part {
   display: block;
   font-weight: bold;
   text-align: center;
   color: black !important;
-}
-ul#main_toc > li > a[href^='#part:'] ::after {
-  content: none !important;
 }
 /*prince-text-replace: "ffi" "\fb03" "fi" "\fb01" "ffl" "\fb04" "fl" "\fb02" "ff" "\fb00";*/
 /*font-variant: prince-opentype(onum) prince-opentype(liga);*/
@@ -1546,6 +1493,12 @@ figcaption {
   color: lightgrey !important;
   float: right;
 }
+cite.used::before {
+  content: attr('label-name');
+}
+cite::after {
+  content: "Ciao";
+}
 /* These are the fixes for printing / prince */
 body {
   page: normal;
@@ -1887,6 +1840,41 @@ h1::after {
   margin-right: 6.175mm;
   padding-right: 0.3825cm;
   margin-left: 1.7cm;
+}
+@media screen {
+  body {
+    display: inline-block;
+  }
+  html {
+    text-align: center;
+  }
+  body {
+    margin-left: auto;
+    margin-right: auto;
+  }
+  body {
+    width: 360pt;
+    /* A5 is  420pt × 595  */
+    background-color: white;
+    /** essentially these are our "page margins" **/
+    border-right: solid 30pt white;
+    border-left: solid 30pt white;
+    margin-top: 0;
+  }
+  html {
+    background-color: #eee;
+    border-right: solid 1px gray;
+  }
+  /* zoom the page - equal to browser zoom */
+  body {
+    transform: scale(1.5);
+    transform: scale(66.66666667%);
+    transform-origin: top center;
+  }
+  /** add space for h1, in place of page breaks **/
+  h1:not(#booktitle) {
+    margin-top: 4em;
+  }
 }
 .errored {
   /*border: solid 2px red !important;*/

@@ -2,14 +2,23 @@
 .chapter_toc { display: none; }
 
 
-.toc a { text-decoration: none; }
+ul#main_toc, ul#main_toc ul, ul#main_toc li {
+    padding: 0;
+    margin: 0;
+    list-style-type: none;
+}
+
+.toc a {
+    color: black !important;
+    text-decoration: none;
+}
 
 /************ TOC ***************/
-
-ul.toc {
-  //  column-count: 2;
-    column-gap: 20px;
-}
+//
+// ul.toc {
+//   //  column-count: 2;
+//     column-gap: 20px;
+// }
 
 @media screen {
 
@@ -22,123 +31,77 @@ ul.toc {
     }
 
 }
+//
+// .toc_a_for_code,
+// .toc_a_for_fig,
+// .toc_a_for_tab,
+// .toc_a_for_subsub,
+// .toc_a_for_par {
+//     display: none;
+// }
 
-@media print {
-    /** two-column format */
-
-
-    /** add page numbers for the first two */
-    ul#main_toc > li > a::after {
-        content: leader('.')  target-counter(attr(href), page) ;
+.toc_a_for_part {
+    padding-top: 5px;
+}
+.toc_a_for_sec, .toc_a_for_app {
+    padding-top: 4px;
+    .toc_what, .toc_number, .toc_name {
         font-weight: bold;
     }
-
-    ul#main_toc > li > ul > li > a::after {
-         content: leader('.') target-counter(attr(href), page);
-     }
 }
+.toc_a_for_sub > .toc_what,
+.toc_a_for_appsub > .toc_what { display: None; }
 
-ul#main_toc .toc_ul-depth-4 {display:none;}
-ul#main_toc .toc_link-depth-100 { display:none; }
-ul#main_toc .toc_ul-depth-100 { display:none; }
-ul#main_toc .toc_link-depth-4 {
-    color: blue;
-    .toc_what, .toc_number, .toc_sep {
-        display: none;
-        color: red;
+// @media print {
+    /** two-column format */
+
+    /** add page numbers for the first two */
+    .toc_a_for_part::after,
+    .toc_a_for_sec::after, .toc_a_for_sub::after {
+
+            content: leader('.')  target-counter(attr(href), page) ;
+            font-weight: bold;
+        
     }
-}
-ul#main_toc ul {
-    margin-left: 0;
-
-    ul {
-        margin-left: 0;
-
-        // li  {
-        //     display: inline;
-        //     a {
-        //         color: gray !important;
-        //
-        //         span.toc_number { display: none; }
-        //         span.toc_name::before {
-        //             margin-right: 3pt;
-        //
-        //             content: '⟡'; /*◇';*/
-        //             font-family: 'Cambria' !important;
-        //             font-size: 6pt;
-        //             /*padding-bottom: 5pt !important;*/
-        //         /*border: solid 1px red;*/
-        //         /*margin-top: -20pt !important;*/
-        //         /*display: inline;*/
-        //         }
-        //     }
-        //
-        //     &:first-child a span.toc_name::before {
-        //         content: '';
-        //         margin: 0;
-        //     }
-        //
-        // }
-    }
-}
-
-.toc_li-depth-3  {
-    display: inline;
-    a {
-        color: gray !important;
-
-        span.toc_number { display: none; }
-        span.toc_name::before {
-
-            /*padding-bottom: 5pt !important;*/
-        /*border: solid 1px red;*/
-        /*margin-top: -20pt !important;*/
-        /*display: inline;*/
-        }
-    }
-    // &:first-child a span.toc_name::before {
-    //     content: '';
-    //     margin: 0;
-    // }
-}
-
-
-.toc_li-depth-3 + .toc_li-depth-3::before {
-    margin-right: 1.6pt;
-    margin-left: 1.6pt;
-
-    // content: '⟡'; /*◇';*/
-    // content: '♦';
-    content: '◇';
-    color: lightgrey !important;
-    // font-family: 'Cambria' !important;
-    font-size: 6pt;
-}
-
-
-
-/* first header down is highlighted */
-ul.chapter_toc > li > a {
-    font-weight: bold;
-}
-
-
-/* below numbers are erased */
-
-// ul#main_toc > li > ul > li > a.toc_link > span.toc_what {
-//     color: red;
+    //
+    // ul#main_toc > li > ul > li > a::after {
+    //      content: leader('.') target-counter(attr(href), page);
+    //  }
 // }
-// .toc_link-depth-1 {outline: solid 1px blue;}
-// .toc_link-depth-4 {outline: solid 1px red;}
 
-ul.chapter_toc > li > ul > li > a.toc_link > span.toc_number {
-    // display: none;
-}
+// ul#main_toc .toc_ul-depth-4 {display:none;}
+// ul#main_toc .toc_link-depth-100 { display:none; }
+// ul#main_toc .toc_ul-depth-100 { display:none; }
+// ul#main_toc .toc_link-depth-4 {
+//     color: blue;
+//     .toc_what, .toc_number, .toc_sep {
+//         display: none;
+//         color: red;
+//     }
+// }
 
-ul.chapter_toc > li > ul > li > a.toc_link > span.toc_name::before {
-    content: '•';
-    margin-right: 0.5em;
-}
+//
+// .toc_li-depth-3  {
+//     display: inline;
+//     a {
+//         color: gray !important;
+//
+//         span.toc_number { display: none; }
+//         span.toc_name::before {
+//
+//         }
+//     }
+// }
+//
+//
+// .toc_li-depth-3 + .toc_li-depth-3::before {
+//     margin-right: 1.6pt;
+//     margin-left: 1.6pt;
+//     content: '◇';
+//     color: lightgrey !important;
+//     font-size: 6pt;
+// }
+//
 
 
 /* keywords appearing in headers */
@@ -150,53 +113,38 @@ ul.chapter_toc > li > ul > li > a.toc_link > span.toc_name::before {
 ul.toc, ul.toc ul { padding: 0; margin-left: 1em;}
 
 ul.toc li { padding: 0; margin: 0;}
-
-ul#main_toc > li {
-    padding-bottom: 1em;
-
-    > ul {
-        padding-top: 4pt;
-    }
-    > a span.toc_name {
-        font-weight: bold;
-    }
-
-}
-
-
-
-ul#main_toc > li > a > span.toc_number {
-    font-weight: bold;
-
-    ::before {
-        content: 'Chapter ';
-        font-weight: bold;
-    }
-}
+//
+// ul#main_toc > li {
+//     padding-bottom: 1em;
+//
+//     > ul {
+//         padding-top: 4pt;
+//     }
+//     > a span.toc_name {
+//         font-weight: bold;
+//     }
+//
+// }
+//
+//
+//
+// ul#main_toc > li > a > span.toc_number {
+//     font-weight: bold;
+//
+//     ::before {
+//         content: 'Chapter ';
+//         font-weight: bold;
+//     }
+// }
 
 ul.toc, ul.toc li, ul.toc ul {
     margin:0; padding: 0;
 }
 
-ul#main_toc > li > a[href^='#part:'] {
+
+.toc_a_for_part  {
     display: block;
     font-weight: bold;
     text-align: center;
-
-    // ::before {
-    //     content: 'Part ? – ';
-    //     content: 'Part ' target-counter(attr(href), part) ' – ';
-    //     font-weight: bold;
-    // }
     color: black !important;
-    ::after {
-        content: none !important;
-    }
 }
-//
-//
-// ul.toc a[href^='#sub:']::before {
-//     content: '♦.♦' ' –';
-//     content: target-counter(attr(href), section) '.' target-counter(attr(href), subsection) ' –';
-//
-// }

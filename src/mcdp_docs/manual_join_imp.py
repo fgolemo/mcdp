@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from collections import OrderedDict
+from contracts import contract
 from mcdp.logs import logger
 from mcdp_docs.minimal_doc import add_extra_css
-from mcdp_docs.tocs import substituting_empty_links
+from mcdp_docs.tocs import substituting_empty_links, LABEL_WHAT_NUMBER,\
+    LABEL_NAME, LABEL_NUMBER, LABEL_WHAT
 from mcdp_utils_xml import add_class
 import os
 import sys
@@ -11,7 +13,6 @@ import warnings
 
 from bs4 import BeautifulSoup
 from bs4.element import Comment, Tag, NavigableString
-from contracts import contract
 
 from .macros import replace_macros
 from .read_bibtex import get_bibliography
@@ -190,8 +191,9 @@ def do_bib(soup, bibhere):
         href = a.attrs.get('href', '')
         if href.startswith('#bib:'):
             used.add(href[1:])  # no "#"
-    print('I found %d references, to these: %s' % (len(used), used))
+    logger.info('I found %d references, to these: %s' % (len(used), used))
 
+    num = 1
     if bibhere is None:
         logger.error('Could not find #put-bibliography-here in document.')
     else:
@@ -205,10 +207,16 @@ def do_bib(soup, bibhere):
                 # add to bibliography
                 bibhere.append(c)
                 add_class(c, 'used')
+                short = '[%s]' % num
+                num += 1
+                c.attrs[LABEL_NAME] = short
+                c.attrs[LABEL_WHAT_NUMBER] = 'Reference ' + short
+                c.attrs[LABEL_NUMBER] = short
+                c.attrs[LABEL_WHAT] = 'Reference'
             else:
                 unused.add(ID)
                 add_class(c, 'unused')
-    print('I found %d unused bibs.' % (len(unused)))
+    logger.info('I found %d unused bibs.' % (len(unused)))
 
 
 def warn_for_duplicated_ids(soup):
@@ -403,7 +411,6 @@ def split_in_files(body, levels=['sec', 'part']):
     name_for_first = 'index.html'
     first = list(file2contents)[0]
     file2contents = OrderedDict([(name_for_first if k == first else k, v) for k, v in file2contents.items()]) 
-     
 
     ids = []
     for i, (filename, section) in enumerate(file2contents.items()):

@@ -673,8 +673,15 @@ figcaption { font-size: smaller; }
 // @regular-ref: ~':not(.only-number)::before';
 //
 
-
 .github-edit-link {
     font-size: 8pt !important;
     color: lightgrey !important;
     float: right;}
+
+cite.used::before {
+    content: attr('label-name');
+}
+
+cite::after {
+    content: "Ciao";
+}
