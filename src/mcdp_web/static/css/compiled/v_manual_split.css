@@ -1144,38 +1144,8 @@ figure:not(.subfloat) {
 figure.subfloat {
   counter-increment: subfloat;
 }
-figure[id^='fig:'] {
-  counter-increment: figure;
-}
-figure.table {
-  counter-increment: table;
-}
-div.example {
-  counter-increment: example;
-}
-div.remark {
-  counter-increment: remark;
-}
-div.definition {
-  counter-increment: definition;
-}
-div.lemma {
-  counter-increment: lemma;
-}
-div.proposition {
-  counter-increment: proposition;
-}
-div.theorem {
-  counter-increment: theorem;
-}
-div.problem {
-  counter-increment: problem;
-}
-figure[id^='code:'] {
-  counter-increment: listing;
-}
 figure[id^='code:'] figcaption:not(:empty)::before {
-  content: 'Listing ' counter(listing) '. ';
+  content: 'Listing ' attr(label-number) '. ';
 }
 figure[id^='code:'] {
   display: inline-block;
@@ -1195,7 +1165,7 @@ figure[id^='code:'] figcaption:not(:empty) {
   max-width: 30em;
 }
 figure[id^='code:'] figcaption:empty::before {
-  content: 'Listing ' counter(listing);
+  content: 'Listing ' attr(label-number);
 }
 /* Not empty caption */
 figure.table {
@@ -1494,7 +1464,7 @@ figcaption {
   float: right;
 }
 cite.used::before {
-  content: attr('label-name');
+  content: attr(label-name);
 }
 cite::after {
   content: "Ciao";
