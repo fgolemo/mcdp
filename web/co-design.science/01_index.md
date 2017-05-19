@@ -13,7 +13,10 @@ permalink: index.html
 For more information, please see:
 
 * [the papers](/papers/) 
-* a [demo][demo] with pointers to the manual.
+* a [live demo site][demo] 
+* the [software manual (PDF)][manual].
+
+[manual]: https://andreacensi.github.io/mcdp-manual/mcdp-manual.pdf
 
 [demo]: http://demo.co-design.science/ 
 
