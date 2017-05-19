@@ -28,7 +28,7 @@
 
 Please see the website <http://co-design.science> and in particular [the manual (PDF)][manual], which contains up-to-date installation instructions.
 
-[manual]: http://co-design.science/media/manual.pdf
+[manual]: https://andreacensi.github.io/mcdp-manual/mcdp-manual.pdf
 
 <!--
 *Below, an example of a graphical representation of an MCDP (left)
