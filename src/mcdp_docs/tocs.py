@@ -1,75 +1,79 @@
 # -*- coding: utf-8 -*-
 
 from collections import namedtuple
+
+from bs4.element import Comment, Tag, NavigableString
+
 from contracts.utils import indent
 from mcdp.logs import logger
 from mcdp_docs.manual_constants import MCDPManualConstants
 from mcdp_docs.toc_number import render_number, number_styles
 from mcdp_utils_xml import add_class, note_error_msg, bs
 
-from bs4.element import Comment, Tag, NavigableString
 
-
-figure_prefixes = ['fig','tab','subfig','code']
+figure_prefixes = ['fig', 'tab', 'subfig', 'code']
 cite_prefixes = ['bib']
 div_latex_prefixes = ['exa', 'rem', 'lem', 'def', 'prop', 'prob', 'thm']
 
+
 def element_has_one_of_prefixes(element, prefixes):
     eid = element.attrs.get('id', 'notpresent')
-    return any(eid.startswith(_+':') for _  in prefixes)
+    return any(eid.startswith(_ + ':') for _ in prefixes)
+
 
 class GlobalCounter:
-    header_id = 1 
-    
-    
+    header_id = 1
+
+
 def fix_header_id(header):
     ID = header.get('id', None)
-    prefix = None if (ID is None or not ':' in ID) else ID[:ID.index(':')] 
-    
+    prefix = None if (ID is None or not ':' in ID) else ID[:ID.index(':')]
+
     allowed_prefixes_h = {
         'h1': ['sec', 'app', 'part'],
         'h2': ['sub', 'appsub'],
         'h3': ['subsub', 'appsubsub'],
         'h4': ['par'],
     }
-    
-    if header.name in allowed_prefixes_h: 
+
+    if header.name in allowed_prefixes_h:
         allowed_prefixes = allowed_prefixes_h[header.name]
         default_prefix = allowed_prefixes[0]
-        
-        if ID is None: 
+
+        if ID is None:
             header['id'] = '%s:%s' % (default_prefix, GlobalCounter.header_id)
             GlobalCounter.header_id += 1
         else:
             if prefix is None:
-                if ID != 'booktitle': 
-                    msg = ('Adding prefix %r to current id %r for %s.' % 
+                if ID != 'booktitle':
+                    msg = ('Adding prefix %r to current id %r for %s.' %
                            (default_prefix, ID, header.name))
                     header.insert_before(Comment('Warning: ' + msg))
                     header['id'] = default_prefix + ':' + ID
-            else: 
+            else:
                 if prefix not in allowed_prefixes:
-                    msg = ('The prefix %r is not allowed for %s (ID=%r)' % 
+                    msg = ('The prefix %r is not allowed for %s (ID=%r)' %
                            (prefix, header.name, ID))
                     logger.error(msg)
                     header.insert_after(Comment('Error: ' + msg))
-    
+
+
 def get_things_to_index(soup):
     """
         nothing with attribute "notoc"
-         
+
         h1, h2, h3, h4
         figure  with id= "fig:*" or "tab:*" or "subfig:*" or code
     """
     formatter = None
     for h in soup.findAll(['h1', 'h2', 'h3', 'h4', 'figure', 'div', 'cite']):
-        
+
         if formatter is None:
             formatter = h._formatter_for_name("html")
 
         if h.has_attr('notoc'):
             continue
-        
+
         if h.name in ['h1', 'h2', 'h3', 'h4']:
             fix_header_id(h)
             h_id = h.attrs['id']
@@ -92,21 +96,22 @@ def get_things_to_index(soup):
                 depth = 7
             elif h.name == 'h6':
                 depth = 8
-            
+
             name = h.decode_contents(formatter=formatter)
             yield h, depth, name
-            
+
         elif h.name in ['figure']:
             if not element_has_one_of_prefixes(h, figure_prefixes):
                 continue
-            
-            figcaption = h.find('figcaption') # XXX: bug because it gets confused with children
+
+            # XXX: bug because it gets confused with children
+            figcaption = h.find('figcaption')
             if figcaption is None:
                 name = None
             else:
                 name = figcaption.decode_contents(formatter=formatter)
             yield h, 100, name
-            
+
         elif h.name in ['div']:
             if not element_has_one_of_prefixes(h, div_latex_prefixes):
                 continue
@@ -119,96 +124,124 @@ def get_things_to_index(soup):
         else:
             pass
 
-def generate_toc(soup):
-    stack = [ Item(None, 0, 'root', 'root', []) ]
+
+def generate_toc(soup, max_depth=None):
+    stack = [Item(None, 0, 'root', 'root', [])]
 
     headers_depths = list(get_things_to_index(soup))
-    #print('iterating headers')
+
     for header, depth, using in headers_depths:
+        if max_depth is not None:
+            if depth > max_depth:
+                continue
+
         item = Item(header, depth, using, header['id'], [])
 
-#         using =  using[:35]
-#         m = 'header %s %s   %-50s    %s  ' % (' '*2*depth,  header.name, header['id'],  using)
-#         m = m + ' ' * (120-len(m))
-#         print(m)
-        
         while(stack[-1].depth >= depth):
             stack.pop()
         stack[-1].items.append(item)
         stack.append(item)
-        
- 
+
     root = stack[0]
 
     logger.debug('numbering items')
     number_items2(root)
-    logger.debug(toc_summary(root)) 
-
+    logger.debug(toc_summary(root))
 
     logger.debug('toc iterating')
     # iterate over chapters (below each h1)
     # XXX: this is parts
-    for item in root.items:
-        s = item.__str__(root=True)
-        stoc = bs(s)
-        if stoc.ul is not None: # empty document case
-            ul = stoc.ul
-            ul.extract() 
-            ul['class'] = 'toc chapter_toc'
-            # todo: add specific h1
-            item.tag.insert_after(ul) # XXX: uses <fragment>
-            
+    if False:
+        for item in root.items:
+            s = item.to_html(root=True, max_levels=100)
+            stoc = bs(s)
+            if stoc.ul is not None:  # empty document case
+                ul = stoc.ul
+                ul.extract()
+                ul['class'] = 'toc chapter_toc'
+                # todo: add specific h1
+                item.tag.insert_after(ul)  # XXX: uses <fragment>
+
     logger.debug('toc done iterating')
-    return root.__str__(root=True)
+    exclude = ['subsub', 'fig', 'code', 'tab', 'par', 'subfig',
+                'appsubsub',
+                        'def', 'eq', 'rem', 'lem', 'prob', 'prop', 'exa', 'thm' ]
+    without_levels = root.copy_excluding_levels(exclude)
+    res = without_levels.to_html(root=True, max_levels=13)
+    return res
+
 
 def toc_summary(root):
     s = ''
-    for item in root.depth_first_descendants(): 
-
+    for item in root.depth_first_descendants():
         number = item.tag.attrs.get(LABEL_WHAT_NUMBER, '???')
-        m = 'depth %s tag %s id %-30s %-20s %s %s  ' % (item.depth, item.tag.name, item.id[:26], number, ' '*2*item.depth,  item.name,)
-        m = m + ' ' * (120-len(m))
+        display_name = item.name
+        if display_name:
+            display_name = display_name.replace('\n', ' ')
+            display_name = display_name[:100]
+        m = ('depth %s tag %s id %-30s %-20s %s %s  ' %
+             (item.depth, item.tag.name, item.id[:26], 
+              number, ' ' * 2 * item.depth, display_name))
+        m = m + ' ' * (120 - len(m))
         s += '\n' + m
     return s
 
 
 class Item(object):
+
     def __init__(self, tag, depth, name, _id, items):
         self.tag = tag
         self.name = name
         self.depth = depth
         self.id = _id
-        self.items = items 
+        self.items = items
         self.number = None
+        if ":" in self.id:
+            # Get "sub", "sec", "part", etc.
+            self.header_level = self.id.split(":")[0]
+        else:
+            self.header_level = 'unknown'
+            logger.warn(self.id)
 
-    def __str__(self, root=False):
+    def copy_excluding_levels(self, exclude_levels):
+        items = []
+        for _ in self.items:
+            x = _.copy_excluding_levels(exclude_levels)
+            if x.header_level not in exclude_levels:
+                items.append(x)
+        item = Item(
+            tag=self.tag, depth=self.depth, name=self.name, _id=self.id, items=items)
+        return item
+
+    def to_html(self, root, max_levels, ):
         s = u''
         if not root:
-            s += (u"""<a class="toc_link toc_link-depth-%s number_name" href="#%s"></a>""" % (self.depth, self.id))
-#             use_name = self.name 
-#             s += (u"""<a class="toc_link" href="#%s">
-#                         <span class="toc_number">%s –</span> 
-#                         <span class="toc_name">%s</span></a>""" % 
-#                         (self.id, self.number, use_name))
-        if self.items:
-            s += '<ul class="toc_ul-depth-%s">' % self.depth
+            s += (u"""<a class="toc_link toc_link-depth-%s number_name toc_a_for_%s" href="#%s"></a>""" %
+                  (self.depth, self.header_level, self.id))
+
+        if max_levels and self.items:
+            s += '<ul class="toc_ul-depth-%s toc_li_for_%s">' % (
+                self.depth, self.header_level)
             for item in self.items:
-                sitem = indent(item.__str__(), '  ')
-                s += '\n  <li class="toc_li-depth-%s">\n%s\n  </li>' % (self.depth, sitem)
+                sitem = item.to_html(root=False, max_levels=max_levels - 1)
+                sitem = indent(sitem, '  ')
+                s += ('\n  <li class="toc_li-depth-%s toc_ul_for_%s">\n%s\n  </li>' %
+                      (self.depth, self.header_level, sitem))
             s += '\n</ul>'
         return s
-    
+
     def depth_first_descendants(self):
         for item in self.items:
             yield item
             for item2 in item.depth_first_descendants():
                 yield item2
 
+
 def number_items2(root):
     counters = set(['part', 'app', 'sec', 'sub', 'subsub', 'appsub', 'appsubsub', 'par']
-                    + ['fig', 'tab', 'subfig', 'code']
-                    + ['exa', 'rem', 'lem', 'def', 'prop', 'prob', 'thm'])
-    
+                   + ['fig', 'tab', 'subfig', 'code']
+                   + ['exa', 'rem', 'lem', 'def', 'prop', 'prob', 'thm'])
+
     resets = {
         'part': [],
         'sec': ['sub', 'subsub', 'par'],
@@ -240,7 +273,7 @@ def number_items2(root):
         'app': Label('Appendix', '${app|upper-alpha}', ''),
         'appsub': Label('Section', '${app|upper-alpha}.${appsub}', ''),
         'appsubsub': Label('Subsection', '${app|upper-alpha}.${appsub}.${appsubsub}', ''),
-        # global counters 
+        # global counters
         'fig': Label('Figure', '${fig}', ''),
         'subfig': Label('Figure', '${fig}${subfig|lower-alpha}', '(${subfig|lower-alpha})'),
         'tab': Label('Table', '${tab}', ''),
@@ -252,22 +285,22 @@ def number_items2(root):
         'prop': Label('Proposition', '${prop}', ''),
         'thm': Label('Theorem', '${thm}', ''),
         'exa': Label('Example', '${exa}', ''),
-         
+
     }
-    
+
     for c in counters:
-        assert c in resets,c
-        assert c in labels,c  
+        assert c in resets, c
+        assert c in labels, c
     from collections import defaultdict
     counter_parents = defaultdict(lambda: set())
     for c, cc in resets.items():
-        for x in cc: 
+        for x in cc:
             counter_parents[x].add(c)
 
     counter_state = {}
     for counter in counters:
-        counter_state[counter] = 0       
-        
+        counter_state[counter] = 0
+
     for item in root.depth_first_descendants():
         counter = item.id.split(":")[0]
 #         print('counter %s id %s %s' % (counter, item.id, counter_state))
@@ -275,23 +308,26 @@ def number_items2(root):
             counter_state[counter] += 1
             for counter_to_reset in resets[counter]:
                 counter_state[counter_to_reset] = 0
-            
+
             label_spec = labels[counter]
             what = label_spec.what
             number = render(label_spec.number, counter_state)
-            
+
             item.tag.attrs[LABEL_NAME] = item.name
             item.tag.attrs[LABEL_WHAT] = what
-            item.tag.attrs[LABEL_SELF] = render(label_spec.label_self, counter_state)
-            
+            item.tag.attrs[LABEL_SELF] = render(
+                label_spec.label_self, counter_state)
+
             if item.name is None:
-                item.tag.attrs[LABEL_WHAT_NUMBER_NAME] = what + ' ' + number 
+                item.tag.attrs[LABEL_WHAT_NUMBER_NAME] = what + ' ' + number
             else:
-                item.tag.attrs[LABEL_WHAT_NUMBER_NAME] = what + ' ' + number + ' - ' + item.name
+                item.tag.attrs[LABEL_WHAT_NUMBER_NAME] = what + \
+                    ' ' + number + ' - ' + item.name
             item.tag.attrs[LABEL_WHAT_NUMBER] = what + ' ' + number
             item.tag.attrs[LABEL_NUMBER] = number
-            
-            allattrs = [LABEL_NAME, LABEL_WHAT, LABEL_WHAT_NUMBER_NAME, LABEL_NUMBER, LABEL_SELF]
+
+            allattrs = [LABEL_NAME, LABEL_WHAT,
+                        LABEL_WHAT_NUMBER_NAME, LABEL_NUMBER, LABEL_SELF]
             for c in counters:
                 if c in counter_parents[counter] or c == counter:
                     attname = 'counter-%s' % c
@@ -305,7 +341,7 @@ def number_items2(root):
                         continue
                     for x in allattrs:
                         figcaption.attrs[x] = item.tag.attrs[x]
-                        
+
 LABEL_NAME = 'label-name'
 LABEL_NUMBER = 'label-number'
 LABEL_WHAT = 'label-what'
@@ -313,33 +349,41 @@ LABEL_SELF = 'label-self'
 LABEL_WHAT_NUMBER_NAME = 'label-what-number-name'
 LABEL_WHAT_NUMBER = 'label-what-number'
 
+
 def render(s, counter_state):
     reps = {}
     for c, v in counter_state.items():
         for style in number_styles:
             reps['${%s|%s}' % (c, style)] = render_number(v, style)
         reps['${%s}' % c] = render_number(v, 'decimal')
-        
+
     for k, v in reps.items():
         s = s.replace(k, v)
     return s
 
+
 def substituting_empty_links(soup, raise_errors=False):
+    '''
+
+
+    '''
     logger.debug('substituting_empty_links')
     n = 0
     nerrors = 0
     for a, element_id, element in get_empty_links_to_fragment(soup):
-#             logger.debug('%s %s %s %s' % (a, element_id, element, empty))
-        # a is empty
         n += 1
         if element:
             if (not LABEL_WHAT_NUMBER  in element.attrs) or \
-                (not LABEL_NAME  in element.attrs):
-                msg = 'Could not find attributes %s or %s in %s' % (LABEL_NAME, LABEL_WHAT_NUMBER, element)
-                note_error_msg(a, msg)
-                nerrors += 1
-                if raise_errors:
-                    raise ValueError(msg)
+                    (not LABEL_NAME in element.attrs):
+                msg = ('substituting_empty_links: Could not find attributes %s or %s in %s' %
+                       (LABEL_NAME, LABEL_WHAT_NUMBER, element))
+                if True:
+                    logger.warning(msg)
+                else:
+                    note_error_msg(a, msg)
+                    nerrors += 1
+                    if raise_errors:
+                        raise ValueError(msg)
             else:
                 label_what_number = element.attrs[LABEL_WHAT_NUMBER]
                 label_number = element.attrs[LABEL_NUMBER]
@@ -351,9 +395,9 @@ def substituting_empty_links(soup, raise_errors=False):
                     s.string = label_what
                     add_class(s, 'toc_what')
                     a.append(s)
-                    
+
                     a.append(' ')
-                    
+
                     s = Tag(name='span')
                     s.string = label_number
                     add_class(s, 'toc_number')
@@ -363,76 +407,79 @@ def substituting_empty_links(soup, raise_errors=False):
                     s.string = ' - '
                     add_class(s, 'toc_sep')
                     a.append(s)
-                    
+
                     if label_name is not None and '<' in label_name:
                         contents = bs(label_name)
                         # sanitize the label name
                         for br in contents.findAll('br'):
                             br.replaceWith(NavigableString(' '))
-                        for a in contents.findAll('a'):
-                            a.extract()
+                        for _ in contents.findAll('a'):
+                            _.extract()
+                        
                         a.append(contents)
+                        #logger.debug('From label_name = %r to a = %r' % (label_name, a))
                     else:
                         s = Tag(name='span')
                         if label_name is None:
-                            s.string = '(unnamed)' # XXX
-                        else: 
+                            s.string = '(unnamed)'  # XXX
+                        else:
                             s.string = label_name
                         add_class(s, 'toc_name')
                         a.append(s)
-                    
-                    
+
                 else:
                     if MCDPManualConstants.CLASS_ONLY_NUMBER in classes:
                         label = label_number
                     elif MCDPManualConstants.CLASS_NUMBER_NAME in classes:
                         if label_name is None:
-                            label = label_what_number + ' - ' + '(unnamed)' # warning
+                            label = label_what_number + \
+                                ' - ' + '(unnamed)'  # warning
                         else:
                             label = label_what_number + ' - ' + label_name
                     elif MCDPManualConstants.CLASS_ONLY_NAME in classes:
                         if label_name is None:
-                            label =  '(unnamed)' # warning
+                            label = '(unnamed)'  # warning
                         else:
                             label = label_name
                     else:
                         label = label_what_number
-                    
+
                     span1 = Tag(name='span')
                     add_class(span1, 'reflabel')
                     span1.string = label
                     a.append(span1)
 
-                
         else:
             msg = ('Cannot find %s' % element_id)
             note_error_msg(a, msg)
             nerrors += 1
             if raise_errors:
                 raise ValueError(msg)
-    logger.debug('substituting_empty_links: %d total, %d errors' % (n, nerrors))
-    
-    
+    logger.debug('substituting_empty_links: %d total, %d errors' %
+                 (n, nerrors))
+
+
 def get_empty_links_to_fragment(soup):
     """
         Find all links that have a reference to a fragment.
     """
-#     
-# s.findAll(lambda tag: tag.name == 'p' and tag.find(True) is None and 
-# (tag.string is None or tag.string.strip()=="")) 
+#
+# s.findAll(lambda tag: tag.name == 'p' and tag.find(True) is None and
+# (tag.string is None or tag.string.strip()==""))
 
     logger.debug('building index')
     # first find all elements by id
     id2element = {}
     for x in soup.descendants:
-        if isinstance(x, Tag) and  'id' in x.attrs:
+        if isinstance(x, Tag) and 'id' in x.attrs:
             id2element[x.attrs['id']] = x
-            
+
     logger.debug('building index done')
-    
+
     for element in soup.find_all('a'):
         empty = len(list(element.descendants)) == 0
-        if not empty: continue
+        if not empty:
+            continue
 
         if not 'href' in element.attrs:
             continue
@@ -441,4 +488,3 @@ def get_empty_links_to_fragment(soup):
             eid = href[1:]
             linked = id2element.get(eid, None)
             yield element, eid, linked
-

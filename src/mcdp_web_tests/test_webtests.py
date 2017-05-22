@@ -1,4 +1,5 @@
-from comptests.registrar import run_module_tests, comptest, comptest_fails
+from comptests.registrar import run_module_tests
+from contracts.utils import raise_desc, indent
 from mcdp import MCDPConstants
 from mcdp.logs import logger
 from mcdp_docs.preliminary_checks import assert_not_contains
@@ -16,7 +17,6 @@ import shutil
 import unittest
 import urlparse
 
-from contracts.utils import raise_desc, indent
 from git import Repo
 from pyramid.security import Allow, Everyone
 
@@ -119,6 +119,7 @@ class FunctionalTests(unittest.TestCase):
             res = res.follow()
         return url0, res
  
+class FunctionalTestsSpider(FunctionalTests):
     def runTest(self):
         # turn off access control for user list
         MCDPResourceRoot.__acl__.append((Allow, Everyone, Privileges.ACCESS))
@@ -229,9 +230,10 @@ class FunctionalTests(unittest.TestCase):
 
 #@comptest_fails
 def check_tree():
-    ft = FunctionalTests()
+    ft = FunctionalTestsSpider()
     ft.setUp()
     ft.runTest()
+
 
 
 if __name__ == '__main__':

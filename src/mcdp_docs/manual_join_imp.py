@@ -1,6 +1,14 @@
 # -*- coding: utf-8 -*-
 #!/usr/bin/env python
 from collections import OrderedDict
+
+from contracts import contract
+from mcdp.logs import logger
+from mcdp_docs.minimal_doc import add_extra_css
+from mcdp_docs.tocs import substituting_empty_links, LABEL_WHAT_NUMBER,\
+    LABEL_NAME, LABEL_NUMBER, LABEL_WHAT
+from mcdp_utils_xml import add_class
+
 import os
 import sys
 import warnings
@@ -30,7 +38,7 @@ def get_manual_css_frag():
 
     frag = Tag(name='fragment-css')
     if link_css:
-        
+
         link = Tag(name='link')
         link['rel'] = 'stylesheet'
         link['type'] = 'text/css'
@@ -42,16 +50,20 @@ def get_manual_css_frag():
         assert False
 
 
-@contract(files_contents='list( tuple( tuple(str,str), str) )', returns='str')
+@contract(files_contents='list( tuple( tuple(str,str), str) )', returns='str',
+          remove_selectors='None|seq(str)')
 def manual_join(template, files_contents, bibfile, stylesheet, remove=None, extra_css=None,
+                remove_selectors=None,
                 hook_before_toc=None):
     """
         extra_css: if not None, a string of more CSS to be added
-        Remove: selector for elements to remove (e.g. ".draft").
+        Remove_selectors: list of selectors to remove (e.g. ".draft").
 
         hook_before_toc if not None is called with hook_before_toc(soup=soup)
         just before generating the toc
     """
+    logger.debug('remove_selectors: %s' % remove_selectors)
+    logger.debug('remove: %s' % remove)
     from mcdp_utils_xml import bs
 
     template = replace_macros(template)
@@ -107,14 +119,14 @@ def manual_join(template, files_contents, bibfile, stylesheet, remove=None, extr
             bibliography_entries = get_bibliography(bibfile)
             bibliography_entries['id'] = 'bibliography_entries'
             body.append(bibliography_entries)
-    
+
     bibhere = d.find('div', id='put-bibliography-here')
     if bibhere is None:
         logger.warning('Could not find #put-bibliography-here in document. Adding one at end of document')
         bibhere = Tag(name='div')
         bibhere.attrs['id'] = 'put-bibliography-here'
         d.find('body').append(bibhere)
-    
+
     do_bib(d, bibhere)
 
     if True:
@@ -126,12 +138,20 @@ def manual_join(template, files_contents, bibfile, stylesheet, remove=None, extr
         body2 = body
 
     # Removing
-    all_removed = ''
+    all_selectors = []
     if remove is not None and remove != '':
+        all_selectors.append(remove)
+    if remove_selectors:
+        all_selectors.extend(remove_selectors)
+        
+    logger.debug('all_selectors: %s' % all_selectors)
+        
+    all_removed = ''
+    for selector in all_selectors:
         nremoved = 0
-#         logger.debug('Removing selector %r' % remove)
-        toremove = list(body2.select(remove))
-#         logger.debug('Removing %d objects' % len(toremove))
+        logger.debug('Removing selector %r' % remove)
+        toremove = list(body2.select(selector))
+        logger.debug('Removing %d objects' % len(toremove))
         for x in toremove:
             nremoved += 1
             nd = len(list(x.descendants))
@@ -140,15 +160,17 @@ def manual_join(template, files_contents, bibfile, stylesheet, remove=None, extr
                 s =  str(x)[:300]
                 logger.debug(' it is %s' %s)
             x.extract()
-            
-            all_removed += '\n\n' + '-' * 50 + ' chunk %d removed\n' % nremoved 
-            all_removed += str(x) 
+
+            all_removed += '\n\n' + '-' * 50 + ' chunk %d removed\n' % nremoved
+            all_removed += str(x)
             all_removed += '\n\n' + '-' * 100 + '\n\n'
-            
+
         logger.info('Removed %d elements of selector %r' % (nremoved, remove))
+    
+#     if False:
     with open('all_removed.html', 'w') as f:
         f.write(all_removed)
-        
+
     if hook_before_toc is not None:
         hook_before_toc(soup=d)
     ###
@@ -215,7 +237,7 @@ def do_bib(soup, bibhere):
         else:
             unused.add(ID)
             add_class(c, 'unused')
-    
+
     # divide in found and not found
     found = []
     notfound = []
@@ -225,7 +247,7 @@ def do_bib(soup, bibhere):
                 notfound.append(ID)
         else:
             found.append(ID)
-            
+
     # now create additional <cite> for the ones that are not found
     for ID in notfound:
         cite = Tag(name='cite')
@@ -234,27 +256,27 @@ def do_bib(soup, bibhere):
         cite.attrs['class'] = ['errored', 'error'] # XXX
         soup.append(cite)
         id2cite[ID] = cite
-    
+
     # now number the cites
     n = 1
     id2number = {}
     for ID in used:
         if not ID in id2number:
             id2number[ID] = n
-        n += 1 
-    
+        n += 1
+
     # now add the attributes for cross-referencing
     for ID in used:
         number = id2number[ID]
         cite = id2cite[ID]
-        
+
         cite.attrs[LABEL_NAME] = '[%s]' % number
         cite.attrs[LABEL_SELF] = '[%s]' % number
         cite.attrs[LABEL_NUMBER] =  number
         cite.attrs[LABEL_WHAT] = 'Reference'
         cite.attrs[LABEL_WHAT_NUMBER_NAME] = '[%s]' % number
         cite.attrs[LABEL_WHAT_NUMBER] = '[%s]' % number
-        
+
     # now put the cites at the end of the document
     for ID in used:
         c = id2cite[ID]
@@ -262,10 +284,11 @@ def do_bib(soup, bibhere):
         c.extract()
         # add to bibliography
         bibhere.append(c)
-            
-    s = ("Bib cites: %d\nBib used: %s\nfound: %s\nnot found: %s\nunused: %d" 
-         % (len(id2cite), len(used), len(found), len(notfound), len(unused))) 
+
+    s = ("Bib cites: %d\nBib used: %s\nfound: %s\nnot found: %s\nunused: %d"
+         % (len(id2cite), len(used), len(found), len(notfound), len(unused)))
     logger.info(s)
+
 
 
 def warn_for_duplicated_ids(soup):
@@ -355,7 +378,7 @@ def fix_duplicated_ids(basename2soup):
 
 
 def reorganize_contents(body0, add_debug_comments=False):
-    """ reorganizes contents 
+    """ reorganizes contents
 
         h1
         h2
@@ -364,18 +387,18 @@ def reorganize_contents(body0, add_debug_comments=False):
         section
             h1
             h2
-        section 
+        section
             h1
 
     """
     reorganized = reorganize_by_parts(body0)
-    
+
     # now dissolve all the elements of the type <div class='without-header-inside'>
     options = ['without-header-inside', 'with-header-inside']
-    for x in reorganized.findAll('div', attrs={'class': 
+    for x in reorganized.findAll('div', attrs={'class':
                                                lambda x: x is not None and x in options}):
-        dissolve(x) 
-     
+        dissolve(x)
+
     return reorganized
 
 def dissolve(x):
@@ -386,12 +409,12 @@ def dissolve(x):
         x.parent.insert(index, child)
         index += 1
 #         x.insert_before(child)
-        
+
     x.extract()
-        
-        
-    
-    
+
+
+
+
 def add_prev_next_links(filename2contents):
     for filename, contents in filename2contents.items():
         id_prev = contents.attrs['prev']
@@ -400,20 +423,20 @@ def add_prev_next_links(filename2contents):
             a.attrs['href'] = '#' + id_prev
             a.append('prev')
             contents.insert(0, a)
-        
+
         id_next = contents.attrs['next']
         if id_next is not None:
             a = Tag(name='a')
             a.attrs['href'] = '#' + id_next
             a.append('next')
             contents.append(a)
-            
+
 def split_in_files(body, levels=['sec', 'part']):
     """
         Returns an ordered dictionary filename -> contents
     """
     file2contents = OrderedDict()
-    
+
     # now find all the sections in order
     sections = []
     sections.append(body)
@@ -421,78 +444,77 @@ def split_in_files(body, levels=['sec', 'part']):
         level = section.attrs['level']
         if level in levels:
             sections.append(section)
-    
+
     for i, section in enumerate(sections):
         if not 'id' in section.attrs:
             section.attrs['id'] = 'page%d' % i
-            
+
     filenames = []
     for i, section in enumerate(sections):
         if i < len(sections) - 1:
             section.attrs['next'] = sections[i+1].attrs['id']
         else:
-            section.attrs['next'] = None 
+            section.attrs['next'] = None
         if i == 0:
             section.attrs['prev'] = None
-        else: 
+        else:
             section.attrs['prev'] = sections[i-1].attrs['id']
 
         id_ = section.attrs['id']
         id_sanitized = id_.replace(':', '_').replace('-','_').replace('_section','')
 #         filename = '%03d_%s.html' % (i, id_sanitized)
         filename = '%s.html' % (id_sanitized)
-        
+
         filenames.append(filename)
-    
+
     f0 = OrderedDict()
     for filename, section in reversed(zip(filenames, sections)):
         section.extract()
         f0[filename] = section
-    
-    for k, v in reversed(f0.items()):    
-        file2contents[k] =v 
-#         
+
+    for k, v in reversed(f0.items()):
+        file2contents[k] =v
+#
     for filename, section in file2contents.items():
-        if len(list(section.descendants)) < 2: 
+        if len(list(section.descendants)) < 2:
             del file2contents[filename]
 
     # rename the first to be called index.html
     name_for_first = 'index.html'
     first = list(file2contents)[0]
-    file2contents = OrderedDict([(name_for_first if k == first else k, v) for k, v in file2contents.items()]) 
-     
+    file2contents = OrderedDict([(name_for_first if k == first else k, v) for k, v in file2contents.items()])
 
     ids = []
     for i, (filename, section) in enumerate(file2contents.items()):
         ids.append(section.attrs['id'])
-        
+
     for i, (filename, section) in enumerate(file2contents.items()):
         if i < len(ids) - 1:
             section.attrs['next'] = ids[i+1]
         else:
-            section.attrs['next'] = None 
+            section.attrs['next'] = None
         if i == 0:
             section.attrs['prev'] = None
-        else: 
+        else:
             section.attrs['prev'] = ids[i-1]
-            
+
     return file2contents
 
 def update_refs(filename2contents):
     id2filename = {}
     for filename, contents in filename2contents.items():
-        
+
         for element in contents.findAll(id=True):
             id_ = element.attrs['id']
             if id_ in id2filename:
                 logger.error('double element with ID %s' % id_)
             id2filename[id_] = filename
-        
+
         # also don't forget the id for the entire section
         if 'id' in contents.attrs:
             id_ = contents.attrs['id']
             id2filename[id_] = filename
-        
+
 #     logger.info(id2filename)
     for filename, contents in filename2contents.items():
         for a in contents.findAll( href=lambda x:  x is not None and x.startswith('#')):
@@ -504,7 +526,7 @@ def update_refs(filename2contents):
                 a.attrs['href'] = new_href
             else:
                 logger.error('no elemement with ID %s' % id_)
-    
+
 def write_split_files(filename2contents, d):
     if not os.path.exists(d):
         os.makedirs(d)
@@ -513,7 +535,7 @@ def write_split_files(filename2contents, d):
         with open(fn, 'w') as f:
             f.write(str(contents))
         logger.info('written section to %s' % fn)
-                    
+
 def tag_like(t):
     t2 = Tag(name=t.name)
     for k,v in t.attrs.items():
@@ -539,11 +561,11 @@ def reorganize_by_parts(body):
             S = Tag(name='section')
             S.attrs['level'] = 'part'
             S.attrs['class'] = 'with-header-inside'
-            S.append(header) 
+            S.append(header)
             section2 = reorganize_by_chapters(section)
             S.append(section2)
             copy_attributes_from_header(S, header)
-            res.append(S)            
+            res.append(S)
     return res
 
 def reorganize_by_chapters(section):
@@ -554,7 +576,7 @@ def reorganize_by_chapters(section):
     res = tag_like(section)
     for header, section in sections:
         if not header:
-            
+
             S = Tag(name='section')
             S.attrs['level'] = 'sec'
             S.attrs['class'] = 'without-header-inside'
@@ -566,42 +588,67 @@ def reorganize_by_chapters(section):
             S = Tag(name='section')
             S.attrs['level'] = 'sec'
             S.attrs['class'] = 'with-header-inside'
-            S.append(header) 
+            S.append(header)
             section2 = reorganize_by_section(section)
             S.append(section2)
             copy_attributes_from_header(S, header)
-            res.append(S)            
+            res.append(S)
     return res
-     
+
 def reorganize_by_section(section):
     def is_section_marker(x):
         return isinstance(x, Tag) and x.name == 'h2'
     elements = section.contents
     sections = make_sections2(elements, is_section_marker, attrs={'level': 'sub-down'})
     res = tag_like(section)
-    for header, section in sections: 
+    for header, section in sections:
         if not header:
             S = Tag(name='section')
             S.attrs['level'] = 'sub'
             S.attrs['class'] = 'without-header-inside'
             S.append(section)
-            res.append(S)   
+            res.append(S)
         else:
             S = Tag(name='section')
             S.attrs['level'] = 'sub'
             S.attrs['class'] = 'with-header-inside'
-            S.append(header) 
+            S.append(header)
+            section2 = reorganize_by_subsection(section)
+            S.append(section2)
+            copy_attributes_from_header(S, header)
+            res.append(S)
+
+    return res
+
+def reorganize_by_subsection(section):
+    def is_section_marker(x):
+        return isinstance(x, Tag) and x.name == 'h3'
+    elements = section.contents
+    sections = make_sections2(elements, is_section_marker, attrs={'level': 'subsub-down'})
+    res = tag_like(section)
+    for header, section in sections:
+        if not header:
+            S = Tag(name='section')
+            S.attrs['level'] = 'subsub'
+            S.attrs['class'] = 'without-header-inside'
+            S.append(section)
+            res.append(S)
+        else:
+            S = Tag(name='section')
+            S.attrs['level'] = 'subsub'
+            S.attrs['class'] = 'with-header-inside'
+            S.append(header)
             S.append(section)
             copy_attributes_from_header(S, header)
-            res.append(S)     
-            
+            res.append(S)
+
     return res
 
 def copy_attributes_from_header(section, header):
     assert section.name == 'section'
     section.attrs['id'] = header.attrs.get('id', 'unnamed-h1') + ':section'
     for c in header.attrs.get('class', []):
-        add_class(section, c) 
+        add_class(section, c)
 
 
 def make_sections2(elements, is_marker, copy=True, element_name='div', attrs={},
@@ -612,26 +659,26 @@ def make_sections2(elements, is_marker, copy=True, element_name='div', attrs={},
         for k, v in attrs.items():
             x.attrs[k] = v
         return x
-    
+
     current_header = None
     current_section = make_new()
-    
+
     current_section['class'] = 'without-header-inside'
 
     for x in elements:
         if is_marker(x):
             if contains_something_else_than_space(current_section):
                 sections.append((current_header, current_section))
-                
+
             current_section = make_new()
             logger.debug('marker %s' % x.attrs.get('id', 'unnamed'))
             current_header = x.__copy__()
 #             current_section.append(x.__copy__())
             current_section['class'] = 'with-header-inside'
-        else: 
+        else:
             x2 = x.__copy__() if copy else x.extract()
             current_section.append(x2)
-            
+
     if current_header or contains_something_else_than_space(current_section):
         sections.append((current_header, current_section))
 
@@ -660,7 +707,7 @@ def contains_something_else_than_space(element):
     return False
 
 def reorganize_contents_old(body0, add_debug_comments=False):
-    """ reorganizes contents 
+    """ reorganizes contents
 
         h1
         h2
@@ -669,11 +716,11 @@ def reorganize_contents_old(body0, add_debug_comments=False):
         section
             h1
             h2
-        section 
+        section
             h1
 
     """
-    
+
 
 
     def make_sections(body, is_marker, preserve=lambda _: False, element_name='section', copy=True, attrs={}):
@@ -683,7 +730,7 @@ def reorganize_contents_old(body0, add_debug_comments=False):
             for k, v in attrs.items():
                 x.attrs[k] = v
             return x
-        
+
         current_section = make_new()
         current_section['id'] = 'before-any-match-of-%s' % is_marker.__name__
         current_section['class'] = 'without-header-inside'
