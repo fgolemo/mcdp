@@ -1,21 +1,24 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
+#!/usr/bin/env python
 from collections import OrderedDict
-from mcdp.logs import logger
-from mcdp_docs.minimal_doc import add_extra_css
-from mcdp_docs.tocs import substituting_empty_links
-from mcdp_utils_xml import add_class
 import os
 import sys
 import warnings
 
 from bs4 import BeautifulSoup
 from bs4.element import Comment, Tag, NavigableString
+
 from contracts import contract
+from mcdp.logs import logger
+from mcdp_docs.minimal_doc import add_extra_css
+from mcdp_docs.tocs import substituting_empty_links, LABEL_WHAT_NUMBER,\
+    LABEL_WHAT_NUMBER_NAME, LABEL_WHAT, LABEL_NUMBER, LABEL_NAME, LABEL_SELF
+from mcdp_utils_xml import add_class
 
 from .macros import replace_macros
 from .read_bibtex import get_bibliography
 from .tocs import generate_toc
+from mcdp_docs.footnote_javascript import add_footnote_polyfill
 
 
 def get_manual_css_frag():
@@ -27,6 +30,7 @@ def get_manual_css_frag():
 
     frag = Tag(name='fragment-css')
     if link_css:
+        
         link = Tag(name='link')
         link['rel'] = 'stylesheet'
         link['type'] = 'text/css'
@@ -103,8 +107,15 @@ def manual_join(template, files_contents, bibfile, stylesheet, remove=None, extr
             bibliography_entries = get_bibliography(bibfile)
             bibliography_entries['id'] = 'bibliography_entries'
             body.append(bibliography_entries)
-            bibhere = d.find('div', id='put-bibliography-here')
-            do_bib(d, bibhere)
+    
+    bibhere = d.find('div', id='put-bibliography-here')
+    if bibhere is None:
+        logger.warning('Could not find #put-bibliography-here in document. Adding one at end of document')
+        bibhere = Tag(name='div')
+        bibhere.attrs['id'] = 'put-bibliography-here'
+        d.find('body').append(bibhere)
+    
+    do_bib(d, bibhere)
 
     if True:
         logger.info('reorganizing contents in <sections>')
@@ -175,6 +186,8 @@ def manual_join(template, files_contents, bibfile, stylesheet, remove=None, extr
         logger.info('adding extra CSS')
         add_extra_css(d, extra_css)
 
+    add_footnote_polyfill(d)
+
     logger.info('converting to string')
     # do not use to_html_stripping_fragment - this is a complete doc
     res = str(d)
@@ -184,31 +197,75 @@ def manual_join(template, files_contents, bibfile, stylesheet, remove=None, extr
 
 def do_bib(soup, bibhere):
     """ find used bibliography entries put them there """
-    used = set()
+    used = []
     unused = set()
     for a in soup.find_all('a'):
         href = a.attrs.get('href', '')
         if href.startswith('#bib:'):
-            used.add(href[1:])  # no "#"
-    print('I found %d references, to these: %s' % (len(used), used))
+            used.append(href[1:])  # no "#"
+    logger.debug('I found %d references, to these: %s' % (len(used), used))
 
-    if bibhere is None:
-        logger.error('Could not find #put-bibliography-here in document.')
-    else:
-        cites = list(soup.find_all('cite'))
-        # TODO: sort
-        for c in cites:
-            ID = c.attrs.get('id', None)
-            if ID in used:
-                # remove it from parent
-                c.extract()
-                # add to bibliography
-                bibhere.append(c)
-                add_class(c, 'used')
-            else:
-                unused.add(ID)
-                add_class(c, 'unused')
-    print('I found %d unused bibs.' % (len(unused)))
+    # collect all the <cite>
+    id2cite = {}
+    for c in soup.find_all('cite'):
+        ID = c.attrs.get('id', None)
+        id2cite[ID] = c
+        if ID in used:
+            add_class(c, 'used')
+        else:
+            unused.add(ID)
+            add_class(c, 'unused')
+    
+    # divide in found and not found
+    found = []
+    notfound = []
+    for ID in used:
+        if not ID in id2cite:
+            if not ID in notfound:
+                notfound.append(ID)
+        else:
+            found.append(ID)
+            
+    # now create additional <cite> for the ones that are not found
+    for ID in notfound:
+        cite = Tag(name='cite')
+        s = 'Reference %s not found.' % ID
+        cite.append(NavigableString(s))
+        cite.attrs['class'] = ['errored', 'error'] # XXX
+        soup.append(cite)
+        id2cite[ID] = cite
+    
+    # now number the cites
+    n = 1
+    id2number = {}
+    for ID in used:
+        if not ID in id2number:
+            id2number[ID] = n
+        n += 1 
+    
+    # now add the attributes for cross-referencing
+    for ID in used:
+        number = id2number[ID]
+        cite = id2cite[ID]
+        
+        cite.attrs[LABEL_NAME] = '[%s]' % number
+        cite.attrs[LABEL_SELF] = '[%s]' % number
+        cite.attrs[LABEL_NUMBER] =  number
+        cite.attrs[LABEL_WHAT] = 'Reference'
+        cite.attrs[LABEL_WHAT_NUMBER_NAME] = '[%s]' % number
+        cite.attrs[LABEL_WHAT_NUMBER] = '[%s]' % number
+        
+    # now put the cites at the end of the document
+    for ID in used:
+        c = id2cite[ID]
+        # remove it from parent
+        c.extract()
+        # add to bibliography
+        bibhere.append(c)
+            
+    s = ("Bib cites: %d\nBib used: %s\nfound: %s\nnot found: %s\nunused: %d" 
+         % (len(id2cite), len(used), len(found), len(notfound), len(unused))) 
+    logger.info(s)
 
 
 def warn_for_duplicated_ids(soup):
@@ -290,7 +347,7 @@ def fix_duplicated_ids(basename2soup):
                     new_id = id_ + '-' + basename
                     element['id'] = new_id
                     tochange.append((basename, id_, new_id))
-    logger.info(tochange)
+    #logger.info(tochange)
     for i, id_, new_id in tochange:
         fragment = basename2soup[i]
         for a in fragment.find_all(href="#" + id_):
@@ -322,7 +379,7 @@ def reorganize_contents(body0, add_debug_comments=False):
     return reorganized
 
 def dissolve(x):
-    print('dissolving')
+
     index = x.parent.index(x)
     for child in list(x.contents):
         child.extract()

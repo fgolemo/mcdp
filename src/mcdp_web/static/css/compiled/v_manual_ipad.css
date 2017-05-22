@@ -1510,6 +1510,9 @@ h3:not([nonumber])::before {
   /*content: counter(section) '.' counter(subsection) '-' counter(subsubsection, upper-alpha) '. ';*/
   content: attr(label-self);
 }
+cite::before {
+  content: attr(label-self) ' ';
+}
 /*@num-eq: target-counter(attr(href), listing);
 @ref-eq: '(' @num-eq ')';
 */

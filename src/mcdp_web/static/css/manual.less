@@ -619,6 +619,10 @@ h3:not([nonumber])::before {
     content: attr(label-self);
 }
 
+cite::before {
+    content: attr(label-self) ' ';
+}
+
 //
 //
 // cite[id^='bib:'] {

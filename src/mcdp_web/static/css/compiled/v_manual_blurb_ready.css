@@ -1510,6 +1510,9 @@ h3:not([nonumber])::before {
   /*content: counter(section) '.' counter(subsection) '-' counter(subsubsection, upper-alpha) '. ';*/
   content: attr(label-self);
 }
+cite::before {
+  content: attr(label-self) ' ';
+}
 /*@num-eq: target-counter(attr(href), listing);
 @ref-eq: '(' @num-eq ')';
 */
@@ -1887,6 +1890,41 @@ h1::after {
   margin-right: 6.175mm;
   padding-right: 0.3825cm;
   margin-left: 1.7cm;
+}
+@media screen {
+  body {
+    display: inline-block;
+  }
+  html {
+    text-align: center;
+  }
+  body {
+    margin-left: auto;
+    margin-right: auto;
+  }
+  body {
+    width: 360pt;
+    /* A5 is  420pt × 595  */
+    background-color: white;
+    /** essentially these are our "page margins" **/
+    border-right: solid 30pt white;
+    border-left: solid 30pt white;
+    margin-top: 0;
+  }
+  html {
+    background-color: #eee;
+    border-right: solid 1px gray;
+  }
+  /* zoom the page - equal to browser zoom */
+  body {
+    transform: scale(1.5);
+    transform: scale(66.66666667%);
+    transform-origin: top center;
+  }
+  /** add space for h1, in place of page breaks **/
+  h1:not(#booktitle) {
+    margin-top: 4em;
+  }
 }
 .errored {
   /*border: solid 2px red !important;*/

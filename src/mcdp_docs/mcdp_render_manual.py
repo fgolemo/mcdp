@@ -10,19 +10,18 @@ from compmake.jobs.storage import get_job_cache
 from compmake.structures import Promise
 from contracts import contract
 from contracts.utils import check_isinstance
-from mcdp import MCDPConstants
-from mcdp import logger
-from mcdp_docs.manual_constants import MCDPManualConstants
-from mcdp_docs.minimal_doc import get_minimal_document
+from mcdp import MCDPConstants, logger
 from mcdp_library.library import MCDPLibrary
 from mcdp_library.stdlib import get_test_librarian
 from mcdp_utils_misc import locate_files
+from mcdp_utils_misc.string_utils import get_md5
 from quickapp import QuickApp
 from reprep.utils import natsorted
 
+from .github_edit_links import add_edit_links
+from .manual_constants import MCDPManualConstants
 from .manual_join_imp import manual_join
-from mcdp_utils_misc.string_utils import get_md5
-from mcdp_docs.github_edit_links import add_edit_links
+from .minimal_doc import get_minimal_document
 
 
 class RenderManual(QuickApp):
