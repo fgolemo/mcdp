@@ -17,8 +17,6 @@ from bs4.element import Tag, NavigableString
 # 
 # </dd>
 
-
-
 def get_bibliography(bibfile):
     data = open(bibfile).read()
     frag = bs(data)
@@ -56,6 +54,19 @@ def get_bibliography(bibfile):
         res.append(NavigableString('\n'))
     print('Found %d bib entries.' % len(ids))
     return res
+
+def extract_bibtex_blocks(soup):
+    """ Removes the blocks marked code.bibtex and returns a string
+        with a composition of them. """
+    s = ""
+    for code in soup.select('code.bibtex'):
+        parent = code.parent
+        s += code.string + '\n\n'
+        if parent.name == 'pre':
+            parent.extract()
+        else:
+            code.extract()
+    return s    
     
     
 if __name__ == '__main__':

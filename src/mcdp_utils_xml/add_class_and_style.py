@@ -1,3 +1,4 @@
+from contracts.utils import check_isinstance
 
 def add_style(tag, after=True, **kwargs):
     """    
@@ -26,6 +27,8 @@ def add_class(e, c):
     if isinstance(c, str):    
         cc = c.split(' ')
     elif isinstance(c, list):
+        for _ in c:
+            check_isinstance(_, str)
         cc = c
     else:
         raise ValueError(c)

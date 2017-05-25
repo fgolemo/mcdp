@@ -9,6 +9,7 @@ from mcdp_docs.tocs import substituting_empty_links, LABEL_WHAT_NUMBER,\
     LABEL_NAME, LABEL_NUMBER, LABEL_WHAT
 from mcdp_utils_xml import add_class
 
+
 import os
 import sys
 import warnings
@@ -27,6 +28,7 @@ from .macros import replace_macros
 from .read_bibtex import get_bibliography
 from .tocs import generate_toc
 from mcdp_docs.footnote_javascript import add_footnote_polyfill
+from mcdp_docs.read_bibtex import extract_bibtex_blocks
 
 
 def get_manual_css_frag():
@@ -111,6 +113,7 @@ def manual_join(template, files_contents, bibfile, stylesheet, remove=None, extr
             body.append(Comment('End of document dump of %r' % docname))
             body.append(NavigableString('\n\n'))
 
+    extract_bibtex_blocks(d)
     logger.info('external bib')
     if bibfile is not None:
         if not os.path.exists(bibfile):
@@ -212,7 +215,8 @@ def manual_join(template, files_contents, bibfile, stylesheet, remove=None, extr
 
     logger.info('converting to string')
     # do not use to_html_stripping_fragment - this is a complete doc
-    res = str(d)
+    res = unicode(d)
+    res = res.encode('utf8')
     logger.info('done - %d bytes' % len(res))
     return res
 

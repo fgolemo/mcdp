@@ -364,104 +364,144 @@ def render(s, counter_state):
 
 def substituting_empty_links(soup, raise_errors=False):
     '''
-
+    
+    
+        default style is [](#sec:systems)  "Chapter 10"
+        
+        the name is [](#sec:systems?only_name) "My title"
+        
+        the number is [](#sec:systems?only_number) "10"
+        
+        and full is [](#sec:systems?toc_link) "Chapter 10 - My title"
+    
+    
+        You can also use "class":
+        
+            <a href='#sec:name' class='only_number'></a>
+            
+            or
+            
+            <a href='#sec:name?only_number'></a>
+    
 
     '''
+    CLASS_ONLY_NUMBER = MCDPManualConstants.CLASS_ONLY_NUMBER
+    CLASS_NUMBER_NAME = MCDPManualConstants.CLASS_NUMBER_NAME
+    CLASS_ONLY_NAME = MCDPManualConstants.CLASS_ONLY_NAME
+
     logger.debug('substituting_empty_links')
     n = 0
     nerrors = 0
-    for a, element_id, element in get_empty_links_to_fragment(soup):
+    for le in get_empty_links_to_fragment(soup):
+        a = le.linker
+        element_id = le.eid
+        element = le.linked
+        
         n += 1
-        if element:
-            if (not LABEL_WHAT_NUMBER  in element.attrs) or \
-                    (not LABEL_NAME in element.attrs):
-                msg = ('substituting_empty_links: Could not find attributes %s or %s in %s' %
-                       (LABEL_NAME, LABEL_WHAT_NUMBER, element))
-                if True:
-                    logger.warning(msg)
-                else:
-                    note_error_msg(a, msg)
-                    nerrors += 1
-                    if raise_errors:
-                        raise ValueError(msg)
-            else:
-                label_what_number = element.attrs[LABEL_WHAT_NUMBER]
-                label_number = element.attrs[LABEL_NUMBER]
-                label_what = element.attrs[LABEL_WHAT]
-                label_name = element.attrs[LABEL_NAME]
-                classes = a.attrs.get('class', [])
-                if 'toc_link' in classes:
-                    s = Tag(name='span')
-                    s.string = label_what
-                    add_class(s, 'toc_what')
-                    a.append(s)
-
-                    a.append(' ')
-
-                    s = Tag(name='span')
-                    s.string = label_number
-                    add_class(s, 'toc_number')
-                    a.append(s)
-
-                    s = Tag(name='span')
-                    s.string = ' - '
-                    add_class(s, 'toc_sep')
-                    a.append(s)
-
-                    if label_name is not None and '<' in label_name:
-                        contents = bs(label_name)
-                        # sanitize the label name
-                        for br in contents.findAll('br'):
-                            br.replaceWith(NavigableString(' '))
-                        for _ in contents.findAll('a'):
-                            _.extract()
-                        
-                        a.append(contents)
-                        #logger.debug('From label_name = %r to a = %r' % (label_name, a))
-                    else:
-                        s = Tag(name='span')
-                        if label_name is None:
-                            s.string = '(unnamed)'  # XXX
-                        else:
-                            s.string = label_name
-                        add_class(s, 'toc_name')
-                        a.append(s)
-
-                else:
-                    if MCDPManualConstants.CLASS_ONLY_NUMBER in classes:
-                        label = label_number
-                    elif MCDPManualConstants.CLASS_NUMBER_NAME in classes:
-                        if label_name is None:
-                            label = label_what_number + \
-                                ' - ' + '(unnamed)'  # warning
-                        else:
-                            label = label_what_number + ' - ' + label_name
-                    elif MCDPManualConstants.CLASS_ONLY_NAME in classes:
-                        if label_name is None:
-                            label = '(unnamed)'  # warning
-                        else:
-                            label = label_name
-                    else:
-                        label = label_what_number
-
-                    span1 = Tag(name='span')
-                    add_class(span1, 'reflabel')
-                    span1.string = label
-                    a.append(span1)
-
-        else:
+        if not element:
             msg = ('Cannot find %s' % element_id)
             note_error_msg(a, msg)
             nerrors += 1
             if raise_errors:
                 raise ValueError(msg)
+            continue
+        # if there is a query, remove it
+        if le.query is not None:
+            new_href = '#' + le.eid
+            a.attrs['href'] = new_href
+            logger.info('setting new href= %s' % (new_href))
+            
+        if (not LABEL_WHAT_NUMBER  in element.attrs) or \
+                (not LABEL_NAME in element.attrs):
+            msg = ('substituting_empty_links: Could not find attributes %s or %s in %s' %
+                   (LABEL_NAME, LABEL_WHAT_NUMBER, element))
+            if True:
+                logger.warning(msg)
+            else:
+                note_error_msg(a, msg)
+                nerrors += 1
+                if raise_errors:
+                    raise ValueError(msg)
+            continue
+        
+        label_what_number = element.attrs[LABEL_WHAT_NUMBER]
+        label_number = element.attrs[LABEL_NUMBER]
+        label_what = element.attrs[LABEL_WHAT]
+        label_name = element.attrs[LABEL_NAME]
+        
+        classes = a.attrs.get('class', [])
+        classes.append(le.query)
+        
+        if 'toc_link' in classes:
+            s = Tag(name='span')
+            s.string = label_what
+            add_class(s, 'toc_what')
+            a.append(s)
+
+            a.append(' ')
+
+            s = Tag(name='span')
+            s.string = label_number
+            add_class(s, 'toc_number')
+            a.append(s)
+
+            s = Tag(name='span')
+            s.string = ' - '
+            add_class(s, 'toc_sep')
+            a.append(s)
+
+            if label_name is not None and '<' in label_name:
+                contents = bs(label_name)
+                # sanitize the label name
+                for br in contents.findAll('br'):
+                    br.replaceWith(NavigableString(' '))
+                for _ in contents.findAll('a'):
+                    _.extract()
+                
+                a.append(contents)
+                #logger.debug('From label_name = %r to a = %r' % (label_name, a))
+            else:
+                s = Tag(name='span')
+                if label_name is None:
+                    s.string = '(unnamed)'  # XXX
+                else:
+                    s.string = label_name
+                add_class(s, 'toc_name')
+                a.append(s)
+
+        else:
+             
+            if CLASS_ONLY_NUMBER in classes:
+                label = label_number
+            elif CLASS_NUMBER_NAME in classes:
+                if label_name is None:
+                    label = label_what_number + \
+                        ' - ' + '(unnamed)'  # warning
+                else:
+                    label = label_what_number + ' - ' + label_name
+            elif CLASS_ONLY_NAME in classes:
+                if label_name is None:
+                    label = '(unnamed)'  # warning
+                else:
+                    label = label_name
+            else:
+                label = label_what_number
+
+            span1 = Tag(name='span')
+            add_class(span1, 'reflabel')
+            span1.string = label
+            a.append(span1)
+       
     logger.debug('substituting_empty_links: %d total, %d errors' %
                  (n, nerrors))
 
 
+LinkElement = namedtuple('LinkElement', 'linker eid linked query')
+
 def get_empty_links_to_fragment(soup):
     """
         Find all links that have a reference to a fragment.
+        yield LinkElement
     """
 #
 # s.findAll(lambda tag: tag.name == 'p' and tag.find(True) is None and
@@ -485,6 +525,15 @@ def get_empty_links_to_fragment(soup):
             continue
         href = element.attrs['href']
         if href.startswith('#'):
-            eid = href[1:]
+            rest = href[1:]
+            if '?' in rest:
+                i = rest.index('?')
+                eid = rest[:i]
+                query = rest[i+1:]
+            else:
+                eid = rest
+                query = None
+
             linked = id2element.get(eid, None)
-            yield element, eid, linked
+            yield LinkElement(linker=element, eid=eid, linked=linked, query=query)
+

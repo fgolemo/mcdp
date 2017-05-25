@@ -38,7 +38,11 @@ def get_id2element(soup, att):
 
 
 def check_if_any_href_is_invalid(soup):
-    ''' Checks if references are invalid and tries to correct them. '''
+    '''
+         Checks if references are invalid and tries to correct them. 
+         
+        if it is of the form "#frag?query" then query is stripped out
+    '''
     errors = []
     math_errors = []
     
@@ -58,6 +62,9 @@ def check_if_any_href_is_invalid(soup):
             continue 
         assert href.startswith('#')
         ID = href[1:]
+        # remove query if it exists
+        if '?' in ID:
+            ID = ID[:ID.index('?')]
 #         not_found = []
 
         if not ID in id2element:
