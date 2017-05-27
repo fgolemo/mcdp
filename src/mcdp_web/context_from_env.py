@@ -1,7 +1,7 @@
 
 def library_from_env(e):
-    from mcdp_hdb_mcdp.library_view import TheContext
     ''' Creates a suitable MCDPLibrary from the environment '''
+    from mcdp_hdb_mcdp.library_view import TheContext
     db_view = e.db_view
     host_cache = e.app.hi.host_cache
     subscribed_shelves = e.session.get_subscribed_shelves()

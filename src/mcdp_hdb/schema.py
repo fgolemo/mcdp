@@ -2,16 +2,15 @@
 from abc import ABCMeta, abstractmethod
 from collections import OrderedDict
 from contextlib import contextmanager
-import datetime
-import random
-
 from contracts import contract
-from contracts.interface import describe_value, describe_type
-from contracts.utils import indent, check_isinstance, raise_desc, raise_wrapped
-
+from copy import deepcopy
+import datetime
 from mcdp_shelf.access import ACL
 from mcdp_utils_misc import format_list, get_md5, yaml_dump
-from copy import deepcopy
+import random
+
+from contracts.interface import describe_value, describe_type
+from contracts.utils import indent, check_isinstance, raise_desc, raise_wrapped
 
 
 class NotValid(Exception):

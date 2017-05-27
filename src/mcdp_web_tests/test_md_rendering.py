@@ -1,14 +1,7 @@
 # -*- coding: utf-8 -*-
 import codecs
 from contextlib import contextmanager
-import os
-import shutil
-import tempfile
-
-from contracts.utils import check_isinstance
-
-from mcdp import MCDPConstants
-from mcdp import logger
+from mcdp import MCDPConstants, logger
 from mcdp.exceptions import mcdp_dev_warning, DPSyntaxError
 from mcdp_docs.minimal_doc import get_minimal_document
 from mcdp_docs.pipeline import render_complete
@@ -16,6 +9,11 @@ from mcdp_library.library_utils import list_library_files
 from mcdp_library_tests.tests import enumerate_test_libraries, get_test_library
 from mcdp_utils_misc.fileutils import get_mcdp_tmp_dir
 from mcdp_web_tests.test_server import test_mcdpweb_server
+import os
+import shutil
+import tempfile
+
+from contracts.utils import check_isinstance
 
 
 def define_tests_mcdp_web(context):

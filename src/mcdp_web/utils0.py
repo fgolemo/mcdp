@@ -79,7 +79,7 @@ def add_other_fields(self, res, request, context):
         return _ in e.user_info.subscriptions
     
     res['shelf_can_read'] = can_read
-    res['shelf_can_write'] = can_write
+    res['shelf_can_write'] = can_write 
     res['shelf_can_subscribe'] = can_subscribe
     res['shelf_can_discover'] = can_discover
     res['shelf_can_admin'] = can_admin

@@ -2,11 +2,6 @@
 import cgi
 from collections import defaultdict
 import json
-
-from contracts.utils import check_isinstance
-from pyramid.httpexceptions import HTTPFound
-from pyramid.renderers import render_to_response
-
 from mcdp import MCDPConstants, logger
 from mcdp.exceptions import DPInternalError, DPSemanticError, DPSyntaxError,\
     DPNotImplementedError
@@ -23,6 +18,10 @@ from mcdp_web.utils import (ajax_error_catch,
                             format_exception_for_ajax_response, response_image, response_data)
 from mcdp_web.utils0 import add_std_vars_context
 from mocdp.comp.interfaces import NamedDP
+
+from contracts.utils import check_isinstance
+from pyramid.httpexceptions import HTTPFound
+from pyramid.renderers import render_to_response
 
 from .html_mark_imp import html_mark, html_mark_syntax_error
 from .warnings_unconnected import generate_unconnected_warnings

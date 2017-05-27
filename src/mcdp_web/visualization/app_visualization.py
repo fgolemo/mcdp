@@ -6,6 +6,7 @@ from mcdp.logs import logger
 from mcdp_lang.namedtuple_tricks import recursive_print
 from mcdp_lang.parts import CDPLanguage
 from mcdp_lang.utils_lists import unwrap_list
+from mcdp_lang_utils.where import format_where
 from mcdp_report.html import ast_to_html
 from mcdp_utils_xml import add_style, to_html_stripping_fragment, bs
 from mcdp_web.context_from_env import library_from_env, image_source_from_env
@@ -24,7 +25,6 @@ from contracts.utils import check_isinstance, indent, raise_wrapped
 from pyramid.httpexceptions import HTTPFound
 
 from .add_html_links_imp import add_html_links
-from mcdp_lang_utils.where import format_where
 
 
 class AppVisualization(object):

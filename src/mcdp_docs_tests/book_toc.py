@@ -34,22 +34,57 @@ def test_toc():
 </html>
     """
     soup = bs(s)
-    print(soup)
+#     print(soup)
 #     body = soup.find('body')
     _toc = generate_toc(soup)
     s = str(soup)
     expected = ['sec:one', 'sub:two']
-    print(indent(s, 'transformed > '))
+#     print(indent(s, 'transformed > '))
     for e in expected:
         assert e in s
 
+
+@comptest
+def test_toc2():
+    s = """
+<html>
+<head></head>
+<body>
+<h1>One</h1>
+<h1>Two</h1>
+<h1>Three</h1>
+<p></p>
+
+<h2>A</h2>
+
+<h2>B</h2>
+
+<h2>C</h2>
+
+<h3>a</h3>
+<h3>b</h3>
+<h3>c</h3>
+
+</body>
+</html>
+    """
+    soup = bs(s)
+#     print(soup)
+#     body = soup.find('body')
+    _toc = generate_toc(soup)
+    s = str(soup)
+#     expected = ['sec:one', 'sub:two']
+#     print(indent(s, 'transformed > '))
+#     for e in expected:
+#         assert e in s
+        
 @comptest
 def test_render_number():
     styles = sorted(number_styles)
     numbers = range(0, 55)
     for s in styles:
         r = [render_number(_, s) for _ in numbers]
-        print('%s: %s' % (s, r))
+#         print('%s: %s' % (s, r))
     
 @comptest
 def test_toc_numbers1():
@@ -180,8 +215,7 @@ Citing only number:
     stylesheet = 'v_manual_blurb_ready'
     res = manual_join(template=template, files_contents=files_contents, bibfile=None, stylesheet=stylesheet)
 
-#     print res
-    fn = 'test_toc_numbers1.html'
+    fn = 'out/comptests/test_toc_numbers1.html' # XXX: write on test folder
     logger.info('written on %s' % fn)
     with open(fn, 'w') as f:
         f.write(res) 

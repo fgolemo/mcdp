@@ -1,34 +1,35 @@
 {% extends "desc_page.jinja2" %}
+
 {% block head_extra %}
     <style>{% include 'shelves_index.css' %}</style>
     <script>{% include 'shelves_index.js' %}</script>
 {% endblock %}
+
 {% block title %}
-Shelf {{navigation.shelf_name}}
+    Shelf {{navigation.shelf_name}}
 {% endblock %}
+
 {% block desc_page_title %}
 
 {{links.shelf(navigation.repo_name, navigation.shelf_name)}}
 
-
 {% endblock %}
 {% block desc_page_desc %}
     {% if navigation.shelf.get_authors() %}
-    <p id='authors'>
-        {% if navigation.shelf.get_authors() %}
-        Created by
-        {% for author in navigation.shelf.get_authors()%}
-        {{ user_name_and_picture(author) }}{% if not loop.last %}, {%endif%}
-        {% endfor %}.
-        {% endif %}
-    </p>
-    <style>
-    p#authors {
-        font-weight: normal;
-    }
-    </style>
+        <p id='authors'>
+            {% if navigation.shelf.get_authors() %}
+            Created by
+            {% for author in navigation.shelf.get_authors()%}
+            {{ user_name_and_picture(author) }}{% if not loop.last %}, {%endif%}
+            {% endfor %}.
+            {% endif %}
+        </p>
+        <style>
+        p#authors {
+            font-weight: normal;
+        }
+        </style>
     {% endif %}
-
 
 {% set repo_name = navigation.repo_name %}
 {% set shelf_name = navigation.shelf_name %}

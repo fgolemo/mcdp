@@ -1,5 +1,6 @@
 from comptests.registrar import run_module_tests, comptest, comptest_fails
 from contextlib import contextmanager
+from mcdp_hdb_mcdp.main_db_schema import DB
 from mcdp_hdb_mcdp_tests.dbs import testdb1
 from mcdp_tests import logger
 from mcdp_utils_misc import dir_from_package_name
@@ -9,25 +10,8 @@ import os
 
 from pyramid.paster import bootstrap
 from pyramid.renderers import render_to_response
+from .mockups import with_pyramid_environment
 
-
-USER1 = 'uname1'
-
-def with_pyramid_environment(f):
-    @contextmanager
-    def f2():
-        d = dir_from_package_name('mcdp_web_tests')
-        ini = os.path.join(d, 'test1.ini')
-        with bootstrap(ini) as env:
-            app = WebApp.singleton
-            db_view = app.hi.db_view 
-            db0 = testdb1()
-            db_view.user_db.users[USER1] = db0['user_db']['users']['andrea']
-            
-            f(env)
-        
-    f2.__name__ = f.__name__
-    return f2
 
 def get_template(name):
     ''' returns the jinja file  with base in mcdp_web '''

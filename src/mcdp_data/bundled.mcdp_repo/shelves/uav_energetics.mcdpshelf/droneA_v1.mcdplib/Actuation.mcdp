@@ -2,7 +2,7 @@ mcdp {
     provides lift  [N]
     requires power [W]
         
-    c = 3 W/N^2
+    c = 3 W/N²
         
-    required power >= (lift^2) * c
+    required power ≽ (provided lift²) · c
 }

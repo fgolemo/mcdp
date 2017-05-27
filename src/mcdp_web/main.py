@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from ConfigParser import RawConfigParser
 from collections import OrderedDict
-from contracts.utils import indent, check_isinstance
+from contracts import contract
 import datetime
 from mcdp import MCDPConstants
 from mcdp import logger
@@ -18,7 +18,7 @@ import traceback
 import urlparse
 from wsgiref.simple_server import make_server
 
-from contracts import contract
+from contracts.utils import indent, check_isinstance
 import git.cmd  # @UnusedImport
 from pyramid.authentication import AuthTktAuthenticationPolicy
 from pyramid.authorization import ACLAuthorizationPolicy
@@ -60,6 +60,7 @@ from .utils.response import response_data
 from .utils0 import add_other_fields, add_std_vars_context
 from .utils0 import add_std_vars_context_no_redir
 from .visualization.app_visualization import AppVisualization
+from mcdp_hdb_mcdp.main_db_schema import DB
 
 
 Privileges = MCDPConstants.Privileges
@@ -240,8 +241,8 @@ class WebApp(AppVisualization, AppStatus,
     
     @cr2e
     def view_shelf_library_new(self, e):
-        raise NotImplementedError("New library not implemented")
         new_library_name = e.context.name
+        # TODO: check good name
         url_edit = get_url_library(e, e.shelf_name, new_library_name)
 
         if new_library_name in e.shelf.libraries:
@@ -258,19 +259,22 @@ class WebApp(AppVisualization, AppStatus,
             return render_to_response(template, res, request=e.request, 
                                       response=e.request.response)
         else:
-            # does not exist
-            dirname = os.path.join(e.shelf.write_to, new_library_name + '.' + MCDPConstants.library_extension)
-            if os.path.exists(dirname):
-                logger.error('Directory %s already exists.' % dirname)
-            else:
-                os.makedirs(dirname)
-                one = os.path.join(dirname, '.gitignore')
-                with open(one, 'w') as f:
-                    f.write("")
-                    
-                logger.info('Created library %r in %r' % (new_library_name, dirname))
-            
-            e.session.notify_created_library(e.shelf_name,new_library_name)
+            # The library does not exist: we create it
+            empty = DB.library.generate_empty()
+            e.shelf.libraries[new_library_name] = empty
+#             
+#             dirname = os.path.join(e.shelf.write_to, new_library_name + '.' + MCDPConstants.library_extension)
+#             if os.path.exists(dirname):
+#                 logger.error('Directory %s already exists.' % dirname)
+#             else:
+#                 os.makedirs(dirname)
+#                 one = os.path.join(dirname, '.gitignore')
+#                 with open(one, 'w') as f:
+#                     f.write("")
+#                     
+#                 logger.info('Created library %r in %r' % (new_library_name, dirname))
+#             
+#             e.session.notify_created_library(e.shelf_name,new_library_name)
             raise HTTPFound(url_edit) 
          
     @cr2e

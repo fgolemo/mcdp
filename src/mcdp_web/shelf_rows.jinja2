@@ -4,6 +4,7 @@
     {% if shelf_can_discover(repo_name, shelf_name) %}
     {{shelf_row(repo_name, shelf_name, shelf)}}
 
+     {# if shelf_can_read(repo_name, shelf_name) and shelf_subscribed(repo_name, shelf_name) #} 
     {% if shelf_can_read(repo_name, shelf_name) %}
     <tr style='display:none' id="contents-{{shelf_name}}">
         <td colspan=6>

@@ -15,7 +15,7 @@
     {%if shelf_subscribed(repo_name, shelf_name)%}
     <a href='{{url}}/'>{{icon_shelf|safe}}&nbsp;Shelf&nbsp;<code>{{shelf_name}}</code></a>
     {% else %}
-    {{icon_shelf|safe}}&nbsp;Shelf&nbsp;<code>{{shelf_name}}
+    {{icon_shelf|safe}}&nbsp;Shelf&nbsp;<code>{{shelf_name}}</code>
     {% endif %}
 {% endmacro %}
 

@@ -55,7 +55,8 @@ http://127.0.0.1:8080/libraries/basic/models/prod2r/views/solver2/#eyJhcmVhX0YiO
   table#params {padding-top: 1em; /* for h2 trick above */}
 
   div#query_box {
-        border: solid 1px #ddd; padding: 1em;
+        /*border: solid 1px #ddd;*/
+         padding: 1em;
 
    }
   div#query_box p#par_image {
@@ -70,7 +71,14 @@ http://127.0.0.1:8080/libraries/basic/models/prod2r/views/solver2/#eyJhcmVhX0YiO
       margin-bottom: 3pt;
     }
 
-  img#problem_icon {height: 7em;}
+    #problem_icon_container {
+        vertical-align: top;
+    }
+    label.ui-state-active {
+        outline: solid 1px red;
+    }
+  img#problem_icon {height: 7em;
+  display:block;}
 
   .not-implemented { color: gray; font-weight:normal;}
 	</style>
@@ -80,11 +88,10 @@ http://127.0.0.1:8080/libraries/basic/models/prod2r/views/solver2/#eyJhcmVhX0YiO
     <h2>Query</h2>
 
   <div id='query_box'>
-      <p id='par_image'>
-  <img src='../images/ndp_graph_templatized.svg' id='compact_graph'/>
+      <!-- <p id='par_image'> -->
 
 
-</p>
+<!-- </p> -->
   <table id='params'>
   <tr>
     <td>
@@ -96,7 +103,7 @@ http://127.0.0.1:8080/libraries/basic/models/prod2r/views/solver2/#eyJhcmVhX0YiO
         <span class='Ftext'>Fixed the functionality</span>,<br/>
         <span class='Rtext'>minimize the resources</span>.
       </label>
-      <input type="radio" name="query-type" id="ftor_checkbox" checked="checked">
+      <input type="radio" name="query-type" id="ftor_checkbox" >
 
       <label for="rtof_checkbox">
         <span class='Rtext'>Fixed the resources</span>,<br/>
@@ -105,8 +112,8 @@ http://127.0.0.1:8080/libraries/basic/models/prod2r/views/solver2/#eyJhcmVhX0YiO
       <input type="radio" name="query-type" id="rtof_checkbox">
       <br/>
       <label for="itofr_checkbox">
-        Given an <span class='Itext'>implementation</span>,<br/>evaluate <span class='Ftext'>functionality</span>/resources.
-        <span class='not-implemented'>[not implemented]</span>
+        Given an <span class='Itext'>implementation</span>,<br/>evaluate <span class='Ftext'>functionality</span>/<span class='Rtext'>resources</span>.
+        <span class='not-implemented'>[UI not implemented]</span>
       </label>
       <input type="radio" name="query-type" id="itofr_checkbox" >
       <br/>
@@ -115,26 +122,29 @@ http://127.0.0.1:8080/libraries/basic/models/prod2r/views/solver2/#eyJhcmVhX0YiO
           Given  <span class='Ftext'>min functionality</span> and
           <span class='Rtext'>max resources</span>,<br/>
           determine if there is a <span class='Itext'>feasible implementation</span>.
-          <span class='not-implemented'>[not implemented]</span>
+          <span class='not-implemented'>[UI not implemented]</span>
         </label>
       <input type="radio" name="query-type" id="existsi_checkbox"  >
       <br/>
 
       <label for="frtoi_checkbox">
           Given <span class='Ftext'>min functionality</span> and
-          <span class='Rtext'>max resources</span> and max resources,<br/> find a
+          <span class='Rtext'>max resources</span>,<br/> find a
         <span class='Itext'>feasible implementation</span>.
-        <span class='not-implemented'>[not implemented]</span>
+        <span class='not-implemented'>[UI not implemented]</span>
       </label>
-      <input type="radio" name="query-type" id="frtoi_checkbox"  >
+      <input enabled="0" type="radio" name="query-type" id="frtoi_checkbox"  >
       <br/>
 
       <label for="solveforx_checkbox">
           "Solve for X": find the minimal component that makes the co-design problem feasible.
-          <span class='not-implemented'>[not implemented]</span>
+          <span class='not-implemented'>[UI not implemented]</span>
       </label>
       <input type="radio" name="query-type" id="solveforx_checkbox" >
     </fieldset>
+</td>
+<td id='problem_icon_container'>
+    <img src='../images/ndp_graph_templatized.svg' id='compact_graph'/>
     <br/>
     <img id='problem_icon' src='{{static}}/white_small.png'/>
     </td>
@@ -159,7 +169,7 @@ http://127.0.0.1:8080/libraries/basic/models/prod2r/views/solver2/#eyJhcmVhX0YiO
     </td>
   </tr>
 
-  <tr>
+  <tr class='more_parameters'>
     <td></td><td>
         <fieldset>
             <input type="checkbox" name="do_approximations_x" id="do_approximations"/>
@@ -169,7 +179,7 @@ http://127.0.0.1:8080/libraries/basic/models/prod2r/views/solver2/#eyJhcmVhX0YiO
         </fieldset>
     </td>
   </tr>
-  <tr>
+  <tr  class='more_parameters'>
     <td valign='top' id='approx_cell'></td>
       <!-- <fieldset> -->
 
@@ -198,7 +208,7 @@ http://127.0.0.1:8080/libraries/basic/models/prod2r/views/solver2/#eyJhcmVhX0YiO
     </td>
   </tr>
 
-  <tr><td></td>
+  <tr class='more_parameters'><td></td>
     <td>
         <fieldset>
             <input type="checkbox" name="draw_implementations" id="draw_implementations"/>
@@ -215,7 +225,7 @@ http://127.0.0.1:8080/libraries/basic/models/prod2r/views/solver2/#eyJhcmVhX0YiO
 
   <img id='output_img' src="{{static}}/white.png" style='width: 20em; height: 20em'/>
 
-  <p>{{space_description}}</p>
+  {#<p>{{space_description}}</p>#}
 
   <pre class='output_success' id='output_parsed'></pre>
   <pre class='output_success'  id='output_format'></pre>
@@ -325,7 +335,7 @@ function get_ui_state() {
   state['area_F'] = S('#area_F').val();
   state['area_R'] = S('#area_R').val();
   for(c of checkboxes) {
-        state[c] = S("#"+c).is(':checked');
+     state[c] = S("#"+c).is(':checked');
   }
 
   // state['rtof_checkbox'] = S("#rtof_checkbox").is(':checked');
@@ -447,13 +457,31 @@ function set_state_from_hash() {
       mark('#area_R', false);
       S('#row-res').hide();
       S('#row-fun').show();
+      S('.output_success').show();
+      S('.output_error').show();
+      S('.more_parameters').show();
     }
+    else
+
     if( S("#rtof_checkbox").is(':checked') ){
       mark('#area_F', false);
       mark('#area_R', true);
       S('#row-res').show();
       S('#row-fun').hide();
+      S('.output_success').show();
+      S('.output_error').show();
+      S('.more_parameters').show();
     }
+    else{
+        mark('#area_F', false);
+        mark('#area_R', false);
+        S('#row-res').hide();
+        S('#row-fun').hide();
+        S('.output_success').hide();
+        S('.output_error').hide();
+        S('.more_parameters').hide();
+    }
+
 
     if( S("#do_approximations").is(':checked') ){
       S("#approx_params").show();

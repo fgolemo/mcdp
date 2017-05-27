@@ -3,12 +3,6 @@ import base64
 import cgi
 from contextlib import contextmanager
 import json
-
-from contracts.utils import raise_desc, raise_wrapped
-from reprep import Report
-from reprep.constants import MIME_PNG
-from reprep.plot_utils.axes import x_axis_extra_space, y_axis_extra_space
-
 from mcdp import logger
 from mcdp.exceptions import DPSyntaxError, mcdp_dev_warning, DPSemanticError, \
     DPInternalError
@@ -28,7 +22,14 @@ from mcdp_web.resource_tree import ResourceThingViewSolver,\
 from mcdp_web.utils import ajax_error_catch, memoize_simple, response_data
 from mcdp_web.utils.image_error_catch_imp import response_image
 from mcdp_web.utils0 import add_std_vars_context
+
+from contracts.utils import raise_desc, raise_wrapped
+from reprep import Report
+from reprep.constants import MIME_PNG
+from reprep.plot_utils.axes import x_axis_extra_space, y_axis_extra_space
+
 import numpy as np
+from mcdp_web.context_from_env import library_from_env
 
 
 # Alternate chars used for Base64 instead of + / which give problems with urls
@@ -73,14 +74,26 @@ class AppSolver2(object):
         config.add_view(self.view_solver2_display1u, 
                         context=ResourceThingViewSolver_display1u_png)
 
-    def get_ndp_dp(self, session, library_name, model_name):
-        self._xxx_session = session
-        return self._get_ndp_dp(library_name, model_name)
-    
-    @memoize_simple
-    def _get_ndp_dp(self, library_name, model_name):
-        library = self._xxx_session.libraries[library_name]['library']
-        ndp = library.load_ndp(model_name)
+    def get_ndp_dp_e(self, e):
+        return self.get_ndp_dp(e=e,
+                              repo_name=e.repo_name, 
+                              shelf_name=e.shelf_name, 
+                              library_name=e.library_name, 
+                              model_name=e.thing_name)
+
+    def get_ndp_dp(self, e, repo_name, shelf_name, library_name, model_name):
+# #         self._xxx_session = session
+#         return self._get_ndp_dp(repo_name, shelf_name, library_name, model_name)
+#     
+#     @memoize_simple
+#     def _get_ndp_dp(self, repo_name, shelf_name, library_name, model_name):
+#         library = self._xxx_session.libraries[library_name]['library']
+#         
+        mcdp_library = library_from_env(e)
+        
+        ndp = e.spec.load(mcdp_library, e.thing_name)
+        
+#         ndp = library.load_ndp(model_name)
         dp = ndp.get_dp()
         return ndp, dp
 
@@ -88,7 +101,7 @@ class AppSolver2(object):
     @cr2e
     def view_solver2_base(self, e):
         # you don't want to memoize
-        ndp, dp = self.get_ndp_dp(e.session, e.library_name, e.thing_name)
+        ndp, dp = self.get_ndp_dp_e(e)
 
         F = dp.get_fun_space()
         R = dp.get_res_space()
@@ -161,13 +174,14 @@ class AppSolver2(object):
         return ajax_error_catch(go, quiet=quiet, environment=e)
     
     def process_rtof(self, e, string, do_approximations, nl, nu):
-        parsed = e.library.parse_constant(string)
+        mcdp_library = library_from_env(e)
+        parsed = mcdp_library.parse_constant(string)
+
 
         space = parsed.unit
         value = parsed.value
 
-        
-        ndp, dp = self.get_ndp_dp(e.session, e.library_name, e.thing_name)
+        ndp, dp = self.get_ndp_dp_e(e)
 
         R = dp.get_res_space()
         LF = LowerSets(dp.get_fun_space())
@@ -220,14 +234,15 @@ class AppSolver2(object):
         return data, res
 
     def process_ftor(self, e, string, do_approximations, nl, nu):
-        parsed = e.library.parse_constant(string)
+        mcdp_library = library_from_env(e)
+        parsed = mcdp_library.parse_constant(string)
 
         space = parsed.unit
         value = parsed.value
-
          
-        ndp, dp = self.get_ndp_dp(e.session, e.library_name, e.model_name)
-
+        
+        ndp, dp = self.get_ndp_dp_e(e)
+        
         F = dp.get_fun_space()
         UR = UpperSets(dp.get_res_space())
 
@@ -365,7 +380,7 @@ class AppSolver2(object):
             xaxis = str(e.request.params['xaxis'])
             yaxis = str(e.request.params['yaxis'])
  
-            ndp, dp = self.get_ndp_dp(e.session, e.library_name, e.model_name)
+            ndp, dp = self.get_ndp_dp_e(e)
 
             fnames = ndp.get_fnames()
             rnames = ndp.get_rnames()

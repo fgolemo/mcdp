@@ -6,7 +6,7 @@
             shelf_name = $(target).attr('shelf-name');
             repo_name = $(target).attr('repo-name');
 
-            url_base = "{{static}}/repos/"+repo_name+"/shelves/"+shelf_name + "/libraries/:new/";
+            url_base = "{{root}}/repos/"+repo_name+"/shelves/"+shelf_name + "/libraries/:new/";
             prompt_user("library", url_base, prompt="Create new item");
         }
         $(document).ready(function() {

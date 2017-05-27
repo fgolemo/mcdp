@@ -1,5 +1,4 @@
 from comptests.registrar import run_module_tests
-from contracts.utils import raise_desc, indent
 from mcdp import MCDPConstants
 from mcdp.logs import logger
 from mcdp_docs.preliminary_checks import assert_not_contains
@@ -17,6 +16,7 @@ import shutil
 import unittest
 import urlparse
 
+from contracts.utils import raise_desc, indent
 from git import Repo
 from pyramid.security import Allow, Everyone
 

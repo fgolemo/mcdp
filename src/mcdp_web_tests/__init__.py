@@ -7,3 +7,4 @@ from .test_server import *
 from .test_editor import *
 from .test_webtests import *
 from .test_jinja_rendering import *
+from .test_library_creation import *

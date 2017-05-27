@@ -23,8 +23,8 @@ ul.libraries_list > li > *:first-child:before {
 </style>
 
 <ul class='libraries_list'>
-
-    {% for library_name in shelf.libraries %}
+    {% set ordered = shelf.libraries | sort %}
+    {% for library_name in ordered %}
         <li>{{links.library(repo_name, shelf_name, library_name)}}</li>
     {% endfor %}
 </ul>

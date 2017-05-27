@@ -1,10 +1,10 @@
-from contracts.utils import indent
 from mcdp import MCDPConstants
+from mcdp.logs import logger as logger_main
 from mcdp.logs import logger_web_resource_tree as logger
 import os
 
+from contracts.utils import indent
 from pyramid.security import Allow, Authenticated, Everyone
-
 
 
 Privileges = MCDPConstants.Privileges
@@ -46,7 +46,9 @@ class Resource(object):
         r = self.getitem(key)
         if r is None:
             logger.debug('asked for %r - not found' % key)
-            return ResourceNotFoundGeneric(key)
+            notfound = ResourceNotFoundGeneric(key)
+            notfound.__parent__ = self
+            return notfound
 
         if not hasattr(r, '__parent__'):
             r.__parent__ = self
@@ -237,8 +239,11 @@ class ResourceShelves(Resource):
         ui = session.get_user_struct().info
         repo = self.get_repo()
         shelves = repo.shelves
-
+        
         if not key in shelves:
+            
+            msg = 'Not found shelf %r in %s' % (key, sorted(shelves))
+            logger_main.info(msg)
             return ResourceShelfNotFound(key)
         shelf = shelves[key]
         if not shelf.get_acl().allowed2(Privileges.READ, ui):
@@ -269,6 +274,7 @@ class ResourceExceptionsJSON(Resource): pass
 class ResourceRefresh(Resource): pass
 
 class ResourceLibrariesNew(Resource):
+    
     def getitem(self, key):
         return ResourceLibrariesNewLibname(key)
 
