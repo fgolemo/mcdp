@@ -1,4 +1,6 @@
 from contracts.utils import check_isinstance
+from contracts import contract
+from bs4.element import Tag
 
 def add_style(tag, after=True, **kwargs):
     """    
@@ -23,18 +25,23 @@ def add_style(tag, after=True, **kwargs):
             s = s1 + s0
     tag['style'] = s
     
+@contract(e=Tag, c='str|list(str)')
 def add_class(e, c):
+    check_isinstance(e, Tag)
     if isinstance(c, str):    
-        cc = c.split(' ')
+        cc = [_ for _ in c.split(' ') if _]
     elif isinstance(c, list):
         for _ in c:
             check_isinstance(_, str)
         cc = c
     else:
         raise ValueError(c)
-    cur = e.get('class', [])
+    cur = list(e.attrs.get('class', []))
     if isinstance(cur, str):
-        cur = cur.split()
+        cur = [_ for _ in cur.split() if _] # remove None
     cur = cur + cc
-    e['class'] = cur 
+    e.attrs['class'] = cur 
+    # check not None
+    for classname in e.attrs['class']:
+        assert classname is not None
     

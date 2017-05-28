@@ -11,6 +11,7 @@ import os
 from pyramid.paster import bootstrap
 from pyramid.renderers import render_to_response
 from .mockups import with_pyramid_environment
+from mcdp_web_tests.mockups import USER1
 
 
 def get_template(name):

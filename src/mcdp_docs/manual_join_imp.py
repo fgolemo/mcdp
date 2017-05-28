@@ -179,6 +179,8 @@ def manual_join(template, files_contents, bibfile, stylesheet, remove=None, extr
     ###
     logger.info('adding toc')
     toc = generate_toc(body2)
+    
+    logger.info('TOC:\n' + str(toc))
     toc_ul = bs(toc).ul
     toc_ul.extract()
     assert toc_ul.name == 'ul'

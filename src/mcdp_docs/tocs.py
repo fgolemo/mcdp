@@ -218,6 +218,8 @@ class Item(object):
         if not root:
             s += (u"""<a class="toc_link toc_link-depth-%s number_name toc_a_for_%s" href="#%s"></a>""" %
                   (self.depth, self.header_level, self.id))
+            
+#             logger.info(str(bs(s)))
 
         if max_levels and self.items:
             s += '<ul class="toc_ul-depth-%s toc_li_for_%s">' % (
@@ -390,9 +392,12 @@ def substituting_empty_links(soup, raise_errors=False):
     CLASS_ONLY_NAME = MCDPManualConstants.CLASS_ONLY_NAME
 
     logger.debug('substituting_empty_links')
+    
     n = 0
     nerrors = 0
     for le in get_empty_links_to_fragment(soup):
+
+        
         a = le.linker
         element_id = le.eid
         element = le.linked
@@ -429,8 +434,10 @@ def substituting_empty_links(soup, raise_errors=False):
         label_what = element.attrs[LABEL_WHAT]
         label_name = element.attrs[LABEL_NAME]
         
-        classes = a.attrs.get('class', [])
-        classes.append(le.query)
+        classes = list(a.attrs.get('class', [])) # bug: I was modifying
+        
+        if le.query is not None:
+            classes.append(le.query)
         
         if 'toc_link' in classes:
             s = Tag(name='span')
@@ -492,6 +499,7 @@ def substituting_empty_links(soup, raise_errors=False):
             span1.string = label
             a.append(span1)
        
+        logger.debug('acted on ' + str(a))
     logger.debug('substituting_empty_links: %d total, %d errors' %
                  (n, nerrors))
 
