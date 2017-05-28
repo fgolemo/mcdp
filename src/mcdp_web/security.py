@@ -38,7 +38,7 @@ class AppLogin(object):
         # Bug! this must be front-facing
         url_internal = request.url
         if self.options.url_base_internal is not None:
-            url_external = url_internal.replace(self.options.url_base_internal, self.options.url_base_external) 
+            url_external = url_internal.replace(self.options.url_base_internal, self.options.url_base_public) 
         else:
             url_external = url_internal
         
