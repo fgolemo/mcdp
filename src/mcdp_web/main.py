@@ -62,6 +62,7 @@ from .utils0 import add_other_fields, add_std_vars_context
 from .utils0 import add_std_vars_context_no_redir
 from .visualization.app_visualization import AppVisualization
 from mcdp_utils_misc.fileutils import create_tmpdir
+from mcdp_utils_misc.memoize_simple_imp import memoize_simple
 
 
 Privileges = MCDPConstants.Privileges
@@ -690,12 +691,14 @@ class WebApp(AppVisualization, AppStatus,
         u = user_db.users[username]
         picture_data = u.get_picture_jpg()
         if picture_data is None:
-            url = e.root + '/static/nopicture.jpg'
-            raise HTTPFound(url)
+            mime = 'image/jpeg'
+            data = get_nopicture_jpg()
+#             url = e.root + '/static/nopicture.jpg'
+#             raise HTTPFound(url)
         else: 
             mime = get_mime_for_format(data_format)
             data = picture_data 
-            return response_data(request=e.request, data=data, content_type=mime)
+        return response_data(request=e.request, data=data, content_type=mime)
     
     @add_std_vars_context
     @cr2e
@@ -940,3 +943,13 @@ def app_factory(global_config, **settings0):  # @UnusedVariable
 
 mcdp_web_main = MCDPWeb.get_sys_main()
 
+
+
+@memoize_simple
+def get_nopicture_jpg():
+    package = dir_from_package_name('mcdp_web')
+    fn = os.path.join(package, 'static/nopicture.jpg')
+    if not os.path.exists(fn): # pragma: no cover
+        raise ValueError(fn)
+    contents = open(fn).read()
+    return contents
