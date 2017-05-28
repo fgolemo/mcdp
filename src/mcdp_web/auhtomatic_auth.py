@@ -184,8 +184,7 @@ def handle_auth_success(self, e, provider_name, result, next_location):
             e.session.candidate_user = u
             e.session.soft_match = None
             e.session.next_location = next_location
-            confirm_bind = e.root + '/confirm_bind/' 
-            raise HTTPFound(location=confirm_bind)
+            self.redirect_to_page(e, '/confirm_bind/')
     
     if not currently_logged_in:
         # not logged in
@@ -206,15 +205,14 @@ def handle_auth_success(self, e, provider_name, result, next_location):
                 e.session.candidate_user = u
                 e.session.soft_match = soft_match
                 e.session.next_location = next_location
-                confirm_bind = e.root + '/confirm_creation_similar/' 
-                raise HTTPFound(location=confirm_bind)
+                self.redirect_to_page(e, '/confirm_creation_similar/') 
             else:
                 # we will create an accounts
                 e.session.candidate_user = u
                 e.session.soft_match = None
                 e.session.next_location = next_location
-                confirm_bind = e.root + '/confirm_creation/' 
-                raise HTTPFound(location=confirm_bind)
+                self.redirect_to_page(e, '/confirm_creation/') 
+                 
 
     
                 

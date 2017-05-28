@@ -909,6 +909,14 @@ class WebApp(AppVisualization, AppStatus,
         logger.error('Renaming %r to %r' % (name, new_name))
         e.things.rename(name, new_name)
         raise HTTPFound(e.request.referrer)
+    
+    def redirect_to_page(self, e, page):
+        if self.options.url_base_public:
+            url = self.options.url_base_public + page
+        else:
+            url = e.root + page
+        logger.info('redirecting to page %s\nurl: %s' % (page, url)) 
+        raise HTTPFound(location=url)
 
 
 def serve_robots(request):  # @UnusedVariable
