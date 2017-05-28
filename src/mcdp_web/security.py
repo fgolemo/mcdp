@@ -34,7 +34,17 @@ class AppLogin(object):
         logger.error('forbidden result: %s' % request.exception.result)
         request.response.status = 403
         config = self.get_authomatic_config()
-        config['next_location'] = request.url
+        
+        # Bug! this must be front-facing
+        url_internal = request.url
+        if self.options.url_base_internal is not None:
+            url_external = url_internal.replace(self.options.url_base_internal, self.options.url_base_external) 
+        else:
+            url_external = url_internal
+        
+        logger.debug('next_location:\n internal: %s\n external: %s' % (url_internal, url_external))
+        config['next_location'] = url_external
+        
         res = {}
         res['request_exception_message'] = request.exception.message
         res['request_exception_result'] = request.exception.result
