@@ -29,7 +29,7 @@ def ff(f):
     @contract(_id=str, who='assert_valid_who')
     def f2(_id, who, *args, **kwargs):
         check_isinstance(_id, str)
-        logger.debug('Calling %s with args = %s kwargs = %s' % (f, args, kwargs))
+        #logger.debug('Calling %s with args = %s kwargs = %s' % (f, args, kwargs))
         event_name, arguments = f(*args, **kwargs)
         e =  disk_event_make(_id, event_name, who, arguments)
         return e

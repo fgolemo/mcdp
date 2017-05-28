@@ -327,8 +327,8 @@ class ViewContext0(ViewMount):
                 raise NotImplementedError(v._schema)
             self._notify(event)
             
-            logger.debug('setting leaf %s = %s' % (leaf, value))
-            logger.debug('setting leaf schema = %s ' % (v._schema))
+#             logger.debug('setting leaf %s = %s' % (leaf, value))
+#             logger.debug('setting leaf schema = %s ' % (v._schema))
             self._data[leaf] = value
         
     

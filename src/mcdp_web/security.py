@@ -90,7 +90,6 @@ class AppLogin(object):
             login = e.request.params['login'].encode('utf8')
             password = e.request.params['password'].encode('utf8')
 
-            
             if not login in user_db:
                 error = 'Could not find user name "%s".' % login
             else:
@@ -102,7 +101,6 @@ class AppLogin(object):
                     error = 'Password does not match.'
         else: 
             login = None
-             
 
         res = dict(
             name='Login',

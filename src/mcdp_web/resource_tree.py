@@ -1,9 +1,9 @@
+from contracts.utils import indent
 from mcdp import MCDPConstants
 from mcdp.logs import logger as logger_main
 from mcdp.logs import logger_web_resource_tree as logger
 import os
 
-from contracts.utils import indent
 from pyramid.security import Allow, Authenticated, Everyone
 
 

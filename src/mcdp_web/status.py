@@ -1,15 +1,14 @@
 # -*- coding: utf-8 -*-
 import json
+import mcdp
+from mcdp_utils_misc import duration_compact, memoize_simple
 import os
 import socket
+from system_cmd import system_cmd_result
 import time
 
 from dateutil.parser import parse
 import pyramid
-from system_cmd import system_cmd_result
-
-import mcdp
-from mcdp_utils_misc import duration_compact, memoize_simple
 
 
 class AppStatus(object):

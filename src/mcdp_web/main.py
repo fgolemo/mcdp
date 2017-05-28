@@ -9,6 +9,7 @@ from mcdp.exceptions import DPSemanticError, DPSyntaxError
 from mcdp_docs import render_complete
 from mcdp_hdb.schema import SchemaContext, SchemaHash
 from mcdp_hdb_mcdp.host_instance import HostInstance
+from mcdp_hdb_mcdp.main_db_schema import DB
 from mcdp_library import MCDPLibrary
 from mcdp_utils_misc import duration_compact, dir_from_package_name, format_list, yaml_load
 import os
@@ -60,13 +61,10 @@ from .utils.response import response_data
 from .utils0 import add_other_fields, add_std_vars_context
 from .utils0 import add_std_vars_context_no_redir
 from .visualization.app_visualization import AppVisualization
-from mcdp_hdb_mcdp.main_db_schema import DB
+from mcdp_utils_misc.fileutils import create_tmpdir
 
 
 Privileges = MCDPConstants.Privileges
-
-
-
 
 __all__ = [
     'mcdp_web_main',
@@ -137,16 +135,22 @@ class WebApp(AppVisualization, AppStatus,
         # csfr_token -> Session
         self.sessions = OrderedDict()
         
-        # str -> Shelf
-#         self.all_shelves = OrderedDict()
-        
         config_repos = yaml_load(self.options.repos_yaml)
         logger.info('Config:\n'+ indent(self.options.repos_yaml, '>'))
         logger.info(config_repos)
         instance = self.options.instance
-        root= 'out/root'
+        #root= 'out/root'
+        root = create_tmpdir('HostInstance_root')
+        logger.debug('Tmp dir: %s' % root)
         
-        config_repos['local']['bundled'] = os.path.join(dir_from_package_name('mcdp_data'), 'bundled.mcdp_repo')
+        if not 'local' in config_repos:
+            config_repos['local'] = {}
+        if not 'remote' in config_repos:
+            config_repos['remote'] = {}
+        
+        # add the bundled repository
+        bundled_repo_dir = os.path.join(dir_from_package_name('mcdp_data'), 'bundled.mcdp_repo')  
+        config_repos['local']['bundled'] = bundled_repo_dir
         
         self.hi = HostInstance(instance=instance, 
                                upstream='master', 
@@ -154,6 +158,11 @@ class WebApp(AppVisualization, AppStatus,
                                repo_git=config_repos['remote'], 
                                repo_local=config_repos['local'])
 
+        if self.options.allow_anonymous_write:
+            logger.warning('Note: because allow_anonymous_write anonymous users can admin the repos.')
+            self.hi.set_local_permission_mode()
+            from pyramid.security import Allow, Everyone, ALL_PERMISSIONS
+            MCDPResourceRoot.__acl__.append((Allow, Everyone, ALL_PERMISSIONS))
         
     def add_model_view(self, name, desc):
         self.views[name] = dict(desc=desc, order=len(self.views))
@@ -261,20 +270,7 @@ class WebApp(AppVisualization, AppStatus,
         else:
             # The library does not exist: we create it
             empty = DB.library.generate_empty()
-            e.shelf.libraries[new_library_name] = empty
-#             
-#             dirname = os.path.join(e.shelf.write_to, new_library_name + '.' + MCDPConstants.library_extension)
-#             if os.path.exists(dirname):
-#                 logger.error('Directory %s already exists.' % dirname)
-#             else:
-#                 os.makedirs(dirname)
-#                 one = os.path.join(dirname, '.gitignore')
-#                 with open(one, 'w') as f:
-#                     f.write("")
-#                     
-#                 logger.info('Created library %r in %r' % (new_library_name, dirname))
-#             
-#             e.session.notify_created_library(e.shelf_name,new_library_name)
+            e.shelf.libraries[new_library_name] = empty 
             raise HTTPFound(url_edit) 
          
     @cr2e
@@ -320,11 +316,10 @@ class WebApp(AppVisualization, AppStatus,
         self.exceptions.append('Path not found.\n url: %s\n referrer: %s' % (url, referrer))
         res = {
             'url': url,
-             'referrer': referrer,
-             'root': e.root,
-             'static': e.root + '/static',
+            'referrer': referrer,
+            'root': e.root,
+            'static': e.root + '/static',
         }
-
         return res
 
     @add_std_vars_context
@@ -539,8 +534,8 @@ class WebApp(AppVisualization, AppStatus,
         secret = 'itsasecreet' # XXX
         
         self.my_session_factory = SignedCookieSessionFactory(secret+'sign')
-        root_factory =MCDPResourceRoot
-        config = Configurator(root_factory=root_factory, settings=self.settings)
+        self.root_factory = MCDPResourceRoot
+        config = Configurator(root_factory=self.root_factory, settings=self.settings)
         config.set_session_factory(self.my_session_factory)
 
         # config.include('pyramid_debugtoolbar')
@@ -906,19 +901,23 @@ class MCDPWeb(QuickAppBase):
             settings = {}
 
         wa = WebApp(options, settings=settings)
+        # Write warning messages now
+        wa.get_authomatic_config()
         msg = """Welcome to PyMCDP!
         
 To access the interface, open your browser at the address
     
-    http://127.0.0.1:%s/
+    http://localhost:%s/
     
 Use Chrome, Firefox, or Opera - Internet Explorer is not supported.
 """ % options.port
+        logger.info(msg)
 
         if options.delete_cache:
-            logger.info('Deleting cache...')
+            pass # XXX: warning deprecated
+#             logger.info('Deleting cache...')
             #wa._refresh_library(None)
-        logger.info(msg)
+        
         wa.serve(port=options.port)
 
 def get_only_prefixed(settings, prefix, delete=False):

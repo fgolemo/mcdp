@@ -1,19 +1,18 @@
+from contracts import contract
+from mcdp import logger
+from mcdp_utils_misc import yaml_dump
 import os
 
-from contracts import contract
 from contracts.utils import indent, raise_wrapped
 from git.repo.base import Repo
 from git.util import Actor
 
-from mcdp.logs import logger
-from mcdp_utils_misc import yaml_dump
-
 from .disk_map import DiskMap
 from .disk_struct import ProxyDirectory
+from .exceptions import HDBInternalError
 from .gitrepo_map import diskrep_from_gitrep
 from .memdataview import ViewMount
 from .memdataview_utils import host_name
-from mcdp_hdb.exceptions import HDBInternalError
 
 
 @contract(view0=ViewMount, child_name=str, disk_map=DiskMap, repo=Repo)
@@ -107,8 +106,9 @@ class WriteToDiskCallback(object):
     def __call__(self, data_event):
         from mcdp_hdb.disk_map_disk_events_from_data_events import disk_events_from_data_event
         from mcdp_hdb.disk_events import apply_disk_event_to_filesystem
-        s = yaml_dump(data_event)
-        logger.debug('Event #%d:\n%s' % (len(self.data_events), indent(s, '> ')) )
+        # A good one to debug
+        # s = yaml_dump(data_event)
+        # logger.debug('Event #%d:\n%s' % (len(self.data_events), indent(s, '> ')) )
         self.data_events.append(data_event)
         disk_events = disk_events_from_data_event(disk_map=self.disk_map, 
                                                  schema=self.view._schema, 
@@ -116,7 +116,7 @@ class WriteToDiskCallback(object):
                                                  data_event=data_event)
         
         for disk_event in disk_events:
-            logger.debug('Disk event:\n%s' % yaml_dump(disk_event))
+            # logger.debug('Disk event:\n%s' % yaml_dump(disk_event))
             apply_disk_event_to_filesystem(self.dirname, disk_event)
             
     

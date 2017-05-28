@@ -4,10 +4,12 @@ from decent_params import DecentParams
 
 def describe_mcdpweb_params(dp):
     dp.add_int('load_mcdp_data', default=1)
-    dp.add_int('allow_anonymous', default=1)
+    dp.add_int('allow_anonymous', default=1, help='Allow anonymous access')
+    dp.add_int('allow_anonymous_write', default=1, help='Allow anonymous write')
+    
     dp.add_bool('allow_user_login', default=True)
     dp.add_bool('allow_user_signups', default=False)
-    dp.add_bool('delete_cache', default=True)
+    
     dp.add_string('config', short='-c', default=None, 
                   help='Reads .ini file configuration.') 
     dp.add_string('libraries', short='-d',default=None, 
@@ -17,7 +19,7 @@ def describe_mcdpweb_params(dp):
     default = """
 {}
     """
-    dp.add_string('repos_yaml', default=default)
+    dp.add_string('repos_yaml', default=default, help='Repository configuration file')
     
     dp.add_bool('libraries_writable', default=True)
     dp.add_string('users', help='Directories for user data.', default=None)
@@ -29,6 +31,9 @@ def describe_mcdpweb_params(dp):
     for p in ['facebook', 'google', 'linkedin', 'github', 'amazon']:
         dp.add_string('%s_consumer_key' % p, default=None)
         dp.add_string('%s_consumer_secret' % p, default=None)
+    
+    # deprecated
+    dp.add_bool('delete_cache', default=True, help='(deprecated)')
     return dp
 
 @contract(x=dict)

@@ -8,5 +8,5 @@ template mcdp {
     provides force [N] 'Force to be exerted in any direction'
     requires electric_power [W]
     requires mass [g]
-    requires budget [$]
+    requires budget [$] 
 }

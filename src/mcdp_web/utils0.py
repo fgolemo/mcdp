@@ -223,8 +223,12 @@ def add_std_vars_context_(f, redir):
             url = request.url
             p = urlparse.urlparse(url)
             url2 = url
-            if '127.0.0.1' in p.netloc:
-                url2 = url2.replace('127.0.0.1', 'localhost')
+            # only do redirection if we have url_base_internal
+            # The redirection is needed because of https; however
+            # for casual use it is likely https is not set up.
+            if self.options.url_base_internal:
+                if '127.0.0.1' in p.netloc:
+                    url2 = url2.replace('127.0.0.1', 'localhost')
             if not p.path.endswith('.html'):
                 if not p.path.endswith('/'):
                     url2 = url2.replace(p.path, p.path + '/')

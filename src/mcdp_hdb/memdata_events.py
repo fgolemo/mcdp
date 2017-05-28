@@ -86,7 +86,7 @@ def event_leaf_set_interpret(view, name, leaf, value):
         msg = 'leaf_set can be done only for SchemaSimple'
         raise_desc(InvalidOperation, msg, name=name, leaf=leaf, value=value)
         
-    logger.debug('vc type is %s, %s' % (type(vc), vc))
+#     logger.debug('vc type is %s, %s' % (type(vc), vc))
     vc.set(value)
     
 def get_the_list(view, name): 

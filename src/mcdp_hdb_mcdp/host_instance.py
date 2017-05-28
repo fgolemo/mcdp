@@ -1,30 +1,23 @@
-import os
-
 from contracts import contract
-from contracts.utils import raise_desc
-from git.repo.base import Repo
-from nose.tools import assert_equal
-
+from mcdp.constants import MCDPConstants
 from mcdp.logs import logger
 from mcdp_hdb.gitrepo_map import create_empty_dir_from_schema
 from mcdp_hdb.memdataview_utils import host_name
 from mcdp_hdb.pipes import mount_git_repo, WriteToRepoCallback, mount_directory
+from mcdp_hdb_mcdp.host_cache import HostCache
 from mcdp_utils_misc import format_list
+import os
+
+from contracts.utils import raise_desc
+from git.repo.base import Repo
+from nose.tools import assert_equal
 
 from .main_db_schema import DB
-from mcdp_hdb_mcdp.host_cache import HostCache
 
 
 class HostInstance(object):
-    ''' A MCDP server that participaxtes in the network '''
+    ''' A MCDP server that participates in the co-design network. '''
 
-#     hi_config = Schema()
-#     
-#     hi_config.string('root') # where to put temporary files
-#     hi_config.string('instance') # instance name
-#     hi_config.hash('repo_local', SchemaString()) # dirname for local repo
-#     hi_config.hash('repo_git', SchemaString()) # git url for local repo
-#      
     
     @contract(root=str, instance=str, upstream=str, repo_git='dict(str:str)', repo_local='dict(str:str)')
     def __init__(self, instance, upstream, root, repo_git, repo_local):
@@ -79,6 +72,7 @@ class HostInstance(object):
         if not 'user_db' in self.repos and not 'user_db' in self.repo_local:
             dirname = os.path.join(root, 'user_db_local') 
             create_empty_dir_from_schema(dirname=dirname, schema=DB.user_db, disk_map=DB.dm)
+            logger.info('No repository with name "user_db" passed. Creating empty one in %s' % dirname)
             self.repo_local['user_db'] = dirname
         self.mount()
         
@@ -130,13 +124,24 @@ class HostInstance(object):
         for repo_name in all_repo_names:
             view_repos[repo_name]
             db_view.repos[repo_name]
-        username_anonymous = 'anonymous'
+        
+        username_anonymous = MCDPConstants.USER_ANONYMOUS
         if not username_anonymous in db_view.user_db.users:
+            logger.info(('The user %r is not present in DB. '
+                        'Creating one that is subscribed to everything') % username_anonymous)
             subscriptions = []
             for repo_name, repo in db_view.repos.items():
                 subscriptions.extend(sorted(repo.shelves))
-            user = DB.user.generate_empty(info=dict(name='Anonymous', username=username_anonymous, subscriptions=subscriptions))
+            info = dict(name='Anonymous User', username=username_anonymous, subscriptions=subscriptions)
+            user = DB.user.generate_empty(info=info)
             db_view.user_db.users[username_anonymous] = user
+        
+    def set_local_permission_mode(self):
+        ''' The anonymous user is renamed 'Local User' and given group admin. '''
+        username_anonymous = MCDPConstants.USER_ANONYMOUS
+        u = self.db_view.user_db.users[username_anonymous]
+        u.info.name = 'Local user'
+        u.info.groups.append('admin')
         
 class PushCallback(object):
     @staticmethod
@@ -152,3 +157,12 @@ class PushCallback(object):
         repo  = self.other.repo
         logger.debug('pushing')
         repo.remotes.origin.push()
+        
+        
+#     hi_config = Schema()
+#     
+#     hi_config.string('root') # where to put temporary files
+#     hi_config.string('instance') # instance name
+#     hi_config.hash('repo_local', SchemaString()) # dirname for local repo
+#     hi_config.hash('repo_git', SchemaString()) # git url for local repo
+#      
