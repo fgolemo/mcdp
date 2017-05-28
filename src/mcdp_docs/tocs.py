@@ -499,7 +499,6 @@ def substituting_empty_links(soup, raise_errors=False):
             span1.string = label
             a.append(span1)
        
-        logger.debug('acted on ' + str(a))
     logger.debug('substituting_empty_links: %d total, %d errors' %
                  (n, nerrors))
 
