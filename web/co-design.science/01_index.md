@@ -7,9 +7,10 @@ permalink: index.html
 This site contains materials describing a new **mathematical theory of co-design**
 that helps in designing complex systems with many components that are functionally dependent on each other.
 
-"Monotone Co-Design Problems" (MCDPs) are a class of extremely expressive optimization problems. They can express: non-convex constraints, non-differentiable, discontinuous and non-scalarizable objective functions, and work with non-continuous design spaces.
+"Monotone Co-Design Problems" (**MCDPs**) are a class of extremely expressive optimization problems. They can express: non-convex constraints, non-differentiable, discontinuous and non-scalarizable objective functions, and work with non-continuous design spaces.
 
 <strong>MCDP<span style='color:darkred'>L</span></strong> is an extremely expressive language to describe MCDPs.
+
 **[PyMCDP][PyMCDP]** is a Python interpreter and solver for MCDPL.
 
 For more information, please see:
