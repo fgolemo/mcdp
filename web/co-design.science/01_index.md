@@ -4,21 +4,24 @@ title: Home
 permalink: index.html
 ---
 
+This site contains materials describing a new **mathematical theory of co-design**
+that helps in designing complex systems with many components that are functionally dependent on each other.
 
-**Monotone Co-Design Problems (MCDPs)** are a class of extremely expressive optimization problems. They can express: non-convex constraints, non-differentiable, discontinuous and non-scalarizable objective functions, and work with non-continuous design spaces.
+"Monotone Co-Design Problems" (MCDPs) are a class of extremely expressive optimization problems. They can express: non-convex constraints, non-differentiable, discontinuous and non-scalarizable objective functions, and work with non-continuous design spaces.
 
 <strong>MCDP<span style='color:darkred'>L</span></strong> is an extremely expressive language to describe MCDPs.
-**[PyMCDP][PyMCDP]** is a Python interpreter and "compiler" for MCDPL, as well as a solver.
+**[PyMCDP][PyMCDP]** is a Python interpreter and solver for MCDPL.
 
 For more information, please see:
 
-* [the papers](/papers/) 
-* a [live demo site][demo] 
+* [the papers](/papers/)
+* a [live demo site: `demo.co-design.science`][demo]
 * the [software manual (PDF)][manual].
+* the [source code, on github][PyMCDP].
 
 [manual]: https://andreacensi.github.io/mcdp-manual/mcdp-manual.pdf
-
-[demo]: http://demo.co-design.science/ 
+[PyMCDP]: http://github.com/AndreaCensi/mcdp
+[demo]: http://demo.co-design.science/
 
 
 *Below, an example of a graphical representation of an MCDP (left)
@@ -47,18 +50,12 @@ along with the MCDPL snippet that describes it (right).*
         <span class="my-post-title">{{ post.title }}</span>
 
         <!-- <a href="{{ post.url | prepend: site.baseurl }}">{{ post.title }}</a> -->
-  
+
         {{ post.content }}
       </li>
     {% endfor %}
   </ul>
-<!-- 
+<!--
   <p class="rss-subscribe">subscribe <a href="{{ "/feed.xml" | prepend: site.baseurl }}">via RSS</a></p> -->
 
 </div>
-
-
-[PyMCDP]: http://github.com/AndreaCensi/mcdp
-
-
-
