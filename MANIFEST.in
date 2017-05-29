@@ -101,6 +101,7 @@ global-exclude out_expected
 global-exclude _attic
 global-exclude _mcdpweb_cache
 global-exclude node_modules
+global-exclude emergency.dot
 
 
 prune src/mcdp_data/libraries/1600-hepa/1609-minimal_demo.mcdplib/out
@@ -131,3 +132,24 @@ prune src/mcdp_data/libraries/examples/plugs.mcdplib/out-mcdp_plot
 #prune libraries
 prune misc
 prune src/mcdp_data/docs
+
+prune src/mcdp_data/bundled.mcdp_repo/shelves/uav_energetics.mcdpshelf/mcdp_theory.mcdplib/out-plot_batteries_choice.py
+
+prune src/mcdp_data/bundled.mcdp_repo/shelves/mcdp_uncertainty.mcdpshelf/droneD_complete_templates.mcdplib/out-plot_approximations
+prune src/mcdp_data/bundled.mcdp_repo/shelves/uav_energetics.mcdpshelf/actuations_v2.mcdplib/out
+prune
+src/mcdp_data/bundled.mcdp_repo/shelves/uav_energetics.mcdpshelf/actuations_v1.mcdplib/out
+prune src/mcdp_data/bundled.mcdp_repo/shelves/examples.mcdpshelf/example_battery.mcdplib/out
+prune src/mcdp_data/bundled.mcdp_repo/shelves/examples.mcdpshelf/example_plusinv.mcdplib/out
+prune src/mcdp_data/bundled.mcdp_repo/shelves/uav_energetics.mcdpshelf/mcdp_theory.mcdplib/out-plot_drone.py
+prune src/mcdp_data/bundled.mcdp_repo/shelves/uav_energetics.mcdpshelf/droneC_cost_v1.mcdplib/out
+prune src/mcdp_data/bundled.mcdp_repo/shelves/uav_energetics.mcdpshelf/droneB_v1.mcdplib/out
+prune src/mcdp_data/bundled.mcdp_repo/shelves/uav_energetics.mcdpshelf/droneA_v1.mcdplib/out
+prune src/mcdp_data/bundled.mcdp_repo/shelves/uav_energetics.mcdpshelf/batteries_v1.mcdplib/out
+
+prune src/mcdp_data/bundled.mcdp_repo/shelves/uav_energetics.mcdpshelf/actuations_v1.mcdplib/out
+prune src/mcdp_data/bundled.mcdp_repo/shelves/uav_energetics.mcdpshelf/batteries_nodisc.mcdplib/out
+prune src/mcdp_data/bundled.mcdp_repo/shelves/uav_energetics.mcdpshelf/batteries_v1.mcdplib/out
+prune src/mcdp_data/bundled.mcdp_repo/shelves/uav_energetics.mcdpshelf/droneA_v1.mcdplib/out
+prune src/mcdp_data/bundled.mcdp_repo/shelves/uav_energetics.mcdpshelf/droneB_v1.mcdplib/out
+prune src/mcdp_data/bundled.mcdp_repo/shelves/uav_energetics.mcdpshelf/droneC_cost_v1.mcdplib/out

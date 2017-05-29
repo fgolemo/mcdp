@@ -24,7 +24,7 @@ name = 'PyMCDP'
 setup(name=name,
       url='http://github.com/AndreaCensi/mcdp',
       maintainer="Andrea Censi",
-      maintainer_email="censi@mit.edu",
+      maintainer_email="acensi@ethz.ch",
       description='PyMCDP is an interpreter and solver for Monotone Co-Design Problems',
       long_description='',
       #package_data={'':['*.*', '*.mcdp*', '*.js', '*.png', '*.css']},
@@ -74,6 +74,7 @@ setup(name=name,
         'authomatic',
         'webtest',
         'ruamel.yaml',
+        'python-dateutil',
       ],
       # This avoids creating the egg file, which is a zip file, which makes our data
       # inaccessible by dir_from_package_name()
