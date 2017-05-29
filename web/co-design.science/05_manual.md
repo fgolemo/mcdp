@@ -1,6 +1,8 @@
 ---
-layout: page
-title: Manual
+layout: default
+title: Manual 
 ---
 
-[The PyMCDP manual](/media/pymcdp-manual.html)
+[The PyMCDP manual(PDF)][manual]
+
+[manual]: https://andreacensi.github.io/mcdp-manual/mcdp-manual.pdf

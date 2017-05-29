@@ -76,11 +76,15 @@ docoverage-parallel: prepare_tests
 	-DISABLE_CONTRACTS=1 coverage run --concurrency=multiprocessing  `which compmake` $(out) -c "rparmake"
 	coverage combine
 	$(MAKE) coverage-report
+	$(MAKE) coverage-coveralls
 	#coverage html -d out_coverage --include '*src/mcdp*'
 
 coverage-report:
 	coverage html -d out_coverage --include '*src/mcdp*'
 
+coverage-coveralls:
+	# without --nogit, coveralls does not find the source code
+	COVERALLS_REPO_TOKEN=LDWrmw94YNEgp8YSpJ6ifSWb9aKfQt3wC coveralls --nogit --base_dir . 
 
 clean:
 	rm -rf $(out) out/opt_basic_*
