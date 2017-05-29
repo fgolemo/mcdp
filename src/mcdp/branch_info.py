@@ -4,7 +4,7 @@ __all__ = [
     'BranchInfo',
 ]
 
-__version__ = '4.0.0'
+__version__ = '4.0.1'
 
 class BranchInfo(object):
     """ Information about this particular branch """
