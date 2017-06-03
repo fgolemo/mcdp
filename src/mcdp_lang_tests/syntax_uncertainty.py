@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from comptests.registrar import comptest
+from comptests.registrar import comptest, run_module_tests
 from contracts.utils import raise_desc
 from mcdp_dp.dp_transformations import get_dp_bounds
 from mcdp_dp.primitive import WrongUseOfUncertain
@@ -154,9 +154,46 @@ mcdp {
     print su
 
 
+
+@comptest
+def check_uncertainty7():
+    s = """
+    mcdp {
+        provides capacity [m]
+        requires mass [m]
+        energy_density = between 1 and 2
+        required mass * energy_density >= provided capacity 
+    }
+    """
+    parse_ndp(s)
+    
+    
+@comptest
+def check_uncertainty8():
+    s = """
+    mcdp {
+        provides capacity [m]
+        requires mass [m]
+        energy_density = between 1 and 2
+        required mass  >= provided capacity * energy_density 
+    }
+    """
+    parse_ndp(s)
+    
+    
 @comptest
 def check_uncertainty6():
-    pass
+    s = """
+    mcdp {
+        provides capacity [kWh]
+        requires mass [g]
+        requires cost [$]
+        energy_density = between 140 kWh/kg and 160 kWh/kg
+        required mass * energy_density >= provided capacity 
+    }
+    """
+    parse_ndp(s)
+    
 #     s = """
 # mcdp {
 #   provides capacity [J]
@@ -174,3 +211,5 @@ def check_uncertainty6():
 #     print sl
 #     print su
 
+if __name__ == '__main__':
+    run_module_tests()

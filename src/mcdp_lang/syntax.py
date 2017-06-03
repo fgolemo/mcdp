@@ -136,6 +136,7 @@ class SyntaxIdentifiers(object):
         'poset',
         'add_bottom',
         'implements',
+        'and',
     ]
 
     # remember to .copy() this otherwise things don't work
@@ -1159,7 +1160,7 @@ class Syntax(object):
         implements_statement |
         ((constraint_expr_geq ^ constraint_expr_leq) | constraint_invalid)
         ^
-        (setname_constant ^ (
+        (setname_constant | (
             setname_rvalue ^
             setname_fvalue ^
 

@@ -14,6 +14,7 @@ from mcdp_posets import Poset
 
 from .parse_actions import parse_wrap
 from .refinement import apply_refinement
+from mcdp_lang.namedtuple_tricks import recursive_print
 
 
 __all__ = [
@@ -55,7 +56,10 @@ def parse_ndp(string, context=None):
         context = Context()
     
     expr = parse_wrap(Syntax.ndpt_dp_rvalue, string)[0]
-    expr2 = parse_ndp_refine(expr, context)
+    logger.debug('TMP:\n'+ recursive_print(expr))
+    #expr2 = parse_ndp_refine(expr, context)
+    expr2 = expr
+    logger.debug('TMP:\n'+ recursive_print(expr2))
     res = parse_ndp_eval(expr2, context)
     assert isinstance(res, NamedDP), res
     

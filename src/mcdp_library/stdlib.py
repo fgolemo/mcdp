@@ -68,7 +68,8 @@ def get_test_librarian():
             if not _ in use:
                 del libraries[_] 
     else:
-        logger.debug('environment variable %s is unset' % vname)
+        pass
+        #logger.debug('environment variable %s is unset' % vname)
         
 
     vname2 = MCDPConstants.ENV_TEST_LIBRARIES_EXCLUDE
@@ -77,7 +78,7 @@ def get_test_librarian():
         logger.debug('environment variable %s = %s' % (vname2, exclude))
     else:
         exclude = []
-        logger.debug('environment variable %s is unset' % vname2)
+        # logger.debug('environment variable %s is unset' % vname2)
 
 
     if exclude:
