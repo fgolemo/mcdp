@@ -1160,7 +1160,7 @@ class Syntax(object):
         implements_statement |
         ((constraint_expr_geq ^ constraint_expr_leq) | constraint_invalid)
         ^
-        (setname_constant | (
+        (setname_constant ^ (
             setname_rvalue ^
             setname_fvalue ^
 
