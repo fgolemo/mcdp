@@ -1,4 +1,4 @@
-from mcdp_utils_xml.parsing import bs
+from mcdp_utils_xml import bs
 
 def add_footnote_polyfill(soup):
     body = soup.find('body')

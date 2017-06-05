@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
-import itertools
-
 from contracts import contract
-from contracts.utils import raise_desc
-
+import itertools
 from mcdp import logger
 from mcdp.exceptions import DPInternalError
 from mcdp_library import MCDPLibrary
 from mcdp_report.gg_utils import embed_images_from_library2
 from mcdp_utils_xml import to_html_stripping_fragment, bs, describe_tag
+
+from contracts.utils import raise_desc
 
 from .check_missing_links import check_if_any_href_is_invalid, fix_subfig_references
 from .elements_abbrevs import other_abbrevs

@@ -3,10 +3,3 @@ from .mcdp_render import mcdp_render_main
 from .mcdp_render_manual import mcdp_render_manual_main
 from .pipeline import render_complete
 
-# annoying warning from BS4
-import bs4
-import logging
-logging.getLogger("chardet.universaldetector").setLevel(logging.CRITICAL)
-
-
-logging.getLogger("PIL.PngImagePlugin").setLevel(logging.CRITICAL)

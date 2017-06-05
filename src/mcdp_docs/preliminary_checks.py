@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
-import re
-
 from mcdp import MCDPConstants, logger
 from mcdp.exceptions import DPSyntaxError
-from mcdp_docs.latex.latex_preprocess import extract_maths
-from mcdp_docs.mark.markdown_transform import censor_markdown_code_blocks
 from mcdp_lang_utils import Where, location
-from contracts.utils import indent
-from mcdp_utils_misc.string_utils import format_list
+from mcdp_utils_misc import format_list
+import re
+
+from .latex.latex_preprocess import extract_maths
+from .mark.markdown_transform import censor_markdown_code_blocks
 
 
 # from mcdp_docs.latex.latex_preprocess import extract_maths

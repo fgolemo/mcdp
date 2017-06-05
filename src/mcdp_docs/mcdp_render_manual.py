@@ -1,20 +1,19 @@
 # -*- coding: utf-8 -*-
-import logging
-import os
-import tempfile
-import time
-
 from compmake.context import Context
 from compmake.jobs.actions import mark_to_remake
 from compmake.jobs.storage import get_job_cache
 from compmake.structures import Promise
 from contracts import contract
-from contracts.utils import check_isinstance
+import logging
 from mcdp import MCDPConstants, logger
 from mcdp_library.library import MCDPLibrary
 from mcdp_library.stdlib import get_test_librarian
-from mcdp_utils_misc import locate_files
-from mcdp_utils_misc.string_utils import get_md5
+from mcdp_utils_misc import locate_files, get_md5
+import os
+import tempfile
+import time
+
+from contracts.utils import check_isinstance
 from quickapp import QuickApp
 from reprep.utils import natsorted
 

@@ -1,14 +1,11 @@
 # -*- coding: utf-8 -*-
+from mcdp_report.html import ast_to_html
+from mcdp_utils_misc.fileutils import get_mcdp_tmp_dir
 import os
 import shutil
+from system_cmd import CmdException, system_cmd_result
 from tempfile import mkdtemp
 
-from mcdp_utils_misc.fileutils import get_mcdp_tmp_dir
-from mcdp_report.html import ast_to_html
-from system_cmd import CmdException, system_cmd_result
-
- 
- 
 from .minimal_doc import get_minimal_document
 
 

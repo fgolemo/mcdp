@@ -36,9 +36,11 @@ def add_class(e, c):
         cc = c
     else:
         raise ValueError(c)
-    cur = list(e.attrs.get('class', []))
+    cur = e.attrs.get('class', [])
     if isinstance(cur, str):
         cur = [_ for _ in cur.split() if _] # remove None
+    
+    check_isinstance(cur, list)
     cur = cur + cc
     e.attrs['class'] = cur 
     # check not None

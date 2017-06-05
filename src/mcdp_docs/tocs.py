@@ -222,12 +222,12 @@ class Item(object):
 #             logger.info(str(bs(s)))
 
         if max_levels and self.items:
-            s += '<ul class="toc_ul-depth-%s toc_li_for_%s">' % (
+            s += '<ul class="toc_ul-depth-%s toc_ul_for_%s">' % (
                 self.depth, self.header_level)
             for item in self.items:
                 sitem = item.to_html(root=False, max_levels=max_levels - 1)
                 sitem = indent(sitem, '  ')
-                s += ('\n  <li class="toc_li-depth-%s toc_ul_for_%s">\n%s\n  </li>' %
+                s += ('\n  <li class="toc_li-depth-%s toc_li_for_%s">\n%s\n  </li>' %
                       (self.depth, self.header_level, sitem))
             s += '\n</ul>'
         return s

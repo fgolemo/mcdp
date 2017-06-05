@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
+from mcdp_utils_xml import describe_tag
+
 from bs4.element import NavigableString, Tag
 from contracts.utils import raise_desc
 
-from mcdp import logger
-from mcdp_utils_xml import describe_tag
+from .logs import logger
 
 
 def make_figure_from_figureid_attr(soup):

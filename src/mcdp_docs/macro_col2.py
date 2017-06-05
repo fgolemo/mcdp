@@ -27,8 +27,7 @@ from bs4.element import NavigableString, Tag, Comment
 from contracts.utils import raise_desc
 
 
-from mcdp_utils_xml import describe_tag
-from mcdp_utils_xml.add_class_and_style import add_class
+from mcdp_utils_xml import describe_tag, add_class
 
 
 __all__ = [

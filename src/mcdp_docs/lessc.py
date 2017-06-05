@@ -4,10 +4,9 @@ from tempfile import mkdtemp
 
 from contracts import contract
 from contracts.utils import indent
-from system_cmd import CmdException
-from system_cmd import system_cmd_result
+from system_cmd import CmdException,  system_cmd_result
 
-from mcdp_utils_misc.fileutils import get_mcdp_tmp_dir
+from mcdp_utils_misc import get_mcdp_tmp_dir
 
 
 def unescape_entities(s):

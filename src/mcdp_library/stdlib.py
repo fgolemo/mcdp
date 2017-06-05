@@ -70,7 +70,6 @@ def get_test_librarian():
     else:
         pass
         #logger.debug('environment variable %s is unset' % vname)
-        
 
     vname2 = MCDPConstants.ENV_TEST_LIBRARIES_EXCLUDE
     if vname2 in os.environ:

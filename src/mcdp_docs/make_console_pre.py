@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 from bs4.element import NavigableString, Tag
 
-
-
 def mark_console_pres(soup):    
     for code in soup.select('pre code'):
         pre = code.parent

@@ -3,14 +3,13 @@ from mcdp.exceptions import DPSemanticError, DPSyntaxError
 from mcdp_report.generic_report_utils import (
     NotPlottable, enlarge, get_plotters)
 from mcdp_report.plotters.get_plotters_imp import get_all_available_plotters
+from mcdp_utils_xml import note_error
 from mocdp.comp.context import Context
+
+from contracts.utils import raise_wrapped
 from reprep import Report
 
 
-from contracts.utils import raise_wrapped  
-from mcdp_utils_xml.note_errors_inline import note_error
-
- 
 def make_plots(library, soup, raise_errors, realpath):
     """
         Looks for things like:

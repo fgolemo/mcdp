@@ -931,6 +931,7 @@ body {
 span.language_warning {
   background-color: inherit !important;
 }
+section,
 p {
   max-width: 40em;
 }
@@ -1859,6 +1860,44 @@ h1::after {
   #tocdiv a {
     color: black;
   }
+}
+.main-section-for-page {
+  min-height: 65vh;
+}
+div#tocdiv {
+  padding: 2em;
+}
+div#tocdiv .link-different-file {
+  padding: 1px;
+}
+div#tocdiv .link-same-file {
+  padding: 1px;
+  background-color: #ddd !important;
+  color: darkblue;
+}
+div#tocdiv .toc_li_for_sec {
+  display: none;
+}
+div#tocdiv .toc_a_for_part {
+  text-align: left !important;
+  font-weight: bold;
+  font-size: 120%;
+}
+.link_next,
+.link_prev {
+  display: block;
+  font-weight: bold;
+}
+.link_next {
+  width: 40em;
+  margin-top: 1em;
+  padding-right: 2em;
+  text-align: right;
+}
+.link_prev {
+  margin-bottom: 1em;
+  padding-left: 2em;
+  text-align: left;
 }
 /*
 

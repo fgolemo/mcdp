@@ -1,4 +1,4 @@
-from mcdp_utils_xml.add_class_and_style import add_class
+from mcdp_utils_xml import add_class
 
 from bs4.element import Tag, NavigableString
 
