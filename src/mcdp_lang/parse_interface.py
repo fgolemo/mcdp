@@ -56,10 +56,10 @@ def parse_ndp(string, context=None):
         context = Context()
     
     expr = parse_wrap(Syntax.ndpt_dp_rvalue, string)[0]
-    logger.debug('TMP:\n'+ recursive_print(expr))
-    #expr2 = parse_ndp_refine(expr, context)
-    expr2 = expr
-    logger.debug('TMP:\n'+ recursive_print(expr2))
+#     logger.debug('TMP:\n'+ recursive_print(expr))
+    expr2 = parse_ndp_refine(expr, context)
+#     expr2 = expr
+#     logger.debug('TMP:\n'+ recursive_print(expr2))
     res = parse_ndp_eval(expr2, context)
     assert isinstance(res, NamedDP), res
     
