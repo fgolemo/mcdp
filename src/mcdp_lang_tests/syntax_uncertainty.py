@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from comptests.registrar import comptest, run_module_tests
+from comptests.registrar import comptest, run_module_tests, comptest_fails
 from contracts.utils import raise_desc
 from mcdp_dp.dp_transformations import get_dp_bounds
 from mcdp_dp.primitive import WrongUseOfUncertain
@@ -155,7 +155,7 @@ mcdp {
 
 
 
-@comptest
+@comptest_fails
 def check_uncertainty7():
     s = """
     mcdp {
@@ -168,7 +168,7 @@ def check_uncertainty7():
     parse_ndp(s)
     
     
-@comptest
+@comptest_fails
 def check_uncertainty8():
     s = """
     mcdp {
@@ -181,7 +181,7 @@ def check_uncertainty8():
     parse_ndp(s)
     
     
-@comptest
+@comptest_fails
 def check_uncertainty6():
     s = """
     mcdp {
