@@ -75,6 +75,7 @@ setup(name=name,
         'webtest',
         'ruamel.yaml',
         'python-dateutil',
+        'chardet',
       ],
       # This avoids creating the egg file, which is a zip file, which makes our data
       # inaccessible by dir_from_package_name()
