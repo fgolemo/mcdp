@@ -657,10 +657,12 @@ class Syntax(object):
                            constant_name + EQ + (rvalue)
                            + S(O(comment_con)),
                            lambda t: CDP.SetNameConstant(t[0], t[1], t[2], t[3]))
+    
     setname_constant2a = sp(CONSTANT +
                            constant_name + EQ + (definitely_constant_value)
                            + S(O(comment_con)),
                            lambda t: CDP.SetNameConstant(t[0], t[1], t[2], t[3]))
+    
     setname_constant2b = sp( 
                            constant_name + EQ + (definitely_constant_value)
                            + S(O(comment_con)),
@@ -896,9 +898,6 @@ class Syntax(object):
                           lambda t: CDP.UncertainFun(keyword=t[0], lower=t[1], upper=t[2]))
 
     constant_uncertain2 = constant_between | constant_plus_or_minus | constant_plus_or_minus_percent
-    
-
-
 
     # take(<a, b>, 0)
     TAKE = keyword('take', CDP.TakeKeyword)
@@ -1154,18 +1153,25 @@ class Syntax(object):
                     lambda t: CDP.IgnoreRes(t[0], t[1]))
     implements_statement = sp(IMPLEMENTS + ndpt_dp_rvalue,
                               lambda t: CDP.Implements(t[0], t[1]) )
+    
+    setname_constant_uncertain = sp( 
+                           constant_name + EQ + (constant_uncertain2)
+                           + S(O(comment_con)),
+                           lambda t: CDP.SetNameUncertainConstant(None, t[0], t[1], t[2]))
+
+    set_name_exprs = setname_constant_uncertain | (setname_constant ^ (
+            setname_rvalue ^
+            setname_fvalue ^
+            setname_ndp_type1 ^
+            setname_ndp_type2))
+                      
     line_expr = (
         setname_ndp_instance1 |
         setname_ndp_instance2 |
         implements_statement |
         ((constraint_expr_geq ^ constraint_expr_leq) | constraint_invalid)
         ^
-        (setname_constant ^ (
-            setname_rvalue ^
-            setname_fvalue ^
-
-            setname_ndp_type1 ^
-            setname_ndp_type2))
+        set_name_exprs
         #                  ^ fun_statement ^ res_statement ^
         ^ fun_shortcut1 ^ fun_shortcut2
         ^ res_shortcut1 ^ res_shortcut2 ^ res_shortcut3 ^ fun_shortcut3

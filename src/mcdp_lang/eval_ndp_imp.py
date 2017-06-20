@@ -37,13 +37,15 @@ from .parse_actions import (add_where_information, decorate_add_where, raise_wit
                             parse_wrap)
 from .parts import CDPLanguage
 from .utils_lists import get_odd_ops, unwrap_list
+from mcdp_lang.eval_uncertainty import eval_uncertain_constant
 
 
 CDP = CDPLanguage
 
+
 @decorate_add_where
 @contract(returns=NamedDP)
-def eval_ndp(r, context): 
+def eval_ndp(r, context):
     check_isinstance(context, ModelBuildingContext)
     cases = {
         CDP.DPInstance: eval_ndp_dpinstance,
@@ -73,15 +75,16 @@ def eval_ndp(r, context):
         CDP.IgnoreResources: eval_ndp_ignoreresources,
         CDP.Eversion: eval_eversion,
     }
-    
+
     for klass, hook in cases.items():
         if isinstance(r, klass):
             return hook(r, context)
 
-    if True: # pragma: no cover
+    if True:  # pragma: no cover
         r = recursive_print(r)
         msg = 'eval_ndp(): cannot evaluate r as an NDP.'
         raise_desc(DPInternalError, msg, r=r)
+
 
 def eval_eversion(r, context):
     check_isinstance(r, CDP.Eversion)
@@ -89,28 +92,33 @@ def eval_eversion(r, context):
     name = r.dpname.value
     res = cndp_eversion(ndp, name)
     return res
-    
+
+
 def eval_ndp_dpinstance(r, context):
     return eval_ndp(r.dp_rvalue, context)
+
 
 def eval_ndp_ellipsis(r, context):  # @UnusedVariable
     msg = 'Model is incomplete (the ellipsis operator "..." was used)'
     raise_desc(DPSemanticError, msg)
-    
+
+
 def eval_ndp_variableref(r, context):
     try:
         return context.get_var2model(r.name)
     except NoSuchMCDPType as e:  # XXX: fixme
         msg = 'Cannot find name.'
         raise_wrapped(DPSemanticError, e, msg, compact=True)
-        
+
+
 def eval_ndp_VariableRefNDPType(r, context):
     try:
         return context.get_var2model(r.name)
     except NoSuchMCDPType as e:
         msg = 'Cannot find name.'
         raise_wrapped(DPSemanticError, e, msg, compact=True)
-        
+
+
 def eval_ndp_abstractaway(r, context):
     ndp = eval_ndp(r.dp_rvalue, context)
     if isinstance(ndp, SimpleWrap):
@@ -124,10 +132,11 @@ def eval_ndp_abstractaway(r, context):
     ndpa = ndp.abstract()
 
     check_isinstance(ndpa, SimpleWrap)
-    
+
     ndpa.dp = OpaqueDP(ndpa.dp)
 
     return ndpa
+
 
 def eval_ndp_compact(r, context):
     ndp = eval_ndp(r.dp_rvalue, context)
@@ -137,13 +146,14 @@ def eval_ndp_compact(r, context):
         msg = 'Cannot compact primitive NDP.'
         raise_desc(DPSemanticError, msg, ndp=ndp.repr_long())
 
+
 def eval_ndp_ignoreresources(r, context):
     check_isinstance(r, CDP.IgnoreResources)
     rnames = [_.value for _ in get_odd_ops(unwrap_list(r.rnames))]
     ndp = eval_ndp(r.dp_rvalue, context)
     return ignore_some(ndp, ignore_rnames=rnames, ignore_fnames=[])
-    
-    
+
+
 def eval_ndp_addmake(r, context):
     check_isinstance(r, CDP.AddMake)
     ndp = eval_ndp(r.dp_rvalue, context)
@@ -151,7 +161,7 @@ def eval_ndp_addmake(r, context):
     function_name = r.code.function.value
 
     function = ImportedFunction(function_name)
-    
+
     att = MCDPConstants.ATTRIBUTE_NDP_MAKE_FUNCTION
     if not hasattr(ndp, att):
         setattr(ndp, att, [])
@@ -162,12 +172,13 @@ def eval_ndp_addmake(r, context):
 
 
 class ImportedFunction(object):
+
     def __init__(self, function_name):
         self.function_name = function_name
         self.sys_path = sys.path
         # check that it exists
         _check = self._import()
-        
+
     def _import(self):
         with _sys_path_adjust(self.sys_path):
             try:
@@ -239,21 +250,23 @@ def eval_ndp_load(r, context):
             libname = arg.library.value
             name = arg.name.value
             library = context.load_library(libname)
-             
+
             context2 = context.child()
             res = library.load_ndp(name, context2)
-    
+
             msg = 'While loading MCDP %r from library %r:' % (name, libname)
-            warnings_copy_from_child_make_nested2(context, context2, r.where, msg)
+            warnings_copy_from_child_make_nested2(
+                context, context2, r.where, msg)
             return res
-    
+
         if isinstance(arg, CDP.NDPName):
             name = arg.value
-    
+
             context2 = context.child()
             res = context2.load_ndp(name)
             msg = 'While loading MCDP %r:' % (name)
-            warnings_copy_from_child_make_nested2(context, context2, r.where, msg)
+            warnings_copy_from_child_make_nested2(
+                context, context2, r.where, msg)
             return res
     except DPSyntaxError as e:
         msg = 'Syntax error while loading %s:' % (name)
@@ -262,8 +275,8 @@ def eval_ndp_load(r, context):
         msg += '\n\n' + indent(str(e), '   ')
         raise DPSemanticError(msg, where=arg.where)
         #raise_wrapped(DPSemanticError, e, msg, compact=True)
-        
-    if True: # pragma: no cover
+
+    if True:  # pragma: no cover
         msg = 'Unknown construct.'
         raise_desc(DPInternalError, msg, r=r)
 
@@ -271,7 +284,7 @@ def eval_ndp_load(r, context):
 def eval_ndp_instancefromlibrary(r, context):
     msg = 'Construct "new X" is deprecated in favor of "instance `X".'
     warn_language(r, MCDPWarnings.LANGUAGE_CONSTRUCT_DEPRECATED, msg, context)
-    
+
     check_isinstance(r, CDP.DPInstanceFromLibrary)
     check_isinstance(r.dpname, (CDP.NDPName, CDP.NDPNameWithLibrary))
     arg = r.dpname
@@ -282,9 +295,9 @@ def eval_ndp_instancefromlibrary(r, context):
 
         libname = arg.library.value
         name = arg.name.value
-        
+
         library = context.load_library(libname)
-        
+
         context2 = context.child()
         res = library.load_ndp(name, context2)
         msg = 'While loading %r from library %r:' % (name, libname)
@@ -296,7 +309,7 @@ def eval_ndp_instancefromlibrary(r, context):
         ndp = context.load_ndp(name)
         return ndp
 
-    if True: # pragma: no cover
+    if True:  # pragma: no cover
         msg = 'Unknown construct.'
         raise_desc(DPInternalError, msg, r=r)
 
@@ -321,7 +334,7 @@ def eval_ndp_approxdpmodel(r, context):
     # name of function or resource
     name = r.name.value
     approx_perc = float(r.perc.value)
-    
+
     approx_abs = float(r.abs.value.value)
     approx_abs_S = eval_space(r.abs.space, context)  # should be real
     ndp0 = eval_ndp(r.dp, context)
@@ -333,8 +346,6 @@ def eval_ndp_approxdpmodel(r, context):
                               approx_abs=approx_abs, approx_abs_S=approx_abs_S,
                               max_value=max_value, max_value_S=max_value_S,
                               ndp=ndp0)
-
-
 
 
 @contract(r=CDP.DPWrap)
@@ -396,8 +407,10 @@ def eval_ndp_dpwrap(r, context):
 
     ftypes = w.get_ftypes(fnames)
     rtypes = w.get_rtypes(rnames)
-    ftypes_expected = PosetProduct(tuple([eval_space(f.unit, context) for f in fun]))
-    rtypes_expected = PosetProduct(tuple([eval_space(r.unit, context) for r in res]))
+    ftypes_expected = PosetProduct(
+        tuple([eval_space(f.unit, context) for f in fun]))
+    rtypes_expected = PosetProduct(
+        tuple([eval_space(r.unit, context) for r in res]))
 
     try:
         tu.check_equal(ftypes, ftypes_expected)
@@ -406,10 +419,10 @@ def eval_ndp_dpwrap(r, context):
         msg = 'The types in the description do not match.'
         raise_wrapped(DPSemanticError, e, msg,
                       dp=dp,
-                   ftypes=ftypes,
-                   ftypes_expected=ftypes_expected,
-                   rtypes=rtypes,
-                   rtypes_expected=rtypes_expected, compact=True)
+                      ftypes=ftypes,
+                      ftypes_expected=ftypes_expected,
+                      rtypes=rtypes,
+                      rtypes_expected=rtypes_expected, compact=True)
 
     return w
 
@@ -420,7 +433,7 @@ def eval_ndp_catalogue(r, context):
     statements = unwrap_list(r.funres)
     fun = [x for x in statements if isinstance(x, CDP.FunStatement)]
     res = [x for x in statements if isinstance(x, CDP.ResStatement)]
-    
+
     Fs = [eval_space(_.unit, context) for _ in fun]
     Rs = [eval_space(_.unit, context) for _ in res]
 
@@ -434,7 +447,8 @@ def eval_ndp_catalogue(r, context):
         name = items[0].value
         expected = 1 + len(fun) + len(res)
         if len(items) != expected:
-            msg = 'Row with %d elements does not match expected of elements (%s fun, %s res)' % (len(items), len(fun), len(res))
+            msg = 'Row with %d elements does not match expected of elements (%s fun, %s res)' % (
+                len(items), len(fun), len(res))
             # msg += ' items: %s' % str(items)
             raise DPSemanticError(msg, where=items[-1].where)
         fvalues0 = items[1:1 + len(fun)]
@@ -447,7 +461,8 @@ def eval_ndp_catalogue(r, context):
             try:
                 tu.check_leq(Fhave.unit, F)
             except NotLeq as e:
-                msg = 'Dimensionality problem: cannot convert %s to %s.' % (Fhave.unit, F)
+                msg = 'Dimensionality problem: cannot convert %s to %s.' % (
+                    Fhave.unit, F)
                 ex = lambda msg: DPSemanticError(msg, where=cell.where)
                 raise_wrapped(ex, e, msg, compact=True)
 
@@ -455,7 +470,8 @@ def eval_ndp_catalogue(r, context):
             try:
                 tu.check_leq(Rhave.unit, R)
             except NotLeq as e:
-                msg = 'Dimensionality problem: cannot convert %s to %s.' % (Rhave.unit, R)
+                msg = 'Dimensionality problem: cannot convert %s to %s.' % (
+                    Rhave.unit, R)
                 ex = lambda msg: DPSemanticError(msg, where=cell.where)
                 raise_wrapped(ex, e, msg, compact=True)
 
@@ -467,14 +483,13 @@ def eval_ndp_catalogue(r, context):
 
         entries.append((name, tuple(fvalues_), tuple(rvalues_)))
 
-    
     names = set([name for (name, _, _) in entries])
     M = FiniteCollectionAsSpace(names)
     # use integers
     # entries = [(float(i), b, c) for i, (_, b, c) in enumerate(entries)]
 
-    fnames = [_.fname.value for  _ in fun]
-    rnames = [_.rname.value for  _ in res]
+    fnames = [_.fname.value for _ in fun]
+    rnames = [_.rname.value for _ in res]
 
     if len(Fs) == 1:
         F = Fs[0]
@@ -505,31 +520,31 @@ def eval_ndp_catalogue2(r, context):
     Rs = [eval_space(_.unit, context) for _ in res]
 
     assert len(fun) + len(res) == len(statements), statements
-    
+
     tu = get_types_universe()
-    
+
     rows = unwrap_list(r.table)
-    
-    entries = [] # (name, f, r)
-    
+
+    entries = []  # (name, f, r)
+
     for row in rows:
         check_isinstance(row, CDP.CatalogueRowMapsfromto)
-        
-        check_isinstance(row.functions, CDP.CatalogueFunc) 
-        row.mapsfrom 
+
+        check_isinstance(row.functions, CDP.CatalogueFunc)
+        row.mapsfrom
         row.impname
-        row.impname.value 
-        row.mapsto 
+        row.impname.value
+        row.mapsto
         check_isinstance(row.resources, CDP.CatalogueRes)
-        
+
         fs = get_odd_ops(unwrap_list(row.functions.ops))
         rs = get_odd_ops(unwrap_list(row.resources.ops))
-        
+
         for _ in list(fs) + list(rs):
             if isinstance(_, CDP.CatalogueEntryConstantUncertain):
                 msg = 'Uncertain catalogue not implemented'
                 raise DPNotImplementedError(msg, where=_.where)
-        
+
         fs_evaluated = [eval_constant(_.constant, context) for _ in fs]
         rs_evaluated = [eval_constant(_.constant, context) for _ in rs]
 
@@ -542,7 +557,7 @@ def eval_ndp_catalogue2(r, context):
             if len(fs_evaluated) != len(Fs):
                 msg = 'Mismatch with number of functionalities.'
                 raise DPSemanticError(msg, where=row.functions.where)
-        
+
         if len(Rs) == 0:
             if len(rs) != 1 and rs_evaluated.value != ():
                 msg = 'Because there are no resources, I expected simply "<>".'
@@ -551,12 +566,13 @@ def eval_ndp_catalogue2(r, context):
             if len(rs_evaluated) != len(Rs):
                 msg = 'Mismatch with number of resources.'
                 raise DPSemanticError(msg, where=row.resources.where)
-        
+
         for cell, Fhave, F in zip(fs, fs_evaluated, Fs):
             try:
                 tu.check_leq(Fhave.unit, F)
             except NotLeq:
-                msg = 'Dimensionality problem: cannot convert %s to %s.' % (Fhave.unit, F)
+                msg = 'Dimensionality problem: cannot convert %s to %s.' % (
+                    Fhave.unit, F)
                 raise DPSemanticError(msg, where=cell.where)
 #                 ex = lambda msg: DPSemanticError(msg, where=cell.where)
 #                 raise_wrapped(ex, e, msg, compact=True)
@@ -565,7 +581,8 @@ def eval_ndp_catalogue2(r, context):
             try:
                 tu.check_leq(Rhave.unit, R)
             except NotLeq:
-                msg = 'Dimensionality problem: cannot convert %s to %s.' % (Rhave.unit, R)
+                msg = 'Dimensionality problem: cannot convert %s to %s.' % (
+                    Rhave.unit, R)
                 raise DPSemanticError(msg, where=cell.where)
 #                 ex = lambda msg: DPSemanticError(msg, where=cell.where)
 #                 raise_wrapped(ex, e, msg, compact=True)
@@ -575,26 +592,26 @@ def eval_ndp_catalogue2(r, context):
 
         assert len(fvalues_) == len(fun)
         assert len(rvalues_) == len(res)
-        
+
         i = row.impname.value
         f = tuple(fvalues_)
         r = tuple(rvalues_)
-        
+
         if len(Fs) == 0:
             f = ()
         if len(Rs) == 0:
             r = ()
-            
+
         entries.append((i, f, r))
-    
+
     names = set([name for (name, _, _) in entries])
-    
+
     M = FiniteCollectionAsSpace(names)
     # use integers
     # entries = [(float(i), b, c) for i, (_, b, c) in enumerate(entries)]
 
-    fnames = [_.fname.value for  _ in fun]
-    rnames = [_.rname.value for  _ in res]
+    fnames = [_.fname.value for _ in fun]
+    rnames = [_.rname.value for _ in res]
 
     if len(Fs) == 1:
         F = Fs[0]
@@ -614,9 +631,10 @@ def eval_ndp_catalogue2(r, context):
     ndp = dpwrap(dp, fnames=fnames, rnames=rnames)
     return ndp
 
+
 def eval_ndp_catalogue3(r, context):
     check_isinstance(r, CDP.Catalogue3)
-    
+
     statements = unwrap_list(r.funres)
     fun = [x for x in statements if isinstance(x, CDP.FunStatement)]
     res = [x for x in statements if isinstance(x, CDP.ResStatement)]
@@ -624,31 +642,28 @@ def eval_ndp_catalogue3(r, context):
     Rs = [eval_space(_.unit, context) for _ in res]
 
     assert len(fun) + len(res) == len(statements), statements
-    
+
     tu = get_types_universe()
-    
+
     rows = unwrap_list(r.table)
-    
-    entries = [] # (name, f, r)
-    
+
+    entries = []  # (name, f, r)
+
     for i, row in enumerate(rows):
         check_isinstance(row, CDP.CatalogueRow3)
-        
-        check_isinstance(row.functions, CDP.CatalogueFunc) 
+
+        check_isinstance(row.functions, CDP.CatalogueFunc)
         row.leftright
         check_isinstance(row.resources, CDP.CatalogueRes)
-        
-        
-        
+
         fs = get_odd_ops(unwrap_list(row.functions.ops))
         rs = get_odd_ops(unwrap_list(row.resources.ops))
-        
-        
+
         for _ in list(fs) + list(rs):
             if isinstance(_, CDP.CatalogueEntryConstantUncertain):
                 msg = 'Uncertain catalogue not implemented'
                 raise DPNotImplementedError(msg, where=_.where)
-        
+
         fs_evaluated = [eval_constant(_.constant, context) for _ in fs]
         rs_evaluated = [eval_constant(_.constant, context) for _ in rs]
 
@@ -661,7 +676,7 @@ def eval_ndp_catalogue3(r, context):
             if len(fs_evaluated) != len(Fs):
                 msg = 'Mismatch with number of functionalities.'
                 raise DPSemanticError(msg, where=row.functions.where)
-        
+
         if len(Rs) == 0:
             if len(rs) != 1 and rs_evaluated.value != ():
                 msg = 'Because there are no resources, I expected simply "<>".'
@@ -670,19 +685,21 @@ def eval_ndp_catalogue3(r, context):
             if len(rs_evaluated) != len(Rs):
                 msg = 'Mismatch with number of resources.'
                 raise DPSemanticError(msg, where=row.resources.where)
-        
+
         for cell, Fhave, F in zip(fs, fs_evaluated, Fs):
             try:
                 tu.check_leq(Fhave.unit, F)
             except NotLeq:
-                msg = 'Dimensionality problem: cannot convert %s to %s.' % (Fhave.unit, F)
+                msg = 'Dimensionality problem: cannot convert %s to %s.' % (
+                    Fhave.unit, F)
                 raise DPSemanticError(msg, where=cell.where)
 
         for cell, Rhave, R in zip(rs, rs_evaluated, Rs):
             try:
                 tu.check_leq(Rhave.unit, R)
             except NotLeq:
-                msg = 'Dimensionality problem: cannot convert %s to %s.' % (Rhave.unit, R)
+                msg = 'Dimensionality problem: cannot convert %s to %s.' % (
+                    Rhave.unit, R)
                 raise DPSemanticError(msg, where=cell.where)
 
         fvalues_ = [_.cast_value(F) for (_, F) in zip(fs_evaluated, Fs)]
@@ -690,25 +707,25 @@ def eval_ndp_catalogue3(r, context):
 
         assert len(fvalues_) == len(fun)
         assert len(rvalues_) == len(res)
-        
+
         f = tuple(fvalues_)
         r = tuple(rvalues_)
-        
+
         if len(Fs) == 0:
             f = ()
         if len(Rs) == 0:
             r = ()
-            
+
         entries.append((i, f, r))
-    
+
     names = set([name for (name, _, _) in entries])
-    
+
     M = FiniteCollectionAsSpace(names)
     # use integers
     # entries = [(float(i), b, c) for i, (_, b, c) in enumerate(entries)]
 
-    fnames = [_.fname.value for  _ in fun]
-    rnames = [_.rname.value for  _ in res]
+    fnames = [_.fname.value for _ in fun]
+    rnames = [_.rname.value for _ in res]
 
     if len(Fs) == 1:
         F = Fs[0]
@@ -728,11 +745,12 @@ def eval_ndp_catalogue3(r, context):
     ndp = dpwrap(dp, fnames=fnames, rnames=rnames)
     return ndp
 
+
 @contract(resource=CResource, function=CFunction)
 def add_constraint(context, resource, function):
     check_isinstance(resource, CResource)
     check_isinstance(function, CFunction)
-    
+
     R1 = context.get_rtype(resource)
     F2 = context.get_ftype(function)
 
@@ -744,29 +762,33 @@ def add_constraint(context, resource, function):
                            dp2=function.dp, s2=function.s)
             context.add_connection(c)
         else:
-            ##  F2    ---- (<=) ----   becomes  ----(<=)--- [R1_to_F2] ----
-            ##   |     R1       F2                R1      R1             F2
-            ##  R1
+            # F2    ---- (<=) ----   becomes  ----(<=)--- [R1_to_F2] ----
+            # |     R1       F2                R1      R1             F2
+            # R1
             try:
                 R1_to_F2, F2_to_R1 = tu.get_super_conversion(R1, F2)
                 conversion = Conversion(R1_to_F2, F2_to_R1)
                 assert tu.equal(R1, conversion.get_fun_space())
                 assert tu.equal(F2, conversion.get_res_space())
                 resource2 = create_operation(context=context, dp=conversion,
-                                            resources=[resource], name_prefix='_conversion')
+                                             resources=[resource], name_prefix='_conversion')
                 c = Connection(dp1=resource2.dp, s1=resource2.s,
                                dp2=function.dp, s2=function.s)
                 context.add_connection(c)
             except NotLeq as e:
                 msg = 'Constraint between incompatible spaces.'
-                msg += '\n  %s can be embedded in %s: %s ' % (R1, F2, tu.leq(R1, F2))
-                msg += '\n  %s can be embedded in %s: %s ' % (F2, R1, tu.leq(F2, R1))
-                raise_wrapped(DPSemanticError, e, msg, R1=R1, F2=F2, compact=True)
-    except NotImplementedError as e: # pragma: no cover
+                msg += '\n  %s can be embedded in %s: %s ' % (
+                    R1, F2, tu.leq(R1, F2))
+                msg += '\n  %s can be embedded in %s: %s ' % (
+                    F2, R1, tu.leq(F2, R1))
+                raise_wrapped(
+                    DPSemanticError, e, msg, R1=R1, F2=F2, compact=True)
+    except NotImplementedError as e:  # pragma: no cover
         msg = 'Problem while creating embedding.'
         raise_wrapped(DPInternalError, e, msg, resource=resource, function=function,
                       R1=R1, F2=F2)
-        
+
+
 def add_variable(vname, P, where, context):
     if vname in context.variables:
         msg = 'Variable name %r already used once.' % vname
@@ -779,7 +801,7 @@ def add_variable(vname, P, where, context):
     if vname in context.fnames:
         msg = 'Conflict between variable and functionality name %r.' % vname
         raise DPSemanticError(msg, where=where)
-    
+
     if vname in context.var2resource:
         msg = 'The name %r is already used as a resource.' % vname
         raise DPSemanticError(msg, where=where)
@@ -802,66 +824,82 @@ def add_variable(vname, P, where, context):
 
     context.set_var2resource(vname, CResource(vname, rname))
     context.set_var2function(vname, CFunction(vname, fname))
-    
+
     context.variables.add(vname)
 
-def eval_statement_SetNameConstant(r, context):
-    check_isinstance(r, CDP.SetNameConstant)
-    
-    name = r.name.value
-    right_side = r.right_side
 
+def check_name_not_in_use(name, context, expr):
     if name in context.constants:
         msg = 'Constant %r already set.' % name
-        raise DPSemanticError(msg, where=r.where)
+        raise DPSemanticError(msg, where=expr.where)
 
     if name in context.var2resource:
         msg = 'Resource %r already set.' % name
-        raise DPSemanticError(msg, where=r.where)
+        raise DPSemanticError(msg, where=expr.where)
 
     if name in context.var2function:
         msg = 'Name %r already used.' % name
-        raise DPSemanticError(msg, where=r.where)
+        raise DPSemanticError(msg, where=expr.where)
+
+
+def eval_statement_SetNameConstant(r, context):
+    check_isinstance(r, CDP.SetNameConstant)
+
+    name = r.name.value
+    right_side = r.right_side
+
+    check_name_not_in_use(name, context, r)
 
     x = eval_constant(right_side, context)
     context.set_constant(name, x)
+
+
+def eval_statement_SetNameUncertainConstant(r, context):
+    check_isinstance(r, CDP.SetNameUncertainConstant)
+
+    name = r.name.value
+    right_side = r.right_side
+
+    check_name_not_in_use(name, context, r)
+    uc = eval_uncertain_constant(right_side, context)
+    context.set_uncertain_constant(name, uc) 
+
 
 def eval_statement_SetNameRValue(r, context):
     """ 
         This is a special case, because it is the place
         where the syntax is ambiguous.
-        
+
             x = Nat: 1 + r
-        
+
         could be interpreted with r being a functionality
         or a resource.
-        
+
         By default it is parsed as SetNameRValue, and so we get here.
-        
+
         We check whether it could be parsed as setname_fvalue,
         and warn about that.
-         
+
     """
     from .eval_resources_imp import eval_rvalue
     from .eval_constant_imp import NotConstant
     from .syntax import Syntax
-        
+
     check_isinstance(r, CDP.SetNameRValue)
 
     # Check to see if this could have been interpreted using
-    #    setname_fvalue    
-    # Try to have an alternative parsing of the string as 
+    #    setname_fvalue
+    # Try to have an alternative parsing of the string as
     #     Syntax.setname_fvalue
     try:
         w = r.where
         s = w.string[w.character:w.character_end]
         alt = parse_wrap(Syntax.setname_fvalue, s)[0]
         # print('alternative: %s' % recursive_print(alt))
-    except Exception as _: # XXX: which one?
-        #print "No, it does not parse: %s" % traceback.format_exc(e)
+    except Exception as _:  # XXX: which one?
+        # print "No, it does not parse: %s" % traceback.format_exc(e)
         alt = None
-        
-        
+
     name = r.name.value
     right_side = r.right_side
 
@@ -888,28 +926,29 @@ def eval_statement_SetNameRValue(r, context):
             ndp1 = context.names[x.dp]
             current = x.s
             updated = name
-            try: 
-                ndp2 = ndp_rename_resource(ndp1, current=current, updated=updated)
+            try:
+                ndp2 = ndp_rename_resource(
+                    ndp1, current=current, updated=updated)
                 context.names[x.dp] = ndp2
                 x = CResource(x.dp, updated)
             except CouldNotRename:
                 pass
-            
+
             context.set_var2resource(name, x)
             used_rvalue = True
-            
-        except DPSemanticError: # as e:
-#             if 'not declared' in str(e) and alt is not None:
-#                 # XXX: this seems not to be used anymore
-#                 # after we implemented the interpretation at the syntax level
-#                 msg = 'This should not happen...'
-#                 raise_wrapped(DPNotImplementedError, e, msg)
-#                 x = eval_lfunction(alt.right_side, context)
-#                 context.set_var2function(name, x)
-#                 used_rvalue = False
-#             else:
-                raise
-            
+
+        except DPSemanticError:  # as e:
+            #             if 'not declared' in str(e) and alt is not None:
+            #                 # XXX: this seems not to be used anymore
+            #                 # after we implemented the interpretation at the syntax level
+            #                 msg = 'This should not happen...'
+            #                 raise_wrapped(DPNotImplementedError, e, msg)
+            #                 x = eval_lfunction(alt.right_side, context)
+            #                 context.set_var2function(name, x)
+            #                 used_rvalue = False
+            #             else:
+            raise
+
     if alt is not None:
         msg = ('This expression could be parsed both as a functionality '
                'and as a resource.')
@@ -921,9 +960,10 @@ def eval_statement_SetNameRValue(r, context):
                 msg += ' I parsed it as a resource.'
             else:
                 msg += ' I parsed it as a function.'
-          
-                warn_language(r, MCDPWarnings.LANGUAGE_AMBIGUOS_EXPRESSION, 
+
+                warn_language(r, MCDPWarnings.LANGUAGE_AMBIGUOS_EXPRESSION,
                               msg, context)
+
 
 def eval_statement_SetNameFvalue(r, context):
     check_isinstance(r, CDP.SetNameFValue)
@@ -943,65 +983,71 @@ def eval_statement_SetNameFvalue(r, context):
         raise DPSemanticError(msg, where=r.where)
 
     from .eval_lfunction_imp import eval_lfunction
-    
+
     fv = eval_lfunction(right_side, context)
-    
+
     ndp = context.names[fv.dp]
     # TODO: check that is not used anywhere
-    
+
     current = fv.s
     updated = name
-    try: 
+    try:
         ndp2 = ndp_rename_function(ndp, current=current, updated=updated)
         context.names[fv.dp] = ndp2
         fv = CFunction(fv.dp, updated)
     except CouldNotRename:
         pass
-    
+
     context.set_var2function(name, fv)
+
 
 class CouldNotRename(Exception):
     """ Raised by ndp_rename_function() if they could not rename 
         the function/resource.
-        
+
         For example:
             - if it's a SimpleWrap with FunctionNode or ResourceNode
             - if it's a CompositedNamedDP
     """
-            
+
+
 @contract(ndp=NamedDP, current=str, updated=str)
 def ndp_rename_function(ndp, current, updated):
     """ Returns a NamedDP with a renamed function. Only works
         with SimpleWrap + not FunctionNode or ResourceNode. In 
         case, it raises CouldNotRename() """
     fnames = ndp.get_fnames()
-    if not current in fnames: # pragma: no cover
+    if not current in fnames:  # pragma: no cover
         msg = 'Cannot find function %r in ndp.' % current
-        raise_desc(DPInternalError, msg, current=current, updated=updated, ndp=ndp)
-        
+        raise_desc(
+            DPInternalError, msg, current=current, updated=updated, ndp=ndp)
+
     if isinstance(ndp, SimpleWrap) and \
-        not isinstance(ndp.dp, (FunctionNode, ResourceNode)):
-        
+            not isinstance(ndp.dp, (FunctionNode, ResourceNode)):
+
         return ndp.get_copy_with_renamed_function(current, updated)
     else:
         raise CouldNotRename()
-    
+
 #     raise_desc(DPNotImplementedError, 'not implemented', ndp=ndp)
+
 
 @contract(ndp=NamedDP, current=str, updated=str)
 def ndp_rename_resource(ndp, current, updated):
     """ Returns a NamedDP with a renamed resource. """
     rnames = ndp.get_rnames()
-    if not current in rnames: # pragma: no cover
+    if not current in rnames:  # pragma: no cover
         msg = 'Cannot find %r in ndp.' % current
-        raise_desc(DPInternalError, msg, current=current, updated=updated, ndp=ndp)
-        
+        raise_desc(
+            DPInternalError, msg, current=current, updated=updated, ndp=ndp)
+
     if isinstance(ndp, SimpleWrap) and \
-        not isinstance(ndp.dp, (FunctionNode, ResourceNode)):
+            not isinstance(ndp.dp, (FunctionNode, ResourceNode)):
         return ndp.get_copy_with_renamed_resource(current, updated)
     else:
         raise CouldNotRename()
-    
+
+
 def add_function(fname, F, context, r, repeated_ok=False):
     check_isinstance(fname, str)
     try:
@@ -1015,11 +1061,12 @@ def add_function(fname, F, context, r, repeated_ok=False):
             msg = 'Repeated function name %r.' % fname
             raise DPSemanticError(msg, where=r.where)
         else:
-            # check same or different 
+            # check same or different
             warnings.warn('check same')
     else:
         context.add_ndp_fun_node(fname, F)
     return context.make_resource(get_name_for_fun_node(fname), fname)
+
 
 def add_resource(rname, R, context, r, repeated_ok=False):
     check_isinstance(rname, str)
@@ -1034,11 +1081,12 @@ def add_resource(rname, R, context, r, repeated_ok=False):
             msg = 'Repeated resource name %r.' % rname
             raise DPSemanticError(msg, where=r.where)
         else:
-            # check same or different 
+            # check same or different
             warnings.warn('check same')
     else:
         context.add_ndp_res_node(rname, R)
     return context.make_function(get_name_for_res_node(rname), rname)
+
 
 @decorate_add_where
 def eval_statement(r, context):
@@ -1046,13 +1094,13 @@ def eval_statement(r, context):
     from .eval_resources_imp import eval_rvalue
     from .eval_lfunction_imp import eval_lfunction
 
-    invalid = (CDP.ConstraintInvalidRR, 
-               CDP.ConstraintInvalidFF, 
+    invalid = (CDP.ConstraintInvalidRR,
+               CDP.ConstraintInvalidFF,
                CDP.ConstraintInvalidSwapped)
-    
+
     if isinstance(r, invalid):
         msg = 'This constraint is invalid. '
-        
+
         if isinstance(r, CDP.ConstraintInvalidRR):
             msg += 'Both sides are resources.'
         if isinstance(r, CDP.ConstraintInvalidFF):
@@ -1073,18 +1121,18 @@ def eval_statement(r, context):
             add_constraint(context, resource, function)
         except MCDPExceptionWithWhere as e:
             _, _, tb = sys.exc_info()
-            where = r.prep.where # indicate preposition "<="
+            where = r.prep.where  # indicate preposition "<="
             raise_with_info(e, where, tb)
-            
+
     elif isinstance(r, CDP.VarStatement):
         P = eval_space(r.unit, context)
- 
+
         vnames = get_odd_ops(unwrap_list(r.vnames))
         for v in vnames:
             vname = v.value
             where = v.where
             add_variable(vname, P, where, context)
-       
+
     elif isinstance(r, CDP.SetNameNDPInstance):
         name = r.name.value
         ndp = eval_ndp(r.dp_rvalue, context)
@@ -1113,7 +1161,7 @@ def eval_statement(r, context):
         lf = eval_lfunction(r.fvalue, context)
         F = context.get_ftype(lf)
         values = F.get_minimal_elements()
-        
+
         dp = ConstantMinimals(F, values)
         ndp = SimpleWrap(dp, fnames=[], rnames='_out')
         name = context.new_name('_constant')
@@ -1127,7 +1175,7 @@ def eval_statement(r, context):
         R = context.get_rtype(rv)
         try:
             values = R.get_maximal_elements()
-        except NotImplementedError as e: # pragma: no cover
+        except NotImplementedError as e:  # pragma: no cover
             msg = 'Could not call get_maximal_elements().'
             raise_wrapped(DPInternalError, e, msg, R=R)
 
@@ -1137,48 +1185,50 @@ def eval_statement(r, context):
         context.add_ndp(name, ndp)
         f = context.make_function(name, '_limit')
         add_constraint(context, resource=rv, function=f)
-    else: 
+    else:
 
         cases = {
             CDP.ResStatement: eval_statement_ResStatement,
             CDP.FunStatement: eval_statement_FunStatement,
-            
+
             CDP.FunShortcut5: eval_statement_FunShortcut5,
             CDP.ResShortcut5: eval_statement_ResShortcut5,
             CDP.ResShortcut4: eval_statement_ResShortcut4,
             CDP.FunShortcut4: eval_statement_FunShortcut4,
-        
+
             CDP.FunShortcut1m: eval_statement_FunShortcut1m,
             CDP.ResShortcut1m: eval_statement_ResShortcut1m,
-            
+
             CDP.FunShortcut2: eval_statement_FunShortcut2,
             CDP.ResShortcut2: eval_statement_ResShortcut2,
-                        
+
             CDP.FunShortcut1: eval_statement_FunShortcut1,
             CDP.ResShortcut1: eval_statement_ResShortcut1,
-                  
+            CDP.SetNameUncertainConstant: eval_statement_SetNameUncertainConstant,
+
         }
-        
+
         for klass, hook in cases.items():
             if isinstance(r, klass):
                 return hook(r, context)
 
-        if True: # pragma: no cover
+        if True:  # pragma: no cover
             msg = 'eval_statement(): cannot interpret.'
             r2 = recursive_print(r)
-            raise_desc(DPInternalError, msg, r=r2) # where=r.where.__repr__())
+            raise_desc(DPInternalError, msg, r=r2)  # where=r.where.__repr__())
+
 
 def eval_statement_implements(r, context):
     interface = eval_ndp(r.interface, context)
     for fn in interface.get_fnames():
         F = interface.get_ftype(fn)
         add_function(fn, F, context, r=interface)
-    
+
     for rn in interface.get_rnames():
         R = interface.get_rtype(rn)
         add_resource(rn, R, context, r=interface)
-        
-        
+
+
 def eval_statement_FunShortcut1(r, context):
     # provides fname using name
     fname = r.fname.value
@@ -1188,7 +1238,8 @@ def eval_statement_FunShortcut1(r, context):
     A = add_function(r.fname.value, F, context, r=r.name, repeated_ok=True)
     add_constraint(context, resource=A, function=B)
 
-def eval_statement_ResShortcut1(r, context):  
+
+def eval_statement_ResShortcut1(r, context):
     # requires rname for name
     with add_where_information(r.name.where):
         A = context.make_resource(r.name.value, r.rname.value)
@@ -1197,26 +1248,29 @@ def eval_statement_ResShortcut1(r, context):
     add_constraint(context, resource=A, function=B)  # B >= A
 
 
-def eval_statement_FunShortcut2(r, context):  
+def eval_statement_FunShortcut2(r, context):
     # provides rname <= (lf)
     from mcdp_lang.eval_lfunction_imp import eval_lfunction
     if isinstance(r.prep, CDP.leq):
         msg = 'This is deprecated, and should be "=".'
-        warn_language(r.prep, MCDPWarnings.LANGUAGE_CONSTRUCT_DEPRECATED, msg, context)
-        
+        warn_language(
+            r.prep, MCDPWarnings.LANGUAGE_CONSTRUCT_DEPRECATED, msg, context)
+
     B = eval_lfunction(r.lf, context)
     check_isinstance(B, CFunction)
     F = context.get_ftype(B)
     A = add_function(r.fname.value, F, context, r)
     add_constraint(context, resource=A, function=B)
 
+
 def eval_statement_ResShortcut2(r, context):
-    # requires rname >= (rvalue)    
+    # requires rname >= (rvalue)
     from mcdp_lang.eval_resources_imp import eval_rvalue
 
     if isinstance(r.prep, CDP.geq):
         msg = 'This is deprecated, and should be "=".'
-        warn_language(r.prep, MCDPWarnings.LANGUAGE_CONSTRUCT_DEPRECATED, msg, context)
+        warn_language(
+            r.prep, MCDPWarnings.LANGUAGE_CONSTRUCT_DEPRECATED, msg, context)
 
     A = eval_rvalue(r.rvalue, context)
     check_isinstance(A, CResource)
@@ -1224,6 +1278,7 @@ def eval_statement_ResShortcut2(r, context):
     B = add_resource(r.rname.value, R, context, r)
     # B >= A
     add_constraint(context, resource=A, function=B)
+
 
 def eval_statement_ResShortcut1m(r, context):
     # requires rname1, rname2, ... for name
@@ -1234,8 +1289,8 @@ def eval_statement_ResShortcut1m(r, context):
         B = add_resource(rname.value, R, context, r=rname, repeated_ok=True)
         add_constraint(context, resource=A, function=B)
 
-        
-def eval_statement_FunShortcut1m(r, context): 
+
+def eval_statement_FunShortcut1m(r, context):
     # provides fname1,fname2,... using name
     fnames = get_odd_ops(unwrap_list(r.fnames))
     for fname in fnames:
@@ -1251,29 +1306,33 @@ def eval_statement_ResStatement(r, context):
     rname = r.rname
     return add_resource(rname.value, R, context, r=rname)
 
+
 def eval_statement_FunStatement(r, context):
     # provides r [Nat] 'comment'
-    F = eval_space(r.unit, context)  
-    fname = r.fname  
+    F = eval_space(r.unit, context)
+    fname = r.fname
     return add_function(fname.value, F, context, r=fname)
+
 
 def eval_statement_ResShortcut5(r, context):
     # requires r1, r2 [Nat] 'comment'
     check_isinstance(r, CDP.ResShortcut5)
     R = eval_space(r.unit, context)
-    
+
     rnames = get_odd_ops(unwrap_list(r.rnames))
     for rname in rnames:
         add_resource(rname.value, R, context, r=rname)
+
 
 def eval_statement_FunShortcut5(r, context):
     check_isinstance(r, CDP.FunShortcut5)
     # provides f1, f2 [Nat] 'comment'
     F = eval_space(r.unit, context)
-    
+
     fnames = get_odd_ops(unwrap_list(r.fnames))
     for fname in fnames:
         add_function(fname.value, F, context, r=fname)
+
 
 def eval_build_problem(r, context0):
     context = context0.child()
@@ -1286,7 +1345,7 @@ def eval_build_problem(r, context0):
 
     from .eval_warnings import warnings_copy_from_child
     warnings_copy_from_child(context0, context)
-    
+
     # take() optimization
     context.ifun_finish()
     context.ires_finish()
@@ -1296,6 +1355,7 @@ def eval_build_problem(r, context0):
     fix_resources_with_multiple_connections(context)
 
     return CompositeNamedDP.from_context(context)
+
 
 def fix_functions_with_multiple_connections(context):
     # tuples (ndp, res)
@@ -1380,7 +1440,7 @@ def eval_statement_ResShortcut4(r, context):
         rname = _.value
         if rname in context.var2resource:
             A = context.var2resource[rname]
-        elif rname in context.fnames: # it's a function 
+        elif rname in context.fnames:  # it's a function
             A = context.make_resource(get_name_for_fun_node(rname), rname)
         elif rname in context.constants:
             c = context.constants[rname]
@@ -1391,17 +1451,18 @@ def eval_statement_ResShortcut4(r, context):
         R = context.get_rtype(A)
         B = add_resource(rname, R, context, r)
         add_constraint(context, resource=A, function=B)  # B >= A
-  
+
+
 def eval_statement_FunShortcut4(r, context):
     # provides rname1, rname2
     check_isinstance(r, CDP.FunShortcut4)
-    
+
     fnames = get_odd_ops(unwrap_list(r.fnames))
     for _ in fnames:
         fname = _.value
         if fname in context.var2function:
             B = context.var2function[fname]
-        elif fname in context.rnames: # it's a function 
+        elif fname in context.rnames:  # it's a function
             B = context.make_function(get_name_for_res_node(fname), fname)
         elif fname in context.constants:
             c = context.constants[fname]
@@ -1412,6 +1473,3 @@ def eval_statement_FunShortcut4(r, context):
         F = context.get_ftype(B)
         A = add_function(fname, F, context, r)
         add_constraint(context, resource=A, function=B)  # B >= A
-        
-        
-        

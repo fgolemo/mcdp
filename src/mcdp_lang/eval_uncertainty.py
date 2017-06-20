@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
-from contracts.utils import check_isinstance
-from mcdp_posets import R_dimensionless
+from collections import namedtuple
+from contracts import contract
 from mcdp.exceptions import mcdp_dev_warning
+from mcdp_posets import R_dimensionless
+from mocdp.comp.context import UncertainConstant, ValueWithUnits
+
+from contracts.utils import check_isinstance
 
 from .helpers import create_operation
 from .parts import CDPLanguage
@@ -165,3 +169,23 @@ def eval_lfunction_FValuePlusOrMinusPercent(r, context):
     dp = UncertainGateSym(Rl)
 
     return create_operation_lf(context, dp=dp, functions=[rl, ru]) 
+
+
+@contract(returns=UncertainConstant, r=CDP.ConstantBetween)
+def eval_uncertain_constant(r, context):
+    """ returns lower, upper  """
+    if not isinstance(r, CDP.ConstantBetween):
+        raise NotImplementedError(type(r))
+    from .eval_constant_imp import eval_constant
+    
+    lower = eval_constant(r.lower, context)
+    check_isinstance(lower, ValueWithUnits)
+    
+    upper = eval_constant(r.upper, context)
+    check_isinstance(upper, ValueWithUnits)
+
+    upper_value = upper.cast_value(lower.unit)
+    check_isinstance(upper, ValueWithUnits)
+
+    uc = UncertainConstant(space=lower.unit, lower=lower.value, upper=upper_value)
+    return uc

@@ -7,7 +7,8 @@ from mcdp_dp import (InvMult2, InvPlus2, InvPlus2Nat, InvMult2Nat,
                      InvMultValueNatDP, PlusValueNatDP,
                      PlusValueRcompDP, PlusValueDP, InvMultValueDP,  MinusValueDP, MinusValueRcompDP, MinusValueNatDP)
 from mcdp_posets import (Nat, RcompUnits, get_types_universe, mult_table, poset_maxima, RbicompUnits, Rcomp)
-from mocdp.comp.context import CFunction, get_name_for_res_node, ValueWithUnits, ModelBuildingContext
+from mocdp.comp.context import CFunction, get_name_for_res_node, ValueWithUnits, ModelBuildingContext,\
+    UncertainConstant
 
 from .eval_constant_imp import NotConstant
 from .eval_resources_imp_unary import eval_lfunction_genericoperationfun
@@ -96,7 +97,7 @@ def eval_lfunction(lf, context):
             
             
 def eval_fvalue_SumFunctions(lf, context):
-    from mcdp_lang.eval_resources_imp import iterate_normal_ndps
+    from .eval_resources_imp import iterate_normal_ndps
     check_isinstance(lf, CDP.SumFunctions)
     fname = lf.fname.value
     
@@ -105,7 +106,6 @@ def eval_fvalue_SumFunctions(lf, context):
         if fname in ndp.get_fnames():
             cr = CFunction(n, fname)
             cfunctions.append(cr)
-
 
     if not cfunctions:
         msg = 'Cannot find any sub-design problem with functionality "%s".' % fname
@@ -116,8 +116,10 @@ def eval_fvalue_SumFunctions(lf, context):
     else:
         return eval_lfunction_invplus_ops(fs=cfunctions, context=context)
 
+
 def eval_lfunction_Function(lf, context):
     return context.make_function(dp=lf.dp.value, s=lf.s.value)
+
 
 def eval_lfunction_anyoffun(lf, context):
     from .eval_constant_imp import eval_constant
@@ -177,10 +179,17 @@ def eval_lfunction_ConstantRef(lf, context):
         raise DPSemanticError(msg, where=lf.where)
     
 def eval_lfunction_variableref(lf, context):
+    
     if lf.name in context.constants:
         c = context.constants[lf.name]
         assert isinstance(c, ValueWithUnits)
         return get_valuewithunits_as_function(c, context)
+
+    if lf.name in context.uncertain_constants:
+        c = context.uncertain_constants[lf.name]
+        assert isinstance(c, UncertainConstant)
+        from .helpers import get_uncertainconstant_as_function
+        return get_uncertainconstant_as_function(c, context)
 
     if lf.name in context.var2function:
         return context.var2function[lf.name]
@@ -478,7 +487,7 @@ def eval_lfunction_invmult_ops(fs, context):
                 R = Rcomp()
                 dp = InvMult2(R, Fs)
             else:
-                msg = 'Could not create invplus for types {}.'.format(Fs)
+                msg = 'Could not create invmult for types {}.'.format(Fs)
                 raise_desc(DPNotImplementedError, msg, Fs0=Fs[0], Fs1=Fs[1])
                 
         return create_operation_lf(context, dp=dp, functions=fs,

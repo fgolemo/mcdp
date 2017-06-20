@@ -55,6 +55,8 @@ class ValueWithUnits(object):
             the current space). """ 
         return express_value_in_isomorphic_space(self.unit, self.value, P)
 
+UncertainConstant = namedtuple('UncertainConstant', 'space lower upper')
+
 def get_name_for_fun_node(fname):
     check_isinstance(fname, str) # also more conditions
     return '_fun_%s' % fname
@@ -111,6 +113,7 @@ class Context(object):
         self.var2function = {}  # str -> Function
         self.var2model = {}  # str -> NamedDP
         self.constants = {}  # str -> ValueWithUnits
+        self.uncertain_constants = {} # str -> UncertainUniuts
         self.variables = set() # set of strings for variables
         # already explicitly set. It is assumed each will have
         # an NDP of the same name
@@ -289,17 +292,30 @@ class Context(object):
     @contract(name=str)
     def set_constant(self, name, value):
         self._check_good_name(name)
-        if name in self.var2resource:
-            raise ValueError(name)
+        self._check_good_constant_name(name)
 
         self.constants[name] = value
-
+        
+    @contract(name=str, uc=UncertainConstant)
+    def set_uncertain_constant(self, name, uc):
+        self._check_good_name(name)
+        self._check_good_constant_name(name)
+        self.uncertain_constants[name] = uc
+        
+    def _check_good_constant_name(self, name):
+        if name in self.var2resource:
+            raise ValueError(name)
+        if name in self.var2function:
+            raise ValueError(name)
+        if name in self.constants:
+            raise ValueError(name)
+        if name in self.uncertain_constants:
+            raise ValueError(name)
+        
     def info(self, s):
         # print(s)
         pass
 
-    
-        
     def add_ndp(self, name, ndp):
         self.info('Adding name %r = %r' % (name, ndp))
         if name in self.names:

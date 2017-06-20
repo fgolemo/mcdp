@@ -5,6 +5,9 @@ from mcdp_dp.dp_transformations import get_dp_bounds
 from mcdp_dp.primitive import WrongUseOfUncertain
 from mcdp_lang import parse_ndp
 from mcdp_posets import UpperSet, UpperSets
+from mcdp_lang.parse_actions import parse_wrap
+from mcdp_lang.syntax import Syntax
+from mcdp_lang.namedtuple_tricks import recursive_print
 
 
 @comptest
@@ -150,13 +153,19 @@ mcdp {
     sl = dpl.solve(f0)
     su = dpu.solve(f0)
     UR.check_leq(sl, su)
-    print sl
-    print su
+#     print sl
+#     print su
 
 
+from mcdp_tests import logger
 
-@comptest_fails
-def check_uncertainty7():
+@comptest
+def check_uncertainty7_uncertain():
+    string = "energy_density = between 1 and 2"
+    parse_wrap(Syntax.setname_constant_uncertain, string)
+    expr = parse_wrap(Syntax.line_expr, string)[0]
+    logger.debug('TMP:\n'+ recursive_print(expr))
+    
     s = """
     mcdp {
         provides capacity [m]
@@ -167,8 +176,20 @@ def check_uncertainty7():
     """
     parse_ndp(s)
     
+@comptest
+def check_uncertainty7():
+    s = """
+    mcdp {
+        provides capacity [m]
+        requires mass [m]
+        energy_density = 1 # nat
+        required mass * energy_density >= provided capacity 
+    }
+    """
+    parse_ndp(s)
     
-@comptest_fails
+    
+@comptest
 def check_uncertainty8():
     s = """
     mcdp {
@@ -181,7 +202,7 @@ def check_uncertainty8():
     parse_ndp(s)
     
     
-@comptest_fails
+@comptest 
 def check_uncertainty6():
     s = """
     mcdp {

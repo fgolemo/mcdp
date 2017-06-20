@@ -27,6 +27,7 @@ def apply_refinement(expr, context):
     """ 
     
     def transform(x, parents):  # @UnusedVariable
+        # We actually transform only the CDP.ModelStatements
         if not isinstance(x, CDP.ModelStatements):
             return x
         else:
@@ -36,6 +37,7 @@ def apply_refinement(expr, context):
             
             si = SemanticInformation()
             line_exprs = infer_types_of_variables(line_exprs, context, si)
+            logger.debug('Si: %s' % si)
             transformed = CDP.ModelStatements(make_list(line_exprs), where=x.where)
             
             for cname, cinfo in si.constants.items():
@@ -74,6 +76,9 @@ class SemanticInformationForEntity(object):
         #check_isinstance(where_defined, Where)
         self.element_defined = element_defined
         self.where_used = where_used
+#     def __str__(self):
+# 
+#         return 'SemanticInformationForEntity('
         
     def add_use(self, where):
         check_isinstance(where, Where)
@@ -84,11 +89,28 @@ class SemanticInformation(object):
         # maps str to SemanticInformationForEntity
         self.resources = {}  
         self.functions = {} 
+        self.uncertain_constants = {}
         self.constants = {} 
         self.variables = {}
         self.deriv_resources = {}
         self.deriv_functions = {}
         self.instances = {}
+        
+    def __str__(self):
+        return self.summary()
+    
+    def summary(self):
+        s = "SemanticInformation:"
+        p = '\n - '
+        s += p + 'Resources: %s' % self.resources
+        s += p + 'Functions: %s' % self.functions
+        s += p + 'Uncertain constants: %s' % self.uncertain_constants
+        s += p + 'Constants: %s' % self.constants
+        s += p + 'Variables: %s' % self.variables
+        s += p + 'Deriv resources: %s' % self.deriv_resources
+        s += p + 'Deriv functions: %s' % self.deriv_functions
+        s += p + 'Instances: %s' % self.instances
+        return s
         
     def found_constant(self, name, element):
         check_isinstance(name, str)
@@ -96,8 +118,17 @@ class SemanticInformation(object):
         infer_debug('found constant: %s' % name)
         if name in self.constants:
             msg = 'Duplicated constants?'
-            raise DPInternalError(msg, where=where) 
+            raise DPInternalError(msg, where=where)  # XXX
         self.constants[name] = SemanticInformationForEntity(element) 
+    
+    def found_uncertain_constant(self, name, element):
+        check_isinstance(name, str)
+        where = element.where
+        infer_debug('found uncertain constant: %s' % name)
+        if name in self.constants: # XXX
+            msg = 'Duplicated constants?'
+            raise DPInternalError(msg, where=where) 
+        self.uncertain_constants[name] = SemanticInformationForEntity(element) 
     
     def is_constant(self, name):
         check_isinstance(name, str)
@@ -177,7 +208,7 @@ def infer_types_of_variables(line_exprs, context, si):
     
     def check_all_constant(rvalue):
         """ Checks that all VariableRefs are constant """
-        class Tmp:
+        class Tmp():
             verified = True
         def visit_to_check(x, parents):  # @UnusedVariable
             assert isnamedtuplewhere(x), type(x)
@@ -284,6 +315,9 @@ def infer_types_of_variables(line_exprs, context, si):
         
         if isinstance(l, CDP.SetNameConstant):
             si.found_constant(l.name.value, l)
+        
+        if isinstance(l, CDP.SetNameUncertainConstant):
+            si.found_uncertain_constant(l.name.value, l)
             
         if isinstance(l, CDP.VarStatement):
             for _ in get_odd_ops(unwrap_list(l.vnames)):
@@ -462,6 +496,7 @@ def refine(x, parents, si,
             msg += ' Need to implement >= - aware refinement.'
             warn_language(x, MCDPWarnings.LANGUAGE_AMBIGUOS_EXPRESSION, msg, context)
             return x
+        
         elif x.name in resources:
             if x.name in variables:
                 msg = 'I cannot say whether "%s" refers to the variable or resource.' % x.name

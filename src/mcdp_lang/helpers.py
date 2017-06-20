@@ -7,8 +7,10 @@ from mcdp_dp import (Constant, ConstantMinimals, Limit, LimitMaximals,
     get_conversion)
 from mcdp_posets import NotLeq, Poset, get_types_universe
 from mocdp.comp import Connection, dpwrap
-from mocdp.comp.context import CResource, ValueWithUnits
+from mocdp.comp.context import CResource, ValueWithUnits, UncertainConstant,\
+    CFunction
 from mcdp.exceptions import DPSemanticError, DPInternalError, mcdp_dev_warning
+import warnings
 
 
 # from mcdp import logger
@@ -134,7 +136,6 @@ def create_operation_lf(context, dp, functions, name_prefix=None,
                  
 
         c = Connection(dp2=f.dp, s2=f.s, dp1=name, s1=rnames[i])
-
         connections.append(c)
 
     context.add_ndp(name, ndp)
@@ -174,7 +175,8 @@ def get_constant_maximals_as_function(F, values, context):
     context.add_ndp(nres, ndp)
     return context.make_function(nres, '_max')
 
-@contract(v=ValueWithUnits)
+
+@contract(v=ValueWithUnits, returns=CFunction)
 def get_valuewithunits_as_function(v, context):
     dp = Limit(v.unit, v.value)
     n = context.new_name('_lim')
@@ -183,6 +185,28 @@ def get_valuewithunits_as_function(v, context):
     context.add_ndp(n, ndp)
     return context.make_function(n, sn)
 
+
+@contract(v=UncertainConstant, returns=CFunction)
+def get_uncertainconstant_as_function(v, context):
+    warnings.warn('This is a bit inefficient')
+    from mcdp_dp.dp_uncertain import UncertainGateSym
+    vlower = ValueWithUnits(unit=v.space, value=v.lower)
+    vupper = ValueWithUnits(unit=v.space, value=v.upper)
+    rl = get_valuewithunits_as_function(vlower, context)
+    ru = get_valuewithunits_as_function(vupper, context)
+    dp = UncertainGateSym(v.space)
+    return create_operation_lf(context, dp=dp, functions=[rl, ru]) 
+
+@contract(v=UncertainConstant, returns=CResource)
+def get_uncertainconstant_as_resource(v, context):
+    warnings.warn('This is a bit inefficient')
+    from mcdp_dp.dp_uncertain import UncertainGate
+    vlower = ValueWithUnits(unit=v.space, value=v.lower)
+    vupper = ValueWithUnits(unit=v.space, value=v.upper)
+    rl = get_valuewithunits_as_resource(vlower, context)
+    ru = get_valuewithunits_as_resource(vupper, context)
+    dp = UncertainGate(v.space)
+    return create_operation(context, dp=dp, resources=[rl, ru]) 
 
 @contract(returns=CResource, r=CResource, P=Poset)
 def get_resource_possibly_converted(r, P, context):

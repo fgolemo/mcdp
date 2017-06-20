@@ -8,7 +8,7 @@ from mcdp_posets import (NotLeq, express_value_in_isomorphic_space,
     get_types_universe, poset_minima)
 from mcdp_posets import RcompUnits
 from mocdp.comp.context import (CResource, ValueWithUnits, get_name_for_fun_node,
-    ModelBuildingContext)
+    ModelBuildingContext, UncertainConstant)
 
 from .eval_constant_imp import eval_constant
 from .eval_warnings import warn_language, MCDPWarnings
@@ -167,24 +167,35 @@ def eval_rvalue_ActualVarRef(rvalue, context):
         raise DPSemanticError(msg, where=rvalue.where) # or internal?
 
 def eval_rvalue_VariableRef(rvalue, context):
+    from .helpers import get_uncertainconstant_as_resource
     if rvalue.name in context.constants:
         c = context.constants[rvalue.name]
         assert isinstance(c, ValueWithUnits)
         return get_valuewithunits_as_resource(c, context)
-        # return eval_rvalue(context.constants[rvalue.name], context)
-
+    elif rvalue.name in context.uncertain_constants:
+        uc = context.uncertain_constants[rvalue.name]
+        assert isinstance(uc, UncertainConstant)
+        return get_uncertainconstant_as_resource(uc, context)
     elif rvalue.name in context.var2resource:
         return context.var2resource[rvalue.name]
-
     try:
         dummy_ndp = context.get_ndp_fun(rvalue.name)
     except ValueError:  # as e:
         msg = 'Function %r not declared.' % rvalue.name
 
         if context.fnames:
-            msg += ' Available: %s.' % ", ".join(context.fnames)
+            msg += ' Available functions: %s.' % ", ".join(context.fnames)
         else:
             msg += ' No function declared so far.'
+        if context.constants:
+            msg += ' Available constants: %s.' % ", ".join(context.constants)
+        else:
+            msg += ' No constants declared so far.'
+        if context.uncertain_constants:
+            msg += ' Available uncertain constants: %s.' % ", ".join(context.uncertain_constants)
+        else:
+            msg += ' No uncertain constants declared so far.'
+        
         raise DPSemanticError(msg, where=rvalue.where)
 
     s = dummy_ndp.get_rnames()[0]

@@ -121,6 +121,7 @@ class CDPLanguage(object):
     SetNameNDPInstance = namedtuplewhere('SetNameNDPInstance', 'keyword name eq dp_rvalue')
     SetNameMCDPType = namedtuplewhere('SetNameMCDPType', 'keyword name eq right_side')
     SetNameConstant = namedtuplewhere('SetNameConstant', 'keyword name eq right_side')
+    SetNameUncertainConstant =  namedtuplewhere('SetNameUncertainConstant', 'keyword name eq right_side')
     SetNameRValue = namedtuplewhere('SetNameRValue', 'name eq right_side')
     SetNameFValue = namedtuplewhere('SetNameFValue', 'name eq right_side')
 
