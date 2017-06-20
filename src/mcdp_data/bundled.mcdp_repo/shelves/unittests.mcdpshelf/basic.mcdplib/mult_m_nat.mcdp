@@ -1,0 +1,6 @@
+mcdp {
+    provides f [m]
+    requires r [m]
+    c = 2
+    required r * c >=  provided f
+}
