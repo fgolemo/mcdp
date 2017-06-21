@@ -32,3 +32,5 @@ decentlogs
 
 #numpy
 #matplotlib
+chardet
+pillow
