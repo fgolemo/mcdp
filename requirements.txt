@@ -10,7 +10,8 @@ bs4
 nose
 reprep
 
-
+chardet
+pillow
 bcrypt
 markdown
 junit_xml
