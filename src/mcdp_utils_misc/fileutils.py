@@ -6,11 +6,15 @@ from tempfile import mkdtemp, NamedTemporaryFile
 
 
 def get_mcdp_tmp_dir():
-    """ Returns *the* temp dir for this process """
+    """ Returns *the* temp dir for this project.
+	Note that we need to customize with username, otherwise
+	there will be permission problems.  """
     from tempfile import gettempdir
     import os
     d0 = gettempdir()
-    d = os.path.join(d0, 'mcdp_tmp_dir')
+    import getpass
+    username = getpass.getuser()
+    d = os.path.join(d0, 'mcdp_tmp_dir-%s' % username)
     if not os.path.exists(d):
         try:
             os.makedirs(d)

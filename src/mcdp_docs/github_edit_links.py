@@ -59,6 +59,10 @@ def get_repo_information(repo_root):
     branch = gitrepo.active_branch
     commit = gitrepo.head.commit.hexsha
     url = gitrepo.remotes.origin.url
+   
+    # now github can use urls that do not end in '.git'
+    if 'github' in url and not url.endswith('.git'):
+       url = url + '.git'
     org, repo = org_repo_from_url(url)
     return dict(branch=branch, commit=commit, org=org, repo=repo)
 
