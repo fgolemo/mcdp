@@ -10,6 +10,7 @@ import warnings
 
 from bs4 import BeautifulSoup
 from bs4.element import Comment, Tag, NavigableString
+from contracts.utils import raise_desc
 
 from .footnote_javascript import add_footnote_polyfill
 from .macros import replace_macros
@@ -56,11 +57,16 @@ def manual_join(template, files_contents, bibfile, stylesheet, remove=None, extr
     logger.debug('remove: %s' % remove)
     from mcdp_utils_xml import bs
 
+    template0 = template
     template = replace_macros(template)
 
     # cannot use bs because entire document
     template_soup = BeautifulSoup(template, 'lxml', from_encoding='utf-8')
     d = template_soup
+    if d.html is None:
+        s = "Invalid template"
+        raise_desc(ValueError, s, template0=template0)
+        
     assert d.html is not None
     assert '<html' in str(d)
     head = d.find('head')

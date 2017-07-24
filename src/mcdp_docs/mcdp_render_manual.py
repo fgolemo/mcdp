@@ -30,6 +30,7 @@ class RenderManual(QuickApp):
         params.add_string('src', help='Root directory with all contents')
         params.add_string('output_file', help='Output file')
         params.add_string('stylesheet', help='Stylesheet', default=None)
+        params.add_int('mathjax', help='Use MathJax (requires node)', default=1)
         params.add_flag('cache')
         params.add_flag('pdf', help='Generate PDF version of code and figures.')
         params.add_string('remove', help='Remove the items with the given selector (so it does not mess indexing)',
@@ -45,6 +46,9 @@ class RenderManual(QuickApp):
         output_file = options.output_file
         remove = options.remove
         stylesheet = options.stylesheet
+        use_mathjax = True if options.mathjax else False
+        
+        logger.info('use mathjax: %s' % use_mathjax)
 
         bibfile = os.path.join(src_dir, 'bibliography/bibliography.html')
 
@@ -58,6 +62,7 @@ class RenderManual(QuickApp):
                     bibfile=bibfile,
                     stylesheet=stylesheet,
                     remove=remove,
+                    use_mathjax=use_mathjax
                     )
         
 def get_manual_contents(srcdir):
@@ -84,7 +89,8 @@ def get_manual_contents(srcdir):
         yield 'manual', docname
 
 
-def manual_jobs(context, src_dir, output_file, generate_pdf, bibfile, stylesheet, 
+def manual_jobs(context, src_dir, output_file, generate_pdf, bibfile, stylesheet,
+                use_mathjax,
                 remove=None, filter_soup=None, extra_css=None):
     manual_contents = list(get_manual_contents(src_dir))
 
@@ -116,6 +122,7 @@ def manual_jobs(context, src_dir, output_file, generate_pdf, bibfile, stylesheet
         job_id = '%s-%s' % (docname,contents_hash)
         res = context.comp(render_book, src_dir, docname, generate_pdf,
                            
+                           use_mathjax=use_mathjax,
                            main_file=output_file,
                            out_part_basename=out_part_basename,
                            
@@ -204,7 +211,7 @@ def write(s, out):
     print('Written %s ' % out)
 
 
-def render_book(src_dir, docname, generate_pdf, main_file, out_part_basename, filter_soup=None,
+def render_book(src_dir, docname, generate_pdf, main_file, use_mathjax, out_part_basename, filter_soup=None,
                 extra_css=None):
     from mcdp_docs.pipeline import render_complete
 
@@ -230,7 +237,6 @@ def render_book(src_dir, docname, generate_pdf, main_file, out_part_basename, fi
     data = f['data']
     realpath = f['realpath']
 
-
     def filter_soup0(soup, library):
         if filter_soup is not None:
             filter_soup(soup=soup, library=library)
@@ -240,6 +246,7 @@ def render_book(src_dir, docname, generate_pdf, main_file, out_part_basename, fi
                                     s=data, 
                                     raise_errors=True, 
                                     realpath=realpath,
+                                    use_mathjax=use_mathjax,
                                     generate_pdf=generate_pdf,
                                     filter_soup=filter_soup0)
 

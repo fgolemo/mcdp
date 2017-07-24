@@ -24,7 +24,7 @@ __all__ = [
 
 @contract(returns='str', s=str, library=MCDPLibrary, raise_errors=bool)
 def render_complete(library, s, raise_errors, realpath, generate_pdf=False,
-                    check_refs=False, do_math=True, filter_soup=None,
+                    check_refs=False, use_mathjax=True, filter_soup=None,
                     raise_missing_image_errors = False):
     """
         Transforms markdown into html and then renders the mcdp snippets inside.
@@ -47,7 +47,6 @@ def render_complete(library, s, raise_errors, realpath, generate_pdf=False,
         msg = 'I expect a str encoded with utf-8, not unicode.'
         raise_desc(TypeError, msg, s=s)
 
-    
     # need to do this before do_preliminary_checks_and_fixes 
     # because of & char
     s, tabulars = extract_tabular(s)
@@ -72,16 +71,13 @@ def render_complete(library, s, raise_errors, realpath, generate_pdf=False,
                 logger.error(msg)
                 raise ValueError(msg)
     
-    # fixes for LaTeX
     s = latex_preprocessing(s) 
-    
     s = '<div style="display:none">Because of mathjax bug</div>\n\n\n' + s
 
     # cannot parse html before markdown, because md will take
     # invalid html, (in particular '$   ciao <ciao>' and make it work)
     
     s = s.replace('*}', '\*}') 
-    
     
     s, mcdpenvs = protect_my_envs(s) 
 #     print('mcdpenvs = %s' % maths)
@@ -122,7 +118,7 @@ def render_complete(library, s, raise_errors, realpath, generate_pdf=False,
     
     s = to_html_stripping_fragment(soup)
     
-    if do_math:
+    if use_mathjax:
         s = prerender_mathjax(s)
 
     soup = bs(s)

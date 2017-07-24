@@ -1,5 +1,62 @@
 # -*- coding: utf-8 -*-
 from bs4.element import NavigableString, Tag
+from collections import namedtuple
+from contracts import contract
+from comptests.registrar import comptest, run_module_tests
+
+ConsoleLine = namedtuple('ConsoleLine', 'hostname symbol command')
+
+@contract(returns='$ConsoleLine|None')
+def is_console_line(line):
+    """ Returns true if it looks like a console line, such as:
+    
+        $ command args
+        hostname $ command args
+        hostname # command args
+    """
+    def is_console_token(x):
+        return x in ['#', '$', 'DOLLAR']
+    
+    tokens = line.strip().split(' ')
+    if not tokens: 
+        return None
+    if is_console_token(tokens[0]):
+        hostname = None
+        symbol = tokens[0] 
+        command = " ".join(tokens[1:])
+        
+    elif len(tokens) >= 2 and is_console_token(tokens[1]):
+        hostname = tokens[0]
+        symbol = tokens[1]
+        command = " ".join(tokens[2:])
+        
+    else:
+        return None
+    
+    return ConsoleLine(hostname=hostname, symbol=symbol, command=command)
+
+@comptest
+def is_console_line_test():
+    s = "laptop $ sudo dd of=DEVICE if=IMG status=progress bs=4M "
+    ct = is_console_line(s)
+    assert ct is not None
+    assert ct.hostname == 'laptop'
+    assert ct.symbol == '$'
+    assert ct.command == 'sudo dd of=DEVICE if=IMG status=progress bs=4M'
+
+    s = " # echo"
+    ct = is_console_line(s)
+    assert ct is not None
+    assert ct.hostname == None
+    assert ct.symbol == '#'
+    assert ct.command == 'echo'
+    
+    s = " DOLLAR echo"
+    ct = is_console_line(s)
+    assert ct is not None
+    assert ct.hostname == None
+    assert ct.symbol == 'DOLLAR'
+    assert ct.command == 'echo'
 
 def mark_console_pres(soup):    
     for code in soup.select('pre code'):
@@ -16,11 +73,11 @@ def mark_console_pres(soup):
             pass  
         
         beg = s.strip()
-        if beg.startswith('DOLLAR') or beg.startswith('$'):
-            pass
-#             print('it is console (%r)' % s)
-        else:
-#             print('not console (%r)' % s)
+        
+        
+        ct = is_console_line(beg)
+        
+        if ct is None: 
             continue
 
         from mcdp_docs.highlight import add_class
@@ -36,7 +93,7 @@ def mark_console_pres(soup):
         program_commands = ['install', 'develop', 'clone']
         
         def is_program(x, l):
-            if x == 'git' and 'apt-get' in l:
+            if x == 'git' and 'apt' in l:
                 return False
             return x in programs
             
@@ -74,3 +131,7 @@ def mark_console_pres(soup):
             is_last_line = j == len(lines) - 1
             if not is_last_line:
                 code.append(NavigableString('\n'))
+
+
+if __name__ == '__main__':
+    run_module_tests()
