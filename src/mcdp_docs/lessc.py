@@ -1,12 +1,12 @@
+from contracts import contract
+from mcdp import logger
+from mcdp_utils_misc import get_mcdp_tmp_dir
 import os
 import shutil
+from system_cmd import CmdException,  system_cmd_result
 from tempfile import mkdtemp
 
-from contracts import contract
 from contracts.utils import indent
-from system_cmd import CmdException,  system_cmd_result
-
-from mcdp_utils_misc import get_mcdp_tmp_dir
 
 
 def unescape_entities(s):
@@ -24,7 +24,12 @@ def run_lessc(soup):
         s1 = unescape_entities(s1)
         s1 = s1.replace('AND', '&')
         s1 = s1.encode('utf-8')
-        s2 = lessc_string(s1)
+        try:
+            s2 = lessc_string(s1)    
+        except LesscError as e:
+            logger.error('less failed')
+            continue
+        
         s2 = unicode(s2, 'utf-8')
 #         print indent(s2, 'less |')
         s2 = '/* preprocessed with less */\n' + s2

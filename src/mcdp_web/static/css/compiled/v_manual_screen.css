@@ -1532,6 +1532,12 @@ figcaption {
     margin-top: 4em;
   }
 }
+code {
+  font-family: "Anka/Coder Narrow", monospace;
+}
+pre code {
+  line-height: 120%;
+}
 /*
 
 
