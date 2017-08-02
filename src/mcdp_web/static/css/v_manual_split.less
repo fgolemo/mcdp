@@ -1,7 +1,12 @@
 @stylesheet: v_manual_split;
 
 @import 'manual';
-@import 'manual_prince';
+
+// Not sure why it was this
+// @import 'manual_prince';
+
+@import 'manual_screen';
+
 @import 'page-blurb';
 
 // This is for preview
@@ -15,46 +20,4 @@
 
 .main-section-for-page {
     min-height: 65vh;
-}
-
-div#tocdiv {
-    padding: 2em;
-
-    .link-different-file {
-        padding: 1px;
-    }
-
-    .link-same-file {
-        padding: 1px;
-        background-color: #ddd !important;
-        color: darkblue;
-    }
-
-    .toc_li_for_sec {
-        display: none;
-    }
-     .toc_a_for_part {
-    text-align: left !important;
-    font-weight: bold;
-    font-size: 120%;
-    }
-}
-
-.link_next, .link_prev {
-    display: block;
-    font-weight: bold;
-    // font-size: smaller;
-}
-
-.link_next {
-    width: 40em;
-    margin-top: 1em;
-    padding-right: 2em;
-    text-align: right;
-}
-
-.link_prev {
-    margin-bottom: 1em;
-    padding-left: 2em;
-    text-align: left;
 }
