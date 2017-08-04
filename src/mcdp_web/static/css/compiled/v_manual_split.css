@@ -887,6 +887,9 @@ code.rvalue span.RcompUnit {
 .CatalogueRes span.RcompUnit {
   color: darkred !important;
 }
+li p {
+  display: inline;
+}
 p,
 div.latex_env,
 div.minipage,
@@ -1540,9 +1543,6 @@ pre code {
 }
 pre + p {
   margin-top: 1.5em;
-}
-li p {
-  display: inline;
 }
 @page {
   size: 6.125in 9.250in;
