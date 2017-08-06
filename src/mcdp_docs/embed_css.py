@@ -20,8 +20,17 @@ def embed_css_files(soup):
 if __name__ == '__main__':
     sys.stderr.write('Loading from stdin...\n')
     
+        
     contents = sys.stdin.read()
     soup = BeautifulSoup(contents, 'lxml', from_encoding='utf-8')
     embed_css_files(soup)
     contents2 = str(soup)
-    sys.stdout.write(contents2)
+    
+    if len(sys.argv) >= 2:
+        fn = sys.argv[1]
+        sys.stderr.write('Writing to %s' % fn)
+        with open(fn, 'w') as f:
+            f.write(contents2)
+    else:
+        sys.stderr.write('Writing to stdout')
+        sys.stdout.write(contents2)
