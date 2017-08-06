@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import sys
 
 from bs4 import BeautifulSoup
@@ -16,7 +17,9 @@ def add_github_links_if_edit_url(soup):
         a.attrs['href'] = h.attrs[attname]
         a.attrs['class'] = 'github-edit-link'
         a.string = ' ✎'
-        h.append(a)
+        # h.append(a)
+        h.insert_before(a)
+        
 #         msg = 'Found element %s' % h
 #         logger.info(msg)
     

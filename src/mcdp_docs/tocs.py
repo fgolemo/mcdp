@@ -230,6 +230,9 @@ class Item(object):
                 s += ('\n  <li class="toc_li-depth-%s toc_li_for_%s">\n%s\n  </li>' %
                       (self.depth, self.header_level, sitem))
             s += '\n</ul>'
+#             
+#         # hack
+#         s = s.replace('✎', '')
         return s
 
     def depth_first_descendants(self):
