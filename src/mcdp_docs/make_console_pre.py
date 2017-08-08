@@ -89,8 +89,16 @@ def mark_console_pres(soup):
         
         programs = ['sudo', 'pip', 'git', 'python', 'cd', 'apt-get',
                     'mcdp-web', 'mcdp-solve', 'mcdp-render', 'npm',
-                    'mcdp-plot','mcdp-eval','mcdp-render-manual']
-        program_commands = ['install', 'develop', 'clone']
+                    'mcdp-plot','mcdp-eval','mcdp-render-manual',
+                    'dd', 'apt', 'ifconfig', 'iconfig', 'htop',
+                    'iotop', 'iwlist', 'git-ignore','sha256sum','umount', 'mount', 'xz',
+                    'raspi-config', 'usermod', 'udevadm', 'sh', 'apt-key','systemctl',
+                    'mkswap', 'swapon', 'visudo', 'update-alternatives',
+                    'mkdir', 'chmod', 'wget', 'byobu-enable', 'exit','ssh','scp','rsync',
+                    'raspistill', 'reboot', 'vim', 'vi', 'ping', 'ssh-keygen',
+                    'mv', 'cat', 'touch' ,'source', 'make', 'roslaunch', 'jstest',
+                    'shutdown', 'virtualenv', 'nodejs', 'cp', 'fc-cache', 'venv']
+        program_commands = ['install', 'develop', 'clone', 'config']
         
         def is_program(x, l):
             if x == 'git' and 'apt' in l:
