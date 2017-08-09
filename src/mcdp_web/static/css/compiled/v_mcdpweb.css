@@ -151,6 +151,18 @@ h2.draft,
 h3.draft {
   color: red !important;
 }
+span.placeholder {
+  color: orange;
+  font-weight: bold;
+}
+span.placeholder:before {
+  content: '\3008';
+  font-family: Times;
+}
+span.placeholder:after {
+  content: '\3009';
+  font-family: Times;
+}
 span.Unit,
 span.Nat,
 span.Int,

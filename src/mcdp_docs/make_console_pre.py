@@ -3,6 +3,22 @@ from bs4.element import NavigableString, Tag
 from collections import namedtuple
 from contracts import contract
 from comptests.registrar import comptest, run_module_tests
+ 
+# What is recognized as a program name
+programs = ['sudo', 'pip', 'git', 'python', 'cd', 'apt-get',
+            'echo', 'sync', 'tee',
+            'mcdp-web', 'mcdp-solve', 'mcdp-render', 'npm',
+            'mcdp-plot','mcdp-eval','mcdp-render-manual',
+            'dd', 'apt', 'ifconfig', 'iconfig', 'htop',
+            'iotop', 'iwlist', 'git-ignore','sha256sum','umount', 'mount', 'xz',
+            'raspi-config', 'usermod', 'udevadm', 'sh', 'apt-key','systemctl',
+            'mkswap', 'swapon', 'visudo', 'update-alternatives',
+            'mkdir', 'chmod', 'wget', 'byobu-enable', 'exit','ssh','scp','rsync',
+            'raspistill', 'reboot', 'vim', 'vi', 'ping', 'ssh-keygen',
+            'mv', 'cat', 'touch' ,'source', 'make', 'roslaunch', 'jstest',
+            'shutdown', 'virtualenv', 'nodejs', 'cp', 'fc-cache', 'venv'] \
+            + ['|'] # pipe
+program_commands = ['install', 'develop', 'clone', 'config']
 
 ConsoleLine = namedtuple('ConsoleLine', 'hostname symbol command')
 
@@ -58,7 +74,80 @@ def is_console_line_test():
     assert ct.symbol == 'DOLLAR'
     assert ct.command == 'echo'
 
-def mark_console_pres(soup):    
+def mark_console_pres(soup):  
+    mark_console_pres_highlight(soup)
+    mark_console_pres_defaults(soup)
+    
+def mark_console_pres_defaults(soup):
+    """
+        Looks in "pre code" or "p code" blocks 
+        and changes a pattern of the type
+        
+            xxxx ![variable] xxxx
+            
+        into
+            xxxx <span class='placeholder'>variable</span>
+    """
+    
+#     logger.debug('Replacing things')
+    
+    for code in soup.select('code'):
+        join_successive_strings(code)
+        for t in code.children:
+            
+            if isinstance(t, NavigableString):
+                
+                msg = "Do not copy and paste. "
+                msg += 'I guarantee, only trouble will come from it.'
+                code.attrs['oncopy'] = 'alert("%s");return false;' % msg
+                process_ns(t)
+                
+def join_successive_strings(e):
+    """ Joins successive strings in a BS4 element """
+    children = list(e.children)
+    for i in range(len(children)-1):
+#         print(' %s %s %s' % (i, type(children[i]), type(children[i+1])))
+        if isinstance(children[i], NavigableString) and \
+           isinstance(children[i+1], NavigableString):
+#             print('collapsed %r and %r' % (children[i], children[i+1]))
+            both = children[i] + children[i+1]
+            children[i].replace_with(both)
+            children[i+1].extract()
+            join_successive_strings(e)
+            return
+    
+from mcdp import logger
+def process_ns(t):
+    s = t + ''
+#     logger.debug('Handling %r' % t)
+    marker = '!['
+    marker2 = ']'
+    if marker not in s:
+        return
+    
+    i = s.index(marker)
+    try:
+        n = i + s[i:].index(marker2)
+    except ValueError:
+        msg = 'I found the substring "![" and so I thought there would '
+        msg += 'be a closing "]"; however, I could not find one.'
+        logger.warning(msg)
+        logger.warning('In string: %r.' % s)
+        logger.warning('Above: %s' % t.parent)
+        return
+    before = s[:i]
+    inside = s[i+len(marker):n]
+    after = s[n+len(marker2):]
+#     logger.debug('before = %r inside = %r after = %r' % (before, inside, after))
+    
+    p = Tag(name='span')
+    p.attrs['class'] = 'placeholder'
+    p.append(inside)
+    t.replace_with(p)
+    p.insert_before(before)
+    p.insert_after(after)
+    
+def mark_console_pres_highlight(soup):    
     for code in soup.select('pre code'):
         pre = code.parent
         if code.string is None:
@@ -87,18 +176,7 @@ def mark_console_pres(soup):
         
         lines = s.split('\n')
         
-        programs = ['sudo', 'pip', 'git', 'python', 'cd', 'apt-get',
-                    'mcdp-web', 'mcdp-solve', 'mcdp-render', 'npm',
-                    'mcdp-plot','mcdp-eval','mcdp-render-manual',
-                    'dd', 'apt', 'ifconfig', 'iconfig', 'htop',
-                    'iotop', 'iwlist', 'git-ignore','sha256sum','umount', 'mount', 'xz',
-                    'raspi-config', 'usermod', 'udevadm', 'sh', 'apt-key','systemctl',
-                    'mkswap', 'swapon', 'visudo', 'update-alternatives',
-                    'mkdir', 'chmod', 'wget', 'byobu-enable', 'exit','ssh','scp','rsync',
-                    'raspistill', 'reboot', 'vim', 'vi', 'ping', 'ssh-keygen',
-                    'mv', 'cat', 'touch' ,'source', 'make', 'roslaunch', 'jstest',
-                    'shutdown', 'virtualenv', 'nodejs', 'cp', 'fc-cache', 'venv']
-        program_commands = ['install', 'develop', 'clone', 'config']
+       
         
         def is_program(x, l):
             if x == 'git' and 'apt' in l:

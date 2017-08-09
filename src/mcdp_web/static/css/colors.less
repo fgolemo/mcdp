@@ -13,3 +13,21 @@
 
 
 h1.draft, h2.draft, h3.draft { color: red !important; }
+
+
+// Something like <code>![variable]</code>
+// becomes: <code><span class='placeholder'>varibale</span></code>
+
+span.placeholder {
+    color: orange;
+    font-weight: bold;
+}
+
+span.placeholder:before {
+    content: '\3008';
+    font-family: Times;
+}
+span.placeholder:after {
+    content: '\3009';
+    font-family: Times;
+}

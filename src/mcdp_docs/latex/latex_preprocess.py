@@ -103,7 +103,7 @@ def latex_process_title(s):
 def latex_process_tilde_nbsp_and_protect_fenced(s):
     group = 'TILDETILDETILDE'
     s = s.replace('~~~', group)
-    if False:
+    if True:
         pass
         warnings.warn('TODO: tilde has been disabled.')
     else:
