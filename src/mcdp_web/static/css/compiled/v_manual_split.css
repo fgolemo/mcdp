@@ -259,30 +259,6 @@ span.placeholder:after {
     display: table-cell;
   }
 }
-h2 code:first-of-type::before,
-h3 code:first-of-type::before,
-h4 code:first-of-type::before,
-ul.toc code:first-of-type::before {
-  content: '(';
-  font-weight: normal;
-  font-family: serif;
-}
-h2 code:not(:last-of-type)::after,
-h3 code:not(:last-of-type)::after,
-h4 code:not(:last-of-type)::after,
-ul.toc code:not(:last-of-type)::after {
-  content: ', ';
-  font-weight: normal;
-  font-family: serif;
-}
-h2 code:last-of-type::after,
-h3 code:last-of-type::after,
-h4 code:last-of-type::after,
-ul.toc code:last-of-type::after {
-  content: ')';
-  font-weight: normal;
-  font-family: serif;
-}
 .chapter_toc {
   display: none;
 }
@@ -1646,8 +1622,16 @@ ul.toc ul:not(.contains-link-same-file) li:not(.link-same-file-inside) {
   color: red !important;
   display: none;
 }
+/* Do not display "Section" in "Section 13.2" */
 .toc_a_for_sub .toc_what {
   display: none;
+}
+/* if the same parent is part, do not show section */
+.link-same-file-direct-parent.toc_li-depth-0 li.toc_li_for_sec {
+  display: none;
+}
+.link-same-file-direct-parent {
+  background-color: #ddd;
 }
 /*
 

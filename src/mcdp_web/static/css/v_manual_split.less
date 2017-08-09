@@ -49,6 +49,19 @@ ul.toc ul:not(.contains-link-same-file) li:not(.link-same-file-inside) {
     display: none;
 }
 
+/* Do not display "Section" in "Section 13.2" */
 .toc_a_for_sub .toc_what {
     display: none;
+}
+
+/* if the same parent is part, do not show section */
+.link-same-file-direct-parent.toc_li-depth-0 li.toc_li_for_sec {
+    display: none;
+}
+
+.link-same-file-direct-parent {
+    background-color: #ddd;
+    // font-size: 120%;
+    // padding-top: 1em;
+    // padding-bottom: 1em;
 }

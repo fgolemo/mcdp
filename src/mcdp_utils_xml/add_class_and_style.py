@@ -25,6 +25,13 @@ def add_style(tag, after=True, **kwargs):
             s = s1 + s0
     tag['style'] = s
     
+@contract(e=Tag, c='str')
+def remove_class(e, c):
+    cur = e.attrs.get('class', [])
+    if c in cur:
+        cur.remove(c)
+        e.attrs['class'] = cur 
+
 @contract(e=Tag, c='str|list(str)')
 def add_class(e, c):
     check_isinstance(e, Tag)

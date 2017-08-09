@@ -18,6 +18,7 @@ from .minimal_doc import add_extra_css
 from .read_bibtex import extract_bibtex_blocks, get_bibliography
 from .tocs import generate_toc, substituting_empty_links, LABEL_WHAT_NUMBER,\
     LABEL_WHAT_NUMBER_NAME, LABEL_WHAT, LABEL_NUMBER, LABEL_NAME, LABEL_SELF
+from mcdp_utils_xml.add_class_and_style import remove_class
 
 
 def get_manual_css_frag():
@@ -569,6 +570,13 @@ def update_refs(filename2contents):
                         p = p.parent
             else:
                 logger.error('no element with ID %s' % id_)
+    
+        # if there are two link-same-file-direct-parent
+        #   section.html
+        #    section.html#paragraph
+        # only leave the first one
+#         for p in contents.find('.link-same-file-direct-parent .link-same-file-direct-parent'):
+#             remove_class(p, 'link-same-file-direct-parent')
     
 
 def write_split_files(filename2contents, d):

@@ -259,30 +259,6 @@ span.placeholder:after {
     display: table-cell;
   }
 }
-h2 code:first-of-type::before,
-h3 code:first-of-type::before,
-h4 code:first-of-type::before,
-ul.toc code:first-of-type::before {
-  content: '(';
-  font-weight: normal;
-  font-family: serif;
-}
-h2 code:not(:last-of-type)::after,
-h3 code:not(:last-of-type)::after,
-h4 code:not(:last-of-type)::after,
-ul.toc code:not(:last-of-type)::after {
-  content: ', ';
-  font-weight: normal;
-  font-family: serif;
-}
-h2 code:last-of-type::after,
-h3 code:last-of-type::after,
-h4 code:last-of-type::after,
-ul.toc code:last-of-type::after {
-  content: ')';
-  font-weight: normal;
-  font-family: serif;
-}
 .chapter_toc {
   display: none;
 }
