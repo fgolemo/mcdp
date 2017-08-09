@@ -63,9 +63,13 @@ def split_file(html, directory):
             del toc.attrs['id']
             tocdiv.append(toc)
         body.append(tocdiv)
-        body.append(contents)
+        not_toc = Tag(name='div')
+        not_toc.attrs['id'] = 'not-toc'
+        not_toc.append(contents)
+        body.append(not_toc)
         html.append(body)
     
+        # append discus section
         PAGE_IDENTIFIER = filename.replace('.html', '')
         PAGE_URL = 'https://duckietown.github.io/duckuments/master/' + filename
         DISQUS_DOMAIN = 'duckuments.disqus.com'
@@ -76,7 +80,7 @@ def split_file(html, directory):
         disqus_section = bs(s)
         disqus_section.name = 'div'
         
-        body.append(disqus_section)
+        not_toc.append(disqus_section)
         
         filename2contents[filename] = html
     

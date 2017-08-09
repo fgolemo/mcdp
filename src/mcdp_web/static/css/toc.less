@@ -50,7 +50,9 @@ ul#main_toc, ul#main_toc ul, ul#main_toc li {
     }
 }
 .toc_a_for_sub > .toc_what,
-.toc_a_for_appsub > .toc_what { display: None; }
+.toc_a_for_appsub > .toc_what {
+    // display: None; 
+}
 
 // @media print {
     /** two-column format */
@@ -61,7 +63,7 @@ ul#main_toc, ul#main_toc ul, ul#main_toc li {
 
             content: leader('.')  target-counter(attr(href), page) ;
             font-weight: bold;
-        
+
     }
     //
     // ul#main_toc > li > ul > li > a::after {

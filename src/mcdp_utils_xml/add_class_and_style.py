@@ -41,6 +41,9 @@ def add_class(e, c):
         cur = [_ for _ in cur.split() if _] # remove None
     
     check_isinstance(cur, list)
+    if isinstance(c, str):
+        if c in cur:
+            return
     cur = cur + cc
     e.attrs['class'] = cur 
     # check not None

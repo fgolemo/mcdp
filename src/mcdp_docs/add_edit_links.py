@@ -45,10 +45,10 @@ if __name__ == '__main__':
     
     if len(sys.argv) >= 2:
         fn = sys.argv[1]
-        sys.stderr.write('Writing to %s' % fn)
+        sys.stderr.write('Writing to %s\n' % fn)
         with open(fn, 'w') as f:
             f.write(contents2)
     else:
-        sys.stderr.write('Writing to stdout')
+        sys.stderr.write('Writing to stdout\n')
         sys.stdout.write(contents2)
         

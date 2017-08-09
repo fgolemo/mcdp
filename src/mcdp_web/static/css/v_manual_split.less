@@ -21,3 +21,34 @@
 .main-section-for-page {
     min-height: 65vh;
 }
+
+html {
+    background-color: white;
+}
+
+
+/* We cannot have tocdiv: fixed if we tranform the body */
+
+#tocdiv {
+    position: fixed;
+    left: 0;
+    top: 0;
+}
+body {
+    transform: none;
+}
+#not-toc {
+    transform-origin: top center;
+        transform: scale(1.5);
+}
+
+/* hide the other parts of the TOC */
+ul.toc ul:not(.contains-link-same-file) li:not(.link-same-file-inside) {
+    outline: solid 1px red;
+    color: red !important;
+    display: none;
+}
+
+.toc_a_for_sub .toc_what {
+    display: none;
+}

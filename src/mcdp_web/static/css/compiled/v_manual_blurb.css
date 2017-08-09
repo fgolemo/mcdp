@@ -322,10 +322,6 @@ ul#main_toc li {
 .toc_a_for_app .toc_name {
   font-weight: bold;
 }
-.toc_a_for_sub > .toc_what,
-.toc_a_for_appsub > .toc_what {
-  display: None;
-}
 /** two-column format */
 /** add page numbers for the first two */
 .toc_a_for_part::after,

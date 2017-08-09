@@ -174,7 +174,7 @@ def manual_join(template, files_contents, bibfile, stylesheet, remove=None, extr
     logger.info('adding toc')
     toc = generate_toc(body2)
     
-    logger.info('TOC:\n' + str(toc))
+#     logger.info('TOC:\n' + str(toc))
     toc_ul = bs(toc).ul
     toc_ul.extract()
     assert toc_ul.name == 'ul'
@@ -549,8 +549,27 @@ def update_refs(filename2contents):
                     new_href = '#%s' % (id_)
                     a.attrs['href'] = new_href
                     add_class(a, 'link-same-file')
+                    
+                    if 'toc_link' in a.attrs['class']:
+                        p = a.parent
+#                         print('parent: %r' % p)
+                        assert p.name == 'li'
+                        add_class(p, 'link-same-file-direct-parent')
+                        
+                        # now find all the lis
+                        for x in p.descendants:
+                            if isinstance(x, Tag) and x.name == 'li':
+                                add_class(x, 'link-same-file-inside')
+                     
+                    
+                    p = a.parent
+                    while p:
+                        if isinstance(p, Tag) and p.name in ['ul', 'li']:
+                            add_class(p, 'contains-link-same-file')
+                        p = p.parent
             else:
                 logger.error('no element with ID %s' % id_)
+    
 
 def write_split_files(filename2contents, d):
     if not os.path.exists(d):

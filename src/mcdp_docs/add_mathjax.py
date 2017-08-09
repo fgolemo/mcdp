@@ -42,7 +42,7 @@ if __name__ == '__main__':
     logger.info('Adding mathjax to all files specified on the command line (overwriting them)')
     
     filenames = sys.argv[1:]
-    print filenames
+#     print filenames
     
     for filename in filenames:
         logger.info('Adding script to %s' % filename)
