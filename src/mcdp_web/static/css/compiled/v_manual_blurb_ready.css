@@ -1541,6 +1541,7 @@ figcaption {
   font-size: 8pt !important;
   color: lightgrey !important;
   float: right;
+  display: block;
 }
 /* These are the fixes for printing / prince */
 body {

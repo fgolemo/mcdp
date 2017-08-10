@@ -18,7 +18,8 @@ def add_github_links_if_edit_url(soup):
         a.attrs['class'] = 'github-edit-link'
         a.string = ' ✎'
         # h.append(a)
-        h.insert_before(a)
+#         h.insert_before(a)
+        h.insert_after(a)
         
 #         msg = 'Found element %s' % h
 #         logger.info(msg)
