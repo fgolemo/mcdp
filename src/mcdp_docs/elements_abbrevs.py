@@ -43,6 +43,12 @@ def substitute_special_paragraphs(soup):
         'Task: ': 'special-par-task',
         'Remark: ': 'special-par-remark',  
         'Note: ': 'special-par-note',
+        'Symptom: ': 'special-par-symptom',
+        'Resolution: ': 'special-par-resolution',
+        'See: ': 'special-par-see',
+        'Bad:': 'special-par-bad',
+        'Better:': 'special-par-better',
+        'Warning:': 'special-par-warning',
     } 
     
     for prefix, klass in prefix2class.items():

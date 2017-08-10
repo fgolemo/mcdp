@@ -499,7 +499,8 @@ def split_in_files(body, levels=['sec', 'part']):
     body.extract()
     file2contents[first].insert(0, body) 
     
-    file2contents = OrderedDict([(name_for_first if k == first else k, v) for k, v in file2contents.items()])
+    file2contents = OrderedDict([(name_for_first if k == first else k, v) 
+                                 for k, v in file2contents.items()])
 
 
     ids = []
@@ -519,11 +520,18 @@ def split_in_files(body, levels=['sec', 'part']):
     return file2contents
 
 def update_refs(filename2contents):
+    # XXX
+    ignore_these = [
+        'tocdiv', 'not-toc', 'disqus_thread', 'disqus_section', 'dsq-count-scr'
+    ]
+    
     id2filename = {}
     for filename, contents in filename2contents.items():
 
         for element in contents.findAll(id=True):
             id_ = element.attrs['id']
+            if id_ in ignore_these:
+                continue
             if id_ in id2filename:
                 logger.error('double element with ID %s' % id_)
             id2filename[id_] = filename
@@ -553,7 +561,6 @@ def update_refs(filename2contents):
                     
                     if 'toc_link' in a.attrs['class']:
                         p = a.parent
-#                         print('parent: %r' % p)
                         assert p.name == 'li'
                         add_class(p, 'link-same-file-direct-parent')
                         
@@ -562,7 +569,6 @@ def update_refs(filename2contents):
                             if isinstance(x, Tag) and x.name == 'li':
                                 add_class(x, 'link-same-file-inside')
                      
-                    
                     p = a.parent
                     while p:
                         if isinstance(p, Tag) and p.name in ['ul', 'li']:
@@ -570,14 +576,7 @@ def update_refs(filename2contents):
                         p = p.parent
             else:
                 logger.error('no element with ID %s' % id_)
-    
-        # if there are two link-same-file-direct-parent
-        #   section.html
-        #    section.html#paragraph
-        # only leave the first one
-#         for p in contents.find('.link-same-file-direct-parent .link-same-file-direct-parent'):
-#             remove_class(p, 'link-same-file-direct-parent')
-    
+     
 
 def write_split_files(filename2contents, d):
     if not os.path.exists(d):

@@ -343,7 +343,7 @@ span.PlaceholderLabel {
   font-family: "Cambria Math" !important;
 }
 body {
-  font-family: STIX, STIXMath, monospace;
+  font-family: STIX, STIXMath, Times, monospace;
   font-variant: prince-opentype(kern, liga, dlig, clig, calt);
   font-kerning: normal;
 }
@@ -1070,9 +1070,6 @@ pre + br + pre {
   /*border: solid 1px red;*/
   /*float: left; clear: left;*/
 }
-div.todo-wrap {
-  text-align: center;
-}
 p.todo {
   display: inline-block;
   background-color: #fdd;
@@ -1084,6 +1081,61 @@ p.todo::before {
 p.special-par-note::before {
   content: 'Note: ';
   font-weight: bold;
+  color: darkred;
+}
+p.special-par-note {
+  border-left: solid 3px darkred;
+  padding-left: 0.5em;
+}
+p.special-par-see::before {
+  content: '\027A1';
+  font-weight: bold;
+  margin-right: 0.5em;
+}
+p.special-par-symptom::before {
+  content: 'Symptom: ';
+  font-weight: bold;
+  color: darkred;
+}
+p.special-par-symptom {
+  border-left: solid 3px darkred;
+  padding-left: 0.5em;
+}
+p.special-par-resolution::before {
+  content: 'Resolution: ';
+  font-weight: bold;
+  color: darkgren;
+}
+p.special-par-bad::before {
+  content: '\2716';
+  margin-right: 0.5em;
+  color: darkred;
+  font-size: 80%;
+}
+p.special-par-bad {
+  color: darkred;
+}
+p.special-par-better::before {
+  content: '\2714';
+  margin-right: 0.5em;
+  color: darkgreen;
+  font-size: 80%;
+}
+p.special-par-better {
+  color: darkgreen;
+}
+p.special-par-warning::before {
+  content: 'Warning';
+  margin-right: 0.5em;
+  font-size: 80%;
+}
+p.special-par-warning {
+  border-left: solid 3px yellow;
+  padding-left: 0.5em;
+}
+div.requirements {
+  border-left: solid 3px lightgrey;
+  padding-left: 0.5em;
 }
 p.special-par-task::before {
   content: 'Task: ';
@@ -1116,6 +1168,12 @@ p.special-par-task::before {
 }
 .status-XXX {
   background-color: pink;
+  padding-left: 0.5em;
+  border-left: solid 2px red;
+}
+p.special-par-remark {
+  padding-left: 0.5em;
+  border-left: solid 2px gray;
 }
 p.special-par-remark::before {
   content: 'Remark: ';

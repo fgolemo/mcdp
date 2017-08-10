@@ -14,14 +14,19 @@ span.OpenBraceKeyword,  span.CloseBraceKeyword, span.PlaceholderLabel {
 }
 
 body {
-   // font-family: STIX, Times, monospace;
-   font-family: STIX, STIXMath, monospace;
+   // Fallback is Times
+   font-family: STIX, STIXMath, Times, monospace;
+   // Fallback is monospace to check errors
+   // font-family: STIX, STIXMath, monospace;
 
    font-variant: prince-opentype(kern, liga, dlig, clig, calt);
    font-kerning: normal;
    // font-variant: prince-opentype(kern, liga);
 }
 
+
+//  prince: page 76: warning: no font for Dingbats character U+274C, fallback to '?'
+// -> PragmataPro
 
 @font-face {
     font-family: monospace;

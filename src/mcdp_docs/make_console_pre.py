@@ -6,7 +6,8 @@ from comptests.registrar import comptest, run_module_tests
  
 # What is recognized as a program name
 programs = ['sudo', 'pip', 'git', 'python', 'cd', 'apt-get',
-            'echo', 'sync', 'tee',
+            'echo', 'sync', 'tee', 'curl',  'rm', 'df', 'ls',
+            'apt-mark', 'iwconfig', 'vcgencmd', 'hostname',
             'mcdp-web', 'mcdp-solve', 'mcdp-render', 'npm',
             'mcdp-plot','mcdp-eval','mcdp-render-manual',
             'dd', 'apt', 'ifconfig', 'iconfig', 'htop',
@@ -18,7 +19,8 @@ programs = ['sudo', 'pip', 'git', 'python', 'cd', 'apt-get',
             'mv', 'cat', 'touch' ,'source', 'make', 'roslaunch', 'jstest',
             'shutdown', 'virtualenv', 'nodejs', 'cp', 'fc-cache', 'venv'] \
             + ['|'] # pipe
-program_commands = ['install', 'develop', 'clone', 'config']
+# program_commands = ['install', 'develop', 'clone', 'config']
+program_commands = []
 
 ConsoleLine = namedtuple('ConsoleLine', 'hostname symbol command')
 
