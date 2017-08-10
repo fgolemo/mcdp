@@ -3,10 +3,12 @@ from bs4.element import NavigableString, Tag
 from collections import namedtuple
 from contracts import contract
 from comptests.registrar import comptest, run_module_tests
+from mcdp_utils_xml.project_text import project_html
  
 # What is recognized as a program name
 programs = ['sudo', 'pip', 'git', 'python', 'cd', 'apt-get',
             'echo', 'sync', 'tee', 'curl',  'rm', 'df', 'ls',
+            'adduser', 'useradd', 'passwd', 'chsh',
             'apt-mark', 'iwconfig', 'vcgencmd', 'hostname',
             'mcdp-web', 'mcdp-solve', 'mcdp-render', 'npm',
             'mcdp-plot','mcdp-eval','mcdp-render-manual',
@@ -95,13 +97,24 @@ def mark_console_pres_defaults(soup):
     
     for code in soup.select('code'):
         join_successive_strings(code)
+        
+#         text = project_html(code)
+#         
+#         allow = 'apt install' in text
+#         
+#         if not allow:
+#             msg = "Do not copy and paste. "
+#             msg += 'I guarantee, only trouble will come from it.'
+#             code.attrs['oncopy'] = 'alert("%s");return false;' % msg
+#             process_ns(t)
+#             
         for t in code.children:
-            
             if isinstance(t, NavigableString):
-                
-                msg = "Do not copy and paste. "
-                msg += 'I guarantee, only trouble will come from it.'
-                code.attrs['oncopy'] = 'alert("%s");return false;' % msg
+                if '![' in t:
+                    msg = "Do not copy and paste. "
+                    msg += 'I guarantee, only trouble will come from it.'
+                    code.attrs['oncopy'] = 'alert("%s");return false;' % msg
+                        
                 process_ns(t)
                 
 def join_successive_strings(e):
