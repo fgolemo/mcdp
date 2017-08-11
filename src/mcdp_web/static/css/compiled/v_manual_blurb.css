@@ -1087,6 +1087,13 @@ p.special-par-note {
   border-left: solid 3px darkred;
   padding-left: 0.5em;
 }
+p.special-par-question::before {
+  content: 'Q: ';
+  font-weight: bold;
+}
+p.special-par-question {
+  font-style: italic;
+}
 p.special-par-assigned::before {
   content: 'Assigned to: ';
   font-weight: bold;
