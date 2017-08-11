@@ -230,6 +230,19 @@ p.special-par-note {
 
 }
 
+
+p.special-par-assigned::before {
+    content: 'Assigned to: ';
+    font-weight: bold;
+    color: grey;
+}
+
+p.special-par-assigned {
+    border-left: solid 3px grey;
+    padding-left: 0.5em;
+    color: grey;
+}
+
 // See: See page. ..
 
 p.special-par-see::before {

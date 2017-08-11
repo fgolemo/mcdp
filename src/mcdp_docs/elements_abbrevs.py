@@ -16,7 +16,6 @@ def other_abbrevs(soup):
         <p>TODO:...</p> -> <div class="todo"><p><span>TODO:</span></p>
     """ 
     
-    
     translate = {
         'v': 'mcdp-value',
         'val': 'mcdp-value',
@@ -49,6 +48,10 @@ def substitute_special_paragraphs(soup):
         'Bad:': 'special-par-bad',
         'Better:': 'special-par-better',
         'Warning:': 'special-par-warning',
+        'Q:': 'special-par-question',
+        'A:': 'special-par-answer',
+        "Assigned: ": 'special-par-assigned',
+        "Maintainer: ": 'special-par-mantainer',
     } 
     
     for prefix, klass in prefix2class.items():

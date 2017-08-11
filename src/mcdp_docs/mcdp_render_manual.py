@@ -100,9 +100,15 @@ def manual_jobs(context, src_dir, output_file, generate_pdf, bibfile, stylesheet
 
     # check that all the docnames are unique
     pnames = [_[1] for _ in manual_contents]
-    if len(pnames) != len(set(pnames)):
-        msg = 'Repeated names detected: %s' % pnames
-        raise ValueError(msg)
+    counts = dict([(x,pnames.count(x)) for x in set(pnames)])
+    for pname, n in counts.items():
+        if n > 1:
+            msg = 'I found the same element %r a total of %d times' % (pname, n)
+            raise ValueError(msg)
+#         
+#     if len(pnames) != len(set(pnames)):
+#         msg = 'Repeated names detected: %s' % pnames
+#         raise ValueError(msg)
 
     local_files = list(locate_files(src_dir, '*.md'))
     basename2filename = dict( (os.path.basename(_), _) for _ in local_files)
