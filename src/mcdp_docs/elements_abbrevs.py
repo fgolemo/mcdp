@@ -51,7 +51,7 @@ def substitute_special_paragraphs(soup):
         'Q:': 'special-par-question',
         'A:': 'special-par-answer',
         "Assigned: ": 'special-par-assigned',
-        "Maintainer: ": 'special-par-mantainer',
+        "Maintainer: ": 'special-par-maintainer',
     } 
     
     for prefix, klass in prefix2class.items():

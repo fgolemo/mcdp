@@ -58,7 +58,7 @@ number_styles = {
     'upper-alpha': [ZERO,] + list(string.ascii_uppercase),
     'lower-latin': [ZERO,] + list(string.ascii_lowercase), 
     'upper-latin': [ZERO,] + list(string.ascii_uppercase),
-    'decimal': map(str, range(0, 100)),
+    'decimal': map(str, range(0, 500)),
     'lower-greek': map(str, range(0, 26)), # todo
     'upper-greek': map(str, range(0, 26)), # todo
     'lower-roman': [ZERO,]+[write_roman(_).lower() for _ in range(1, 100)], 
