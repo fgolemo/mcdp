@@ -45,6 +45,7 @@ def substitute_special_paragraphs(soup):
         'Symptom: ': 'special-par-symptom',
         'Resolution: ': 'special-par-resolution',
         'See: ': 'special-par-see',
+        'See also: ': 'special-par-see-also',
         'Bad:': 'special-par-bad',
         'Better:': 'special-par-better',
         'Warning:': 'special-par-warning',

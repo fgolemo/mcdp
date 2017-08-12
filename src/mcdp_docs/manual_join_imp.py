@@ -522,7 +522,8 @@ def split_in_files(body, levels=['sec', 'part']):
 def update_refs(filename2contents):
     # XXX
     ignore_these = [
-        'tocdiv', 'not-toc', 'disqus_thread', 'disqus_section', 'dsq-count-scr'
+        'tocdiv', 'not-toc', 'disqus_thread', 'disqus_section', 'dsq-count-scr',
+        'banner',
     ]
     
     id2filename = {}

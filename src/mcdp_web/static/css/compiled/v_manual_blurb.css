@@ -1109,6 +1109,20 @@ p.special-par-see::before {
   font-weight: bold;
   margin-right: 0.5em;
 }
+p.special-par-see {
+  text-align: right;
+  margin-bottom: 1em;
+  margin-top: 0.5em;
+}
+p.special-par-see-also::before {
+  content: '\02600';
+  font-weight: bold;
+  margin-right: 0.5em;
+}
+p.special-par-see-also {
+  margin: 1em;
+  font-style: italic;
+}
 p.special-par-symptom::before {
   content: 'Symptom: ';
   font-weight: bold;

@@ -9,6 +9,7 @@ from mcdp_utils_xml.project_text import project_html
 programs = ['sudo', 'pip', 'git', 'python', 'cd', 'apt-get',
             'echo', 'sync', 'tee', 'curl',  'rm', 'df', 'ls',
             'adduser', 'useradd', 'passwd', 'chsh',
+            'rostopic', 'roscd', 'rviz', 'rqt_console',
             'apt-mark', 'iwconfig', 'vcgencmd', 'hostname',
             'mcdp-web', 'mcdp-solve', 'mcdp-render', 'npm',
             'mcdp-plot','mcdp-eval','mcdp-render-manual',
@@ -21,6 +22,7 @@ programs = ['sudo', 'pip', 'git', 'python', 'cd', 'apt-get',
             'mv', 'cat', 'touch' ,'source', 'make', 'roslaunch', 'jstest',
             'shutdown', 'virtualenv', 'nodejs', 'cp', 'fc-cache', 'venv'] \
             + ['|'] # pipe
+            
 # program_commands = ['install', 'develop', 'clone', 'config']
 program_commands = []
 

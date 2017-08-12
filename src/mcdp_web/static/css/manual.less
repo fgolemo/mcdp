@@ -261,6 +261,28 @@ p.special-par-see::before {
     margin-right: 0.5em;
 }
 
+p.special-par-see {
+    text-align: right;
+    margin-bottom: 1em;
+    margin-top: 0.5em;
+}
+
+
+// See also: optional reference
+
+p.special-par-see-also::before {
+    content: '\02600'; // ☀
+    // content: '\1F4DA'; // Books 📚
+    //http://www.fileformat.info/info/unicode/char/1F4DA/fontsupport.htm
+    // font-family: Symbola, "Unifont Upper", sans-serif, serif, monospace;
+    font-weight: bold;
+    margin-right: 0.5em;
+}
+p.special-par-see-also {
+    margin: 1em;
+    font-style: italic;
+}
+
 // Symptoms
 
 p.special-par-symptom::before {

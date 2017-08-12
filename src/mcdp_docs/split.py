@@ -79,8 +79,34 @@ def split_file(html, directory):
         s = s.replace('DISQUS_DOMAIN', DISQUS_DOMAIN)
         disqus_section = bs(s)
         disqus_section.name = 'div'
-        
         not_toc.append(disqus_section)
+        banner_string = """
+<style type="text/css">
+#banner {
+    display: block;
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    padding-top: 0.5em;
+    padding-left:2em;
+    padding-right: 0.5em;
+    font-weight: bold !important;
+    font-size: 120%;
+    //background-color: yellow;
+    color: red;
+    font-weight: bold;
+    padding-bottom: 0.5em;
+}
+div.super { margin-top: 2em; }
+</style>
+<div id='banner'>
+We are preparing things for Fall 2017. Please pardon our dust as we prepare the Duckiebook.
+</div>
+"""
+        banner = bs(banner_string)
+        banner.name = 'div'
+        body.insert(0, banner)
         
         filename2contents[filename] = html
     
