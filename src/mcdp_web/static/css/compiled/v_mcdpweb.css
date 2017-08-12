@@ -156,12 +156,10 @@ span.placeholder {
   font-weight: bold;
 }
 span.placeholder:before {
-  content: '\3008';
-  font-family: Times;
+  content: '[';
 }
 span.placeholder:after {
-  content: '\3009';
-  font-family: Times;
+  content: ']';
 }
 span.Unit,
 span.Nat,

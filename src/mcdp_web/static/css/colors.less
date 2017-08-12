@@ -24,10 +24,21 @@ span.placeholder {
 }
 
 span.placeholder:before {
-    content: '\3008';
-    font-family: Times;
+    content: '[';
+    // font-family: Times;
 }
 span.placeholder:after {
-    content: '\3009';
-    font-family: Times;
+    content: ']';
+    // font-family: Times;
 }
+
+
+// XXX these do not work on linux for some reason
+// span.placeholder:before {
+//     content: '\3008';
+//     font-family: Times;
+// }
+// span.placeholder:after {
+//     content: '\3009';
+//     font-family: Times;
+// }
