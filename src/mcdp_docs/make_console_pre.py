@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
-from bs4.element import NavigableString, Tag
 from collections import namedtuple
-from contracts import contract
+
+from bs4.element import NavigableString, Tag
+
 from comptests.registrar import comptest, run_module_tests
-from mcdp_utils_xml.project_text import project_html
- 
+from contracts import contract
+from mcdp import logger
+
+
 # What is recognized as a program name
 programs = ['sudo', 'pip', 'git', 'python', 'cd', 'apt-get',
             'echo', 'sync', 'tee', 'curl',  'rm', 'df', 'ls',
@@ -133,7 +136,6 @@ def join_successive_strings(e):
             join_successive_strings(e)
             return
     
-from mcdp import logger
 def process_ns(t):
     s = t + ''
 #     logger.debug('Handling %r' % t)
