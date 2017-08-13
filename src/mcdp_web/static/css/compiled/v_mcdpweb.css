@@ -152,31 +152,13 @@ h3.draft {
   color: red !important;
 }
 span.placeholder {
-  color: orange;
-  font-weight: bold;
-}
-span.placeholder:before {
-  content: '[';
-}
-span.placeholder:after {
-  content: ']';
-}
-kbd + kbd {
-  margin-left: .1em;
-}
-kbd {
-  display: inline-block;
-  padding: .06em .4em;
-  font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
   font-size: 50%;
-  /* line-height: 1.4; */
-  /* color: #242729; */
-  text-shadow: 0 1px 0 #FFF;
-  background-color: #e1e3e5;
-  border: 1px solid #adb3b9;
-  border-radius: 3px;
-  box-shadow: 0 1px 0 rgba(12, 13, 14, 0.2);
-  white-space: nowrap;
+  font-family: serif;
+  padding-left: 1px;
+  padding-right: 1px;
+  font-style: italic;
+  color: white;
+  background-color: blue;
 }
 span.Unit,
 span.Nat,

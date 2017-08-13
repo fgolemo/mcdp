@@ -222,31 +222,13 @@ h3.draft {
   color: red !important;
 }
 span.placeholder {
-  color: orange;
-  font-weight: bold;
-}
-span.placeholder:before {
-  content: '[';
-}
-span.placeholder:after {
-  content: ']';
-}
-kbd + kbd {
-  margin-left: .1em;
-}
-kbd {
-  display: inline-block;
-  padding: .06em .4em;
-  font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
   font-size: 50%;
-  /* line-height: 1.4; */
-  /* color: #242729; */
-  text-shadow: 0 1px 0 #FFF;
-  background-color: #e1e3e5;
-  border: 1px solid #adb3b9;
-  border-radius: 3px;
-  box-shadow: 0 1px 0 rgba(12, 13, 14, 0.2);
-  white-space: nowrap;
+  font-family: serif;
+  padding-left: 1px;
+  padding-right: 1px;
+  font-style: italic;
+  color: white;
+  background-color: blue;
 }
 .figcontent {
   margin: 0;
@@ -1171,17 +1153,30 @@ p.special-par-better {
   color: darkgreen;
 }
 p.special-par-warning::before {
-  content: 'Warning';
+  content: 'Warning: ';
   margin-right: 0.5em;
-  font-size: 80%;
+  font-style: bold;
 }
 p.special-par-warning {
+  background-color: yellow;
   border-left: solid 3px yellow;
   padding-left: 0.5em;
 }
 div.requirements {
   border-left: solid 3px lightgrey;
   padding-left: 0.5em;
+}
+div.check::before {
+  content: "Check before you continue";
+  font-weight: bold;
+}
+div.check {
+  margin-left: 2em;
+  background-color: #fff3db;
+  box-shadow: 4px 4px 10px 0px #ebddc1;
+  margin-top: 1.5em;
+  margin-bottom: 1.5em;
+  padding: 0.3em;
 }
 p.special-par-task::before {
   content: 'Task: ';
@@ -1588,6 +1583,23 @@ figcaption {
   color: lightgrey !important;
   float: right;
   display: block;
+}
+kbd + kbd {
+  margin-left: .1em;
+}
+kbd {
+  display: inline-block;
+  padding: .06em .4em;
+  font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
+  font-size: 50%;
+  /* line-height: 1.4; */
+  /* color: #242729; */
+  text-shadow: 0 1px 0 #FFF;
+  background-color: #e1e3e5;
+  border: 1px solid #adb3b9;
+  border-radius: 3px;
+  box-shadow: 0 1px 0 rgba(12, 13, 14, 0.2);
+  white-space: nowrap;
 }
 /* These are the fixes for printing / prince */
 body {

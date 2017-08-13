@@ -11,6 +11,7 @@ from mcdp import logger
 # What is recognized as a program name
 programs = ['sudo', 'pip', 'git', 'python', 'cd', 'apt-get',
             'echo', 'sync', 'tee', 'curl',  'rm', 'df', 'ls',
+            'catkin_make', 'ntpdate',
             'adduser', 'useradd', 'passwd', 'chsh',
             'rostopic', 'roscd', 'rviz', 'rqt_console',
             'apt-mark', 'iwconfig', 'vcgencmd', 'hostname',
@@ -23,7 +24,8 @@ programs = ['sudo', 'pip', 'git', 'python', 'cd', 'apt-get',
             'mkdir', 'chmod', 'wget', 'byobu-enable', 'exit','ssh','scp','rsync',
             'raspistill', 'reboot', 'vim', 'vi', 'ping', 'ssh-keygen',
             'mv', 'cat', 'touch' ,'source', 'make', 'roslaunch', 'jstest',
-            'shutdown', 'virtualenv', 'nodejs', 'cp', 'fc-cache', 'venv'] \
+            'shutdown', 'virtualenv', 'nodejs', 'cp', 'fc-cache', 'venv',
+            'export'] \
             + ['|'] # pipe
             
 # program_commands = ['install', 'develop', 'clone', 'config']
@@ -195,7 +197,6 @@ def mark_console_pres_highlight(soup):
         
         lines = s.split('\n')
         
-       
         
         def is_program(x, l):
             if x == 'git' and 'apt' in l:
@@ -205,13 +206,15 @@ def mark_console_pres_highlight(soup):
         for j, line in enumerate(lines):
             tokens = line.split(' ')
             for i, token in enumerate(tokens):
+                previous_is_sudo_or_dollar = i >= 1 and tokens[i-1] in ['$', 'sudo']
+                
                 if token in  ['$', 'DOLLAR']:
                     # add <span class=console_sign>$</span>
                     e = Tag(name='span')
                     e['class'] = 'console_sign'
                     e.string = '$'
                     code.append(e)
-                elif is_program(token, line):
+                elif is_program(token, line) and previous_is_sudo_or_dollar:
                     e = Tag(name='span')
                     e['class'] = '%s program' % token
                     e.string = token

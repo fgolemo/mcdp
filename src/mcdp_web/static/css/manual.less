@@ -330,13 +330,16 @@ p.special-par-better {
 }
 
 p.special-par-warning::before {
-    content: 'Warning';
+    content: 'Warning: ';
     margin-right: 0.5em;
     // color: yellow;
-    font-size: 80%;
+    // font-size: 80%;
+    font-style: bold;
 }
 
+
 p.special-par-warning {
+    background-color: yellow;
     border-left: solid 3px yellow;
     padding-left: 0.5em;
 }
@@ -346,7 +349,22 @@ div.requirements {
     padding-left: 0.5em;
 }
 
+div.check::before {
+    content: "Check before you continue";
+    font-weight: bold;
+}
 
+div.check {
+    margin-left: 2em;
+
+    // border: solid 1px black;
+    background-color: #fff3db;
+    box-shadow: 4px 4px 10px 0px rgba(235,221,193,1);
+    margin-top: 1.5em;
+    margin-bottom: 1.5em;
+
+    padding:0.3em;
+}
 
 
 p.special-par-task::before {
