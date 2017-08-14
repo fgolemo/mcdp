@@ -245,10 +245,14 @@ def mark_console_pres_highlight(soup):
                     
                 is_last = i == len(tokens) - 1
                 if not is_last:
-                    space = Tag(name='span')
-                    space.append(' ')
-                    space['class'] = 'space'
-                    code.append(space)
+                    if not '![' in line:
+                        # XXX: this is a bug
+                        space = Tag(name='span')
+                        space.append(' ')
+                        space['class'] = 'space'
+                        code.append(space)
+                    else:
+                        code.append(' ')
             
             is_last_line = j == len(lines) - 1
             if not is_last_line:
