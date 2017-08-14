@@ -42,7 +42,7 @@ def add_class(e, c):
             check_isinstance(_, str)
         cc = c
     else:
-        raise ValueError(c)
+        raise ValueError(c.__repr__())
     cur = e.attrs.get('class', [])
     if isinstance(cur, str):
         cur = [_ for _ in cur.split() if _] # remove None

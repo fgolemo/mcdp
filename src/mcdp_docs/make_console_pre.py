@@ -11,7 +11,8 @@ from mcdp import logger
 # What is recognized as a program name
 programs = ['sudo', 'pip', 'git', 'python', 'cd', 'apt-get',
             'echo', 'sync', 'tee', 'curl',  'rm', 'df', 'ls',
-            'catkin_make', 'ntpdate',
+            'catkin_make', 'ntpdate', 'groups', 'which',
+            'what-the-duck',
             'adduser', 'useradd', 'passwd', 'chsh',
             'rostopic', 'roscd', 'rviz', 'rqt_console',
             'apt-mark', 'iwconfig', 'vcgencmd', 'hostname',
@@ -25,7 +26,7 @@ programs = ['sudo', 'pip', 'git', 'python', 'cd', 'apt-get',
             'raspistill', 'reboot', 'vim', 'vi', 'ping', 'ssh-keygen',
             'mv', 'cat', 'touch' ,'source', 'make', 'roslaunch', 'jstest',
             'shutdown', 'virtualenv', 'nodejs', 'cp', 'fc-cache', 'venv',
-            'export'] \
+            'export', 'fdisk', 'rosdep'] \
             + ['|'] # pipe
             
 # program_commands = ['install', 'develop', 'clone', 'config']
@@ -184,7 +185,7 @@ def mark_console_pres_highlight(soup):
         
         beg = s.strip()
         
-        
+        # is it a console line?
         ct = is_console_line(beg)
         
         if ct is None: 
@@ -193,10 +194,14 @@ def mark_console_pres_highlight(soup):
         from mcdp_docs.highlight import add_class
         add_class(pre, 'console')
 
+        # add class "on-hostname"
+        if ct.hostname is not None:
+            cn = 'on-%s' % str(ct.hostname)
+            add_class(pre, cn)
+
         code.string = ''
         
         lines = s.split('\n')
-        
         
         def is_program(x, l):
             if x == 'git' and 'apt' in l:
@@ -213,6 +218,12 @@ def mark_console_pres_highlight(soup):
                     e = Tag(name='span')
                     e['class'] = 'console_sign'
                     e.string = '$'
+                    code.append(e)
+                elif i == 0 and token == ct.hostname:
+                    # it's the hostname
+                    e = Tag(name='span')
+                    e['class'] = 'hostname'
+                    e.string = token
                     code.append(e)
                 elif is_program(token, line) and previous_is_sudo_or_dollar:
                     e = Tag(name='span')
@@ -234,7 +245,10 @@ def mark_console_pres_highlight(soup):
                     
                 is_last = i == len(tokens) - 1
                 if not is_last:
-                    code.append(NavigableString(' '))
+                    space = Tag(name='span')
+                    space.append(' ')
+                    space['class'] = 'space'
+                    code.append(space)
             
             is_last_line = j == len(lines) - 1
             if not is_last_line:
