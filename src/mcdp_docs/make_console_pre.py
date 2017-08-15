@@ -116,14 +116,15 @@ def mark_console_pres_defaults(soup):
 #             code.attrs['oncopy'] = 'alert("%s");return false;' % msg
 #             process_ns(t)
 #             
-        for t in code.children:
-            if isinstance(t, NavigableString):
-                if '![' in t:
-                    msg = "Do not copy and paste. "
-                    msg += 'I guarantee, only trouble will come from it.'
-                    code.attrs['oncopy'] = 'alert("%s");return false;' % msg
-                        
-                process_ns(t)
+        if False:
+            for t in code.children:
+                if isinstance(t, NavigableString):
+                    if '![' in t:
+                        msg = "Do not copy and paste. "
+                        msg += 'I guarantee, only trouble will come from it.'
+                        code.attrs['oncopy'] = 'alert("%s");return false;' % msg
+                            
+                    process_ns(t)
                 
 def join_successive_strings(e):
     """ Joins successive strings in a BS4 element """
@@ -157,6 +158,7 @@ def process_ns(t):
         logger.warning('In string: %r.' % s)
         logger.warning('Above: %s' % t.parent)
         return
+    
     before = s[:i]
     inside = s[i+len(marker):n]
     after = s[n+len(marker2):]
@@ -261,3 +263,5 @@ def mark_console_pres_highlight(soup):
 
 if __name__ == '__main__':
     run_module_tests()
+    
+    

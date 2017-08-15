@@ -1,7 +1,7 @@
 import sys
 
-from bs4 import BeautifulSoup
-from bs4.element import Tag
+from bs4 import BeautifulSoup, Tag
+
 from contracts.utils import raise_desc
 
 from .logs import logger

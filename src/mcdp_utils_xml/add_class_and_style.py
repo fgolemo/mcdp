@@ -1,6 +1,8 @@
-from contracts.utils import check_isinstance
+from bs4 import Tag
+
 from contracts import contract
-from bs4.element import Tag
+from contracts.utils import check_isinstance
+
 
 def add_style(tag, after=True, **kwargs):
     """    

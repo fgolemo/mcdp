@@ -1,16 +1,17 @@
 # -*- coding: utf-8 -*-
 #!/usr/bin/env python
 from collections import OrderedDict
-from contracts import contract
-from mcdp.logs import logger
-from mcdp_utils_xml import add_class
 import os
 import sys
 import warnings
 
 from bs4 import BeautifulSoup
 from bs4.element import Comment, Tag, NavigableString
+
+from contracts import contract
 from contracts.utils import raise_desc
+from mcdp.logs import logger
+from mcdp_utils_xml import add_class
 
 from .footnote_javascript import add_footnote_polyfill
 from .macros import replace_macros
@@ -18,7 +19,6 @@ from .minimal_doc import add_extra_css
 from .read_bibtex import extract_bibtex_blocks, get_bibliography
 from .tocs import generate_toc, substituting_empty_links, LABEL_WHAT_NUMBER,\
     LABEL_WHAT_NUMBER_NAME, LABEL_WHAT, LABEL_NUMBER, LABEL_NAME, LABEL_SELF
-from mcdp_utils_xml.add_class_and_style import remove_class
 
 
 def get_manual_css_frag():
@@ -166,8 +166,9 @@ def manual_join(template, files_contents, bibfile, stylesheet, remove=None, extr
         logger.info('Removed %d elements of selector %r' % (nremoved, remove))
     
 #     if False:
-    with open('all_removed.html', 'w') as f:
-        f.write(all_removed)
+    if all_removed:
+        with open('parts-removed.html', 'w') as f:
+            f.write(all_removed)
 
     if hook_before_toc is not None:
         hook_before_toc(soup=d)

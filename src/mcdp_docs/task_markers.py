@@ -1,6 +1,8 @@
 from bs4.element import NavigableString
-from mcdp_utils_xml.add_class_and_style import add_class
+
 from mcdp import logger
+from mcdp_utils_xml import add_class
+
 
 def substitute_task_markers(soup):
     subs2class = {

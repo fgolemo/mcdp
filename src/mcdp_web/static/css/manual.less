@@ -282,6 +282,30 @@ p.special-par-see-also {
     margin: 1em;
     font-style: italic;
 }
+// Requires
+
+
+p.special-par-requires::before {
+    content: 'Requires: ';
+    font-weight: bold;
+}
+
+p.special-par-requires {
+    border-left: solid 3px black;
+    padding-left: 0.5em;
+}
+
+
+p.special-par-recommended::before {
+    content: 'Recommended: ';
+    font-weight: bold;
+}
+
+p.special-par-recommended {
+    border-left: solid 3px black;
+    padding-left: 0.5em;
+}
+
 
 // Symptoms
 

@@ -44,8 +44,6 @@ def substitute_special_paragraphs(soup):
         'Note: ': 'special-par-note',
         'Symptom: ': 'special-par-symptom',
         'Resolution: ': 'special-par-resolution',
-        'See: ': 'special-par-see',
-        'See also: ': 'special-par-see-also',
         'Bad:': 'special-par-bad',
         'Better:': 'special-par-better',
         'Warning:': 'special-par-warning',
@@ -53,6 +51,14 @@ def substitute_special_paragraphs(soup):
         'A:': 'special-par-answer',
         "Assigned: ": 'special-par-assigned',
         "Maintainer: ": 'special-par-maintainer',
+        
+        # Reference and See are the same thing
+        'See: ': 'special-par-see',
+        'Reference: ': 'special-par-see',
+        
+        'Requires: ': 'special-par-requires',
+        'Recommended: ': 'special-par-recommended',
+        'See also: ': 'special-par-see-also',
     } 
     
     for prefix, klass in prefix2class.items():
