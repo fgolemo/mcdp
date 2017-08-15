@@ -54,11 +54,19 @@ def get_prerender_js():
 class PrerenderError(Exception):
     pass
 
-def prerender_mathjax(s):
+def prerender_mathjax(s, symbols):
+    if symbols:
+        lines = symbols.split('\n')
+        lines = [l for l in lines if l.strip()]
+        m = '$$' + "\n".join(lines) +'$$\n\n'
+    else:
+        m = ''
+    
     STARTTAG = 'STARTHERE'
     ENDTAG = 'ENDHERE'
-    s = STARTTAG +  get_mathjax_preamble() + ENDTAG + s
+    s = STARTTAG +  get_mathjax_preamble() + ENDTAG + m + s
 
+                         
     try:
         s = prerender_mathjax_(s)
     except PrerenderError: # pragma: no cover
@@ -68,7 +76,6 @@ def prerender_mathjax(s):
             return s
         else:
             raise
-
 
     c0 = s.index(STARTTAG)
     c1 = s.index(ENDTAG) + len(ENDTAG)

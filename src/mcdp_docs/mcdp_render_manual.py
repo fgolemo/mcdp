@@ -1,26 +1,30 @@
 # -*- coding: utf-8 -*-
-from compmake.context import Context
-from compmake.jobs.actions import mark_to_remake
-from compmake.jobs.storage import get_job_cache
-from compmake.structures import Promise
-from contracts import contract
 import logging
-from mcdp import MCDPConstants, logger
-from mcdp_library.library import MCDPLibrary
-from mcdp_library.stdlib import get_test_librarian
-from mcdp_utils_misc import locate_files, get_md5
 import os
 import tempfile
 import time
 
+from contracts import contract
 from contracts.utils import check_isinstance
 from quickapp import QuickApp
 from reprep.utils import natsorted
+
+from compmake.context import Context
+from compmake.jobs.actions import mark_to_remake
+from compmake.jobs.storage import get_job_cache
+from compmake.structures import Promise
+from mcdp import MCDPConstants, logger
+from mcdp_library import MCDPLibrary
+from mcdp_library.stdlib import get_test_librarian
+from mcdp_utils_misc import locate_files, get_md5
 
 from .github_edit_links import add_edit_links
 from .manual_constants import MCDPManualConstants
 from .manual_join_imp import manual_join
 from .minimal_doc import get_minimal_document
+from mcdp_utils_xml.parsing import bs, to_html_stripping_fragment_document
+from mcdp_docs.add_mathjax import add_mathjax_preamble
+from bs4 import BeautifulSoup
 
 
 class RenderManual(QuickApp):
@@ -31,6 +35,7 @@ class RenderManual(QuickApp):
         params.add_string('output_file', help='Output file')
         params.add_string('stylesheet', help='Stylesheet', default=None)
         params.add_int('mathjax', help='Use MathJax (requires node)', default=1)
+        params.add_string('symbols', help='.tex file for MathJax', default=None)
         params.add_flag('cache')
         params.add_flag('pdf', help='Generate PDF version of code and figures.')
         params.add_string('remove', help='Remove the items with the given selector (so it does not mess indexing)',
@@ -46,9 +51,14 @@ class RenderManual(QuickApp):
         output_file = options.output_file
         remove = options.remove
         stylesheet = options.stylesheet
+        symbols = options.symbols 
         use_mathjax = True if options.mathjax else False
         
         logger.info('use mathjax: %s' % use_mathjax)
+        logger.info('use symbols: %s' % symbols)
+        
+        if symbols is not None:
+            symbols = open(symbols).read()
 
         bibfile = os.path.join(src_dir, 'bibliography/bibliography.html')
 
@@ -62,7 +72,8 @@ class RenderManual(QuickApp):
                     bibfile=bibfile,
                     stylesheet=stylesheet,
                     remove=remove,
-                    use_mathjax=use_mathjax
+                    use_mathjax=use_mathjax,
+                    symbols=symbols,
                     )
         
 def get_manual_contents(srcdir):
@@ -91,7 +102,10 @@ def get_manual_contents(srcdir):
 
 def manual_jobs(context, src_dir, output_file, generate_pdf, bibfile, stylesheet,
                 use_mathjax,
-                remove=None, filter_soup=None, extra_css=None):
+                remove=None, filter_soup=None, extra_css=None, symbols=None):
+    """
+        symbols: a TeX preamble (or None)
+    """
     manual_contents = list(get_manual_contents(src_dir))
 
     if not manual_contents:
@@ -129,21 +143,14 @@ def manual_jobs(context, src_dir, output_file, generate_pdf, bibfile, stylesheet
         res = context.comp(render_book, src_dir, docname, generate_pdf,
                            
                            use_mathjax=use_mathjax,
+                           symbols=symbols,
                            main_file=output_file,
                            out_part_basename=out_part_basename,
                            
                            filter_soup=filter_soup, 
                            extra_css=extra_css,
                            job_id=job_id)
-
-#         source = '%s.md' % docname
-#         if source in basename2filename:
-#             filenames = [basename2filename[source]]
-#             erase_job_if_files_updated(context.cc, promise=res,
-#                                        filenames=filenames)
-#         else:
-#             logger.debug('Could not find file %r for date check' % source)
-
+ 
         files_contents.append(res)
 
     fn = os.path.join(src_dir, MCDPManualConstants.main_template)
@@ -153,14 +160,21 @@ def manual_jobs(context, src_dir, output_file, generate_pdf, bibfile, stylesheet
     
     template = open(fn).read()
     
-
     d = context.comp(manual_join, template=template, files_contents=files_contents, 
                      bibfile=bibfile, stylesheet=stylesheet, remove=remove)
+    
     context.comp(write, d, output_file)
 
     if os.path.exists(MCDPManualConstants.pdf_metadata_template):
         context.comp(generate_metadata, src_dir)
 
+# def job_add_mathjax_preamble(document, preamble):
+#     soup =  BeautifulSoup(document, 'lxml', from_encoding='utf-8')
+# #     soup = bs(document)
+#     add_mathjax_preamble(soup.html, preamble)
+#     d2 = to_html_stripping_fragment_document(soup)
+#     return d2
+    
 @contract(compmake_context=Context, promise=Promise, filenames='seq[>=1](str)')
 def erase_job_if_files_updated(compmake_context, promise, filenames):
     """ Invalidates the job if the filename is newer """
@@ -218,7 +232,7 @@ def write(s, out):
 
 
 def render_book(src_dir, docname, generate_pdf, main_file, use_mathjax, out_part_basename, filter_soup=None,
-                extra_css=None):
+                extra_css=None, symbols=None):
     from mcdp_docs.pipeline import render_complete
 
     librarian = get_test_librarian()
@@ -253,6 +267,7 @@ def render_book(src_dir, docname, generate_pdf, main_file, use_mathjax, out_part
                                     raise_errors=True, 
                                     realpath=realpath,
                                     use_mathjax=use_mathjax,
+                                    symbols=symbols,
                                     generate_pdf=generate_pdf,
                                     filter_soup=filter_soup0)
 

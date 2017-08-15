@@ -25,6 +25,7 @@ __all__ = [
 @contract(returns='str', s=str, library=MCDPLibrary, raise_errors=bool)
 def render_complete(library, s, raise_errors, realpath, generate_pdf=False,
                     check_refs=False, use_mathjax=True, filter_soup=None,
+                    symbols=None,
                     raise_missing_image_errors = False):
     """
         Transforms markdown into html and then renders the mcdp snippets inside.
@@ -119,7 +120,7 @@ def render_complete(library, s, raise_errors, realpath, generate_pdf=False,
     s = to_html_stripping_fragment(soup)
     
     if use_mathjax:
-        s = prerender_mathjax(s)
+        s = prerender_mathjax(s, symbols)
 
     soup = bs(s)
     escape_for_mathjax_back(soup)

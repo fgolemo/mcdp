@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-from networkx.algorithms.dag import ancestors, descendants
-
 from contracts import contract
 from contracts.utils import raise_desc, check_isinstance
+from networkx.algorithms.dag import ancestors, descendants, dag_longest_path
+
 from mcdp.development import do_extra_checks
 
 from .finite_collection_as_space import FiniteCollectionAsSpace
@@ -57,7 +57,7 @@ class FinitePoset(FiniteCollectionAsSpace, Poset):
             raise Uninhabited()
         G = self._get_graph_closure_no_cycles()
         # this returns the paths at least of length 2
-        from networkx.algorithms.dag import dag_longest_path
+        
 
         path = list(dag_longest_path(G))
         if not path:
