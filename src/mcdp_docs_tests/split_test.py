@@ -2,7 +2,7 @@ from comptests.registrar import run_module_tests, comptest
 from mcdp_library.library import MCDPLibrary
 from mcdp_docs.pipeline import render_complete
 from mcdp_docs.manual_join_imp import manual_join, split_in_files,\
-    add_prev_next_links, update_refs, write_split_files
+    add_prev_next_links, update_refs, write_split_files, get_id2filename
 from mcdp_tests import logger
 from bs4 import BeautifulSoup
 from bs4.element import Tag
@@ -20,11 +20,14 @@ def document_split():
         f.write(html)
     logger.info('written on %s' % fn)
      
-    
     filename2contents = split_in_files(soup)
+    id2filename = get_id2filename(filename2contents)
     add_prev_next_links(filename2contents)
-    update_refs(filename2contents)
+    update_refs(filename2contents, id2filename)
         
+    linkbase='link.html'
+    filename2contents[linkbase] = create_link_base(id2filename)
+    
     d = 'out/sec'
     write_split_files(filename2contents, d)
 

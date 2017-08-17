@@ -19,6 +19,7 @@ from .minimal_doc import add_extra_css
 from .read_bibtex import extract_bibtex_blocks, get_bibliography
 from .tocs import generate_toc, substituting_empty_links, LABEL_WHAT_NUMBER,\
     LABEL_WHAT_NUMBER_NAME, LABEL_WHAT, LABEL_NUMBER, LABEL_NAME, LABEL_SELF
+import json
 
 
 def get_manual_css_frag():
@@ -520,8 +521,7 @@ def split_in_files(body, levels=['sec', 'part']):
 
     return file2contents
 
-def update_refs(filename2contents):
-    # XXX
+def get_id2filename(filename2contents):
     ignore_these = [
         'tocdiv', 'not-toc', 'disqus_thread', 'disqus_section', 'dsq-count-scr',
         'banner',
@@ -542,7 +542,11 @@ def update_refs(filename2contents):
         if 'id' in contents.attrs:
             id_ = contents.attrs['id']
             id2filename[id_] = filename
+            
+    return id2filename
 
+def update_refs(filename2contents, id2filename):
+    
     for filename, contents in filename2contents.items():
         test_href = lambda x: x is not None and x.startswith('#') 
         for a in contents.findAll(href=test_href):
@@ -766,4 +770,67 @@ def check_various_errors(d):
 
 def debug(s):
     sys.stderr.write(str(s) + ' \n')
- 
+
+jump_script = """
+id2fragment = {};
+
+for(fragment in links) {
+    // remove ":section"
+    // remove XXX:
+    i = fragment.indexOf(':');
+    if(i>0) {
+        rest = fragment.substring(i+1);
+        id2fragment[rest] = fragment;
+    }
+}
+
+function log(s) {
+    console.info(s);
+    var p = document.createElement('p');
+    p.innerHTML = s;
+
+    // var body = document.getElementsByTagName('body');
+    document.body.appendChild(p);
+}
+
+if(window.location.hash) {
+    hash = window.location.hash;
+    hashid = hash.substring(1);
+    console.info(hashid);
+    if (hashid in id2fragment) {
+        fragment = id2fragment[hashid];
+        filename = links[fragment];
+        outlink = filename + '#' + fragment;
+        log("Redirecting to <a href='"+outlink+"'><code>" + outlink+ "</code></a>");
+        window.location = outlink;
+    } else {
+        log("Could not find hashid <code>" + hashid+ "</code>.");
+    }
+} else {
+    log("No hash found");
+}
+"""
+
+def create_link_base(id2filename):
+    ''' Returns a Tag <html> containing the page that is responsible to translate links '''
+    html = Tag(name='html')
+    head = Tag(name='head')
+    html.append(head)
+
+    body = Tag(name='body')
+    html.append(body)
+    s = """
+   
+links = %s; 
+    
+""" % json.dumps(id2filename)
+    script = Tag(name='script')
+    script.append(s)
+    
+    script = Tag(name='script')
+    script.append(jump_script)
+    body.append(script)
+#     pre = Tag(name='pre')
+#     pre.append(str(id2filename))
+#     body.append(pre)
+    return html
