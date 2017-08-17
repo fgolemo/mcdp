@@ -826,6 +826,7 @@ links = %s;
 """ % json.dumps(id2filename)
     script = Tag(name='script')
     script.append(s)
+    body.append(script)
     
     script = Tag(name='script')
     script.append(jump_script)
