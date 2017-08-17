@@ -12,7 +12,7 @@ from mcdp import logger
 programs = ['sudo', 'pip', 'git', 'python', 'cd', 'apt-get',
             'echo', 'sync', 'tee', 'curl',  'rm', 'df', 'ls',
             'catkin_make', 'ntpdate', 'groups', 'which',
-            'what-the-duck',
+            'what-the-duck', 'wajig', 'dpigs',
             'adduser', 'useradd', 'passwd', 'chsh',
             'rostopic', 'roscd', 'rviz', 'rqt_console',
             'apt-mark', 'iwconfig', 'vcgencmd', 'hostname',
