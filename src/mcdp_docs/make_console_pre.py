@@ -116,15 +116,16 @@ def mark_console_pres_defaults(soup):
 #             code.attrs['oncopy'] = 'alert("%s");return false;' % msg
 #             process_ns(t)
 #             
-        if False:
-            for t in code.children:
-                if isinstance(t, NavigableString):
-                    if '![' in t:
-                        msg = "Do not copy and paste. "
-                        msg += 'I guarantee, only trouble will come from it.'
+        for t in code.children:
+            if isinstance(t, NavigableString):
+                if '![' in t:
+                    msg = "Do not copy and paste. "
+                    msg += 'I guarantee, only trouble will come from it.'
+        
+                    if False:
                         code.attrs['oncopy'] = 'alert("%s");return false;' % msg
-                            
-                    process_ns(t)
+                        
+                process_ns(t)
                 
 def join_successive_strings(e):
     """ Joins successive strings in a BS4 element """

@@ -734,7 +734,7 @@ def make_sections2(elements, is_marker, copy=True, element_name='div', attrs={},
     if current_header or contains_something_else_than_space(current_section):
         sections.append((current_header, current_section))
 
-    logger.info('make_sections: %s found using marker %s' %
+    logger.debug('make_sections: %s found using marker %s' %
                 (len(sections), is_marker.__name__))
     return sections
 
