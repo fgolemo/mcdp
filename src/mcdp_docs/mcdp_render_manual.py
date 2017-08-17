@@ -1,30 +1,26 @@
 # -*- coding: utf-8 -*-
-import logging
-import os
-import tempfile
-import time
-
-from contracts import contract
-from contracts.utils import check_isinstance
-from quickapp import QuickApp
-from reprep.utils import natsorted
-
 from compmake.context import Context
 from compmake.jobs.actions import mark_to_remake
 from compmake.jobs.storage import get_job_cache
 from compmake.structures import Promise
+from contracts import contract
+import logging
 from mcdp import MCDPConstants, logger
 from mcdp_library import MCDPLibrary
 from mcdp_library.stdlib import get_test_librarian
 from mcdp_utils_misc import locate_files, get_md5
+import os
+import tempfile
+import time
+
+from contracts.utils import check_isinstance
+from quickapp import QuickApp
+from reprep.utils import natsorted
 
 from .github_edit_links import add_edit_links
 from .manual_constants import MCDPManualConstants
 from .manual_join_imp import manual_join
 from .minimal_doc import get_minimal_document
-from mcdp_utils_xml.parsing import bs, to_html_stripping_fragment_document
-from mcdp_docs.add_mathjax import add_mathjax_preamble
-from bs4 import BeautifulSoup
 
 
 class RenderManual(QuickApp):
@@ -168,12 +164,6 @@ def manual_jobs(context, src_dir, output_file, generate_pdf, bibfile, stylesheet
     if os.path.exists(MCDPManualConstants.pdf_metadata_template):
         context.comp(generate_metadata, src_dir)
 
-# def job_add_mathjax_preamble(document, preamble):
-#     soup =  BeautifulSoup(document, 'lxml', from_encoding='utf-8')
-# #     soup = bs(document)
-#     add_mathjax_preamble(soup.html, preamble)
-#     d2 = to_html_stripping_fragment_document(soup)
-#     return d2
     
 @contract(compmake_context=Context, promise=Promise, filenames='seq[>=1](str)')
 def erase_job_if_files_updated(compmake_context, promise, filenames):
@@ -240,14 +230,7 @@ def render_book(src_dir, docname, generate_pdf, main_file, use_mathjax, out_part
         
     load_library_hooks = [librarian.load_library]
     library = MCDPLibrary(load_library_hooks=load_library_hooks)
-    library.add_search_dir(src_dir)
-# 
-#     data = dict(path=dirname, library=l)
-#     l.library_name = library_name
-#     
-#     library = librarian.load_library(libname)
-#     
-#     l = library.load_library(libname)
+    library.add_search_dir(src_dir) 
     
     d = tempfile.mkdtemp()
     library.use_cache_dir(d)

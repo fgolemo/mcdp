@@ -164,13 +164,38 @@ h3 {
 
 /******  latex ****/
 
-div.definition::before { font-weight: bold; content: 'Definition ' counter(definition)'.';}
-div.example::before { font-weight: bold; content: 'Example ' counter(example) '.';}
-div.remark::before { font-weight: bold; content: 'Remark ' counter(remark)'.';}
-div.problem::before { font-weight: bold; content: 'Problem ' counter(problem)'.';}
-div.lemma::before { font-weight: bold; content: 'Lemma ' counter(lemma)'.';}
-div.proposition::before { font-weight: bold; content: 'Proposition ' counter(proposition)'.';}
-div.theorem::before { font-weight: bold; content: 'Theorem ' counter(theorem)'.';}
+div.definition::before {
+    font-weight: bold;
+    content: 'Definition' @nbsp attr(label-number) '.';
+}
+
+div.example::before {
+    font-weight: bold;
+    content: 'Example' @nbsp attr(label-number) '.';
+}
+div.remark::before {
+    font-weight: bold;
+    content: 'Remark' @nbsp attr(label-number) '.';
+}
+div.problem::before {
+    font-weight: bold;
+    content: 'Problem' @nbsp attr(label-number) '.';
+}
+
+div.lemma::before {
+    font-weight: bold;
+    content: 'Lemma' @nbsp attr(label-number) '.';
+}
+
+div.proposition::before {
+    font-weight: bold;
+    content: 'Proposition' @nbsp attr(label-number) '.';
+}
+
+div.theorem::before {
+    font-weight: bold;
+    content: 'Theorem' @nbsp attr(label-number) '.';
+}
 
 
 .latex_env span.latex_env_label::before {content: ' (';}
@@ -450,30 +475,6 @@ p.special-par-towrite::before {
 }
 
 
-figure:not(.subfloat) {
-    /*counter-increment: figure;*/
-    counter-reset: subfloat;
-}
-figure.subfloat {
-    counter-increment: subfloat;
-}
-
-figure[id^='fig:'] { counter-increment: figure; }
-figure.table {  counter-increment: table; }
-div.example {  counter-increment: example; }
-div.remark {  counter-increment: remark; }
-div.definition {  counter-increment: definition; }
-div.lemma {  counter-increment: lemma; }
-div.proposition {  counter-increment: proposition; }
-div.theorem {  counter-increment: theorem; }
-div.problem {  counter-increment: problem; }
-
-
-
-figure[id^='code:'] { counter-increment: listing; }
-figure[id^='code:'] figcaption:not(:empty)::before {
-    content: 'Listing ' counter(listing) '. ';
-}
 
 figure[id^='code:'] {
     display: inline-block;
@@ -492,9 +493,6 @@ figure[id^='code:'] figcaption {
 figure[id^='code:'] figcaption:not(:empty) {
     text-align: left;
     max-width: 30em;
-}
-figure[id^='code:'] figcaption:empty::before {
-    content: 'Listing ' counter(listing);
 }
 
 
@@ -798,7 +796,6 @@ h2:not([nonumber])[id^='appsub:']::before {
 }
 
 h3:not([nonumber])::before {
-    /*content: counter(section) '.' counter(subsection) '-' counter(subsubsection, upper-alpha) '. ';*/
     content: attr(label-self);
 }
 
@@ -806,43 +803,34 @@ cite::before {
     content: attr(label-self) ' ';
 }
 
-//
-//
-// cite[id^='bib:'] {
-//     counter-increment: bib;
-// }
-// cite[id^='bib:']::before {
-//     content: '[' counter(bib) '] ';
-//     font-style: normal;
-// }
-
 
 @NS: '♦';
 
-@label-tab: 'Table' @nbsp counter(table);
 @label-subfig: '(' attr(label-number) ')';
 @nbsp: '\0000a0';
 
-/*@num-eq: target-counter(attr(href), listing);
-@ref-eq: '(' @num-eq ')';
-*/
 
 @label-code: 'Listing' @nbsp attr(label-number);
-@label-fig: 'Figure' @nbsp attr(label-number);
 @not_empty_before: ~':not(:empty)::before';
 @empty_before: ~':empty::before';
 
 figure[id^='tab:'] > figcaption{
-    &@{not_empty_before} { content: @label-tab '. '; }
-    &@{empty_before}     { content: @label-tab;      }
+    &@{not_empty_before} { content: 'Table' @nbsp attr(label-number) '. '; }
+    &@{empty_before}     { content: 'Table' @nbsp attr(label-number);      }
 }
+
+figure[id^='code:'] figcaption{
+    &@{not_empty_before} { content: 'Listing' @nbsp attr(label-number) '. '; }
+    &@{empty_before}     { content: 'Listing' @nbsp attr(label-number);      }
+}
+
 
 figure[id^='fig:'] > figcaption {
     &:not(:empty)  {
         text-align: justify;
     }
-    &@{not_empty_before} { content: @label-fig '. '; }
-    &@{empty_before}     { content: @label-fig;      }
+    &@{not_empty_before} { content: 'Figure' @nbsp attr(label-number) '. '; }
+    &@{empty_before}     { content: 'Figure' @nbsp attr(label-number);      }
 }
 
 figure[id^='subfig:'] > figcaption {
@@ -941,3 +929,10 @@ pre {
 }
 
 // raspberry_pi_pcb.png
+
+
+
+p > code {
+    border: solid 1px #f1f1f1;
+    padding: 1px;
+}
