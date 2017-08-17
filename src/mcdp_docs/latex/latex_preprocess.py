@@ -12,6 +12,7 @@ from mcdp_utils_misc.string_utils import get_md5
 from mcdp_docs.latex.latex_inside_equation_abbrevs import replace_inside_equations
 from mcdp_docs.mark.markdown_transform import is_inside_markdown_quoted_block
 import warnings
+from mcdp_docs.manual_constants import MCDPManualConstants
 
 
 class LatexProcessingConstants():
@@ -103,10 +104,7 @@ def latex_process_title(s):
 def latex_process_tilde_nbsp_and_protect_fenced(s):
     group = 'TILDETILDETILDE'
     s = s.replace('~~~', group)
-    if True:
-        pass
-        warnings.warn('TODO: tilde has been disabled.')
-    else:
+    if MCDPManualConstants.activate_tilde_as_nbsp:
         s = s.replace('~', UNICODE_NBSP)
     s = s.replace(group, '~~~')
     return s
