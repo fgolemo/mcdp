@@ -1,22 +1,11 @@
 # -*- coding: utf-8 -*-
 
-# 
-#     
-# # def tag_edit_github(origin):
-# #     p = Tag(name='p')
-# #     relpath, href = get_github_url(origin)
-# #     
-# #     a = Tag(name='a')
-# #     a['href'] = href
-# #     a.append('✎ ')
-# #     a.append(stag('code', relpath))
-# # #     a.append('on Github.')
-# #     p.append(a)
-# #     p['class'] = 'edit-on-github'
-# #     return p
+ 
 import os
-from git.repo.base import Repo
 import re
+
+from git.repo.base import Repo
+
 
 def get_repo_root(d):
     ''' Returns the root of the repo root, or raise ValueError. '''
@@ -62,7 +51,7 @@ def get_repo_information(repo_root):
    
     # now github can use urls that do not end in '.git'
     if 'github' in url and not url.endswith('.git'):
-       url = url + '.git'
+        url = url + '.git'
     org, repo = org_repo_from_url(url)
     return dict(branch=branch, commit=commit, org=org, repo=repo)
 

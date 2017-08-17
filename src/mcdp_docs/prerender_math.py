@@ -17,6 +17,7 @@ __all__ = [
       
 TAG_DOLLAR = 'tag-dollar'
 which = 'code, mcdp-poset, mcdp-value, mcdp-fvalue, mcdp-rvalue, render'
+
 def escape_for_mathjax(soup):
     """ Escapes dollars in code 
      
@@ -61,12 +62,11 @@ def prerender_mathjax(s, symbols):
         m = '$$' + "\n".join(lines) +'$$\n\n'
     else:
         m = ''
-    
+
     STARTTAG = 'STARTHERE'
     ENDTAG = 'ENDHERE'
     s = STARTTAG +  get_mathjax_preamble() + ENDTAG + m + s
 
-                         
     try:
         s = prerender_mathjax_(s)
     except PrerenderError: # pragma: no cover

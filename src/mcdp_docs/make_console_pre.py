@@ -9,7 +9,7 @@ from mcdp import logger
 
 
 # What is recognized as a program name
-programs = ['sudo', 'pip', 'git', 'python', 'cd', 'apt-get',
+programs = ['sudo', 'pip', 'git', 'python', 'cd', 'apt-get', 'rosrun',
             'echo', 'sync', 'tee', 'curl',  'rm', 'df', 'ls',
             'catkin_make', 'ntpdate', 'groups', 'which',
             'what-the-duck', 'wajig', 'dpigs',
@@ -26,6 +26,7 @@ programs = ['sudo', 'pip', 'git', 'python', 'cd', 'apt-get',
             'raspistill', 'reboot', 'vim', 'vi', 'ping', 'ssh-keygen',
             'mv', 'cat', 'touch' ,'source', 'make', 'roslaunch', 'jstest',
             'shutdown', 'virtualenv', 'nodejs', 'cp', 'fc-cache', 'venv',
+            'add-apt-repository',
             'export', 'fdisk', 'rosdep'] \
             + ['|'] # pipe
             

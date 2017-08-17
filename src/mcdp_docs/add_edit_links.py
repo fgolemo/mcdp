@@ -13,20 +13,32 @@ def add_github_links_if_edit_url(soup):
     nfound = 0
     for h in soup.findAll(['h1','h2','h3','h4'], attrs={attname: True}):
         nfound += 1
+        s = Tag(name='span')
         a = Tag(name='a')
         a.attrs['href'] = h.attrs[attname]
         a.attrs['class'] = 'github-edit-link'
-        a.string = ' ✎'
-        # h.append(a)
-#         h.insert_before(a)
-        h.insert_after(a)
+        a.attrs['title'] = "Click this link to directly edit on the repository."
+        a.string = '✎' 
+        s.append(a)
         
-#         msg = 'Found element %s' % h
-#         logger.info(msg)
+        a = Tag(name='a')
+        hid = h.attrs['id']
+        if hid is not None:
+            if ':' in hid:
+                hid = hid[hid.index(':')+1:]
+            url = 'http://purl.org/dth/%s' % hid
+            a.attrs['href'] = url
+            a.string = '🔗'
+            a.attrs['class'] = 'purl-link'
+            a.attrs['title'] = "Use this link as the permanent link to share with people."
+#             s.append(Tag(name='br')) 
+            s.append(a)
+
+        s.attrs['class'] = 'github-etc-links'
+        h.insert_after(s)
     
     logger.info('Found %d elements with attribute %r' % (nfound, attname) )
-        
-        
+
 if __name__ == '__main__':
     sys.stderr.write('Loading from stdin...\n')
     

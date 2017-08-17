@@ -419,7 +419,7 @@ def substituting_empty_links(soup, raise_errors=False):
             a.attrs['href'] = new_href
             logger.info('setting new href= %s' % (new_href))
             
-        if (not LABEL_WHAT_NUMBER  in element.attrs) or \
+        if (not LABEL_WHAT_NUMBER in element.attrs) or \
                 (not LABEL_NAME in element.attrs):
             msg = ('substituting_empty_links: Could not find attributes %s or %s in %s' %
                    (LABEL_NAME, LABEL_WHAT_NUMBER, element))
@@ -501,6 +501,7 @@ def substituting_empty_links(soup, raise_errors=False):
             add_class(span1, 'reflabel')
             span1.string = label
             a.append(span1)
+            span1.attrs['comment'] = str(le)
        
     logger.debug('substituting_empty_links: %d total, %d errors' %
                  (n, nerrors))
@@ -528,16 +529,22 @@ def get_empty_links_to_fragment(soup):
 
     for element in soup.find_all('a'):
         empty = len(list(element.descendants)) == 0
+        
+#         logger.debug('get_empty_links_to_fragment link: %s %s' % (element, empty))
+        
         if not empty:
             continue
 
+        
+        
         if not 'href' in element.attrs:
             continue
+        
         href = element.attrs['href']
         if href.startswith('#'):
             rest = href[1:]
-            if '?' in rest:
-                i = rest.index('?')
+            if '/' in rest:
+                i = rest.index('/')
                 eid = rest[:i]
                 query = rest[i+1:]
             else:
