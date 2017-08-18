@@ -1605,6 +1605,7 @@ h1 + .github-etc-links {
   margin-top: -2em;
 }
 .purl-link {
+  font-family: Symbola !important;
   font-size: 5pt;
   margin: 3pt;
 }
