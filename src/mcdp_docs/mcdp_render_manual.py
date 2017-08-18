@@ -1,33 +1,36 @@
 # -*- coding: utf-8 -*-
-from compmake.context import Context
-from compmake.jobs.actions import mark_to_remake
-from compmake.jobs.storage import get_job_cache
-from compmake.structures import Promise
-from contracts import contract
 import logging
-from mcdp import MCDPConstants, logger
-from mcdp_library import MCDPLibrary
-from mcdp_library.stdlib import get_test_librarian
-from mcdp_utils_misc import locate_files, get_md5
 import os
 import tempfile
 import time
 
-from contracts.utils import check_isinstance
+from contracts import contract
+from contracts.utils import check_isinstance, raise_wrapped
 from quickapp import QuickApp
 from reprep.utils import natsorted
+
+from compmake.context import Context
+from compmake.jobs.actions import mark_to_remake
+from compmake.jobs.storage import get_job_cache
+from compmake.structures import Promise
+from mcdp.exceptions import DPSyntaxError
+from mcdp_library import MCDPLibrary
+from mcdp_library.stdlib import get_test_librarian
+from mcdp_utils_misc import locate_files, get_md5
 
 from .github_edit_links import add_edit_links
 from .manual_constants import MCDPManualConstants
 from .manual_join_imp import manual_join
 from .minimal_doc import get_minimal_document
+from mcdp import logger
 
 
 class RenderManual(QuickApp):
     """ Renders the PyMCDP manual """
 
     def define_options(self, params):
-        params.add_string('src', help='Root directory with all contents')
+        params.add_string('src', help="""
+        Directories with all contents; separate multiple entries with a colon.""")
         params.add_string('output_file', help='Output file')
         params.add_string('stylesheet', help='Stylesheet', default=None)
         params.add_int('mathjax', help='Use MathJax (requires node)', default=1)
@@ -41,7 +44,11 @@ class RenderManual(QuickApp):
         logger.setLevel(logging.DEBUG)
 
         options = self.get_options()
-        src_dir = options.src
+        src = options.src
+        src_dirs = [_ for _ in src.split(":") if _ and _.strip()]
+        
+#         src_dirs = [expand_all(_) for _ in src_dirs]
+        
         out_dir = options.output
         generate_pdf = options.pdf
         output_file = options.output_file
@@ -56,13 +63,13 @@ class RenderManual(QuickApp):
         if symbols is not None:
             symbols = open(symbols).read()
 
-        bibfile = os.path.join(src_dir, 'bibliography/bibliography.html')
+        bibfile = os.path.join(src_dirs[0], 'bibliography/bibliography.html')
 
         if out_dir is None:
             out_dir = os.path.join('out', 'mcdp_render_manual')
 
         manual_jobs(context, 
-                    src_dir=src_dir, 
+                    src_dirs=src_dirs, 
                     output_file=output_file,
                     generate_pdf=generate_pdf,
                     bibfile=bibfile,
@@ -71,73 +78,92 @@ class RenderManual(QuickApp):
                     use_mathjax=use_mathjax,
                     symbols=symbols,
                     )
+def expand_all(x0):
+    x = x0
+    x = os.path.expanduser(x)
+    x = os.path.expandvars(x)
+    if '$' in x:
+        msg = 'Cannot resolve all environment variables in %r.' % x0
+        raise ValueError(msg)
+    return x
+
+@contract(srcdirs='seq(str)')
+def get_markdown_files(srcdirs):
+    """ Returns a hash of 
+            nickname -> full path """
+    results = []
+    for d0 in srcdirs:
         
-def get_manual_contents(srcdir):
-    root = os.getcwd()
-    directory = os.path.join(root, srcdir)
-    if not os.path.exists(directory):
-        msg = 'Expected directory %s' % directory
-        raise Exception(msg)
-    pattern = '*.md'
-    filenames = locate_files(directory, pattern, followlinks=True,
-                 include_directories=False,
-                 include_files=True,
-                 normalize=False)
-    ok = []
-    for fn in filenames:
-        fn = os.path.relpath(fn, root)
-        if 'exclude' in fn:
-            logger.info('Excluding file %r because of string "exclude" in it' % fn)
-            continue
-        ok.append(fn)
-    filenames = natsorted(ok)
-    for f in filenames:
-        docname, _extension = os.path.splitext(os.path.basename(f))
-        yield 'manual', docname
+        d = expand_all(d0)
+        if not os.path.exists(d):
+            msg = 'Expected directory %s' % d
+            raise Exception(msg)
+    
+        pattern = '*.md'
+        filenames = locate_files(d, pattern, 
+                                 followlinks=True,
+                                 include_directories=False,
+                                 include_files=True,
+                                 normalize=False)
+        
+        ok = []
+        for fn in filenames:
+            fn = os.path.realpath(fn)
+#             fn = os.path.relpath(fn, root)
+            if 'exclude' in fn:
+                logger.info('Excluding file %r because of string "exclude" in it' % fn)
+            else:
+                if fn in results:
+                    logger.debug('Reached the file %s twice' % fn)
+                    pass # 
+                else:
+                    ok.append(fn)
+        results.extend(natsorted(ok))
+    
+    logger.info('Found %d files in %s' % (len(results), srcdirs))
+    return results
 
+# def make_it_simpler(fn):
+#     base = os.getcwd()
+#     fn = os.path.realpath(fn)
+#     
+# 
+# def uniq(s):
+#     output = []
+#     for x in s:
+#         if x not in output:
+#             output.append(x)
+#     return output
 
-def manual_jobs(context, src_dir, output_file, generate_pdf, bibfile, stylesheet,
+@contract(src_dirs='seq(str)')
+def manual_jobs(context, src_dirs, output_file, generate_pdf, bibfile, stylesheet,
                 use_mathjax,
                 remove=None, filter_soup=None, extra_css=None, symbols=None):
     """
+        src_dirs: list of sources
         symbols: a TeX preamble (or None)
     """
-    manual_contents = list(get_manual_contents(src_dir))
+    root_dir = src_dirs[0]
+    
+    filenames = get_markdown_files(src_dirs)
 
-    if not manual_contents:
+    if not filenames:
         msg = 'Could not find any file for composing the book.'
         raise Exception(msg)
 
-    # check that all the docnames are unique
-    pnames = [_[1] for _ in manual_contents]
-    counts = dict([(x,pnames.count(x)) for x in set(pnames)])
-    for pname, n in counts.items():
-        if n > 1:
-            msg = 'I found the same element %r a total of %d times' % (pname, n)
-            raise ValueError(msg)
-#         
-#     if len(pnames) != len(set(pnames)):
-#         msg = 'Repeated names detected: %s' % pnames
-#         raise ValueError(msg)
-
-    local_files = list(locate_files(src_dir, '*.md'))
-    basename2filename = dict( (os.path.basename(_), _) for _ in local_files)
-
     files_contents = []
-    for i, (_, docname) in enumerate(manual_contents):
-        libname = 'unused'
-        logger.info('adding document %s - %s' % (libname, docname))
-        out_part_basename = '%02d%s' % (i, docname)
+    for i, filename in enumerate(filenames):
+        logger.info('adding document %s ' % (filename))
         
-        # read the file to get hash
-        basename = '%s.md' % docname
-        fn = basename2filename[basename]
-        contents = open(fn).read()
+        docname,_ = os.path.splitext(os.path.basename(filename))
+        out_part_basename = '%03d-%s' % (i, docname)
+        
+        contents = open(filename).read()
         contents_hash = get_md5(contents)[:8] 
-        # job will be automatically erased if the source changes
-        job_id = '%s-%s' % (docname,contents_hash)
-        res = context.comp(render_book, src_dir, docname, generate_pdf,
-                           
+        # because of hash job will be automatically erased if the source changes
+        job_id = '%s-%s-%s' % (docname, get_md5(filename)[:8], contents_hash)
+        res = context.comp(render_book, root_dir, docname, generate_pdf,
+                           data=contents, realpath=filename,
                            use_mathjax=use_mathjax,
                            symbols=symbols,
                            main_file=output_file,
@@ -148,8 +174,8 @@ def manual_jobs(context, src_dir, output_file, generate_pdf, bibfile, stylesheet
                            job_id=job_id)
  
         files_contents.append(res)
-
-    fn = os.path.join(src_dir, MCDPManualConstants.main_template)
+    
+    fn = os.path.join(root_dir, MCDPManualConstants.main_template)
     if not os.path.exists(fn):
         msg = 'Could not find template %s' % fn 
         raise ValueError(msg)
@@ -162,7 +188,7 @@ def manual_jobs(context, src_dir, output_file, generate_pdf, bibfile, stylesheet
     context.comp(write, d, output_file)
 
     if os.path.exists(MCDPManualConstants.pdf_metadata_template):
-        context.comp(generate_metadata, src_dir)
+        context.comp(generate_metadata, root_dir)
 
     
 @contract(compmake_context=Context, promise=Promise, filenames='seq[>=1](str)')
@@ -221,7 +247,9 @@ def write(s, out):
     print('Written %s ' % out)
 
 
-def render_book(src_dir, docname, generate_pdf, main_file, use_mathjax, out_part_basename, filter_soup=None,
+def render_book(src_dir, docname, generate_pdf, 
+                data, realpath,
+                main_file, use_mathjax, out_part_basename, filter_soup=None,
                 extra_css=None, symbols=None):
     from mcdp_docs.pipeline import render_complete
 
@@ -235,17 +263,18 @@ def render_book(src_dir, docname, generate_pdf, main_file, use_mathjax, out_part
     d = tempfile.mkdtemp()
     library.use_cache_dir(d)
 
-    basename = docname + '.' + MCDPConstants.ext_doc_md
-    f = library._get_file_data(basename)
-    data = f['data']
-    realpath = f['realpath']
+#     basename = docname + '.' + MCDPConstants.ext_doc_md
+#     f = library._get_file_data(basename)
+#     data = f['data']
+#     realpath = f['realpath']
 
     def filter_soup0(soup, library):
         if filter_soup is not None:
             filter_soup(soup=soup, library=library)
         add_edit_links(soup, realpath)
         
-    html_contents = render_complete(library=library,
+    try:
+        html_contents = render_complete(library=library,
                                     s=data, 
                                     raise_errors=True, 
                                     realpath=realpath,
@@ -253,6 +282,9 @@ def render_book(src_dir, docname, generate_pdf, main_file, use_mathjax, out_part
                                     symbols=symbols,
                                     generate_pdf=generate_pdf,
                                     filter_soup=filter_soup0)
+    except DPSyntaxError as e:
+        msg = 'Could not compile %s' % realpath
+        raise_wrapped(DPSyntaxError, e, msg, compact=True)
 
     doc = get_minimal_document(html_contents,
                                add_markdown_css=True, extra_css=extra_css)
@@ -266,7 +298,7 @@ def render_book(src_dir, docname, generate_pdf, main_file, use_mathjax, out_part
     with open(fn, 'w') as f:
         f.write(doc)
 
-    return (('unused', docname), html_contents)
+    return (('unused', out_part_basename), html_contents)
 
     
 

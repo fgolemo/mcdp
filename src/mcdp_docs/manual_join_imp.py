@@ -42,6 +42,7 @@ def get_manual_css_frag():
     else:
         assert False
 
+from mcdp_utils_xml import bs
 
 @contract(files_contents='list( tuple( tuple(str,str), str) )', returns='str',
           remove_selectors='None|seq(str)')
@@ -57,7 +58,6 @@ def manual_join(template, files_contents, bibfile, stylesheet, remove=None, extr
     """
     logger.debug('remove_selectors: %s' % remove_selectors)
     logger.debug('remove: %s' % remove)
-    from mcdp_utils_xml import bs
 
     template0 = template
     template = replace_macros(template)
@@ -86,6 +86,9 @@ def manual_join(template, files_contents, bibfile, stylesheet, remove=None, extr
 
     basename2soup = OrderedDict()
     for (_libname, docname), data in files_contents:
+        if docname in basename2soup:
+            msg = 'Repeated docname %r' % docname
+            raise ValueError(msg)
         frag = bs(data)
         basename2soup[docname] = frag
 

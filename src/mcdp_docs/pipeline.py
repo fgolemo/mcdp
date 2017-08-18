@@ -16,7 +16,7 @@ from .macros import replace_macros
 from .make_console_pre import mark_console_pres
 from .make_figures import make_figure_from_figureid_attr
 from .prerender_math import escape_for_mathjax_back, escape_for_mathjax
-from mcdp_docs.videos import make_videos
+from .videos import make_videos
 
 
 __all__ = [
