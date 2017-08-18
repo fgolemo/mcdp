@@ -26,7 +26,7 @@ programs = ['sudo', 'pip', 'git', 'python', 'cd', 'apt-get', 'rosrun',
             'raspistill', 'reboot', 'vim', 'vi', 'ping', 'ssh-keygen',
             'mv', 'cat', 'touch' ,'source', 'make', 'roslaunch', 'jstest',
             'shutdown', 'virtualenv', 'nodejs', 'cp', 'fc-cache', 'venv',
-            'add-apt-repository',
+            'add-apt-repository', 'truncate', 'losetup',
             'export', 'fdisk', 'rosdep'] \
             + ['|'] # pipe
             
@@ -100,33 +100,26 @@ def mark_console_pres_defaults(soup):
             
         into
             xxxx <span class='placeholder'>variable</span>
-    """
-    
-#     logger.debug('Replacing things')
+    """ 
     
     for code in soup.select('code'):
         join_successive_strings(code)
+         
+        replace_template(code)
         
-#         text = project_html(code)
-#         
-#         allow = 'apt install' in text
-#         
-#         if not allow:
-#             msg = "Do not copy and paste. "
-#             msg += 'I guarantee, only trouble will come from it.'
-#             code.attrs['oncopy'] = 'alert("%s");return false;' % msg
-#             process_ns(t)
-#             
-        for t in code.children:
-            if isinstance(t, NavigableString):
-                if '![' in t:
+def replace_template(element):
+    for t in element.children:
+        if isinstance(t, NavigableString):
+            if '![' in t:
+                
+                if False:
                     msg = "Do not copy and paste. "
                     msg += 'I guarantee, only trouble will come from it.'
-        
-                    if False:
-                        code.attrs['oncopy'] = 'alert("%s");return false;' % msg
-                        
+                    element.attrs['oncopy'] = 'alert("%s");return false;' % msg
+                    
                 process_ns(t)
+        else:
+            replace_template(t)
                 
 def join_successive_strings(e):
     """ Joins successive strings in a BS4 element """
@@ -246,10 +239,11 @@ def mark_console_pres_highlight(soup):
                     code.append(e)
                 else:
                     code.append(NavigableString(token))
-                    
+
                 is_last = i == len(tokens) - 1
                 if not is_last:
-                    if not '![' in line:
+                    before = '![' in ' '.join(tokens[:i+1])
+                    if not before:
                         # XXX: this is a bug
                         space = Tag(name='span')
                         space.append(' ')

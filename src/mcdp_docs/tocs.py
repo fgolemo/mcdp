@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
 
 from collections import namedtuple
-
-from bs4.element import Comment, Tag, NavigableString
-
-from contracts.utils import indent
 from mcdp.logs import logger
 from mcdp_docs.manual_constants import MCDPManualConstants
 from mcdp_docs.toc_number import render_number, number_styles
 from mcdp_utils_xml import add_class, note_error_msg, bs
+
+from bs4.element import Comment, Tag, NavigableString
+from contracts.utils import indent
 
 
 figure_prefixes = ['fig', 'tab', 'subfig', 'code']
@@ -218,8 +217,6 @@ class Item(object):
         if not root:
             s += (u"""<a class="toc_link toc_link-depth-%s number_name toc_a_for_%s" href="#%s"></a>""" %
                   (self.depth, self.header_level, self.id))
-            
-#             logger.info(str(bs(s)))
 
         if max_levels and self.items:
             s += '<ul class="toc_ul-depth-%s toc_ul_for_%s">' % (
@@ -230,9 +227,7 @@ class Item(object):
                 s += ('\n  <li class="toc_li-depth-%s toc_li_for_%s">\n%s\n  </li>' %
                       (self.depth, self.header_level, sitem))
             s += '\n</ul>'
-#             
-#         # hack
-#         s = s.replace('✎', '')
+
         return s
 
     def depth_first_descendants(self):

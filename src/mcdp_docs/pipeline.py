@@ -16,6 +16,7 @@ from .macros import replace_macros
 from .make_console_pre import mark_console_pres
 from .make_figures import make_figure_from_figureid_attr
 from .prerender_math import escape_for_mathjax_back, escape_for_mathjax
+from mcdp_docs.videos import make_videos
 
 
 __all__ = [
@@ -156,7 +157,8 @@ def render_complete(library, s, raise_errors, realpath, generate_pdf=False,
     
     embed_images_from_library2(soup=soup, library=library, 
                               raise_errors=raise_missing_image_errors)
-        
+    make_videos(soup=soup)
+    
     if check_refs:    
         check_if_any_href_is_invalid(soup)
             

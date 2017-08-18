@@ -1,3 +1,40 @@
+.only-webpage {
+    outline: solid 0.5px red;
+    ::before {
+        content: "webpage";
+    }
+}
+
+.only-ebook {
+    outline: solid 0.5px green;
+    ::before {
+        content: "ebook";
+    }
+}
+
+.only-deadtree {
+    outline: solid 0.5px blue;
+    ::before {
+        content: "deadtree";
+    }
+}
+
+// do not display deadtree at all
+.only-deadtree {
+    display: none;
+}
+@media screen {
+    .only-ebook {
+        display:none;
+    }
+}
+@media print {
+    .only-webpage {
+        display:none;
+    }
+}
+
+
 #version-@{stylesheet} {
     border: solid 1px red;
 }
@@ -11,6 +48,7 @@ body > p:first-of-type::before {
 @import 'reset-fix';
 @import 'colors';
 @import 'captions';
+@import 'vimeo';
 // TODO: re-add in MCDP
 // @import 'mcdp_keywords_in_headers';
 
@@ -87,7 +125,8 @@ code { page-break-inside: avoid; }
 
 
 
-pre code, p code, td code {
+pre code, p code, td code,
+ul:not(.toc) code {
     font-size: 8pt;
 }
 

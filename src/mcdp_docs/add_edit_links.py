@@ -6,7 +6,6 @@ from bs4.element import Tag
 
 from .logs import logger
 
-
 def add_github_links_if_edit_url(soup):
     """ If an element has an attribute 'github-edit-url' then add little icons """
     attname = 'github-edit-url'

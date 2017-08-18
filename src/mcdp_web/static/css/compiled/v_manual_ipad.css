@@ -28,7 +28,38 @@
 
 
 
-*/#version-v_manual_ipad {
+*/.only-webpage {
+  outline: solid 0.5px red;
+}
+.only-webpage ::before {
+  content: "webpage";
+}
+.only-ebook {
+  outline: solid 0.5px green;
+}
+.only-ebook ::before {
+  content: "ebook";
+}
+.only-deadtree {
+  outline: solid 0.5px blue;
+}
+.only-deadtree ::before {
+  content: "deadtree";
+}
+.only-deadtree {
+  display: none;
+}
+@media screen {
+  .only-ebook {
+    display: none;
+  }
+}
+@media print {
+  .only-webpage {
+    display: none;
+  }
+}
+#version-v_manual_ipad {
   border: solid 1px red;
 }
 body > p:first-of-type::before {
@@ -252,6 +283,14 @@ span.placeholder {
   div.caption-right figure > .figcontent {
     display: table-cell;
   }
+}
+img.video-vimeo-thumbnail-ebook,
+img.video-vimeo-thumbnail-deadtree {
+  width: 15em;
+}
+img.video-vimeo-thumbnail-ebook,
+img.video-vimeo-thumbnail-deadtree {
+  max-width: 20em;
 }
 .chapter_toc {
   display: none;
@@ -921,7 +960,8 @@ code {
 }
 pre code,
 p code,
-td code {
+td code,
+ul:not(.toc) code {
   font-size: 8pt;
 }
 body {

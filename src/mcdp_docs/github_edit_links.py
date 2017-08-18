@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 
- 
-import os
-import re
+import os, re
 
 from git.repo.base import Repo
 
@@ -43,6 +41,7 @@ def add_edit_links(soup, filename):
         h.attrs['github-edit-url'] = edit_url
         h.attrs['github-blob-url'] = blob_url
 
+
 def get_repo_information(repo_root):
     gitrepo = Repo(repo_root)
     branch = gitrepo.active_branch
@@ -54,6 +53,7 @@ def get_repo_information(repo_root):
         url = url + '.git'
     org, repo = org_repo_from_url(url)
     return dict(branch=branch, commit=commit, org=org, repo=repo)
+
 
 def org_repo_from_url(url):
     # 'git@host:<org>/<repo>.git'
