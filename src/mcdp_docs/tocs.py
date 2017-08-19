@@ -516,7 +516,7 @@ def get_empty_links_to_fragment(soup):
     logger.debug('building index')
     # first find all elements by id
     id2element = {}
-    for x in soup.descendants:
+    for x in list(soup.descendants):
         if isinstance(x, Tag) and 'id' in x.attrs:
             id2element[x.attrs['id']] = x
 

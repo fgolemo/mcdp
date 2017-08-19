@@ -2,27 +2,24 @@
 import logging
 import os
 import tempfile
-import time
 
 from contracts import contract
-from contracts.utils import check_isinstance, raise_wrapped
+from contracts.utils import raise_wrapped
 from quickapp import QuickApp
 from reprep.utils import natsorted
 
-from compmake.context import Context
-from compmake.jobs.actions import mark_to_remake
-from compmake.jobs.storage import get_job_cache
-from compmake.structures import Promise
+from mcdp import logger
 from mcdp.exceptions import DPSyntaxError
 from mcdp_library import MCDPLibrary
 from mcdp_library.stdlib import get_test_librarian
 from mcdp_utils_misc import locate_files, get_md5
+from mcdp_utils_misc import expand_all
 
 from .github_edit_links import add_edit_links
 from .manual_constants import MCDPManualConstants
 from .manual_join_imp import manual_join
 from .minimal_doc import get_minimal_document
-from mcdp import logger
+from .read_bibtex import run_bibtex2html
 
 
 class RenderManual(QuickApp):
@@ -78,28 +75,30 @@ class RenderManual(QuickApp):
                     use_mathjax=use_mathjax,
                     symbols=symbols,
                     )
-def expand_all(x0):
-    x = x0
-    x = os.path.expanduser(x)
-    x = os.path.expandvars(x)
-    if '$' in x:
-        msg = 'Cannot resolve all environment variables in %r.' % x0
-        raise ValueError(msg)
-    return x
 
-@contract(srcdirs='seq(str)')
-def get_markdown_files(srcdirs):
-    """ Returns a hash of 
-            nickname -> full path """
+
+
+@contract(src_dirs='seq(str)', returns='list(str)')
+def get_bib_files(src_dirs):
+    """ Looks for .bib files in the source dirs; returns list of filenames """
+    return look_for_files(src_dirs, "*.bib")
+
+@contract(src_dirs='seq(str)', returns='list(str)')
+def get_markdown_files(src_dirs):
+    """ Returns a list of filenames. """
+    return look_for_files(src_dirs, "*.md")
+
+def look_for_files(srcdirs, pattern):
+    """
+        Excludes files with "excludes" in the name.
+    """
     results = []
-    for d0 in srcdirs:
-        
+    for d0 in srcdirs:  
         d = expand_all(d0)
         if not os.path.exists(d):
             msg = 'Expected directory %s' % d
             raise Exception(msg)
     
-        pattern = '*.md'
         filenames = locate_files(d, pattern, 
                                  followlinks=True,
                                  include_directories=False,
@@ -123,17 +122,7 @@ def get_markdown_files(srcdirs):
     logger.info('Found %d files in %s' % (len(results), srcdirs))
     return results
 
-# def make_it_simpler(fn):
-#     base = os.getcwd()
-#     fn = os.path.realpath(fn)
-#     
-# 
-# def uniq(s):
-#     output = []
-#     for x in s:
-#         if x not in output:
-#             output.append(x)
-#     return output
+    
 
 @contract(src_dirs='seq(str)')
 def manual_jobs(context, src_dirs, output_file, generate_pdf, bibfile, stylesheet,
@@ -175,50 +164,70 @@ def manual_jobs(context, src_dirs, output_file, generate_pdf, bibfile, styleshee
  
         files_contents.append(res)
     
-    fn = os.path.join(root_dir, MCDPManualConstants.main_template)
-    if not os.path.exists(fn):
-        msg = 'Could not find template %s' % fn 
-        raise ValueError(msg)
+    bib_files = get_bib_files(src_dirs)
+    logger.debug('Found bib files:\n%s' % "\n".join(bib_files))
+    if bib_files:
+        bib_contents = job_bib_contents(context, bib_files)
+        entry  = ('unused', 'bibtex'), bib_contents 
+        files_contents.append(entry)
     
-    template = open(fn).read()
-    
+    template = get_main_template(root_dir)
+   
     d = context.comp(manual_join, template=template, files_contents=files_contents, 
-                     bibfile=bibfile, stylesheet=stylesheet, remove=remove)
+                     stylesheet=stylesheet, remove=remove)
     
     context.comp(write, d, output_file)
 
     if os.path.exists(MCDPManualConstants.pdf_metadata_template):
         context.comp(generate_metadata, root_dir)
 
+def job_bib_contents(context, bib_files):
+    bib_files = natsorted(bib_files)
+    # read all contents
+    contents = ""
+    for fn in bib_files:
+        contents += open(fn).read() + '\n\n'
+    h = get_md5(contents)[:8]
+    job_id = 'bibliography-' + h
+    return context.comp(run_bibtex2html, contents, job_id=job_id)
+
+def get_main_template(root_dir):
+    fn = os.path.join(root_dir, MCDPManualConstants.main_template)
+    if not os.path.exists(fn):
+        msg = 'Could not find template %s' % fn 
+        raise ValueError(msg)
     
-@contract(compmake_context=Context, promise=Promise, filenames='seq[>=1](str)')
-def erase_job_if_files_updated(compmake_context, promise, filenames):
-    """ Invalidates the job if the filename is newer """
-    check_isinstance(promise, Promise)
-    check_isinstance(filenames, (list, tuple))
+    template = open(fn).read()
+    return template
 
-    def friendly_age(ts):
-        age = time.time() - ts
-        return '%.3fs ago' % age
-
-    filenames = list(filenames)
-    for _ in filenames:
-        if not os.path.exists(_):
-            msg = 'File does not exist: %s' % _
-            raise ValueError(msg)
-    last_update = max(os.path.getmtime(_) for _ in filenames)
-    db = compmake_context.get_compmake_db()
-    job_id = promise.job_id
-    cache = get_job_cache(job_id, db)
-    if cache.state == cache.DONE:
-        done_at = cache.timestamp
-        if done_at < last_update:
-            show_filenames = filenames if len(filenames) < 3 else '(too long to show)' 
-            logger.info('Cleaning job %r because files updated %s' % (job_id, show_filenames))
-            logger.info('  files last updated: %s' % friendly_age(last_update))
-            logger.info('       job last done: %s' % friendly_age(done_at))
-
-            mark_to_remake(job_id, db)
+# @contract(compmake_context=Context, promise=Promise, filenames='seq[>=1](str)')
+# def erase_job_if_files_updated(compmake_context, promise, filenames):
+#     """ Invalidates the job if the filename is newer """
+#     check_isinstance(promise, Promise)
+#     check_isinstance(filenames, (list, tuple))
+# 
+#     def friendly_age(ts):
+#         age = time.time() - ts
+#         return '%.3fs ago' % age
+# 
+#     filenames = list(filenames)
+#     for _ in filenames:
+#         if not os.path.exists(_):
+#             msg = 'File does not exist: %s' % _
+#             raise ValueError(msg)
+#     last_update = max(os.path.getmtime(_) for _ in filenames)
+#     db = compmake_context.get_compmake_db()
+#     job_id = promise.job_id
+#     cache = get_job_cache(job_id, db)
+#     if cache.state == cache.DONE:
+#         done_at = cache.timestamp
+#         if done_at < last_update:
+#             show_filenames = filenames if len(filenames) < 3 else '(too long to show)' 
+#             logger.info('Cleaning job %r because files updated %s' % (job_id, show_filenames))
+#             logger.info('  files last updated: %s' % friendly_age(last_update))
+#             logger.info('       job last done: %s' % friendly_age(done_at))
+# 
+#             mark_to_remake(job_id, db)
 
 def generate_metadata(src_dir):
     template = MCDPManualConstants.pdf_metadata_template

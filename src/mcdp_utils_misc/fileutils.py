@@ -28,14 +28,21 @@ def create_tmpdir(prefix='tmpdir'):
     return d
 
 @contextmanager
-def tmpdir(prefix='tmpdir', erase=True):
-    ''' Yields a temporary dir that shall be deleted later. '''
+def tmpdir(prefix='tmpdir', erase=True, keep_on_exception=False):
+    ''' Yields a temporary dir that shall be deleted later.
+    
+        If keep_on_exception is True, does not erase.
+        This is helpful for debugging problems.
+     '''
     d = create_tmpdir(prefix)
     try:
         yield d
-    finally:
-        if erase:
+    except:
+        if erase and (not keep_on_exception):
             shutil.rmtree(d)
+        raise
+    if erase:
+        shutil.rmtree(d)
 
 @contextmanager
 def tmpfile(suffix):
@@ -49,4 +56,3 @@ def read_file_encoded_as_utf8(filename):
     u = codecs.open(filename, encoding='utf-8').read()
     s = u.encode('utf-8')
     return s
-

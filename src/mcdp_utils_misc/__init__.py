@@ -15,3 +15,5 @@ from .safe_pickling import *
 from .safe_write import *
 from .good_identifiers import *
 from .my_yaml import *
+
+from .path_utils import * 

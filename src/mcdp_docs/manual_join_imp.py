@@ -1,25 +1,26 @@
 # -*- coding: utf-8 -*-
 #!/usr/bin/env python
 from collections import OrderedDict
+import json
 import os
 import sys
 import warnings
 
 from bs4 import BeautifulSoup
 from bs4.element import Comment, Tag, NavigableString
-
 from contracts import contract
 from contracts.utils import raise_desc
+
 from mcdp.logs import logger
 from mcdp_utils_xml import add_class
+from mcdp_utils_xml import bs
 
 from .footnote_javascript import add_footnote_polyfill
 from .macros import replace_macros
 from .minimal_doc import add_extra_css
-from .read_bibtex import extract_bibtex_blocks, get_bibliography
+from .read_bibtex import extract_bibtex_blocks
 from .tocs import generate_toc, substituting_empty_links, LABEL_WHAT_NUMBER,\
     LABEL_WHAT_NUMBER_NAME, LABEL_WHAT, LABEL_NUMBER, LABEL_NAME, LABEL_SELF
-import json
 
 
 def get_manual_css_frag():
@@ -42,11 +43,11 @@ def get_manual_css_frag():
     else:
         assert False
 
-from mcdp_utils_xml import bs
 
 @contract(files_contents='list( tuple( tuple(str,str), str) )', returns='str',
           remove_selectors='None|seq(str)')
-def manual_join(template, files_contents, bibfile, stylesheet, remove=None, extra_css=None,
+def manual_join(template, files_contents, 
+                stylesheet, remove=None, extra_css=None,
                 remove_selectors=None,
                 hook_before_toc=None):
     """
@@ -114,13 +115,13 @@ def manual_join(template, files_contents, bibfile, stylesheet, remove=None, extr
 
     extract_bibtex_blocks(d)
     logger.info('external bib')
-    if bibfile is not None:
-        if not os.path.exists(bibfile):
-            logger.error('Cannot find bib file %s' % bibfile)
-        else:
-            bibliography_entries = get_bibliography(bibfile)
-            bibliography_entries['id'] = 'bibliography_entries'
-            body.append(bibliography_entries)
+#     if bibfile is not None:
+#         if not os.path.exists(bibfile):
+#             logger.error('Cannot find bib file %s' % bibfile)
+#         else:
+#             bibliography_entries = get_bibliography(bibfile)
+#             bibliography_entries['id'] = 'bibliography_entries'
+#             body.append(bibliography_entries)
 
     bibhere = d.find('div', id='put-bibliography-here')
     if bibhere is None:
@@ -574,7 +575,7 @@ def update_refs(filename2contents, id2filename):
                         add_class(p, 'link-same-file-direct-parent')
                         
                         # now find all the lis
-                        for x in p.descendants:
+                        for x in list(p.descendants):
                             if isinstance(x, Tag) and x.name == 'li':
                                 add_class(x, 'link-same-file-inside')
                      
