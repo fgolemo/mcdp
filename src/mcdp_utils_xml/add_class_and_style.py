@@ -45,11 +45,9 @@ def add_class(e, c):
         cc = c
     else:
         raise ValueError(c.__repr__())
-    cur = e.attrs.get('class', [])
-    if isinstance(cur, str):
-        cur = [_ for _ in cur.split() if _] # remove None
-    
+    cur = list(get_classes(e))
     check_isinstance(cur, list)
+    
     if isinstance(c, str):
         if c in cur:
             return
@@ -58,4 +56,28 @@ def add_class(e, c):
     # check not None
     for classname in e.attrs['class']:
         assert classname is not None
+
+@contract(returns='tuple(str)')
+def get_classes(e):
+    if not 'class' in e.attrs:
+        return ()
+    c = e.attrs['class']
+    if isinstance(c, (str, unicode)):
+        if ' ' in c:
+            return tuple([str(_) for _ in c.split() if _])
+        else:
+            return (str(c),)
+    elif isinstance(c, list):
+        return tuple(c)
+    else: 
+        assert False, (c, str(e))
+    
+        
+def has_class(e, cname):
+    return cname in get_classes(e)
+    
+    
+    
+    
+    
     

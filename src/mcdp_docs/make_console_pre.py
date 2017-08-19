@@ -7,6 +7,7 @@ from comptests.registrar import comptest, run_module_tests
 from contracts import contract
 from mcdp import logger 
 from mcdp_utils_xml.parsing import bs
+from mcdp_utils_xml.add_class_and_style import has_class
 
 
 # What is recognized as a program name
@@ -27,7 +28,7 @@ programs = ['sudo', 'pip', 'git', 'python', 'cd', 'apt-get', 'rosrun',
             'raspistill', 'reboot', 'vim', 'vi', 'ping', 'ssh-keygen',
             'mv', 'cat', 'touch' ,'source', 'make', 'roslaunch', 'jstest',
             'shutdown', 'virtualenv', 'nodejs', 'cp', 'fc-cache', 'venv',
-            'add-apt-repository', 'truncate', 'losetup',
+            'add-apt-repository', 'truncate', 'losetup','gparted',
             'export', 'fdisk', 'rosdep', 'rosrun', 'rosparam', 'rospack', 'rostest'] \
             + ['|'] # pipe
             
@@ -105,13 +106,11 @@ def link_to_command_explanation(soup):
             pre.console span.program
         
         and creates a link to the section.
-    """
-#     selected = list(soup.select('pre.console span.program')) 
-#     selected = list(soup.select('pre.console span.program'))
-    selected = list(soup.select('span.program'))
+    """ 
+    
     for s in soup.select('span'):
-        if 'class' in s.attrs and 'program' in s.attrs['class']:
-            logger.debug('found command: %s' % s)
+        if has_class(s, 'program'):
+#             logger.debug('found command: %s' % s)
             program_name = list(s.children)[0]
             a = Tag(name='a')
             a.attrs['href'] = '#' + program_name
