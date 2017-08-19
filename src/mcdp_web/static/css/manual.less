@@ -1,35 +1,37 @@
-.only-webpage {
-    outline: solid 0.5px red;
-    ::before {
-        content: "webpage";
-    }
-}
-
-.only-ebook {
-    outline: solid 0.5px green;
-    ::before {
-        content: "ebook";
-    }
-}
-
-.only-deadtree {
-    outline: solid 0.5px blue;
-    ::before {
-        content: "deadtree";
-    }
-}
+// .only-web  {
+//     outline: solid 0.5px red;
+//     ::before {
+//         content: "webpage";
+//     }
+// }
+//
+// .only-ebook {
+//     outline: solid 0.5px green;
+//     ::before {
+//         content: "ebook";
+//     }
+// }
+//
+// .only-deadtree {
+//     outline: solid 0.5px blue;
+//     ::before {
+//         content: "deadtree";
+//     }
+// }
 
 // do not display deadtree at all
 .only-deadtree {
     display: none;
 }
+
 @media screen {
     .only-ebook {
         display:none;
     }
 }
+
 @media print {
-    .only-webpage {
+    .only-web {
         display:none;
     }
 }
@@ -78,7 +80,6 @@ p, div.latex_env, div.minipage, li, table {
 p {
     margin-bottom: 3pt;
     margin-top: 3pt;
-
 }
 figcaption {
     line-height: @line-height;
