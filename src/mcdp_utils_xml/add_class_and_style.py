@@ -57,7 +57,7 @@ def add_class(e, c):
     for classname in e.attrs['class']:
         assert classname is not None
 
-@contract(returns='tuple(str)')
+@contract(returns='seq(str)')
 def get_classes(e):
     if not 'class' in e.attrs:
         return ()
