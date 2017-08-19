@@ -5,7 +5,8 @@ from bs4.element import NavigableString, Tag
 
 from comptests.registrar import comptest, run_module_tests
 from contracts import contract
-from mcdp import logger
+from mcdp import logger 
+from mcdp_utils_xml.parsing import bs
 
 
 # What is recognized as a program name
@@ -27,7 +28,7 @@ programs = ['sudo', 'pip', 'git', 'python', 'cd', 'apt-get', 'rosrun',
             'mv', 'cat', 'touch' ,'source', 'make', 'roslaunch', 'jstest',
             'shutdown', 'virtualenv', 'nodejs', 'cp', 'fc-cache', 'venv',
             'add-apt-repository', 'truncate', 'losetup',
-            'export', 'fdisk', 'rosdep'] \
+            'export', 'fdisk', 'rosdep', 'rosrun', 'rosparam', 'rospack', 'rostest'] \
             + ['|'] # pipe
             
 # program_commands = ['install', 'develop', 'clone', 'config']
@@ -90,7 +91,98 @@ def is_console_line_test():
 def mark_console_pres(soup):  
     mark_console_pres_highlight(soup)
     mark_console_pres_defaults(soup)
+    link_to_command_explanation(soup)
     
+#     if 'program' in str(soup):
+#         if not '<a ' in str(soup):
+#             print str(soup)
+#             raise Exception(str(soup))
+    
+def link_to_command_explanation(soup):
+    """
+        Looks for 
+        
+            pre.console span.program
+        
+        and creates a link to the section.
+    """
+#     selected = list(soup.select('pre.console span.program')) 
+#     selected = list(soup.select('pre.console span.program'))
+    selected = list(soup.select('span.program'))
+    for s in soup.select('span'):
+        if 'class' in s.attrs and 'program' in s.attrs['class']:
+            logger.debug('found command: %s' % s)
+            program_name = list(s.children)[0]
+            a = Tag(name='a')
+            a.attrs['href'] = '#' + program_name
+            a.append(s.__copy__())
+            s.replace_with(a)
+        
+@comptest
+def link_to_command_explanation_check1():
+    s = """
+<pre class='console'>
+<span class='program'>ls</span> file
+</pre>
+    """
+    soup = bs(s)
+    link_to_command_explanation(soup)
+    s2 = str(soup)
+    # print s2
+    assert '<a href="#ls"' in s2
+
+@comptest
+def link_to_command_explanation_check2():
+    s = """
+    <pre class="console"><code><span class="console_sign">$</span><span class="space"> </span><span class="curl program">curl</span><span class="space"> </span><span class="program_option">-o</span><span class="space"> </span>duckiebot-RPI3-AC-aug10.img.xz<span class="space"> </span><span class="placeholder">URL above</span>
+</code></pre>"""
+
+    soup = bs(s)
+    link_to_command_explanation(soup)
+    s2 = str(soup)
+    print s2
+    assert '<a href="#curl"' in s2
+    
+@comptest
+def link_to_command_explanation_check3():
+    s = """
+ <fragment><div style="display:none">Because of mathjax bug</div>
+<h1 id="networking">Networking tools</h1>
+<div class="special-par-assigned-wrap"><p class="special-par-assigned">Andrea</p></div>
+<div class="requirements">
+<p>Preliminary reading:</p>
+<ul>
+<li>
+<p>Basics of networking, including</p>
+<ul>
+<li>what are IP addresses</li>
+<li>what are subnets</li>
+<li>how DNS works</li>
+<li>how <code>.local</code> names work</li>
+<li>…</li>
+</ul>
+ </li>
+</ul>
+<div class="special-par-see-wrap"><p class="status-XXX special-par-see"> (ref to find).</p></div>
+</div>
+<div class="todo-wrap"><p class="todo">to write</p></div>
+<p>Make sure that you know:</p>
+<h2 id="visualizing-information-about-the-network">Visualizing information about the network</h2>
+<h3 id="ping-are-you-there"><code>ping</code>: are you there?</h3>
+<div class="todo-wrap"><p class="todo">to write</p></div>
+<h3 id="ifconfig"><code>ifconfig</code></h3>
+<div class="todo-wrap"><p class="todo">to write</p></div>
+<pre class="console"><code><span class="console_sign">$</span><span class="space"> </span><span class="ifconfig program">ifconfig</span>
+</code></pre></fragment>
+
+"""
+    soup = bs(s)
+    link_to_command_explanation(soup)
+    s2 = str(soup)
+    print s2
+    assert '<a href="#ifconfig"' in s2
+    
+
 def mark_console_pres_defaults(soup):
     """
         Looks in "pre code" or "p code" blocks 

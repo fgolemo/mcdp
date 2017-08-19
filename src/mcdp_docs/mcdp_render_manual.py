@@ -145,11 +145,11 @@ def manual_jobs(context, src_dirs, output_file, generate_pdf, bibfile, styleshee
         logger.info('adding document %s ' % (filename))
         
         docname,_ = os.path.splitext(os.path.basename(filename))
-        out_part_basename = '%03d-%s' % (i, docname)
         
         contents = open(filename).read()
         contents_hash = get_md5(contents)[:8] 
         # because of hash job will be automatically erased if the source changes
+        out_part_basename = '%03d-%s-%s' % (i, docname, contents_hash)
         job_id = '%s-%s-%s' % (docname, get_md5(filename)[:8], contents_hash)
         res = context.comp(render_book, root_dir, docname, generate_pdf,
                            data=contents, realpath=filename,

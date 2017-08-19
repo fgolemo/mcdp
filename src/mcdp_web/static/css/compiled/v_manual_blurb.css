@@ -1125,7 +1125,7 @@ p.special-par-see::before {
   margin-right: 0.5em;
 }
 p.special-par-see {
-  text-align: right;
+  padding-left: 5em;
   margin-bottom: 1em;
   margin-top: 0.5em;
 }
@@ -2025,7 +2025,7 @@ h1::after {
   }
   /** add space for h1, in place of page breaks **/
   h1:not(#booktitle) {
-    margin-top: 4em;
+    margin-top: 1.5em;
   }
 }
 /*
