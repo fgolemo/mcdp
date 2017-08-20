@@ -46,7 +46,7 @@ def is_console_line(line):
         hostname # command args
     """
     def is_console_token(x):
-        return x in ['#', '$', 'DOLLAR']
+        return x in ['$', 'DOLLAR']
     
     tokens = line.strip().split(' ')
     if not tokens: 

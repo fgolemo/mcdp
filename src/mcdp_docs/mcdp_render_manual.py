@@ -151,13 +151,20 @@ def manual_jobs(context, src_dirs, output_file, generate_pdf, bibfile, styleshee
         # because of hash job will be automatically erased if the source changes
         out_part_basename = '%03d-%s-%s' % (i, docname, contents_hash)
         job_id = '%s-%s-%s' % (docname, get_md5(filename)[:8], contents_hash)
-        res = context.comp(render_book, root_dir, docname, generate_pdf,
+        
+        # find the dir
+        for d in src_dirs:
+            if os.path.realpath(d) in filename:
+                break
+        else:
+            msg = 'Could not find dir for %s in %s' % (filename, src_dirs)
+            
+        res = context.comp(render_book, d, docname, generate_pdf,
                            data=contents, realpath=filename,
                            use_mathjax=use_mathjax,
                            symbols=symbols,
                            main_file=output_file,
                            out_part_basename=out_part_basename,
-                           
                            filter_soup=filter_soup, 
                            extra_css=extra_css,
                            job_id=job_id)

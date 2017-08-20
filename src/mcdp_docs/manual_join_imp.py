@@ -21,6 +21,7 @@ from .minimal_doc import add_extra_css
 from .read_bibtex import extract_bibtex_blocks
 from .tocs import generate_toc, substituting_empty_links, LABEL_WHAT_NUMBER,\
     LABEL_WHAT_NUMBER_NAME, LABEL_WHAT, LABEL_NUMBER, LABEL_NAME, LABEL_SELF
+from mcdp_docs.moving_copying_deleting import move_things_around
 
 
 def get_manual_css_frag():
@@ -175,6 +176,8 @@ def manual_join(template, files_contents,
         with open('parts-removed.html', 'w') as f:
             f.write(all_removed)
 
+    move_things_around(soup=d)
+    
     if hook_before_toc is not None:
         hook_before_toc(soup=d)
     ###
