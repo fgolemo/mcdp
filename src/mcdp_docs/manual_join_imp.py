@@ -458,7 +458,7 @@ def split_in_files(body, levels=['sec', 'part']):
 
     # now find all the sections in order
     sections = []
-#     sections.append(body)
+
     for section in body.select('section.with-header-inside'):
         level = section.attrs['level']
         if level in levels:
@@ -481,14 +481,23 @@ def split_in_files(body, levels=['sec', 'part']):
 
         id_ = section.attrs['id']
         id_sanitized = id_.replace(':', '_').replace('-','_').replace('_section','')
+        
 #         filename = '%03d_%s.html' % (i, id_sanitized)
         filename = '%s.html' % (id_sanitized)
+        
+        if filename in filenames:
+            for i in xrange(1000):
+                filename = '%s-%d.html' % (id_sanitized, i)
+                if not filename in filenames:
+                    break
 
+        assert not filename in filenames
         filenames.append(filename)
 
     f0 = OrderedDict()
     for filename, section in reversed(zip(filenames, sections)):
         section.extract()
+        assert not filename in f0
         f0[filename] = section
 
     for k, v in reversed(f0.items()):
@@ -555,50 +564,53 @@ def get_id2filename(filename2contents):
 def update_refs(filename2contents, id2filename):
     
     for filename, contents in filename2contents.items():
-        test_href = lambda x: x is not None and x.startswith('#') 
-        for a in contents.findAll(href=test_href):
-            href = a.attrs['href']
-            assert href[0] == '#'
-            id_ = href[1:] # Todo, parse out "?"
-            if id_ in id2filename:
-                point_to_filename = id2filename[id_]
-                if point_to_filename != filename:
-                    new_href = '%s#%s' % (point_to_filename, id_)
-                    a.attrs['href'] = new_href
-                    add_class(a, 'link-different-file')
-                else:
-                    # actually it doesn't change
-                    new_href = '#%s' % (id_)
-                    a.attrs['href'] = new_href
-                    add_class(a, 'link-same-file')
-                    
-                    if 'toc_link' in a.attrs['class']:
-                        p = a.parent
-                        assert p.name == 'li'
-                        add_class(p, 'link-same-file-direct-parent')
-                        
-                        # now find all the lis
-                        for x in list(p.descendants):
-                            if isinstance(x, Tag) and x.name == 'li':
-                                add_class(x, 'link-same-file-inside')
-                     
-                    p = a.parent
-                    while p:
-                        if isinstance(p, Tag) and p.name in ['ul', 'li']:
-                            add_class(p, 'contains-link-same-file')
-                        p = p.parent
+        update_refs(filename, contents, id2filename)
+        
+def update_refs_(filename, contents, id2filename):
+    test_href = lambda x: x is not None and x.startswith('#') 
+    for a in contents.findAll(href=test_href):
+        href = a.attrs['href']
+        assert href[0] == '#'
+        id_ = href[1:] # Todo, parse out "?"
+        if id_ in id2filename:
+            point_to_filename = id2filename[id_]
+            if point_to_filename != filename:
+                new_href = '%s#%s' % (point_to_filename, id_)
+                a.attrs['href'] = new_href
+                add_class(a, 'link-different-file')
             else:
-                logger.error('no element with ID %s' % id_)
+                # actually it doesn't change
+                new_href = '#%s' % (id_)
+                a.attrs['href'] = new_href
+                add_class(a, 'link-same-file')
+                
+                if 'toc_link' in a.attrs['class']:
+                    p = a.parent
+                    assert p.name == 'li'
+                    add_class(p, 'link-same-file-direct-parent')
+                    
+                    # now find all the lis
+                    for x in list(p.descendants):
+                        if isinstance(x, Tag) and x.name == 'li':
+                            add_class(x, 'link-same-file-inside')
+                 
+                p = a.parent
+                while p:
+                    if isinstance(p, Tag) and p.name in ['ul', 'li']:
+                        add_class(p, 'contains-link-same-file')
+                    p = p.parent
+        else:
+            logger.error('update_ref() for %r: no element with ID %s' % (filename, id_))
      
 
-def write_split_files(filename2contents, d):
-    if not os.path.exists(d):
-        os.makedirs(d)
-    for filename, contents in filename2contents.items():
-        fn = os.path.join(d, filename)
-        with open(fn, 'w') as f:
-            f.write(str(contents))
-        logger.info('written section to %s' % fn)
+# def write_split_files(filename2contents, d):
+#     if not os.path.exists(d):
+#         os.makedirs(d)
+#     for filename, contents in filename2contents.items():
+#         fn = os.path.join(d, filename)
+#         with open(fn, 'w') as f:
+#             f.write(str(contents))
+#         logger.info('written section to %s' % fn)
 
 def tag_like(t):
     t2 = Tag(name=t.name)

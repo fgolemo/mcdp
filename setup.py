@@ -108,6 +108,7 @@ setup(name=name,
             'mcdp-render-manual = mcdp_docs:mcdp_render_manual_main',
             'mcdp-depgraph = mcdp_depgraph:mcdp_depgraph_main',
             'mcdp-load-all = mcdp_hdb_mcdp:mcdp_load_all_main',
+            'mcdp-split = mcdp_docs.split:split_main',
         ]
       }
 )

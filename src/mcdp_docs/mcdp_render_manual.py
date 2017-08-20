@@ -20,6 +20,7 @@ from .manual_constants import MCDPManualConstants
 from .manual_join_imp import manual_join
 from .minimal_doc import get_minimal_document
 from .read_bibtex import run_bibtex2html
+import getpass
 
 
 class RenderManual(QuickApp):
@@ -270,7 +271,10 @@ def render_book(src_dir, docname, generate_pdf,
     from mcdp_docs.pipeline import render_complete
 
     librarian = get_test_librarian()
-    librarian.find_libraries('.')
+    # XXX: these might need to be changed
+    if getpass.getuser() == 'andrea':
+        logger.error('Remember this might break MCDP')
+        #     librarian.find_libraries('.')
         
     load_library_hooks = [librarian.load_library]
     library = MCDPLibrary(load_library_hooks=load_library_hooks)

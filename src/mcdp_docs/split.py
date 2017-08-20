@@ -1,30 +1,46 @@
-import sys
+from contextlib import contextmanager
+import logging
+from mcdp import logger
+from mcdp_docs.add_mathjax import add_mathjax_call, add_mathjax_preamble
+from mcdp_docs.manual_join_imp import update_refs_
+from mcdp_utils_misc.string_utils import get_md5
+from mcdp_utils_xml import bs
 import os
+import time
 
 from bs4 import BeautifulSoup
 from bs4.element import Tag
+from quickapp.quick_app import QuickApp
 
-from mcdp import logger
-from mcdp_utils_xml import bs
-
+from .manual_join_imp import add_prev_next_links, split_in_files
 from .manual_join_imp import get_id2filename, create_link_base
-from .manual_join_imp import write_split_files, add_prev_next_links,\
-    split_in_files, update_refs
 from .split_disqus import append_disqus
 
 
+@contextmanager
+def timeit(s):
+    t0 = time.clock()
+    yield
+    delta = time.clock() - t0
+    logger.debug('%10d ms: %s' % ( 1000*delta, s))
+    
 def make_page(contents, head0, main_toc):
     """ Returns html """
     html = Tag(name='html')
+    
     head = head0.__copy__()
     html.append(head)
     body = Tag(name='body')
-    if main_toc:
-        tocdiv = Tag(name='div')
-        tocdiv.attrs['id'] = 'tocdiv'
-        toc = main_toc.__copy__()
-        del toc.attrs['id']
-        tocdiv.append(toc)
+    
+    with timeit('make_page() / copy toc'):
+        if main_toc:
+            tocdiv = Tag(name='div')
+            tocdiv.attrs['id'] = 'tocdiv' 
+
+            toc = main_toc
+            toc.extract()
+            del toc.attrs['id']
+            tocdiv.append(toc)
     body.append(tocdiv)
     not_toc = Tag(name='div')
     not_toc.attrs['id'] = 'not-toc'
@@ -33,7 +49,8 @@ def make_page(contents, head0, main_toc):
     html.append(body)
     return html
 
-def split_file(html, directory):
+def split_file(ifilename, directory, filename, mathjax, preamble, disqus, id2filename):
+    html = open(ifilename).read()
     soup = BeautifulSoup(html, 'lxml', from_encoding='utf-8')
     body = soup.html.body
     head0 = soup.html.head
@@ -45,34 +62,97 @@ def split_file(html, directory):
 
     p = bs('<p><a href="index.html">Home</a></p>')
     main_toc.insert(0, p.p)
-
+    
     assert body is not None, soup
-    logger.debug('Splitting in files...')
-    filename2contents = split_in_files(body)
-    id2filename = get_id2filename(filename2contents)
-    logger.debug('add_prev_next_links()...')
-    filename2contents = add_prev_next_links(filename2contents)
-    logger.debug('adding_toc()...')
-    for filename, contents in list(filename2contents.items()):
-        logger.debug('%s: make_page()' % os.path.basename(filename))
+    
+    with timeit('Splitting in files...'):
+        filename2contents = split_in_files(body)
+    
+    with timeit('add_prev_next_links()...'):
+        filename2contents = add_prev_next_links(filename2contents)
+    
+
+    with timeit('make_page()'):
+        contents = filename2contents[filename]
         html = make_page(contents, head0, main_toc)
-        logger.debug('%s: append_disqus' % os.path.basename(filename))
-        append_disqus(filename, html)
-        filename2contents[filename] = html
+    
+    
+    if mathjax: 
+        if preamble is not None:
+            with timeit('add_mathjax_preamble()'):
+                add_mathjax_preamble(html, preamble)
+            
+            
+        with timeit('add_mathjax_call'):
+            add_mathjax_call(html)
+        
+    
+    if disqus:
+        with timeit('disqus'):
+            append_disqus(filename, html)
+        
+         
 
-    logger.debug('update_refs()...')
-
-    update_refs(filename2contents, id2filename)
-
-    linkbase='link.html'
-    filename2contents[linkbase] = create_link_base(id2filename)
-    logger.debug('write_split_files()...')
-    write_split_files(filename2contents, directory)
+    with timeit('update_refs_'):
+        update_refs_(filename, html, id2filename)
 
 
-if __name__ == '__main__':
-    filename = sys.argv[1]
-    directory = sys.argv[2]
-    html = open(filename).read()
+    with timeit('serialize'):
+        result = str(html)
+    
+    with timeit('writing'): 
+        
+        if not os.path.exists(directory):
+            try:
+                os.makedirs(directory)
+            except:
+                pass
+        fn = os.path.join(directory, filename)
+        with open(fn, 'w') as f:
+            f.write(result)
+    logger.info('written section to %s' % fn)
+    
 
-    split_file(html, directory)
+
+class Split(QuickApp):
+    """ Splits the manual into files """
+
+    def define_options(self, params):
+        params.add_string('filename', help="""Input filename""")
+        params.add_string('output_dir', help='Output directory')
+        params.add_flag('disqus')
+        params.add_flag('mathjax')
+        params.add_string('preamble', default=None)
+        
+    def define_jobs_context(self, context):
+        ifilename = self.options.filename
+        output_dir = self.options.output_dir
+        mathjax = self.options.mathjax
+        preamble = self.options.preamble
+        disqus = self.options.disqus
+        logger.setLevel(logging.DEBUG)
+    
+        html = open(ifilename).read()
+        soup = BeautifulSoup(html, 'lxml', from_encoding='utf-8')
+        body = soup.html.body
+        filename2contents = split_in_files(body)
+        
+        id2filename = get_id2filename(filename2contents)
+        linkbase='link.html'
+        lb = create_link_base(id2filename)
+        with open(os.path.join(output_dir, linkbase), 'w') as f:
+            f.write(str(lb)) 
+
+        if preamble:
+            preamble = open(preamble).read()
+            
+        contents_hash = get_md5( html)[:8]
+        for filename, contents in filename2contents.items():
+            logger.info('Set up %r' % filename)
+            job_id = 'split-%s-%s' % (filename, contents_hash)
+            context.comp(split_file, ifilename, output_dir, filename, mathjax=mathjax, preamble=preamble,
+                         disqus=disqus, id2filename=id2filename,
+                         job_id=job_id)
+
+split_main = Split.get_sys_main()
+
