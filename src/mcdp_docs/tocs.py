@@ -463,14 +463,19 @@ def substituting_empty_links(soup, raise_errors=False):
                 for _ in contents.findAll('a'):
                     _.extract()
                 
+                contents.name = 'span'
+                add_class(contents, 'toc_name')
                 a.append(contents)
                 #logger.debug('From label_name = %r to a = %r' % (label_name, a))
             else:
-                s = Tag(name='span')
                 if label_name is None:
+                    s = Tag(name='span')
                     s.string = '(unnamed)'  # XXX
                 else:
-                    s.string = label_name
+                    s = bs(label_name)
+                    assert s.name == 'fragment'
+                    s.name = 'span'
+                    #add_class(s, 'produced-here') # XXX
                 add_class(s, 'toc_name')
                 a.append(s)
 
@@ -492,11 +497,12 @@ def substituting_empty_links(soup, raise_errors=False):
             else:
                 label = label_what_number
 
-            span1 = Tag(name='span')
-            add_class(span1, 'reflabel')
-            span1.string = label
-            a.append(span1)
-            span1.attrs['comment'] = str(le)
+            frag = bs(label)
+            assert frag.name == 'fragment'
+            frag.name = 'span'
+            add_class(frag, 'reflabel')
+            a.append(frag)
+#             span1.attrs['comment'] = str(le)
        
     logger.debug('substituting_empty_links: %d total, %d errors' %
                  (n, nerrors))
@@ -528,9 +534,7 @@ def get_empty_links_to_fragment(soup):
 #         logger.debug('get_empty_links_to_fragment link: %s %s' % (element, empty))
         
         if not empty:
-            continue
-
-        
+            continue 
         
         if not 'href' in element.attrs:
             continue

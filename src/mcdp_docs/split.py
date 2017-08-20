@@ -1,10 +1,5 @@
 from contextlib import contextmanager
 import logging
-from mcdp import logger
-from mcdp_docs.add_mathjax import add_mathjax_call, add_mathjax_preamble
-from mcdp_docs.manual_join_imp import update_refs_
-from mcdp_utils_misc.string_utils import get_md5
-from mcdp_utils_xml import bs
 import os
 import time
 
@@ -12,17 +7,25 @@ from bs4 import BeautifulSoup
 from bs4.element import Tag
 from quickapp.quick_app import QuickApp
 
+from mcdp import logger
+from mcdp_docs.add_mathjax import add_mathjax_call, add_mathjax_preamble
+from mcdp_docs.manual_join_imp import update_refs_
+from mcdp_utils_misc.string_utils import get_md5
+from mcdp_utils_xml import bs
+
 from .manual_join_imp import add_prev_next_links, split_in_files
 from .manual_join_imp import get_id2filename, create_link_base
 from .split_disqus import append_disqus
 
+show_timing = False
 
 @contextmanager
 def timeit(s):
     t0 = time.clock()
     yield
     delta = time.clock() - t0
-    logger.debug('%10d ms: %s' % ( 1000*delta, s))
+    if show_timing:
+        logger.debug('%10d ms: %s' % ( 1000*delta, s))
     
 def make_page(contents, head0, main_toc):
     """ Returns html """

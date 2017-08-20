@@ -29,6 +29,7 @@ programs = ['sudo', 'pip', 'git', 'python', 'cd', 'apt-get', 'rosrun',
             'mv', 'cat', 'touch' ,'source', 'make', 'roslaunch', 'jstest',
             'shutdown', 'virtualenv', 'nodejs', 'cp', 'fc-cache', 'venv',
             'add-apt-repository', 'truncate', 'losetup','gparted',
+            'rosbag', 'roscore',
             'export', 'fdisk', 'rosdep', 'rosrun', 'rosparam', 'rospack', 'rostest'] \
             + ['|'] # pipe
             

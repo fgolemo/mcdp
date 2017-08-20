@@ -2,7 +2,6 @@
 #!/usr/bin/env python
 from collections import OrderedDict
 import json
-import os
 import sys
 import warnings
 
@@ -12,6 +11,7 @@ from contracts import contract
 from contracts.utils import raise_desc
 
 from mcdp.logs import logger
+from mcdp_docs.moving_copying_deleting import move_things_around
 from mcdp_utils_xml import add_class
 from mcdp_utils_xml import bs
 
@@ -21,7 +21,6 @@ from .minimal_doc import add_extra_css
 from .read_bibtex import extract_bibtex_blocks
 from .tocs import generate_toc, substituting_empty_links, LABEL_WHAT_NUMBER,\
     LABEL_WHAT_NUMBER_NAME, LABEL_WHAT, LABEL_NUMBER, LABEL_NAME, LABEL_SELF
-from mcdp_docs.moving_copying_deleting import move_things_around
 
 
 def get_manual_css_frag():
@@ -115,14 +114,7 @@ def manual_join(template, files_contents,
             body.append(NavigableString('\n\n'))
 
     extract_bibtex_blocks(d)
-    logger.info('external bib')
-#     if bibfile is not None:
-#         if not os.path.exists(bibfile):
-#             logger.error('Cannot find bib file %s' % bibfile)
-#         else:
-#             bibliography_entries = get_bibliography(bibfile)
-#             bibliography_entries['id'] = 'bibliography_entries'
-#             body.append(bibliography_entries)
+    logger.info('external bib') 
 
     bibhere = d.find('div', id='put-bibliography-here')
     if bibhere is None:
@@ -171,7 +163,6 @@ def manual_join(template, files_contents,
 
         logger.info('Removed %d elements of selector %r' % (nremoved, remove))
     
-#     if False:
     if all_removed:
         with open('parts-removed.html', 'w') as f:
             f.write(all_removed)
