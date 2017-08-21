@@ -149,10 +149,15 @@ class Split(QuickApp):
         if preamble:
             preamble = open(preamble).read()
             
-        contents_hash = get_md5( html)[:8]
+        ids = sorted(id2filename)
+        data = "".join(id2filename[_] for _ in ids)
+        links_hash = get_md5(data)[:8]
+        
+
         for filename, contents in filename2contents.items():
+            contents_hash = get_md5(str(contents) + preamble)[:8]
             logger.info('Set up %r' % filename)
-            job_id = 'split-%s-%s' % (filename, contents_hash)
+            job_id = '%s-%s-%s' % (filename, links_hash, contents_hash)
             context.comp(split_file, ifilename, output_dir, filename, mathjax=mathjax, preamble=preamble,
                          disqus=disqus, id2filename=id2filename,
                          job_id=job_id)
