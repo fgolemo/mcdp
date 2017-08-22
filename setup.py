@@ -1,5 +1,3 @@
-import os
-
 from setuptools import find_packages, setup
 
 
@@ -85,7 +83,7 @@ setup(name=name,
       dependency_links  = [
           # 'https://github.com/AndreaCensi/contracts/archive/env_mcdp.zip#egg=PyContracts',
           # 'https://github.com/AndreaCensi/conf_tools/archive/env_fault.zip#egg=ConfTools',
-          #'https://github.com/AndreaCensi/quickapp/archive/env_fault.zip#egg=QuickApp',
+          # 'https://github.com/AndreaCensi/quickapp/archive/env_fault.zip#egg=QuickApp',
           # 'git+https://github.com/AndreaCensi/quickapp.git@env_mcdp#egg=QuickApp',
           # 'https://github.com/AndreaCensi/reprep/archive/env_mcdp.zip#egg=RepRep',
           # 'https://github.com/AndreaCensi/gvgen/archive/master.zip#egg=gvgen-0.9.1',
