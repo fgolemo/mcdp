@@ -98,10 +98,10 @@ def get_vimeo_info(vimeo_id):
 
     response = urllib2.urlopen(url) 
     data = response.read()
-    logger.debug(data)
+    #logger.debug(data)
     
     data = json.loads(data)
-    logger.debug( json.dumps(data))
+    #logger.debug(json.dumps(data))
     v = data[0]
     
     assert v['id'] == int(vimeo_id)

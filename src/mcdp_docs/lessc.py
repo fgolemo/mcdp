@@ -27,7 +27,8 @@ def run_lessc(soup):
         try:
             s2 = lessc_string(s1)    
         except LesscError as e:
-            logger.error('less failed')
+            logger.error('less failed (ignored)')
+            logger.error(e)
             continue
         
         s2 = unicode(s2, 'utf-8')

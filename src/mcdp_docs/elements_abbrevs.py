@@ -50,6 +50,7 @@ def substitute_special_paragraphs(soup):
         'Q:': 'special-par-question',
         'A:': 'special-par-answer',
         "Assigned: ": 'special-par-assigned',
+        "Author: ": 'special-par-author',
         "Maintainer: ": 'special-par-maintainer',
         
         # Reference and See are the same thing

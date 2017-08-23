@@ -1101,6 +1101,14 @@ p.special-par-note {
   border-left: solid 3px darkred;
   padding-left: 0.5em;
 }
+p.special-par-maintainer::before {
+  content: 'Maintainer: ';
+  font-weight: bold;
+}
+p.special-par-author::before {
+  content: 'Author: ';
+  font-weight: bold;
+}
 p.special-par-question::before {
   content: 'Q: ';
   font-weight: bold;

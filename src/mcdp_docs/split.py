@@ -153,7 +153,6 @@ class Split(QuickApp):
         data = "".join(id2filename[_] for _ in ids)
         links_hash = get_md5(data)[:8]
         
-
         for filename, contents in filename2contents.items():
             contents_hash = get_md5(str(contents) + preamble)[:8]
             logger.info('Set up %r' % filename)
