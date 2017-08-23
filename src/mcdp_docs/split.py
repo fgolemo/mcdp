@@ -1,21 +1,20 @@
 from contextlib import contextmanager
 import logging
-import os
-import time
-
-from bs4 import BeautifulSoup
-from bs4.element import Tag
-from quickapp.quick_app import QuickApp
-
 from mcdp import logger
 from mcdp_docs.add_mathjax import add_mathjax_call, add_mathjax_preamble
 from mcdp_docs.manual_join_imp import update_refs_
 from mcdp_utils_misc.string_utils import get_md5
 from mcdp_utils_xml import bs
+import os
+import time
 
-from .manual_join_imp import add_prev_next_links, split_in_files
-from .manual_join_imp import get_id2filename, create_link_base
+from bs4 import BeautifulSoup
+from bs4.element import Tag
+from quickapp import QuickApp
+
+from .manual_join_imp import add_prev_next_links, split_in_files, get_id2filename, create_link_base
 from .split_disqus import append_disqus
+
 
 show_timing = False
 
@@ -44,6 +43,7 @@ def make_page(contents, head0, main_toc):
             toc.extract()
             del toc.attrs['id']
             tocdiv.append(toc)
+            
     body.append(tocdiv)
     not_toc = Tag(name='div')
     not_toc.attrs['id'] = 'not-toc'
@@ -153,7 +153,6 @@ class Split(QuickApp):
         data = "".join(id2filename[_] for _ in ids)
         links_hash = get_md5(data)[:8]
         
-
         for filename, contents in filename2contents.items():
             contents_hash = get_md5(str(contents) + preamble)[:8]
             logger.info('Set up %r' % filename)
