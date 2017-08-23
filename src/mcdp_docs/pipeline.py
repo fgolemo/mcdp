@@ -18,6 +18,7 @@ from .make_figures import make_figure_from_figureid_attr
 from .prerender_math import escape_for_mathjax_back, escape_for_mathjax
 from .videos import make_videos
 from mcdp_docs.github_file_ref.display_file_imp import display_files
+from mcdp_docs.github_file_ref.substitute_github_refs_i import substitute_github_refs
 
 
 __all__ = [
@@ -145,6 +146,7 @@ def render_complete(library, s, raise_errors, realpath, generate_pdf=False,
     soup = bs(s)
     mark_console_pres(soup)
     
+    substitute_github_refs(soup, defaults={})
     # must be before make_figure_from_figureid_attr()
     display_files(soup, defaults={})
     

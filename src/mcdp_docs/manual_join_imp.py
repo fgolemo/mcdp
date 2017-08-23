@@ -204,7 +204,7 @@ def manual_join(template, files_contents,
     logger.info('substituting empty links')
     substituting_empty_links(d)
 #     defaults = {'org': 'duckietown', 'repo': 'duckuments'}
-    substitute_github_refs(d, defaults={'branch': 'master'})
+    
     warn_for_duplicated_ids(d)
 
     if extra_css is not None:
