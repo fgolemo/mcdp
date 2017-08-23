@@ -1,10 +1,9 @@
-from mcdp import logger
+from collections import namedtuple
+from contracts.utils import raise_desc
+import json
 import urllib2
 
 from bs4.element import Tag, Comment
-from contracts.utils import raise_desc
-import json
-from collections import namedtuple
 
 
 def make_videos(soup):
@@ -109,6 +108,6 @@ def get_vimeo_info(vimeo_id):
     thumbnail_large = v['thumbnail_large']
     
     return VimeoInfo(title=title, thumbnail_large=thumbnail_large, url=v['url'])
-    # [{"id":152825632,"title":"Cool Duckietown at night","description":"http:\/\/duckietown.com\/","url":"https:\/\/vimeo.com\/152825632","upload_date":"2016-01-23 13:21:19","thumbnail_small":"http:\/\/i.vimeocdn.com\/video\/552922776_100x75.jpg","thumbnail_medium":"http:\/\/i.vimeocdn.com\/video\/552922776_200x150.jpg","thumbnail_large":"http:\/\/i.vimeocdn.com\/video\/552922776_640.jpg","user_id":2729150,"user_name":"Duckietown Engineering","user_url":"https:\/\/vimeo.com\/andreacensi","user_portrait_small":"http:\/\/i.vimeocdn.com\/portrait\/11460832_30x30","user_portrait_medium":"http:\/\/i.vimeocdn.com\/portrait\/11460832_75x75","user_portrait_large":"http:\/\/i.vimeocdn.com\/portrait\/11460832_100x100","user_portrait_huge":"http:\/\/i.vimeocdn.com\/portrait\/11460832_300x300","duration":111,"width":1920,"height":1080,"tags":"duckietown","embed_privacy":"anywhere"}]
+    
     
     

@@ -52,7 +52,8 @@ def substitute_special_paragraphs(soup):
         "Assigned: ": 'special-par-assigned',
         "Author: ": 'special-par-author',
         "Maintainer: ": 'special-par-maintainer',
-        
+        "Point of contact: ": 'special-par-point-of-contact',
+        "Slack channel: ": 'special-par-point-of-contact',
         # Reference and See are the same thing
         'See: ': 'special-par-see',
         'Reference: ': 'special-par-see',
