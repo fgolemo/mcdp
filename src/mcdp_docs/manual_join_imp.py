@@ -21,6 +21,8 @@ from .minimal_doc import add_extra_css
 from .read_bibtex import extract_bibtex_blocks
 from .tocs import generate_toc, substituting_empty_links, LABEL_WHAT_NUMBER,\
     LABEL_WHAT_NUMBER_NAME, LABEL_WHAT, LABEL_NUMBER, LABEL_NAME, LABEL_SELF
+from mcdp_docs.github_file_ref.substitute_github_refs_i import substitute_github_refs
+
 
 
 def get_manual_css_frag():
@@ -201,7 +203,8 @@ def manual_join(template, files_contents,
     # because that one might fix some references
     logger.info('substituting empty links')
     substituting_empty_links(d)
-
+#     defaults = {'org': 'duckietown', 'repo': 'duckuments'}
+    substitute_github_refs(d, defaults={'branch': 'master'})
     warn_for_duplicated_ids(d)
 
     if extra_css is not None:

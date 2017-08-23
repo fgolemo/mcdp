@@ -17,6 +17,7 @@ from .make_console_pre import mark_console_pres
 from .make_figures import make_figure_from_figureid_attr
 from .prerender_math import escape_for_mathjax_back, escape_for_mathjax
 from .videos import make_videos
+from mcdp_docs.github_file_ref.display_file_imp import display_files
 
 
 __all__ = [
@@ -143,6 +144,10 @@ def render_complete(library, s, raise_errors, realpath, generate_pdf=False,
     
     soup = bs(s)
     mark_console_pres(soup)
+    
+    # must be before make_figure_from_figureid_attr()
+    display_files(soup, defaults={})
+    
     make_figure_from_figureid_attr(soup)
     col_macros(soup)
     fix_subfig_references(soup)  
