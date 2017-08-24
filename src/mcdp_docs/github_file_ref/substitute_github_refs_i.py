@@ -176,52 +176,9 @@ def checkout(path, url, branch):
         shutil.rmtree(path)
         raise 
 
-@comptest
-def sub1():
-    defaults = {'org': 'AndreaCensi', 
-                'repo': 'mcdp',
-                'branch': 'duckuments'}
-     
-    s = """
-<a href="github:path=context_eval_as_constant.py"></a> 
-"""
-    soup = bs(s)
-    n = substitute_github_refs(soup, defaults)
-    assert n == 1
-    
-    s2 = str(soup)
-    logger.debug(indent(s2, '  '))
-    
-    expect = '<code class="github-resource-link">context_eval_as_constant.py</code>'
-    if not expect in s2:
-        raise Exception(s2)
     
 
-@comptest
-def sub2():
-    defaults = {'org': 'AndreaCensi', 
-                'repo': 'mcdp',
-                'branch': 'duckuments'}
-     
-    s = """
-<a href="github:path=context_eval_as_constant.py,from_text=get_connections_for,to_text=return"></a> 
-"""
-    soup = bs(s)
-    n = substitute_github_refs(soup, defaults)
-    assert n == 1
-    
-    s2 = str(soup)
-    logger.debug('\n'+indent(s2, '  '))
-    
-    expect=  'context_eval_as_constant.py#L7-L12'
-    
-    if not expect in s2:
-        raise Exception('No %s in %s' % (expect, s2))
-    
-    
-    
-    
-    
-        
 if __name__ == '__main__':
     run_module_tests()
+    
+    

@@ -1,12 +1,10 @@
-from comptests.registrar import comptest, run_module_tests
-from mcdp_utils_xml.parsing import bs
-from mcdp.logs import logger
-from contracts.utils import indent
+from mcdp.exceptions import DPSemanticError
 from mcdp_docs.github_file_ref.reference import parse_github_file_ref
 from mcdp_docs.github_file_ref.substitute_github_refs_i import resolve_reference
-from bs4.element import Tag
-from mcdp.exceptions import DPSemanticError
 import os
+
+from bs4.element import Tag
+
 
 def display_files(soup, defaults):
     n = 0 
@@ -55,27 +53,3 @@ def display_file(element, defaults):
     element.replace_with(div)
 
     
-@comptest
-def displayfile1():
-    defaults = {'org': 'AndreaCensi', 
-                'repo': 'mcdp',
-                'branch': 'duckuments'}
-     
-    s = """
-<display-file src="github:path=context_eval_as_constant.py,from_text=get_connections_for,to_text=return"></a> 
-"""
-    soup = bs(s)
-    n = display_files(soup, defaults)
-    assert n == 1
-    
-    s2 = str(soup)
-    logger.debug('\n'+indent(s2, '  '))
-     
-    
-    
-    
-    
-    
-        
-if __name__ == '__main__':
-    run_module_tests()

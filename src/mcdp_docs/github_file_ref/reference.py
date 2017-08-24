@@ -1,8 +1,8 @@
 from collections import namedtuple
 from contracts import contract
-from contracts.utils import raise_wrapped
-from comptests.registrar import run_module_tests, comptest
 import urllib2
+
+from contracts.utils import raise_wrapped
 
 
 # Consider an URL of the type
@@ -18,7 +18,6 @@ import urllib2
 #     line
 # contents
 # url
-
 GithubFileRef = namedtuple('GithubFileRef', 
                            ['org', 'repo', 'path', 'branch', 
                             'from_line', 'to_line',
@@ -35,7 +34,9 @@ def parse_github_file_ref(s):
     
         github:k=v,k=v
         
+        newlines are ignored
     """
+    
     prefix = 'github:'
     try:
         if not s.startswith(prefix):
@@ -43,6 +44,7 @@ def parse_github_file_ref(s):
             raise InvalidGithubRef(msg)
         
         values = {}
+        s = s.replace('\n', '')
         then = s[len(prefix):]
         pairs = then.split(',')
         #print 'pairs', pairs
@@ -107,64 +109,4 @@ def parse_github_file_ref(s):
         raise_wrapped(InvalidGithubRef, e, msg, compact=True)
     
 
-def expect_failure(s):
-    try:
-        parse_github_file_ref(s)
-    except InvalidGithubRef:
-        pass
-    else:
-        raise Exception('expected failure for %r' % s)
-    
-@comptest
-def parse1():
-    expect_failure('github')
-    expect_failure('github:')
-    expect_failure('github:path=')
-    expect_failure('github:path=,')
-    expect_failure('github:,')
-    expect_failure('github:notexist=one')
-    expect_failure('github:from_line=1,from_text=ciao')
-    expect_failure('github:to_line=1') # to without from
-        
-@comptest
-def parse2():
-    s = 'github:path=name'
-    r = parse_github_file_ref(s)
-    assert r.path == 'name'
-    s = 'github:org=name'
-    r = parse_github_file_ref(s)
-    assert r.org == 'name'        
-    s = 'github:branch=name'
-    r = parse_github_file_ref(s)
-    assert r.branch == 'name'        
-    s = 'github:from_line=3'
-    r = parse_github_file_ref(s)
-    assert r.from_line == 3        
-    s = 'github:from_text=3'
-    r = parse_github_file_ref(s)
-    assert r.from_text == '3'        
-    s = 'github:from_line=0,to_line=3'
-    r = parse_github_file_ref(s)
-    assert r.to_line == 3        
-    s = 'github:from_text=1,to_text=3'
-    r = parse_github_file_ref(s)
-    assert r.to_text == '3'        
-    
-    s = 'github:from_text=ciao%20come'
-    r = parse_github_file_ref(s)
-    assert r.from_text == "ciao come"        
-    
-    s = 'github:from_text=3,to_line=1'
-    r = parse_github_file_ref(s)
-    s = 'github:from_line=3,to_text=1'
-    r = parse_github_file_ref(s)
-    s = 'github:from_text=3,to_text=1'
-    r = parse_github_file_ref(s)
-    s = 'github:from_line=3,to_line=1'
-    r = parse_github_file_ref(s)
-    
-
-if __name__ == '__main__':
-    run_module_tests()
-    
     
