@@ -23,6 +23,7 @@ jobs:
             name: NPM
             command: |
                 curl -sL https://deb.nodesource.com/setup_6.x | bash
+                apt install nodejs
                 npm install MathJax-node jsdom@9.3 less
 
         - run:
