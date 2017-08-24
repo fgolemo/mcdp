@@ -1,8 +1,9 @@
 
 config interactive 0
+config colorize 1
 config echo_stdout 1
 config echo_stderr 1
-config echo True
-config status_line_enabled True 
-config console_status True
+config echo 0
+config status_line_enabled 0 
+config console_status 0
 config console_status_delta 5
