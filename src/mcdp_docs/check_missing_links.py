@@ -60,7 +60,7 @@ def check_if_any_href_is_invalid(soup):
         href = a['href']
         if a.has_attr('class') and  "mjx-svg-href" in a['class']:
             msg = 'Invalid math reference (sorry, no details): href = %s .' % href
-            logger.error(msg)
+            logger.warning(msg)
             a.insert_before(Comment('Error: %s' % msg))
             math_errors.append(msg)
             continue 
