@@ -1,0 +1,55 @@
+version: 2
+jobs:
+    build:
+     docker:
+        - image: andreacensi/duckietown-xenial-kinetic:7
+
+     steps:
+        - checkout
+
+        - run:
+            name: deps
+            command: |
+                apt-get install -y pdftk bibtex2html libxml2-dev libxslt1-dev libffi6 libffi-dev python-dev python-numpy python-matplotlib virtualenv
+                pip install -U decorator>=4.1.0
+                
+        - run:
+            name: prince
+            command: |
+                wget https://www.princexml.com/download/prince_11.3-1_ubuntu16.04_amd64.deb
+                dpkg -i prince_11.3-1_ubuntu16.04_amd64.deb
+                
+        - run:
+            name: NPM
+            command: |
+                 npm install MathJax-node jsdom@9.3 less
+
+        - run:
+            name: Install 
+            command: |
+                python setup.py develop
+
+        - run:
+            command:  | 
+                echo "Worker" $CIRCLE_NODE_INDEX " of " $CIRCLE_NODE_TOTAL: 
+                echo "Current directory:"
+                pwd
+                /usr/bin/nodejs --version
+                /usr/bin/npm --version
+                python --version
+                python -c "import numpy; print numpy.__version__"
+                python -c "import matplotlib; print matplotlib.__version__"
+                python -c "import compmake; print compmake.__version__"
+                python -c "import contracts; print contracts.__version__"
+                fc-list | sort
+                echo '\nconfig interactive 0\nconfig echo_stdout 1\nconfig echo_stderr 1\nconfig echo True\nconfig status_line_enabled True \nconfig console_status True\nconfig console_status_delta 5' >> .compmake.rc 
+                cat .compmake.rc
+            
+                make clean circle
+              
+            environment:
+                MCDP_TEST_SKIP_MCDPOPT: 1
+                # MCDP_TEST_LIBRARIES_EXCLUDE = mcdp_theory
+                # MCDP_TEST_LIBRARIES = "basic,eversion,libtemplates,multisets_tests,posets,tuple_indexing,tuple_making,uncertainty,comments,documents,making,pop,batteries_v1"
+                MPLBACKEND: agg
+                 
