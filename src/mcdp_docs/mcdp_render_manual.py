@@ -21,6 +21,7 @@ from .manual_join_imp import manual_join
 from .minimal_doc import get_minimal_document
 from .read_bibtex import run_bibtex2html
 import getpass
+from compmake.utils.friendly_path_imp import friendly_path
 
 
 class RenderManual(QuickApp):
@@ -143,7 +144,7 @@ def manual_jobs(context, src_dirs, output_file, generate_pdf, bibfile, styleshee
 
     files_contents = []
     for i, filename in enumerate(filenames):
-        logger.info('adding document %s ' % (filename))
+        logger.info('adding document %s ' % friendly_path(filename))
         
         docname,_ = os.path.splitext(os.path.basename(filename))
         
