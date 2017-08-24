@@ -2,7 +2,7 @@ version: 2
 jobs:
     build:
      docker:
-        - image: andreacensi/duckietown-xenial-kinetic:7
+        - image: andreacensi/duckietown-xenial-kinetic:10
      parallelism: 4
      steps:
         - checkout
