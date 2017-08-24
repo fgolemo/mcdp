@@ -1,20 +1,18 @@
+from comptests.registrar import run_module_tests
+from mcdp.exceptions import DPSyntaxError, DPSemanticError
+from mcdp.logs import logger
+from mcdp_utils_misc.locate_files_imp import locate_files
+from mcdp_utils_misc.memoize_simple_imp import memoize_simple
+from mcdp_utils_xml.add_class_and_style import add_class
 import os
 import shutil
 
 from bs4.element import Tag
 from contracts.utils import raise_wrapped, raise_desc, indent
+from git.exc import GitCommandError
 from git.repo.base import Repo
 
-from comptests.registrar import comptest, run_module_tests
-from mcdp.exceptions import DPSyntaxError, DPSemanticError
-from mcdp.logs import logger
-from mcdp_docs.github_file_ref.reference import parse_github_file_ref,\
-    InvalidGithubRef
-from mcdp_utils_misc.locate_files_imp import locate_files
-from mcdp_utils_xml.add_class_and_style import add_class
-from mcdp_utils_xml.parsing import bs
-from mcdp_utils_misc.memoize_simple_imp import memoize_simple
-from git.exc import GitCommandError
+from .reference import parse_github_file_ref, InvalidGithubRef
 
 
 def substitute_github_refs(soup, defaults):

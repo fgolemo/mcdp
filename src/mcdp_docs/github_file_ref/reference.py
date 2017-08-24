@@ -56,8 +56,8 @@ def parse_github_file_ref(s):
                 msg = 'Invalid pair %r'% p
                 raise InvalidGithubRef(msg)
             i = p.index('=')
-            k = p[:i]
-            v = p[i+1:]
+            k = p[:i].strip()
+            v = p[i+1:].strip()
             if not v or not k:
                 msg = 'Invalid pair %r.' % p
                 raise InvalidGithubRef(msg)
