@@ -140,8 +140,14 @@ class Split(QuickApp):
         body = soup.html.body
         filename2contents = split_in_files(body)
         
+        if not os.path.exists(output_dir):
+            try:
+                os.makedirs(output_dir)
+            except:
+                pass
+        
         id2filename = get_id2filename(filename2contents)
-        linkbase='link.html'
+        linkbase = 'link.html'
         lb = create_link_base(id2filename)
         with open(os.path.join(output_dir, linkbase), 'w') as f:
             f.write(str(lb)) 
@@ -155,7 +161,7 @@ class Split(QuickApp):
         
         for filename, contents in filename2contents.items():
             contents_hash = get_md5(str(contents) + preamble)[:8]
-            logger.info('Set up %r' % filename)
+            # logger.info('Set up %r' % filename)
             job_id = '%s-%s-%s' % (filename, links_hash, contents_hash)
             context.comp(split_file, ifilename, output_dir, filename, mathjax=mathjax, preamble=preamble,
                          disqus=disqus, id2filename=id2filename,

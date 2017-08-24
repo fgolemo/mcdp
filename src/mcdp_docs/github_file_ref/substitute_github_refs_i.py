@@ -115,9 +115,9 @@ def resolve_reference(ref, defaults):
             ref = ref._replace(to_line = tl)
             
     if ref.from_line is not None:
-        github_url += '#L%d' % ref.from_line
+        github_url += '#L%d' % (ref.from_line+1) # github is 1-based
     if ref.to_line is not None:
-        github_url += '-L%d' % ref.to_line
+        github_url += '-L%d' % (ref.to_line+1)
             
     ref = ref._replace(contents=contents) 
     ref = ref._replace(url=github_url)
@@ -132,7 +132,7 @@ def which_line(contents, fragment, after_line):
         msg += '\n' + indent(after, '| ')
         raise DPSemanticError(msg)
     i = after.index(fragment)
-    line = len(after[:i].split('\n'))
+    line = len(after[:i].split('\n')) -1 
     return line + after_line
     
 def checkout_repository(tmpdir, org, repo, branch):

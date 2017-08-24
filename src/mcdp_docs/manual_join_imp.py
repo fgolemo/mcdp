@@ -723,6 +723,11 @@ def copy_attributes_from_header(section, header):
 
 def make_sections2(elements, is_marker, copy=True, element_name='div', attrs={},
                    add_debug_comments=False):
+    
+    def debug(s):
+        if False:
+            logger.debug(s)
+            
     sections = []
     def make_new():
         x = Tag(name=element_name)
@@ -741,7 +746,7 @@ def make_sections2(elements, is_marker, copy=True, element_name='div', attrs={},
                 sections.append((current_header, current_section))
 
             current_section = make_new()
-            logger.debug('marker %s' % x.attrs.get('id', 'unnamed'))
+            debug('marker %s' % x.attrs.get('id', 'unnamed'))
             current_header = x.__copy__() 
             current_section['class'] = 'with-header-inside'
         else:
@@ -751,7 +756,7 @@ def make_sections2(elements, is_marker, copy=True, element_name='div', attrs={},
     if current_header or contains_something_else_than_space(current_section):
         sections.append((current_header, current_section))
 
-    logger.debug('make_sections: %s found using marker %s' %
+    debug('make_sections: %s found using marker %s' %
                 (len(sections), is_marker.__name__))
     return sections
 

@@ -1,7 +1,6 @@
 pint
 pyparsing
 networkx
-pint
 watchdog
 pyramid
 pyramid_jinja2
