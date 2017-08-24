@@ -44,9 +44,8 @@ jobs:
                 python -c "import compmake; print compmake.__version__"
                 python -c "import contracts; print contracts.__version__"
                 fc-list | sort
-                echo '\nconfig interactive 0\nconfig echo_stdout 1\nconfig echo_stderr 1\nconfig echo True\nconfig status_line_enabled True \nconfig console_status True\nconfig console_status_delta 5' >> .compmake.rc 
+                cp misc/unittests-compmake.rc .compmake.rc 
                 cat .compmake.rc
-            
                 make clean circle
               
             environment:
