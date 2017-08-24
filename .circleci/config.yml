@@ -22,7 +22,8 @@ jobs:
         - run:
             name: NPM
             command: |
-                 npm install MathJax-node jsdom@9.3 less
+                curl -sL https://deb.nodesource.com/setup_6.x | bash
+                npm install MathJax-node jsdom@9.3 less
 
         - run:
             name: Install 
