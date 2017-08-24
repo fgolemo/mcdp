@@ -3,7 +3,7 @@ jobs:
     build:
      docker:
         - image: andreacensi/duckietown-xenial-kinetic:7
-
+     parallelism: 4
      steps:
         - checkout
 
@@ -32,6 +32,7 @@ jobs:
                 python setup.py develop
 
         - run:
+            name: Make sure things are ok
             command:  | 
                 echo "Worker" $CIRCLE_NODE_INDEX " of " $CIRCLE_NODE_TOTAL: 
                 echo "Current directory:"
@@ -46,8 +47,10 @@ jobs:
                 fc-list | sort
                 cp misc/unittests-compmake.rc .compmake.rc 
                 cat .compmake.rc
-                make clean circle
-              
+                
+        - run:
+            command:  | 
+                make clean circle    
             environment:
                 MCDP_TEST_SKIP_MCDPOPT: 1
                 # MCDP_TEST_LIBRARIES_EXCLUDE = mcdp_theory
