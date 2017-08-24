@@ -57,3 +57,12 @@ jobs:
                 # MCDP_TEST_LIBRARIES = "basic,eversion,libtemplates,multisets_tests,posets,tuple_indexing,tuple_making,uncertainty,comments,documents,making,pop,batteries_v1"
                 MPLBACKEND: agg
                  
+        - run:
+            when: always
+            command: |
+                ./misc/collect-test-artifacts.sh ${CIRCLE_ARTIFACTS} ${CIRCLE_TEST_REPORTS}
+        
+        - store_artifacts:
+              path: out
+              destination: out
+              
