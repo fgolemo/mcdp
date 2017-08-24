@@ -1,0 +1,8 @@
+
+config interactive 0
+config echo_stdout 1
+config echo_stderr 1
+config echo True
+config status_line_enabled True 
+config console_status True
+config console_status_delta 5
