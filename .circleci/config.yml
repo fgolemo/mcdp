@@ -59,7 +59,7 @@ jobs:
 
         - run:
             when: always
-            mmand: |
+            command: |
                 comptests-to-junit  out/comptests/compmake >  out/comptests/junit/junit.xml
         - test-results-store:
                 path: out/comptests/junit
