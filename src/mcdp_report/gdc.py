@@ -14,6 +14,7 @@ from .utils import safe_makedirs
 from contracts import contract
 from mcdp_report.image_source import ImagesSource, ImagesFromPaths, TryMany,\
     NoImageFound
+from mcdp_report.gg_utils import check_not_lfs_pointer
 
 
 __all__ = [
@@ -291,6 +292,8 @@ def choose_best_icon(iconoptions, image_source):
 
 def resize_icon(filename, size):
     check_isinstance(filename, str)
+    contents = open(filename).read()
+    check_not_lfs_pointer(filename, contents)
     
     tmppath = get_mcdp_tmp_dir()
     res = os.path.join(tmppath, 'resized', str(size))

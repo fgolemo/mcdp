@@ -251,5 +251,7 @@ def embed_images_from_library2(soup, library, raise_errors):
 def check_not_lfs_pointer(label, contents):
     if 'git-lfs.github.com' in contents:
         msg = 'File %s is actually a git lfs pointer.' % label
+        msg += '\nThis means that you have not installed Git LFS.'
+        msg += '\nAfter that, perhaps you might recover using `git lfs pull`.'
         raise Exception(msg )
         

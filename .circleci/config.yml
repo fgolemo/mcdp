@@ -2,23 +2,20 @@ version: 2
 jobs:
     build:
      docker:
-        - image: andreacensi/duckietown-xenial-kinetic:10
+        - image: andreacensi/duckietown-xenial-kinetic:11
      parallelism: 4
      steps:
         - checkout
-
- 
+        - run:
+            name: Pulling large files.
+            command: |
+                # git lfs version
+                # git lfs pull
         - run:
             name: deps
             command: |
-                apt-get install -y pdftk bibtex2html libxml2-dev libxslt1-dev libffi6 libffi-dev python-dev python-numpy python-matplotlib virtualenv
                 pip install -U decorator>=4.1.0
-                
-        - run:
-            name: prince
-            command: |
-                wget https://www.princexml.com/download/prince_11.3-1_ubuntu16.04_amd64.deb
-                dpkg -i prince_11.3-1_ubuntu16.04_amd64.deb
+                 
                 
         - run:
             name: NPM
