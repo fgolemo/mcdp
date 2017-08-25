@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# Author: Andrea Censi <acensi@idsc.mavt.ethz.ch>
  
 import logging
 import os

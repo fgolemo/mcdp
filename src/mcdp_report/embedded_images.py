@@ -7,13 +7,15 @@ import re
 from bs4 import BeautifulSoup
 from bs4.element import Tag
 from contracts import contract
-from contracts.utils import check_isinstance
+from contracts.utils import check_isinstance, raise_wrapped
 
 from mcdp import logger
 from mcdp_utils_misc import get_md5
 from mcdp_utils_xml import add_style, add_class
 
 from .pdf_conversion import png_from_pdf
+from mcdp_report.pdf_conversion import ConversionError
+from mcdp_utils_xml.note_errors_inline import note_error_msg
 
 
 # def embed_images(html, basedir):
@@ -289,7 +291,7 @@ def embed_pdf_images(soup, resolve, density):
         if tag.has_attr('src') and tag['src'].lower().endswith('pdf'):
             embed_pdf_image(tag, resolve, density)
          
-def embed_pdf_image(tag, resolve, density):
+def embed_pdf_image(tag, resolve, density, raise_on_error):
     assert tag.name == 'img'
     assert tag.has_attr('src')
     #print('!!embedding %s' % str(tag))
@@ -302,7 +304,17 @@ def embed_pdf_image(tag, resolve, density):
 
     # convert PDF to PNG
     # density = pixels per inch
-    data_png = png_from_pdf(data_pdf, density=density)
+    try:
+        data_png = png_from_pdf(data_pdf, density=density)
+    except ConversionError as e:
+        msg = 'I was not able to convert the PDF "%s" to PNG.' % tag['src']
+        if raise_on_error:
+            raise_wrapped(ConversionError, e, msg, compact=True)
+        else:
+            logger.error(msg)
+            note_error_msg(tag, msg)
+        return 
+        
     # get PNG image size in pixels
     width_px, height_px = get_pixel_width_height_of_png(data_png)
     # compute what was the original width of PDF in points

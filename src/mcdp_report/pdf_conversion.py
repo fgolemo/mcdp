@@ -5,7 +5,10 @@ import warnings
 
 from system_cmd.meat import system_cmd_result
 from system_cmd.structures import CmdException
+from contracts.utils import raise_wrapped
 
+class ConversionError(Exception):
+    pass
 
 def png_from_pdf(pdf_data, density):
     """ Converts a pdf to png with the given density """
@@ -36,8 +39,9 @@ def png_from_pdf(pdf_data, density):
                      display_stderr=False,
                      raise_on_error=True)
 
-        except CmdException:
-            raise
+        except CmdException as e:
+            msg = 'I was not able to use Imagemagick to convert an image.'
+            raise_wrapped(ConversionError, e, msg, compact=True)
         
         r = open(out,'rb').read()
         return r
