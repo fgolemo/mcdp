@@ -1,28 +1,27 @@
 # -*- coding: utf-8 -*-
+from compmake.utils.friendly_path_imp import friendly_path
+from contracts import contract
+import getpass
 import logging
+from mcdp import logger
+from mcdp.exceptions import DPSyntaxError
+from mcdp_docs.check_bad_input_files import check_bad_input_file_presence
+from mcdp_library import MCDPLibrary
+from mcdp_library.stdlib import get_test_librarian
+from mcdp_utils_misc import expand_all
+from mcdp_utils_misc import locate_files, get_md5
 import os
 import tempfile
 
-from contracts import contract
 from contracts.utils import raise_wrapped
 from quickapp import QuickApp
 from reprep.utils import natsorted
-
-from mcdp import logger
-from mcdp.exceptions import DPSyntaxError
-from mcdp_library import MCDPLibrary
-from mcdp_library.stdlib import get_test_librarian
-from mcdp_utils_misc import locate_files, get_md5
-from mcdp_utils_misc import expand_all
 
 from .github_edit_links import add_edit_links
 from .manual_constants import MCDPManualConstants
 from .manual_join_imp import manual_join
 from .minimal_doc import get_minimal_document
 from .read_bibtex import run_bibtex2html
-import getpass
-from compmake.utils.friendly_path_imp import friendly_path
-from mcdp_docs.check_bad_input_files import check_bad_input_file_presence
 
 
 class RenderManual(QuickApp):

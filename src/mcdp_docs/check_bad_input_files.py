@@ -23,6 +23,9 @@ def check_bad_input_file_presence(d):
         x = ext if  ext else '(no ext)'
             
         s += '\n %3d  %10s  files' % ( len(ext2filenames[ext]), x)
+        
+        if len(ext) > 4:
+            logger.warn(ext2filenames[ext])
     logger.info(s)
         
     
