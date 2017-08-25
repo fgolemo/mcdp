@@ -233,8 +233,8 @@ def embed_images_from_library2(soup, library, raise_errors=True):
     
     from mcdp_report.embedded_images import embed_img_data, embed_pdf_images
     
-    embed_pdf_images(soup, resolve, density)
-    embed_img_data(soup, resolve)
-    return None
+    embed_pdf_images(soup, resolve, density, raise_errors)
+    embed_img_data(soup, resolve, raise_on_error=raise_errors)
+    
          
 

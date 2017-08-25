@@ -234,7 +234,8 @@ def get_ext_for_mime(mime):
     return ext
 
 
-def embed_img_data(soup, resolve, img_extensions = ['png', 'jpg', 'PNG', 'JPG', 'svg', 'SVG']):
+def embed_img_data(soup, resolve, raise_on_error, img_extensions=['png', 'jpg', 'jpeg', 'JPEG',
+                                                    'PNG', 'JPG', 'svg', 'SVG']):
     """
         resolve: ref -> str  or None --- how to get the data
     """
@@ -251,8 +252,13 @@ def embed_img_data(soup, resolve, img_extensions = ['png', 'jpg', 'PNG', 'JPG', 
              
             data = resolve(href)
             if data is None:
-                logger.error('embed_img_data: Could not find file %s' % href)
-                continue
+                if raise_on_error:
+                    msg = 'embed_img_data: Could not find file %s' % href
+                    raise Exception(msg) # XXX
+                else:
+                    logger.error(msg)
+                    note_error_msg(tag, msg)
+                    continue
             
             check_isinstance(data, str)
             tag['src'] = data_encoded_for_src(data, ext)
@@ -282,16 +288,16 @@ def embed_svg_images(soup, extensions=('png', 'jpg')):
                 tag[HREF] = data_encoded_for_src(data, ext)
 
 
-def embed_pdf_images(soup, resolve, density):
+def embed_pdf_images(soup, resolve, density, raise_on_error):
     """ 
         Converts PDFs to PNGs and embeds them
         resolve: filename --> string
     """  
     for tag in soup.select('img'):
         if tag.has_attr('src') and tag['src'].lower().endswith('pdf'):
-            embed_pdf_image(tag, resolve, density)
+            embed_pdf_image(tag, resolve, density, raise_on_error)
          
-def embed_pdf_image(tag, resolve, density, raise_on_error):
+def embed_pdf_image(tag, resolve, density, raise_on_error=True):
     assert tag.name == 'img'
     assert tag.has_attr('src')
     #print('!!embedding %s' % str(tag))
