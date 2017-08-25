@@ -27,7 +27,10 @@ def check_bad_input_file_presence(d):
 #         if len(ext) > 4:
 #             logger.warn(ext2filenames[ext])
     logger.info(s)
-        
+    check_lfs_checkout(ext2filenames)
+    no_forbidden(ext2filenames)
+    
+def no_forbidden(ext2filenames):
     
     def check(ext, msg):
         if ext in ext2filenames:
@@ -40,4 +43,14 @@ def check_bad_input_file_presence(d):
     check('.JPG', 'Use lower case "jpg". ')
     check('.jpeg', 'Use "jpg", not "jpeg". ')
     check('.JPEG', 'Use lower case "jpg", not "JPEG". ')
+    
+def check_lfs_checkout(ext2filenames):
+    lfs_extensions = ['.docx', '.pdf', '.xlsx', '.png', '.pptx', '.key',
+     '.JPG', '.JPEG', '.jpg', '.PDF' ,'.pdf', '.PNG', '.png']
+    for ext in lfs_extensions:
+        for filenames in ext2filenames[ext]:
+            # check_not_lfs_pointer(fn)
+            pass
+   
+    
     

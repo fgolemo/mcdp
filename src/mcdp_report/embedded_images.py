@@ -233,7 +233,7 @@ def get_ext_for_mime(mime):
         
     return ext
 
-
+    
 def embed_img_data(soup, resolve, raise_on_error, img_extensions=['png', 'jpg', 'jpeg', 'JPEG',
                                                     'PNG', 'JPG', 'svg', 'SVG']):
     """
@@ -256,6 +256,7 @@ def embed_img_data(soup, resolve, raise_on_error, img_extensions=['png', 'jpg', 
                 continue
              
             data = resolve(href)
+            
             if data is None:
                 msg = 'embed_img_data: Could not find file %s' % href
                 

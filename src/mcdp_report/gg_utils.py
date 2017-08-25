@@ -234,6 +234,8 @@ def embed_images_from_library2(soup, library, raise_errors):
             logger.error(str(e))
             return None
         data = f['data']
+        
+        check_not_lfs_pointer(f['realpath'], data)
         # realpath = f['realpath']
         return data
             
@@ -246,3 +248,8 @@ def embed_images_from_library2(soup, library, raise_errors):
     
          
 
+def check_not_lfs_pointer(label, contents):
+    if 'git-lfs.github.com' in contents:
+        msg = 'File %s is actually a git lfs pointer.' % label
+        raise Exception(msg )
+        
