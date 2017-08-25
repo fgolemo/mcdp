@@ -7,6 +7,7 @@ jobs:
      steps:
         - checkout
 
+ 
         - run:
             name: deps
             command: |
@@ -27,10 +28,18 @@ jobs:
                 npm install MathJax-node jsdom@9.3 less
 
         - run:
+            name: update comptests
+            command: |
+                pip uninstall -y comptests
+                python setup.py develop
+                python -c "import comptests; print comptests.__version__"
+  
+        - run:
             name: Install 
             command: |
                 python setup.py develop
 
+  
         - run:
             name: Make sure things are ok
             command:  | 

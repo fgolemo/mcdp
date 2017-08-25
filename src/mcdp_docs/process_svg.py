@@ -2,7 +2,6 @@
 
 from mcdp_utils_misc.locate_files_imp import locate_files
 import os
-import sys
 from system_cmd import system_cmd_result
 from mcdp_utils_misc.fileutils import create_tmpdir
 from compmake.utils.friendly_path_imp import friendly_path
