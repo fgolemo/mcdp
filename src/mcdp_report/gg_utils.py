@@ -214,17 +214,25 @@ def gg_get_format(gg, data_format):
 
 def embed_images_from_library2(soup, library, raise_errors):
     """ Resolves images from library """
+    
     def resolve(href):
         #print('resolving %r' % href)
+        if href.startswith('http'):
+            msg = 'I am not able to download external resources, such as:'
+            msg += '\n  '  + href
+            logger.error(msg)
+            return None
+        
         try:
             f = library._get_file_data(href)
-        except DPSemanticError:
-            if raise_errors:
-                raise
-            else:
-                msg = 'Could not find file %r.' % href
-                logger.error(msg)
-                return None
+        except DPSemanticError as e:
+#             if raise_errors:
+#                 raise
+#             else:
+            msg = 'Could not find file %r.' % href
+            logger.error(msg)
+            logger.error(str(e))
+            return None
         data = f['data']
         # realpath = f['realpath']
         return data

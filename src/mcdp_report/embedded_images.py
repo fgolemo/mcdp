@@ -245,6 +245,11 @@ def embed_img_data(soup, resolve, raise_on_error, img_extensions=['png', 'jpg', 
         if href.startswith('data:'):
             continue
         
+        if href.startswith('http'):
+            msg = 'I will not embed remote files, such as %s: ' % href
+            logger.warning(msg)
+            continue
+        
         for ext in img_extensions:
             
             if not href.endswith('.' + ext):
@@ -304,7 +309,11 @@ def embed_pdf_image(tag, resolve, density, raise_on_error=True):
     #print('!!embedding %s' % str(tag))
     #raise Exception(str(tag))
     # load pdf data    
-    data_pdf = resolve(tag['src'])
+    src = tag['src']
+    if src.startswith('http'):
+        msg = 'I will not embed remote files, such as %s: ' % src
+        logger.warning(msg)
+    data_pdf = resolve(src)
     if data_pdf is None:
         add_class(tag, 'missing-image')
         return
