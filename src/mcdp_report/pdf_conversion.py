@@ -27,6 +27,7 @@ def png_from_pdf(pdf_data, density):
             '-background', 'white',
             '-alpha','remove',
             '-alpha','off', 
+            '-strip',
         ]
         shave = True
         if shave:
