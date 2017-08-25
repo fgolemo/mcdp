@@ -22,6 +22,7 @@ from .minimal_doc import get_minimal_document
 from .read_bibtex import run_bibtex2html
 import getpass
 from compmake.utils.friendly_path_imp import friendly_path
+from mcdp_docs.check_bad_input_files import check_bad_input_file_presence
 
 
 class RenderManual(QuickApp):
@@ -67,6 +68,9 @@ class RenderManual(QuickApp):
         if out_dir is None:
             out_dir = os.path.join('out', 'mcdp_render_manual')
 
+        for s in src_dirs:
+            check_bad_input_file_presence(s)
+            
         manual_jobs(context, 
                     src_dirs=src_dirs, 
                     output_file=output_file,
@@ -208,35 +212,6 @@ def get_main_template(root_dir):
     
     template = open(fn).read()
     return template
-
-# @contract(compmake_context=Context, promise=Promise, filenames='seq[>=1](str)')
-# def erase_job_if_files_updated(compmake_context, promise, filenames):
-#     """ Invalidates the job if the filename is newer """
-#     check_isinstance(promise, Promise)
-#     check_isinstance(filenames, (list, tuple))
-# 
-#     def friendly_age(ts):
-#         age = time.time() - ts
-#         return '%.3fs ago' % age
-# 
-#     filenames = list(filenames)
-#     for _ in filenames:
-#         if not os.path.exists(_):
-#             msg = 'File does not exist: %s' % _
-#             raise ValueError(msg)
-#     last_update = max(os.path.getmtime(_) for _ in filenames)
-#     db = compmake_context.get_compmake_db()
-#     job_id = promise.job_id
-#     cache = get_job_cache(job_id, db)
-#     if cache.state == cache.DONE:
-#         done_at = cache.timestamp
-#         if done_at < last_update:
-#             show_filenames = filenames if len(filenames) < 3 else '(too long to show)' 
-#             logger.info('Cleaning job %r because files updated %s' % (job_id, show_filenames))
-#             logger.info('  files last updated: %s' % friendly_age(last_update))
-#             logger.info('       job last done: %s' % friendly_age(done_at))
-# 
-#             mark_to_remake(job_id, db)
 
 def generate_metadata(src_dir):
     template = MCDPManualConstants.pdf_metadata_template
