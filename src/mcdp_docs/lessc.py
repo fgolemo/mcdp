@@ -27,8 +27,9 @@ def run_lessc(soup):
         try:
             s2 = lessc_string(s1)    
         except LesscError as e:
-            logger.error('less failed (ignored)')
-            logger.error(e)
+            msg = 'Could not convert string using less (ignored)'
+            msg += '\n'+indent(e, '>> ')
+            logger.warning(msg)
             continue
         
         s2 = unicode(s2, 'utf-8')
@@ -69,8 +70,9 @@ def lessc_string(s1):
                     raise_on_error=False)
             
             if res.ret:
-                msg = 'lessc error (ret = %d).' % res.ret 
-                msg += '\n\n' + indent(res.stderr, '  |')
+                msg = 'lessc error (return value = %d).' % res.ret 
+                msg += '\n\n' + indent(res.stderr, '',  'stderr:')
+                msg += '\n\n' + indent(res.stdout, '',  'stdout:')
                 raise LesscError(msg)
             
             with open(f2) as f:

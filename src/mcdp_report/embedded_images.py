@@ -252,8 +252,9 @@ def embed_img_data(soup, resolve, raise_on_error, img_extensions=['png', 'jpg', 
              
             data = resolve(href)
             if data is None:
+                msg = 'embed_img_data: Could not find file %s' % href
+                
                 if raise_on_error:
-                    msg = 'embed_img_data: Could not find file %s' % href
                     raise Exception(msg) # XXX
                 else:
                     logger.error(msg)
