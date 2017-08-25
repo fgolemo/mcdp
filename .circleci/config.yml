@@ -56,7 +56,14 @@ jobs:
                 # MCDP_TEST_LIBRARIES_EXCLUDE = mcdp_theory
                 # MCDP_TEST_LIBRARIES = "basic,eversion,libtemplates,multisets_tests,posets,tuple_indexing,tuple_making,uncertainty,comments,documents,making,pop,batteries_v1"
                 MPLBACKEND: agg
-                 
+
+        - run:
+            when: always
+            mmand: |
+                comptests-to-junit  out/comptests/compmake >  out/comptests/junit/junit.xml
+        - test-results-store:
+                path: out/comptests/junit
+                     
         - run:
             when: always
             command: |

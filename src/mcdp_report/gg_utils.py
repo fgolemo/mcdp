@@ -212,7 +212,7 @@ def gg_get_format(gg, data_format):
         raise ValueError('No known format %r.' % data_format)
 
 
-def embed_images_from_library2(soup, library, raise_errors=True):
+def embed_images_from_library2(soup, library, raise_errors):
     """ Resolves images from library """
     def resolve(href):
         #print('resolving %r' % href)
@@ -233,7 +233,7 @@ def embed_images_from_library2(soup, library, raise_errors=True):
     
     from mcdp_report.embedded_images import embed_img_data, embed_pdf_images
     
-    embed_pdf_images(soup, resolve, density, raise_errors)
+    embed_pdf_images(soup, resolve, density, raise_on_error=raise_errors)
     embed_img_data(soup, resolve, raise_on_error=raise_errors)
     
          

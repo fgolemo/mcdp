@@ -17,8 +17,8 @@ from .make_console_pre import mark_console_pres
 from .make_figures import make_figure_from_figureid_attr
 from .prerender_math import escape_for_mathjax_back, escape_for_mathjax
 from .videos import make_videos
-from mcdp_docs.github_file_ref.display_file_imp import display_files
-from mcdp_docs.github_file_ref.substitute_github_refs_i import substitute_github_refs
+from .github_file_ref.display_file_imp import display_files
+from .github_file_ref.substitute_github_refs_i import substitute_github_refs
 
 
 __all__ = [
@@ -29,7 +29,7 @@ __all__ = [
 def render_complete(library, s, raise_errors, realpath, generate_pdf=False,
                     check_refs=False, use_mathjax=True, filter_soup=None,
                     symbols=None,
-                    raise_missing_image_errors = False):
+                    raise_missing_image_errors =True):
     """
         Transforms markdown into html and then renders the mcdp snippets inside.
         
