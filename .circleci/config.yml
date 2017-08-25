@@ -60,6 +60,7 @@ jobs:
         - run:
             when: always
             command: |
+                mkdir -p out/comptests/junit
                 comptests-to-junit  out/comptests/compmake >  out/comptests/junit/junit.xml
         - test-results-store:
                 path: out/comptests/junit
