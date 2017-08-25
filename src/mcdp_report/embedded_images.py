@@ -313,10 +313,17 @@ def embed_pdf_image(tag, resolve, density, raise_on_error=True):
     if src.startswith('http'):
         msg = 'I will not embed remote files, such as %s: ' % src
         logger.warning(msg)
+        
     data_pdf = resolve(src)
     if data_pdf is None:
-        add_class(tag, 'missing-image')
-        return
+        msg = 'Could not find PDF file %r.' % src
+        if raise_on_error:
+            raise Exception(msg) # xxx
+        else:
+            logger.error(msg)
+            note_error_msg(tag, msg)
+            add_class(tag, 'missing-image')
+            return
 
     # convert PDF to PNG
     # density = pixels per inch

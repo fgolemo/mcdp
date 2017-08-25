@@ -5,7 +5,7 @@ import warnings
 
 from system_cmd.meat import system_cmd_result
 from system_cmd.structures import CmdException
-from contracts.utils import raise_wrapped
+from contracts.utils import raise_wrapped, indent
 
 class ConversionError(Exception):
     pass
@@ -41,6 +41,16 @@ def png_from_pdf(pdf_data, density):
 
         except CmdException as e:
             msg = 'I was not able to use Imagemagick to convert an image.'
+            
+            try: 
+                version = system_cmd_result(cwd='.', cmd=['convert', '--version'],
+                     display_stdout=False,
+                     display_stderr=False,
+                     raise_on_error=True)
+                msg += '\n ImageMagick "convert" version:'
+                msg += '\n' + indent(version.stdout, ' | ')
+            except: 
+                pass
             raise_wrapped(ConversionError, e, msg, compact=True)
         
         r = open(out,'rb').read()
