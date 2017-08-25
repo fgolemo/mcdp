@@ -64,8 +64,7 @@ def process_svg_file(filename, target, preamble, proc_dir):
             os.makedirs(proc_dir)
         except:
             pass
-    
-    texfile = 'file.tex'
+     
 
     logger.debug('Copying SVG file to temp directory %s '% proc_dir)
     shutil.copy(filename, join(proc_dir, 'in.svg.tmp'))
@@ -102,27 +101,28 @@ def process_svg_file(filename, target, preamble, proc_dir):
     s = s.strip() 
     s = s.replace('PREAMBLE', os.path.realpath(preamble))
 
-    fn = join(proc_dir, texfile)
+    fn = join(proc_dir, 'file.tex')
     with open(fn, 'w') as f:
         f.write(s)
 
     # compile
     logger.debug('Compile using latex..')
-    cmd = [latex_cmd, texfile]
+    cmd = [latex_cmd, 'file.tex']
     system_cmd_result(cwd=proc_dir, cmd=cmd,
                       display_stdout=False,
                       display_stderr=False,
                       raise_on_error=True)
     # crop
     logger.debug('Crop the pdf..')
-    cmd = [crop_cmd, 'out.pdf', 'out.pdf']
+    cmd = [crop_cmd, 'file.pdf', 'cropped.pdf']
     system_cmd_result(cwd=proc_dir, cmd=cmd,
                       display_stdout=False,
                       display_stderr=False,
                       raise_on_error=True)
     
+    
     logger.debug('Copying to target %r..' % target)
-    shutil.copy(join(proc_dir, 'out.pdf'), target)
+    shutil.copy(join(proc_dir, 'cropped.pdf'), target)
 
 def main(args):
     if len(args) != 3:
@@ -134,5 +134,4 @@ def main(args):
 
 
 if __name__ == '__main__':
-    from mcdp import logger
     wrap_script_entry_point(main, logger)
