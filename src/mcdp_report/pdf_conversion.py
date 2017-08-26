@@ -35,10 +35,20 @@ def png_from_pdf(pdf_data, density):
         cmd += ['-strip']
         cmd += [out]
         try:
-            system_cmd_result(cwd='.', cmd=cmd,
+            res = system_cmd_result(cwd='.', cmd=cmd,
                      display_stdout=False,
                      display_stderr=False,
                      raise_on_error=True)
+            
+            if not os.path.exists(out):
+                msg = "ImageMagick did not fail, but it didn't write the image it promised."
+                msg += "\n"+indent(" ".join(cmd), " invocation: ") 
+                msg += "\n"+ indent(res.stdout or "(no output)", '|', 'stdout: |')
+                msg += "\n"+ indent(res.stderr or "(no output)", '|', 'stderr: |')
+                where = 'problematic.pdf'
+                msg += "\n I will copy the problematic pdf file to %s" % where
+                shutil.copy(tmpfile, where)
+                raise CmdException(msg)
 
         except CmdException as e:
             msg = 'I was not able to use Imagemagick to convert an image.'
