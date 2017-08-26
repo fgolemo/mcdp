@@ -7,18 +7,18 @@ from mcdp_library import MCDPLibrary
 from mcdp_report.gg_utils import embed_images_from_library2
 from mcdp_utils_xml import to_html_stripping_fragment, bs, describe_tag
 
-from contracts.utils import raise_desc
+from contracts.utils import raise_desc, indent
 
 from .check_missing_links import check_if_any_href_is_invalid, fix_subfig_references
 from .elements_abbrevs import other_abbrevs
+from .github_file_ref.display_file_imp import display_files
+from .github_file_ref.substitute_github_refs_i import substitute_github_refs
 from .lessc import run_lessc
 from .macros import replace_macros
 from .make_console_pre import mark_console_pres
 from .make_figures import make_figure_from_figureid_attr
 from .prerender_math import escape_for_mathjax_back, escape_for_mathjax
 from .videos import make_videos
-from .github_file_ref.display_file_imp import display_files
-from .github_file_ref.substitute_github_refs_i import substitute_github_refs
 
 
 __all__ = [
@@ -146,7 +146,13 @@ def render_complete(library, s, raise_errors, realpath, generate_pdf=False,
     soup = bs(s)
     mark_console_pres(soup)
     
-    substitute_github_refs(soup, defaults={})
+    try:
+        substitute_github_refs(soup, defaults={})
+    except Exception as e:
+        msg = 'I got an error while substituting github: references.'
+        msg += '\nI will ignore this error because it might not be the fault of the writer.'
+        msg += '\n\n'+indent(str(e), '|', ' error: |')
+        logger.warn(msg)
     # must be before make_figure_from_figureid_attr()
     display_files(soup, defaults={})
     

@@ -63,7 +63,6 @@ def process_svg_file(filename, target, preamble, proc_dir):
             os.makedirs(proc_dir)
         except:
             pass
-     
 
     logger.debug('Copying SVG file to temp directory %s '% proc_dir)
     shutil.copy(filename, join(proc_dir, 'in.svg.tmp'))
