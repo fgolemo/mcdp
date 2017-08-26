@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """ Checks that all important dependencies are installed """
 from .logs import logger
+import traceback
 
 __all__ = []
 
@@ -18,8 +19,8 @@ try:
     import quickapp  # @UnusedImport
 except ImportError as e:  # pragma: no cover
     logger.error(e)
-    suggest_package('python-numpy')
-    raise Exception('Numpy not available')
+    suggest_package('quickapp')
+    raise Exception('quickapp not available: %s' % traceback.format_exc(e))
 
 try:
     import numpy
