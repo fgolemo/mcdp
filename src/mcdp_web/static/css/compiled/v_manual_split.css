@@ -1818,12 +1818,6 @@ div#tocdiv .toc_a_for_part {
 html {
   background-color: white;
 }
-/* We cannot have tocdiv: fixed if we tranform the body */
-#tocdiv {
-  position: fixed;
-  left: 0;
-  top: 0;
-}
 body {
   transform: none;
 }
