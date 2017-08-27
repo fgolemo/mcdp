@@ -27,6 +27,7 @@ class Render(QuickAppBase):
         params.add_flag('cache')
         params.add_flag('contracts')
         params.add_flag('pdf')
+        params.add_flag('forgiving')
         params.add_string('stylesheet', default='v_mcdp_render_default')
         params.add_string('symbols', default=None)
         params.add_flag('pdf_figures', help='Generate PDF version of code and figures.')
@@ -99,9 +100,11 @@ class Render(QuickAppBase):
             else:
                 use_out_dir = os.path.join('out', 'mcdp_render')
 
+            raise_errors = not options.forgiving
+            
             html_filename = render(library, docname, data, realpath, use_out_dir, 
                                    generate_pdf, stylesheet=stylesheet,
-                                   symbols=symbols)
+                                   symbols=symbols, raise_errors=raise_errors)
             if options.pdf:
                 run_prince(html_filename)
 
@@ -119,7 +122,7 @@ def run_prince(html_filename):
     
     
 def render(library, docname, data, realpath, out_dir, generate_pdf, stylesheet,
-           symbols):
+           symbols, raise_errors):
     
     if MCDPConstants.pdf_to_png_dpi < 300:
         msg =( 'Note that pdf_to_png_dpi is set to %d, which is not suitable for printing'
@@ -132,7 +135,7 @@ def render(library, docname, data, realpath, out_dir, generate_pdf, stylesheet,
     out = os.path.join(out_dir, docname + '.html')
     
     html_contents = render_complete(library=library,
-                                    s=data, raise_errors=True, realpath=realpath,
+                                    s=data, raise_errors=raise_errors, realpath=realpath,
                                     generate_pdf=generate_pdf,
                                     symbols=symbols)
 
