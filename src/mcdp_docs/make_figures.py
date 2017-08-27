@@ -15,6 +15,8 @@ def make_figure_from_figureid_attr(soup):
         <figure id="fig:ure">
             <e figure-id='fig:ure' figure-caption='ciao'/>
             <figcaption>ciao</figcaption>
+            
+            <div style='clear: both;'></div> <!-- for floating stuff-->
         </figure>
 
         Makes a table:
@@ -25,9 +27,7 @@ def make_figure_from_figureid_attr(soup):
         
         figure-id
         figure-class
-        
-        
-        
+
         
     """
     from mcdp_docs.highlight import add_class 
@@ -86,13 +86,24 @@ def make_figure_from_figureid_attr(soup):
             outside['style'] = towrap['figure-style']
         if towrap.has_attr('figure-class'):
             for k in towrap['figure-class'].split(' '):
+                logger.debug('figure-class: %s' % k)
                 add_class(towrap, k)
+                ## XXX but not to figure itself?
+                add_class(fig, k)
                 add_class(outside, k )
         
         i = parent.index(towrap)
         towrap.extract()
         figcontent = Tag(name='div', attrs={'class':'figcontent'})
         figcontent.append(towrap)
+        
+#         <div style='clear: both;'></div> <!-- for floating stuff-->
+
+        # Not 100% where it should go
+        breaking_div = Tag(name='div')
+        breaking_div.attrs['style'] = 'clear: both'
+        figcontent.append(breaking_div)
+        
         fig.append(figcontent)
         
         if caption_below:

@@ -14,6 +14,8 @@ def bs(fragment):
     assert res.name == 'fragment'
     return res
 
+    
+
 def to_html_stripping_fragment(soup):
     """ Returns a string encoded in UTF-8 """
     assert soup.name == 'fragment'
@@ -41,3 +43,12 @@ def check_html_fragment(m, msg=None):
         msg2 += 'This appears to be a complete document instead of a fragment.'
         raise_desc(ValueError, msg2, m=m)
         
+## Use these for entire documents
+
+def bs_entire_document(s):
+    parsed = BeautifulSoup(s, 'lxml', from_encoding='utf-8')
+    assert parsed.find('body') is not None
+    return parsed
+
+def to_html_entire_document(soup):
+    return str(soup)

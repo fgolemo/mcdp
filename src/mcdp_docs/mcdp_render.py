@@ -12,11 +12,14 @@ from decent_params import UserError
 from quickapp import QuickAppBase
 
 from .minimal_doc import get_minimal_document
+from mcdp_utils_xml.parsing import \
+    bs_entire_document, to_html_entire_document
+from mcdp_docs.manual_join_imp import document_final_pass_after_toc,\
+    document_final_pass_before_toc, generate_and_add_toc
 
 
-class Render(QuickAppBase):
-    """ Evaluates one of the constants """
-
+class Render(QuickAppBase): 
+    """ Render a single document """
     def define_program_options(self, params):
         params.add_string('out', help='Output dir', default=None)
 
@@ -24,7 +27,9 @@ class Render(QuickAppBase):
         params.add_flag('cache')
         params.add_flag('contracts')
         params.add_flag('pdf')
+        params.add_flag('forgiving')
         params.add_string('stylesheet', default='v_mcdp_render_default')
+        params.add_string('symbols', default=None)
         params.add_flag('pdf_figures', help='Generate PDF version of code and figures.')
 
         params.add_string('config_dirs', default='.', short='-D',
@@ -37,6 +42,10 @@ class Render(QuickAppBase):
 
         options = self.get_options()
 
+        symbols=self.options.symbols
+        if symbols is not None:
+            symbols = open(symbols).read()
+            
         if not options.contracts:
             disable_all()
 
@@ -91,8 +100,11 @@ class Render(QuickAppBase):
             else:
                 use_out_dir = os.path.join('out', 'mcdp_render')
 
+            raise_errors = not options.forgiving
+            
             html_filename = render(library, docname, data, realpath, use_out_dir, 
-                                   generate_pdf, stylesheet=stylesheet)
+                                   generate_pdf, stylesheet=stylesheet,
+                                   symbols=symbols, raise_errors=raise_errors)
             if options.pdf:
                 run_prince(html_filename)
 
@@ -109,7 +121,8 @@ def run_prince(html_filename):
     logger.info('Written %s' % rel) 
     
     
-def render(library, docname, data, realpath, out_dir, generate_pdf, stylesheet):
+def render(library, docname, data, realpath, out_dir, generate_pdf, stylesheet,
+           symbols, raise_errors):
     
     if MCDPConstants.pdf_to_png_dpi < 300:
         msg =( 'Note that pdf_to_png_dpi is set to %d, which is not suitable for printing'
@@ -122,13 +135,27 @@ def render(library, docname, data, realpath, out_dir, generate_pdf, stylesheet):
     out = os.path.join(out_dir, docname + '.html')
     
     html_contents = render_complete(library=library,
-                                    s=data, raise_errors=True, realpath=realpath,
-                                    generate_pdf=generate_pdf)
+                                    s=data, 
+                                    raise_errors=raise_errors, 
+                                    raise_missing_image_errors=raise_errors,
+                                    realpath=realpath,
+                                    generate_pdf=generate_pdf,
+                                    symbols=symbols)
 
+    
     title = docname
     
     doc = get_minimal_document(html_contents, title=title, stylesheet=stylesheet,
                                add_markdown_css=True, add_manual_css=True)
+    
+    soup = bs_entire_document(doc)
+    
+    document_final_pass_before_toc(soup, remove=None, remove_selectors=[])
+    generate_and_add_toc(soup)
+    document_final_pass_after_toc(soup)
+    
+    doc = to_html_entire_document(soup)
+
 
     d = os.path.dirname(out)
     if not os.path.exists(d):

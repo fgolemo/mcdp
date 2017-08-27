@@ -29,7 +29,7 @@ __all__ = [
 def render_complete(library, s, raise_errors, realpath, generate_pdf=False,
                     check_refs=False, use_mathjax=True, filter_soup=None,
                     symbols=None,
-                    raise_missing_image_errors =True):
+                    raise_missing_image_errors = True):
     """
         Transforms markdown into html and then renders the mcdp snippets inside.
         

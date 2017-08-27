@@ -1699,6 +1699,10 @@ ol code {
 strong {
   text-shadow: 0.04pt 0 #af5757;
 }
+/*figure.flow-subfigures div.generated-figure-wrap { display: inline-block; }*/
+figure.flow-subfigures div.generated-figure-wrap {
+  display: inline-block;
+}
 @media screen {
   body {
     display: inline-block;
@@ -1817,6 +1821,12 @@ div#tocdiv .toc_a_for_part {
 }
 html {
   background-color: white;
+}
+/* We cannot have tocdiv: fixed if we tranform the body */
+#tocdiv {
+  position: fixed;
+  left: 0;
+  top: 0;
 }
 body {
   transform: none;
