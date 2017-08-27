@@ -1539,21 +1539,21 @@ section > svg {
   display: none;
 }
 h1:not([nonumber])[id^="app:"]::before {
-  content: 'Appendix\0000a0' attr(label-number);
+  content: attr(label-what) '\0000a0' attr(label-number);
   display: block;
   font-variant: small-caps;
   font-size: smaller;
   margin-bottom: 0.5em;
 }
 h1:not([nonumber])[id^="sec:"]::before {
-  content: 'Chapter\0000a0' attr(label-number);
+  content: attr(label-what) '\0000a0' attr(label-number);
   display: block;
   font-variant: small-caps;
   font-size: smaller;
   margin-bottom: 0.5em;
 }
 h1:not([nonumber])[id^="part:"]::before {
-  content: 'Part\0000a0' attr(label-number);
+  content: attr(label-what) '\0000a0' attr(label-number);
   display: block;
   font-variant: small-caps;
   font-size: smaller;
