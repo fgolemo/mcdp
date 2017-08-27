@@ -27,9 +27,7 @@ def make_figure_from_figureid_attr(soup):
         
         figure-id
         figure-class
-        
-        
-        
+
         
     """
     from mcdp_docs.highlight import add_class 

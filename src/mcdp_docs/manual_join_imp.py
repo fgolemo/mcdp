@@ -3,13 +3,12 @@
 from collections import OrderedDict
 import json
 import sys
-import warnings
 
 from bs4 import BeautifulSoup
 from bs4.element import Comment, Tag, NavigableString
+
 from contracts import contract
 from contracts.utils import raise_desc, indent
-
 from mcdp.logs import logger
 from mcdp_docs.moving_copying_deleting import move_things_around
 from mcdp_utils_xml import add_class
@@ -21,7 +20,6 @@ from .minimal_doc import add_extra_css
 from .read_bibtex import extract_bibtex_blocks
 from .tocs import generate_toc, substituting_empty_links, LABEL_WHAT_NUMBER,\
     LABEL_WHAT_NUMBER_NAME, LABEL_WHAT, LABEL_NUMBER, LABEL_NAME, LABEL_SELF
-
 
 
 def get_manual_css_frag():
