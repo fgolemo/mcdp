@@ -19,7 +19,7 @@ from mcdp_docs.manual_join_imp import document_final_pass_after_toc,\
 
 
 class Render(QuickAppBase): 
-
+    """ Render a single document """
     def define_program_options(self, params):
         params.add_string('out', help='Output dir', default=None)
 
