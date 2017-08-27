@@ -236,12 +236,12 @@ class Item(object):
             for item2 in item.depth_first_descendants():
                 yield item2
 
+Label = namedtuple('Label', 'what number label_self')
 
-def number_items2(root):
-    counters = set(['part', 'app', 'sec', 'sub', 'subsub', 'appsub', 'appsubsub', 'par']
-                   + ['fig', 'tab', 'subfig', 'code']
-                   + ['exa', 'rem', 'lem', 'def', 'prop', 'prob', 'thm'])
+Style = namedtuple('Style', 'resets labels')
 
+def get_style_book():
+    
     resets = {
         'part': [],
         'sec': ['sub', 'subsub', 'par'],
@@ -263,7 +263,7 @@ def number_items2(root):
         'prob': [],
         'thm': [],
     }
-    Label = namedtuple('Label', 'what number label_self')
+    
     labels = {
         'part': Label('Part', '${part}', ''),
         'sec': Label('Chapter', '${sec}', ''),
@@ -287,7 +287,68 @@ def number_items2(root):
         'exa': Label('Example', '${exa}', ''),
 
     }
+    return Style(resets, labels)
 
+def get_style_duckietown():
+    resets = {
+        'part': ['sec'],
+        'sec': ['sub', 'subsub', 'par', 'fig', 'tab'],
+        'sub': ['subsub', 'par'],
+        'subsub': ['par'],
+        'app': ['appsub', 'appsubsub', 'par'],
+        'appsub': ['appsubsub', 'par'],
+        'appsubsub': ['par'],
+        'par': [],
+        'fig': ['subfig'],
+        'subfig': [],
+        'tab': [],
+        'code': [],
+        'exa': [],
+        'rem': [],
+        'lem': [],
+        'def': [],
+        'prop': [],
+        'prob': [],
+        'thm': [],
+    }
+    
+
+    labels = {
+        'part': Label('Part', '${part|upper-alpha}', ''),
+        'sec': Label('Unit', '${part|upper-alpha}-${sec}', ''),
+        'sub': Label('Section', '${sec}.${sub}', ''),
+        'subsub': Label('Subsection', '${sec}.${sub}.${subsub}', '${subsub}) '),
+        'par': Label('Paragraph', '${par|lower-alpha}', ''),
+        'app': Label('Appendix', '${app|upper-alpha}', ''),
+        'appsub': Label('Section', '${app|upper-alpha}.${appsub}', ''),
+        'appsubsub': Label('Subsection', '${app|upper-alpha}.${appsub}.${appsubsub}', ''),
+        # global counters
+        'fig': Label('Figure', '${sec}.${fig}', ''),
+        'subfig': Label('Figure', '${sec}.${fig}${subfig|lower-alpha}', '(${subfig|lower-alpha})'),
+        'tab': Label('Table', '${sec}.${tab}', ''),
+        'code': Label('Listing', '${sec}.${code}', ''),
+        'rem': Label('Remark', '${rem}', ''),
+        'lem': Label('Lemma', '${lem}', ''),
+        'def': Label('Definition', '${def}', ''),
+        'prob': Label('Problem', '${prob}', ''),
+        'prop': Label('Proposition', '${prop}', ''),
+        'thm': Label('Theorem', '${thm}', ''),
+        'exa': Label('Example', '${exa}', ''),
+
+    }
+    
+    return Style(resets, labels)
+
+def number_items2(root):
+    counters = set(['part', 'app', 'sec', 'sub', 'subsub', 'appsub', 'appsubsub', 'par']
+                   + ['fig', 'tab', 'subfig', 'code']
+                   + ['exa', 'rem', 'lem', 'def', 'prop', 'prob', 'thm'])
+    
+    style = get_style_book()
+    style = get_style_duckietown()
+    resets = style.resets
+    labels = style.labels
+    
     for c in counters:
         assert c in resets, c
         assert c in labels, c
