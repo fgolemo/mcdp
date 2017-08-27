@@ -8,7 +8,7 @@ import warnings
 from bs4 import BeautifulSoup
 from bs4.element import Comment, Tag, NavigableString
 from contracts import contract
-from contracts.utils import raise_desc
+from contracts.utils import raise_desc, indent
 
 from mcdp.logs import logger
 from mcdp_docs.moving_copying_deleting import move_things_around
@@ -126,91 +126,23 @@ def manual_join(template, files_contents,
 
     do_bib(d, bibhere)
 
-    if True:
-        logger.info('reorganizing contents in <sections>')
-        body2 = reorganize_contents(d.find('body'))
-        body.replace_with(body2)
-    else:
-        warnings.warn('fix')
-        body2 = body
 
-    # Removing
-    all_selectors = []
-    if remove is not None and remove != '':
-        all_selectors.append(remove)
-    if remove_selectors:
-        all_selectors.extend(remove_selectors)
-        
-    logger.debug('all_selectors: %s' % all_selectors)
-        
-    all_removed = ''
-    for selector in all_selectors:
-        nremoved = 0
-        logger.debug('Removing selector %r' % remove)
-        toremove = list(body2.select(selector))
-        logger.debug('Removing %d objects' % len(toremove))
-        for x in toremove:
-            nremoved += 1
-            nd = len(list(x.descendants))
-            logger.debug('removing %s with %s descendants' % (x.name, nd))
-            if nd > 1000:
-                s =  str(x)[:300]
-                logger.debug(' it is %s' %s)
-            x.extract()
-
-            all_removed += '\n\n' + '-' * 50 + ' chunk %d removed\n' % nremoved
-            all_removed += str(x)
-            all_removed += '\n\n' + '-' * 100 + '\n\n'
-
-        logger.info('Removed %d elements of selector %r' % (nremoved, remove))
+    document_final_pass_before_toc(d, remove, remove_selectors)
     
-    if all_removed:
-        with open('parts-removed.html', 'w') as f:
-            f.write(all_removed)
-
-    move_things_around(soup=d)
     
     if hook_before_toc is not None:
         hook_before_toc(soup=d)
     ###
-    logger.info('adding toc')
-    toc = generate_toc(body2)
     
-#     logger.info('TOC:\n' + str(toc))
-    toc_ul = bs(toc).ul
-    toc_ul.extract()
-    assert toc_ul.name == 'ul'
-    toc_ul['class'] = 'toc'
-    toc_ul['id'] = 'main_toc'
-    toc_selector = 'div#toc'
-    tocs = list(d.select(toc_selector))
-    if not tocs:
-        msg = 'Cannot find any element of type %r to put TOC inside.' % toc_selector
-        logger.warning(msg)
-    else:
-        toc_place = tocs[0]
-        toc_place.replaceWith(toc_ul)
+    generate_and_add_toc(d)
 
-    logger.info('checking errors')
-    check_various_errors(d)
-
-    from mcdp_docs.check_missing_links import check_if_any_href_is_invalid
-    logger.info('checking hrefs')
-    check_if_any_href_is_invalid(d)
-
-    # Note that this should be done *after* check_if_any_href_is_invalid()
-    # because that one might fix some references
-    logger.info('substituting empty links')
-    substituting_empty_links(d)
-#     defaults = {'org': 'duckietown', 'repo': 'duckuments'}
-    
-    warn_for_duplicated_ids(d)
+    document_final_pass_after_toc(soup=d)
 
     if extra_css is not None:
         logger.info('adding extra CSS')
         add_extra_css(d, extra_css)
 
-    add_footnote_polyfill(d)
+    document_only_once(d)
 
     logger.info('converting to string')
     # do not use to_html_stripping_fragment - this is a complete doc
@@ -219,6 +151,42 @@ def manual_join(template, files_contents,
     logger.info('done - %d bytes' % len(res))
     return res
 
+def document_final_pass_before_toc(soup, remove, remove_selectors):
+    
+    logger.info('reorganizing contents in <sections>')
+    body = soup.find('body')
+    if body is None:
+        msg = 'Cannot find <body>:\n%s' % indent(str(soup)[:1000], '|')
+        raise ValueError(msg)
+    body2 = reorganize_contents(body)
+    body.replace_with(body2)
+
+
+    # Removing stuff
+    do_remove_stuff(body2, remove_selectors, remove)
+    move_things_around(soup=soup)
+
+    
+def document_final_pass_after_toc(soup):
+    """ This is done to a final document """
+    
+    logger.info('checking errors')
+    check_various_errors(soup)
+
+    from mcdp_docs.check_missing_links import check_if_any_href_is_invalid
+    logger.info('checking hrefs')
+    check_if_any_href_is_invalid(soup)
+
+    # Note that this should be done *after* check_if_any_href_is_invalid()
+    # because that one might fix some references
+    logger.info('substituting empty links')
+    substituting_empty_links(soup)
+    
+    warn_for_duplicated_ids(soup)
+    
+def document_only_once(html_soup):
+    add_footnote_polyfill(html_soup)
+    
 
 def do_bib(soup, bibhere):
     """ find used bibliography entries put them there """
@@ -852,3 +820,60 @@ links = %s;
 #     pre.append(str(id2filename))
 #     body.append(pre)
     return html
+
+
+
+def do_remove_stuff(soup, remove_selectors, remove):
+    all_selectors = []
+    if remove is not None and remove != '':
+        all_selectors.append(remove)
+    if remove_selectors:
+        all_selectors.extend(remove_selectors)
+        
+    logger.debug('all_selectors: %s' % all_selectors)
+        
+    all_removed = ''
+    for selector in all_selectors:
+        nremoved = 0
+        logger.debug('Removing selector %r' % remove)
+        toremove = list(soup.select(selector))
+        logger.debug('Removing %d objects' % len(toremove))
+        for x in toremove:
+            nremoved += 1
+            nd = len(list(x.descendants))
+            logger.debug('removing %s with %s descendants' % (x.name, nd))
+            if nd > 1000:
+                s =  str(x)[:300]
+                logger.debug(' it is %s' %s)
+            x.extract()
+
+            all_removed += '\n\n' + '-' * 50 + ' chunk %d removed\n' % nremoved
+            all_removed += str(x)
+            all_removed += '\n\n' + '-' * 100 + '\n\n'
+
+        logger.info('Removed %d elements of selector %r' % (nremoved, remove))
+    
+    if all_removed:
+        with open('parts-removed.html', 'w') as f:
+            f.write(all_removed)
+            
+
+def generate_and_add_toc(soup):
+    logger.info('adding toc')
+    body= soup.find('body')
+    toc = generate_toc(body)
+    
+#     logger.info('TOC:\n' + str(toc))
+    toc_ul = bs(toc).ul
+    toc_ul.extract()
+    assert toc_ul.name == 'ul'
+    toc_ul['class'] = 'toc'
+    toc_ul['id'] = 'main_toc'
+    toc_selector = 'div#toc'
+    tocs = list(body.select(toc_selector))
+    if not tocs:
+        msg = 'Cannot find any element of type %r to put TOC inside.' % toc_selector
+        logger.warning(msg)
+    else:
+        toc_place = tocs[0]
+        toc_place.replaceWith(toc_ul)
