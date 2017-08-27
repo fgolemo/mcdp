@@ -135,7 +135,10 @@ def render(library, docname, data, realpath, out_dir, generate_pdf, stylesheet,
     out = os.path.join(out_dir, docname + '.html')
     
     html_contents = render_complete(library=library,
-                                    s=data, raise_errors=raise_errors, realpath=realpath,
+                                    s=data, 
+                                    raise_errors=raise_errors, 
+                                    raise_missing_image_errors=raise_errors,
+                                    realpath=realpath,
                                     generate_pdf=generate_pdf,
                                     symbols=symbols)
 
