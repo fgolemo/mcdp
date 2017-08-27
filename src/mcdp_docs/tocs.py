@@ -428,21 +428,11 @@ def substituting_empty_links(soup, raise_errors=False):
     
     
         default style is [](#sec:systems)  "Chapter 10"
-        
-        the name is [](#sec:systems?only_name) "My title"
-        
-        the number is [](#sec:systems?only_number) "10"
-        
-        and full is [](#sec:systems?toc_link) "Chapter 10 - My title"
-    
+ 
     
         You can also use "class":
         
             <a href='#sec:name' class='only_number'></a>
-            
-            or
-            
-            <a href='#sec:name?only_number'></a>
     
 
     '''
