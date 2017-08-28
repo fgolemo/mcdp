@@ -16,6 +16,8 @@ from mcdp_utils_xml.parsing import \
     bs_entire_document, to_html_entire_document
 from mcdp_docs.manual_join_imp import document_final_pass_after_toc,\
     document_final_pass_before_toc, generate_and_add_toc
+from bs4 import BeautifulSoup
+from mcdp_docs.add_mathjax import add_mathjax_preamble
 
 
 class Render(QuickAppBase): 
@@ -28,6 +30,7 @@ class Render(QuickAppBase):
         params.add_flag('contracts')
         params.add_flag('pdf')
         params.add_flag('forgiving')
+        params.add_int('mathjax', help='Use MathJax (requires node)', default=1)
         params.add_string('stylesheet', default='v_mcdp_render_default')
         params.add_string('symbols', default=None)
         params.add_flag('pdf_figures', help='Generate PDF version of code and figures.')
@@ -101,12 +104,21 @@ class Render(QuickAppBase):
                 use_out_dir = os.path.join('out', 'mcdp_render')
 
             raise_errors = not options.forgiving
+            use_mathjax = bool(options.mathjax)
             
             html_filename = render(library, docname, data, realpath, use_out_dir, 
                                    generate_pdf, stylesheet=stylesheet,
-                                   symbols=symbols, raise_errors=raise_errors)
+                                   symbols=symbols, raise_errors=raise_errors,
+                                   use_mathjax=use_mathjax)
             if options.pdf:
                 run_prince(html_filename)
+            
+
+# def add_mathjax_call(s, preamble):
+#     soup = BeautifulSoup(s, 'lxml', from_encoding='utf-8')
+#     add_mathjax_preamble(soup, preamble)
+#     contents2 = str(s)
+#     return contents2
 
 def run_prince(html_filename):
     pdf = os.path.splitext(html_filename)[0] + '.pdf'
@@ -122,7 +134,7 @@ def run_prince(html_filename):
     
     
 def render(library, docname, data, realpath, out_dir, generate_pdf, stylesheet,
-           symbols, raise_errors):
+           symbols, raise_errors, use_mathjax):
     
     if MCDPConstants.pdf_to_png_dpi < 300:
         msg =( 'Note that pdf_to_png_dpi is set to %d, which is not suitable for printing'
@@ -140,7 +152,8 @@ def render(library, docname, data, realpath, out_dir, generate_pdf, stylesheet,
                                     raise_missing_image_errors=raise_errors,
                                     realpath=realpath,
                                     generate_pdf=generate_pdf,
-                                    symbols=symbols)
+                                    symbols=symbols,
+                                    use_mathjax=use_mathjax)
 
     
     title = docname
@@ -156,6 +169,8 @@ def render(library, docname, data, realpath, out_dir, generate_pdf, stylesheet,
     
     doc = to_html_entire_document(soup)
 
+    if use_mathjax:
+        add_mathjax_preamble(soup, symbols)
 
     d = os.path.dirname(out)
     if not os.path.exists(d):
@@ -165,6 +180,7 @@ def render(library, docname, data, realpath, out_dir, generate_pdf, stylesheet,
 
     logger.info('Written %s ' % out)
     return out
+
 
 
 mcdp_render_main = Render.get_sys_main()
