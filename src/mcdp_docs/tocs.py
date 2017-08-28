@@ -4,7 +4,8 @@ from collections import namedtuple
 from mcdp.logs import logger
 from mcdp_docs.manual_constants import MCDPManualConstants
 from mcdp_docs.toc_number import render_number, number_styles
-from mcdp_utils_xml import add_class, note_error_msg, bs
+from mcdp_utils_xml import add_class, bs
+from mcdp_utils_xml.note_errors_inline import note_error2
 
 from bs4.element import Comment, Tag, NavigableString
 from contracts.utils import indent
@@ -454,7 +455,7 @@ def substituting_empty_links(soup, raise_errors=False):
         n += 1
         if not element:
             msg = ('Cannot find %s' % element_id)
-            note_error_msg(a, msg)
+            note_error2(a, 'Ref. error', 'substituting_empty_links():\n'+msg)
             nerrors += 1
             if raise_errors:
                 raise ValueError(msg)
@@ -472,7 +473,8 @@ def substituting_empty_links(soup, raise_errors=False):
             if True:
                 logger.warning(msg)
             else:
-                note_error_msg(a, msg)
+#                 note_error_msg(a, msg)
+                note_error2(a, 'Ref. error', 'substituting_empty_links():\n'+msg)
                 nerrors += 1
                 if raise_errors:
                     raise ValueError(msg)

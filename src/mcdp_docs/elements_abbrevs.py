@@ -60,10 +60,28 @@ def substitute_special_paragraphs(soup):
         'Requires: ': 'special-par-requires',
         'Recommended: ': 'special-par-recommended',
         'See also: ': 'special-par-see-also',
+        
+        'Comment: ': 'comment',
+        'Question: ': 'question',
+        'Doubt: ': 'doubt',
     } 
     
     for prefix, klass in prefix2class.items():
         substitute_special_paragraph(soup, prefix, klass)
+        
+    make_details = ['comment', 'question', 'doubt']
+    for c in make_details:
+        for e in list(soup.select('.%s' % c)):
+            details = Tag(name='details')
+            add_class(details, c)
+            summary = Tag(name='summary')
+            summary.append(c)
+            details.append(summary)
+            rest = e.__copy__()
+            details.append(rest)
+            e.replace_with(details)
+            
+#             e.append('Found')
         
 def substitute_special_paragraph(soup, prefix, klass):
     """ 

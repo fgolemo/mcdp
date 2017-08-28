@@ -1,6 +1,9 @@
 from mcdp.logs import logger
-from bs4.element import Comment, Tag
 from mcdp_utils_xml.add_class_and_style import add_class
+from mcdp_utils_xml.note_errors_inline import note_error2, note_warning2
+
+from bs4.element import Comment, Tag
+
 
 show_debug_message_for_corrected_links = False
 
@@ -53,8 +56,7 @@ def check_if_any_href_is_invalid(soup):
     # let's first find all the IDs
     id2element, duplicates = get_id2element(soup, 'id')
     _name2element, _duplicates = get_id2element(soup, 'name')
-#     id2element.update(name2element)
-#     for a in soup.select('a[href^="#"]'):
+
 
     for a in soup.select('[href^="#"]'):
         href = a['href']
@@ -96,46 +98,30 @@ def check_if_any_href_is_invalid(soup):
 #             logger.debug('others = %r, matches = %r' % (others, matches))
             
             if len(matches) > 1:
+                short = 'Ref. error'
                 msg = '%s not found, and multiple matches for heuristics (%s)' % (href, matches)
-                logger.error(msg)
-                add_class(a, 'errored')
-                w = Tag(name='span', attrs={'class':'href-invalid href-invalid-missing'})
-                w.string = msg
-                a.insert_after(w)
+                note_error2(a, short, msg, ['href-invalid', 'href-invalid-missing'])
+                
+                
             elif len(matches) == 1:
                 
                 a['href'] = '#' + matches[0]
                 
-                msg = '%s not found, but corrected in %s' % (href, matches[0])
-                
                 if show_debug_message_for_corrected_links:
-                    logger.debug(msg)
-                        
-                    add_class(a, 'warning')
-                    w = Tag(name='span', attrs={'class':'href-replaced'})
-                    w.string = msg
-                    a.insert_after(w)
-                
+                    short = 'Ref replaced'
+                    msg = '%s not found, but corrected in %s' % (href, matches[0])
+                    note_warning2(a, short, msg, ['href-replaced'])
+                 
             else:
+                short = 'Ref. error'
                 msg = 'Not found %r (also tried %s)' % (href, ", ".join(others))
-#                 not_found.append(ID)
-                logger.error(msg)
-                errors.append('Could not find any match %r' % (href))
-                if not 'errored' in a.attrs.get('class', ''):
-                    add_class(a, 'errored')
-                    w = Tag(name='span', attrs={'class':'href-invalid href-invalid-missing'})
-                    w.string = 'Not found %r' % (href)
-                    a.insert_after(w)
-            
+                note_error2(a, short, msg, ['href-invalid', 'href-invalid-missing'])
+                errors.append(msg)
+                    
         if ID in duplicates:
             msg = 'More than one element matching %r.' % href
-            logger.error(msg)
-            if not 'errored' in a.attrs.get('class', ''):
-                add_class(a, 'errored')
-                w = Tag(name='span', attrs={'class':'href-invalid href-invalid-multiple'})
-                w.string = msg
-                a.insert_after(w)
-
+            short = 'Ref. error'
+            note_error2(a, short, msg, ['href-invalid', 'href-invalid-multiple'])
             errors.append(msg)
             
     return errors, math_errors

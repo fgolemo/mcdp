@@ -11,11 +11,12 @@ from contracts.utils import check_isinstance, raise_wrapped
 
 from mcdp import logger
 from mcdp_utils_misc import get_md5
-from mcdp_utils_xml import add_style, add_class
+from mcdp_utils_xml import add_style
 
 from .pdf_conversion import png_from_pdf
 from mcdp_report.pdf_conversion import ConversionError
-from mcdp_utils_xml.note_errors_inline import note_error_msg
+from mcdp_utils_xml.note_errors_inline import  note_error2,\
+    note_warning2
 
 
 # def embed_images(html, basedir):
@@ -247,7 +248,8 @@ def embed_img_data(soup, resolve, raise_on_error, img_extensions=['png', 'jpg', 
         
         if href.startswith('http'):
             msg = 'I will not embed remote files, such as %s: ' % href
-            logger.warning(msg)
+            note_warning2(tag, 'Resource error', msg)
+#             logger.warning(msg)
             continue
         
         for ext in img_extensions:
@@ -263,8 +265,9 @@ def embed_img_data(soup, resolve, raise_on_error, img_extensions=['png', 'jpg', 
                 if raise_on_error:
                     raise Exception(msg) # XXX
                 else:
-                    logger.error(msg)
-                    note_error_msg(tag, msg)
+                    
+                    note_error2(tag, 'Resource error', msg)
+                    
                     continue
             
             check_isinstance(data, str)
@@ -321,9 +324,7 @@ def embed_pdf_image(tag, resolve, density, raise_on_error=True):
         if raise_on_error:
             raise Exception(msg) # xxx
         else:
-            logger.error(msg)
-            note_error_msg(tag, msg)
-            add_class(tag, 'missing-image')
+            note_error2(tag, 'Resource error', msg, ['missing-image'])
             return
 
     # convert PDF to PNG
@@ -335,8 +336,7 @@ def embed_pdf_image(tag, resolve, density, raise_on_error=True):
         if raise_on_error:
             raise_wrapped(ConversionError, e, msg, compact=True)
         else:
-            logger.error(msg)
-            note_error_msg(tag, msg)
+            note_error2(tag, 'Conversion error', msg, [])
         return 
         
     # get PNG image size in pixels

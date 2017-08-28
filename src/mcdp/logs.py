@@ -24,3 +24,4 @@ logger_performance = logger.getChild('performance')
 
 logger_web_resource_tree = logger.getChild('resource_tree')
 logger_web_resource_tree.setLevel(logging.FATAL)
+

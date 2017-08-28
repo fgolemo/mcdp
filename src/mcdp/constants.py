@@ -1,4 +1,5 @@
 import numpy as np
+import getpass
 
 __all__ = ['MCDPConstants']
 
@@ -208,4 +209,7 @@ class MCDPConstants(object):
     ]
     
     allow_soft_matching = True
+    
+    softy_mode = True
+    
     
