@@ -56,6 +56,7 @@ class PrerenderError(Exception):
     pass
 
 def prerender_mathjax(s, symbols):
+    
     if symbols:
         lines = symbols.split('\n')
         lines = [l for l in lines if l.strip()]

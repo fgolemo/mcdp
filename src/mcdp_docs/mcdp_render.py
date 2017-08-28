@@ -16,7 +16,6 @@ from mcdp_utils_xml.parsing import \
     bs_entire_document, to_html_entire_document
 from mcdp_docs.manual_join_imp import document_final_pass_after_toc,\
     document_final_pass_before_toc, generate_and_add_toc
-from bs4 import BeautifulSoup
 from mcdp_docs.add_mathjax import add_mathjax_preamble
 
 

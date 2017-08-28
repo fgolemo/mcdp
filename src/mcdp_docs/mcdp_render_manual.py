@@ -247,9 +247,12 @@ def render_book(src_dir, docname, generate_pdf,
 
     librarian = get_test_librarian()
     # XXX: these might need to be changed
-    if getpass.getuser() == 'andrea':
-        logger.error('Remember this might break MCDP')
-        #     librarian.find_libraries('.')
+    if False:
+        librarian.find_libraries('.')
+    else:
+        if getpass.getuser() == 'andrea':
+            logger.error('Remember this might break MCDP')
+    
         
     load_library_hooks = [librarian.load_library]
     library = MCDPLibrary(load_library_hooks=load_library_hooks)
