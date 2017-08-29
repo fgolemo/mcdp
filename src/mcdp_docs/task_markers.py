@@ -10,6 +10,7 @@ def substitute_task_markers(soup):
         '(DONE)': 'status-done',
         '(IN PROGRESS)': 'status-inprogress',
         'XXX': 'status-XXX',
+        '???': 'status-XXX',
     } 
     
     for sub, klass in subs2class.items():
@@ -29,9 +30,9 @@ def substitute_task_marker_p(p, sub, klass):
             s = element.string
             if sub in s:
                 add_class(p, klass)
-                s2 = s.replace(sub, '')
-                ns = NavigableString(s2)
-                element.replaceWith(ns)
+#                 s2 = s.replace(sub, '')
+#                 ns = NavigableString(s2)
+#                 element.replaceWith(ns)
 #     except AttributeError as e: # a bug with bs4
 #         msg = 'Bug with descendants: %s' % e
 #         logger.debug(msg)
