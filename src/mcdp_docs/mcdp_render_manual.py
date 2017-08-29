@@ -148,6 +148,9 @@ def manual_jobs(context, src_dirs, output_file, generate_pdf, bibfile, styleshee
 
     files_contents = []
     for i, filename in enumerate(filenames):
+        if is_ignored_by_catkin(filename):
+            logger.debug('Ignoring because of CATKIN_IGNORE: %s' % filename)
+            continue
         logger.info('adding document %s ' % friendly_path(filename))
         
         docname,_ = os.path.splitext(os.path.basename(filename))
@@ -193,6 +196,17 @@ def manual_jobs(context, src_dirs, output_file, generate_pdf, bibfile, styleshee
 
     if os.path.exists(MCDPManualConstants.pdf_metadata_template):
         context.comp(generate_metadata, root_dir)
+
+
+
+def is_ignored_by_catkin(dn):
+    """ Returns true if the directory is inside one with CATKIN_IGNORE """
+    while dn != '/':
+        i = os.path.join(dn, "CATKIN_IGNORE")
+        if os.path.exists(i):
+            return True
+        dn = os.path.dirname(dn)
+    return False
 
 def job_bib_contents(context, bib_files):
     bib_files = natsorted(bib_files)

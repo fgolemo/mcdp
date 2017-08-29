@@ -13,6 +13,7 @@ from git.exc import GitCommandError
 from git.repo.base import Repo
 
 from .reference import parse_github_file_ref, InvalidGithubRef
+import time
 
 
 def substitute_github_refs(soup, defaults):
@@ -142,15 +143,23 @@ def checkout_repository(tmpdir, org, repo, branch):
     
     try:
         if not os.path.exists(path):
-            
             checkout(path, url, branch)
         else:
-            repo = Repo(path)
-            try:
-                # race condition
-                repo.remotes.origin.pull()
-            except:
-                pass  
+            
+            m = os.path.getmtime(path)
+            age = time.time() - m
+            if age < 10*60:
+                msg = 'Do not checkout repo if young.'
+                logger.debug(msg)
+            else:
+                msg = 'Checkout repo of  age %s.' % age
+                logger.debug(msg)
+                repo = Repo(path)
+                try:
+                    repo.remotes.origin.pull()
+                    os.utime(path, None)
+                except:
+                    pass  
         return path
     except GitCommandError as e:
         msg = 'Could not checkout repository %s' % path
