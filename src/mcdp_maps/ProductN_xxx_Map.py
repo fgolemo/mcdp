@@ -53,7 +53,7 @@ class ProductNNatMap(Map):
         return Nat_mult_uppersets_continuous_seq(x)
 
     def __repr__(self):
-        return 'ProductNNatMap(%s)' % (self.n)
+        return f"ProductNNatMap({self.n})"
 
     def repr_map(self, letter):
         return repr_map_product(letter, self.n)

@@ -13,7 +13,7 @@ from mcdp_web_tests.mockups import get_context_request, USER1
 @comptest
 @with_pyramid_environment
 def test_lib_creation1(env):
-    logger.info('env: %s' % env)
+    logger.info(f"env: {env}")
     app = WebApp.singleton # XXX
     
     authenticated_userid = USER1
@@ -23,8 +23,7 @@ def test_lib_creation1(env):
     model_name = 'Actuation'
     # check that it doesn't exist
     
-    url = ('/repos/%s/shelves/%s/libraries/%s/models/%s/views/solver2/'  % 
-           (repo_name, shelf_name, library_name, model_name))
+    url = (f"/repos/{repo_name}/shelves/{shelf_name}/libraries/{library_name}/models/{model_name}/views/solver2/")
     
     mocked = get_context_request(test_env=env, url=url, authenticated_userid=authenticated_userid)
     
@@ -39,7 +38,7 @@ def test_lib_creation1(env):
     except HTTPFound as e:
         headers=dict(e._headerlist)
         location = headers['Location']
-        logger.debug('original url: %s' % request.url)
+        logger.debug(f"original url: {request}".url)
         logger.debug('redirect to: %r' % location)
         
     url2 = url + 'submit'
@@ -83,7 +82,7 @@ def test_lib_creation1(env):
     ui_state['area_R'] = '12 W'
     
     res2 = view(context=mocked2.context, request=mocked2.request)
-    print res2
+    print(res2)
     if app.exceptions:
         msg = 'Found these exceptions:'
         msg += '\n'.join(app.exceptions)

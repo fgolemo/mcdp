@@ -188,7 +188,7 @@ def iterate_prefix(disk_map, view, name):
  
 
 def disk_events_from_list_append(disk_map, view, _id, who, name, value):
-    logger.debug('list append to %s for value %s' % (name, value)) 
+    logger.debug(f"list append to {name} for value {value}") 
     view_parent = get_view_node(view, name)
     schema_parent = view_parent._schema
     check_isinstance(schema_parent, SchemaList)
@@ -218,8 +218,8 @@ def disk_events_from_list_insert(disk_map, view, _id, who, name, index, value):
     check_isinstance(schema_parent, SchemaList)
     hint = disk_map.get_hint(schema_parent)
     length = len(view_parent._data)
-#     logger.debug('list:\n%s' % yaml_dump(view_parent._data))
-#     logger.debug('inserting at index %d value %s' % (index, value))
+#     logger.debug(f"list:\n{yaml_dump}"(view_parent._data))
+#     logger.debug(f"inserting at index {value} value {index}")
     if isinstance(hint, HintDir):
         # TODO: what about it is not a list of files, but directories?
 #         dirname = disk_map.dirname_from_data_url(name)
@@ -230,7 +230,7 @@ def disk_events_from_list_insert(disk_map, view, _id, who, name, index, value):
         to_rename = []
         for i in range(index, length):
             to_rename.append((i, i+1))
-#         logger.debug('to rename: %s' % to_rename)
+#         logger.debug(f"to rename: {to_rename}")
         for i in reversed(range(index, length)):
             i2 = i + 1
             filename1 = hint.filename_for_key(str(i))
@@ -240,7 +240,7 @@ def disk_events_from_list_insert(disk_map, view, _id, who, name, index, value):
             else:
                 dr = disk_event_dir_rename(_id, who, dirname, filename1, filename2)
             events.append(dr)
-#         logger.debug('Renaming events:\n %s' % yaml_dump(events))
+#         logger.debug(f"Renaming events:\n {yaml_dump}"(events))
         # now create the file
         sub = disk_map.create_hierarchy_(schema_parent.prototype, value)
         if isinstance(sub, ProxyFile):
@@ -301,8 +301,8 @@ def disk_events_from_list_remove(disk_map, view, _id, who, name, value):
     for index, v in enumerate(data):
         if v == value:
             return disk_events_from_list_delete(disk_map, view, _id, who, name, index)
-    msg = 'There is no value %s in the list.' % value
-    msg += '\n values: %s' % format_list(data) 
+    msg = f"There is no value {value} in the list."
+    msg += f"\n values: {format_list}"(data) 
     raise InvalidOperation(msg)
 
 def disk_events_from_dict_setitem(disk_map, view, _id, who, name, key, value):
@@ -387,7 +387,7 @@ def disk_events_from_dict_rename(disk_map, view, _id, who, name, key, key2):
         its_name2 = hint.filename_for_key(key2)
         # I just need to find out whether it would be ProxyDir or ProxyFile
         if not key in view_parent._data:
-            msg = 'Cannot rename key %r that does not exist in %s.'  % (key, format_list(view_parent._data))
+            msg = f"Cannot rename key %r that does not exist in {key}.")
             raise InvalidOperation(msg)
         value = view_parent._data[key]
         d = disk_map.create_hierarchy_(prototype, value)

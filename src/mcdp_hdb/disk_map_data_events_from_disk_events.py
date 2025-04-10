@@ -49,7 +49,7 @@ def data_events_from_disk_event_queue(disk_map, schema, disk_rep, disk_events_qu
                    disk_events_queue=disk_events_queue,
                                _id='tmp-id', who=who, **arguments)
             if not isinstance(res, tuple) or len(res) != 2:
-                msg = 'Expected %r to return a tuple of len 2, got %s' % (f, describe_value(res))
+                msg = f"Expected %r to return a tuple of len 2, got {f}")
                 raise Exception(msg)
             evs, consumed = res
             for i, ev in enumerate(evs):
@@ -94,7 +94,7 @@ def data_events_from_dir_create(schema, disk_map, disk_rep, disk_events_queue, _
             # XXX: this is the same as below
             # get more events that create file in this directory
             related_disk_events = get_disk_events_for_dir(dirname, disk_events_queue)
-            logger.warning('Adding key %r, related disk events:\n%s' % (key, yaml_dump(related_disk_events)))
+            logger.warning(f"Adding key %r, related disk events:\n{key}"))
             disk_rep = deepcopy(disk_rep)
             disk_rep.get_descendant(dirname).dir_create(name)
             for re in related_disk_events:
@@ -113,7 +113,7 @@ def data_events_from_dir_create(schema, disk_map, disk_rep, disk_events_queue, _
         # we expect many more events for the creation of this directory
         # XXX: should be dirname + index???
         related_disk_events = get_disk_events_for_dir(dirname, disk_events_queue) # XXX
-        logger.debug('Creating directory, related: \n %s'  % yaml_dump(related_disk_events))
+        logger.debug(f"Creating directory, related: \n {yaml_dump}"(related_disk_events))
         # we apply all of them to a copy of the disk rep
         # (XXX here we are copying the entire db)
         disk_rep = deepcopy(disk_rep)
@@ -133,7 +133,7 @@ def data_events_from_dir_create(schema, disk_map, disk_rep, disk_events_queue, _
             e = event_list_append(name=parent, value=value, _id=_id, who=who)
         return [e], related_disk_events
     
-    msg = 'Not implemented\n %s\nwith\n%s' % (schema_parent, hint)
+    msg = f"Not implemented\n {schema_parent}\nwith\n{hint}"
     raise NotImplementedError(msg)
 
 def get_disk_events_for_dir(dirname, disk_events_queue):
@@ -176,9 +176,9 @@ def data_events_from_dir_rename(schema, disk_map, disk_rep, disk_events_queue, _
             key2 = hint.key_from_filename(name2)
             index = int(key)
             index2 = int(key2)
-            logger.debug('renaming %s to %s' % (index, index2))
+            logger.debug(f"renaming {index} to {index2}")
             # this is now an operation with insert index
-            logger.debug('Next events:\n%s'%yaml_dump(disk_events_queue))
+            logger.debug(f"Next events:\n{yaml_dump}"(disk_events_queue))
             raise NotImplementedError()
 #             consumed = []
 #             while disk_events_queue:
@@ -195,7 +195,7 @@ def data_events_from_dir_rename(schema, disk_map, disk_rep, disk_events_queue, _
 #             e = event_dict_rename(name=parent, key=key, key2=key2, _id=_id, who=who)
 #             return [e], []
         
-    msg = 'Not implemented %s with %s' % (schema_parent, hint)
+    msg = f"Not implemented {schema_parent} with {hint}"
     raise NotImplementedError(msg)
 
 def data_events_from_dir_delete(schema, disk_map, disk_rep, disk_events_queue, _id, who, dirname, name):  # @UnusedVariable
@@ -215,7 +215,7 @@ def data_events_from_dir_delete(schema, disk_map, disk_rep, disk_events_queue, _
             e = event_list_delete(name=parent, index=index, _id=_id, who=who)
             return [e], []
         
-    msg = 'Not implemented %s with %s' % (schema_parent, hint)
+    msg = f"Not implemented {schema_parent} with {hint}"
     raise NotImplementedError(msg)
 
 def data_events_from_file_create(schema, disk_map, disk_rep, disk_events_queue, _id, who, dirname, name, contents):  # @UnusedVariable
@@ -252,7 +252,7 @@ def data_events_from_file_create(schema, disk_map, disk_rep, disk_events_queue, 
                 consumed = [] 
                 return events, consumed
 
-    msg = 'Not implemented %s with %s' % (type(schema_parent), hint)
+    msg = f"Not implemented {type(schema_parent} with %s", hint)
     raise NotImplementedError(msg)
 
 def data_events_from_file_modify(schema, disk_map, disk_rep, disk_events_queue, _id, who, dirname, name, contents):  # @UnusedVariable
@@ -260,7 +260,7 @@ def data_events_from_file_modify(schema, disk_map, disk_rep, disk_events_queue, 
     if isinstance(schema_parent, SchemaContext):
         if isinstance(hint, HintDir):
             key = hint.key_from_filename(name)
-            logger.debug('name = %s became key = %s from %s' % (name, key, hint))
+            logger.debug(f"name = {name} became key = {key} from {hint}")
             schema_child = schema_parent.get_descendant((key,))
             value = disk_map.interpret_hierarchy_(schema_child, ProxyFile(contents))
             if isinstance(schema_child, SchemaSimple):
@@ -312,7 +312,7 @@ def data_events_from_file_modify(schema, disk_map, disk_rep, disk_events_queue, 
                 
                 
                 
-    msg = 'Not implemented %s with %s' % (type(schema_parent), hint)
+    msg = f"Not implemented {type(schema_parent} with %s", hint)
     raise NotImplementedError(msg)
 
 @contract(schema=SchemaBase, disk_map=DiskMap, name=str)
@@ -340,9 +340,9 @@ def data_events_from_file_rename(schema, disk_map, disk_rep, disk_events_queue, 
         if isinstance(hint, HintDir):
             index = int(hint.key_from_filename(name))
             index2 = int(hint.key_from_filename(name2))
-            logger.debug('renaming %s to %s' % (index, index2))
+            logger.debug(f"renaming {index} to {index2}")
             # this is now an operation with insert index
-            logger.debug('Next events:\n%s'%yaml_dump(disk_events_queue))
+            logger.debug(f"Next events:\n{yaml_dump}"(disk_events_queue))
             consumed = []
             while disk_events_queue:
                 nexte = disk_events_queue.pop(0)
@@ -357,7 +357,7 @@ def data_events_from_file_rename(schema, disk_map, disk_rep, disk_events_queue, 
             msg = 'I was waiting for a file_create_event'
             raise Exception(msg)
             
-    msg = 'Not implemented %s with %s' % (type(schema_parent), hint)
+    msg = f"Not implemented {type(schema_parent} with %s", hint)
     raise NotImplementedError(msg)
 
 @contract(schema=SchemaBase)
@@ -376,6 +376,6 @@ def data_events_from_file_delete(schema, disk_map, disk_rep, disk_events_queue, 
             e = event_list_delete(name=parent, index=index, _id=_id, who=who)
             return [e],[]
 
-    msg = 'Not implemented %s with %s' % (type(schema_parent), hint)
+    msg = f"Not implemented {type(schema_parent} with %s", hint)
     raise NotImplementedError(msg)
 

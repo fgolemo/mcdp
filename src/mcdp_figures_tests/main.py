@@ -24,7 +24,7 @@ def figint01():
     for name in mf.available():
         formats = mf.available_formats(name)
         res = mf.get_figure(name, formats)
-        print('%s -> %s %s ' % (name, formats, map(len, [res[f] for f in formats])))
+        print(f"{name} -> {formats} {map(len, [res[f] for f in formats]} "))
 
 def toss_coin(h, prob_success):
     random.seed(h)
@@ -93,9 +93,9 @@ def allformats_report(id_ndp, ndp, libname, which):
         res = mf.get_figure(which, formats)
     except DPSemanticError as e:
         if 'Cannot abstract' in str(e):
-            r.text('warning', 'Not connected. \n\n %s' % e)
+            r.text(f"warning', 'Not connected. \n\n {e}")
             return r
-    print('%s -> %s %s ' % (which, formats, map(len, [res[f] for f in formats])))
+    print(f"{which} -> {formats} {map(len, [res[f] for f in formats]} "))
     fig = r.figure()
     for f in formats:
         data = res[f]

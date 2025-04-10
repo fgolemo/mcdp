@@ -48,14 +48,14 @@ def draw_depgraph(res):
 
     @memoize_simple
     def get_gg_cluster(libname):
-        print('creating cluster %s ' % entry)
+        print(f"creating cluster {entry} ")
         return gg.newItem(libname)
 
     @memoize_simple
     def get_gg_node(entry):
-        print('creating node %s ' % entry)
+        print(f"creating node {entry} ")
         parent = get_gg_cluster(entry.libname)
-        label = '%s/%s' % (entry.libname, entry.name)
+        label = f"{entry.libname}/{entry.name}"
         return gg.newItem(label, parent=parent)
 
     for entry in G.nodes():

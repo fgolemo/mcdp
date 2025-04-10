@@ -42,7 +42,22 @@ def tmpfile(suffix):
     
 
 def read_file_encoded_as_utf8(filename):
-    u = codecs.open(filename, encoding='utf-8').read()
-    s = u.encode('utf-8')
-    return s
+    """
+    Reads a file and ensures its content is in UTF-8 bytes.
+    
+    In Python 2: returns utf-8 encoded bytes from unicode
+    In Python 3: returns utf-8 encoded bytes from str
+    """
+    import sys
+    
+    with codecs.open(filename, encoding='utf-8') as f:
+        content = f.read()
+        
+    # In Python 3, str is already Unicode, in Python 2 it's read as unicode
+    if sys.version_info[0] >= 3:
+        # Convert Unicode string to UTF-8 encoded bytes
+        return content.encode('utf-8')
+    else:
+        # In Python 2, content is already unicode, encode to utf-8
+        return content.encode('utf-8')
 

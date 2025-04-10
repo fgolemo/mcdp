@@ -77,8 +77,7 @@ class AppVisualization(object):
         make_relative = lambda _: self.make_relative(e.request, _)
         res = generate_view_syntax(e,  make_relative)
         add_other_fields(self, res, e.request, e.context)
-        url_edit0 = ("/repos/%s/shelves/%s/libraries/%s/%s/%s/views/edit_fancy/" %  
-                    (e.repo_name, e.shelf_name, e.library_name, e.spec.url_part, e.thing_name))
+        url_edit0 = (f"/repos/{e.repo_name}/shelves/{e.shelf_name}/libraries/{e.library_name}/{e.spec.url_part}/{e.thing_name}/views/edit_fancy/")
         res['url_edit'] = make_relative(url_edit0)
         return res
     
@@ -111,7 +110,7 @@ def generate_view_syntax(e, make_relative):
                 rname, sname = e.session.get_repo_shelf_for_libname(libname)
             except NoSuchLibrary:
                 raise
-            url0 =  "/repos/%s/shelves/%s/libraries/%s/" % (rname, sname, libname)
+            url0 =  f"/repos/{rname}/shelves/{sname}/libraries/{libname}/"
             return make_relative(url0)
             
         def get_link(specname, libname, thingname):
@@ -129,8 +128,8 @@ def generate_view_syntax(e, make_relative):
                 
             # check if the thing exists
             
-                res = get_link_library(libname) + '%s/%s/views/syntax/' % (specname, thingname)
-#                 logger.debug(' link for %s = %s' % (thingname, res))
+                res = get_link_library(libname) + f"{specname}/{thingname}/views/syntax/"
+#                 logger.debug(f" link for {thingname} = {res}")
                 return res
             else:
                 msg = 'No such thing %r' % thingname
@@ -141,7 +140,7 @@ def generate_view_syntax(e, make_relative):
         parses = True 
         error = ''
     except (DPSyntaxError, DPNotImplementedError ) as exc:
-        highlight = '<pre class="source_code_with_error">%s</pre>' % source_code
+        highlight = f"<pre class="source_code_with_error">{source_code}</pre>"
         error = exc.__str__()
         parses = False
      
@@ -245,7 +244,7 @@ def get_svg_for_visualization(e, image_source, library_name, spec, name, thing, 
         if a in fragment.svg.attrs:
             value = fragment.svg.attrs[a]
             del fragment.svg.attrs[a]
-            style['max-%s' %a ]= value
+            style[f"max-{a}" ]= value
     add_style(fragment.svg, **style)
             
     remove_doctype_etc(fragment)
@@ -261,7 +260,7 @@ def get_svg_for_visualization(e, image_source, library_name, spec, name, thing, 
         if identifier in table:
             a = table[identifier]
             libname = a.libname if a.libname is not None else library_name
-            href0 = '/repos/%s/shelves/%s/libraries/%s/models/%s/views/syntax/' % (e.repo_name, e.shelf_name, libname, a.name)
+            href0 = f"/repos/{e.repo_name}/shelves/{e.shelf_name}/libraries/{libname}/models/{a.name}/views/syntax/"
             return make_relative(href0)
         else:
             return None
@@ -294,7 +293,7 @@ def identifier2ndp(xr):
                         look_in_coproduct_with_names(x, res)
                     else:
                         pass
-#                         print('cannot identify %s' % type(x).__name__)
+#                         print(f"cannot identify {type}"(x).__name__)
                     
     elif isinstance(xr, CDP.CoproductWithNames):
         look_in_coproduct_with_names(xr, res)
@@ -316,7 +315,7 @@ def look_in_coproduct_with_names(x, res):
 
     ops = unwrap_list(x.elements)
     nops = len(ops)
-    n = nops/2
+    n = nops//2
     for i in range(n):
         e, load = ops[i*2], ops[i*2 +1]
         assert isinstance(e, CDP.CoproductWithNamesName)
@@ -330,7 +329,7 @@ def remove_doctype_etc(fragment):
     for e in list(fragment):
         remove = (Declaration, ProcessingInstruction, Doctype)
         if isinstance(e, remove):
-            c = Comment('Removed object of type %s' % type(e).__name__)
+            c = Comment(f"Removed object of type {type}"(e).__name__)
             e.replace_with(c)
             
             

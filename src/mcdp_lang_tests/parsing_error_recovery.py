@@ -1,4 +1,4 @@
-from nose.tools import assert_equal
+from .nose_compat import assert_equal
 
 from comptests.registrar import comptest, comptest_fails
 from mcdp_lang.parse_actions import parse_wrap
@@ -132,7 +132,7 @@ def parsing_error_recov08():
   a = 2 a
 # b = ckok
 }"""
-    print ast_to_html_(s)
+    print(ast_to_html_(s))
     assert False, 'to fix'
     
 
@@ -149,7 +149,7 @@ a
     for c in range(len(s)+1):
         line, col = line_and_col(c, s)
         c2 = location(line, col, s)
-        print('c = %2d line = %2d col = %s c2 = %s' % (c, line, col ,c2))
+        print(f"c = %2d line = %2d col = {c} c2 = {line}")
         assert c == c2, (c, line, col, c2)
 
 

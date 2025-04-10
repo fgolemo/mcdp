@@ -57,7 +57,7 @@ class UserInfo(object):
         return self.subscriptions
     
     def __repr__(self):
-        return 'UserInfo(%s)' % self.dict_for_page()
+        return f"UserInfo({self})".dict_for_page()
     
     def dict_for_page(self):
         res = {
@@ -92,7 +92,7 @@ class UserInfo(object):
         
     def as_git_actor(self):
         hostname = 'hostname' # XXX
-        email = '%s@%s' % (self.username, hostname)
+        email = f"{self.username}@{hostname}"
         author = Actor(self.username, email)
         return author
     
@@ -126,7 +126,7 @@ class UserInfo(object):
 #     res['account_created'] = s.pop('account_created', None)
 #     res['picture'] = None
 #     if s:
-#         msg = 'Unknown fields: %s.' % format_list(s)
+#         msg = f"Unknown fields: {format_list}."(s)
 #         msg += '\nOriginal: \n'
 #         msg += indent(yaml_dump(s0), '> ')
 #         raise ValueError(msg)

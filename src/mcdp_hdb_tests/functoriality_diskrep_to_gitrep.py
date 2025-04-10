@@ -29,7 +29,7 @@ def check_translation_diskrep_to_gitrep(disk_rep0, disk_events, disk_rep1, out):
             
         message = yaml_dump(disk_event)
         who = disk_event['who']
-        logger.info('who: %s' % who)
+        logger.info(f"who: {who}")
         actor = who['actor']
         instance = who.get('instance', None)
         host = who.get('host', None)

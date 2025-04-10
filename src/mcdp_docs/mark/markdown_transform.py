@@ -67,7 +67,7 @@ def replace_markdown_line_by_line(s, line_transform=None, code_transform=None, i
             l = l[1:]
         if not tagname: # pragma: no cover
             msg = 'Cannot get tagname from line %r' % line_in[0]
-            msg += '\n in:%s out= %s' % (line_in, line_out)
+            msg += f"\n in:{line_in} out= {line_out}"
             raise ValueError(msg)
         # <tagname> okokokok </tagname>
         # <tagname /> okokokok
@@ -91,7 +91,7 @@ def replace_markdown_line_by_line(s, line_transform=None, code_transform=None, i
             
             # if first line then </tag> can be anywhere
             # if not first line, it should be at the beginning
-            end_tag ='</%s>' % tagname 
+            end_tag =f"</{tagname}>" 
             cond1 = (i == 0) and (end_tag in l)
             cond2 = (i > 0) and l.startswith(end_tag) 
             if cond1 or cond2:
@@ -101,7 +101,7 @@ def replace_markdown_line_by_line(s, line_transform=None, code_transform=None, i
                 pass
 #                 print ('No %r in %r; continue' % (end_tag, l))
             i += 1
-        msg = 'Cannot find matching tag to %r. Around line %d.' % (tagname, approximate_line)
+        msg = f"Cannot find matching tag to %r. Around line {tagname}."
         msg + '\n Remember I want it either on the first line (anywhere) or at the start of a line.'
         character = location(approximate_line, 0, s)
         where = Where(s, character)
@@ -125,7 +125,7 @@ def replace_markdown_line_by_line(s, line_transform=None, code_transform=None, i
         
         while line_in:
             l = line_in.pop(0)
-#             print('considering xml (in %d out %d) %r' % (len(line_in), len(line_out), l))
+#             print(f"considering xml (in {len(line_in} out %d) %r", len(line_out), l))
             if l.startswith('~~~'):
                 line_in.insert(0, l)
 #                 print('considering xml fence')
@@ -176,7 +176,7 @@ def replace_markdown_line_by_line(s, line_transform=None, code_transform=None, i
 #             assert not block_started
 #             assert tagname is not None
 #             
-#             end = '</%s' % tagname
+#             end = f"</{tagname}"
 #             if end in l:
 #                 #print('detected end of tag %r' % tagname)
 #                 tag_started = False

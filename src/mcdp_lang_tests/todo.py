@@ -14,7 +14,7 @@ def check_nat_power():
 
 @comptest_fails
 def check_nat_power_frac():
-    eval_rvalue_as_constant_same_exactly('9 ^ (1/2)', 'Rcomp: 3.0')
+    eval_rvalue_as_constant_same_exactly('9 ^ (1//2)', 'Rcomp: 3.0')
 
 @comptest
 def check_comments_show_up():
@@ -105,7 +105,7 @@ def check_poset_bottom_checks():
         parse_poset(s)
         assert False, 'Should have detected the inconsistency'
     except DPSemanticError as e:
-        print str(e)
+        print(str(e))
         return
     
     

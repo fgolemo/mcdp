@@ -32,7 +32,7 @@ def create_movie_from_png_sequence(sequence, out, fps=1.0):
     except ImportError as e:
         logger.error('Cannot use Procgraph to create video.')
         logger.error(e)
-        logger.info('The frames are in the directory %s' % tmpdir)
+        logger.info(f"The frames are in the directory {tmpdir}")
     else:
         join_video_29_fixed(output=out, dirname=tmpdir,
                             pattern='.*.png', fps=fps)

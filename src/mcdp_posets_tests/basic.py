@@ -15,8 +15,8 @@ import numpy as np
 @for_all_posets
 def check_poset1(_id_poset, poset):
 
-    print poset.__str__()
-    print poset.__repr__()
+    print(poset.__str__())
+    print(poset.__repr__())
 
     # Checks that bottom <= top
 
@@ -52,7 +52,7 @@ def check_poset1_chain(id_poset, poset):
         # list exceptions that can be empty
         if isinstance(poset, FinitePoset):
             return
-        raise Exception('%s %s is Uninhabited' % (id_poset, poset))
+        raise Exception(f'{id_poset} {poset} is Uninhabited')
 
 
     for a in chain:
@@ -78,7 +78,7 @@ def check_poset1_chain(id_poset, poset):
         e1 = chain[i]
         e2 = chain[j]
 
-        print('Comparing e1 = {} and e2 = {}'.format(poset.format(e1), poset.format(e2)))
+        print(f'Comparing e1 = {poset.format(e1)} and e2 = {poset.format(e2)}')
 
         poset.check_leq(e1, e2)
         try:
@@ -89,14 +89,14 @@ def check_poset1_chain(id_poset, poset):
         meet1 = poset.meet(e1, e2)
         meet2 = poset.meet(e2, e1)
 
-        print('meet1: {}'.format(meet1))
-        print('meet2: {}'.format(meet2))
+        print(f'meet1: {meet1}')
+        print(f'meet2: {meet2}')
 
         join1 = poset.join(e1, e2)
         join2 = poset.join(e2, e1)
 
-        print('join1: {}'.format(join1))
-        print('join2: {}'.format(join2))
+        print(f'join1: {join1}')
+        print(f'join2: {join2}')
 
         poset.check_equal(meet1, e1)
         poset.check_equal(meet2, e1)
@@ -120,10 +120,10 @@ def check_poset_top(_id_poset, poset):
         top = poset.get_top()
     except NotBounded:
         return
-    print('top: {}'.format(poset.format(top)))
+    print(f'top: {poset.format(top)}')
     poset.check_leq(top, top)
     a = poset.witness()
-    print('a: {}'.format(poset.format(a)))
+    print(f'a: {poset.format(a)}')
 
     try:
         poset.check_leq(a, top)
@@ -200,7 +200,7 @@ def check_rcomp_corner_cases():
         except NotBelongs:
             pass
         else:
-            raise Exception('Violation with {}'.format(x))
+            raise Exception(f'Violation with {x}')
 
     not_belongs(2) # not a float
     not_belongs(-2.0) # negative

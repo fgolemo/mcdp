@@ -198,7 +198,7 @@ class InvPlus2Nat(PrimitiveDP):
         s = set()
         
         if f >= MCDPConstants.InvPlus2Nat_max_antichain_size:
-            msg = 'This would create an antichain of %s items.' % f
+            msg = f"This would create an antichain of {f} items."
             raise NotSolvableNeedsApprox(msg)
         
         for o in range(f + 1):
@@ -215,7 +215,7 @@ class InvPlus2Nat(PrimitiveDP):
         return set([(f, r)])
 
     def __repr__(self):
-        return 'InvPlus2Nat(%s -> %s)' % (self.F, self.R)
+        return f"InvPlus2Nat({self.F} -> {self.R})"
 
     def repr_h_map(self):
         return invplus2_repr_h_map('f', 'r')

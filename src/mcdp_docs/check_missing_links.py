@@ -8,14 +8,14 @@ def get_id2element(soup, att):
     
     # ignore the maths
     ignore = set() 
-    for element in soup.select('svg [%s]' % att): # node with ID below SVG
+    for element in soup.select(f"svg [{att}]"): # node with ID below SVG
         ignore.add(element[att])
-    for element in soup.select('svg[%s]' % att): # svg with ID
+    for element in soup.select(f"svg[{att}]"): # svg with ID
         ignore.add(element[att])
-    for element in soup.select('[%s^="MathJax"]' % att): # stuff created by MathJax
+    for element in soup.select(f"[{att}^="MathJax"]"): # stuff created by MathJax
         ignore.add(element[att])
         
-    for element in soup.select('[%s]' % att):
+    for element in soup.select(f"[{att}]"):
         ID = element[att]
         if ID in ignore:
             continue
@@ -32,7 +32,7 @@ def get_id2element(soup, att):
         
     if duplicates:
         s = ", ".join(sorted(duplicates))
-        msg = '%d duplicated %s found (not errored): %s' % (len(duplicates), att, s) 
+        msg = f"%d duplicated {len(duplicates} found (not errored): %s", att, s) 
         logger.error(msg)
     return id2element, duplicates
 
@@ -55,9 +55,9 @@ def check_if_any_href_is_invalid(soup):
     for a in soup.select('[href^="#"]'):
         href = a['href']
         if a.has_attr('class') and  "mjx-svg-href" in a['class']:
-            msg = 'Invalid math reference (sorry, no details): href = %s .' % href
+            msg = f"Invalid math reference (sorry, no details): href = {href} ."
             logger.error(msg)
-            a.insert_before(Comment('Error: %s' % msg))
+            a.insert_before(Comment(f"Error: {msg}"))
             math_errors.append(msg)
             continue 
         assert href.startswith('#')
@@ -92,14 +92,14 @@ def check_if_any_href_is_invalid(soup):
                     matches.append(why_not)
             
             if len(matches) > 1:
-                msg = '%s not found, and multiple matches for heuristics (%s)' % (href, matches)
+                msg = f"{href} not found, and multiple matches for heuristics ({matches})"
                 logger.error(msg)
                 add_class(a, 'errored')
                 w = Tag(name='span', attrs={'class':'href-invalid href-invalid-missing'})
                 w.string = msg
                 a.insert_after(w)
             elif len(matches) == 1:
-                msg = '%s not found, but corrected in %s' % (href, matches[0])
+                msg = f"{href} not found, but corrected in {matches[0]}"
                 logger.debug(msg)
                 
                 add_class(a, 'warning')
@@ -109,7 +109,7 @@ def check_if_any_href_is_invalid(soup):
                 a.insert_after(w)
                 
             else:
-#                 msg = 'Not found %r (also tried %s)' % (href, ", ".join(others))
+#                 msg = f"Not found %r (also tried {href})")
 #                 not_found.append(ID)
 #                 logger.error(msg)
                 errors.append('Not found %r' % (href))

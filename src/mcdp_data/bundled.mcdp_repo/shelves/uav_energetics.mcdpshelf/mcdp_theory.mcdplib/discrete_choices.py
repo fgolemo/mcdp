@@ -104,7 +104,7 @@ def figure_discrete_choices2(r, data, cs, fname1, fname2):
         if not p: continue
         
         feasible = np.array([p in _ for _ in all_discrete_choices])
-        with f.plot('where_%s' % p, **fig) as pylab:
+        with f.plot(f"where_{p}", **fig) as pylab:
             
             ieee_spines_zoom3(pylab)
   
@@ -142,7 +142,7 @@ def figure_discrete_choices2(r, data, cs, fname1, fname2):
             plot(is_one_of_three, '>','#880000')
             plot(is_one_of_four_or_more,'s', '#880088')
             
-            pylab.title('%s' % p,  y=1.08)
+            pylab.title(f"{p}",  y=1.08)
             do_axes(pylab)
     
     r.text('possible', possible) 

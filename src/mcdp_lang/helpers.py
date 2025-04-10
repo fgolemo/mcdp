@@ -31,7 +31,7 @@ def create_operation(context, dp, resources, name_prefix=None, op_prefix=None, r
     
     """
     if name_prefix is None:
-        name_prefix = '_%s' % type(dp).__name__
+        name_prefix = f"_{type(dp).__name__}"
     # new name for the ndp
     name = context.new_name(name_prefix)
     if op_prefix is None:
@@ -44,7 +44,7 @@ def create_operation(context, dp, resources, name_prefix=None, op_prefix=None, r
     connections = []
     fnames = []
     for i, r in enumerate(resources):
-        ni = context.new_fun_name('%s%s' % (op_prefix, i))
+        ni = context.new_fun_name(f"{op_prefix}{i}")
         fnames.append(ni)
 
     fnames_ = fnames[0] if len(fnames) == 1 else fnames
@@ -64,11 +64,11 @@ def create_operation(context, dp, resources, name_prefix=None, op_prefix=None, r
         if not tu.equal(F, R):
             conversion = get_conversion(R, F)
             if conversion is None:
-                msg = 'I need a conversion from %s to %s' % (R, F)
+                msg = f"I need a conversion from {R} to {F}"
                 raise DPInternalError(msg)
             else:
                 r = create_operation(context, conversion, [r],
-                                     name_prefix='_conversion_for_%s' % name_result)
+                                     name_prefix=f"_conversion_for_{name_result}")
 
         R = context.get_rtype(r)
         assert tu.equal(F, R)
@@ -86,13 +86,13 @@ def create_operation(context, dp, resources, name_prefix=None, op_prefix=None, r
 def create_operation_lf(context, dp, functions, name_prefix=None, 
                         op_prefix='_op', res_prefix='_res', allow_conversion=True):
     if name_prefix is None:
-        name_prefix = '_%s' % type(dp).__name__ 
+        name_prefix = f"_{type(dp).__name__}" 
     name = context.new_name(name_prefix)
     name_result = context.new_res_name(res_prefix)
     
     rnames = []
     for i, f in enumerate(functions):
-        ni = context.new_fun_name('%s%s' % (op_prefix, i))
+        ni = context.new_fun_name(f"{op_prefix}{i}")
         rnames.append(ni)
         
     _rnames = rnames[0] if len(rnames) == 1 else rnames
@@ -111,8 +111,8 @@ def create_operation_lf(context, dp, functions, name_prefix=None,
 #         print('I need to connect function %s of type %s to resource %s of new NDP with type %s'%
 #               (f, Fi, rnames[i], Fhave))
 #         
-#         print('Fi: %s' % Fi)
-#         print('Fhave: %s' % Fhave)
+#         print(f"Fi: {Fi}")
+#         print(f"Fhave: {Fhave}")
         
         if not tu.equal(Fi, Fhave):
             if not allow_conversion:
@@ -123,13 +123,13 @@ def create_operation_lf(context, dp, functions, name_prefix=None,
 #             print('creating conversion')
             conversion = get_conversion(Fhave, Fi)
             if conversion is None:
-                msg = 'I need a conversion from %s to %s' % (Fi, Fhave)
+                msg = f"I need a conversion from {Fi} to {Fhave}"
                 raise DPInternalError(msg)
             else:
-#                 print('Conversion: %s' % conversion.repr_long())
+#                 print(f"Conversion: {conversion}".repr_long())
 #                 print('Creating recursive...')
                 f = create_operation_lf(context, conversion, [f],
-                                        name_prefix='_conversion_for_%s' % name_result, 
+                                        name_prefix=f"_conversion_for_{name_result}", 
                                         allow_conversion=False)
                  
 
@@ -198,7 +198,7 @@ def get_resource_possibly_converted(r, P, context):
         try:
             tu.get_super_conversion(R, P)
         except NotLeq as e:
-            msg = 'Cannot convert %s to %s.' % (R, P)
+            msg = f"Cannot convert {R} to {P}."
             raise_wrapped(DPSemanticError, e, msg, R=R, P=P, exc=sys.exc_info())
 
         conversion = get_conversion(R, P)
@@ -226,7 +226,7 @@ mcdp_dev_warning('get_function_possibly_converted() not used at all, but get_res
 #         try:
 #             tu.get_super_conversion(P, F)
 #         except NotLeq as e:
-#             msg = 'Cannot convert %s to %s.' % (P, F)
+#             msg = f"Cannot convert {P} to {F}."
 #             raise_wrapped(DPSemanticError, e, msg, P=P, F=F, exc=sys.exc_info())
 # 
 #         conversion = get_conversion(P, F)

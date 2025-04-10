@@ -30,7 +30,7 @@ class Max1Map(Map):
         return r
     
     def repr_map(self, letter):
-        return "%s ⟼ %s ∧ %s" % (letter, letter, self.F.format(self.value))
+        return f"{letter} ⟼ {letter} ∧ {self.F.format(self.value}")
 
 class Min1Map(Map):
     """
@@ -53,7 +53,7 @@ class Min1Map(Map):
         return r
     
     def repr_map(self, letter):
-        return "%s ⟼ %s v %s" % (letter, letter, self.F.format(self.value))
+        return f"{letter} ⟼ {letter} v {self.F.format(self.value}")
   
 class Min1dualMap(Map):
     """

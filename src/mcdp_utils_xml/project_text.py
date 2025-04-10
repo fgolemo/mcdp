@@ -12,7 +12,7 @@ def project_html(html):
     return res
 
 def gettext(element, n):
-    # print('%d %s element %r' % (n, '  ' * n, element.string))
+    # print(f"{'  ' * n} {n} element %r")
     
     if isinstance(element, NavigableString):
         string = element.string

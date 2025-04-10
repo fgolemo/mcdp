@@ -156,13 +156,13 @@ class CompositeNamedDP(NamedDP):
         if hasattr(self, att):
             s += '\n (loaded as %r)' % getattr(self, att)
 #         if hasattr(self, ATTRIBUTE_NDP_RECURSIVE_NAME):
-#             s += '\n (labeled as %s)' % getattr(self, ATTRIBUTE_NDP_RECURSIVE_NAME).__str__()
+#             s += f"\n (labeled as {getattr})"(self, ATTRIBUTE_NDP_RECURSIVE_NAME).__str__()
         for f in self._fnames:
-            s += '\n provides %s  [%s]' % (f, self.get_ftype(f))
+            s += f"\n provides {f}  [{self.get_ftype(f}]")
         for r in self._rnames:
-            s += '\n requires %s  [%s]' % (r, self.get_rtype(r))
+            s += f"\n requires {r}  [{self.get_rtype(r}]")
 
-        s += '\n %d nodes, %d edges' % (len(self.context.names), len(self.context.connections))
+        s += f"\n {len(self.context.names} nodes, %d edges", len(self.context.connections))
 
         s += '\n connections: \n' + format_list_long(self.context.connections, informal=True)
         s += '\n names: \n' + format_dict_long(self.context.names, informal=True)
@@ -250,11 +250,11 @@ def check_consistent_data(names, fnames, rnames, connections):
             try:
                 tu.check_equal(R, F)
             except NotEqual as e:
-                msg = 'Invalid connection %s' % c.__repr__()
+                msg = f"Invalid connection {c}".__repr__()
                 raise_wrapped(ValueError, e, msg, R=R, F=F)
 
         except ValueError as e:
-            msg = 'Invalid connection %s.' % (c.__repr__())
+            msg = f"Invalid connection {c.__repr__(}.")
             raise_wrapped(ValueError, e, msg, compact=True)
 
 @contract(cndp=CompositeNamedDP, returns='list(tuple(str, $NamedDP))')

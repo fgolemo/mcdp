@@ -290,7 +290,7 @@ def do_plots(logger, model_name, plots, outdir, extra_params,
 
     if use_cache:
         cache_dir = os.path.join(outdir, '_cached/mcdp_plot_cache')
-        logger.info('using cache %s' % cache_dir)
+        logger.info(f"using cache {cache_dir}")
     else:
         cache_dir = None
 
@@ -325,10 +325,10 @@ def write_results(res, model_name, outdir):
         assert isinstance(x, str), x
         ext = mime
     
-        base = model_name + '-%s.%s' % (name, ext)
+        base = model_name + f"-{name}.{ext}"
     
         out = os.path.join(outdir, base)
-        logger.info('Writing to %s' % out)
+        logger.info(f"Writing to {out}")
         with open(out, 'w') as f:
             f.write(x)
 
@@ -402,7 +402,7 @@ class PlotDP(QuickAppBase):
         params.add_string('out', help='Output dir', default=None)
         params.add_string('extra_params', help='Add extra params', default="")
         #print possible
-        params.add_string('plots', default='*', help='One of: %s' % possible)
+        params.add_string(f"plots', default='*', help='One of: {possible}")
 
         params.add_string('maindir', default='.', short='-d',
                            help='Main library directory.')

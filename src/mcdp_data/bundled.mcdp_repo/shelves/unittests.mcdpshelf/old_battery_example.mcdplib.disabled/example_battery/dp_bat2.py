@@ -36,7 +36,7 @@ class SimpleNonlinearity1(PrimitiveDP):
 def T_from_Ps(Ps):
     if Ps == 0:
         return R_Time.get_top()
-    return float(10.0 + 1 / np.sqrt(Ps))
+    return float(10.0 + 1 // np.sqrt(Ps))
 
 class TimeEnergyTradeoff(PrimitiveDP):
 
@@ -81,7 +81,7 @@ class PowerTimeTradeoff(PrimitiveDP):
     def evaluate_f_m(self, func, m):
         assert func == ()
         Ps = m
-        print('M = %s m= %s' % (self.M, m))
+        print(f"M = {self.M} m= {m}")
         self.M.belongs(m)
         return (Ps, T_from_Ps(Ps))
 

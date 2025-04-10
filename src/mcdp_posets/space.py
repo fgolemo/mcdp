@@ -26,8 +26,8 @@ class Uninhabited(Exception):
     """ There is no element in this space. Raised by witness(). """
     
 
-class Space(object):
-    __metaclass__ = SpaceMeta
+class Space(object, metaclass=SpaceMeta):
+    """Base class for all spaces."""
 
     def format(self, x):
         """ Formats a point in the space. """
@@ -62,9 +62,8 @@ class Space(object):
 class MapNotDefinedHere(Exception):
     """ The map is not defined at this point """
 
-class Map(object):
-
-    __metaclass__ = ABCMeta
+class Map(object, metaclass=ABCMeta):
+    """Base class for maps between spaces."""
 
     @contract(dom=Space, cod=Space)
     def __init__(self, dom, cod):
@@ -105,10 +104,9 @@ class Map(object):
         """ Might raise MapNotDefinedHere. """
 
     def __repr__(self):
-        return "%s:%s→%s" % (type(self).__name__,
-                             self.get_domain(), self.get_codomain())
+        return f"{type(self).__name__}:{self.get_domain()}→{self.get_codomain()}"
         
     @abstractmethod
     def repr_map(self, letter):  # @UnusedVariable
         """ Returns a string of the type <letter> |-> f(<letter>) """
-        #return '(undef for %s)' % type(self).__name__ 
+        #return f"(undef for {type})"(self).__name__ 

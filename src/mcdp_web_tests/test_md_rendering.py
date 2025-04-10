@@ -38,7 +38,7 @@ def define_tests_rendering(context, libname):
     
     ext = MCDPConstants.ext_doc_md
     for docname, realpath in list_library_files(library, ext):
-        job_id = 'render-%s' % docname
+        job_id = f"render-{docname}"
         context.comp(check_rendering, libname=libname, filename=realpath, job_id=job_id)
 
 def read_file_encoded_as_utf8(filename):
@@ -58,7 +58,7 @@ def write_file_encoded_as_utf8(filename, data):
     with codecs.open(filename, encoding='utf-8') as f:
         f.write(u)
         
-    logger.debug('Written %s' % filename)
+    logger.debug(f"Written {filename}")
     
 def get_expected_exceptions(markdown_data):
     expected = []
@@ -98,7 +98,7 @@ def with_library_cache_dir(library, prefix='with_library_cache_dir'):
     try: 
         yield
     except:
-        logger.debug('Keeping %s' % tmpdir)
+        logger.debug(f"Keeping {tmpdir}")
         pass
     else:
         shutil.rmtree(tmpdir)

@@ -2,7 +2,7 @@
 from contracts.utils import check_isinstance
 
 from .parts import CDPLanguage
-from .pyparsing_bundled import Keyword, Literal, Optional, Suppress
+from .pyparsing_compat import Keyword, Literal, Optional, Suppress
 
 
 CDP = CDPLanguage

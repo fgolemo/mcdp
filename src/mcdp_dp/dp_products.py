@@ -73,7 +73,7 @@ class ProductNDP_L(WrapAMap):
         self.nl = nl
         
     def solve_r(self, r):  # @UnusedVariable
-        msg = 'ProductNDP_L(%s, %s):solve_r()' % (self.F, self.nl)
+        msg = f"ProductNDP_L({self.F}, {self.nl}):solve_r()"
         raise_desc(NotImplementedError, msg)
         
     def repr_hd_map(self):
@@ -87,7 +87,7 @@ class ProductNDP_U(WrapAMap):
         self.nl = nl #XXX
         
     def solve_r(self, r):  # @UnusedVariable
-        msg = 'ProductNDP_U(%s, %s):solve_r()' % (self.F, self.nl)
+        msg = f"ProductNDP_U({self.F}, {self.nl}):solve_r()"
         raise_desc(NotImplementedError, msg)
 
     def repr_hd_map(self):
@@ -168,7 +168,7 @@ class ProductNRcompDP_L(WrapAMap):
         self.nl = nl
 
     def solve_r(self, f):  # @UnusedVariable
-        msg = 'ProductNRcompDP_L(%s, %s):solve_r()' % (self.Fs, self.nl)
+        msg = f"ProductNRcompDP_L({self.Fs}, {self.nl}):solve_r()"
         raise_desc(NotImplementedError, msg)
         
     def repr_hd_map(self):
@@ -185,7 +185,7 @@ class ProductNRcompDP_U(WrapAMap):
         self.nu = nu
 
     def solve_r(self, f):  # @UnusedVariable
-        msg = 'ProductNRcompDP_U(%s, %s):solve_r()' % (self.Fs, self.nl)
+        msg = f"ProductNRcompDP_U({self.Fs}, {self.nl}):solve_r()"
         raise_desc(NotImplementedError, msg)
         
     def repr_hd_map(self):
@@ -241,7 +241,7 @@ class ProductNNatDP(WrapAMap):
 
     def solve_r(self, r):
         if self.n > 2:
-            msg = 'ProductNNatDP not implemented for n = %s.' % self.n
+            msg = f"ProductNNatDP not implemented for n = {self}.".n
             raise_desc(NotImplementedError, msg, n=self.n)
 
         assert self.n == 2

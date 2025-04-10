@@ -55,8 +55,7 @@ def expand_wildcard(wildcard, universe):
     matches = list(get_wildcard_matches(wildcard, universe))
 
     if not matches:
-        msg = ('Could not find matches for pattern %r in %s.' %
-                (wildcard, universe))
+        msg = (f"Could not find matches for pattern %r in {wildcard}.")
         raise ValueError(msg)
 
     return matches

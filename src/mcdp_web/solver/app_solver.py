@@ -20,14 +20,14 @@ class AppSolver(object):
     """
         /libraries/{}/models/{}/views/solver/   - redirects to one with the right amount of axis
     
-        /libraries/{}/models/{}/views/solver/0,1/0,1/   presents the gui. 0,1 are the axes
+        /libraries/{}/models/{}/views/solver//0,1//0,1//   presents the gui. 0,1 are the axes
     
         AJAX:
-            /libraries/{}/models/{}/views/solver/0,1/0,1/addpoint     params x, y
-            /libraries/{}/models/{}/views/solver/0,1/0,1/getdatasets  params -
-            /libraries/{}/models/{}/views/solver/0,1/0,1/reset        params -
+            /libraries/{}/models/{}/views/solver//0,1//0,1//addpoint     params x, y
+            /libraries/{}/models/{}/views/solver//0,1//0,1//getdatasets  params -
+            /libraries/{}/models/{}/views/solver//0,1//0,1//reset        params -
             
-        /libraries/{}/models/{}/views/solver/0,1/0,1/compact_graph    png image
+        /libraries/{}/models/{}/views/solver//0,1//0,1//compact_graph    png image
         /libraries/{}/models/{}/views/solver/compact_graph    png image
     """
 
@@ -81,15 +81,15 @@ class AppSolver(object):
         nf = len(ndp.get_fnames())
         nr = len(ndp.get_rnames())
 
-        base = '/shelves/%s/libraries/%s/models/%s/views/solver/' % (e.shelf_name, e.library_name, e.model_name)
+        base = f"/shelves/{e.shelf_name}/libraries/{e.library_name}/models/{e.model_name}/views/solver/"
         if nf >= 2 and nr >= 2:
-            url = base + '0,1/0,1/'
+            url = base + '0,1//0,1/'
             raise HTTPSeeOther(url)
         elif nf == 1 and nr >= 2:
-            url = base + '0/0,1/'
+            url = base + '0//0,1/'
             raise HTTPSeeOther(url)
         elif nf == 1 and nr == 1:
-            url = base + '0/0/'
+            url = base + '0//0/'
             raise HTTPSeeOther(url)
         else:
             title = 'Could not find render view for this model. '
@@ -176,7 +176,7 @@ def create_alternative_urls(params, ndp):
     def make_url(faxes, raxes):
         faxes = ",".join(map(str, faxes))
         raxes = ",".join(map(str, raxes))
-        return '/libraries/%s/models/%s/views/solver/%s/%s/' % (library, model_name, faxes, raxes)
+        return f"/libraries/{library}/models/{model_name}/views/solver/{faxes}/{raxes}/"
 
     # let's create the urls for different options
     fnames = ndp.get_fnames()
@@ -185,13 +185,13 @@ def create_alternative_urls(params, ndp):
     fun_alternatives = []
     for option in itertools.permutations(range(len(fnames)), 2):
         url = make_url(faxes=option, raxes=params['res_axes'])
-        desc = "%s vs %s" % (fnames[option[0]], fnames[option[1]])
+        desc = f"{fnames[option[0]]} vs {fnames[option[1]]}"
         fun_alternatives.append({'url':url, 'desc':desc})
 
     res_alternatives = []
     for option in itertools.permutations(range(len(rnames)), 2):
         url = make_url(faxes=params['fun_axes'], raxes=option)
-        desc = "%s vs %s" % (rnames[option[0]], rnames[option[1]])
+        desc = f"{rnames[option[0]]} vs {rnames[option[1]]}"
         res_alternatives.append({'url':url, 'desc':desc})
 
     return fun_alternatives, res_alternatives

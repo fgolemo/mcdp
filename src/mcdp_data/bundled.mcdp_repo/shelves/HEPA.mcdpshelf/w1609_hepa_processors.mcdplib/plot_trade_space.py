@@ -24,7 +24,7 @@ def go(model_name):
     combinations = {
         "min_throughput": (np.linspace(10, 1000, nt), "Hz"),
         "resolution": (np.linspace(1.3, 10, nr), "pixels/deg"),
-        "inverse_of_max_latency": (0.0, '1/s')
+        "inverse_of_max_latency": (0.0, '1//s')
     }
     result_like = dict(power="W", budget="USD")
     ndp = lib.load_ndp(model_name)
@@ -133,9 +133,9 @@ def create_report1(data, model_name):
 
         do_axes(pylab)
 
-    r.text('about_budget', '%s = %s' % (unique_budgets, markers))
+    r.text(f"about_budget', '{unique_budgets} = {markers}")
     r.text('misc',
-           'min_power: %s W - %s W' % (np.min(all_min_power[is_feasible]),
+           f"min_power: {np.min(all_min_power[is_feasible]} W - %s W",
                                        np.max(all_min_power[is_feasible])))
     return r
 

@@ -1,189 +1,138 @@
-<!--
+# PyMCDP
 
-<table>
-<tr>
-<td>Production server (EU)</td>
-<td><a href="https://circleci.com/gh/AndreaCensi/mcdp/tree/inst00"><img src="https://circleci.com/gh/AndreaCensi/mcdp/tree/inst00.png?style=shield&amp;circle-token=f59172bb200232cffc45e43473c4eaf5c2b3e776"/></a>
-</td>
-</tr>
-<tr>
-<td>Master</td>
-<td><a href="https://circleci.com/gh/AndreaCensi/mcdp/tree/master"><img src="https://circleci.com/gh/AndreaCensi/mcdp/tree/master.png?style=shield&amp;circle-token=f59172bb200232cffc45e43473c4eaf5c2b3e776"/></a>
-</td>
-</tr>
-<tr>
-<td>Development</td>
-<td><a href="https://circleci.com/gh/AndreaCensi/mcdp/tree/devel"><img src="https://circleci.com/gh/AndreaCensi/mcdp/tree/devel.png?style=shield&amp;circle-token=f59172bb200232cffc45e43473c4eaf5c2b3e776"/></a>
-</td>
-</tr>
-<tr>
-<td>Daily</td>
-<td><a href="https://circleci.com/gh/AndreaCensi/mcdp/tree/last"><img src="https://circleci.com/gh/AndreaCensi/mcdp/tree/last.png?style=shield&amp;circle-token=f59172bb200232cffc45e43473c4eaf5c2b3e776"/></a>
-</td>
-</tr>
-</table> -->
+A Python interpreter and solver for Monotone Co-Design Problems.
 
+[![Build Status](https://travis-ci.org/your-username/mcdp.svg?branch=master)](https://travis-ci.org/your-username/mcdp)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-**PyMCDP** is a Python interpreter and solver for Monotone Co-Design Problems.
+## Overview
 
-Please see the website <http://co-design.science> and in particular [the manual (PDF)][manual], which contains up-to-date installation instructions.
+PyMCDP provides tools for defining, solving, and visualizing co-design problems through a specialized language and mathematical framework. The project includes:
 
-[manual]: https://andreacensi.github.io/mcdp-manual/mcdp-manual.pdf
+- **MCDPL**: A domain-specific language for expressing co-design problems
+- **Solver engine**: For computing solutions to monotone co-design problems
+- **Visualization tools**: For representing problems and solutions graphically
+- **Web interface**: For interactive development and analysis
 
-<!--
-*Below, an example of a graphical representation of an MCDP (left)
-along with the MCDPL snippet that describes it (right)*
-
-<table>
- <tr>
- <td><img src="web/co-design.science/media/battery-out_expected3/battery_minimal-ndp_greenredsym.png" width="400px"/></td>
- <td><img src="web/co-design.science/media/battery-out_expected3/battery_minimal-syntax_pdf.png" width="300px"/>
- </td>
- </tr>
-</table>
-
+Please see the [website](http://co-design.science) and in particular
+[the manual](https://co-design.science/media/pymcdp-manual-jul16.html)
+for detailed documentation.
 
 ## Installation
 
-The code has been tested on Ubuntu 14.04, Ubuntu 16.04, and OS X using Enthought Python distribution.
+The code works with Python 3.8+. It has been tested on Ubuntu and macOS.
 
+### Dependencies
 
-### Installing dependencies
+Required system packages:
+```bash
+# Ubuntu
+sudo apt-get install python3-dev python3-pip graphviz wkhtmltopdf git
 
-On Ubuntu:
-
-    $ sudo apt-get install python-numpy python-matplotlib python-yaml python-pip python-dev python-setproctitle python-psutil graphviz wkhtmltopdf git
-
-For math support:
-
-    $ sudo apt-get install nodejs npm
-    $ sudo npm install MathJax-node jsdom
-
-For printing to PDF, install Prince from https://www.princexml.com/download/.
-
+# macOS (with Homebrew)
+brew install graphviz wkhtmltopdf git
+```
 
 ### Option 1: Install using pip
 
-Run this command:
+```bash
+pip install PyMCDP
+```
 
-    $ sudo pip install -U PyMCDP conftools quickapp decentlogs systemcmd
+### Option 2: Installation from source (recommended for development)
 
-Note that if you omit the ``sudo``, modern Ubuntu 16 will install
-correctly in the directory ``~/.local/``. In this case,
-make sure you have ``~/.local/bin/`` in your ``PATH``.
+```bash
+# Clone the repository
+git clone https://github.com/AndreaCensi/mcdp.git
+cd mcdp
 
-### Option 2: Installation from source (preferred)
+# Create a virtual environment (optional but recommended)
+python -m venv venv
+source venv/bin/activate  # On Windows, use venv\Scripts\activate
 
-Clone the repo using:
+# Install in development mode
+pip install -e .
 
-    $ git clone https://github.com/AndreaCensi/mcdp.git
+# Install development dependencies
+pip install -r requirements-dev.txt
+```
 
-Jump into the directory:
+## Getting Started
 
-	$ cd mcdp
+### Running the web interface
 
-Then install the main module:
+Start the web server:
 
-    $ sudo python setup.py develop
+```bash
+mcdp-web
+```
 
-Omit the sudo if you have already set up a virtual environment.
+Then open your browser to [http://127.0.0.1:8080/](http://127.0.0.1:8080/).
 
+### Solving co-design problems
 
-## wkhtmltopdf
+Use the solver command line tool:
 
-If you get an error like "cannot connect to X server", try  [this solution](http://stackoverflow.com/a/34947479/334788).
+```bash
+mcdp-solve -d <library> <model_name> <functionality>
+```
 
-## Getting started
+Example:
 
+```bash
+mcdp-solve -d src/mcdp_data/libraries/examples/example-battery.mcdplib battery "<1 hour, 0.1 kg, 1 W>"
+```
 
-#### Running the web interface
+### Visualization of co-design problems
 
-Run the command:
+Generate visual representations:
 
-    $ mcdp-web
+```bash
+mcdp-plot -d <library> <model_name>
+```
 
-Then point your browser to the address <http://127.0.0.1:8080/>.
+## Development
 
+### Code Quality
 
-#### Solving Monotone Co-Design Problems
+This project uses the following tools to maintain code quality:
 
-The program ``mcdp-solve`` is a solver.
+- **Black**: For code formatting
+- **Flake8**: For code linting
+- **Pytest**: For testing
 
-    $ mcdp-solve -d <library> <model_name>  <functionality>
+Run the formatters and linters:
 
-For example, to solve the MCDP specified in the file ``battery.mcdp`` in
-the library ``src/mcdp_data/libraries/examples/example-battery.mcdplib``, use:
+```bash
+# Format code with Black
+black .
 
-    $ mcdp-solve -d src/mcdp_data/libraries/examples/example-battery.mcdplib battery "<1 hour, 0.1 kg, 1 W>"
+# Run linter
+flake8
 
-The expected output is:
+# Run tests
+pytest
+```
 
-    ...
-    Minimal resources needed: mass = ↑{0.039404 kg}
+### Pre-commit Hooks
 
-This is the case of unreasonable demands (1 kg of extra payload):
+We use pre-commit hooks to ensure code quality:
 
-    $ mcdp-solve -d src/mcdp_data/libraries/examples/example-battery.mcdplib battery "<1 hour, 1.0 kg, 1 W>"
+```bash
+# Install pre-commit
+pip install pre-commit
 
-This is the expected output:
+# Install the hooks
+pre-commit install
 
-    Minimal resources needed: mass = ↑{+∞ kg}
+# Run manually on all files
+pre-commit run --all-files
+```
 
-#### Visualization of Co-Design Problems
+## License
 
-The programs ``mcdp-plot`` will parse and plot the MCDP in a variety of representations.
+PyMCDP is licensed under [LICENSE INFORMATION].
 
-    $ mcdp-plot  -d <library> <model name>
+## More Information
 
-For example, the command
-
-    $ mcdp-plot  -d src/mcdp_data/libraries/examples/example-battery.mcdplib battery
-
-will produce these graphs:
-
-<table>
-    <tr>
-        <td>Syntax highlighting</td>
-        <td><a href="web/co-design.science/media/battery-out_expected3/battery-syntax_pdf.png">
-            <img src="web/co-design.science/media/battery-out_expected3/battery-syntax_pdf.png" height="500px"/>
-            </a>
-        </td>
-    </tr>
-    <tr><td>Verbose graph</td><td><a href="web/co-design.science/media/battery-out_expected3/battery-ndp_graph_enclosed_LR.png"><img src="web/co-design.science/media/battery-out_expected3/battery-ndp_graph_enclosed_LR.png"/></a></td></tr>
-    <tr><td>Tree representation</td><td><img src="web/co-design.science/media/battery-out_expected3/battery-dp_graph_tree.png"/></td></tr>
-    </tr>
-</table>
-
-
-<h2>Visualization of the solution</h2>
-
-To solve an MCDP, one constructs a chain of antichains in the product poset of resources.
-
-The animations below show the sequence of antichains being
-constructed to solve two variations of the same problem.
-
-(Whether the problem statement describes an MCDP is
-absolutely not obvious using the formula representation;  it becomes obvious when writing the problem as a graph
-of monotone problems.)
-
-<table>
-    <tr><td colspan="2">
-        <img src="web/co-design.science/media/animations/model.png" width="500px"/>
-    </td></tr>
-    <tr>
-     <td><img src="web/co-design.science/media/animations/plusinvnat2-nat4-problem.png" width="300px"/></td>
-     <td><img src="web/co-design.science/media/animations/plusinvnat2-nat10-problem.png" width="300px"/>
-     </td>
-     </tr>
-     <tr>
-     <td><img src="web/co-design.science/media/animations/plusinvnat2-nat4.gif" width="300px"/></td>
-     <td><img src="web/co-design.science/media/animations/plusinvnat2-nat10.gif" width="300px"/></td>
-     </tr>
-     <tr>
-     <td colspan="2"><img src="web/co-design.science/media/animations/legend.png" width="500px"/></td>
-     </tr>
-</table>
-
-<h2>More information</h2>
-
-For more information, please see <http://co-design.science>. -->
+For more information, please visit [http://co-design.science](http://co-design.science).

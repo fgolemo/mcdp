@@ -22,7 +22,7 @@ class PrimitiveMeta(ABCMeta):
         if all_disabled():
             pass
         else:
-#             print('Adding checks on Primitive %s: Switches.disable_all = %s' % (name, Switches.disable_all))
+#             print(f"Adding checks on Primitive {name}: Switches.disable_all = {Switches.disable_all}")
             from mcdp_dp.primitive import NotSolvableNeedsApprox
             from mcdp_dp.primitive import WrongUseOfUncertain
 
@@ -49,7 +49,7 @@ class PrimitiveMeta(ABCMeta):
                             'Solve failed.', self=self, f=f, exc=sys.exc_info())
                     except NotImplementedError as e:
                         raise_wrapped(NotImplementedError, e,
-                            'Solve not implemented for class %s.' % name, exc=sys.exc_info())
+                            f"Solve not implemented for class {name}.", exc=sys.exc_info())
                     except NotSolvableNeedsApprox:
                         raise
                     except WrongUseOfUncertain:
@@ -90,7 +90,7 @@ class PrimitiveMeta(ABCMeta):
                             'Solve failed.', self=self, f=f, exc=sys.exc_info())
                     except NotImplementedError as e:
                         raise_wrapped(NotImplementedError, e,
-                            'Solve not implemented for class %s.' % name)
+                            f"Solve not implemented for class {name}.")
                     except NotSolvableNeedsApprox:
                         raise
                     except WrongUseOfUncertain:

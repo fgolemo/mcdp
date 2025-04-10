@@ -141,7 +141,7 @@ class WebApp(AppVisualization, AppStatus,
         instance = self.options.instance
         #root= 'out/root'
         root = create_tmpdir('HostInstance_root')
-        logger.debug('Tmp dir: %s' % root)
+        logger.debug(f"Tmp dir: {root}")
 
         if not 'local' in config_repos:
             config_repos['local'] = {}
@@ -211,7 +211,7 @@ class WebApp(AppVisualization, AppStatus,
         root = MCDPResourceRoot(e.request)
 
         def get_pages(node, prefix):
-            logger.info('get_pages(%s, %s)' % (node, prefix))
+            logger.info(f"get_pages({node}, {prefix})")
             for child in node:
                 yield "/".join(prefix + (child,))
 
@@ -305,8 +305,8 @@ class WebApp(AppVisualization, AppStatus,
         if e.request.referrer is None:
             redirect = self.get_root_relative_to_here(e.request)
             logger.info('REFRESH')
-            logger.info('context.url = %s' % e.request.url)
-            logger.info('redirect = %s' % redirect)
+            logger.info(f"context.url = {e}".request.url)
+            logger.info(f"redirect = {redirect}")
         else:
             redirect = e.request.referrer
         raise HTTPFound(redirect)
@@ -316,9 +316,9 @@ class WebApp(AppVisualization, AppStatus,
         e.request.response.status = 404
         url = e.request.url
         referrer = e.request.referrer
-        #print('context: %s' % e.context)
+        #print(f"context: {e}".context)
         self.exceptions.append(
-            'Path not found.\n url: %s\n referrer: %s' % (url, referrer))
+            f"Path not found.\n url: {url}\n referrer: {referrer}")
         res = {
             'url': url,
             'referrer': referrer,
@@ -377,8 +377,8 @@ class WebApp(AppVisualization, AppStatus,
             url = request.url
             referrer = request.referrer
             n += 'Error during serving this URL:'
-            n += '\n url: %s' % url
-            n += '\n referrer: %s' % referrer
+            n += f"\n url: {url}"
+            n += f"\n referrer: {referrer}"
 
         if context is not None:
             n += '\n\n' + context_display_in_detail(context) + '\n'
@@ -451,7 +451,7 @@ class WebApp(AppVisualization, AppStatus,
         # f['data'] not utf-8
         # reopen as utf-8
         document = e.context.name
-#         filename = '%s.%s' % (document, MCDPConstants.ext_doc_md)
+#         filename = f"{document}.{MCDPConstants.ext_doc_md}"
 #         if not e.library.file_exists(filename):
 #             res = {}
 #             add_other_fields(self, res, e.request, context=e.context)
@@ -481,7 +481,7 @@ class WebApp(AppVisualization, AppStatus,
     @contract(e=Environment, document=str)
     def _render_library_doc(self, e, document):
         strict = int(e.request.params.get('strict', '0'))
-#         filename = '%s.%s' % (document, MCDPConstants.ext_doc_md)
+#         filename = f"{document}.{MCDPConstants.ext_doc_md}"
 #
         data_str = e.library.documents[document]
         realpath = 'Document "%s"' % document
@@ -503,7 +503,7 @@ class WebApp(AppVisualization, AppStatus,
         name = e.context.name
         asset = os.path.splitext(name)[0]
         ext = os.path.splitext(name)[1][1:]
-        filename = '%s.%s' % (asset, ext)
+        filename = f"{asset}.{ext}"
         try:
             f = e.library._get_file_data(filename)
         except DPSemanticError as exc:
@@ -524,7 +524,7 @@ class WebApp(AppVisualization, AppStatus,
         sys.exit(0)
         setattr(self.server, '_BaseServer__shutdown_request', True)
         howlong = duration_compact(self.get_uptime_s())
-        return "Bye. Uptime: %s." % howlong
+        return f"Bye. Uptime: {howlong}."
 
     def get_uptime_s(self):
         return time.time() - self.time_start
@@ -773,7 +773,7 @@ class WebApp(AppVisualization, AppStatus,
             content = ""
             content += '<ul>'
             for k, url in links:
-                content += '\n <li><a href="%s">%s</a></li>' % (url, k)
+                content += f"\n <li><a href="{url}">{k}</a></li>"
             content += '\n</ul>'
             error = None
         elif isinstance(schema, SchemaHash):
@@ -790,11 +790,11 @@ class WebApp(AppVisualization, AppStatus,
                 content = ""
                 content += '<ul>'
                 for k, url in links:
-                    content += '\n <li><a href="%s">%s</a></li>' % (url, k)
+                    content += f"\n <li><a href="{url}">{k}</a></li>"
                 content += '\n</ul>'
             error = None
         else:
-            error = 'Unimplemented for %s' % type(view)
+            error = f"Unimplemented for {type}"(view)
             content = None
 
         res = {}
@@ -857,7 +857,7 @@ class WebApp(AppVisualization, AppStatus,
                     else:
                         change['url'] = None
 
-                    #print('change: %s url = %s' % (change, change['url']))
+                    #print(f"change: {change} url = {change['url']}")
                     change['date_human'] = datetime.datetime.fromtimestamp(
                         change['date']).strftime('%b %d, %H:%M')
                     changes.append(change)
@@ -894,8 +894,8 @@ class WebApp(AppVisualization, AppStatus,
     @cr2e
     def view_thing_delete(self, e):
         name = e.thing_name
-#         basename = "%s.%s" % (name, e.spec.extension)
-        logger.error('Deleting %s' % name)
+#         basename = f"{name}.{e.spec.extension}"
+        logger.error(f"Deleting {name}")
         del e.things[name]
 #         filename = e.library.delete_file(basename)
 #         e.session.notify_deleted_file(e.shelf_name, e.library_name, filename)
@@ -915,7 +915,7 @@ class WebApp(AppVisualization, AppStatus,
             url = self.options.url_base_public + page
         else:
             url = e.root + page
-        logger.info('redirecting to page %s\nurl: %s' % (page, url)) 
+        logger.info(f"redirecting to page {page}\nurl: {url}") 
         raise HTTPFound(location=url)
 
 
@@ -941,17 +941,17 @@ class MCDPWeb(QuickAppBase):
         options = self.get_options()
 
         if options.config is not None:
-            logger.info('Reading configuration from %s' % options.config)
+            logger.info(f"Reading configuration from {options}".config)
             logger.warn('Other options from command line will be ignored. ')
             parser = RawConfigParser()
             parser.read(options.config)
             sections = parser.sections()
-            logger.info('sections: %s' % sections)
+            logger.info(f"sections: {sections}")
             s = 'app:main'
             if not s in sections:
                 msg = 'Could not find section "%s": available are %s.' % (
                     s, format_list(sections))
-                msg += '\n file %s' % options.config
+                msg += f"\n file {options}".config
                 raise Exception(msg)  # XXX
             settings = dict((k, parser.get(s, k)) for k in parser.options(s))
 
@@ -965,7 +965,7 @@ class MCDPWeb(QuickAppBase):
 #                     del settings[k]
             options = parse_mcdpweb_params_from_dict(mcdp_web_settings)
 
-            logger.debug('Using these options: %s' % options)
+            logger.debug(f"Using these options: {options}")
         else:
             logger.info('No configuration .ini specified (use --config).')
             settings = {}
@@ -1004,7 +1004,7 @@ def get_only_prefixed(settings, prefix, delete=False):
 
 def app_factory(global_config, **settings0):  # @UnusedVariable
     settings = get_only_prefixed(settings0, 'mcdp_web.', delete=True)
-    #print('app_factory settings %s' % settings)
+    #print(f"app_factory settings {settings}")
     options = parse_mcdpweb_params_from_dict(settings)
     wa = WebApp(options, settings=settings0)
     app = wa.get_app()

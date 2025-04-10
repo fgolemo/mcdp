@@ -37,7 +37,15 @@ class Multiset(object):
         return self._elements
 
     def __repr__(self):
-        return 'Multiset(%r, %r)' % (self._elements, self._S)
+        return f'Multiset({self._elements!r}, {self._S!r})'
+        
+    def __eq__(self, other):
+        if not isinstance(other, Multiset):
+            return False
+        return self._elements == other._elements and self._S == other._S
+        
+    def __hash__(self):
+        return hash((self._elements, self._S))
 
 class Multisets(Poset):
     """ 
@@ -66,6 +74,9 @@ class Multisets(Poset):
 
     def __eq__(self, other):
         return isinstance(other, Multisets) and self.S == other.S
+        
+    def __hash__(self):
+        return hash(self.S)
 
     def belongs(self, x):
         if not isinstance(x, Multiset):
@@ -112,9 +123,9 @@ class Multisets(Poset):
         N = Nat()
         elements = x.get_elements()
         ordered = sorted(elements)
-        strings = ['%s of %s' % (N.format(elements[k]), k) for k in ordered]
+        strings = [f'{N.format(elements[k])} of {k}' for k in ordered]
         contents = ", ".join(strings)
-        return "{%s}" % contents
+        return f"{{{contents}}}"
 
     def __repr__(self):
-        return "Multisets(%r)" % self.S
+        return f"Multisets({self.S!r})"

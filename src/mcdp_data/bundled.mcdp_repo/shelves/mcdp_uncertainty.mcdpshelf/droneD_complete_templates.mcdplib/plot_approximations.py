@@ -13,7 +13,7 @@ from mcdp_dp.dp_inv_plus import InvPlus2
 
 def plot_nominal_invmult(pylab):
     nomimal_x = np.linspace(0.1, 10, 100)
-    nomimal_y = 1.0 / nomimal_x
+    nomimal_y = 1.0 // nomimal_x
     pylab.plot(nomimal_x, nomimal_y, 'k-')
     axes = pylab.gca()
     axes.xaxis.set_ticklabels([])
@@ -59,7 +59,7 @@ def go():
     for algo in algos:
         InvMult2.ALGO = algo
         InvPlus2.ALGO = algo
-        print('Using algorithm %s ' % algo)
+        print(f"Using algorithm {algo} ")
         with r.subsection(algo) as r2:
             # first
             F = parse_poset('dimensionless')
@@ -79,7 +79,7 @@ def go():
                 go1(rr, ns, dp, plot_nominal_invplus, axis)
 
     fn = 'out-plot_approximations/report.html'
-    print('writing to %s' % fn)
+    print(f"writing to {fn}")
     r.to_html(fn)
 
 if __name__ == '__main__':

@@ -8,7 +8,7 @@ class ParsingElement(object):
         from .syntax import Syntax
         return getattr(Syntax, self.name) # bug
     def __repr__(self):
-        return 'ParsingElement(%s)' % self.name
+        return f"ParsingElement({self.name})"
 
 
 @contract(returns=ParsingElement)
@@ -24,4 +24,4 @@ def find_parsing_element(x):
         if value is x:
             return ParsingElement(name)
 
-    raise ValueError('Cannot find element for %s.' % str(x))
+    raise ValueError(f"Cannot find element for {str(x)}.")

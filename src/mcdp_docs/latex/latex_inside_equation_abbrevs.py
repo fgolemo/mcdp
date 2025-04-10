@@ -143,7 +143,7 @@ def count_possible_replacements(fn):
     latex2text = dict((_.latex, _.text) for _ in rs)
     
 #     for _ in rs:
-#         print('%s     %s' % (_.text, _.latex))
+#         print(f"{_.text}     {_.latex}")
     
     s, subs = extract_maths(s)
     
@@ -158,7 +158,7 @@ def count_possible_replacements(fn):
     counted = sorted(counts, key=lambda k: -counts[k])
     print('counters:')
     for c in counted:
-        print('   %3d   %14s  %s' % (counts[c], c, latex2text[c])) 
+        print(f"   %3d   %14s  {counts[c]}") 
     
     
 

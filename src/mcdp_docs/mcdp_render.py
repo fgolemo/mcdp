@@ -43,7 +43,7 @@ class Render(QuickAppBase):
 
         stylesheet = options.stylesheet
         # make sure it exists
-        get_css_filename('compiled/%s' % stylesheet)
+        get_css_filename(f"compiled/{stylesheet}")
         
         params = options.get_extra()
 
@@ -107,7 +107,7 @@ def run_prince(html_filename):
     
     cwd = os.getcwd()
     rel = os.path.relpath(pdf, cwd)
-    logger.info('Written %s' % rel) 
+    logger.info(f"Written {rel}") 
     
     
 def render(library, docname, data, realpath, out_dir, generate_pdf, stylesheet):
@@ -137,7 +137,7 @@ def render(library, docname, data, realpath, out_dir, generate_pdf, stylesheet):
     with open(out, 'w') as f:
         f.write(doc)
 
-    logger.info('Written %s ' % out)
+    logger.info(f"Written {out} ")
     return out
 
 

@@ -67,6 +67,6 @@ def primitive_dp_test(id_dp, dp):
         yield
     except:
         logger.error('Test failure for DP %r' % id_dp)
-        logger.error('__repr__():\n%s' % dp.__repr__())
-        logger.error('repr_long():\n%s' % dp.repr_long())
+        logger.error(f"__repr__():\n{dp}".__repr__())
+        logger.error(f"repr_long():\n{dp}".repr_long())
         raise

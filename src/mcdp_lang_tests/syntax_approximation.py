@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from nose.tools import assert_equal
+from .nose_compat import assert_equal
 
 from comptests.registrar import comptest
 from mcdp.exceptions import DPSemanticError, DPSyntaxError
@@ -29,7 +29,7 @@ def check_approx_res2():
     """
     ndp = parse_ndp(s)
     dp = ndp.get_dp()
-    print dp.repr_long()
+    print(dp.repr_long())
     res = dp.solve(0.006)
     assert_equal(set([0.01]), res.minimals)
     res = dp.solve(0.016)
@@ -104,8 +104,8 @@ def check_approx_res5():
     dpl, dpu = get_dp_bounds(dp, 1, 1)
     resl = dpl.solve(0.016)
     resu = dpu.solve(0.016)
-    print resl
-    print resu
+    print(resl)
+    print(resu)
     assert resl.minimals == set([0.01])
     assert resu.minimals == set([0.02])
 

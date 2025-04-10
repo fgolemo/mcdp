@@ -8,7 +8,7 @@ from contracts.utils import raise_desc
 def bs(fragment):
     """ Returns the contents wrapped in an element called "fragment".
         Expects fragment as a str in utf-8 """
-    s = '<fragment>%s</fragment>' % fragment
+    s = f"<fragment>{fragment}</fragment>"
     parsed = BeautifulSoup(s, 'lxml', from_encoding='utf-8')
     res = parsed.html.body.fragment
     assert res.name == 'fragment'

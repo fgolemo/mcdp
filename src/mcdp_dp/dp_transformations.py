@@ -41,7 +41,7 @@ def dp_transform(dp, f):
         try:
             check_same_spaces(dp, dp2)
         except AssertionError as e: # pragma: no cover
-            msg = 'Transformation %s does not preserve spaces.' % f
+            msg = f"Transformation {f} does not preserve spaces."
             raise_wrapped(DPInternalError, e, msg, dp=dp, dp2=dp2, f=f, compact=True)
         return dp2
 

@@ -50,10 +50,10 @@ def less_resources2(ua, ub):
     A_to_B, _ = tu.get_embedding(Pa, Pb2)
     ua2 = upperset_project_map(ua, A_to_B)
 
-    print('Pa: %s' % Pa)
-    print('Pb2:  %s' % Pb2)
-    print('ua2: %s' % ua2)
-    print('ub2: %s' % ub2)
+    print(f"Pa: {Pa}")
+    print(f"Pb2:  {Pb2}")
+    print(f"ua2: {ua2}")
+    print(f"ub2: {ub2}")
 
     return UPb2.leq(ua2, ub2)
 
@@ -108,8 +108,8 @@ def get_common(ua, ub):
             else:
                 matches2.append(('B', j))
 
-    print('matches1:  %s' % matches1)
-    print('matches2: %s' % matches2)
+    print(f"matches1:  {matches1}")
+    print(f"matches2: {matches2}")
 
     used = sorted(set(matches1 + matches2))
     def get_P(_):
@@ -119,15 +119,15 @@ def get_common(ua, ub):
         assert False
 
     Ps = PosetProduct(tuple(map(get_P, used)))
-    print('used: %s' % used)
-    print('Ps: %s' % Ps)
+    print(f"used: {used}")
+    print(f"Ps: {Ps}")
 
     # now we need to complete the first
     Ps_a = get(matches1, used, Ps, get_P, Pa, ua)
     Ps_b = get(matches2, used, Ps, get_P, Pb, ub)
 
-    print('Ps_a: %s' % Ps_a)
-    print('Ps_b: %s' % Ps_b)
+    print(f"Ps_a: {Ps_a}")
+    print(f"Ps_b: {Ps_b}")
 
     S = UpperSets(Ps)
     return S, Ps_a, Ps_b
@@ -136,9 +136,9 @@ def get_common(ua, ub):
 def get(matches, used, Ps, get_P, Pa, ua):
     others = list(set(used) - set(matches))
     extra = PosetProduct(tuple(map(get_P, others)))
-    print('extra for Pa: %s' % extra)
+    print(f"extra for Pa: {extra}")
     Pa_comp = PosetProduct(Pa.subs + extra.subs)
-    print('Pa_comp: %s' % Pa_comp)
+    print(f"Pa_comp: {Pa_comp}")
     extra_minimals = extra.get_minimal_elements()
     m_matches = matches + others
     s = set()
@@ -155,7 +155,7 @@ def get(matches, used, Ps, get_P, Pa, ua):
         r = tuple(r)
         R.add(r)
     Pa_comp_lb = Pa_comp.Us(s)
-    print('Pa_comp_lb: %s' % Pa_comp_lb)
+    print(f"Pa_comp_lb: {Pa_comp_lb}")
     Ps_a = Ps.Us(R)
     return Ps_a
 

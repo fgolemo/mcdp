@@ -45,14 +45,14 @@ def check_coproducts1():
     dp = ndp.get_dp()
     R = dp.get_res_space()
     I = dp.get_imp_space()
-    print('R: %s' % R)
-    print('I: %s' % I)
+    print(f"R: {R}")
+    print(f"I: {I}")
     UR = UpperSets(R)
     res = dp.solve(0.0)
-    print UR.format(res)
+    print(UR.format(res))
 
     imps = dp.get_implementations_f_r(f=0.0, r=R.get_top())
-    print imps
+    print(imps)
 
 
 

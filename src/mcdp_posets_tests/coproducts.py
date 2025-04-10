@@ -13,7 +13,7 @@ def check_coproduct1():
 
     x = C.witness()
     C.belongs(x)
-    print C.format(x)
+    print(C.format(x))
 
     
     i, xi = C.unpack(x)
@@ -43,7 +43,7 @@ def check_coproduct_embedding1():
     # a2 = express_value_in_isomorphic_space(P, p, A)
     # A.belongs(a2)
 
-    print p
+    print(p)
 
 @comptest
 def check_coproduct_embedding2():

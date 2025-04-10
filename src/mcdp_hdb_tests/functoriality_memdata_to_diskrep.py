@@ -39,10 +39,10 @@ def check_translation_memdata_to_diskrep(schema, data_rep0, data_events, data_re
         name = os.path.join(out, name)
         with open(name, 'w') as f:
             f.write(what)
-        logger.info('wrote on %s' % name)
+        logger.info(f"wrote on {name}")
         
     def write_file(i, n, what):
-        name = '%d-%s.txt' % (i, n)
+        name = f"{n}-{i}.txt"
         write_file_(name, what)
     
     write_file_('0-aa-data_events.yaml', yaml_dump(data_events))
@@ -82,7 +82,7 @@ def check_translation_memdata_to_diskrep(schema, data_rep0, data_events, data_re
         assert_equal_disk_rep(disk_rep_by_translation, disk_rep)
       
     
-    logger.info('test ok, written on %s' % out)
+    logger.info(f"test ok, written on {out}")
     return dict(disk_rep0=disk_rep0, disk_events=disk_events, disk_rep=disk_rep)
 
 def check_translation_diskrep_to_memdata(schema, disk_rep0, disk_events, disk_rep1, disk_map, out):
@@ -99,10 +99,10 @@ def check_translation_diskrep_to_memdata(schema, disk_rep0, disk_events, disk_re
         name = os.path.join(out, name)
         with open(name, 'w') as f:
             f.write(what)
-        logger.info('wrote on %s' % name)
+        logger.info(f"wrote on {name}")
         
     def write_file(i, n, what):
-        name = '%d-%s.txt' % (i, n)
+        name = f"{n}-{i}.txt"
         write_file_(name, what)
     
     write_file_('0-aa-disk_events.yaml', yaml_dump(disk_events))
@@ -153,7 +153,7 @@ def check_translation_diskrep_to_memdata(schema, disk_rep0, disk_events, disk_re
             data_rep_by_translation = disk_map.interpret_hierarchy_(schema, disk_rep)
         except IncorrectFormat as exc:
             s = traceback.format_exc(exc)
-            logger.error('Failed check:\n%s' %s)
+            logger.error(f"Failed check:\n{s}")
             write_file(i, 'f-disk_rep-modified-translated-to-data_rep-FAIL', s)
             data_rep_by_translation = None
         else:
@@ -177,7 +177,7 @@ def check_translation_diskrep_to_memdata(schema, disk_rep0, disk_events, disk_re
         else:
             raise Exception()
         i += 1
-    logger.info('test_inverse ok, written on %s' % out)
+    logger.info(f"test_inverse ok, written on {out}")
     return dict(data_rep0=data_rep0, data_events=data_events, data_rep=data_rep)
     
 if __name__ == '__main__':

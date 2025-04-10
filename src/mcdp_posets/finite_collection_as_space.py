@@ -40,10 +40,10 @@ class FiniteCollectionAsSpace(Space):
         if a == b:
             pass
         else:
-            raise NotEqual('%s ≠ %s' % (a, b))
+            raise NotEqual(f"{a} ≠ {b}")
 
     def format(self, x):
         return x.__repr__()
 
     def __repr__(self):
-        return "FiniteCollectionAsSpace(%s)" % self.elements
+        return f"FiniteCollectionAsSpace({self})".elements

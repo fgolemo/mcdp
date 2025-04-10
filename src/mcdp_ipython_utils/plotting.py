@@ -40,7 +40,7 @@ def plot_all_directions(r, queries, results, what_to_plot_fun, what_to_plot_res)
     marker_fun = marker_res = marker_joint = 'o'
 
     for xwhat, ywhat in itertools.combinations(what_to_plot_res, 2):
-        name = '%s_%s' % (xwhat, ywhat)
+        name = f"{xwhat}_{ywhat}"
         with r.plot(name) as pylab:
             with figure_style1(pylab):
                 plot_axis(pylab, results, what_to_plot_res, colors, xwhat, ywhat,
@@ -49,7 +49,7 @@ def plot_all_directions(r, queries, results, what_to_plot_fun, what_to_plot_res)
 
     qqueries = [ [ x ] for x in queries]            
     for xwhat, ywhat in itertools.combinations(what_to_plot_fun, 2):
-        name = '%s_%s' % (xwhat, ywhat)
+        name = f"{xwhat}_{ywhat}"
         with r.plot(name) as pylab:
             with figure_style1(pylab):                    
                 plot_axis(pylab, qqueries, what_to_plot_fun, colors, xwhat, ywhat,
@@ -59,7 +59,7 @@ def plot_all_directions(r, queries, results, what_to_plot_fun, what_to_plot_res)
 
     for xwhat in what_to_plot_fun:
         for ywhat in what_to_plot_res:
-            name = '%s_%s' % (xwhat, ywhat)
+            name = f"{xwhat}_{ywhat}"
             with r.plot(name) as pylab:
                 with figure_style1(pylab):
                     for fun, res, color in zip(qqueries, results, colors):
@@ -93,7 +93,7 @@ def plot_axis(pylab, results, what_to_plot, colors, xwhat, ywhat, marker):
 def axis_label(what_to_plot, what) :
     if what_to_plot[what] == '[]':
         return what
-    st = '%s [%s]' % (what, what_to_plot[what])
+    st = f"{what} [{what_to_plot[what]}]"
     st.replace('$', '\\$')
     return st
 

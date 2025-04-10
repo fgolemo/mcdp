@@ -116,7 +116,7 @@ def load_fragments(library, soup, realpath):
             id_ndp = tag['id'].encode('utf-8')
             source_code = get_source_code(tag)
 
-            basename = '%s.%s' % (id_ndp, MCDPConstants.ext_ndps)
+            basename = f"{id_ndp}.{MCDPConstants.ext_ndps}"
             res = dict(data=source_code, realpath=realpath)
 
             if basename in library.file_to_contents:
@@ -134,7 +134,7 @@ def load_fragments(library, soup, realpath):
             id_ndp = tag['id'].encode('utf-8')
             source_code = get_source_code(tag)
 
-            basename = '%s.%s' % (id_ndp, MCDPConstants.ext_posets)
+            basename = f"{id_ndp}.{MCDPConstants.ext_posets}"
             res = dict(data=source_code, realpath=realpath)
 
             if basename in library.file_to_contents:
@@ -152,7 +152,7 @@ def load_fragments(library, soup, realpath):
             id_ndp = tag['id'].encode('utf-8')
             source_code = get_source_code(tag)
 
-            basename = '%s.%s' % (id_ndp, MCDPConstants.ext_templates)
+            basename = f"{id_ndp}.{MCDPConstants.ext_templates}"
             res = dict(data=source_code, realpath=realpath)
 
             if basename in library.file_to_contents:
@@ -238,7 +238,7 @@ def highlight_mcdp_code(library, soup, realpath, generate_pdf=False, raise_error
                     else:
                         name = tag_id
                         use_library= library
-                    basename = '%s.%s' % (name, extension)
+                    basename = f"{name}.{extension}"
                     data = use_library._get_file_data(basename)
                     source_code = data['data']
                 else:
@@ -343,7 +343,7 @@ def highlight_mcdp_code(library, soup, realpath, generate_pdf=False, raise_error
                             basename = tag['id']
                         else:
                             hashcode = hashlib.sha224(source_code).hexdigest()[-8:]
-                            basename = 'code-%s' % (hashcode)
+                            basename = f"code-{hashcode}"
 
                         docname = os.path.splitext(os.path.basename(realpath))[0]
                         download = docname + '.' + basename + '.source_code.pdf'
@@ -366,7 +366,7 @@ def highlight_mcdp_code(library, soup, realpath, generate_pdf=False, raise_error
                 else:
                     note_error(tag, e)
                     if tag.string is None:
-                        tag.string = "`%s" % tag['id']
+                        tag.string = f"`{tag}"['id']
                     continue
 
             except DPSemanticError as e:
@@ -375,7 +375,7 @@ def highlight_mcdp_code(library, soup, realpath, generate_pdf=False, raise_error
                 else:
                     note_error(tag, e)
                     if tag.string is None:
-                        tag.string = "`%s" % tag['id']
+                        tag.string = f"`{tag}"['id']
                     continue
 
             except DPInternalError as e:
@@ -415,7 +415,7 @@ def highlight_mcdp_code(library, soup, realpath, generate_pdf=False, raise_error
     for x in special_classes:
         # we do not expect to see an element that has class with '-' instead of '_'
         erroring = x.replace('_', '-')
-        mistakes = list(soup.select('.%s' % erroring))
+        mistakes = list(soup.select(f".{erroring}"))
         if mistakes:
             msg = 'You cannot use %r as a class; use lowercase.' % erroring
             tags = "\n\n".join(indent(describe_tag(_),' | ') for _ in mistakes)
@@ -527,9 +527,9 @@ def make_figures(library, soup, raise_error_dp, raise_error_others, realpath, ge
             h2 = h * scale
             tag_svg['width'] = w2
             tag_svg['height'] = h2
-            tag_svg['rescaled'] = 'Rescaled from %s %s, scale = %s' % (ws, hs, scale)
+            tag_svg[f"rescaled'] = 'Rescaled from {ws} {hs}, scale = {scale}"
         else:
-            print('no width in SVG tag: %s' % tag_svg)
+            print(f"no width in SVG tag: {tag_svg}")
 
         tag_svg['class'] = klass
 
@@ -555,7 +555,7 @@ def make_figures(library, soup, raise_error_dp, raise_error_others, realpath, ge
                 basename = getattr(poset, att)
             else:
                 hashcode = hashlib.sha224(tag0.string).hexdigest()[-8:]
-                basename = 'code-%s' % (hashcode)
+                basename = f"code-{hashcode}"
 
             docname = os.path.splitext(os.path.basename(realpath))[0]
             download = docname + "." + basename + "." + klass + '.pdf'
@@ -587,7 +587,7 @@ def make_figures(library, soup, raise_error_dp, raise_error_others, realpath, ge
             data = mf.get_figure(which,formats)
             tag = make_tag(tag0, which, data, ndp=ndp, template=None)
             return tag
-        selector = 'render.%s,pre.%s,img.%s' % (which, which, which)
+        selector = f"render.{which},pre.{which},img.{which}"
         go(selector, callback)
 
 
@@ -608,7 +608,7 @@ def make_figures(library, soup, raise_error_dp, raise_error_others, realpath, ge
             tag = make_tag(tag0, which, data, ndp=None, template=template)
             return tag
 
-        selector = 'render.%s,pre.%s,img.%s' % (which, which, which)
+        selector = f"render.{which},pre.{which},img.{which}"
         go(selector, callback)
 
 
@@ -628,7 +628,7 @@ def make_figures(library, soup, raise_error_dp, raise_error_others, realpath, ge
             data = mf.get_figure(which, formats)
             tag = make_tag(tag0, which, data, ndp=None, template=None, poset=poset)
             return tag
-        selector = 'render.%s,pre.%s,img.%s' % (which, which, which)
+        selector = f"render.{which},pre.{which},img.{which}"
         go(selector, callback)
 
     unsure = list(soup.select('render'))

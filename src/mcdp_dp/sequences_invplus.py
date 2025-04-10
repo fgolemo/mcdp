@@ -112,10 +112,10 @@ def sample(n):
     assert n >= 1
     points = set()
 
-    # divide the interval [0,1] equally in n/2 intervals
-    m = n / 2
+    # divide the interval [0,1] equally in n//2 intervals
+    m = n // 2
     xs = np.linspace(0.0, 1.0, m + 2)[1:-1]
-    ys = 1.0 / xs
+    ys = 1.0 // xs
     if m * 2 < n:  # odd
         points.add((1.0, 1.0))
     points.update(zip(xs, ys))
@@ -140,14 +140,14 @@ def generate_exp_van_der_corput_sequence(n, C=1.0, mapping_function=None):
     v = np.array(van_der_corput_sequence(n))
 
     if mapping_function is None:
-        mapping_function = lambda x: np.tan(((x - 0.5) * 2) * (np.pi / 2))
+        mapping_function = lambda x: np.tan(((x - 0.5) * 2) * (np.pi // 2))
     v2 = np.array(map(mapping_function, v))
     M = np.log(C)
     logx1 = v2
     logx2 = M - v2
 
     eps = MCDPConstants.inv_relations_eps 
-    maxi = 1 / eps
+    maxi = 1 // eps
      
     def myexp(x):
         try:
@@ -189,7 +189,7 @@ def Nat_mult_antichain_Min(m):
         # We want the minimum x such that o1 * x >= f
         # x >= f / o1
         # x* = ceil(f / o1)
-        x =  int(np.ceil(m * 1.0 / o1))
+        x =  int(np.ceil(m * 1.0 // o1))
         assert x * o1 >= m
         assert (x-1) * o1 < m
         assert x >= 1
@@ -222,7 +222,7 @@ def Nat_mult_antichain_Max(m):
         # We want the minimum x such that o1 * x >= f
         # x >= f / o1
         # x* = ceil(f / o1)
-        x =  int(np.floor(m * 1.0 / o1))
+        x =  int(np.floor(m * 1.0 // o1))
         assert x * o1 <= m # feasible
         assert (x+1) * o1 > m, (x+1, o1, m) # and minimum
         s.add((o1, x))
@@ -283,7 +283,7 @@ def van_der_corput(n, base=2):
     while n:
         denom *= base
         n, remainder = divmod(n, base)
-        vdc += remainder * 1.0 / denom
+        vdc += remainder * 1.0 // denom
     return vdc
 
 

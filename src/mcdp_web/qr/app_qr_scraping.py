@@ -9,13 +9,13 @@ def scrape(qrstring):
     """
         Resource(name=u'aaa_battery', 
         type=[u'mcdp/icon'], 
-        url=u'file:///Users/andrea/boot-docs/ext/minimality_game/website/rdg/decks/1/cards/aaa_battery-web.png', 
+        url=u'file:///Users/andrea/boot-docs/ext/minimality_game/website/rdg/decks//1/cards/aaa_battery-web.png', 
         content_type=u'image/png', content='')
         
     """
     web = 'http://minimality.mit.edu/rdg/'
     local = 'file:///Users/andrea/boot-docs/ext/minimality_game/website/rdg/'
-#     local = 'http://127.0.0.1:8080/rdg/'
+#     local = 'http://127.0.0.1:8080//rdg/'
     qrstring = qrstring.replace(web, local)
 
     url = qrstring
@@ -39,16 +39,16 @@ def scrape(qrstring):
             r = Resource(type=str(rel), content_type=str(content_type),
                          url=str(abs_url), content=content, name=str(name))
 
-            print r.type, r.content_type, r.url, r.name, len(r.content)
+            print(r.type, r.content_type, r.url, r.name, len(r.content))
             resources.append(r)
         else:
-            print('cannot parse: %s' % tag)
+            print(f"cannot parse: {tag}")
 
     return resources
 
 def test_scraper1():
-    resources = scrape('http://minimality.mit.edu/rdg/decks/1/cards/aaa_battery.html')
-    print resources
+    resources = scrape('http://minimality.mit.edu/rdg/decks//1/cards/aaa_battery.html')
+    print(resources)
     
 
 

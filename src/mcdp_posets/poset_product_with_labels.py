@@ -29,7 +29,7 @@ class PosetProductWithLabels(PosetProduct):
 
         ss = []
         for label, sub, xe in zip(self.labels, self.subs, x):
-            s = '%s:%s' % (label, sub.format(xe))
+            s = f"{label}:{sub.format(xe)}"
             ss.append(s)
 
         # 'MATHEMATICAL LEFT ANGLE BRACKET' (U+27E8) ⟨
@@ -37,7 +37,7 @@ class PosetProductWithLabels(PosetProduct):
         return '⟨' + ', '.join(ss) + '⟩'
 
     def __repr__(self):
-        ps = ['%s:%s' % (label, sub) for (label, sub) in zip(self.labels, self.subs)]
+        ps = [f"{label}:{sub}" for (label, sub) in zip(self.labels, self.subs)]
         p = ", ".join(ps)
-        return "product(%s)" % p
+        return f"product({p})"
 

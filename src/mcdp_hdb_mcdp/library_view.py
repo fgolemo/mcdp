@@ -46,9 +46,9 @@ class TheContext(Context):
                     if library_name in shelf.libraries:
                         return self.make_library(repo_name, shelf_name, library_name)
         msg = 'Could not find library %r.' % library_name
-        msg += '\n Subscribed shelves: %s.' % format_list(sorted(self.subscribed_shelves))
-        msg += '\n All shelves: %s.' % format_list(sorted(all_shelves))
-        msg += '\n All libraries: %s.' % format_list(sorted(all_libraries))
+        msg += f"\n Subscribed shelves: {format_list}."(sorted(self.subscribed_shelves))
+        msg += f"\n All shelves: {format_list}."(sorted(all_shelves))
+        msg += f"\n All libraries: {format_list}."(sorted(all_libraries))
         raise ValueError(msg)
     
     @memoize_simple
@@ -104,12 +104,11 @@ class TheContextLibrary(MCDPLibrary):
         try:
             match = get_soft_match(thing_name, list(things))
         except KeyError:
-            msg = 'Soft match failed: Could not find %r in %s.' % (thing_name, spec_name)
+            msg = f"Soft match failed: Could not find %r in {thing_name}."
             available = sorted(things)
 
             if available:
-                msg += ("\n Available %s: %s." %
-                        (spec_name, format_list(sorted(available))))
+                msg += (f"\n Available {spec_name}: {format_list(sorted(available}.")))
             else:
                 msg += "\n None available."
             
@@ -146,7 +145,7 @@ class TheContextLibrary(MCDPLibrary):
         host_cache = self.the_context.host_cache
         res =  host_cache.load_spec(context=context, **params)
         # XXX this is mainly need for templates now
-        realpath = '%s/%s/%s/%s/%s' % (self.repo_name, self.shelf_name, self.library_name, spec_name, name)
+        realpath = f"{self.repo_name}/{self.shelf_name}/{self.library_name}/{spec_name}/{name}"
         setattr(res,  MCDPConstants.ATTR_LOAD_LIBNAME, self.library_name)
         setattr(res,  MCDPConstants.ATTR_LOAD_REALPATH, realpath)
         return res
@@ -166,9 +165,9 @@ def get_soft_match(x, options):
         if x.lower() == o.lower():
             res.append(o)
     if not res:
-        msg = 'Could not find any soft match for "%s" in %s.' % (x, format_list(options))
+        msg = f"Could not find any soft match for "{x}" in {format_list(options}.")
         raise KeyError(msg)
     if len(res) > 1:
-        msg = 'Too many matches (%s) for "%s" in %s.' % (format_list(res), x, format_list(options))
+        msg = ff"Too many matches ({s}) for "" in {format_list(res}.", x, format_list(options))
         raise KeyError(msg)
     return res[0]

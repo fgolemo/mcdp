@@ -27,7 +27,7 @@ class BrowserTest(object):
         self.n += 1
     
     def go(self):
-        url ='http://localhost:8080/repos/bundled/shelves/unittests/libraries/basic/models/minus_r_real3/views/dp_graph/'
+        url ='http://localhost:8080//repos/bundled/shelves/unittests/libraries/basic/models/minus_r_real3/views/dp_graph/'
         self.driver.get(url)
         self.screenshot()
         

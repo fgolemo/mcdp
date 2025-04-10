@@ -111,8 +111,8 @@ class AppEditorFancyGeneric(object):
                 key = (e.library_name, e.spec.url_part, e.thing_name, text_hash)
     
                 if not key in self.last_processed2:
-                    logger.error('Cannot find key %s' % str(key))
-                    logger.error('keys: %s' % list(self.last_processed2))
+                    logger.error(f"Cannot find key {str}"(key))
+                    logger.error(f"keys: {list}"(self.last_processed2))
                     context = e.library._generate_context_with_hooks()
                     thing = e.spec.load(e.library, e.thing_name, context=context)
                 else:
@@ -135,8 +135,8 @@ class AppEditorFancyGeneric(object):
         new_thing_name = e.context.name
         logger.info('Creating new %r' % new_thing_name)
     
-        basename = '%s.%s' % (new_thing_name, e.spec.extension)
-        url_edit = '../%s/views/edit_fancy/' % new_thing_name
+        basename = f"{new_thing_name}.{e.spec.extension}"
+        url_edit = f"../{new_thing_name}/views/edit_fancy/"
     
         if new_thing_name in e.things:
             error = 'File %r already exists.' % basename
@@ -221,14 +221,13 @@ def process_parse_request(library, string, spec, key, cache, make_relative):
         
         warnings.append(sanitize(warning.strip())) 
 
-    x = ['<div class="language_warning_entry">%s</div>' % w 
+    x = [f"<div class="language_warning_entry">{w}</div>" 
          for w in warnings]
     language_warnings_html = "\n".join(x)
                            
     def get_link(specname, libname, thingname):
         spec = specs[specname]
-        url0 =  ("/libraries/%s/%s/%s/views/syntax/" %  
-                    (libname, spec.url_part, thingname))
+        url0 =  (f"/libraries/{libname}/{spec.url_part}/{thingname}/views/syntax/")
         return make_relative(url0)
         
 #     highlight2 = add_html_links(highlight, library_name, get_link)
@@ -250,16 +249,16 @@ def get_suggestions_for_string(highlight, string, xri):
         if where.character < where.character_end:
             orig = where.string[where.character:where.character_end]
             if replacement.strip():
-                tooltip = 'Aesthetic suggestion: replace “%s” with “%s”.' % (orig, replacement)
+                tooltip = f"Aesthetic suggestion: replace “{orig}” with “{replacement}”."
                 bulb = '\xf0\x9f\x92\xa1'
-                tooltip += ' The “%sbeautify” button on the top right does it for you.' % bulb
+                tooltip += f" The “{bulb}beautify” button on the top right does it for you."
                 klass = "suggestion"
             else:
                 tooltip = 'Fix indentation.'
                 klass = 'indentation'
         elif where.character == where.character_end:
             if replacement.strip():
-                tooltip = 'Add “%s”.' % replacement
+                tooltip = f"Add “{replacement}”."
                 klass = 'suggestion'
             else:
                 tooltip = 'Fix indentation.'

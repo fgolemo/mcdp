@@ -13,7 +13,7 @@ def read_as_user_db(dirname):
     
     hierarchy = ProxyDirectory.from_disk(dirname)
     
-    logger.info('These are the files found:\n%s' % indent(hierarchy.tree(), '  '))
+    logger.info(f"These are the files found:\n{indent}"(hierarchy.tree(), '  '))
     
     user_db_schema = DB.user_db
     user_db_data = dm.interpret_hierarchy_(user_db_schema, hierarchy)
@@ -28,18 +28,18 @@ def read_as_user_db(dirname):
     return user_db_view
 
 #     if False:
-#         print ('users_data:\n%s' % yaml.dump(users_data))
+#         print (f"users_data:\n{yaml}".dump(users_data))
 #     
 #         shelves_data = dm.interpret_hierarchy_(DB.shelves, hierarchy)
 #         DB.shelves.validate(shelves_data)
 #         
-#         #print ('shelves_data:\n%s' % yaml.dump(shelves_data))
+#         #print (f"shelves_data:\n{yaml}".dump(shelves_data))
 #          
 #         if len(sys.argv) >= 3:
 #             # serialize
 #             h2 = dm.create_hierarchy_(DB.shelves, shelves_data)
 #             where = sys.argv[2]
-#             print('Creating directory %s' % where)
+#             print(f"Creating directory {where}")
 #             if os.path.exists(where):
 #                 shutil.rmtree(where)    
 #             os.makedirs(where)
@@ -57,10 +57,10 @@ if __name__ == '__main__':
     user_db_view._notify_callback = notify_callback
         
     user = user_db_view.best_match(None, None, 'censi@mit.edu')
-    print('user: %s' % user)
+    print(f"user: {user}")
     user.info.email = 'new email'
     user.info.groups.append('group:new-group')
-    print yaml_dump(events)
+    print(yaml_dump(events))
     
     for data_event in events:
         dm = DB.dm

@@ -37,8 +37,8 @@ def html_mark(html, where, add_class, tooltip=None):
                 found.append(e)
                 
     if not found:
-        msg = 'Cannot find any html element for this location:\n\n%s' % where
-        msg += '\nwhere start: %s end: %s' % (where.character, where.character_end)
+        msg = f"Cannot find any html element for this location:\n\n{where}"
+        msg += f"\nwhere start: {where.character} end: {where.character_end}"
         msg += '\nwhere.string = %r' % where.string
         msg += '\n' + indent(html.__repr__(), 'html ')
         raise_desc(NoLocationFound, msg)

@@ -86,7 +86,7 @@ class ViewBase(object):
         for r in remove:
             if r in names:
                 names.remove(r)
-        s = '%s[%s]' % ("/".join(names), self._data)
+        s = f"{"/".join(names}[%s]", self._data)
         assert not 'Mount' in s
         return s
 
@@ -139,12 +139,12 @@ class ViewBase(object):
         principals = self._principals
         ok = acl.allowed_(privilege, principals)
         if not ok:
-            msg = 'Cannot have privilege %r for principals %s.' % (privilege, principals)
+            msg = f"Cannot have privilege %r for principals {privilege}."
             msg += '\n' + indent(acl, ' > ')
             raise_desc(InsufficientPrivileges, msg)
             
         if False:
-            msg = 'Permission %s granted to %s' % (privilege, principals)
+            msg = f"Permission {privilege} granted to {principals}"
             msg += '\n' + indent(acl, ' > ')
             logger.debug(msg)
             
@@ -190,13 +190,13 @@ class ViewMount(ViewBase):
 
     def mount_init(self):
         ''' initializes mount points '''
-        # logger.debug('mount_init() for %s' % id(self))
+        # logger.debug(f"mount_init() for {id}"(self))
         object.__setattr__(self, 'mount_points', {})
         
 class ViewContext0(ViewMount):  
 
     def init_context(self):
-#         logger.debug('init_context() for %s' % id(self))
+#         logger.debug(f"init_context() for {id}"(self))
         self.mount_init()
 #         object.__setattr__(self, 'mount_points', {})
         object.__setattr__(self, 'children_already_provided', {})
@@ -216,7 +216,7 @@ class ViewContext0(ViewMount):
             children_already_provided = object.__getattribute__(self, 'children_already_provided')
             mount_points = object.__getattribute__(self, 'mount_points')
         except AttributeError as e:
-            msg = 'Could not get basic attrs for %s: %s' % (id(self), e)
+            msg = f"Could not get basic attrs for {id(self}: %s", e)
             raise_wrapped(AttributeError, e, msg)
             
         if name in mount_points:
@@ -264,13 +264,13 @@ class ViewContext0(ViewMount):
         res = []
         for k, schema_child in self._schema.children.items():
             if isinstance(schema_child, SchemaSimple):
-                res.append('%s=%r' % (k, self._data[k]))
+                res.append(f"{k}=%r")
             else:
-                res.append('%s=%s' % (k, self.child(k)))
+                res.append(f"{k}={self.child(k}"))
                 
         data_string = ", ".join(res) 
         
-        return '%s[%s]' % (myname, data_string)
+        return f"{myname}[{data_string}]"
 
     def __getattr__(self, name):
         try:
@@ -296,7 +296,7 @@ class ViewContext0(ViewMount):
         try:
             v._schema.validate(value)
         except NotValid as e:
-            msg = 'Cannot set %s = %s:' % (leaf, describe_value(value))
+            msg = f"Cannot set {leaf} = {describe_value(value}:")
             raise_wrapped(NotValid, e, msg, compact=True)
             
         from .memdata_events import event_leaf_set
@@ -327,8 +327,8 @@ class ViewContext0(ViewMount):
                 raise NotImplementedError(v._schema)
             self._notify(event)
             
-#             logger.debug('setting leaf %s = %s' % (leaf, value))
-#             logger.debug('setting leaf schema = %s ' % (v._schema))
+#             logger.debug(f"setting leaf {leaf} = {value}")
+#             logger.debug(f"setting leaf schema = {v._schema} ")
             self._data[leaf] = value
         
     
@@ -353,7 +353,7 @@ class ViewHash0(ViewMount):
             return self.mount_points[name]
         
         if not name in self._data:
-            msg = 'Cannot get child "%s"; known: %s.' % (name, format_list(self.keys()))
+            msg = f"Cannot get child "{name}"; known: {format_list(self.keys(}."))
             raise_desc(InvalidOperation, msg)
             
         d = self._data[name]
@@ -371,7 +371,7 @@ class ViewHash0(ViewMount):
             return self.mount_points[key]
 
         if not key in self._data:
-            msg = 'Could not find key "%s"; available keys are %s, mount points %s' % (key, format_list(self._data),
+            msg = f"Could not find key "{key}"; available keys are {format_list(self._data}, mount points %s",
                                                                                        format_list(self.mount_points))
             raise_desc(EntryNotFound, msg)
         d = self._data[key]
@@ -408,8 +408,7 @@ class ViewHash0(ViewMount):
         
         self.check_can_write()
         if not key in self._data:
-            msg = ('Could not delete not existing key "%s"; known: %s.' % 
-                   (key, format_list(self._data)))
+            msg = (f"Could not delete not existing key "{key}"; known: {format_list(self._data}."))
             raise_desc(InvalidOperation, msg)
         
         event = event_dict_delitem(name=self._prefix,
@@ -423,8 +422,7 @@ class ViewHash0(ViewMount):
         from .memdata_events import event_dict_rename
         self.check_can_write()
         if not key1 in self._data:
-            msg = ('Could not rename not existing key "%s"; known: %s.' % 
-                   (key1, format_list(self._data)))
+            msg = (f"Could not rename not existing key "{key1}"; known: {format_list(self._data}."))
             raise_desc(InvalidOperation, msg)
         
         event = event_dict_rename(name=self._prefix,
@@ -559,7 +557,7 @@ class ViewList0(ViewBase):
         
     def remove(self, value):
         if not value in self._data:
-            msg = 'The list does not contain %r: available %s' % (value, format_list(self._data))
+            msg = f"The list does not contain %r: available {value}")
             raise ValueError(msg)
         from .memdata_events import event_list_remove
         event = event_list_remove(name=self._prefix,
@@ -572,7 +570,7 @@ class ViewList0(ViewBase):
     def delete(self, i):
         # todo: check i 
         if not( 0 <= i < len(self._data)):
-            msg ='Invalid index %d for list of length %d.' % (i, len(self._data))
+            msg =f"Invalid index {i} for list of length {len(self._data}.")
             raise ValueError(msg)
         
         from .memdata_events import event_list_delete

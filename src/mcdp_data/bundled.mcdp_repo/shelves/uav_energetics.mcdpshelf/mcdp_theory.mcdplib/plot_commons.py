@@ -73,7 +73,7 @@ def figure_num_implementations2(r, data, cs, fname1, fname2):
         pylab.title('num solutions', color=color_resources,  y=1.08)
         do_axes(pylab)
         
-    misc = 'num solutions: %s\n num implementations: %s' % (cs.all_num_solutions, cs.all_num_implementations)
+    misc = f"num solutions: {cs.all_num_solutions}\n num implementations: {cs.all_num_implementations}"
 #     r.text('misc', misc)
     
     

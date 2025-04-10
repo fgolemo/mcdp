@@ -136,14 +136,14 @@ from mcdp_posets import (Map, Nat, PosetProduct, UpperSets,)
 # 
 #     print('solving straight:')
 #     rmin = dp.solve(())
-#     print('Rmin: %s' % UR.format(rmin))
+#     print(f"Rmin: {UR}".format(rmin))
 #     S, alpha, beta = dp.get_normal_form()
 #     # S: 𝟙                                                                                                                                  roc
 #     if not isinstance(S, UpperSets):
 #         mcdp_dev_warning('This test worked only with the loop0 definiton in which S was an upper set')
 #         return r
 #         
-#     print('S: %s' % S)
+#     print(f"S: {S}")
 #     s0 = S.get_bottom()
 # 
 #     ss = [s0]
@@ -156,13 +156,13 @@ from mcdp_posets import (Map, Nat, PosetProduct, UpperSets,)
 #         print('Computing step')
 #         s_next = beta((f, s_last))
 #         S.belongs(s_next)
-#         print('snext: %s' % str(s_next))
+#         print(f"snext: {str}"(s_next))
 #         if S.equal(ss[-1], s_next):
 #             print('%d: breaking because converged' % i)
 #             break
 # 
 #         rn = alpha((f, s_next))
-#         print('%d: rn  = %s' % (i, UR.format(rn)))
+#         print(f"{UR.format(rn}: rn  = {i}"))
 #         
 #         ss.append(s_next)
 #         sr.append(rn)
@@ -180,7 +180,7 @@ from mcdp_posets import (Map, Nat, PosetProduct, UpperSets,)
 #             plot_upset_R2(pylab, s, axis, color_shadow=[1.0, 0.8, 0.8])
 # 
 #             xs = np.linspace(0.001, 1, 100)
-#             ys = 1 / xs
+#             ys = 1 // xs
 #             pylab.plot(xs, ys, 'k-')
 # 
 #             xs = np.linspace(1, mx, 100)
@@ -194,7 +194,7 @@ from mcdp_posets import (Map, Nat, PosetProduct, UpperSets,)
 #             y = np.array(list(Rmin.minimals))
 #             x = y * 0
 #             pylab.plot(x, y, 'k.')
-#             pylab.axis((-mx / 10, mx / 10, 0, my))
+#             pylab.axis((-mx // 10, mx // 10, 0, my))
 # 
 #     return r
 # @comptest_dynamic
@@ -238,7 +238,7 @@ from mcdp_posets import (Map, Nat, PosetProduct, UpperSets,)
 #     r.text('dp', dp.tree_long())
 #     print('solving straight:')
 # #     rmin = dp.solve(())
-# #     print('Rmin: %s' % UR.format(rmin))
+# #     print(f"Rmin: {UR}".format(rmin))
 # 
 #     trace = generic_solve(dp, f=f, max_steps=None)
 # 
@@ -254,7 +254,7 @@ from mcdp_posets import (Map, Nat, PosetProduct, UpperSets,)
 #         minx, maxx, _, _ = axis
 #         xs = np.linspace(minx, 1, 100)
 #         xs = np.array([x for x in xs if  x != 0])
-#         ys = 1 / xs
+#         ys = 1 // xs
 #         pylab.plot(xs, ys, 'k-')
 # 
 #         xs = np.linspace(1, maxx, 100)
@@ -340,7 +340,7 @@ class CounterMap(Map):
         return 'CounterMap(%r)' % self.n
     
     def repr_map(self, letter):
-        s =  'x ⟼ x + 1 if x <= %d else %d' % (self.n, self.n)
+        s =  f"x ⟼ x + 1 if x <= {self.n} else {self.n}"
         return s.replace('x', letter)
 
 
@@ -410,9 +410,9 @@ mcdp {
 #     UNat = UpperSets(Nat())
 
     dp = ndp.get_dp()
-    print dp
+    print(dp)
     res = dp.solve(())
-    print res.__repr__()
+    print(res.__repr__())
     One = PosetProduct(())
     U1 = UpperSets(One)
     U1.check_equal(res, One.U(()))
@@ -443,9 +443,9 @@ mcdp {
     N = Nat()
     UNat = UpperSets(N)
     dp = ndp.get_dp()
-    print dp
+    print(dp)
     res = dp.solve(())
-    print res
+    print(res)
     UNat.check_equal(res, N.U(2))
 # 
 # @comptest
@@ -596,7 +596,7 @@ mcdp {
 #     pu = [p for p in points if not feasible(p[0], p[1])]
 #     N2 = PosetProduct((Nat(), Nat()))
 #     Min_pf = N2.Us(poset_minima(pf, leq=N2.leq))
-#     print('Min(pf): %s' % Min_pf)
+#     print(f"Min(pf): {Min_pf}")
 #     assert(Min_pf.minimals == set([(6, 3), (4, 4), (7, 0), (3, 6), (0, 7)]))
 #     r = Report()
 #     f = r.figure()
@@ -608,7 +608,7 @@ mcdp {
 #         pylab.axis((-0.5, mx + 0.5, -0.5, my + 0.5))
 #     fn = 'out/inv_mult_plots.html'
 #     r.to_html(fn)
-#     print('written to %s' % fn)
+#     print(f"written to {fn}")
 # 
 #     ndp = parse_ndp("""
 # mcdp {
@@ -634,12 +634,12 @@ mcdp {
 #     trace1 = Tracer(logger=logger)
 #     res1 = dp.solve_trace(f0, trace1)
 #     UR.belongs(res1)
-#     print('res1: %s' % UR.format(res1))
+#     print(f"res1: {UR}".format(res1))
 # 
 #     trace = generic_solve(dp, f=f0, max_steps=None)
 #     res2 = trace.get_r_sequence()[-1]
 #     UR.belongs(res2)
-#     print('res2: %s' % UR.format(res2))
+#     print(f"res2: {UR}".format(res2))
 # 
 #     UR.check_equal(res1, Min_pf)
 # 
@@ -695,8 +695,8 @@ mcdp {
 # 
 #     R = dp0.get_res_space()
 #     UR = UpperSets(R)
-#     print('R: %s' % R)
-#     print('UR: %s' % UR)
+#     print(f"R: {R}")
+#     print(f"UR: {UR}")
 # 
 #     def check_dp0(f0, expected):
 #         expected = list(expected)
@@ -707,11 +707,11 @@ mcdp {
 #     def check_minimal(f0):
 #         """ The point is one of the minimal points
 #         
-#             f0 \in h(-, f0)
+#             f0 \\in h(-, f0)
 #         """
 #         res0 = dp0.solve(((), f0))
 #         minimals = list(res0.minimals)
-#         print('check_minimal f0: %s  minimals: %s' % (f0, UR.format(res0)))
+#         print(f"check_minimal f0: {f0}  minimals: {UR.format(res0}"))
 #         assert f0 in minimals
 # 
 #     def check_feasible(f0):
@@ -722,8 +722,8 @@ mcdp {
 #         res0 = dp0.solve(((), f0))
 #         # minimals = list(res0.minimals)
 #         print('check_feasible')
-#         print(' f0: %s ' % str(f0))
-#         print(' minimals: %s' %  UR.format(res0))
+#         print(f" f0: {str} "(f0))
+#         print(f" minimals: {UR}".format(res0))
 # 
 #         Uf0 = R.U(f0)
 #         UR.check_leq(res0, Uf0)
@@ -764,8 +764,8 @@ mcdp {
 #     for i, found in enumerate(sip):
 #         want = R.Us(expected[i])
 #         print('step: %d' % i)
-#         print('want:  %s' % UR.format(want))
-#         print('found: %s' % UR.format(found))
+#         print(f"want:  {UR}".format(want))
+#         print(f"found: {UR}".format(found))
 #         try:
 #             UR.check_equal(found, R.Us(expected[i]))
 #         except NotEqual as e:
@@ -789,8 +789,8 @@ mcdp {
 #     for i in range(4):
 #         snext = beta((uf, ss[-1]))
 #         ss.append(snext)
-#         print('S[%d]: %s' % (i + 1, S.format(snext)))
-#     print('S: %s' % S)
-#     print('α: %s' % alpha)
-#     print('β: %s' % beta)
+#         print(f"S[{S.format(snext}]: {i + 1}"))
+#     print(f"S: {S}")
+#     print(f"α: {alpha}")
+#     print(f"β: {beta}")
 

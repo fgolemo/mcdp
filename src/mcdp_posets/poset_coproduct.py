@@ -26,6 +26,9 @@ class PosetCoproduct(Coproduct1, Poset):
 
     def __eq__(self, b):
         return isinstance(b, PosetCoproduct) and b.spaces == self.spaces
+        
+    def __hash__(self):
+        return hash(self.spaces)
 
     def get_test_chain(self, n):
         i = random.randint(0, len(self.spaces) - 1)
@@ -85,9 +88,12 @@ class PosetCoproductWithLabels(Coproduct1Labels, Poset):
         Coproduct1Labels.__init__(self, subs, labels)
  
     def __eq__(self, b):
-        return (isinstance(b, PosetCoproduct) and
+        return (isinstance(b, PosetCoproductWithLabels) and
                 b.spaces == self.spaces and
                 b.labels == self.labels)
+                
+    def __hash__(self):
+        return hash((tuple(self.spaces), tuple(self.labels)))
  
     def get_test_chain(self, n):
         i = random.randint(0, len(self.spaces) - 1)

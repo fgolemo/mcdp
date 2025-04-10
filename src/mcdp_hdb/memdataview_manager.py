@@ -93,7 +93,7 @@ class ViewManager(object):
                 view.init_context()
                 return view
             except TypeError as e:
-                msg = 'Probably due to a constructor in Base = %s' % (Base)
+                msg = f"Probably due to a constructor in Base = {Base}"
                 if s in self.s2baseclass:
                     msg += '\n' + str(self.s2baseclass[s])
                 raise_wrapped(ValueError, e, msg)

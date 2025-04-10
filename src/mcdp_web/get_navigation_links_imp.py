@@ -46,7 +46,7 @@ def get_navigation_links_context(e):
 
         d['documents'] = []
         for id_doc in documents:
-            url = library_url + '%s.html' %  id_doc
+            url = library_url + f"{id_doc}.html"
             desc = dict(id=id_doc,id_document=id_doc, name=id_doc, url=url, current=False)
             d['documents'].append(desc)
 
@@ -66,7 +66,7 @@ def get_navigation_links_context(e):
                 url_delete = url0 + VIEW_DELETE 
                 url_rename = 'javascript:rename_thing(%r,%r)' % (spec_name, _)  
     
-#                 name = "Value: %s" % _
+#                 name = f"Value: {_}"
                 name = _
                 desc = dict(id=_, name=name, url=url, current=is_current, 
                             url_edit=url_edit, url_delete=url_delete, url_rename=url_rename)
@@ -83,7 +83,7 @@ def get_navigation_links_context(e):
 #             url_edit = url0 + VIEW_EDITOR  
 #             url_delete = url0 + VIEW_DELETE  
 #              
-#             name = "Model %s" % _
+#             name = f"Model {_}"
 #             desc = dict(id=_, id_ndp=_, name=name, url=url, url_edit=url_edit, 
 #                         url_delete=url_delete, current=is_current)
 #             d[SPEC_MODELS].append(desc) 
@@ -98,7 +98,7 @@ def get_navigation_links_context(e):
 #             url_edit = url0 + VIEW_EDITOR  
 #             url_delete = url0 + VIEW_DELETE  
 #             
-#             name = "Template: %s" % _
+#             name = f"Template: {_}"
 #             desc = dict(id=_, name=name, url=url, current=is_current, url_edit=url_edit, url_delete=url_delete)
 #             d[SPEC_TEMPLATES].append(desc)
 # 
@@ -112,7 +112,7 @@ def get_navigation_links_context(e):
 #             url_edit = url0 + VIEW_EDITOR  
 #             url_delete = url0 + VIEW_DELETE  
 # 
-#             name = "Poset: %s" % _
+#             name = f"Poset: {_}"
 #             desc = dict(id=_, name=name, url=url, current=is_current, url_edit=url_edit, url_delete=url_delete)
 #             d[SPEC_POSETS].append(desc)
 
@@ -126,7 +126,7 @@ def get_navigation_links_context(e):
                 is_current = v == e.view_name
     
                 url = library_url + SPEC_MODELS + '/' + e.thing_name + '/' + 'views/' + v + '/'
-                name = "View: %s" % view['desc']
+                name = f"View: {view}"['desc']
                 desc = dict(name=name, url=url, current=is_current)
                 d['views'].append(desc)
             
@@ -140,10 +140,10 @@ def get_navigation_links_context(e):
     libname2desc = {}
     for l in natural_sorted(libraries):
         is_current = l == e.library_name
-        p = '/repos/{repo_name}/shelves/{shelf_name}/libraries/%s/' % l
+        p = f"/repos/{repo_name}/shelves/{shelf_name}/libraries/{l}/"
         url = e.app.make_relative(e.request, p.format(**d))
 
-        #name = "Library: %s" % l
+        #name = f"Library: {l}"
         name = l
         desc = dict(id=l,name=name, url=url, current=is_current)
         libname2desc[l] =desc

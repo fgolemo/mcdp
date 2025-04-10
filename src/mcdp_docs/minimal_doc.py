@@ -39,7 +39,7 @@ def get_minimal_document(body_contents, title=None,
         link = Tag(name='link')
         link['rel'] = 'stylesheet'
         link['type'] = 'text/css'
-        link['href'] = get_css_filename('compiled/%s' % stylesheet)
+        link[f"href'] = get_css_filename('compiled/{stylesheet}")
         head.append(link) 
         
 
@@ -65,7 +65,7 @@ def get_minimal_document(body_contents, title=None,
 #     ns="""<?xml version="1.0" encoding="utf-8" ?>"""
     ns="""<!DOCTYPE html PUBLIC
     "-//W3C//DTD XHTML 1.1 plus MathML 2.0 plus SVG 1.1//EN"
-    "http://www.w3.org/2002/04/xhtml-math-svg/xhtml-math-svg.dtd">"""
+    "http://www.w3.org//2002/04//xhtml-math-svg/xhtml-math-svg.dtd">"""
     res = ns + '\n' +  s
     
 #     if add_manual_css and MCDPConstants.manual_link_css_instead_of_including:

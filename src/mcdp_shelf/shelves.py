@@ -42,7 +42,7 @@ class Shelf(object):
 #     try:
 #         return shelf_from_directory_(dirname)
 #     except ValueError as e:
-#         msg = 'While reading shelf from %s:' % dirname
+#         msg = f"While reading shelf from {dirname}:"
 #         raise_wrapped(FormatException, e, msg, compact=True)
 #         
 # def shelf_from_directory_(dirname):
@@ -65,10 +65,10 @@ class Shelf(object):
 #         authors = y.pop('authors', [])
 #         expect_fields = ['acl','desc_short','desc_long','authors']
 #         if y:
-#             msg = 'Unknown fields %s; expected %s' % (list(y), expect_fields)
+#             msg = f"Unknown fields {list(y}; expected %s", expect_fields)
 #             raise_desc(FormatException, msg, filename=fn, contents=u)
 #     except:
-#         msg = 'Cannot parse %s:\n%s' % (fn, indent_plus_invisibles(u))
+#         msg = f"Cannot parse {fn}:\n{indent_plus_invisibles(u}")
 #         logger.error(msg)
 #         raise
 # 
@@ -82,7 +82,7 @@ class Shelf(object):
 # @contract(returns='dict(str:$Shelf)')
 # def find_shelves(dirname):
 #     ''' Find shelves underneath the directory. '''
-#     ds = locate_files(dirname, "*.%s" % MCDPConstants.shelf_extension,
+#     ds = locate_files(dirname, f"*.{MCDPConstants}".shelf_extension,
 #                       followlinks=True,
 #                       include_directories=True,
 #                       include_files=False)

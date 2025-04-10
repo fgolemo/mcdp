@@ -10,7 +10,7 @@ from .parse_actions import (divide_parse_action,
                             space_product_parse_action, rvalue_minus_parse_action, fvalue_minus_parse_action,
                             dp_model_statements_parse_action, add_where_to_empty_list, copy_expr_remove_action, integer_fraction_from_superscript)
 from .parts import CDPLanguage
-from .pyparsing_bundled import (
+from .pyparsing_compat import (
     CaselessLiteral, Combine, Forward, Group, Keyword, Literal, MatchFirst,
     NotAny, OneOrMore, Optional, ParserElement, Word, ZeroOrMore, alphanums,
     alphas, dblQuotedString, nums, oneOf, opAssoc, operatorPrecedence,
@@ -188,16 +188,34 @@ class SyntaxIdentifiers(object):
 
 def decode_identifier(s):
     ''' Decodes '₁' to '_1', Ψ to Psi '''
-    check_isinstance(s, bytes)
-    for part, letter in greek_letters.items():
-        part = part.encode('utf8')
-        letter = letter.encode('utf8')
-        while letter in s:
-            s = s.replace(letter, part)
-    for num, glyph in subscripts.items():
-        glyph = glyph.encode('utf8')
-        if glyph in s:
-            s = s.replace(glyph, '_%d' % num)
+    from mcdp.py_compatibility import PY2, string_types
+    
+    check_isinstance(s, string_types)
+    
+    if PY2:
+        # Python 2 version - working with bytes
+        if isinstance(s, unicode):
+            s = s.encode('utf8')
+            
+        for part, letter in greek_letters.items():
+            part = part.encode('utf8')
+            letter = letter.encode('utf8')
+            while letter in s:
+                s = s.replace(letter, part)
+        
+        for num, glyph in subscripts.items():
+            glyph = glyph.encode('utf8')
+            if glyph in s:
+                s = s.replace(glyph, '_%d' % num)
+    else:
+        # Python 3 version - working with strings
+        for part, letter in greek_letters.items():
+            while letter in s:
+                s = s.replace(letter, part)
+                
+        for num, glyph in subscripts.items():
+            if glyph in s:
+                s = s.replace(glyph, '_%d' % num)
     return s
 
 
@@ -1514,6 +1532,6 @@ class Syntax(object):
 for x, expr in Syntax.__dict__.items():  # @UndefinedVariable
     #print x, type(expr)
     if isinstance(expr, ParseExpression):
-        #print('setting name %s' % expr)
+        #print(f"setting name {expr}")
         expr.setName(x)
 

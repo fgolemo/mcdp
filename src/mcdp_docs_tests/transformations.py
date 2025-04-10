@@ -21,7 +21,7 @@ def tryit(s, write_to=None, forbid=[]):
             doc = get_minimal_document(s2, add_manual_css=True)
             with open(write_to, 'wb') as f:
                 f.write(doc)
-            print('written to %s' % write_to)
+            print(f"written to {write_to}")
         
     tests = {
      'doctype': not 'DOCTYPE' in s2,
@@ -44,10 +44,10 @@ def tryit(s, write_to=None, forbid=[]):
         if not passed:
             summary[level] += 1
         mark = '✓' if passed else 'no'
-        msg += '\n %20s : %s' % (k, mark)
+        msg += f"\n %20s : {k}"
     
     if summary['error']:
-        msg += '\nSee output in %s'%  (write_to)
+        msg += f"\nSee output in {write_to}"
         raise_desc(Exception, msg)
     
     return s2      
@@ -134,7 +134,7 @@ syntax ``instance `Name``. The backtick means "load symbols from the library".
 """
     s2 = tryit(s, 'out-transformation.html')
     
-    print s2
+    print(s2)
     
 
 
@@ -401,7 +401,7 @@ This is the case of unreasonable demands (1 kg of extra payload):
     $ mcdp-solve -d src/mcdp_data/libraries/examples/example-battery.mcdplib battery "<1 hour, 1.0 kg, 1 W>"
     """
     s2 = tryit(s)
-    print indent(s2, 's2: ')
+    print(indent(s2, 's2: '))
     assert '1 hour' in s2
     
 assert len(others) == 12, len(others)
@@ -426,9 +426,9 @@ plus completeness is sufficient to ensure existence.
     s2 = censor_markdown_code_blocks(s)
     
     print('original:')
-    print indent_plus_invisibles(s)
+    print(indent_plus_invisibles(s))
     print('later:')
-    print indent_plus_invisibles(s2)
+    print(indent_plus_invisibles(s2))
     
     assert not 'censored-code' in s
 
@@ -467,7 +467,7 @@ href="mailto:censi@mit.edu">censi@mit.edu</a>.
 
 """
     s2 = tryit(s) 
-    print s2
+    print(s2)
     
     sub = r"""<p>Please send any comments, suggestions, or bug reports to <a href="mailto:censi@mit.edu">censi@mit.edu.</p>"""
     assert sub in s2

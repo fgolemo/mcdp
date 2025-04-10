@@ -51,7 +51,7 @@ def eval_arguments(arguments):
     n = len(ops)
     assert n % 2 == 0
     res = {}
-    for i in range(n / 2):
+    for i in range(n // 2):
         o1 = ops[i * 2]
         o2 = ops[i * 2 + 1]
         assert isinstance(o1, CDP.ArgName)

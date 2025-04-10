@@ -41,6 +41,9 @@ class Any(Poset):
     def __eq__(self, other):
         # all objects of this class are the same
         return isinstance(other, Any)
+        
+    def __hash__(self):
+        return hash("Any")
 
 
 class TopCompletion(Poset):
@@ -63,7 +66,7 @@ class TopCompletion(Poset):
         if x == self.top and y == self.top:
             return
         if x == self.top or y == self.top:
-            msg = 'x %s != %s y' % (x, y)
+            msg = f'x {x} != {y} y'
             raise NotEqual(msg)
         self.P.check_equal(x, y)
     
@@ -76,10 +79,13 @@ class TopCompletion(Poset):
         self.P.check_leq(x, y)
         
     def __repr__(self):
-        return 'T%s' % self.P
+        return f'T{self.P}'
 
     def __eq__(self, other):
         return isinstance(other, TopCompletion) and other.P == self.P
+        
+    def __hash__(self):
+        return hash(self.P)
     
     def witness(self):
         return self.top
@@ -107,7 +113,7 @@ class BottomCompletion(Poset):
         if x == self.bottom and y == self.bottom:
             return
         if x == self.bottom or y == self.bottom:
-            msg = 'x %s != %s y' % (x, y)
+            msg = f'x {x} != {y} y'
             raise NotEqual(msg)
         self.P.check_equal(x, y)
 
@@ -120,7 +126,10 @@ class BottomCompletion(Poset):
         self.P.check_leq(x, y)
 
     def __repr__(self):
-        return 'B%s' % self.P
+        return f'B{self.P}'
 
     def __eq__(self, other):
         return isinstance(other, BottomCompletion) and other.P == self.P
+        
+    def __hash__(self):
+        return hash(self.P)

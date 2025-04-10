@@ -35,8 +35,8 @@ def test_create_user():
     user_db_view.set_root()
     user = DB.view_manager.create_view_instance(DB.user, user_data)
     user.set_root()
-    print user.info.get_email()
-    print user.info.get_name()
+    print(user.info.get_email())
+    print(user.info.get_name())
     user_db_view.create_new_user('andrea_censi', user)
     
 if __name__ == '__main__':

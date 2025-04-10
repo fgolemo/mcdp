@@ -63,7 +63,7 @@ class CoProductDP(PrimitiveDP):
         for j, dp in enumerate(self.dps):
             try:
                 ms = dp.get_implementations_f_r(f, r)
-                # print('%s: dp.get_implementations_f_r(f, r) = %s ' % (j, ms))
+                # print(f"{j}: dp.get_implementations_f_r(f, r) = {ms} ")
                 for m in ms:
                     if do_extra_checks():
                         Mj = dp.get_imp_space()
@@ -116,19 +116,19 @@ class CoProductDP(PrimitiveDP):
 
     def __repr__(self):
         s = "^".join('%s' % x for x in self.dps)
-        return 'CoProduct(%s)' % s
+        return f"CoProduct({s})"
 
     def repr_long(self):
-        s = 'CoProduct  %% %s ⇸ %s' % (self.get_fun_space(), self.get_res_space())
+        s = f"CoProduct  %% {self.get_fun_space(} ⇸ %s", self.get_res_space())
         for dp in self.dps:
             r1 = dp.repr_long()
             s += '\n' + indent(r1, '. ', first='^ ')
         return s
     
     def repr_h_map(self):
-        con = " ∪ ".join('h%d(f)' % (i+1) for i in range(len(self.dps)))
-        return 'f ⟼ Min {%s}' % con
+        con = f" ∪ ".join('h{i+1}(f)" for i in range(len(self.dps)))
+        return f"f ⟼ Min {{con}}"
     
     def repr_hd_map(self):
-        con = " ∪ ".join('h*%d(r)' % (i+1) for i in range(len(self.dps)))
-        return 'r ⟼ Max {%s}' % con
+        con = f" ∪ ".join('h*{i+1}(r)" for i in range(len(self.dps)))
+        return f"r ⟼ Max {{con}}"

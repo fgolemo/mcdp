@@ -45,13 +45,13 @@ def check_translation_gitrep_to_diskrep(repo, branch_name, out):
         name = os.path.join(out, name)
         with open(name, 'w') as f:
             f.write(what)
-        logger.info('wrote on %s' % name)
+        logger.info(f"wrote on {name}")
         
     def write_file(i, n, what):
-        name = '%d-%s.txt' % (i, n)
+        name = f"{n}-{i}.txt"
         write_file_(name, what)
     
-    logger.debug('Initial files: %s' % list(_.path for _ in commits[1].tree.traverse()))
+    logger.debug(f"Initial files: {list}"(_.path for _ in commits[1].tree.traverse()))
     
     msg = ""
     for i, commit in enumerate(commits):
@@ -84,7 +84,7 @@ def check_translation_gitrep_to_diskrep(repo, branch_name, out):
         
         assert_equal_disk_rep(disk_rep, supposedly)
 
-    logger.debug('wd: %s' % wd)
+    logger.debug(f"wd: {wd}")
     return dict(disk_rep0=disk_rep0, disk_events=all_disk_events, disk_rep=disk_rep)
 
     
@@ -109,8 +109,8 @@ def who_from_commit(commit):
     assert isinstance(author, Actor)
     assert isinstance(committer, Actor)
     
-    print author.__repr__()
-    print committer.__repr__()
+    print(author.__repr__())
+    print(committer.__repr__())
 
     author_email = author.email
     if '@' in author_email:
@@ -175,7 +175,7 @@ def diskevents_from_diff(commit_a, commit_b):
     deleted_by_deleting_dir = set()
     for di, di_contents in dir2contents.items():
         if all(x in removed_files for x in di_contents):
-            print('detected that %s was removed completely' % di)
+            print(f"detected that {di} was removed completely")
             deleted_completely.add(di)
     
     
@@ -185,7 +185,7 @@ def diskevents_from_diff(commit_a, commit_b):
             continue
         else:
             dirname, name = dirname_name_from_path(di)
-            print('%s -> %s, %s' % (di, dirname, name))
+            print(f"{di} -> {dirname}, {name}")
             deleted_by_deleting_dir.update(dir2contents[di])
             e = disk_event_dir_delete(_id, who, dirname=dirname, name=name)
             events.append(e)
@@ -197,7 +197,7 @@ def diskevents_from_diff(commit_a, commit_b):
         e = disk_event_file_delete(_id, who, dirname=dirname, name=name)
         events.append(e)
 
-    logger.debug('trees: %s' % list(commit_a.tree.traverse()))
+    logger.debug(f"trees: {list}"(commit_a.tree.traverse()))
     logger.debug('existing: %s' % "\n- ".join(existing))
     
     for d in diff.iter_change_type('A'):
@@ -256,7 +256,7 @@ def get_first_diff(a,b ):
     name1 = a[n]
     name2 = b[n]
     sol = dirname, name1, name2
-    print('a = %s   b = %s  n = %s sol = %s' % (a,b,n,sol))
+    print(f"a = {a}   b = {b}  n = {n} sol = {sol}")
     return sol
     
 

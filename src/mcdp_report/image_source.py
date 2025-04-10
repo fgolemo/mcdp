@@ -28,7 +28,7 @@ class ImagesSource(object):
         
 class NoImages(ImagesSource):
     def get_image(self, name, data_format):
-        msg = 'NoImages: not found %s %s' % (name, data_format)
+        msg = f"NoImages: not found {name} {data_format}"
         raise NoImageFound(msg)
             
 class ImagesFromPaths(ImagesSource):
@@ -45,19 +45,19 @@ class ImagesFromPaths(ImagesSource):
                 
                 if x.lower() == name.lower():
                     if x != name:
-                        msg = 'Using file "%s" for image "%s", even though case does not match.' % (bn, name)
+                        msg = f"Using file "{bn}" for image "{name}", even though case does not match."
                         _warn_once(msg)
                     
                     if os.path.exists(fn):
                         return open(fn).read()
                     else:
                         # warn broken link
-                        msg = 'Filename does not exist (broken link?): %s' % fn
+                        msg = f"Filename does not exist (broken link?): {fn}"
                         logger.debug(msg)
                          
-        msg = 'Could not find %s.%s in %d paths.' % (name, data_format, len(self.paths))
+        msg = f"Could not find {name}.{data_format} in {len(self.paths} paths.")
         for p in self.paths:
-            msg += '\n path: %s' % p
+            msg += f"\n path: {p}"
         raise NoImageFound(msg)
 
 @memoize_simple
@@ -68,7 +68,7 @@ def _warn_once(msg):
 def _list_files_with_extension(dirname, extension):
     ''' List all files in the given directory with an extension.
         The result is cached. '''
-    pattern = '*.%s' % extension
+    pattern = f"*.{extension}"
     res = list(locate_files(dirname, pattern))
     return res
 
@@ -91,7 +91,7 @@ class ImagesFromDB(ImagesSource):
         for candidate in images:
             if candidate.lower() == name.lower():
                 if candidate != name:
-                    msg = 'Using image "%s" for "%s" even though the name does not match.' % (candidate, name)
+                    msg = f"Using image "{candidate}" for "{name}" even though the name does not match."
                     _warn_once(msg)
         
                 image = images[candidate]
@@ -111,7 +111,7 @@ class ImagesFromDB(ImagesSource):
                         data = getattr(image, data_format)
                         if data is not None:
                             return data
-        msg = 'Could not find image %s %s' % (name, data_format)
+        msg = f"Could not find image {name} {data_format}"
         raise NoImageFound(msg)
         
 class TryMany(ImagesSource):
@@ -126,7 +126,7 @@ class TryMany(ImagesSource):
                 return source.get_image(name, data_format)
             except NoImageFound as e:
                 errors.append(e)
-        msg = 'Could not find %s.%s in %d sources.' % (name, data_format, len(self.sources))
+        msg = f"Could not find {name}.{data_format} in {len(self.sources} sources.")
         for i, e in enumerate(errors):
             msg += '\n' + indent(str(e), '%d> ' % i) 
         raise NoImageFound(msg)

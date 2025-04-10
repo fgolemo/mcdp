@@ -14,7 +14,7 @@ from mcdp_web_tests.mockups import get_context_request
 @comptest
 @with_pyramid_environment
 def test_lib_creation1(env):
-    logger.info('env: %s' % env)
+    logger.info(f"env: {env}")
     app = WebApp.singleton # XXX
     db_view = app.hi.db_view
     
@@ -31,7 +31,7 @@ def test_lib_creation1(env):
         msg = 'The library %r already exists' % library_name
         raise Exception(msg)
     
-    url = '/repos/%s/shelves/%s/libraries/:new/%s' % (repo_name, shelf_name, library_name)
+    url = f"/repos/{repo_name}/shelves/{shelf_name}/libraries/:new/{library_name}"
     
     mocked = get_context_request(test_env=env, url=url, authenticated_userid=authenticated_userid)
     

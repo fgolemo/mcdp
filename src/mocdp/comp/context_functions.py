@@ -52,7 +52,7 @@ def dpgraph_making_sure_no_reps(context):
                 # print('need to translate F (%s, %s) because already in %s' %
                 #       (name, fn, functions[fn]))
 
-                fn2 = '_%s_%s' % (name, fn)
+                fn2 = f"_{name}_{fn}"
 
                 return dpgraph_translate_fn(context, name, fn, fn2)
 
@@ -67,7 +67,7 @@ def dpgraph_making_sure_no_reps(context):
                 # print('need to translate R (%s, %s) because already in %s' %
                 #        (name, rn, resources[rn]))
 
-                rn2 = '_%s_%s' % (name, rn)
+                rn2 = f"_{name}_{rn}"
 
                 return dpgraph_translate_rn(context, name, rn, rn2)
 
@@ -214,7 +214,7 @@ def wrap_change_name_resource(ndp, rn, rn2):
     from mocdp.comp.wrap import dpwrap
 
     R = ndp.get_rtype(rn)
-    tmpname = '__tmp_%s' % rn
+    tmpname = f"__tmp_{rn}"
     second = dpwrap(Identity(R), tmpname, rn2)
     from mocdp.comp.connection import connect2
     connections = set([Connection('-', rn, '-', tmpname)])
@@ -244,7 +244,7 @@ def wrap_change_name_function(ndp, fn, fn2):
     from mocdp.comp.wrap import dpwrap
 
     F = ndp.get_ftype(fn)
-    tmpname = '__tmp_%s' % fn
+    tmpname = f"__tmp_{fn}"
     first = dpwrap(Identity(F), fn2, tmpname)
     from mocdp.comp.connection import connect2
     connections = set([Connection('-', tmpname, '-', fn)])

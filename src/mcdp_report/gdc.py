@@ -251,7 +251,7 @@ def get_images(dirname, exts=None):
         
     """ Returns a dict from lowercase basename to realpath """
     
-    pattern = ['*.%s' % ext for ext in exts]
+    pattern = [f"*.{ext}" for ext in exts]
     allfiles = {}
     files = locate_files(dirname, pattern, followlinks=True, normalize=False)
     for f in files:
@@ -263,7 +263,7 @@ def get_images(dirname, exts=None):
 @contract(image_source=ImagesSource)
 def choose_best_icon(iconoptions, image_source):
     ''' Returns the name of a file, or raise exception KeyError. '''
-#     logger.debug('Looking for %s in %s.' % (str(iconoptions), imagepaths))
+#     logger.debug(f"Looking for {str(iconoptions} in %s.", imagepaths))
     exts = MCDPConstants.exts_for_icons
     iconoptions = [_ for _ in iconoptions if _ is not None]
     errors = []

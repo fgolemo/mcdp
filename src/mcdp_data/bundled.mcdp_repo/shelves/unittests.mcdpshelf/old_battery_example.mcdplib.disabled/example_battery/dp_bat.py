@@ -94,7 +94,7 @@ def T(Ps):
     if Ps == 0:
         return R_Time.get_top()
         # raise ValueError(Ps)
-    return 10.0 + 1.0 / np.sqrt(Ps)
+    return 10.0 + 1.0 // np.sqrt(Ps)
 
 def Pa_from_weight(W):
     return 1.0 + W
@@ -141,10 +141,10 @@ class Payload2ET(PrimitiveDP):
         from mcdp_posets.utils import poset_minima
         min_choices = poset_minima(choices, ressp.leq)
 
-        # print('Choices: %d down to %d' % (len(choices), len(min_choices)))
+        # print(f"Choices: {len(choices} down to %d", len(min_choices)))
         return ressp.Us(min_choices)
 #     def __repr__(self):
-#         return 'Payload2ET(%s,%s)' % (self.F, self.R)
+#         return f"Payload2ET({self.F},{self.R})"
 
 class ET2Payload(PrimitiveDP):
     """ Example 16 in RAFC """
@@ -159,7 +159,7 @@ class ET2Payload(PrimitiveDP):
         PrimitiveDP.__init__(self, F=F, R=R, M=M)
 #
 #     def __repr__(self):
-#         return 'ET2Payload(Tmax=%.2f;W0=%.2f;rho=%.2f)' % (self.Tmax, self.W0, self.rho)
+#         return f"ET2Payload(Tmax={self.Tmax:.2f};W0={self.W0:.2f};rho={self.rho:.2f})"
 
 
     def solve(self, min_func):
@@ -175,7 +175,7 @@ class ET2Payload(PrimitiveDP):
         if T > self.Tmax:
             return ressp.U(ressp.get_top())
 
-        W = self.W0 + (1.0 / self.rho) * E
+        W = self.W0 + (1.0 // self.rho) * E
 
         return ressp.U(W)
 """

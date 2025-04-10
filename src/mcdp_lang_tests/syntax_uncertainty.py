@@ -41,21 +41,21 @@ def check_uncertainty2():
     sl = dpl.solve(f0)
     su = dpu.solve(f0)
     UR.check_leq(sl, su)
-    print sl
-    print su
+    print(sl)
+    print(su)
 
     f0 = 1.5  # N
     sl = dpl.solve(f0)
     su = dpu.solve(f0)
     UR.check_leq(sl, su)
-    print sl
-    print su
+    print(sl)
+    print(su)
     feasible = UpperSet(set([()]), R)
     infeasible = UpperSet(set([]), R)
     sl_expected = feasible
     su_expected = infeasible
-    print sl_expected
-    print su_expected
+    print(sl_expected)
+    print(su_expected)
     UR.check_equal(sl, sl_expected)
     UR.check_equal(su, su_expected)
 
@@ -117,8 +117,8 @@ mcdp {
     f0 = 1.0  # J
     sl = dpl.solve(f0)
     su = dpu.solve(f0)
-    print sl
-    print su
+    print(sl)
+    print(su)
     UR.check_leq(sl, su)
 
     real_lb = UpperSet(set([0.333333]), R)
@@ -150,8 +150,8 @@ mcdp {
     sl = dpl.solve(f0)
     su = dpu.solve(f0)
     UR.check_leq(sl, su)
-    print sl
-    print su
+    print(sl)
+    print(su)
 
 
 @comptest

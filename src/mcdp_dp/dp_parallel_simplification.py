@@ -38,7 +38,7 @@ class ParSimplificationRule(object):
         try:
             res = self._execute(dp1, dp2)
         except BaseException as e: # pragma: no cover
-            msg = 'Error while executing Parallel simplification rule %s.' % type(self).__name__
+            msg = f"Error while executing Parallel simplification rule {type}."(self).__name__
             raise_wrapped(DPInternalError, e, msg, dp1=dp1.repr_long(),
                           dp2=dp2.repr_long(), rule=self)
 
@@ -46,7 +46,7 @@ class ParSimplificationRule(object):
             from mcdp_dp.dp_series_simplification import check_same_spaces
             check_same_spaces(dp0, res)
         except AssertionError as e: # pragma: no cover
-            msg = 'Invalid Parallel simplification rule %s.' % type(self).__name__
+            msg = f"Invalid Parallel simplification rule {type}."(self).__name__
             raise_wrapped(DPInternalError, e, msg, dp1=dp1.repr_long(),
                           dp2=dp2.repr_long(), res=res.repr_long(), rule=self)
         return res
@@ -306,7 +306,7 @@ def make_parallel(dp1, dp2):
 
     for rule in rules:
         if rule.applies(dp1, dp2):
-            # logger.debug('Applying par. simplification rule %s' % type(rule).__name__)
+            # logger.debug(f"Applying par. simplification rule {type}"(rule).__name__)
             return rule.execute(dp1, dp2)
 
     return Parallel(dp1, dp2)

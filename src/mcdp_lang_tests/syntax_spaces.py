@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from contracts.utils import indent
-from nose.tools import assert_equal, assert_raises
+from .nose_compat import assert_equal, assert_raises
 
 from comptests.registrar import comptest, run_module_tests, comptest_fails
 from mcdp.exceptions import DPSemanticError
@@ -93,7 +93,7 @@ def check_suggestions_result(s, s2_expected=None, nexpected=None):
     s2 = apply_suggestions(s, suggestions)
     if nexpected is not None:
         if nexpected != len(suggestions):
-            msg = 'Expected %d suggestions, got %d.' % (nexpected, len(suggestions))
+            msg = f"Expected {nexpected} suggestions, got {len(suggestions}.")
             msg += '\n\n'+indent(make_chars_visible(s), '   original |')
             msg += '\n\n'+indent(make_chars_visible(s2), 'transformed |')
             if s2_expected is not None:
@@ -252,7 +252,7 @@ mcdp {
     variable a_1_last [dimensionless]
 }"""
     suggestions = get_suggestions_ndp(s)
-    if suggestions: print suggestions
+    if suggestions: print(suggestions)
     assert_equal(0, len(suggestions)) 
     
 @comptest
@@ -264,7 +264,7 @@ mcdp {
     num_replacements = 0
 }"""
     suggestions = get_suggestions_ndp(s)
-    if suggestions: print suggestions
+    if suggestions: print(suggestions)
     assert_equal(0, len(suggestions)) 
 
 @comptest
@@ -290,7 +290,7 @@ mcdp {
     variable a₁ [dimensionless]
 }"""
     suggestions = get_suggestions_ndp(s)
-    if suggestions: print suggestions
+    if suggestions: print(suggestions)
     assert_equal(0, len(suggestions))
 
 @comptest
@@ -301,7 +301,7 @@ mcdp {
     variable α [dimensionless]
 }"""
     suggestions = get_suggestions_ndp(s)
-    if suggestions: print suggestions
+    if suggestions: print(suggestions)
     assert_equal(0, len(suggestions))
 
 
@@ -318,7 +318,7 @@ def get_suggestions_ndp(s):
 def just_list():
     s = sorted(greek_letters, key=lambda t: t.lower() + t[0])
     print(" ".join(greek_letters[_] for _ in s))   
-    print("\n".join('%s %s' % (greek_letters[k], k) for k in s))
+    print(f"\n".join('{greek_letters[k]} {k}" for k in s))
     print(" ".join(subscripts.values()))
 
 @comptest

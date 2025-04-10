@@ -7,10 +7,10 @@ from .utils import parse_wrap_check
 @comptest
 def check_templates1():
     
-    print parse_wrap_check('specialize [b1: `s1, b2: `s2] `sum_battery  ',
-                    Syntax.ndpt_specialize)
-    print parse_wrap_check('specialize [] `sum_battery',
-                     Syntax.ndpt_specialize)
+    print(parse_wrap_check('specialize [b1: `s1, b2: `s2] `sum_battery  ',
+                    Syntax.ndpt_specialize))
+    print(parse_wrap_check('specialize [] `sum_battery',
+                     Syntax.ndpt_specialize))
 
 
 @comptest

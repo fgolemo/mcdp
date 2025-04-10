@@ -29,7 +29,7 @@ class PlotterUR(Plotter):
             try:
                 tu.check_leq(P, R)
             except NotLeq as e:
-                msg = ('cannot convert to R^2 from %s' % space)
+                msg = (f"cannot convert to R^2 from {space}")
                 raise_wrapped(NotPlottable, e, msg, compact=True)
     
             self.P_to_S, _ = tu.get_embedding(P, R)
@@ -82,7 +82,7 @@ class PlotterUR(Plotter):
 
         p2 = x, y
 
-        # print('p: %s -> %s' % (p, p2))
+        # print(f"p: {p} -> {p2}")
         return p2
 
     def plot(self, pylab, axis, space, value, params={}):
@@ -100,7 +100,7 @@ class PlotterUR(Plotter):
         self.check_plot_space(space)
 
         minimals = [self._get_screen_coords(_, axis) for _ in value.minimals]
-        print 'minimals',minimals
+        print('minimals',minimals)
         R2 = PosetProduct((Rcomp(), Rcomp()))
         v = R2.Us(minimals)
 

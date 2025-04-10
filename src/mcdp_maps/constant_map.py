@@ -20,4 +20,4 @@ class ConstantPosetMap(Map):
     
     def repr_map(self, letter):
         b = self.cod.format(self.value)
-        return "%s ⟼ %s" % (letter, b)
+        return f"{letter} ⟼ {b}"

@@ -47,8 +47,8 @@ class SchemaBase(object):
         return ACL(self.get_acl_rules())
         
     def __str__(self):
-        s = '%s' % type(self).__name__
-        s += '(Can be none: %s)' % self.can_be_none 
+        s = f"{type}"(self).__name__
+        s += f"(Can be none: {self})".can_be_none 
         acl = self.get_acl_local()
         if acl.rules:
             s += '\n' + acl.__str__()
@@ -143,7 +143,7 @@ class SchemaContext(SchemaRecursive):
     
     def child(self, name):
         if not name in self.children:
-            msg = 'Could not find child %r; available: %s.' % (name, format_list(self.children))
+            msg = f"Could not find child %r; available: {name}.")
             raise ValueError(msg)
         child = self.children[name]
         return child
@@ -168,7 +168,7 @@ class SchemaContext(SchemaRecursive):
 
         for k, v in self.children.items():
             if not k in data:
-                msg = 'Expecting key "%s" but not found in %s.' % (k, format_list(data))
+                msg = f"Expecting key "{k}" but not found in {format_list(data}.")
                 
                 raise_desc(NotValid, msg, data=describe_value(data), self=str(self))
             try:
@@ -229,7 +229,7 @@ class SchemaContext(SchemaRecursive):
         
     def __getitem__(self, name):
         if not name in self.children:
-            msg = 'Could not find %r: available %s.' % (name, format_list(self.children))
+            msg = f"Could not find %r: available {name}.")
             raise KeyError(msg)
         return self.children[name]
     
@@ -260,7 +260,7 @@ class SchemaContext(SchemaRecursive):
         res = {}
         for k in kwargs:
             if not k in self.children:
-                msg = 'Extra key %r not in %s.' % (k, format_list(self.children))
+                msg = f"Extra key %r not in {k}.")
                 raise ValueError(msg)
         kwargs = deepcopy(kwargs)
         for k, c in self.children.items():
@@ -271,7 +271,7 @@ class SchemaContext(SchemaRecursive):
                 elif c.can_be_none:
                     res[k] = None
                 else:
-                    msg = 'Cannot generate empty for child %r: %s.' % (k, c)
+                    msg = f"Cannot generate empty for child %r: {k}."
                     raise ValueError(msg)
             else:
                 if k in kwargs:
@@ -292,9 +292,9 @@ def describe(children):
     for k, c in children.items():
         cs = c.__str__().strip()
         if '\n' in cs:
-            s += '%s:\n%s' % (k, indent(cs, ' | '))
+            s += f"{k}:\n{indent(cs, ' | '}")
         else:
-            s += '%s: %s' % (k,cs)
+            s += f"{k}: {cs}"
         s += '\n'
     return s.rstrip()
 
@@ -436,10 +436,10 @@ def data_hash_code(s):
     elif isinstance(s, dict):
         keys = sorted(s)
         values = [s[k] for k in keys]
-        codes = ['%s-%s' % (k, data_hash_code(v)) for k,v in zip(keys, values)]
+        codes = [f"{k}-{data_hash_code(v}") for k,v in zip(keys, values)]
         return data_hash_code("_".join(codes))
     else:
-        msg = 'Invalid type %s' % describe_type(s)
+        msg = f"Invalid type {describe_type}"(s)
         raise ValueError(msg)
     
     

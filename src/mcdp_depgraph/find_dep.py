@@ -38,7 +38,7 @@ def find_dependencies(config_dirs, maindir, seeds):
             ndps = library.list_spec(SPEC_MODELS)
             
             for name in ndps:
-                seeds.append('%s.%s' % (libname, name))
+                seeds.append(f"{libname}.{name}")
     else:
         pass
     
@@ -57,7 +57,7 @@ class Entry():
         self.name = name
         
     def __repr__(self):
-        return '%s(%s,%s)' % (type(self), self.libname, self.name)
+        return f"{type(self}(%s,%s)", self.libname, self.name)
 
     def __hash__(self):
         return hash(str(self))
@@ -147,7 +147,7 @@ class FindDependencies():
             for d in deps:
                 self.stack.append(d)
 
-            print('%s -> %s' % (s, self.visited[s]))
+            print(f"{s} -> {self.visited[s]}")
 
     def get_dependencies(self, s):
         assert isinstance(s, Entry), s

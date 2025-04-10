@@ -24,13 +24,13 @@ def should_do_basic_tests():
     # only do basic mcdp_comp_tests if we are #0
     i, n = get_test_index()
 
-    #logger.info('Testing box #%d of %d' % (i+1, n))
+    #logger.info(f"Testing box #{i+1} of {n}")
     if n == 1: # only one total
         should = True
     else: # the first of many
         should = (i == 0)
     
-    logger.debug('should_do_basic_tests i = %s n = %d should? %s' % (i, n, should))
+    logger.debug(f"should_do_basic_tests i = {i} n = {should} should? {n}")
     return should
 
 def load_tests_modules():

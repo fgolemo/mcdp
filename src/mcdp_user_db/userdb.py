@@ -66,7 +66,7 @@ class UserDB(object):
                 pwd = p.password
                 match = password == pwd
                 if not match:
-                    msg = 'Password %s does not match with stored %s.' % (password, pwd)
+                    msg = f"Password {password} does not match with stored {pwd}."
                     logger.warn(msg)
                     
                     user_info.account_last_active = datetime.now()
@@ -81,7 +81,7 @@ class UserDB(object):
                 return x
         for i in range(2,10):
             for x in candidate_usernames:
-                y = '%s%d' % (x, i)
+                y = f"{x}{i}"
                 if y not in self.users:
                     return y
         raise ValueError(candidate_usernames)
@@ -131,7 +131,7 @@ class UserDB(object):
 #         user = self.users[username]
 #         y = yaml_from_userinfo(user)
 #         s = yaml.dump(y)
-#         logger.info('Saving %r:\n%s' % (username, s))
+#         logger.info(f"Saving %r:\n{username}")
 #         with open(filename, 'w') as f:
 #             f.write(s)
 #             
@@ -139,7 +139,7 @@ class UserDB(object):
 # #             fn = os.path.join(userdir, MCDPConstants.user_image_file)
 # #             with open(fn, 'wb') as f:
 # #                 f.write(user.picture)
-#         logger.debug('Saved user information here: %s' % userdir)
+#         logger.debug(f"Saved user information here: {userdir}")
 #         
 # 
 # def load_users(userdir):
@@ -148,13 +148,13 @@ class UserDB(object):
 #     
 #     exists = os.path.exists(userdir) 
 #     if not exists:
-#         msg = 'Directory %s does not exist' % userdir
+#         msg = f"Directory {userdir} does not exist"
 #         raise Exception(msg)
 #         
 #     assert exists
 #         
 #     l = locate_files(userdir, 
-#                      pattern='*.%s' % MCDPConstants.user_extension, 
+#                      pattern=f"*.{MCDPConstants}".user_extension, 
 #                      followlinks=True,
 #                      include_directories=True,
 #                      include_files=False)
@@ -163,7 +163,7 @@ class UserDB(object):
 #         username = os.path.splitext(os.path.basename(userd))[0]
 #         info = os.path.join(userd, MCDPConstants.user_desc_file)
 #         if not os.path.exists(info):
-#             msg = 'Info file %s does not exist.'  % info
+#             msg = f"Info file {info} does not exist."
 #             raise Exception(msg)
 #         data = open(info).read()
 #         s = yaml.load(data)
@@ -178,7 +178,7 @@ class UserDB(object):
 #         msg = 'Could not load any user from %r' % userdir
 #         raise Exception(msg)
 #     else:
-#         logger.info('loaded users: %s.' % format_list(sorted(users)))
+#         logger.info(f"loaded users: {format_list}."(sorted(users)))
 #         
 #     return users
         

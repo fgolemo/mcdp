@@ -118,19 +118,19 @@ class ProxyDirectory(object):
             f = self._files[k]
             MAX = 50
             if k.endswith('yaml'):
-                s += '%s' % k
+                s += f"{k}"
                 s += '\n' + indent(f.contents, ' | ') + '\n'
             else: 
                 if len(f.contents) < MAX:
                     if '\n' in f.contents:
-                        s += '%r =\n%s\n' % (k, indent(f.contents, '> '))
+                        s += f"%r =\n{k}\n")
                     else:
                         s += '%r = %r\n' % (k, f.contents)
                 else:
-                    s += '%s: %d bytes\n' % (k, len(f.contents))
+                    s += f"{k}: {len(f.contents} bytes\n")
         for k in sorted(self._directories):
             d = self._directories[k]
-            s += '%s/\n' % k
+            s += f"{k}/\n"
             s += indent(d.tree(max_levels-1).rstrip(), '.   ') + '\n' 
         return s
 
@@ -164,7 +164,7 @@ class ProxyDirectory(object):
                     msg = 'Invalid name %r; it is neither a dir or a file.' % first
                     raise_desc(NoSuchDescendant, msg)   
         except NoSuchDescendant as e:
-            msg = 'Cannot get the descendant %s:' % prefix.__repr__()
+            msg = f"Cannot get the descendant {prefix}:".__repr__()
             msg += '\n' + indent(self.tree(), 'self | ')
             raise_wrapped(NoSuchDescendant, e, msg, compact=True)
    
@@ -204,14 +204,13 @@ class ProxyDirectory(object):
 
     def dir_create(self, name):
         if name in self._directories:
-            msg = 'Cannot create directory %s that already exists.' % name
+            msg = f"Cannot create directory {name} that already exists."
             raise InvalidDiskOperation(msg)
         self._directories[name] = ProxyDirectory()
     
     def dir_rename(self, name, name2):    
         if not name in self._directories:
-            msg = ('Cannot rename directory %r to %r if does not exist in %s.' % 
-                   (name, name2, format_list(self._directories)))
+            msg = (f"Cannot rename directory %r to %r if does not exist in {name}."))
             raise InvalidDiskOperation(msg)
         if name2 in self._directories:
             msg = ('Cannot rename directory %r to %r if %r already exists' % 

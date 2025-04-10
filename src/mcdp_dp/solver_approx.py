@@ -61,7 +61,7 @@
 #         print('Computing step')
 #         s_l_next, s_u_next = beta((uf, s_last))
 # 
-#         print('%d: si  = %s' % (i, S.format(s_next)))
+#         print(f"{S.format(s_next}: si  = {i}"))
 # 
 #         if S.equal(ss[-1], s_next):
 #             print('%d: breaking because converged' % i)
@@ -69,7 +69,7 @@
 #             break
 # 
 #         rn = alpha((uf, s_next))
-#         print('%d: rn  = %s' % (i, UR.format(rn)))
+#         print(f"{UR.format(rn}: rn  = {i}"))
 # 
 #         ss.append(s_next)
 #         sr.append(rn)

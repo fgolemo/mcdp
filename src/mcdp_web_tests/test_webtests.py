@@ -43,7 +43,7 @@ another_name_for_unittests_shelf = 'unittests'
 
 def create_user_db_repo(where, bname):
     user_db_skeleton = {
-        'anonymous.%s' % MCDPConstants.user_extension: {
+        f"anonymous.{MCDPConstants}".user_extension: {
             MCDPConstants.user_desc_file: '''
             name: Anonymous user
             authentication_ids: []
@@ -130,7 +130,7 @@ class FunctionalTestsSpider(FunctionalTests):
         else:
             exclude = []
                 
-        ushelf = '/repos/bundled/shelves/%s' % another_name_for_unittests_shelf
+        ushelf = f"/repos/bundled/shelves/{another_name_for_unittests_shelf}"
         bugs = [
             ushelf + '/libraries/basic/models/sum2f_rcomp/views/solver',
             ushelf + '/libraries/pop/models/pop_example_3_7_newsyntax/views/ndp_repr/',
@@ -144,10 +144,10 @@ class FunctionalTestsSpider(FunctionalTests):
             self.testapp.get(b)
             
         # this should not redirect
-        url = '/repos/bundled/shelves/%s/libraries/documents/align.html'  % another_name_for_unittests_shelf
+        url = f"/repos/bundled/shelves/{another_name_for_unittests_shelf}/libraries/documents/align.html"
         res = self.testapp.get(url)
         if '302' in res.status:
-            msg = 'Document redirect: %s -> %s' % (url, res.headers['location'])
+            msg = f"Document redirect: {url} -> {res.headers['location']}"
             msg += '\n' + indent(res.body, '> ')
             raise Exception(msg)
         
@@ -202,18 +202,18 @@ class FunctionalTestsSpider(FunctionalTests):
         spider.log_summary()
         if spider.skipped:
             for url in sorted(spider.skipped):
-                logger.warn('Skipped %s' % url)
+                logger.warn(f"Skipped {url}")
         if spider.failed or spider.not_found:
             msg = ''
             if spider.not_found:
                 msg += 'These URLs not found:'
                 for f, e in spider.not_found.items():
-                    msg += '\n- %s' % f
+                    msg += f"\n- {f}"
                 
             if spider.failed:
                 msg += '\nErrors for these URLs:'
                 for f, e in spider.failed.items():
-                    msg += '\n- %s' % f
+                    msg += f"\n- {f}"
                     msg += '\n referrers: \n' + "\n  - ".join(spider.referrers[f])
                     
                 if False:
@@ -225,7 +225,7 @@ class FunctionalTestsSpider(FunctionalTests):
                         s = project_html(body) 
                         msg += '\n' + indent(s, '  > ')
     #                 msg += '\n' + indent(str(e), '  > ')
-#                 msg += '\n'.join('- %s' % _ for _ in sorted(spider.failed))
+#                 msg += f"\n'.join('- {_}" for _ in sorted(spider.failed))
             raise_desc(Exception, msg)
 
 #@comptest_fails

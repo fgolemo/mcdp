@@ -105,7 +105,7 @@ def test_conversion(id_ndp, ndp):
     for f in fs:
         try:
             res = dp.solve(f)
-            print('%s -> %s' % (F.format(f), UR.format(res)))
+            print(f"{F.format(f} -> %s", UR.format(res)))
 
             for r in res.minimals:
                 imps = dp.get_implementations_f_r(f, r)

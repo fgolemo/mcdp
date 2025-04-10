@@ -63,8 +63,8 @@ def data_diff(schema, data1, data2, prefix=()):
         
 #         m_2_in_1 = get_map(hc2, hc1)
 #         m_1_in_2 = get_map(hc1, hc2) 
-#         logger.debug('map 2 in 1: %s' % m_2_in_1)
-#         logger.debug('map 1 in 2: %s' % m_1_in_2)
+#         logger.debug(f"map 2 in 1: {m_2_in_1}")
+#         logger.debug(f"map 1 in 2: {m_1_in_2}")
          
         events = []
         for i in range(len(hc2)): 
@@ -114,7 +114,7 @@ def data_diff(schema, data1, data2, prefix=()):
         return events
     
     elif isinstance(schema, (SchemaString, SchemaDate, SchemaBytes)):
-        msg = 'I was not expecting to be called for %s' % schema
+        msg = f"I was not expecting to be called for {schema}"
         raise ValueError(msg)
     else:
         assert False, schema

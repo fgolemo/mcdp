@@ -23,8 +23,7 @@ class Where(object):
             raise ValueError('I expect the string to be a str, not %r' % string)
 
         if not (0 <= character <= len(string)):
-            msg = ('Invalid character loc %s for string of len %s.' %
-                    (character, len(string)))
+            msg = (f"Invalid character loc {character} for string of len {len(string}."))
             raise_desc(ValueError, msg, string=string.__repr__())
             # Advance pointer if whitespace
             # if False:
@@ -40,13 +39,12 @@ class Where(object):
 
         if character_end is not None:
             if not (0 <= character_end <= len(string)):
-                msg = ('Invalid character_end loc %s for string of len %s.'%
-                       (character_end, len(string)))
+                msg = (f"Invalid character_end loc {character_end} for string of len {len(string}."))
 
                 raise_desc(ValueError, msg, string=string.__repr__())
 
             if not (character_end >= character):
-                msg=  'Invalid interval [%d:%d]' % (character, character_end)
+                msg=  f"Invalid interval [{character}:{character_end}]"
                 raise ValueError(msg)
 
             self.line_end, self.col_end = line_and_col(character_end, string)
@@ -70,7 +68,7 @@ class Where(object):
             part = self.string[self.character:self.character_end]
             return 'Where(%r)' % part
         else:
-            return 'Where(s=...,char=%s-%s,line=%s,col=%s)' % (self.character, self.character_end, self.line, self.col)
+            return f"Where(s=...,char={self.character}-{self.character_end},line={self.line},col={self.col})"
 
     def with_filename(self, filename):
         if self.character is not  None:
@@ -112,7 +110,7 @@ def format_where(w, context_before=3, mark=None, arrow=True,
         # suppress empty lines
         if one_written or lines[i].strip():
             lines[i] = lines[i].replace('\t', TAB_VISIBLE_CHAR)
-            s += ("%s%s\n" % (pattern % (i+1), lines[i]))
+            s += (f"{pattern % (i+1}%s\n", lines[i]))
             one_written = True
 
     fill = len(pattern % maxi)
@@ -128,13 +126,13 @@ def format_where(w, context_before=3, mark=None, arrow=True,
 
     #s += '\n' + '~' * fill + '\n'
     space = S * fill + S * nindent
-#     print 'column %s, len(space) = %s\n' % (w.col, len(space))
+#     print f"column {w.col}, len(space) = {len(space}\n")
 #     s += len(space) * '1' + '\n'
     if w.col_end is not None:
         if w.line == w.line_end:
             num_highlight = printable_length_where(w)
             s += space + '~' * num_highlight + '\n'
-            space += S * (num_highlight/2)
+            space += S * (num_highlight//2)
         else:
             # cannot highlight if on different lines
             num_highlight = None

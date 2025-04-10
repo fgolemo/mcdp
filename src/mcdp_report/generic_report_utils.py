@@ -43,7 +43,7 @@ def _report_loop(r, trace_loop, out, do_movie=True):
 
         if do_movie:
             for name, sequence in sequences.items():                
-                outmp4 = os.path.join(out, 'video-r-%s.mp4' % name)
+                outmp4 = os.path.join(out, f"video-r-{name}.mp4")
                 create_movie_from_png_sequence(sequence, outmp4)
 
     with r.subsection('sip') as r2:
@@ -51,7 +51,7 @@ def _report_loop(r, trace_loop, out, do_movie=True):
 
         if do_movie:
             for name, sequence in sequences.items():                
-                outmp4 = os.path.join(out, 'video-s-%s.mp4' % name)
+                outmp4 = os.path.join(out, f"video-s-{name}.mp4")
                 create_movie_from_png_sequence(sequence, outmp4)
     
  
@@ -72,7 +72,7 @@ def _report_loop_sequence(report, R, sips, converged, do_movie):
     try:
         available_plotters = list(get_plotters(get_all_available_plotters(), UR))
     except NotPlottable as e:
-        msg = 'Could not find plotter for space UR = %s.' % UR
+        msg = f"Could not find plotter for space UR = {UR}."
         raise_wrapped(DPInternalError, e, msg , UR=UR, compact=True)
     
     with report.subsection('sip') as r2:
@@ -93,7 +93,7 @@ def _report_loop_sequence(report, R, sips, converged, do_movie):
 
             for i, sip in enumerate(sips):
                 with f.plot('step%03d' % i, figsize=figsize) as pylab:
-                    logger.debug('Plotting iteration %d/%d' % (i, len(sips)))
+                    logger.debug(f"Plotting iteration {i}/{len(sips}"))
                     ieee_spines(pylab)
                     c_orange = '#FFA500'
                     c_red = [1, 0.5, 0.5]
@@ -157,12 +157,12 @@ def generic_plot(f, space, value):
             plotter.check_plot_space(space)
         except NotPlottable as e:
             es.append(e)
-            # print('Plotter %r cannot plot %r:\n%s' % (name, space, e))
+            # print(f"Plotter %r cannot plot %r:\n{name}")
             continue
 
         axis = plotter.axis_for_sequence(space, [value])
         axis = enlarge(axis, 0.15)
-        #print('enlarged:  %s' % str(axis))
+        #print(f"enlarged:  {str}"(axis))
         with f.plot(name) as pylab:
             plotter.plot(pylab, axis, space, value, params={})
             pylab.axis(axis)
@@ -212,7 +212,7 @@ def generic_try_plotters(r, plotters, space, sequence,
             plotter.check_plot_space(space)
         except NotPlottable as e:
             es.append(e)
-            # print('Plotter %r cannot plot %r:\n%s' % (name, space, e))
+            # print(f"Plotter %r cannot plot %r:\n{name}")
             continue
         nplots += 1
 
@@ -221,6 +221,6 @@ def generic_try_plotters(r, plotters, space, sequence,
                               annotation=annotation)
 
     if not nplots:
-        r.text('error', 'No plotters for %s' % space +
+        r.text(f"error', 'No plotters for {space}" +
                '\n\n' + "\n".join(str(e) for e in es))
 

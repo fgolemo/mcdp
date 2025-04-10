@@ -78,7 +78,7 @@ def _get_where_with_filename(e, filename):
     where = e.where
     
     if where is None:
-        mcdp_dev_warning('warning, where is None here: %s' % e)
+        mcdp_dev_warning(f"warning, where is None here: {e}")
         where = None
     else:    
         where = where.with_filename(filename)

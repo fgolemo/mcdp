@@ -39,14 +39,14 @@ class NamedDPCoproduct(NamedDP):
             try:
                 tu.check_equal(ftypes, ftypes_i)
             except NotEqual as e:
-                msg = 'Cannot create co-product: ftypes of %s do not match the first.' % name
+                msg = f"Cannot create co-product: ftypes of {name} do not match the first."
                 raise_wrapped(ValueError, e, msg,
                               ftypes=ftypes, ftypes_i=ftypes_i)
 
             try:
                 tu.check_equal(rtypes, rtypes_i)
             except NotEqual as e:
-                msg = 'Cannot create co-product: rtypes of %s not match the first.' % name
+                msg = f"Cannot create co-product: rtypes of {name} not match the first."
                 raise_wrapped(ValueError, e, msg,
                               rtypes=rtypes, rtypes_i=rtypes_i)
 
@@ -107,15 +107,15 @@ class NamedDPCoproduct(NamedDP):
             s += '\n (loaded as %r)' % getattr(self,  MCDPConstants.ATTR_LOAD_NAME)
 
         if hasattr(self,  MCDPConstants.ATTRIBUTE_NDP_RECURSIVE_NAME):
-            s += '\n (labeled as %s)' % getattr(self,  MCDPConstants.ATTRIBUTE_NDP_RECURSIVE_NAME).__str__()
+            s += f"\n (labeled as {getattr})"(self,  MCDPConstants.ATTRIBUTE_NDP_RECURSIVE_NAME).__str__()
 
         for f in self.get_fnames():
-            s += '\n provides %s  [%s]' % (f, self.get_ftype(f))
+            s += f"\n provides {f}  [{self.get_ftype(f}]")
         for r in self.get_rnames():
-            s += '\n requires %s  [%s]' % (r, self.get_rtype(r))
+            s += f"\n requires {r}  [{self.get_rtype(r}]")
 
         for label, ndp in zip(self.labels, self.ndps):
-            prefix = '- %s: ' % label
+            prefix = f"- {label}: "
             prefix2 = ' ' * len(prefix)
             s += '\n' + indent(ndp, prefix2, prefix)
         return s

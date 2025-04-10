@@ -59,7 +59,7 @@ class Mux(WrapAMap):
         self.coords = coords
 
     def __repr__(self):
-        return 'Mux(%r → %r, %s)' % (self.F, self.R, self.coords)
+        return f"Mux(%r → %r, {self.F})"
 
     def repr_long(self):
         s = 'Mux(%r -> %r, %s)    I = %s' % (self.F, self.R,

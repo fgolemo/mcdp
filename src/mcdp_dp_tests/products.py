@@ -10,7 +10,7 @@ from nose.tools import assert_equal
 def check_products1():
     def check_product(S1, S2, expected):
         S, pack, unpack = get_product_compact(S1, S2)
-        print('product(%s, %s) = %s  expected %s' % (S1, S2, S, expected))
+        print(f"product({S1}, {S2}) = {S}  expected {expected}")
         assert_equal(S, expected)
 
         a = S1.witness()
@@ -22,9 +22,9 @@ def check_products1():
         S1.check_equal(a, a2)
         S2.check_equal(b, b2)
 
-        print('a = %s  b = %s' % (a, b))
-        print('c = %s ' % S.format(c))
-        print('a2 = %s  b2 = %s' % (a2, b2))
+        print(f"a = {a}  b = {b}")
+        print(f"c = {S} ".format(c))
+        print(f"a2 = {a2}  b2 = {b2}")
 
 
     R = Rcomp()
@@ -58,16 +58,16 @@ def check_products():
     F2 = PosetProduct(())
     F3 = R_Energy
     F = PosetProduct((F1, F2, F3))
-    print('F: %s' % F)
+    print(f"F: {F}")
     M, pack, unpack = get_product_compact(F1, F2, F3)
 
-    print('M: %s' % M)
+    print(f"M: {M}")
     element = (F1.get_top(), F2.get_bottom(), F3.get_top())
-    print('elements: %s' % F.format(element))
+    print(f"elements: {F}".format(element))
     s = pack(*element)
-    print('packed: %s' % str(s))
+    print(f"packed: {str}"(s))
     u = unpack(s)
-    print('depacked: %s' % str(u))
+    print(f"depacked: {str}"(u))
     assert_equal(u, element)
 
     # NOte now this is different
@@ -78,14 +78,14 @@ def check_products2():
     F1 = PosetProduct(())
     M, pack, unpack = get_product_compact(F1)
 
-    print('M: %s' % M)
+    print(f"M: {M}")
     element = ()
     F1.belongs(element)
-    print('elements: %s' % F1.format(element))
+    print(f"elements: {F}"1.format(element))
     
     s = pack(*(element,))
-    print('packed: %s' % str(s))
+    print(f"packed: {str}"(s))
     u,  = unpack(s)
-    print('depacked: %s' % str(u))
+    print(f"depacked: {str}"(u))
     assert_equal(u, element)
 

@@ -47,7 +47,7 @@ def check_flatten2():
     """)
     ndp2 = ndp.flatten()
     print('resulting ndp2:\n')
-    print ndp2
+    print(ndp2)
 
 @comptest
 def check_flatten3():
@@ -69,7 +69,7 @@ def check_flatten3():
     """)
     ndp2 = ndp.flatten()
     print('resulting ndp2:\n')
-    print ndp2
+    print(ndp2)
 
 @comptest
 def check_flatten4():
@@ -102,7 +102,7 @@ def check_flatten4():
     """)
     ndp2 = ndp.flatten()
     print('resulting ndp2:\n')
-    print ndp2
+    print(ndp2)
 
 
 @comptest

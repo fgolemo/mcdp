@@ -38,7 +38,8 @@ class TemplateForNamedDP(object):
             realpath = getattr(self, MCDPConstants.ATTR_LOAD_REALPATH)
             if realpath is not None and e.where.filename is None:
                 e = e.with_filename(realpath)
-                raise type(e), e.args, sys.exc_info()[2]
+                tb = sys.exc_info()[2]
+                raise e.with_traceback(tb)
             else:
                 raise
         
@@ -147,8 +148,7 @@ def describe_interface(ndp):
     ftypes = ndp.get_ftypes(fnames)
     rnames = ndp.get_rnames()
     rtypes = ndp.get_rtypes(rnames)
-    return ("fnames: %s\nftypes: %s\nrnames: %s\nrtypes: %s" % 
-            (fnames, ftypes, rnames, rtypes))
+    return (f"fnames: {fnames}\nftypes: {ftypes}\nrnames: {rnames}\nrtypes: {rtypes}")
 
 
 

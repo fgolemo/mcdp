@@ -13,8 +13,8 @@ for f in files:
     mod = f2.replace('.py', '')
 
     cwd = '.'
-    cmd = ['python', '-c', 'import %s' % mod]
-    print "python -c 'import %s'" % mod
+    cmd = [f"python', '-c', 'import {mod}"]
+    print(f"python -c 'import {mod}'")
     system_cmd_result(
             cwd, cmd,
             display_stdout=False,

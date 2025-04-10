@@ -2,6 +2,7 @@
 import functools
 import inspect
 import sys
+from mcdp.py_compatibility import get_arg_spec, raise_with_traceback
 
 
 def parse_action(f):
@@ -19,7 +20,8 @@ def parse_action(f):
     from the call to the parse action (instead of the one caused by pyparsing's
     trial & error).
     """
-    num_args = len(inspect.getargspec(f).args)
+    args_info = get_arg_spec(f)
+    num_args = len(args_info.args)
     if num_args > 3:
         raise ValueError('Input function must take at most 3 parameters.')
 
@@ -27,11 +29,12 @@ def parse_action(f):
     def action(*args):
         if len(args) < num_args:
             if action.exc_info:
-                raise action.exc_info[0], action.exc_info[1], action.exc_info[2]
+                exc_type, exc_value, exc_traceback = action.exc_info
+                raise_with_traceback(exc_value, exc_traceback)
         action.exc_info = None
         try:
             return f(*args[:-(num_args + 1):-1])
-        except TypeError as e:  # @UnusedVariable
+        except TypeError:  # @UnusedVariable
             action.exc_info = sys.exc_info()
             raise
 

@@ -21,7 +21,7 @@ from nose.tools import assert_equal
 
 @contract(a=MakeArguments)
 def make_root(a):
-    print('make_root(%s)' % a.__str__())
+    print(f"make_root({a})".__str__())
     assert a.key == 'root'
     sub = a.subresult
     assert sub['a']['status'] == 'make_a_ok'
@@ -31,7 +31,7 @@ def make_root(a):
 
 @contract(a=MakeArguments)
 def make_a(a):
-    print('make_a(%s)' % a.__str__())
+    print(f"make_a({a})".__str__())
     res = a.subresult
     assert res['a2']['status'] == 'make_a2_ok'
 
@@ -101,13 +101,13 @@ mcdp {
     I = dp.get_imp_space()
     assert isinstance(I, SpaceProduct)
 
-    print('I: %s' % I)
-    print('get_names_used: %s' % get_names_used(I))
+    print(f"I: {I}")
+    print(f"get_names_used: {get_names_used}"(I))
 
     for r in ur.minimals:
-        print('r = %s' % R.format(r))
+        print(f"r = {R}".format(r))
         imps = dp.get_implementations_f_r(f, r)
-        print('imps: %s' % imps)
+        print(f"imps: {imps}")
 
         for imp in imps:
             I.belongs(imp)
@@ -117,7 +117,7 @@ mcdp {
             assert set(imp_dict['a']) == set(['_plus1', 'a2', '_fun_capacity', '_res_mass' ]), imp_dict['a']
             context = {}
             artifact = ndp_make(ndp0, imp_dict, context)
-            print('artifact: %s' % artifact)
+            print(f"artifact: {artifact}")
 
 
 @for_all_nameddps
@@ -138,7 +138,7 @@ def test_imp_dict_1(id_ndp, ndp):
     I = dp0.get_imp_space()
     # print ndp_labeled.repr_long()
     # print dp0.repr_long()
-    print('I: %s' % I.repr_long())
+    print(f"I: {I}".repr_long())
     
 
     f = list(F.get_minimal_elements())[0]
@@ -173,7 +173,7 @@ def test_imp_dict_1(id_ndp, ndp):
         report = Report()
         gg_figure(report, 'figure', gg, do_png=True, do_pdf=False, do_svg=False, do_dot=False)
         fn = os.path.join('out', 'test_imp_dict_1', '%s.html' % id_ndp)
-        print('written to %s' % fn)
+        print(f"written to {fn}")
         report.to_html(fn)
 
 
@@ -185,7 +185,7 @@ def test_imp_dict_2_makecanonical(id_ndp, ndp0):
         return
 
     if not isinstance(ndp0, CompositeNamedDP):
-        print('skipping because not CompositeNamedDP: %s' % type(ndp0).__name__)
+        print(f"skipping because not CompositeNamedDP: {type}"(ndp0).__name__)
         return
 
     try:
@@ -201,8 +201,8 @@ def test_imp_dict_2_makecanonical(id_ndp, ndp0):
     I = dp0.get_imp_space()
     assert isinstance(I, SpaceProduct)
 #     print ndp.repr_long()
-    print('I: %s' % I)
-    print('get_names_used: %s' % get_names_used(I))
+    print(f"I: {I}")
+    print(f"get_names_used: {get_names_used}"(I))
 
     f = list(F.get_minimal_elements())[0]
 
@@ -218,7 +218,7 @@ def test_imp_dict_2_makecanonical(id_ndp, ndp0):
             context = {}
             imp_dict = get_imp_as_recursive_dict(I, imp)
             artifact = ndp_make(ndp0, imp_dict, context)
-            print('artifact: %s' % artifact)
+            print(f"artifact: {artifact}")
 
 
 @comptest
@@ -284,13 +284,13 @@ mcdp {
     I = dp.get_imp_space()
     assert isinstance(I, SpaceProduct)
     print(getattr(I, MCDPConstants.ATTRIBUTE_NDP_RECURSIVE_NAME, 'no attr'))
-    print('I: %s' % I)
-    print('get_names_used: %s' % get_names_used(I))
+    print(f"I: {I}")
+    print(f"get_names_used: {get_names_used}"(I))
 
     for r in ur.minimals:
-        print('r = %s' % R.format(r))
+        print(f"r = {R}".format(r))
         imps = dp.get_implementations_f_r(f, r)
-        print('imps: %s' % imps)
+        print(f"imps: {imps}")
 
         for imp in imps:
             I.belongs(imp)
@@ -305,4 +305,4 @@ mcdp {
 
             context = {}
             artifact = ndp_make(ndp0, imp_dict, context)
-            print('artifact: %s' % artifact)
+            print(f"artifact: {artifact}")

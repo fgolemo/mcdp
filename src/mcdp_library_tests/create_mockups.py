@@ -91,6 +91,6 @@ def unflatten(x):
 def mockup_add_prefix(prefix, d):
     res = {}
     for k, v in d.items():
-        res['%s/%s' % (prefix, k)] = v
+        res[f"{prefix}/{k}"] = v
     return res
 

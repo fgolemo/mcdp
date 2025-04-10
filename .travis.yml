@@ -1,0 +1,23 @@
+language: python
+python:
+  - "3.8"
+  - "3.9"
+  - "3.10"
+  - "3.11"
+
+# Use pip for dependency management
+install:
+  - pip install -r requirements.txt
+  - pip install pytest pytest-cov black flake8
+
+# Run tests with coverage reporting
+script:
+  - black --check .
+  - flake8
+  - pytest --cov=mcdp
+
+# Notify on success/failure
+notifications:
+  email:
+    on_success: change
+    on_failure: always

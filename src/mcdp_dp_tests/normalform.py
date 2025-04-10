@@ -6,10 +6,10 @@
 #     @for_all_dps
 #     def check_normalform(id_dp, dp):
 #         S, alpha, beta = dp.get_normal_form()
-#         print('design problem %s = %s' % (id_dp, dp))
-#         print('S: %s' % S)
-#         print('α: %s' % alpha)
-#         print('β: %s' % beta)
+#         print(f"design problem {id_dp} = {dp}")
+#         print(f"S: {S}")
+#         print(f"α: {alpha}")
+#         print(f"β: {beta}")
 # 
 #         F = dp.get_fun_space()
 #         R = dp.get_res_space()
@@ -27,16 +27,16 @@
 # 
 #         z = beta(x)
 # 
-#         print('codomain: %s' % beta.get_codomain())
-#         print('z = %s' % str(z))
+#         print(f"codomain: {beta}".get_codomain())
+#         print(f"z = {str}"(z))
 #         beta.get_codomain().belongs(z)
 # 
 #         f_fix = uf_bot
-#         print('f_fix: %s' % UF.format(f_fix))
+#         print(f"f_fix: {UF}".format(f_fix))
 #         Ss = [S_bot]
 #         for i in range(10):
 #             Si = beta((f_fix, Ss[-1]))
-#             print('i = %s  %s' % (i, Si))
+#             print(f"i = {i}  {Si}")
 #             S.belongs(Si)
 #             Ss.append(Si)
 #             # check increasing sequence
@@ -45,12 +45,12 @@
 #                 print('Converged exactly')
 #                 break
 #         Sinf = Ss[-1]
-#         print('S converged to %s' % S.format(Sinf))
+#         print(f"S converged to {S}".format(Sinf))
 #         ur = alpha((f_fix, Sinf))
 #         print('Results:')
-#         print(' uf: %s' % UF.format(f_fix))
-#         print(' ur: %s' % UR.format(ur))
-#         print(' Sinf: %s' % S.format(Sinf))
+#         print(f" uf: {UF}".format(f_fix))
+#         print(f" ur: {UR}".format(ur))
+#         print(f" Sinf: {S}".format(Sinf))
 # 
 # 
 

@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
-from collections import defaultdict
 import fnmatch
 import os
+import time
+import sys
+
+# defaultdict is in collections, not collections.abc
+from collections import defaultdict
 
 from contracts import contract
 from mcdp import MCDPConstants, logger
-import time
 from contracts.utils import check_isinstance
 
 
@@ -85,15 +88,15 @@ def locate_files(directory, pattern, followlinks=True,
         for norm in filenames:
             real = os.path.realpath(norm)
             real2norm[real].append(norm)
-            # print('%s -> %s' % (real, norm))
+            # print(f"{real} -> {norm}")
 
         for k, v in real2norm.items():
             if len(v) > 1:
-                msg = 'In directory:\n\t%s\n' % directory
+                msg = f"In directory:\n\t{directory}\n"
                 msg += 'I found %d paths that refer to the same file:\n'
                 for n in v:
-                    msg += '\t%s\n' % n
-                msg += 'refer to the same file:\n\t%s\n' % k
+                    msg += f"\t{n}\n"
+                msg += f"refer to the same file:\n\t{k}\n"
                 msg += 'I will silently eliminate redundancies.'
                 logger.warning(v)
 
@@ -103,6 +106,5 @@ def locate_files(directory, pattern, followlinks=True,
     if seconds > 0.2:
         n = len(filenames)
         nuniques = len(set(filenames))
-        logger.debug('%.4f s for locate_files(%s,%s): %d traversed, found %d filenames (%d uniques)' % 
-              (seconds, directory, pattern, ntraversed, n, nuniques))
+        logger.debug(f'{seconds:.4f} s for locate_files({directory},{pattern}): {ntraversed} traversed, found {n} filenames ({nuniques} uniques)')
     return filenames

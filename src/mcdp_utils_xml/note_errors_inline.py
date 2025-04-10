@@ -9,7 +9,7 @@ def note_error(tag0, e):
     check_isinstance(e, BaseException)
     add_class(tag0, 'errored')
 #     logger.error(str(e))  # XXX
-    t = Tag(name='pre', attrs={'class': 'error %s' % type(e).__name__})
+    t = Tag(name=f"pre', attrs={'class': 'error {type}"(e).__name__})
     t.string = traceback.format_exc(e)
     tag0.insert_after(t) 
 

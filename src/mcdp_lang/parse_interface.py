@@ -91,9 +91,10 @@ def parse_ndp_filename(filename, context=None):
     except MCDPExceptionWithWhere as e:
         active = True
         if active:
-# http://stackoverflow.com/questions/1350671/inner-exception-with-traceback-in-python
+# http://stackoverflow.com/questions//1350671/inner-exception-with-traceback-in-python
             e = e.with_filename(filename)
-            raise type(e), e.args, sys.exc_info()[2]
+            tb = sys.exc_info()[2]
+            raise e.with_traceback(tb)
         else: # pragma: no cover
             logger.debug('Deactivated trace in parse_ndp_filename().')
             raise

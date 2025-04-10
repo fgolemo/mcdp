@@ -59,34 +59,33 @@ def get_test_librarian():
     if vname in os.environ:
         use = os.environ[vname].split(",")
         
-        logger.debug('environment variable %s = %s' % (vname, use))
+        logger.debug(f"environment variable {vname} = {use}")
         
-        logger.info('Because %s is set, I will use only %s instead of %s.' %
-                     (vname, use, orig))
+        logger.info(f"Because {vname} is set, I will use only {use} instead of {orig}.")
         
         for _ in orig:
             if not _ in use:
                 del libraries[_] 
     else:
-        logger.debug('environment variable %s is unset' % vname)
+        logger.debug(f"environment variable {vname} is unset")
         
 
     vname2 = MCDPConstants.ENV_TEST_LIBRARIES_EXCLUDE
     if vname2 in os.environ:
         exclude = os.environ[vname2].split(',')
-        logger.debug('environment variable %s = %s' % (vname2, exclude))
+        logger.debug(f"environment variable {vname2} = {exclude}")
     else:
         exclude = []
-        logger.debug('environment variable %s is unset' % vname2)
+        logger.debug(f"environment variable {vname} is unset"2)
 
 
     if exclude:
         for a in exclude:
             if not a in libraries:
-                msg = '%s = %s but %r is not a library.' % (vname2, exclude, a)
+                msg = f"{vname2} = {exclude} but %r is not a library."
                 logger.error(msg)
             else:
-                logger.info('Excluding %s' % vname2)
+                logger.info(f"Excluding {vname2}")
                 del libraries[a]
 
     return librarian

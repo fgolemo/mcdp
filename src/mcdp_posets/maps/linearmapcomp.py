@@ -28,7 +28,7 @@ class LinearMapComp(Map):
             res = x * self.factor
         except FloatingPointError as e:
             assert 'underflow' in str(e)
-            # print x, self.factor
+            # print(x, self.factor)  # Python 3 syntax
             res = finfo.tiny
 
         if np.isinf(res):
@@ -36,6 +36,6 @@ class LinearMapComp(Map):
         return res
 
     def repr_map(self, letter):
-        label = '× %f' % self.factor
-        return  '%s ⟼ %s %s' % (letter, letter, label)
+        label = f'× {self.factor:f}'
+        return f'{letter} ⟼ {letter} {label}'
     

@@ -49,7 +49,7 @@ def eval_rvalue_as_constant_same_exactly(s1, s2):
 
     p1 = eval_rvalue_as_constant2(s1)
     p2 = eval_rvalue_as_constant2(s2)
-    #print('Checking that %s === %s' % (p1, p2))
+    #print(f"Checking that {p1} === {p2}")
 
     assert p1.unit == p2.unit, (p1, p2)
     p1.unit.check_equal(p1.value, p2.value)
@@ -62,7 +62,7 @@ def eval_constant_same_exactly(s1, s2):
     """
     p1 = parse_constant(s1)
     p2 = parse_constant(s2)
-#     print('Checking that %s === %s' % (p1, p2))
+#     print(f"Checking that {p1} === {p2}")
 
     assert p1.unit == p2.unit, (p1, p2)
     p1.unit.check_equal(p1.value, p2.value)
@@ -84,4 +84,4 @@ def eval_rvalue_as_constant_same(s1, s2):
     v2 = express_value_in_isomorphic_space(p2.unit, p2.value, p1.unit)
 
     p1.unit.check_equal(p1.value, v2)
-#     print('Found that %s == %s' % (p1, p2))
+#     print(f"Found that {p1} == {p2}")

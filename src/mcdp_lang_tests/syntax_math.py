@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from nose.tools import assert_equal, assert_raises
+from .nose_compat import assert_equal, assert_raises
 
 from comptests.registrar import comptest, comptest_fails, run_module_tests
 from mcdp.exceptions import DPSemanticError

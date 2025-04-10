@@ -11,7 +11,7 @@ from nose.tools import assert_equal
 @for_all_dps
 def check_evaluate(id_dp, dp):
     """ Test for PrimitiveDP:evaluate() """
-    print('Testing %s: %s' % (id_dp, dp))
+    print(f"Testing {id_dp}: {dp}")
     F = dp.get_fun_space()
     R = dp.get_res_space()
     UR = UpperSets(R)
@@ -66,9 +66,9 @@ def to_be_updated_check_evaluation():
     assert_equal(dp.get_res_space(), SpaceProduct(()))
     assert_equal(dp.get_fun_space(), SpaceProduct(()))
 
-    print dp.solve(())  # = ↑{⟨⟩}
+    print(dp.solve(())  # = ↑{⟨⟩})
     imps = dp.get_implementations_f_r((), ())
-    print imps
+    print(imps)
     # here, (x,y) => (x,y,y,y) actually I'm not sure
     assert_feasible(dp, (), (0.0, 0.0, 0.0, 0.0), ())
     assert_feasible(dp, (), (1.0, 1.0, 1.0, 1.0), ())
@@ -133,7 +133,7 @@ def to_be_updated_check_evaluation2():
     M = dp.get_imp_space()
 
     Is = dp.get_implementations_f_r((), ())
-    print Is
+    print(Is)
 
     assert_equal(M, SpaceProduct((R_dimensionless,) * 4))
     assert_equal(dp.get_res_space(), SpaceProduct(()))
@@ -189,7 +189,7 @@ def assert_check_feasible_raises(dp, *args):
         pass
     else:
         msg = 'Expected check_feasible() to raise NotFeasible.'
-        msg += 'args = %s' % str(args)
+        msg += f"args = {str}"(args)
         raise Exception(msg)
 
 def assert_check_unfeasible_raises(dp, *args):
@@ -199,7 +199,7 @@ def assert_check_unfeasible_raises(dp, *args):
         pass
     else:
         msg = 'Expected check_unfeasible() to raise Feasible.'
-        msg += 'args = %s' % str(args)
+        msg += f"args = {str}"(args)
         raise Exception(msg)
 
 def assert_feasible(dp, *args):
@@ -232,7 +232,7 @@ def print_diagram(dp, xs, ys):
             else:
                 unfeasible = True
             if feasible and unfeasible or (not feasible and not unfeasible):
-                raise Exception('Point is both feasible and unfeasible: %s %s %s' % (f, m, r))
+                raise Exception(f"Point is both feasible and unfeasible: {f} {m} {r}")
             res.append(feasible)
             # res.append(unfeasible)
 

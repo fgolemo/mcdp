@@ -15,7 +15,7 @@ from contracts.utils import raise_desc
 
 def test_mcdpweb_server(dirname):
     port = random.randint(11000, 15000)
-    base = 'http://127.0.0.1:%s' % port
+    base = f"http://127.0.0.1:{port}"
 
     p = Process(target=start_server, args=(dirname, port,))
     p.start()
@@ -95,7 +95,7 @@ def start_server(dirname, port):
 
 
 def get_exceptions(port):
-    base = 'http://127.0.0.1:%s' % port
+    base = f"http://127.0.0.1:{port}"
     url_exit = base + '/exceptions'
     data = urllib2.urlopen(url_exit).read()
     data = str(data)

@@ -46,7 +46,7 @@ def check_render(env, template, res):
 @comptest
 @with_pyramid_environment
 def test_rendering_jinja_env(env):
-    logger.info('env: %s' % env)
+    logger.info(f"env: {env}")
     template = get_template('editor_fancy/error_model_exists_generic.jinja2')
     res = {
         'static': '',
@@ -60,7 +60,7 @@ def test_rendering_jinja_env(env):
 @comptest_fails
 @with_pyramid_environment
 def test_rendering_confirm_bind_bind(env):
-    logger.info('env: %s' % env)
+    logger.info(f"env: {env}")
     template = get_template('confirm_bind_bind.jinja2')
     res = {
         'static': '',
@@ -70,7 +70,7 @@ def test_rendering_confirm_bind_bind(env):
 @comptest_fails
 @with_pyramid_environment
 def test_rendering_confirm_creation_similar(env):
-    logger.info('env: %s' % env)
+    logger.info(f"env: {env}")
     template = get_template('confirm_creation_similar.jinja2')
     res = {
         'static': '',
@@ -80,7 +80,7 @@ def test_rendering_confirm_creation_similar(env):
 @comptest_fails
 @with_pyramid_environment
 def test_rendering_confirm_creation(env):
-    logger.info('env: %s' % env)
+    logger.info(f"env: {env}")
     template = get_template('confirm_creation.jinja2')
     res = {
         'static': '',
@@ -91,7 +91,7 @@ def test_rendering_confirm_creation(env):
 @comptest
 @with_pyramid_environment
 def test_rendering_confirm_bind(env):
-    logger.info('env: %s' % env)
+    logger.info(f"env: {env}")
     template = get_template('confirm_bind.jinja2')
     app = WebApp.singleton # XXX
     db_view = app.hi.db_view

@@ -30,7 +30,7 @@ from .pdf_conversion import png_from_pdf
 #                 encoded = base64.b64encode(data)
 #                 from mcdp_web.images.images import get_mime_for_format
 #                 mime = get_mime_for_format(ext)
-#                 src = 'data:%s;base64,%s' % (mime, encoded)
+#                 src = f"data:{mime};base64,{encoded}"
 #                 tag['src'] = src
 #     return str(soup) 
 #### One direction
@@ -44,7 +44,7 @@ def data_encoded_for_src(data, ext):
     
     encoded = base64.b64encode(data)
     mime = get_mime_for_format(ext)
-    link = 'data:%s;base64,%s' % (mime, encoded)
+    link = f"data:{mime};base64,{encoded}"
     return link
 
 #### Other direction (note mime, not ext)
@@ -93,7 +93,7 @@ def extract_assets(html, basedir):
             filename = os.path.join(basedir, basename)
             with open(filename, 'w') as f:
                 f.write(data)
-            print('written to %s' % filename)
+            print(f"written to {filename}")
 
 
 def extract_img_to_file(soup, savefile):
@@ -137,11 +137,11 @@ def extract_svg_to_file(soup, savefile):
             continue
         
 #        <svg focusable="false" height="2.176ex" role="img" style="vertical-align: -0.505ex;" viewbox="0        
-        svg['xmlns']="http://www.w3.org/2000/svg"
+        svg['xmlns']="http://www.w3.org//2000/svg"
         svg['version']="1.1"
         prefix="""<?xml version="1.0"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
-  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">\n"""
+  "http://www.w3.org/Graphics/SVG//1.1//DTD/svg11.dtd">\n"""
         img = Tag(name='img')      
         if 'width' in svg.attrs:
             add_style(img, width=svg['width'] + 'pt', height=svg['height'] + 'pt')
@@ -151,7 +151,7 @@ def extract_svg_to_file(soup, savefile):
         data = prefix + str(svg)
         md5 = get_md5(data)        
         
-        basename = 'svg-%03d-%s' % (i, md5)
+        basename = f"svg-%03d-{i}"
         propose = basename + '.svg' 
         url = savefile(propose, data)
         
@@ -166,8 +166,7 @@ def extract_svg_to_file(soup, savefile):
         svg.replace_with(img)
         
     
-    logger.debug('extract_svg_to_file: extracted %d/%d images from SVG tags.' 
-                  % (n, tot))
+    logger.debug(f"extract_svg_to_file: extracted {n}/{tot} images from SVG tags.")
 
 def extract_img_to_file_(soup, savefile, tagname, attrname):
     n = 0
@@ -186,12 +185,12 @@ def extract_img_to_file_(soup, savefile, tagname, attrname):
             basename = tag['id']
         else:
             md5 = get_md5(data)
-            basename = 'data-from-%s-%s' % (tagname, md5)
+            basename = f"data-from-{tagname}-{md5}"
 
         # Guess extension
         ext = get_ext_for_mime(mime)
         filename = basename + '.' + ext
-        src = "%s" % filename
+        src = f"{filename}"
         # ask what we should be using
         use_src = savefile(filename, data)
         check_isinstance(use_src, str)
@@ -249,7 +248,7 @@ def embed_img_data(soup, resolve, img_extensions = ['png', 'jpg', 'PNG', 'JPG', 
              
             data = resolve(href)
             if data is None:
-                logger.error('embed_img_data: Could not find file %s' % href)
+                logger.error(f"embed_img_data: Could not find file {href}")
                 continue
             
             check_isinstance(data, str)
@@ -292,7 +291,7 @@ def embed_pdf_images(soup, resolve, density):
 def embed_pdf_image(tag, resolve, density):
     assert tag.name == 'img'
     assert tag.has_attr('src')
-    #print('!!embedding %s' % str(tag))
+    #print(f"!!embedding {str}"(tag))
     #raise Exception(str(tag))
     # load pdf data    
     data_pdf = resolve(tag['src'])
@@ -314,7 +313,7 @@ def embed_pdf_image(tag, resolve, density):
     props = parse_includegraphics_option_string(latex_options)
 
     if 'height' in props:
-        logger.warning('Cannot deal with "height" yet: latex_options = %s' % latex_options)
+        logger.warning(f"Cannot deal with "height" yet: latex_options = {latex_options}")
     
     if 'scale' in props:
         scale = float(props['scale'])
@@ -324,7 +323,7 @@ def embed_pdf_image(tag, resolve, density):
         try:
             use_width_in = get_length_in_inches(props['width'])
         except ValueError as e:
-            logger.error('Cannot interpret %s: %s' % (latex_options, e))
+            logger.error(f"Cannot interpret {latex_options}: {e}")
             use_width_in = 5.0
         ratio = height_in/width_in
         use_height_in = use_width_in * ratio
@@ -333,8 +332,8 @@ def embed_pdf_image(tag, resolve, density):
         use_height_in = height_in
 
     # Add it before so that we can override
-    add_style(tag, after=False, width='%sin' % use_width_in, height='%sin' % use_height_in)        
-    tag['size_in_pixels'] = '%s, %s' % (width_px, height_px)
+    add_style(tag, after=False, width=f"{use_width_in}in", height=f"{use_height_in}in")        
+    tag[f"size_in_pixels'] = '{width_px}, {height_px}"
     # encode
     tag['src'] = data_encoded_for_src(data_png, 'png')
     
@@ -373,7 +372,7 @@ def get_length_in_inches(s):
             digits = s[:s.index(unit)]
             num = float(digits)
             res = num * ininches
-            print ('%r = %s inches (digits: %s)' % (s, res, digits))
+            print (f"%r = {s} inches (digits: {res})")
             return res
     msg = 'Cannot interpreted length %r.' % s
     raise ValueError(msg)

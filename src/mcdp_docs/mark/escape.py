@@ -25,7 +25,7 @@ def escape_ticks_before_markdown(html):
     
     comments=soup.find_all(string=lambda text:isinstance(text, bs4.Comment))
     for c in comments:
-#         print('stripping comment %s' % str(c))
+#         print(f"stripping comment {str}"(c))
         c.extract()
     
     res = to_html_stripping_fragment(soup)

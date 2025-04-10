@@ -26,7 +26,7 @@ def can_resource_be_constant(context, r):
     # print('This depends on %r' % dependencies)
     not_constants = [_ for _ in dependencies if context.is_new_function(_) ]
     if not_constants:
-        # print('Not constant because of these deps: %s' % not_constants)
+        # print(f"Not constant because of these deps: {not_constants}")
         return False
     else:
         return True

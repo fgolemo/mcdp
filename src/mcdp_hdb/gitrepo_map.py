@@ -64,7 +64,7 @@ def gitrep_from_diskrep(disk_rep, where=None, branch=None):
         where = create_tmpdir('gitrep_from_diskrep')
         
     repo = Repo.init(where)
-    author = Actor("system", "system@%s" % host_name())
+    author = Actor(f"system", "system@{host_name}"())
     repo.index.commit('initial commit', author=author, committer=author)
     head = repo.create_head(branch)
     head.checkout()
@@ -76,7 +76,7 @@ def gitrep_from_diskrep(disk_rep, where=None, branch=None):
     if repo.untracked_files: 
         repo.index.add(repo.untracked_files)
 
-    message = "gitrep_from_diskrep(%s)" % where
+    message = f"gitrep_from_diskrep({where})"
     repo.index.commit(message, author=author, committer=author)
     return repo
     

@@ -30,7 +30,7 @@ def plot_upset_R2(pylab, us, axis, color_shadow,
             plot_cone(pylab, p, axis, color_shadow=color_shadow,
                       color_lines=color_lines)
         else:
-            logger.debug('Warning: point %s not in axis %s' % (p, axis))
+            logger.debug(f"Warning: point {p} not in axis {axis}")
             
     # cuteness
     if markers is not None:
@@ -39,7 +39,7 @@ def plot_upset_R2(pylab, us, axis, color_shadow,
             # when using "finfo.tiny"
             eps = finfo.eps
             p = np.maximum(p, eps)
-            #print('plot_upset_R2: marker params: %s ' % marker_params)
+            #print(f"plot_upset_R2: marker params: {marker_params} ")
             pylab.plot(p[0], p[1], markers, clip_on=False, **marker_params)
 
 

@@ -178,7 +178,7 @@ def eval_rvalue_RValueMinusN(x, context, wants_constant=False):
     elif isinstance(R, RcompUnits):
         dp = MinusValueDP(F=R, c_value=constant.value, c_space=constant.unit)
     else:
-        msg = 'Could not create this operation with %s ' % R
+        msg = f"Could not create this operation with {R} "
         raise_desc(DPSemanticError, msg, R=R)
              
     return create_operation(context, dp=dp, resources=[rvalue],
@@ -360,7 +360,7 @@ def eval_PlusN_sort_ops(ops, context, wants_constant):
             elif isinstance(x.unit, RbicompUnits):
                 neg_constants.append(x)
             else:
-                msg = 'Cannot use the type %s in a sum.' % x.unit
+                msg = f"Cannot use the type {x} in a sum.".unit
                 raise_desc(DPInternalError, msg, x=x, compact=True)
                 
         except NotConstant as e:
@@ -496,8 +496,8 @@ def eval_PlusN_ops_multi(resources, context):
         except ValueError:
             msg = ''
             for r, rt in zip(resources, resources_types):
-                msg += '- %s has type %s\n' % (r, rt)
-            raise_desc(DPSemanticError, 'Incompatible units:\n%s' % msg)
+                msg += f"- {r} has type {rt}\n"
+            raise_desc(DPSemanticError, f"Incompatible units:\n{msg}")
 
         dp = SumNDP(Fs, R)
     elif all(isinstance(_, Nat) for _ in resources_types):
@@ -557,7 +557,7 @@ def get_plus_op(context, r, c):
         dp = PlusValueRcompDP(val)
     else:
         msg = ('Cannot create addition operation between resource of type %s'
-               ' and constant of type %s.' % (T1, T2))
+               f" and constant of type {T1}.")
         raise_desc(DPInternalError, msg)# , rtype=T1, c=c)
 
     r2 = create_operation(context, dp, resources=[r], name_prefix='_plus')

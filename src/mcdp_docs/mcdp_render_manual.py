@@ -65,7 +65,7 @@ def get_manual_contents(srcdir):
     root = os.getcwd()
     directory = os.path.join(root, srcdir)
     if not os.path.exists(directory):
-        msg = 'Expected directory %s' % directory
+        msg = f"Expected directory {directory}"
         raise Exception(msg)
     pattern = '*.md'
     filenames = locate_files(directory, pattern, followlinks=True,
@@ -96,7 +96,7 @@ def manual_jobs(context, src_dir, output_file, generate_pdf, bibfile, stylesheet
     # check that all the docnames are unique
     pnames = [_[1] for _ in manual_contents]
     if len(pnames) != len(set(pnames)):
-        msg = 'Repeated names detected: %s' % pnames
+        msg = f"Repeated names detected: {pnames}"
         raise ValueError(msg)
 
     local_files = list(locate_files(src_dir, '*.md'))
@@ -105,16 +105,16 @@ def manual_jobs(context, src_dir, output_file, generate_pdf, bibfile, stylesheet
     files_contents = []
     for i, (_, docname) in enumerate(manual_contents):
         libname = 'unused'
-        logger.info('adding document %s - %s' % (libname, docname))
-        out_part_basename = '%02d%s' % (i, docname)
+        logger.info(f"adding document {libname} - {docname}")
+        out_part_basename = f"%02d{i}"
         
         # read the file to get hash
-        basename = '%s.md' % docname
+        basename = f"{docname}.md"
         fn = basename2filename[basename]
         contents = open(fn).read()
         contents_hash = get_md5(contents)[:8] 
         # job will be automatically erased if the source changes
-        job_id = '%s-%s' % (docname,contents_hash)
+        job_id = f"{docname}-{contents_hash}"
         res = context.comp(render_book, src_dir, docname, generate_pdf,
                            
                            main_file=output_file,
@@ -124,7 +124,7 @@ def manual_jobs(context, src_dir, output_file, generate_pdf, bibfile, stylesheet
                            extra_css=extra_css,
                            job_id=job_id)
 
-#         source = '%s.md' % docname
+#         source = f"{docname}.md"
 #         if source in basename2filename:
 #             filenames = [basename2filename[source]]
 #             erase_job_if_files_updated(context.cc, promise=res,
@@ -136,7 +136,7 @@ def manual_jobs(context, src_dir, output_file, generate_pdf, bibfile, stylesheet
 
     fn = os.path.join(src_dir, MCDPManualConstants.main_template)
     if not os.path.exists(fn):
-        msg = 'Could not find template %s' % fn 
+        msg = f"Could not find template {fn}" 
         raise ValueError(msg)
     
     template = open(fn).read()
@@ -162,7 +162,7 @@ def erase_job_if_files_updated(compmake_context, promise, filenames):
     filenames = list(filenames)
     for _ in filenames:
         if not os.path.exists(_):
-            msg = 'File does not exist: %s' % _
+            msg = f"File does not exist: {_}"
             raise ValueError(msg)
     last_update = max(os.path.getmtime(_) for _ in filenames)
     db = compmake_context.get_compmake_db()
@@ -172,16 +172,16 @@ def erase_job_if_files_updated(compmake_context, promise, filenames):
         done_at = cache.timestamp
         if done_at < last_update:
             show_filenames = filenames if len(filenames) < 3 else '(too long to show)' 
-            logger.info('Cleaning job %r because files updated %s' % (job_id, show_filenames))
-            logger.info('  files last updated: %s' % friendly_age(last_update))
-            logger.info('       job last done: %s' % friendly_age(done_at))
+            logger.info(f"Cleaning job %r because files updated {job_id}")
+            logger.info(f"  files last updated: {friendly_age}"(last_update))
+            logger.info(f"       job last done: {friendly_age}"(done_at))
 
             mark_to_remake(job_id, db)
 
 def generate_metadata(src_dir):
     template = MCDPManualConstants.pdf_metadata_template
     if not os.path.exists(template):
-        msg = 'Metadata template does not exist: %s' % template
+        msg = f"Metadata template does not exist: {template}"
         raise ValueError(msg)
 
     out = MCDPManualConstants.pdf_metadata
@@ -202,7 +202,7 @@ def write(s, out):
             os.makedirs(dn)
     with open(out, 'w') as f:
         f.write(s)
-    print('Written %s ' % out)
+    print(f"Written {out} ")
 
 
 def render_book(src_dir, docname, generate_pdf, main_file, out_part_basename, filter_soup=None,
@@ -252,7 +252,7 @@ def render_book(src_dir, docname, generate_pdf, main_file, out_part_basename, fi
             os.makedirs(dirname)
         except:
             pass
-    fn = os.path.join(dirname, '%s.html' % out_part_basename)
+    fn = os.path.join(dirname, f"{out_part_basename}.html")
     with open(fn, 'w') as f:
         f.write(doc)
 

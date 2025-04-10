@@ -17,7 +17,7 @@ class Resource(object):
         self.name = name
 
     def get_subs(self):
-        #print('iter not implemented for %s' % type(self).__name__)
+        #print(f"iter not implemented for {type}"(self).__name__)
         return None
 
     def getitem(self, key):  # @UnusedVariable
@@ -34,9 +34,9 @@ class Resource(object):
 
     def __repr__(self):
         if self.name is None:
-            return '%s()' % type(self).__name__
+            return f"{type}()"(self).__name__
         else:
-            return '%s(%s)' % (type(self).__name__, self.name)
+            return f"{type(self}(%s)".__name__, self.name)
 
     def __getitem__(self, key):
         if isinstance(key, unicode):
@@ -97,7 +97,7 @@ class ResourceEndOfTheLine(Resource):
     
     def __repr__(self):
         url = self.get_url_relative_to_not_found()
-        return '%s(%s, %s)' % (type(self).__name__, self.orig_key_not_found, url)
+        return f"{type(self}(%s, %s)".__name__, self.orig_key_not_found, url)
 
 class ResourceNotFoundGeneric(ResourceEndOfTheLine):
     pass
@@ -107,7 +107,7 @@ def context_display_in_detail(context):
     s = ''
     cs = get_all_contexts(context)
     for c in cs:
-        s += '%s' % c
+        s += f"{c}"
         if hasattr(c, '__acl__'):
             s += '\n' + indent('\n'.join(str(_) for _ in c.__acl__), ' | ')
         s += '\n'
@@ -199,7 +199,7 @@ class ResourceListUsersUser(Resource):
         ]
 
     def getitem(self, key):
-        #print('key : %s' % key)
+        #print(f"key : {key}")
         if key == 'large.jpg':
             return ResourceUserPicture(self.name, 'large', 'jpg')
         if key == 'small.jpg':
@@ -242,7 +242,7 @@ class ResourceShelves(Resource):
         
         if not key in shelves:
             
-            msg = 'Not found shelf %r in %s' % (key, sorted(shelves))
+            msg = f"Not found shelf %r in {key}")
             logger_main.info(msg)
             return ResourceShelfNotFound(key)
         shelf = shelves[key]
@@ -322,7 +322,7 @@ class ResourceShelf(Resource):
             session = self.get_session()
             if not self.name in session.shelves_used:
                 msg = 'Cannot access libraries if not subscribed to shelf "%s".' % self.name
-                msg += ' user: %s' % self.get_session().get_user_struct()
+                msg += f" user: {self}".get_session().get_user_struct()
                 logger.debug(msg)
                 return ResourceShelfInactive(self.name)
 
@@ -376,7 +376,7 @@ class ResourceLibrary(Resource):
 
         if key.endswith('.html'):
             docname = os.path.splitext(key)[0]
-#             filename = '%s.%s' % (docname, MCDPConstants.ext_doc_md)
+#             filename = f"{docname}.{MCDPConstants.ext_doc_md}"
             if not docname in library.documents:
                 return ResourceLibraryDocNotFound(docname)
 
@@ -431,13 +431,13 @@ class ResourceThings(Resource):
                 if MCDPConstants.allow_soft_matching:
                     return ResourceThing(key2)
                 else:
-                    msg = 'Soft matching %s -> %s' % (key, key2)
+                    msg = f"Soft matching {key} -> {key2}"
                     raise Exception(msg)
         else:
             return ResourceThing(key)
 
     def __repr__(self):
-        return '%s(specname=%s)' % (type(self).__name__, self.specname)
+        return f"{type(self}(specname=%s)".__name__, self.specname)
 
 
 class ResourceThingsNewBase(Resource):
@@ -530,7 +530,7 @@ class ResourceThingViewSolver0AxisAxis(ResourceThingView):
     def __init__(self, fun_axes, res_axes):
         self.fun_axes = fun_axes
         self.res_axes = res_axes
-        self.name = '%s-%s' % (fun_axes, res_axes)
+        self.name = f"{fun_axes}-{res_axes}"
     def getitem(self, key):
         subs = {
             'addpoint': ResourceThingViewSolver0AxisAxis_addpoint(),
@@ -564,13 +564,13 @@ class ResourceThingViewEditorGraph(Resource):
     def __init__(self, text_hash, data_format):
         self.text_hash = text_hash
         self.data_format = data_format
-        self.name = 'graph.%s.%s' % (text_hash, data_format)
+        self.name = f"graph.{text_hash}.{data_format}"
 
 class ResourceThingViewImagesOne(Resource):
     def __init__(self, which, data_format):
         self.which = which
         self.data_format = data_format
-        self.name = '%s.%s' % (which, data_format)
+        self.name = f"{which}.{data_format}"
 
 class ResourceRobots(Resource): pass
 class ResourceAuthomatic(Resource):

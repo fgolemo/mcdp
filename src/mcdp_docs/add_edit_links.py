@@ -16,22 +16,22 @@ def add_github_links_if_edit_url(soup):
         a.attrs['class'] = 'github-edit-link'
         a.string = ' ✎'
         h.append(a)
-#         msg = 'Found element %s' % h
+#         msg = f"Found element {h}"
 #         logger.info(msg)
     
-    logger.info('Found %d elements with attribute %r' % (nfound, attname) )
+    logger.info(f"Found {nfound} elements with attribute %r" )
         
         
 if __name__ == '__main__':
     sys.stderr.write('Loading from stdin...\n')
     
     contents = sys.stdin.read()
-#     print ('start: %s  ... %s' % (contents[:100], contents[-100:]))
+#     print (f"start: {contents[:100]}  ... {contents[-100:]}")
     soup = BeautifulSoup(contents, 'lxml', from_encoding='utf-8')
 #     soup = bs(contents)
-#     print 'soup: %s' % soup
+#     print f"soup: {soup}"
     ssoup = str(soup)
-#     print ('\n\nstart: %s  ... %s' % (ssoup[:100], ssoup[-100:]))
+#     print (f"\n\nstart: {ssoup[:100]}  ... {ssoup[-100:]}")
     
     add_github_links_if_edit_url(soup)
 #     print(str(soup)[:0])

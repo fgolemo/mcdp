@@ -7,12 +7,19 @@ from contracts.utils import raise_desc
 
 def printable_length_where(w):
     """ Returns the printable length of the substring """
-    if sys.version_info[0] >= 3:  # pragma: no cover
-        stype = str  
-    else:
-        stype = unicode
+    from mcdp.py_compatibility import PY2
+    
     sub = w.string[w.character:w.character_end]
-    return len(stype(sub, 'utf-8'))
+    
+    if PY2:
+        # Python 2 handling
+        if isinstance(sub, str):
+            return len(unicode(sub, 'utf-8'))
+        else:
+            return len(sub)
+    else:
+        # Python 3 handling
+        return len(sub)
 
 
 def line_and_col(loc, strg):
@@ -30,8 +37,7 @@ def line_and_col(loc, strg):
         return last_line, last_char  
         
     if loc > len(strg):
-        msg = ('Invalid loc = %d for s of len %d (%r)' % 
-                         (loc, len(strg), strg))
+        msg = (f"Invalid loc = {loc} for s of len {len(strg} (%r)", strg))
         raise ValueError(msg)
     
     res_line = 0

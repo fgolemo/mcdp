@@ -2,16 +2,16 @@
 from .imp import get_it
 
 def compose_indices(A, i1, i2, reducel):
-#     print('A: %s ' % str(A))
-#     print('i1: %s ' % str(i1))
-#     print('i2: %s ' % str(i2))
+#     print(f"A: {str} "(A))
+#     print(f"i1: {str} "(i1))
+#     print(f"i2: {str} "(i2))
 
     i0 = get_id_indices(A)
-#     print('i0: %s' % str(i0))
+#     print(f"i0: {str}"(i0))
     i0i1 = get_it(i0, i1, reducel)
-#     print('i0i1: %s' % str(i0i1))
+#     print(f"i0i1: {str}"(i0i1))
     i0i1i2 = get_it(i0i1, i2, reducel)
-#     print('i0i1i2: %s' % str(i0i1i2))
+#     print(f"i0i1i2: {str}"(i0i1i2))
     return i0i1i2
 
         

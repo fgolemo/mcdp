@@ -37,7 +37,7 @@ def ignore_some(ndp, ignore_fnames, ignore_rnames):
 
         if fname in ignore_fnames:
             dp = Constant(F, F.get_bottom())
-            n = '_const_f_%s' % fname
+            n = f"_const_f_{fname}"
             c.add_ndp(n, dpwrap(dp, [], fname))
         else:
             n = c.add_ndp_fun_node(fname, F)
@@ -49,7 +49,7 @@ def ignore_some(ndp, ignore_fnames, ignore_rnames):
 
         if rname in ignore_rnames:
             dp = LimitMaximals(R, R.get_maximal_elements())
-            n = '_const_r_%s' % rname
+            n = f"_const_r_{rname}"
             c.add_ndp(n, dpwrap(dp, rname, []))
         else:
             n = c.add_ndp_res_node(rname, R)

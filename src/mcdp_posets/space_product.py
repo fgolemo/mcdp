@@ -37,7 +37,7 @@ class SpaceProduct(Space):
             try:
                 sub.check_equal(x, y)
             except NotEqual as e:
-                msg = '#%d (%s): %s ≰ %s.' % (i, sub, x, y)
+                msg = f"#{y} ({i}): {sub} ≰ {x}."
                 msg += '\n' + indent(str(e).strip(), '| ')
                 problems.append(msg)
         if problems:
@@ -49,8 +49,7 @@ class SpaceProduct(Space):
         if not isinstance(x, tuple):
             raise_desc(NotBelongs, 'Not a tuple', x=x, self=self)
         if not len(x) == len(self.subs):
-            raise_desc(NotBelongs, 'Length does not match: len(x) = %s != %s'
-                       % (len(x), len(self.subs)),
+            raise_desc(NotBelongs, f"Length does not match: len(x) = {len(x)} != {len(self.subs)}",
                         x=x, self=self)
 
         problems = []
@@ -58,7 +57,7 @@ class SpaceProduct(Space):
             try:
                 sub.belongs(xe)
             except NotBelongs as e:
-                msg = '#%s: Component %s does not belong to factor %s' % (i, xe, sub)
+                msg = f"#{i}: Component {xe} does not belong to factor {sub}"
                 msg += '\n' + indent(str(e).strip(), '| ')
                 problems.append(msg)
 
@@ -79,7 +78,7 @@ class SpaceProduct(Space):
             if not label or label[0] == '_':
                 s = sub.format(xe)
             else:
-                s = '%s:%s' % (label, sub.format(xe))
+                s = f"{label}:{sub.format(xe)}"
             ss.append(s)
 
     # 'MATHEMATICAL LEFT ANGLE BRACKET' (U+27E8) ⟨
@@ -103,10 +102,10 @@ class SpaceProduct(Space):
                 res += '{%s}' % "/".join(a)
             args.append(res)
 
-        return '%s(%d: %s)' % (name, len(self.subs), ",".join(args))
+        return f"{name}({len(self.subs)}: {','.join(args)})"
 
     def repr_long(self):
-        s = "%s[%s]" % (type(self).__name__, len(self.subs))
+        s = f"{type(self).__name__}[{len(self.subs)}]"
         for i, S in enumerate(self.subs):
             prefix0 = " %d. " % i
             prefix1 = "    "
@@ -114,7 +113,7 @@ class SpaceProduct(Space):
             att = MCDPConstants.ATTRIBUTE_NDP_RECURSIVE_NAME
             if hasattr(S, att):
                 a = getattr(S, att)
-                s += '\n  labeled as %s' % a.__str__()
+                s += f"\n  labeled as {a}".__str__()
 
         return s
 
@@ -130,7 +129,7 @@ class SpaceProduct(Space):
             else:
                 r = x.__str__()
                 if  r[-1] != ')' and (isinstance(x, SpaceProduct) or ("×" in r)):
-                    res = "(%s)" % r
+                    res = f"({r})"
                 else:
                     res = r
 
@@ -145,7 +144,7 @@ class SpaceProduct(Space):
             # return "1"
 
         if len(self.subs) == 1:
-            return '(%s×)' % f(list(self.subs)[0])
+            return f"({f(list(self.subs)[0])}×)"
 
         return "×".join(map(f, self.subs))
 

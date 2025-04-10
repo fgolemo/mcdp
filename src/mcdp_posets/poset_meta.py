@@ -33,7 +33,7 @@ def join_decorator(f):
             
             self.belongs(res)
         except:
-            print('Error while joining (%s, %s)' % (a, b))  # xxx
+            print(f"Error while joining ({a}, {b})")  # xxx
             raise
 
     return join

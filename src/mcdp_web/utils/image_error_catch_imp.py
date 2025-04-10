@@ -41,7 +41,7 @@ def create_image_with_string(s, size, color, fontsize=10):
     draw = ImageDraw.Draw(img)
 #     font = ImageFont.truetype('FreeMono', 10)
     options = [
-        '/usr/local/texlive/2015/texmf-dist/fonts/truetype/public/gnu-freefont/FreeMono.ttf',
+        '/usr/local/texlive//2015/texmf-dist/fonts/truetype/public/gnu-freefont/FreeMono.ttf',
         '/usr/share/fonts/truetype/freefont/FreeMono.ttf']
     font = None
     for f in options:

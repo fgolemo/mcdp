@@ -1,0 +1,15 @@
+[submodule "vendor/compmake"]
+	path = vendor/compmake
+	url = https://github.com/eric-downes/compmake.git
+	branch = py3_migration
+[submodule "vendor/quickapp"]
+	path = vendor/quickapp
+	url = https://github.com/eric-downes/quickapp.git
+	branch = py3_migration
+[submodule "vendor/py_contracts"]
+	path = vendor/py_contracts
+	url = https://github.com/eric-downes/py_contracts.git
+	branch = fix-python38-compatibility
+[submodule "vendor/conf_tools"]
+	path = vendor/conf_tools
+	url = git@github.com:eric-downes/conf_tools.git

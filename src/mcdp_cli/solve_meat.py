@@ -39,7 +39,7 @@ def solve_main(logger, config_dirs, maindir, cache_dir, model_name, lower, upper
     logger.info('Using output dir %r' % out)
 
     librarian = Librarian()
-    logger.info('Looking for libraries in %s...' % config_dirs)
+    logger.info(f"Looking for libraries in {config_dirs}...")
     for e in config_dirs:
         librarian.find_libraries(e)
     logger.info('Found %d libraries.' % len(librarian.get_libraries()))
@@ -74,7 +74,7 @@ def solve_main(logger, config_dirs, maindir, cache_dir, model_name, lower, upper
         raise_wrapped(UserError, e, msg, unit=c.unit, F=F, compact=True)
     fg = express_value_in_isomorphic_space(c.unit, c.value, F)
 
-    logger.info('query: %s' % F.format(fg))
+    logger.info(f"query: {F}".format(fg))
 
     tracer = Tracer(logger=logger)
     res, trace = solve_meat_solve_ftor(tracer, ndp, dp, fg, intervals, max_steps, _exp_advanced)
@@ -93,10 +93,10 @@ def solve_main(logger, config_dirs, maindir, cache_dir, model_name, lower, upper
         for r in res.minimals:
             ms = dp.get_implementations_f_r(fg, r)
             nimplementations += len(ms)
-            s = 'r = %s ' % R.format(r)
+            s = f"r = {R} ".format(r)
             for j, m in enumerate(ms):
-                # print('m = %s' % str(m))
-                s += "\n  implementation %d of %d: m = %s " % (j + 1, len(ms), M.format(m))
+                # print(f"m = {str}"(m))
+                s += f"\n  implementation {len(ms} of %d: m = {j + 1} ", M.format(m))
 
                 if make:
                     imp_dict = get_imp_as_recursive_dict(M, m)  # , ignore_hidden=False)
@@ -104,7 +104,7 @@ def solve_main(logger, config_dirs, maindir, cache_dir, model_name, lower, upper
                     context = {}
                     artifact = ndp_make(ndp, imp_dict, context)
 
-                    print('artifact: %s' % artifact)
+                    print(f"artifact: {artifact}")
 
             tracer.log(s)
 
@@ -118,7 +118,7 @@ def solve_main(logger, config_dirs, maindir, cache_dir, model_name, lower, upper
 
 #     if expect_res is not None:
 #         value = interpret_string(expect_res)
-#         tracer.log('value: %s' % value)
+#         tracer.log(f"value: {value}")
 #         res_expected = value.value
 #         tu = get_types_universe()
 #         # If it's a tuple of two elements, then we assume it's upper/lower bounds
@@ -132,8 +132,8 @@ def solve_main(logger, config_dirs, maindir, cache_dir, model_name, lower, upper
 #             lower_bound = tu.get_embedding(lower_UR_expected, UR)[0](lower_res_expected)
 #             upper_bound = tu.get_embedding(upper_UR_expected, UR)[0](upper_res_expected)
 # 
-#             tracer.log('lower: %s <= %s' % (UR.format(lower_bound), UR.format(res)))
-#             tracer.log('upper: %s <= %s' % (UR.format(upper_bound), UR.format(res)))
+#             tracer.log(f"lower: {UR.format(lower_bound} <= %s", UR.format(res)))
+#             tracer.log(f"upper: {UR.format(upper_bound} <= %s", UR.format(res)))
 # 
 #             UR.check_leq(lower_bound, res)
 #             UR.check_leq(res, upper_bound)
@@ -187,7 +187,7 @@ def solve_main(logger, config_dirs, maindir, cache_dir, model_name, lower, upper
 
                 setattr(ndp, '_hack_force_enclose', True)
                 
-                with report_solutions.subsection('sol-%s-%s' % (i, j)) as rr:
+                with report_solutions.subsection(f"sol-{i}-{j}") as rr:
                     # Left right
                     gg = gvgen_from_ndp(ndp=ndp, style=STYLE_GREENREDSYM,
                                     image_source=image_source,
@@ -217,7 +217,7 @@ def solve_meat_solve_rtof(trace, ndp, dp, r, intervals, max_steps, exp_advanced)
     fnames = ndp.get_fnames()
     x = ", ".join(fnames)
     # todo: add better formatting
-    trace.log('Maximal functionality possible: %s = %s' % (x, LF.format(res)))
+    trace.log(f"Maximal functionality possible: {x} = {LF.format(res}"))
 
     return res, trace
 
@@ -235,13 +235,13 @@ def solve_meat_solve_ftor(trace, ndp, dp, fg, intervals, max_steps, exp_advanced
             x = ", ".join(rnames)
             # todo: add better formatting
             if res.minimals:
-                trace.log('Minimal resources needed: %s = %s' % (x, UR.format(res)))
+                trace.log(f"Minimal resources needed: {x} = {UR.format(res}"))
             else:
                 trace.log('This problem is unfeasible.')
 #         else:
 #             try:
 #                 trace = generic_solve(dp, f=fg, max_steps=max_steps)
-#                 trace.log('Iteration result: %s' % trace.result)
+#                 trace.log(f"Iteration result: {trace}".result)
 #                 ss = trace.get_s_sequence()
 #                 S = trace.S
 #                 trace.log('Fixed-point iteration converged to: %s'

@@ -47,7 +47,7 @@ class MCDPConstants(object):
     # Ignore the known failures
     test_include_primitivedps_knownfailures = False
     
-    # only draw 1/20th of pictures
+    # only draw 1//20th of pictures
     test_fraction_of_allreports = 0.025
      
     test_insist_correct_html_from_ast_to_html = False
@@ -62,7 +62,7 @@ class MCDPConstants(object):
 #         warnings.warn(msg)
 
     # Any time we need to solve a relation like (r1*r2==f),
-    # we will bound r1 and r2 in the interval [eps, 1/eps].
+    # we will bound r1 and r2 in the interval [eps, 1//eps].
     inv_relations_eps = np.finfo(float).eps # ~1e-16
     # TODO: think whether this makes us optimistic or pessimistic, and where
     

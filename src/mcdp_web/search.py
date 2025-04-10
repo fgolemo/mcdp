@@ -38,8 +38,8 @@ class AppSearch():
         data = []
         
         for username, user_struct in db_view.user_db.users.items():
-            name = 'User %s (%s)' % (username, user_struct.info.name)
-            url = '/users/%s/' % username
+            name = f"User {username} ({user_struct.info.name})"
+            url = f"/users/{username}/"
             icon = '''
             <img id='gravatar2' src='/users/%s/small.jpg'/>
     <style>
@@ -48,7 +48,7 @@ class AppSearch():
         margin-bottom: -4pt;
     }
     </style>''' % username
-            desc = '%s User <a href="%s" class="highlight"><code>%s</code><a> (%s)' % (icon, url, username, user_struct.info.name)
+            desc = ff"{s} User <a href="" class="highlight"><code>{icon}</code><a> ({url})"
             d = {'name': name,
                  'type': 'user',
                  'desc': desc,
@@ -56,9 +56,9 @@ class AppSearch():
             data.append(d)
             
         for repo_name, repo in db_view.repos.items():
-            name = 'Repository %s' % (repo_name) 
-            url = '/repos/%s/' % (repo_name)
-            desc = '%s Repository <a href="%s" class="highlight"><code>%s</code></a>' %  (
+            name = f"Repository {repo_name}" 
+            url = f"/repos/{repo_name}/"
+            desc = f"{s} Repository <a href="" class="highlight"><code>%s</code></a>' %  (
                 res['icon_repo'], url, repo_name)
             d = {'name': name, 
                  'type': 'repo',
@@ -68,9 +68,9 @@ class AppSearch():
         
         for repo_name, repo in db_view.repos.items():
             for shelf_name, shelf in repo.shelves.items():
-                name = 'Shelf %s (%s)' % (shelf_name, repo_name) 
-                url = '/repos/%s/shelves/%s/' % (repo_name, shelf_name)
-                desc = '%s Shelf <a href="%s"  class="highlight"><code>%s</code></a> (Repo <code>%s</code>)' % (
+                name = f"Shelf {shelf_name} ({repo_name})" 
+                url = f"/repos/{repo_name}/shelves/{shelf_name}/"
+                desc = f"{s} Shelf <a href=""  class="highlight"><code>%s</code></a> (Repo <code>%s</code>)' % (
                     res['icon_shelf'], url, shelf_name, repo_name)
                 d = {'name': name, 
                      'desc': desc,
@@ -81,9 +81,9 @@ class AppSearch():
         for repo_name, repo in db_view.repos.items():
             for shelf_name, shelf in repo.shelves.items():
                 for library_name, _ in shelf.libraries.items():
-                    url = '/repos/%s/shelves/%s/libraries/%s/' % (repo_name, shelf_name, library_name)
-                    name = 'Library %s (Repo %s, shelf %s)' % (library_name, repo_name, shelf_name) 
-                    desc = '%s Library <a href="%s"  class="highlight"><code>%s</code></a> (Repo <code>%s</code>, shelf <code>%s</code>)' %\
+                    url = f"/repos/{repo_name}/shelves/{shelf_name}/libraries/{library_name}/"
+                    name = f"Library {library_name} (Repo {repo_name}, shelf {shelf_name})" 
+                    desc = f"{s} Library <a href=""  class="highlight"><code>%s</code></a> (Repo <code>%s</code>, shelf <code>%s</code>)' %\
                          (res['icon_library'], url, library_name, repo_name, shelf_name)
                     d = {'name': name, 
                          'type': 'library',
@@ -94,9 +94,9 @@ class AppSearch():
     
         stuff = list(iterate_all(db_view))
         for e in stuff:
-            name = '%s %s (Repo %s, shelf %s, library %s)' % (e.spec_name, e.thing_name, e.repo_name, e.shelf_name, e.library_name) 
-            url = '/repos/%s/shelves/%s/libraries/%s/%s/%s/views/syntax/' % (e.repo_name, e.shelf_name, e.library_name, e.spec_name, e.thing_name)
-            icon = res['icon_%s' % e.spec_name]
+            name = f"{e.spec_name} {e.thing_name} (Repo {e.repo_name}, shelf {e.shelf_name}, library {e.library_name})" 
+            url = f"/repos/{e.repo_name}/shelves/{e.shelf_name}/libraries/{e.library_name}/{e.spec_name}/{e.thing_name}/views/syntax/"
+            icon = res[f"icon_{e}".spec_name]
             t = {'models': 'Model',
                  'templates': 'Template',
                  'values': 'Value',

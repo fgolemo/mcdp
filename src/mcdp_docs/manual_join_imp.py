@@ -64,8 +64,8 @@ def manual_join(template, files_contents, bibfile, stylesheet, remove=None, extr
         hook_before_toc if not None is called with hook_before_toc(soup=soup)
         just before generating the toc
     """
-    logger.debug('remove_selectors: %s' % remove_selectors)
-    logger.debug('remove: %s' % remove)
+    logger.debug(f"remove_selectors: {remove_selectors}")
+    logger.debug(f"remove: {remove}")
     from mcdp_utils_xml import bs
 
     template = replace_macros(template)
@@ -85,7 +85,7 @@ def manual_join(template, files_contents, bibfile, stylesheet, remove=None, extr
         link['rel'] = 'stylesheet'
         link['type'] = 'text/css'
         from mcdp_report.html import get_css_filename
-        link['href'] = get_css_filename('compiled/%s' % stylesheet)
+        link[f"href'] = get_css_filename('compiled/{stylesheet}")
         head.append(link)
 
     basename2soup = OrderedDict()
@@ -98,7 +98,7 @@ def manual_join(template, files_contents, bibfile, stylesheet, remove=None, extr
     body = d.find('body')
     add_comments = False
     for docname, content in basename2soup.items():
-        logger.debug('docname %r -> %s KB' % (docname, len(data) / 1024))
+        logger.debug(f"docname %r -> {docname} KB" / 1024))
         from mcdp_docs.latex.latex_preprocess import assert_not_inside
         assert_not_inside(data, 'DOCTYPE')
         if add_comments:
@@ -117,7 +117,7 @@ def manual_join(template, files_contents, bibfile, stylesheet, remove=None, extr
     logger.info('external bib')
     if bibfile is not None:
         if not os.path.exists(bibfile):
-            logger.error('Cannot find bib file %s' % bibfile)
+            logger.error(f"Cannot find bib file {bibfile}")
         else:
             bibliography_entries = get_bibliography(bibfile)
             bibliography_entries['id'] = 'bibliography_entries'
@@ -147,7 +147,7 @@ def manual_join(template, files_contents, bibfile, stylesheet, remove=None, extr
     if remove_selectors:
         all_selectors.extend(remove_selectors)
         
-    logger.debug('all_selectors: %s' % all_selectors)
+    logger.debug(f"all_selectors: {all_selectors}")
         
     all_removed = ''
     for selector in all_selectors:
@@ -158,17 +158,17 @@ def manual_join(template, files_contents, bibfile, stylesheet, remove=None, extr
         for x in toremove:
             nremoved += 1
             nd = len(list(x.descendants))
-            logger.debug('removing %s with %s descendants' % (x.name, nd))
+            logger.debug(f"removing {x.name} with {nd} descendants")
             if nd > 1000:
                 s =  str(x)[:300]
-                logger.debug(' it is %s' %s)
+                logger.debug(f" it is {s}")
             x.extract()
 
             all_removed += '\n\n' + '-' * 50 + ' chunk %d removed\n' % nremoved
             all_removed += str(x)
             all_removed += '\n\n' + '-' * 100 + '\n\n'
 
-        logger.info('Removed %d elements of selector %r' % (nremoved, remove))
+        logger.info(f"Removed {nremoved} elements of selector %r")
     
 #     if False:
     with open('all_removed.html', 'w') as f:
@@ -231,7 +231,7 @@ def do_bib(soup, bibhere):
         href = a.attrs.get('href', '')
         if href.startswith('#bib:'):
             used.append(href[1:])  # no "#"
-    logger.debug('I found %d references, to these: %s' % (len(used), used))
+    logger.debug(f"I found %d references, to these: {len(used}", used))
 
     # collect all the <cite>
     id2cite = {}
@@ -257,7 +257,7 @@ def do_bib(soup, bibhere):
     # now create additional <cite> for the ones that are not found
     for ID in notfound:
         cite = Tag(name='cite')
-        s = 'Reference %s not found.' % ID
+        s = f"Reference {ID} not found."
         cite.append(NavigableString(s))
         cite.attrs['class'] = ['errored', 'error'] # XXX
         soup.append(cite)
@@ -276,12 +276,12 @@ def do_bib(soup, bibhere):
         number = id2number[ID]
         cite = id2cite[ID]
 
-        cite.attrs[LABEL_NAME] = '[%s]' % number
-        cite.attrs[LABEL_SELF] = '[%s]' % number
+        cite.attrs[LABEL_NAME] = f"[{number}]"
+        cite.attrs[LABEL_SELF] = f"[{number}]"
         cite.attrs[LABEL_NUMBER] =  number
         cite.attrs[LABEL_WHAT] = 'Reference'
-        cite.attrs[LABEL_WHAT_NUMBER_NAME] = '[%s]' % number
-        cite.attrs[LABEL_WHAT_NUMBER] = '[%s]' % number
+        cite.attrs[LABEL_WHAT_NUMBER_NAME] = f"[{number}]"
+        cite.attrs[LABEL_WHAT_NUMBER] = f"[{number}]"
 
     # now put the cites at the end of the document
     for ID in used:
@@ -291,8 +291,7 @@ def do_bib(soup, bibhere):
         # add to bibliography
         bibhere.append(c)
 
-    s = ("Bib cites: %d\nBib used: %s\nfound: %s\nnot found: %s\nunused: %d"
-         % (len(id2cite), len(used), len(found), len(notfound), len(unused)))
+    s = (f"Bib cites: %d\nBib used: {len(id2cite}\nfound: %s\nnot found: %s\nunused: %d", len(used), len(found), len(notfound), len(unused)))
     logger.info(s)
 
 
@@ -325,7 +324,7 @@ def warn_for_duplicated_ids(soup):
         if inside_svg:
             continue
 
-        #msg = ('ID %15s: found %s - numbering will be screwed up' % (ID, n))
+        #msg = (f"ID %15s: found {ID} - numbering will be screwed up")
         # logger.error(msg)
         problematic.append(ID)
 
@@ -338,7 +337,7 @@ def warn_for_duplicated_ids(soup):
             add_class(e, 'errored')
 
         for i, e in enumerate(elements[1:]):
-            e['id'] = e['id'] + '-duplicate-%d' % (i + 1)
+            e[f"id'] = e['id'] + '-duplicate-{i + 1}"
             #print('changing ID to %r' % e['id'])
     if problematic:
         logger.error('The following IDs were duplicated: %s' %
@@ -368,11 +367,11 @@ def fix_duplicated_ids(basename2soup):
                 if id2frag[id_] == basename:
                     # frome the same frag
                     logger.debug(
-                        'duplicated id %r inside frag %s' % (id_, basename))
+                        f"duplicated id %r inside frag {id_}")
                 else:
                     # from another frag
                     # we need to rename all references in this fragment
-                    # '%s' % random.randint(0,1000000)
+                    # f"{random}".randint(0,1000000)
                     new_id = id_ + '-' + basename
                     element['id'] = new_id
                     tochange.append((basename, id_, new_id))
@@ -468,8 +467,8 @@ def split_in_files(body, levels=['sec', 'part']):
 
         id_ = section.attrs['id']
         id_sanitized = id_.replace(':', '_').replace('-','_').replace('_section','')
-#         filename = '%03d_%s.html' % (i, id_sanitized)
-        filename = '%s.html' % (id_sanitized)
+#         filename = f"%03d_{i}.html"
+        filename = f"{id_sanitized}.html"
 
         filenames.append(filename)
 
@@ -513,7 +512,7 @@ def update_refs(filename2contents):
         for element in contents.findAll(id=True):
             id_ = element.attrs['id']
             if id_ in id2filename:
-                logger.error('double element with ID %s' % id_)
+                logger.error(f"double element with ID {id_}")
             id2filename[id_] = filename
 
         # also don't forget the id for the entire section
@@ -528,10 +527,10 @@ def update_refs(filename2contents):
             assert href[0] == '#'
             id_ = href[1:] # Todo, parse out "?"
             if id_ in id2filename:
-                new_href = '%s#%s' % (id2filename[id_], id_)
+                new_href = f"{id2filename[id_]}#{id_}"
                 a.attrs['href'] = new_href
             else:
-                logger.error('no elemement with ID %s' % id_)
+                logger.error(f"no elemement with ID {id_}")
 
 def write_split_files(filename2contents, d):
     if not os.path.exists(d):
@@ -540,7 +539,7 @@ def write_split_files(filename2contents, d):
         fn = os.path.join(d, filename)
         with open(fn, 'w') as f:
             f.write(str(contents))
-        logger.info('written section to %s' % fn)
+        logger.info(f"written section to {fn}")
 
 def tag_like(t):
     t2 = Tag(name=t.name)
@@ -677,7 +676,7 @@ def make_sections2(elements, is_marker, copy=True, element_name='div', attrs={},
                 sections.append((current_header, current_section))
 
             current_section = make_new()
-            logger.debug('marker %s' % x.attrs.get('id', 'unnamed'))
+            logger.debug(f"marker {x}".attrs.get('id', 'unnamed'))
             current_header = x.__copy__()
 #             current_section.append(x.__copy__())
             current_section['class'] = 'with-header-inside'
@@ -688,20 +687,19 @@ def make_sections2(elements, is_marker, copy=True, element_name='div', attrs={},
     if current_header or contains_something_else_than_space(current_section):
         sections.append((current_header, current_section))
 
-    logger.info('make_sections: %s found using marker %s' %
-                (len(sections), is_marker.__name__))
+    logger.info(f"make_sections: {len(sections} found using marker %s", is_marker.__name__))
     return sections
 #     for i, s in enumerate(sections):
 # #         if add_debug_comments:
 # #             new_body.append('\n')
 # #             new_body.append(
-# #                 Comment('Start of %s section %d/%d' % (is_marker.__name__, i, len(sections))))
+# #                 Comment(f"Start of {is_marker.__name__} section {i}/{len(sections}")))
 # #         new_body.append('\n')
 #         new_body.append(s)
 # #         new_body.append('\n')
 # #         if add_debug_comments:
 # #             new_body.append(
-# #                 Comment('End of %s section %d/%d' % (is_marker.__name__, i, len(sections))))
+# #                 Comment(f"End of {is_marker.__name__} section {i}/{len(sections}")))
 # #             new_body.append('\n')
 #     return new_body
 def contains_something_else_than_space(element):
@@ -738,20 +736,20 @@ def reorganize_contents_old(body0, add_debug_comments=False):
             return x
 
         current_section = make_new()
-        current_section['id'] = 'before-any-match-of-%s' % is_marker.__name__
+        current_section[f"id'] = 'before-any-match-of-{is_marker}".__name__
         current_section['class'] = 'without-header-inside'
 #         sections.append(current_section)
         for x in body.contents:
             if is_marker(x):
-                #print('starting %s' % str(x))
+                #print(f"starting {str}"(x))
                 if contains_something_else_than_space(current_section):
                     sections.append(current_section)
                 current_section = make_new()
                 current_section['id'] = x.attrs.get(
                     'id', 'unnamed-h1') + ':' + element_name
-                logger.debug('marker %s' % current_section['id'])
+                logger.debug(f"marker {current_section}"['id'])
                 current_section['class'] = x.attrs.get('class', '')
-                #print('%s/section %s %s' % (is_marker.__name__, x.attrs.get('id','unnamed'), current_section['id']))
+                #print(f"{is_marker.__name__}/section {x.attrs.get('id','unnamed'} %s", current_section['id']))
                 current_section.append(x.__copy__())
                 current_section['class'] = 'with-header-inside'
             elif preserve(x):
@@ -759,7 +757,7 @@ def reorganize_contents_old(body0, add_debug_comments=False):
                     sections.append(current_section)
 
                 #current_section['id'] = x.attrs.get('id', 'unnamed-h1') + ':' + element_name
-                #print('%s/preserve %s' % (preserve.__name__, current_section['id']))
+                #print(f"{preserve.__name__}/preserve {current_section['id']}")
                 sections.append(x.__copy__())
                 current_section = make_new()
                 current_section.attrs['comment'] = "Triggered by %r" % x
@@ -771,22 +769,21 @@ def reorganize_contents_old(body0, add_debug_comments=False):
             sections.append(current_section)     # XXX
         new_body = Tag(name=body.name)
 #         if len(sections) < 3:
-#             msg = 'Only %d sections found (%s).' % (len(sections), is_marker.__name__)
+#             msg = f"Only %d sections found ({len(sections}).", is_marker.__name__)
 #             raise ValueError(msg)
 
-        logger.info('make_sections: %s found using marker %s' %
-                    (len(sections), is_marker.__name__))
+        logger.info(f"make_sections: {len(sections} found using marker %s", is_marker.__name__))
         for i, s in enumerate(sections):
             if add_debug_comments:
                 new_body.append('\n')
                 new_body.append(
-                    Comment('Start of %s section %d/%d' % (is_marker.__name__, i, len(sections))))
+                    Comment(f"Start of {is_marker.__name__} section {i}/{len(sections}")))
             new_body.append('\n')
             new_body.append(s)
             new_body.append('\n')
             if add_debug_comments:
                 new_body.append(
-                    Comment('End of %s section %d/%d' % (is_marker.__name__, i, len(sections))))
+                    Comment(f"End of {is_marker.__name__} section {i}/{len(sections}")))
                 new_body.append('\n')
         return new_body
 
@@ -839,8 +836,8 @@ def debug(s):
 #     for tag in main_body.select("a"):
 #         href = tag['href']
 #         # debug(href)
-#         # http://127.0.0.1:8080/libraries/tour1/types.html
+#         # http://127.0.0.1:8080//libraries/tour1/types.html
 #         if href.endswith('html'):
 #             page = href.split('/')[-1]
-#             new_ref = '#%s' % page
+#             new_ref = f"#{page}"
 #             tag['href'] = new_ref

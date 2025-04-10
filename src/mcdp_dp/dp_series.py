@@ -68,7 +68,7 @@ class Series(PrimitiveDP):
 
     @memoize_simple
     def get_implementations_f_r(self, f, r):
-        # print('%s get_implementaion(%s, %s)' % (id(self), f, r))
+        # print(f"{id(self} get_implementaion(%s, %s)", f, r))
         f1 = f
         _, pack, _ = self._get_product()
         R2 = self.dp2.get_res_space()
@@ -83,7 +83,7 @@ class Series(PrimitiveDP):
                     for m1 in m1s:
                         self.M1.belongs(m1)
                 except NotBelongs as e:
-                    msg = 'Invalid result from dp1 (%s)' % type(self.dp1)
+                    msg = f"Invalid result from dp1 ({type})"(self.dp1)
                     raise_wrapped(DPInternalError, e, msg, M1=self.M1, m1=m1,
                                   dp1=self.dp1.repr_long())
 
@@ -112,7 +112,7 @@ class Series(PrimitiveDP):
         return res
 
 #     def check_feasible(self, f1, m, r2):
-#         # print('series:check_feasible(%s,%s,%s)' % (f1, m, r))
+#         # print(f"series:check_feasible({f1},{m},{r})")
 #         M, _, unpack = self._get_product()
 #         if do_extra_checks():
 #             M.belongs(m)
@@ -159,7 +159,7 @@ class Series(PrimitiveDP):
 
     def solve_trace(self, func, trace):
         if func in self._solve_cache:
-            # trace.log('using cache for %s' % str(func))
+            # trace.log(f"using cache for {str}"(func))
             return trace.result(self._solve_cache[func])
 
         trace.values(type='series')
@@ -215,10 +215,10 @@ class Series(PrimitiveDP):
         r1 = self.dp1.repr_long()
         r2 = self.dp2.repr_long()
         s1 = 'Series:'
-        s2 = ' %s ⇸ %s' % (self.get_fun_space(), self.get_res_space())
+        s2 = f" {self.get_fun_space(} ⇸ %s", self.get_res_space())
         s = s1 + ' % ' + s2
-        s += '\n' + indent(r1, '. ', first='\ ')
-        s += '\n' + indent(r2, '. ', first='\ ')
+        s += '\n' + indent(r1, '. ', first='\\ ')
+        s += '\n' + indent(r2, '. ', first='\\ ')
         return s
     
     def repr_h_map(self):

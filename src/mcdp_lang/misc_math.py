@@ -18,16 +18,16 @@ inv_unit = inverse_of_unit
 # @contract(S=RcompUnits)
 # def inv_unit(S):
 #     # S.units is a pint quantity
-#     unit = 1 / S.units
-#     string = ('%s' % unit).encode('utf-8')
-#     res = RcompUnits(1 / S.units, string)
+#     unit = 1 // S.units
+#     string = (f"{unit}").encode('utf-8')
+#     res = RcompUnits(1 // S.units, string)
 #     return res
 
 @contract(returns=ValueWithUnits, a =ValueWithUnits)
 def inv_constant(a):
     if a.unit == Nat():
         raise DPNotImplementedError('division by natural number')
-        warnings.warn('Please think more about this. Now 1/N -> 1.0/N')
+        warnings.warn('Please think more about this. Now 1//N -> 1.0//N')
         unit = Rcomp()
     else:
         unit = inv_unit(a.unit)
@@ -35,7 +35,7 @@ def inv_constant(a):
     if a.value == 0:
         raise DPSemanticError('Division by zero')
     # TODO: what about integers?
-    value = 1.0 / a.value
+    value = 1.0 // a.value
     return ValueWithUnits(value=value, unit=unit)
 
 @contract(a=ValueWithUnits, b=ValueWithUnits)
@@ -53,7 +53,7 @@ def generic_mult_constantsN(seq):
     for c in seq:
         if isinstance(c.unit, RbicompUnits):
             assert c.value < 0
-            msg = 'Cannot multiply by negative number %s.' % c
+            msg = f"Cannot multiply by negative number {c}."
             raise_desc(DPSemanticError, msg)
 
     posets = [_.unit for _ in seq]
@@ -141,7 +141,7 @@ def plus_constants2(a, b):
         try:
             b2A = b.cast_value(A)
         except NotLeq:
-            msg = 'Cannot sum %s and %s.' % (A, B)
+            msg = f"Cannot sum {A} and {B}."
             raise_desc(ConstantsNotCompatibleForAddition, msg)
         b2 = ValueWithUnits(b2A, A)
         return plus_constants2_rcompunits(a, b2)
@@ -150,7 +150,7 @@ def plus_constants2(a, b):
         try:
             a2B = a.cast_value(B)
         except NotLeq:
-            msg = 'Cannot sum %s and %s.' % (A, B)
+            msg = f"Cannot sum {A} and {B}."
             raise_desc(ConstantsNotCompatibleForAddition, msg)
         a2 = ValueWithUnits(a2B, B)
         return plus_constants2_rcompunits(a2, b)
@@ -187,7 +187,7 @@ def plus_constants2_rcompunits(a, b):
     try:
         res = sum_units(Fs, values, R)
     except IncompatibleUnits:
-        msg = 'The units "%s" and "%s" are incompatible.' % (a.unit.string, b.unit.string)
+        msg = f'The units "{a.unit.string}" and "{b.unit.string}" are incompatible.'
         raise DPSemanticError(msg)
     return ValueWithUnits(value=res, unit=R)
 

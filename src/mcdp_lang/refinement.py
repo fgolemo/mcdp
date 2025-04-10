@@ -93,7 +93,7 @@ class SemanticInformation(object):
     def found_constant(self, name, element):
         check_isinstance(name, str)
         where = element.where
-        infer_debug('found constant: %s' % name)
+        infer_debug(f"found constant: {name}")
         if name in self.constants:
             msg = 'Duplicated constants?'
             raise DPInternalError(msg, where=where) 
@@ -130,7 +130,7 @@ def infer_types_of_variables(line_exprs, context, si):
         if isinstance(fname, CDP.Placeholder):
             return
         check_isinstance(fname, CDP.FName)
-        infer_debug('found fname: %s' % fname.value)
+        infer_debug(f"found fname: {fname}".value)
         _ = fname.value
         if _ in functions:
             msg = 'Repeated function %r.' % _
@@ -204,7 +204,7 @@ def infer_types_of_variables(line_exprs, context, si):
             either = set()
             
         def visit_to_check2(x):
-#             print('  visit_to_check2(%s)  %s %s' % (nt_string(x), type(x).__name__, x))
+#             print(f"  visit_to_check2({nt_string(x})  %s %s", type(x).__name__, x))
             if isinstance(x, CDP.Resource):
                 l = x.dp.value + '.' + x.s.value
                 Flavors.rvalue.add(l)
@@ -252,12 +252,12 @@ def infer_types_of_variables(line_exprs, context, si):
             
     def can_be_treated_as_rvalue(x):
         res = get_flavour(x)
-        infer_debug('Results of %r -> %s' % (nt_string(x), res))
+        infer_debug(f"Results of %r -> {nt_string(x}", res))
         return res in [RVALUE, EITHER] 
     
     def can_be_treated_as_fvalue(x):
         res = get_flavour(x)
-        infer_debug('Results of %r -> %s' % (nt_string(x), res))
+        infer_debug(f"Results of %r -> {nt_string(x}", res))
         return res in [FVALUE, EITHER]
      
     for i, l in enumerate(line_exprs):
@@ -320,7 +320,7 @@ def infer_types_of_variables(line_exprs, context, si):
                     assert isinstance(alt0, CDP.SetNameFValue), alt0
                     alt = move_where(alt0, w.string, w.character, w.character_end)
                 except DPSyntaxError as _:
-                    #print "No, it does not parse: %s" % traceback.format_exc(e)
+                    #print f"No, it does not parse: {traceback}".format_exc(e)
                     alt = None
                     
                 if alt:
@@ -328,7 +328,7 @@ def infer_types_of_variables(line_exprs, context, si):
                     # both are feasible; check covariance
                     one_ok = can_be_treated_as_rvalue(l.right_side)
                     two_ok = can_be_treated_as_fvalue(alt.right_side)
-#                    print('can be rvalue %s fvalue %s' % (one_ok, two_ok))
+#                    print(f"can be rvalue {one_ok} fvalue {two_ok}")
 
                     if (not one_ok) and (not two_ok):
                         msg = ('This expression cannot be interpreted either'
@@ -369,7 +369,7 @@ def infer_types_of_variables(line_exprs, context, si):
         elif isinstance(l, (CDP.FunStatement, CDP.ResStatement)):
             pass
         else:
-            #  print('line %s' % type(l).__name__)
+            #  print(f"line {type}"(l).__name__)
             pass
     
     refine0 = lambda x, parents: refine(x, parents, si, None, resources, functions, 
@@ -443,7 +443,7 @@ def refine(x, parents, si,
             return res
         elif x.name in resources and x.name in functions:
             if is_fvalue_context:
-                msg = 'Please use "required %s" rather than just "%s".' % (x.name, x.name)
+                msg = f"Please use "required {s}" rather than just "".' % (x.name, x.name)
                 warn_language(x, MCDPWarnings.LANGUAGE_REFERENCE_OK_BUT_IMPRECISE, msg, context)
 
                 # interpret as 
@@ -451,7 +451,7 @@ def refine(x, parents, si,
                                        CDP.RName(x.name, where=x.where), 
                                    where=x.where)
             if is_rvalue_context:
-                msg = 'Please use "provided %s" rather than just "%s".' % (x.name, x.name)
+                msg = f"Please use "provided {s}" rather than just "".' % (x.name, x.name)
                 warn_language(x, MCDPWarnings.LANGUAGE_REFERENCE_OK_BUT_IMPRECISE, msg, context)
 
                 return CDP.NewFunction(None, 
@@ -468,7 +468,7 @@ def refine(x, parents, si,
                 warn_language(x, MCDPWarnings.LANGUAGE_AMBIGUOS_EXPRESSION, msg, context)
                 return x 
             
-            msg = 'Please use "required %s" rather than just "%s".' % (x.name, x.name)
+            msg = f"Please use "required {s}" rather than just "".' % (x.name, x.name)
             warn_language(x, MCDPWarnings.LANGUAGE_REFERENCE_OK_BUT_IMPRECISE, msg, context)
 
             return CDP.NewResource(None, CDP.RName(x.name, where=x.where), where=x.where)
@@ -479,7 +479,7 @@ def refine(x, parents, si,
                 warn_language(x, MCDPWarnings.LANGUAGE_AMBIGUOS_EXPRESSION, msg, context) # XXX
                 return x
             
-            msg = 'Please use "provided %s" rather than just "%s".' % (x.name, x.name)
+            msg = f"Please use "provided {s}" rather than just "".' % (x.name, x.name)
             warn_language(x, MCDPWarnings.LANGUAGE_REFERENCE_OK_BUT_IMPRECISE, msg, context) # XXX
 
             return CDP.NewFunction(None, CDP.FName(x.name, where=x.where), where=x.where) 

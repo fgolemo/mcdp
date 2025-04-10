@@ -148,9 +148,9 @@ class DPLoop2(PrimitiveDP):
 #         try:
 #             F2.check_leq(r, f2)
 #         except NotLeq as e:
-#             msg = 'Loop constraint not satisfied %s <= %s not satisfied.' % (F2.format(r), F2.format(f2))
-#             msg += "\n f1 = %10s -->| ->[ %s ] --> %s " % (F1.format(f1), self.dp1, F2.format(r))
-#             msg += "\n f2 = %10s -->|" % F2.format(f2)
+#             msg = f"Loop constraint not satisfied {F2.format(r)} <= {F2.format(f2)} not satisfied."
+#             msg += f"\n f1 = {F1.format(f1):10s} -->| ->[ {self.dp1} ] --> {F2.format(r)}"
+#             msg += f"\n f2 = {F2.format(f2):10s} -->|"
 #             raise_wrapped(NotFeasible, e, msg, compact=True)
 # 
 #         self.R.belongs(r)
@@ -168,10 +168,9 @@ class DPLoop2(PrimitiveDP):
             used = self.dp1.evaluate_f_m(f, m0)
             R0 = self.dp1.R
             if R0.leq(used, r):
-                msg = 'loop: asking to show it is unfeasible (%s, %s, %s)' % (f1, m, r)
+                msg = f"loop: asking to show it is unfeasible ({f1}, {m}, {r})"
                 msg += '\nBut inner is feasible and loop constraint *is* satisfied.'
-                msg += "\n f1 = %10s -->| ->[ m0= %s ] --> %s <= %s" % (F1.format(f1), self.M0.format(m0),
-                                                                        R0.format(used), R0.format(r))
+                msg += f"\n f1 = {F1.format(f1):10s} -->| ->[ m0= {self.M0.format(m0)} ] --> {R0.format(used)} <= {R0.format(r)}"
                 msg += "\n f2 = %10s -->|" % F2.format(f2)
                 raise_wrapped(Feasible, e, msg, compact=True, dp1=self.dp1.repr_long())
 
@@ -183,15 +182,15 @@ class DPLoop2(PrimitiveDP):
         try:
             self.dp1.check_feasible(f, m0, r)
         except NotFeasible as e:
-            msg = 'loop: Asking loop if feasible (f1=%s, m=%s, r=%s)' % (f1, m, r)
-            msg += '\nInternal was not feasible when asked for (f=%s, m0=%s, r=%r)' % (f, m0, r)
+            msg = f"loop: Asking loop if feasible (f1={f1}, m={m}, r={r})"
+            msg += f"\nInternal was not feasible when asked for (f={f}, m0={m0}, r={r})"
             raise_wrapped(NotFeasible, e, msg, dp1=self.dp1.repr_long(), compact=True)
  
     def __repr__(self):
         return 'DPLoop2(%r)' % self.dp1
 
     def repr_long(self):
-        s = 'DPLoop2:   %s ⇸ %s\n' % (self.get_fun_space(), self.get_res_space())
+        s = f"DPLoop2:   {self.get_fun_space()} ⇸ {self.get_res_space()}\n"
         s += indent(self.dp1.repr_long(), 'L ')
         return s
 
@@ -215,7 +214,7 @@ class DPLoop2(PrimitiveDP):
 
     def solve_all_cached(self, f1, trace):
         if not f1 in self._solve_cache:
-            #print('solving again %s' % f1.__str__())
+            #print(f"solving again {f1}".__str__())
             R = self.solve_all(f1, trace)
             self._solve_cache[f1] = R
             
@@ -231,7 +230,7 @@ class DPLoop2(PrimitiveDP):
 
         # we consider a set of iterates
         # we start from the bottom
-        trace.log('Iterating in UR = %s' % UR.__str__())
+        trace.log(f"Iterating in UR = {UR}".__str__())
         
         s0 = R.Us(R.get_minimal_elements()) 
         S = [KleeneIteration(s=s0, s_converged=R.Us(set()),
@@ -248,7 +247,7 @@ class DPLoop2(PrimitiveDP):
                                             r_converged=upperset_project(converged, 0))
                 S.append(iteration)
                 
-                t.log('R = %s' % UR.format(si_next))
+                t.log(f"R = {UR.format(si_next)}")
 
                 if do_extra_checks():
                     try:
@@ -261,8 +260,8 @@ class DPLoop2(PrimitiveDP):
                 t.values(state=S[-1])
 
                 if UR.leq(si_next, si_prev):
-                    t.log('Breaking because converged (iteration %s) ' % i)
-                    #t.log(' solution is %s' % (UR.format(sip)))
+                    t.log(f"Breaking because converged (iteration {i}) ")
+                    #t.log(f" solution is {UR.format(sip}"))
                     # todo: add reason why interrupted
                     break
 
@@ -284,7 +283,7 @@ class DPLoop2(PrimitiveDP):
 
         # we consider a set of iterates
         # we start from the bottom
-        trace.log('Iterating in LF = %s' % LF.__str__())
+        trace.log(f"Iterating in LF = {LF}".__str__())
         
         s0 = F.Ls(F.get_maximal_elements()) 
         S = [KleeneIteration(s=s0, s_converged=F.Ls(set()),
@@ -301,7 +300,7 @@ class DPLoop2(PrimitiveDP):
                                             r_converged=lowerset_project(converged, 0))
                 S.append(iteration)
                 
-                t.log('si_next = %s' % LF.format(si_next))
+                t.log(f"si_next = {LF.format(si_next)}")
 
                 if do_extra_checks():
                     try:
@@ -314,7 +313,7 @@ class DPLoop2(PrimitiveDP):
                 t.values(state=S[-1])
 
                 if LF.leq(si_next, si_prev):
-                    t.log('Breaking because converged (iteration %s) ' % i)
+                    t.log(f"Breaking because converged (iteration {i}) ")
                     break
 
         trace.values(type='loop2r', LF=LF, F=F, dp=self, iterations=S)
@@ -329,7 +328,7 @@ class DPLoop2(PrimitiveDP):
 def solve_f_iterate(dp0, f1, R, S, trace):
     """ 
     
-        Returns the next iteration  si \in UR 
+        Returns the next iteration  si \\in UR 
 
         Min ( h(f1, r20) \cup  !r20 ) 
         

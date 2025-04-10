@@ -39,7 +39,7 @@ class SolverState(object):
 
         fv = [None] * len(fnames)
         if len(f) != len(fnames):
-            raise ValueError("Not valid: %s" % f)
+            raise ValueError(f"Not valid: {f}")
 
         for k, v in f.items():
             
@@ -65,7 +65,7 @@ class SolverState(object):
 
         from mcdp import logger
         trace = Tracer(logger=logger)
-        print('solving... %s' % F.format(fv))
+        print(f"solving... {F}".format(fv))
         ures = self.dp.solve_trace(fv, trace)
 
         self.ures.append(ures)

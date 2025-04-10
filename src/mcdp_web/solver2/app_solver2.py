@@ -166,7 +166,7 @@ class AppSolver2(object):
 
             self.solutions[h] = data
 
-            res['output_image'] = 'display.png?hash=%s' % h
+            res[f"output_image'] = 'display.png?hash={h}"
             res['ok'] = True
             return res
    
@@ -189,10 +189,10 @@ class AppSolver2(object):
         try:
             r = parsed.cast_value(R)
         except NotLeq: 
-            msg = 'Space %s cannot be converted to %s' % (parsed.unit, R)
+            msg = f"Space {parsed.unit} cannot be converted to {R}"
             raise DPSemanticError(msg)
 
-        logger.info('query rtof: %s ...' % R.format(r))
+        logger.info(f"query rtof: {R} ...".format(r))
         tracer = Tracer(logger=logger)
         
         max_steps = 10000
@@ -211,7 +211,7 @@ class AppSolver2(object):
             
             data = dict(result_l=result_l, result_u=result_u, dpl=dpl, dpu=dpu)
             
-            res['output_result'] = 'Lower: %s\nUpper: %s' % (LF.format(result_l),
+            res[f"output_result'] = 'Lower: {LF.format(result_l}\nUpper: %s",
                                                             LF.format(result_u))
         else:
             try:
@@ -249,10 +249,10 @@ class AppSolver2(object):
         try:
             f = parsed.cast_value(F)
         except NotLeq: 
-            msg = 'Space %s cannot be converted to %s' % (parsed.unit, F)
+            msg = f"Space {parsed.unit} cannot be converted to {F}"
             raise DPSemanticError(msg)
 
-        logger.info('query rtof: %s ...' % F.format(f))
+        logger.info(f"query rtof: {F} ...".format(f))
  
         tracer = Tracer(logger=logger)
         
@@ -273,7 +273,7 @@ class AppSolver2(object):
             
             data = dict(result_l=result_l, result_u=result_u, dpl=dpl, dpu=dpu)
 
-            res['output_result'] = 'Lower: %s\nUpper: %s' % (UR.format(result_l),
+            res[f"output_result'] = 'Lower: {UR.format(result_l}\nUpper: %s",
                                                          UR.format(result_u))
 
         else:
@@ -309,7 +309,7 @@ class AppSolver2(object):
                 msg = 'Cannot find solution from hash.'
                 others = list(self.solutions)
                 raise_desc(DPInternalError, msg, h=h, decoded=decoded, others=others)
-                #logger.error('do not have solution for %s' % orig)
+                #logger.error(f"do not have solution for {orig}")
             data = self.solutions[h]
             key = data['key']
             

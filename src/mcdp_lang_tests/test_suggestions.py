@@ -22,7 +22,7 @@ def check_suggestions(filename, source):  # @UnusedVariable
     xr = parse_ndp_refine(x, Context())
     suggestions = get_suggestions(xr)
     for w, r in suggestions:  # @UnusedVariable
-        #print('"%s" -> "%s"' % (w.string[w.character:w.character_end], r))
+        #print(f""{w.string[w.character:w.character_end]}" -> "{r}"")
         pass
 #     print source.__repr__()
     print(source)

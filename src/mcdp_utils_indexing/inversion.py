@@ -93,7 +93,7 @@ def transform_right_inverse(P, coords, reduce_list):
         raise_desc(AssertionError, msg, proxy=proxy, proxy2=proxy2)
     
     Q = get_it(P, coords, reduce_list)
-#     print('I have map:\n %s \n %s' % (transform_pretty_print(P, coords), 
+#     print(f"I have map:\n {transform_pretty_print(P, coords} \n %s", 
 #                                       transform_pretty_print(Q, coords2, 'A')))
     # this should be equal to P
     _P2 = get_it(Q, coords2, reduce_list)

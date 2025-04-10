@@ -15,22 +15,23 @@ __all__ = [
 def check_maximal(elements, poset):
     m2 = poset_maxima(elements, poset.leq)
     if not len(m2) == len(elements):
-        msg = 'Set of elements is not minimal: %s' % elements
+        msg = f'Set of elements is not minimal: {elements}'
         raise ValueError(msg)
 
 def check_minimal(elements, poset):
     m2 = poset_minima(elements, poset.leq)
     if not len(m2) == len(elements):
-        msg = 'Set of elements is not minimal: %s' % elements
+        msg = f'Set of elements is not minimal: {elements}'
         extra = set(elements) - set(m2)
-        x = "\n ".join([ '%s %r' % (poset.format(s), s) for s in extra])
-        msg += '\nThese points were dominated:\n %s' %x 
+        x = "\n ".join([f'{poset.format(s)} {s!r}' for s in extra])
+        msg += f'\nThese points were dominated:\n {x}'
         if len(extra) == 1:
             e = list(extra)[0]
             for e2 in elements:
-                if e2 == e: continue
+                if e2 == e: 
+                    continue
                 if poset.leq(e2, e):
-                    msg += '\nDominated by %s %r' % (poset.format(e2), e2)
+                    msg += f'\nDominated by {poset.format(e2)} {e2!r}'
 
         raise ValueError(msg)
 
@@ -42,7 +43,7 @@ def poset_check_chain(poset, chain):
         try:
             poset.check_leq(chain[i], chain[i + 1])
         except NotLeq as e:
-            msg = ('Fails for i = %s: %s ≰ %s' % (i, chain[i], chain[i + 1]))
+            msg = f'Fails for i = {i}: {chain[i]} ≰ {chain[i + 1]}'
             raise_wrapped(ValueError, e, msg, compact=True, chain=chain, poset=poset)
 
     return True

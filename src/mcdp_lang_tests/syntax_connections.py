@@ -22,17 +22,17 @@ mcdp {
     R = dp.get_res_space()
     M = dp.get_imp_space()
 
-    print("I: %s" % I)
-    print("M: %s" % M)
-    print("R: %s" % R)
+    print(f"I: {I}")
+    print(f"M: {M}")
+    print(f"R: {R}")
     UR = UpperSets(R)
     empty = R.Us(set())
 
     ur1 = dp.solve(5.0)
     ur2 = dp.solve(14.0)
 
-    print('ur1: %s' % ur1)
-    print('ur2: %s' % ur2)
+    print(f"ur1: {ur1}")
+    print(f"ur2: {ur2}")
 
     UR.check_equal(empty, ur2)
     # UR.check_not_equal(empty, ur1)
@@ -57,16 +57,16 @@ mcdp {
     R = dp.get_res_space()
     M = dp.get_imp_space()
 
-    print("F: %s" % F)
-    print("R: %s" % R)
-    print("I: %s" % I)
-    print("M: %s" % M)
+    print(f"F: {F}")
+    print(f"R: {R}")
+    print(f"I: {I}")
+    print(f"M: {M}")
 
     UR = UpperSets(R)
 
     ur = dp.solve(())
 
-    print('ur: %s' % ur)
+    print(f"ur: {ur}")
 
     UR.check_equal(ur, R.U(10.0))
 
@@ -142,15 +142,15 @@ mcdp {
     R = dp.get_res_space()
     M = dp.get_imp_space()
 
-    print("F: %s" % F)
-    print("R: %s" % R)
-    print("I: %s" % I)
-    print("M: %s" % M)
+    print(f"F: {F}")
+    print(f"R: {R}")
+    print(f"I: {I}")
+    print(f"M: {M}")
 
     UR = UpperSets(R)
 
     ur = dp.solve(0.5)
-    print('ur: %s' % ur)
+    print(f"ur: {ur}")
 
     UR.check_equal(ur, R.U(2.0))
 
@@ -178,28 +178,28 @@ mcdp {
     R = dp.get_res_space()
     M = dp.get_imp_space()
 
-    print("F: %s" % F)
-    print("R: %s" % R)
-    print("I: %s" % I)
-    print("M: %s" % M)
+    print(f"F: {F}")
+    print(f"R: {R}")
+    print(f"I: {I}")
+    print(f"M: {M}")
 
     UR = UpperSets(R)
 
     ur = dp.solve((0.5, 0.4))
 
-    print('ur: %s' % ur)
+    print(f"ur: {ur}")
 
     UR.check_equal(ur, R.U(2.0))
 
     f_infeasible = (1.1, 1.0)
     ur = dp.solve(f_infeasible)
-    print('ur: %s' % ur)
+    print(f"ur: {ur}")
 
     empty = R.Us(set())
     UR.check_equal(ur, empty)
 
     imps = dp.get_implementations_f_r(f=(0.4, 0.4), r=2.0)
-    print('imps: %s' % imps)
+    print(f"imps: {imps}")
 
 
 @comptest

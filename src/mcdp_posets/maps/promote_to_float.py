@@ -29,4 +29,4 @@ class PromoteToFloat(Map):
             
 
     def repr_map(self, letter):
-        return "%s ⟼ (float) %s" % (letter, letter)
+        return f"{letter} ⟼ (float) {letter}"

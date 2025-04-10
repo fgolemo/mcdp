@@ -26,8 +26,8 @@ def flatten_add_prefix(ndp, prefix):
 
     if isinstance(ndp, SimpleWrap):
         dp = ndp.get_dp()
-        fnames = ['%s%s%s' % (prefix, sep, _) for _ in ndp.get_fnames()]
-        rnames = ['%s%s%s' % (prefix, sep, _) for _ in ndp.get_rnames()]
+        fnames = [f"{prefix}{sep}{_}" for _ in ndp.get_fnames()]
+        rnames = [f"{prefix}{sep}{_}" for _ in ndp.get_rnames()]
         icon = ndp.icon
         if len(fnames) == 1: fnames = fnames[0]
         if len(rnames) == 1: rnames = rnames[0]
@@ -41,11 +41,11 @@ def flatten_add_prefix(ndp, prefix):
             isr, rname = is_res_node_name(name2)
 
             if isf:
-                return get_name_for_fun_node('%s%s%s' % (prefix, sep, fname))
+                return get_name_for_fun_node(f"{prefix}{sep}{fname}")
             elif isr:
-                return get_name_for_res_node('%s%s%s' % (prefix, sep, rname))
+                return get_name_for_res_node(f"{prefix}{sep}{rname}")
             else:
-                return "%s%s%s" % (prefix, sep, name2)
+                return f"{prefix}{sep}{name2}"
             
         def transform(name2, ndp2):
             # Returns name, ndp
@@ -57,11 +57,11 @@ def flatten_add_prefix(ndp, prefix):
                 if isinstance(ndp2, SimpleWrap):
 
                     if isf:
-                        fnames = "%s%s%s" % (prefix, sep, fname)
-                        rnames = "%s%s%s" % (prefix, sep, fname)
+                        fnames = f"{prefix}{sep}{fname}"
+                        rnames = f"{prefix}{sep}{fname}"
                     if isr:
-                        fnames = "%s%s%s" % (prefix, sep, rname)
-                        rnames = "%s%s%s" % (prefix, sep, rname)
+                        fnames = f"{prefix}{sep}{rname}"
+                        rnames = f"{prefix}{sep}{rname}"
 
                     dp = ndp2.dp
                     res = SimpleWrap(dp=dp, fnames=fnames, rnames=rnames)
@@ -90,15 +90,15 @@ def flatten_add_prefix(ndp, prefix):
             dp1, s1, dp2, s2 = c.dp1, c.s1, c.dp2, c.s2
             dp1 = get_new_name(dp1)
             dp2 = get_new_name(dp2)
-            s1_ = "%s%s%s" % (prefix, sep, s1)
-            s2_ = "%s%s%s" % (prefix, sep, s2)
+            s1_ = f"{prefix}{sep}{s1}"
+            s2_ = f"{prefix}{sep}{s2}"
             assert s1_ in names2[dp1].get_rnames(), (s1_, names2[dp1].get_rnames())
             assert s2_ in names2[dp2].get_fnames(), (s2_, names2[dp1].get_fnames())
             c2 = Connection(dp1=dp1, s1=s1_, dp2=dp2, s2=s2_)
             connections2.add(c2)
             
-        fnames2 = ['%s%s%s' % (prefix, sep, _) for _ in ndp.get_fnames()]
-        rnames2 = ['%s%s%s' % (prefix, sep, _) for _ in ndp.get_rnames()]
+        fnames2 = [f"{prefix}{sep}{_}" for _ in ndp.get_fnames()]
+        rnames2 = [f"{prefix}{sep}{_}" for _ in ndp.get_rnames()]
 
         return CompositeNamedDP.from_parts(names2, connections2, fnames2, rnames2)
 
@@ -198,7 +198,7 @@ def cndp_flatten(ndp):
                         #     c >= a
                         # }
                         # In this case, we need to add an identity
-                        new_name = '_%s_pass_through_%s' % (name, c.s2)
+                        new_name = f"_{name}_pass_through_{c.s2}"
                         F = nn.get_name2ndp()[c.dp1].get_ftype(c.s1)
                         ndp_pass = SimpleWrap(Identity(F), fnames=fn, rnames=rn)
                         assert not new_name in names2
@@ -259,10 +259,10 @@ def cndp_flatten(ndp):
             assert name in proxy_resources
             if exploded(name):
                 for fname in n0.get_fnames():
-                    newfname = "%s/%s" % (name, fname)
+                    newfname = f"{name}/{fname}"
                     assert newfname in proxy_functions[name], (newfname, proxy_functions[name])
                 for rname in n0.get_rnames():
-                    newrname = "%s/%s" % (name, rname)
+                    newrname = f"{name}/{rname}"
                     assert newrname in proxy_resources[name], (newrname, proxy_resources[name])
             else:
                 for fname in n0.get_fnames():
@@ -270,11 +270,11 @@ def cndp_flatten(ndp):
                 for rname in n0.get_rnames():
                     assert rname in proxy_resources[name]
         except Exception as e:  # pragma: no cover
-            s = '%s:\n %s %s \n\n%s' % (name, proxy_resources[name], proxy_functions[name], e)
+            s = f"{name}:\n {proxy_resources[name]} {proxy_functions[name]} \n\n{e}"
             errors.append(s)
     if errors: # pragma: no cover
         s = "\n\n".join(errors)
-        s += '%s %s' % (proxy_resources, proxy_functions)
+        s += f"{proxy_resources} {proxy_functions}"
         raise Exception(s)
 
     for c in connections:
@@ -290,7 +290,7 @@ def cndp_flatten(ndp):
                 raise_desc(DPInternalError, msg, dp2=dp2, 
                            keys=list(proxy_functions), c=c)
 
-            (dp2_, s2_) = proxy_functions[dp2]["%s/%s" % (dp2, s2)]
+            (dp2_, s2_) = proxy_functions[dp2][f"{dp2}/{s2}"]
 
             if not dp2_ in names2: # pragma: no cover
                 raise_desc(DPInternalError, "?", dp2_=dp2_, c=c, 
@@ -301,7 +301,7 @@ def cndp_flatten(ndp):
 
         dp1_was_exploded = isinstance(name2ndp[dp1], CompositeNamedDP)
         if dp1_was_exploded:
-            (dp1_, s1_) = proxy_resources[dp1]["%s/%s" % (dp1, s1)] 
+            (dp1_, s1_) = proxy_resources[dp1][f"{dp1}/{s1}"] 
         else:
             dp1_ = dp1
             s1_ = s1

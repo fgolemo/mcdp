@@ -46,5 +46,5 @@ class OpaqueDP(PrimitiveDP):
     def repr_long(self):
         r1 = self.dp.repr_long()
         s = 'OpaqueDP'
-        s+= '\n' + indent(r1, '. ', first='\ ')
+        s+= '\n' + indent(r1, '. ', first='\\ ')
         return s

@@ -2,7 +2,7 @@ from comptests.registrar import comptest, run_module_tests
 from mcdp_lang_tests.utils import parse_wrap_check
 from mcdp_lang.syntax import Syntax
 from mcdp_lang.utils_lists import unwrap_list, get_odd_ops
-from nose.tools import assert_equal
+from .nose_compat import assert_equal
 from mcdp_lang.parse_interface import parse_ndp
 
 

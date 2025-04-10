@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
-from StringIO import StringIO
+try:
+    from StringIO import StringIO  # Python 2
+except ImportError:
+    from io import StringIO  # Python 3
 import os
 
 from contracts.utils import raise_desc
@@ -71,7 +74,7 @@ def test_report_dp1(filename, outdir, basename):
     dp = ndp.get_dp()
     from mcdp_report.report import report_dp1
     r = report_dp1(dp)
-    f = os.path.join(outdir, '%s_dp1.html' % basename)
+    f = os.path.join(outdir, f"{basename}_dp1.html")
     r.to_html(f)
     print('Written to %r.' % f)
     return r
@@ -80,7 +83,7 @@ def test_report_ndp1(filename, outdir, basename):
     ndp = parse_ndp_filename(filename)
     from mcdp_report.report import report_ndp1
     r = report_ndp1(ndp)
-    f = os.path.join(outdir, '%s_ndp1.html' % basename)
+    f = os.path.join(outdir, f"{basename}_ndp1.html")
     r.to_html(f)
     print('Written to %r.' % f)
     return r
@@ -104,7 +107,7 @@ def define_test_for(context, filename, basename, tests):
     
     for test in tests:
         n = test.__name__.replace('assert_', '').replace('_ndp', '')
-        p_job_id = '%s-%s' % (basename, n)
+        p_job_id = f"{basename}-{n}"
         
         if not known_failure:
             p_job = context.comp_config(test_one, test, filename,
@@ -116,13 +119,13 @@ def define_test_for(context, filename, basename, tests):
     if not known_failure:
         if (assert_parsable_to_connected_ndp_fn in tests
             or assert_parsable_to_unconnected_ndp_fn in tests):
-            job_id = '%s-%s' % (basename, 'report_ndp1')
+            job_id = f"{basename}-{'report_ndp1'}"
             r = context.comp_config(test_report_ndp1, filename, outdir, basename,
                                     job_id=job_id, extra_dep=[p_job])
             context.add_report(r, 'examples_report_ndp1', file=basename)
 
         if assert_parsable_to_connected_ndp_fn in tests:
-            job_id = '%s-%s' % (basename, 'report_dp1')
+            job_id = f"{basename}-{'report_dp1'}"
             r = context.comp_config(test_report_dp1, filename, outdir, basename,
                                      job_id=job_id, extra_dep=[p_job])
             context.add_report(r, 'examples_report_dp1', file=basename)
@@ -141,7 +144,7 @@ def define_tests(context):
         orig = os.path.splitext(os.path.basename(f))[0]
         if orig in found:
             for i in range(10):
-                bn = '%s_%d' % (orig, i + 1)
+                bn = f"{orig}_{i + 1}"
                 if not bn in found:
                     return bn
             assert False, (orig, found)
@@ -152,7 +155,7 @@ def define_tests(context):
 #     if False:
 #         folder = os.path.join(dir_from_package_name('mocdp'), '../../libraries')
 #         examples2 = list(locate_files(folder, '*.mcdp'))
-#         print('Other files found: %s' % examples2)
+#         print(f"Other files found: {examples2}")
 #         filenames.extend(examples2)
 #     else:
     examples2 = []
@@ -160,7 +163,7 @@ def define_tests(context):
     for f in filenames:
 
         basename = get_unique_basename(f)
-        print('defining %s - %s' % (basename, f))
+        print(f"defining {basename} - {f}")
         if f in examples2:
             contents = open(f).read()
             if '...' in contents:

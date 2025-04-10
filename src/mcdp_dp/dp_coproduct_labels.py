@@ -65,10 +65,10 @@ class CoProductDPLabels(PrimitiveDP):
 
     def __repr__(self):
         s = "^".join('%s:%s' % x for x in zip(self.labels, self.dp.dps))
-        return 'CoProductDPLabels(%s)' % s
+        return f"CoProductDPLabels({s})"
 
     def repr_long(self):
-        s = "CoProductDPLabels %s " % self.labels.__repr__()
+        s = f"CoProductDPLabels {self} ".labels.__repr__()
         s += '\n' + self.dp.repr_long()
         return s
     

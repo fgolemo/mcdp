@@ -89,7 +89,7 @@ def prerender_mathjax(s):
 #                 x1 = x0/scale
 #                 return 'vertical-align: %.4fex' % x1
 #             s2 = re.sub(r'vertical-align: (.*?)ex', f, s)
-#             print('%s -> %s' % (s, s2))
+#             print(f"{s} -> {s2}")
 #             element['style'] = s2
 # 
 #     return to_html_stripping_fragment(frag)

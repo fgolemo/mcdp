@@ -24,14 +24,14 @@ def generate_unconnected_warnings(ndp, context0, x):
                 
                 for uf in ufs:
                     if uf.dp in si.instances:    
-                        msg = 'Unconnected function “%s”.' % uf.s
+                        msg = f"Unconnected function “{uf}”.".s
                         element = si.instances[uf.dp].element_defined
                         which = MCDPWarnings.UNCONNECTED_FUNCTION
                         warn_language(element, which, msg, context0)
     
                 for ur in urs:
                     if ur.dp in si.instances:
-                        msg = 'Unconnected resource “%s”.' % ur.s
+                        msg = f"Unconnected resource “{ur}”.".s
                         element = si.instances[ur.dp].element_defined
                         which = MCDPWarnings.UNCONNECTED_RESOURCE 
                         warn_language(element, which, msg, context0)

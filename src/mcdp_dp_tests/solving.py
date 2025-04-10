@@ -45,7 +45,7 @@
 #     """
 # 
 #     if add_mass_limit:
-#         prob = prob.replace('OTHER', ' battery.mass <= %s' % add_mass_limit)
+#         prob = prob.replace(f"OTHER', ' battery.mass <= {add_mass_limit}")
 #     else:
 #         prob = prob.replace('OTHER', '')
 #     prob = prob.replace('GAMMA', gamma)

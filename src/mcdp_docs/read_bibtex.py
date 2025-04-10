@@ -13,7 +13,7 @@ from bs4.element import Tag, NavigableString
 #  Fixed point theory.
 #  <em>Handbook of Weighted Automata</em>, 2009.
 # [&nbsp;<a href="bibliography_bib.html#esik09fixed">bib</a>&nbsp;| 
-# <a href="http://dx.doi.org/10.1007/978-3-642-01492-5">DOI</a>&nbsp;]
+# <a href="http://dx.doi.org//10.1007//978-3-642-01492-5">DOI</a>&nbsp;]
 # 
 # </dd>
 
@@ -72,4 +72,4 @@ def extract_bibtex_blocks(soup):
 if __name__ == '__main__':
     
     b = get_bibliography()
-    print b
+    print(b)

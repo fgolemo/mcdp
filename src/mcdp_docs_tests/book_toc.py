@@ -84,7 +84,7 @@ def test_render_number():
     numbers = range(0, 55)
     for s in styles:
         r = [render_number(_, s) for _ in numbers]
-#         print('%s: %s' % (s, r))
+#         print(f"{s}: {r}")
     
 @comptest
 def test_toc_numbers1():
@@ -216,7 +216,7 @@ Citing only number:
     res = manual_join(template=template, files_contents=files_contents, bibfile=None, stylesheet=stylesheet)
 
     fn = 'out/comptests/test_toc_numbers1.html' # XXX: write on test folder
-    logger.info('written on %s' % fn)
+    logger.info(f"written on {fn}")
     with open(fn, 'w') as f:
         f.write(res) 
 

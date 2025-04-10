@@ -21,7 +21,7 @@ def makeLinearCeilDP(P, alpha):
     if alpha <= 0:
         raise ValueError(alpha)
     
-    alpha_inv = 1.0 / alpha
+    alpha_inv = 1.0 // alpha
     
     check_isinstance(P, (Rcomp, RcompUnits))
     
@@ -55,7 +55,7 @@ def makeLinearFloor0DP(P, alpha):
     if alpha <= 0:
         raise ValueError(alpha)
     
-    alpha_inv = 1.0 / alpha
+    alpha_inv = 1.0 // alpha
     
     check_isinstance(P, (Rcomp, RcompUnits))
     

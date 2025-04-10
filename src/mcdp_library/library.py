@@ -144,7 +144,7 @@ class MCDPLibrary(object):
         spec = specs[spec_name]
         parsing_function = spec.parse
         if parsing_function is None:
-            msg = 'Cannot parse %s because the parsing function is not given.' % spec_name
+            msg = f"Cannot parse {spec_name} because the parsing function is not given."
             raise DPInternalError(msg)
         res = self._load_generic(thing_name, spec_name, parsing_function, context)
         check_isinstance(res, spec.klass)
@@ -153,7 +153,7 @@ class MCDPLibrary(object):
     def _load_spec_data(self, spec_name, thing_name):
         from mcdp_library.specs_def import specs
         spec = specs[spec_name]
-        filename = '%s.%s' % (thing_name, spec.extension)
+        filename = f"{thing_name}.{spec.extension}"
         f = self._get_file_data(filename)
         data = f['data']
         realpath = f['realpath']
@@ -193,7 +193,7 @@ class MCDPLibrary(object):
             cached = False
         else:
             cache_file = os.path.join(self.cache_dir, parsing_function.__name__,
-                                      '%s.cached' % name)
+                                      f"{name}.cached")
 
             res_data = memo_disk_cache2(cache_file, data, actual_load)
             cached = True
@@ -213,8 +213,7 @@ class MCDPLibrary(object):
 
         if False:
             cached = '[Cached]' if cached else ''        
-            logger.debug('actual_load(): parsed %r with %d warnings %s' %
-                          (name, len(context_warnings), cached))
+            logger.debug(f"actual_load(): parsed %r with {len(context_warnings} warnings {name}", cached))
             
         class JustAHack(object):
             warnings = context_warnings
@@ -252,7 +251,7 @@ class MCDPLibrary(object):
             _prev = getattr(template,  MCDPConstants.ATTR_LOAD_LIBNAME)
             # print('library %r gets something from %r' % (self.library_name, _prev))
         else:
-            # print('parsed original template at %s' % self.library_name)
+            # print(f"parsed original template at {self}".library_name)
             setattr(template,  MCDPConstants.ATTR_LOAD_LIBNAME, self.library_name)
             setattr(template,  MCDPConstants.ATTR_LOAD_REALPATH, realpath)
         return template
@@ -261,7 +260,7 @@ class MCDPLibrary(object):
     def _sys_path_adjust(self):
         previous = list(sys.path)
 
-        # print('search dirs: %s' % self.search_dirs)
+        # print(f"search dirs: {self}".search_dirs)
         for d in self.search_dirs:
             sys.path.insert(0, d)
 
@@ -284,14 +283,14 @@ class MCDPLibrary(object):
 
                 return result
             except MCDPExceptionWithWhere as e:
-                logger.error('extend_with_filename(%r): seen %s' % (realpath, e))
-                _type, _value, traceback = sys.exc_info()
+                logger.error(f'extend_with_filename({realpath!r}): seen {e}')
+                _type, _value, tb = sys.exc_info()
                 if e.where is None or e.where.filename is None:
                     if realpath is not None:
                         e = e.with_filename(realpath)
                     else:
                         e = e
-                raise e, None, traceback
+                raise e.with_traceback(tb)
              
     def _generate_context_with_hooks(self):
         context = Context()
@@ -378,12 +377,11 @@ class MCDPLibrary(object):
                                key=lambda x: x.lower())
 
             if available:
-                msg += (" Available files with %r extension: %s." %
-                        (ext, format_list(sorted(available))))
+                msg += (f" Available files with %r extension: {ext}.")))
             else:
                 msg += " No files with extension %r found." % ext
                 
-            msg += '\nSearch directories: %s' % self.search_dirs
+            msg += f"\nSearch directories: {self}".search_dirs
                 
             raise_desc(DPSemanticError, msg)
         found = self.file_to_contents[match]
@@ -415,7 +413,7 @@ class MCDPLibrary(object):
             assert isinstance(f, str)
             if os.path.islink(f):
                 if not os.path.exists(f):
-                    msg = 'Ignoring broken link %s' % f
+                    msg = f"Ignoring broken link {f}"
                     logger.warning(msg)
                     continue 
             self._update_file(f, from_search_dir=d)
@@ -441,8 +439,8 @@ class MCDPLibrary(object):
         """ from_search_dir: from whence we arrived at this file. """
         if not os.path.exists(f):
             msg = 'File does not exist:'
-            msg += '\n filename: %s' % f
-            msg += '\n from_search_dir: %s' % from_search_dir
+            msg += f"\n filename: {f}"
+            msg += f"\n from_search_dir: {from_search_dir}"
             raise ValueError(msg)
         basename = os.path.basename(f)
         check_isinstance(basename, str)
@@ -462,8 +460,8 @@ class MCDPLibrary(object):
             if not expected:
                 if res['realpath'] == realpath1:
                     msg = 'File %r reached twice.' % basename
-                    msg += '\n  now from %s' % from_search_dir
-                    msg += '\n prev from %s' % self.file_to_contents[basename]['from_search_dir']
+                    msg += f"\n  now from {from_search_dir}"
+                    msg += f"\n prev from {self}".file_to_contents[basename]['from_search_dir']
                     if not strict:
                         logger.warning(msg + "\n" +
                                        format_obs(dict(path1=path1,

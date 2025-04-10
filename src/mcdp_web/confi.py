@@ -29,8 +29,8 @@ def describe_mcdpweb_params(dp):
     dp.add_string('url_base_internal', default=None)
     dp.add_string('url_base_public', default=None)
     for p in ['facebook', 'google', 'linkedin', 'github', 'amazon']:
-        dp.add_string('%s_consumer_key' % p, default=None)
-        dp.add_string('%s_consumer_secret' % p, default=None)
+        dp.add_string(f"{p}_consumer_key", default=None)
+        dp.add_string(f"{p}_consumer_secret", default=None)
     
     # deprecated
     dp.add_bool('delete_cache', default=True, help='(deprecated)')

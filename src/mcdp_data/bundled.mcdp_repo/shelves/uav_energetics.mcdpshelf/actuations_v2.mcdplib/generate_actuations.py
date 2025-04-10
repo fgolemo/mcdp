@@ -34,9 +34,9 @@ def go():
     for name, v in types.items():
         s2 = string.Template(template).substitute(v) 
 
-        print s2
+        print(s2)
         # ndp = parse_ndp(s2)
-        model_name = 'actuation_%s' % name
+        model_name = f"actuation_{name}"
         fname = model_name + '.mcdp'
         with open(fname, 'w') as f:
             f.write(s2)
@@ -45,7 +45,7 @@ def go():
 
     ss = """
         choose(\n%s\n)
-    """ % ",\n".join("%s:(load %s)" % (g,g) for g in good)
+    f""" % ",\n".join("{g}:(load {g})" for g in good)
     with open('actuation.mcdp', 'w') as f:
         f.write(ss)
 

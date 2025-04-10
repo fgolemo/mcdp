@@ -56,7 +56,7 @@ def check_canonical2(): # change
     dp = ndp.get_dp()
     print(dp.repr_long())
     I = dp.get_imp_space()
-    print('I: %s' % I)
+    print(f"I: {I}")
 
 
 

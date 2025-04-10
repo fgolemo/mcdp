@@ -27,18 +27,18 @@ class PlotterUR2(Plotter):
             isinstance(space.P[0], RcompUnits) and isinstance(space.P[1], RcompUnits):
             self.P_to_S = lambda x: x            
         else:   
-            #logger.debug('space = %s ; P = %s; R2 = %s' % (space,space.P,R2))
+            #logger.debug(f"space = {space} ; P = {space.P}; R2 = {R2}")
             try:
                 tu.check_leq(P, self.R2)
             except NotLeq as e:
-                msg = ('cannot convert to R^2 from %s' % space) 
+                msg = (f"cannot convert to R^2 from {space}") 
                 raise_wrapped(NotPlottable, e, msg, compact=True)
     
             self.P_to_S, _f2 = tu.get_embedding(P, self.R2)
             
     def get_xylabels(self, space):
         P = space.P
-        return '%s' % P[0], '%s' % P[1]
+        return f"{P}"[0], f"{P}"[1]
 
     @contract(returns='seq[4]')
     def axis_for_sequence(self, space, seq):

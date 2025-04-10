@@ -19,7 +19,7 @@ class Instance(object):
         
     def create_user(self, username):
         db_view = self.hi.db_view
-        name = '%s %s' % (username, username)
+        name = f"{username} {username}"
         u = DB.user.generate_empty(info=dict(name=name))
         db_view.user_db.users[username] = u
         
@@ -68,11 +68,11 @@ class ComplicatedTestCase(object):
         for repo_name in repo_names:
             d = os.path.join(self.root, 'remotes', repo_name)
             create_empty_repo_from_schema(branch=upstream, dirname=d, schema=DB.repo, disk_map=DB.dm)
-            self.repo_root[repo_name] = 'file://%s/.git' % os.path.abspath(d)
+            self.repo_root[repo_name] = f"file://{os}/.git".path.abspath(d)
             
         user_db_dir = os.path.join(self.root, 'remotes', 'user_db')
         create_empty_repo_from_schema(branch=upstream, dirname=user_db_dir, schema=DB.user_db, disk_map=DB.dm)
-        self.repo_root['user_db'] = 'file://%s/.git' % os.path.abspath(user_db_dir)
+        self.repo_root['user_db'] = f"file://{os}/.git".path.abspath(user_db_dir)
         
         self.instances = {} 
     

@@ -112,5 +112,5 @@ def feat_import5():
     context = lib._generate_context_with_hooks()
     _model2 = lib.load_ndp('model1', context)
     for w in context.warnings:
-        print w.format_user()
+        print(w.format_user())
     assert_equal(len(context.warnings), 1)

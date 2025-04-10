@@ -40,7 +40,7 @@ class Librarian(object):
     def find_libraries(self, dirname):
         if is_python_module_name(dirname):
             package = dir_from_package_name(dirname)
-            logger.info('%s -> %s' % (dirname, package))
+            logger.info(f"{dirname} -> {package}")
             dirname = package
             
         if dirname.endswith('.' + MCDPConstants.library_extension):
@@ -79,11 +79,11 @@ class Librarian(object):
             entry = self.libraries[short]
             if entry['path'] != data['path']:
                 msg = 'I already know library "%s".\n' % short
-                msg += 'Current entry path:  %s\n' % data['path']
-                msg += 'Previous entry path: %s\n' % entry['path']
+                msg += f"Current entry path:  {data}\n"['path']
+                msg += f"Previous entry path: {entry}\n"['path']
                 raise_desc(ValueError, msg)
             else:
-                msg = 'Reached library "%s" twice (path = %s).' % (short, path)
+                msg = f"Reached library "{short}" twice (path = {path})."
                 logger.debug(msg)
         self.libraries[short] = data
         
@@ -109,8 +109,7 @@ class Librarian(object):
         check_isinstance(libname, str)
         """ hook to pass to MCDPLibrary instances to find their sisters. """
         if not libname in self.libraries:
-            msg = ('Cannot find library "%s". Available: %s.' % 
-                   (libname, format_list(sorted(self.libraries))))
+            msg = (f"Cannot find library "{libname}". Available: {format_list(sorted(self.libraries}.")))
             raise_desc(DPSemanticError, msg)
         l = self.libraries[libname]['library']
         return l

@@ -67,13 +67,13 @@ class MakeFigures(object):
         for _f in formats0:
             assert len(_f) >= 3, (formats, formats0)
             if not _f in available:
-                msg = 'Format %s not provided.' % _f
+                msg = f"Format {_f} not provided."
                 raise_desc(ValueError, msg, available=available)
  
         res = formatter.get(self, formats)
         
 #         if not isinstance(res, tuple) and len(res) == len(formats):
-#             msg = 'Invalid result of %s' % name
+#             msg = f"Invalid result of {name}"
 #             raise_desc(ValueError, msg, res=res)
 #         
         if isinstance(formats, str):

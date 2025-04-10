@@ -70,10 +70,10 @@ class RcompBase(Poset):
         if not isinstance(x, float):
             raise_desc(NotBelongs, 'Not a float.', x=x, type_x=type(x))
         if not np.isfinite(x):
-            msg = 'Not finite and not equal to top (%s).' % self.top
+            msg = f'Not finite and not equal to top ({self.top}).'
             raise_desc(NotBelongs, msg, x=x)
         if not 0 <= x:
-            msg = '%s ≰ %s' % (0, x)
+            msg = f'{0} ≰ {x}'
             raise_desc(NotBelongs, msg, x=x)
 
         return True
@@ -138,7 +138,7 @@ class RcompBase(Poset):
         else:
             # TODO: add parameter
             if x == int(x):
-                return '%d' % int(x)
+                return f'{int(x)}'
             else:
                 if x == finfo.tiny:
                     return 'tiny'
@@ -151,7 +151,7 @@ class RcompBase(Poset):
 
                 # s = '%.5f' % x
                 # s = '%.10f' % x
-                s = '%f' % x
+                s = f'{x:f}'
                 
                 # remove trailing 0s
                 s = s.rstrip('0')
@@ -180,7 +180,7 @@ class RcompBase(Poset):
             self.belongs(a)
             self.belongs(b)
         if not self._leq(a, b):
-            msg = '%s ≰ %s' % (a, b)
+            msg = f'{a} ≰ {b}'
             raise NotLeq(msg)
 
 
@@ -193,7 +193,7 @@ class RcompBase(Poset):
 
     def check_equal(self, x, y):
         if not x == y:
-            raise NotEqual('%s != %s' % (x, y))
+            raise NotEqual(f'{x} != {y}')
 
 
 class Rcomp(RcompBase):
@@ -282,7 +282,7 @@ class Rbicomp(Poset):
             assert isinstance(x, float)
             # TODO: add parameter
             if x == int(x):
-                return '%d' % int(x)
+                return f'{int(x)}'
             else:
                 if x == finfo.tiny:
                     return 'tiny'
@@ -293,9 +293,7 @@ class Rbicomp(Poset):
                 if x == finfo.max:
                     return 'max'
 
-                s = '%.5f' % x
-                s = '%.10f' % x
-                # s = '%f' % x
+                s = f'{x:.10f}'
                 # remove trailing 0s
                 s = s.rstrip('0')
                 return s
@@ -318,12 +316,12 @@ class Rbicomp(Poset):
 
     def check_leq(self, a, b):
         if not self._leq(a, b):
-            msg = '%s ≰ %s' % (a, b)
+            msg = f'{a} ≰ {b}'
             raise NotLeq(msg) 
 
     def check_equal(self, x, y):
         if not x == y:
-            raise NotEqual('%s != %s' % (x, y))
+            raise NotEqual(f'{x} != {y}')
 
 
 def Rcomp_multiply_upper_topology_seq(As, values, C):
@@ -349,7 +347,7 @@ def Rcomp_multiply_upper_topology_seq(As, values, C):
     from mcdp_posets.rcomp_units import RcompUnits
     if isinstance(C, RcompUnits):
         if Cobt.units != C.units:
-            msg = 'Expected %s, obtained %s.' % (C, Cobt)
+            msg = f'Expected {C}, obtained {Cobt}.'
             raise_desc(DPInternalError, msg, As=As, values=values, C=C)
             
     return value

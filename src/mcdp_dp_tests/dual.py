@@ -37,8 +37,8 @@ def dual01_chain(id_dp, dp):
                 print('NotSolvableNeedsApprox - doing  lower bound ')
                 n = 5
                 dpL, dpU = get_dp_bounds(dp, nl=n, nu=n)
-                dual01_chain(id_dp+'_L%s'%n, dpL)
-                dual01_chain(id_dp+'_U%s'%n, dpU)
+                dual01_chain(id_dp+f"_L{n}", dpL)
+                dual01_chain(id_dp+f"_U{n}", dpU)
                 return
             
             LF = LowerSets(F)
@@ -52,7 +52,7 @@ def dual01_chain(id_dp, dp):
                 for lf in lfchain:
                     LF.belongs(lf)
             except NotSolvableNeedsApprox as e:
-                print('skipping because %s'  % e)
+                print(f"skipping because {e}")
                 return
         
             try:
@@ -67,13 +67,13 @@ def dual01_chain(id_dp, dp):
             
             for lf, r in zip(lfchain, rchain):
                 print('')
-                print('r: %s' % R.format(r))
-                print('lf = h*(r) = %s' % LF.format(lf))
+                print(f"r: {R}".format(r))
+                print(f"lf = h*(r) = {LF}".format(lf))
                 
                 for f in lf.maximals:
-                    print('  f = %s' % F.format(f))
+                    print(f"  f = {F}".format(f))
                     f_ur = dp.solve(f)
-                    print('  f_ur = h(f) =  %s' % UR.format(f_ur))
+                    print(f"  f_ur = h(f) =  {UR}".format(f_ur))
                      
                     try:
                         f_ur.belongs(r)

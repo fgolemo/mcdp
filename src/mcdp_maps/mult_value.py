@@ -42,7 +42,7 @@ class MultValueMap(Map):
         Map.__init__(self, dom=dom, cod=cod)
 
     def __repr__(self):
-        return 'MultValueMap(%s)' % (self.unit.format(self.value))
+        return f"MultValueMap({self.unit.format(self.value})")
      
     def repr_map(self, letter):
         return repr_map_multvalue(letter, self.unit, self.value)
@@ -50,10 +50,10 @@ class MultValueMap(Map):
     def diagram_label(self):
         from mcdp_posets.rcomp_units import format_pint_unit_short
         if is_top(self.unit, self.value):
-            label = '× %s' % self.unit.format(self.value)
+            label = f"× {self}".unit.format(self.value)
         else:
             assert isinstance(self.value, float)
-            label = '× %.5f %s' % (self.value, format_pint_unit_short(self.unit.units))
+            label = f"× %.5f {self.value}")
         return label
 
     def _call(self, x):
@@ -132,7 +132,7 @@ class InvMultValueMap(Map):
                                                      self.space.format(self.value))
  
     def diagram_label(self):
-        return "/ %s" % self.space.format(self.value)
+        return f"/ {self}".space.format(self.value)
 
 
 class InvMultValueNatMap(Map):
@@ -167,7 +167,7 @@ class InvMultValueNatMap(Map):
         return repr_map_invmultvalue(letter, self.dom, self.value)
     
     def diagram_label(self):
-        return "/ %s" % self.dom.format(self.value)
+        return f"/ {self}".dom.format(self.value)
 ### InvMultDualValue
 
 

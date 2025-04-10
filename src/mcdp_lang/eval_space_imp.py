@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
 from contracts.utils import raise_desc, check_isinstance
-from mcdp_lang.eval_warnings import MCDPWarnings, warn_language,\
+from .eval_warnings import MCDPWarnings, warn_language,\
     warnings_copy_from_child_make_nested2
 from mcdp_posets import (
     FiniteCollectionsInclusion, FinitePoset, GenericInterval, Int, LowerSets,
@@ -42,6 +42,8 @@ def eval_space(r, context):
         CDP.AddBottom: eval_space_addbottom,
     }
 
+    # In Python 3, items() returns a view object which is memory efficient
+    # Only use list() if we need to modify the dictionary during iteration
     for klass, hook in cases.items():
         if isinstance(r, klass):
             return hook(r, context)
@@ -127,7 +129,7 @@ def express_vu_in_isomorphic_space(vb, va):
 
 
 def eval_space_interval(r, context):
-    from mcdp_lang.eval_constant_imp import eval_constant
+    from .eval_constant_imp import eval_constant
     va = eval_constant(r.a, context)
     vb = eval_constant(r.b, context)
     vb2 = express_vu_in_isomorphic_space(vb, va)
@@ -203,7 +205,7 @@ def eval_poset_load(r, context):
         load_arg = arg.value
         context2 = context.child()
         res = context2.load_poset(load_arg)
-        msg = 'While loading poset %r:' % (load_arg)
+        msg = f'While loading poset {load_arg!r}:'
         warnings_copy_from_child_make_nested2(context, context2, r.where, msg)
         return res
 
@@ -218,7 +220,7 @@ def eval_poset_load(r, context):
         context2 = context.child()
         res = library.load_poset(name, context2)
         
-        msg = 'While loading poset %r from library %r:' % (name, libname)
+        msg = f'While loading poset {name!r} from library {libname!r}:'
         warnings_copy_from_child_make_nested2(context, context2, r.where, msg)
         return res
     

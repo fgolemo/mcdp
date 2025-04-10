@@ -28,7 +28,7 @@ class OptimizationState(object):
     def __init__(self, opt, options, context, executed, forbidden, lower_bounds, ur,
                  creation_order):
 
-        print('CREATED %s' % creation_order)
+        print(f"CREATED {creation_order}")
         self.opt = opt
         self.options = options
 
@@ -65,7 +65,7 @@ class OptimizationState(object):
 
         for r, lb in lower_bounds.items():
             R = self.context.get_rtype(r)
-            self.info('lb %s >= %s' % (r, lb), quiet=True)
+            self.info(f"lb {r} >= {lb}", quiet=True)
 
         self.num_resources_need_connecting = self.compute_num_resources_need_connecting()
         self.creation_order = creation_order
@@ -85,7 +85,7 @@ class OptimizationState(object):
     def info(self, msg, quiet=False):
         """ Writes a message for this node. """
         if not quiet:
-            print('#%s: %s' % (self.creation_order, msg))
+            print(f"#{self.creation_order}: {msg}")
         self._msg += msg
         self._msg += "\n"
 
@@ -153,11 +153,11 @@ class OptimizationState(object):
         for r in unconnected:
             r_actions = []
             R = self.context.get_rtype(r)
-            # print('need to look for somebody implementing %s' % R)
+            # print(f"need to look for somebody implementing {R}")
             lb = self.lower_bounds[r]
             options = self.opt.get_providers(R=R, lb=lb)
             if not options:
-                # self.info('No new providers can provide for %s %s' % (r, lb))
+                # self.info(f"No new providers can provide for {r} {lb}")
                 pass
             else:
                 for id_ndp, fname in options:
@@ -187,8 +187,8 @@ class OptimizationState(object):
             lb = self.lower_bounds[r]
             if not r_actions:
                 # this is a resource that cannot be satisfied...
-                msg = ('Nobody can provide for resource %s %s and no unconnected compatible' % (r, lb))
-                msg += '\n unconn: %s' % unconnected_fun
+                msg = (f"Nobody can provide for resource {r} {lb} and no unconnected compatible")
+                msg += f"\n unconn: {unconnected_fun}"
                 self.info(msg)
                 return []
 
@@ -202,14 +202,14 @@ class OptimizationState(object):
 
                 if isinstance(action, ActionConnect):
                     # If there is only one available we do that first
-                    self.info('There is only one action available for %s' % (r.__str__()))
+                    self.info(f"There is only one action available for {r.__str__(}"))
                     return r_actions
 
         for r, r_actions in r2actions.items():
 
             if len(r_actions) == 1:
                 # If there is only one available we do that first
-                self.info('There is only one action available for %s' % (r.__str__()))
+                self.info(f"There is only one action available for {r.__str__(}"))
                 return r_actions
 
         # concatenate all
@@ -236,8 +236,8 @@ def would_introduce_cycle(context, f, r):
     c2 = len(cycles2)
 #     if c1 != c2:
 #         print G2.edges()
-#         print('c1: %s' % cycles1)
-#         print('c2: %s' % cycles2)
+#         print(f"c1: {cycles1}")
+#         print(f"c2: {cycles2}")
 
     return c1 != c2
 

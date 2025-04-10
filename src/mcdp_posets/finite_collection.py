@@ -34,4 +34,12 @@ class FiniteCollection(object):
         contents = ", ".join(self.S.format(m)
                         for m in sorted(self.elements))
 
-        return "{%s}" % contents
+        return f"{{{contents}}}"
+        
+    def __eq__(self, other):
+        if not isinstance(other, FiniteCollection):
+            return False
+        return self.elements == other.elements and self.S == other.S
+        
+    def __hash__(self):
+        return hash((self.elements, self.S))

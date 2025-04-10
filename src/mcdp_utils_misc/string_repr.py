@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
+# Now that we have fixed PyContracts for Python 3, we can import directly
 from contracts.utils import indent
 
 def indent_plus_invisibles(x, c='  |'):
-    return indent(make_chars_visible(x),c)
+    return indent(make_chars_visible(x), c)
     
 def make_chars_visible(x):
     """ Replaces whitespaces ' ' and '\t' with '␣' and '⇥' """

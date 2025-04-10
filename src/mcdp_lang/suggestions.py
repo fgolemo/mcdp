@@ -89,25 +89,25 @@ def correct(x, parents):  # @UnusedVariable
     if isinstance(x, CDP.NewFunction) and x.keyword is None:
         # name = x.name.value # no! name is interpreted (expanded) 
         name = x.name.where.get_substring()
-        yield name, 'provided %s' % name
+        yield name, f"provided {name}"
     
     if isinstance(x, CDP.NewResource) and x.keyword is None:
         # name = x.name.value # no! name is interpreted (expanded) 
         name = x.name.where.get_substring()
-        yield name, 'required %s' % name
+        yield name, f"required {name}"
     
     if isinstance(x, CDP.Resource) and isinstance(x.keyword, CDP.DotPrep):
         dp, s = x.dp.where.get_substring(), x.s.where.get_substring()
-        r = '%s.*\..*%s' % (dp, s)
+        r = f"{dp}.*\..*{s}"
         old = match_in_x_string(r)
-        new = '%s required by %s' % (s, dp)
+        new = f"{s} required by {dp}"
         yield old, new
     
     if isinstance(x, CDP.Function) and isinstance(x.keyword, CDP.DotPrep):
         dp, s = x.dp.where.get_substring(), x.s.where.get_substring()
-        r = '%s.*\..*%s' % (dp, s)
+        r = f"{dp}.*\..*{s}"
         old = match_in_x_string(r)
-        new = '%s provided by %s' % (s, dp)
+        new = f"{s} provided by {dp}"
         yield old, new
     
     if isinstance(x, CDP.RcompUnit):
@@ -152,7 +152,7 @@ def correct(x, parents):  # @UnusedVariable
 def suggestions_build_problem(x):
     x_string = x.where.string[x.where.character:x.where.character_end]
     offset = x.where.character
-    #print 'build complete %d  %r' %(offset, x.where.string)
+    #print f"build complete {offset}  %r"
     TOKEN = 'mcdp'
     first_appearance_mcdp_in_sub = x_string.index(TOKEN)
     first_appearance_mcdp_in_orig = offset + first_appearance_mcdp_in_sub
@@ -205,13 +205,13 @@ def suggestions_build_problem(x):
         # ignore if empty
         if 0 == len(line_info.line_string.strip()):
             continue 
-#         print(' --- line %s' % str(line_info))
+#         print(f" --- line {str}"(line_info))
         i = line_info.character
         that_line = line_info.line_string
         
         assert that_line == x.where.string[line_info.character:line_info.character_end]
         
-#             print('%d its line: %r' % (i, that_line))
+#             print(f"{i} its line: %r")
         # not the last with only a }
         
         # index of current line start in global string
@@ -327,7 +327,7 @@ def get_suggestion_identifier(s0):
     if s0 != s0.strip():
         msg = 'This is not an identifier: %r' % s0
         raise ValueError(msg)
-    #print('get_suggestion_identifier(%s)' % s0)
+    #print(f"get_suggestion_identifier({s0})")
     suggestions = []
     s = s0
     while True:
@@ -345,7 +345,7 @@ def get_suggestion_identifier(s0):
         assert sub == what, (sub, what)
         s = s[:i] + replacement + s[i+len(what):]
         
-    #print('suggestions: %s  s: %r  s0: %r' % (suggestions, s, s0))
+    #print(f"suggestions: {suggestions}  s: %r  s0: %r")
     if not suggestions:
         return None
     elif len(suggestions) == 1:
@@ -382,7 +382,7 @@ def get_suggestion_identifier0(s):
                 return IdentifierSuggestion(i=i, what=name, replacement=letter)
             else:
                 pass
-                #print('skipping present %r for %s %s' % (name, ok1,ok2) )
+                #print(f"skipping present %r for {name} {ok1}" )
     return None
     
 def get_suggestions(xr):
@@ -396,7 +396,7 @@ def get_suggestions(xr):
             a, b = suggestion
             if isinstance(a, str):
                 if not a in s:
-                    msg = 'Invalid suggestion %s. Could not find piece %r in %r.' % (suggestion, a, s)
+                    msg = f"Invalid suggestion {suggestion}. Could not find piece %r in %r."
                     raise DPInternalError(msg)
                 a_index = s.index(a)
                 a_len = len(a) # in bytes
@@ -426,7 +426,7 @@ def remove_redundant_suggestions(subs):
         chars = range(w.character, w.character_end)
         
         if any(_ in characters_affected for _ in chars):
-            #print('skipping %r - %s because of conflict' % (w, r))
+            #print(f"skipping %r - {w} because of conflict")
             pass
         else:
             res.append(s)
@@ -447,13 +447,13 @@ def apply_suggestions(s, subs):
     
     for where, replacement in sorted(subs, key=order):
         assert where.string == s, (where.string, s)
-        # print ('replace %d to %d with %r' % (where.character, where.character_end, replacement))
+        # print (f"replace {where.character} to {where.character_end} with %r")
         # list of indices of characters to remove
         seq = list(range(where.character, where.character_end))
         
         # offset = chars.index(seq[0])
         if where.character not in chars:
-            msg = 'Oops, char %d not in %s' % (where.character, chars)
+            msg = f"Oops, char {chars} not in {where.character}"
             raise NotImplemented(msg)
         offset = chars.index(where.character)
 

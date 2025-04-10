@@ -36,10 +36,10 @@ class HostCache(object):
                 t1 = time.clock()
                 dms = 1000 * (t1-t0)
                 self.parsing_cache_time_ms[key] = dms
-                logger.warn('Parsing %s: %s ms' % (thing_name, dms))
+                logger.warn(f"Parsing {thing_name}: {dms} ms")
             else:
                 dms =  self.parsing_cache_time_ms[key]
-                logger.debug('Parsing %s: saved %s' % (thing_name, dms))
+                logger.debug(f"Parsing {thing_name}: saved {dms}")
                 
             parsed = self.parsing_cache[key] 
             
@@ -68,11 +68,11 @@ def get_source(db_view, repo_name, shelf_name, library_name, spec_name, thing_na
     try:
         match = get_soft_match(thing_name, list(things))
     except KeyError:
-        msg = 'Soft match failed: Could not find %r in %s.' % (thing_name, spec_name)
+        msg = f"Soft match failed: Could not find %r in {thing_name}."
         available = sorted(things)
 
         if available:
-            msg += ("\n Available %s: %s." % (spec_name, format_list(sorted(available))))
+            msg += (f"\n Available {spec_name}: {format_list(sorted(available}.")))
         else:
             msg += "\n None available."
         
@@ -90,8 +90,7 @@ def get_source(db_view, repo_name, shelf_name, library_name, spec_name, thing_na
         data = things[match]
         spec = specs[spec_name]
         basename  = match + '.' + spec.extension
-        realpath = ('%s in library %r in shelf %r in repo %r' % 
-                    (basename, library_name, shelf_name, repo_name)) 
+        realpath = (f"{basename} in library %r in shelf %r in repo %r") 
         return dict(data=data, realpath=realpath)
     
     

@@ -19,7 +19,7 @@ fn = '../primitivedps.py'
 for func0 in all_primitivedps_tests:
     ext = MCDPConstants.ext_primitivedps
     func = func0.__name__
-    fn = '%s.%s' % (func, ext)
+    fn = f"{func}.{ext}"
     contents = """
 code mcdp_dp_tests.primitivedps.%s
 """ % func

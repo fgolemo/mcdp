@@ -109,10 +109,10 @@ class Session(object):
                 self.shelves_available[sname] = shelf
             else:
                 #print('hiding shelf %r from %r' % (sname, user))
-                print shelf.get_acl()
+                print(shelf.get_acl())
         
-        #print('shelves all: %s' % list(self.shelves_all))
-        #print('shelves available: %s' % list(self.shelves_available))
+        #print(f"shelves all: {list}"(self.shelves_all))
+        #print(f"shelves available: {list}"(self.shelves_available))
         
         for sname in ui.get_subscriptions():
             if sname in self.shelves_available:
@@ -122,14 +122,14 @@ class Session(object):
                     self.shelves_used[sname] = self.shelves_available[sname]
                 else:
                     msg = 'User %r does not have %r for %r' % (ui.username, Privileges.READ, sname)
-                    msg += '\n%s' % acl
+                    msg += f"\n{acl}"
                     logger.error(msg)
             else:
                 msg = 'Could not find shelf %r to which user %r is subscribed to.' % (sname, ui.username)
-                msg += '\n Available: %s' % list(self.shelves_available)
+                msg += f"\n Available: {list}"(self.shelves_available)
                 logger.error(msg)
 
-        #print('shelves used: %s' % list(self.shelves_used))
+        #print(f"shelves used: {list}"(self.shelves_used))
     
         self.librarian = Librarian()
         
@@ -144,7 +144,7 @@ class Session(object):
                            (shelf_name, repo_name, o))
                     
                     for r in [o, repo_name]:
-                        msg += '\n Shelves for %r: %s' % (r, format_list(sorted(self.repos[r].shelves)))
+                        msg += f"\n Shelves for %r: {r}"))
                     
                     raise ValueError(msg)
                 self.shelfname2reponame[shelf_name] = repo_name
@@ -175,7 +175,7 @@ class Session(object):
         ''' Returns the name of the shelf for the given libname. '''
         if not libname in self.libname2shelfname:
             msg = 'Could not find library %r.' % libname
-            msg += '\n Available: %s' % sorted(self.libname2shelfname)
+            msg += f"\n Available: {sorted}"(self.libname2shelfname)
             raise NoSuchLibrary(msg)
         return self.libname2shelfname[libname]
     

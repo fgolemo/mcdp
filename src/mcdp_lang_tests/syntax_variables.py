@@ -92,7 +92,7 @@ def check_variables06():
     }
     """
     expect = "Variable name 'x' already used once"
-    print assert_parse_ndp_semantic_error(s, expect)
+    print(assert_parse_ndp_semantic_error(s, expect))
 
 @comptest
 def check_variables07():
@@ -107,7 +107,7 @@ def check_variables07():
         variable x [Nat]
     }
     """
-    print assert_parse_ndp_semantic_error(s, 'already used as a resource')
+    print(assert_parse_ndp_semantic_error(s, 'already used as a resource'))
 
 
 @comptest
@@ -123,7 +123,7 @@ def check_variables08():
         variable x [Nat]
     }
     """
-    print assert_parse_ndp_semantic_error(s, 'already used as a functionality')
+    print(assert_parse_ndp_semantic_error(s, 'already used as a functionality'))
 
 
 @comptest
@@ -174,7 +174,7 @@ mcdp {
     dp = ndp.get_dp()
     for i in range(6):
         res = dp.solve(i)
-        print('%2d: %s' % (i, res))
+        print(f"%2d: {i}")
     
 
 @comptest
@@ -233,7 +233,7 @@ mcdp {
 }
     """
     expect = "Could not find required resource expression 'notfound'"
-    print assert_parse_ndp_semantic_error(s, expect)
+    print(assert_parse_ndp_semantic_error(s, expect))
     
     s = """
 mcdp {
@@ -245,7 +245,7 @@ mcdp {
 }
     """
     expect = "The name 'x' is already used by a variable"
-    print assert_parse_ndp_semantic_error(s, expect)
+    print(assert_parse_ndp_semantic_error(s, expect))
 
     s = """
 mcdp {
@@ -257,7 +257,7 @@ mcdp {
 }
     """
     expect = "The name 'x' is already used by a variable"
-    print assert_parse_ndp_semantic_error(s, expect)
+    print(assert_parse_ndp_semantic_error(s, expect))
 
 @comptest
 def check_variables15():

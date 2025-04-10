@@ -22,7 +22,7 @@ def poset_minima(elements, leq):
         function. For small sets only - O(n^2). """
     n = len(elements)
     
-    with timeit('poset_minima with n = %d' % n, minimum=0.5):
+    with timeit(f'poset_minima with n = {n}', minimum=0.5):
         if n == 1:
             return set(elements)
     

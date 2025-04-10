@@ -108,6 +108,6 @@ def eval_template_spec(r, context):
 #     libname = context.get_default_library_name()
 #     if libname is None:
 #         raise ValueError()
-#     print('libname: %s' % libname)
+#     print(f"libname: {libname}")
     return TemplateForNamedDP(parameters=params, template_code=ndpt)
 

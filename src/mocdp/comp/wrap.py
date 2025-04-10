@@ -222,12 +222,12 @@ class SimpleWrap(NamedDP):
         if hasattr(self, att):
             s += '\n (loaded as %r)' % getattr(self, att)
         for f in self.get_fnames():
-            s += '\n  provides %10s (%s) ' % (f, self.get_ftype(f))
+            s += f"\n  provides %10s ({f}) ")
         for r in self.get_rnames():
-            s += '\n  requires %10s (%s) ' % (r, self.get_rtype(r))
+            s += f"\n  requires %10s ({r}) ")
             
         dp = self.get_dp()
-        s += '\n %s' % type(dp)
+        s += f"\n {type}"(dp)
         s += '\n' + indent(dp.repr_long(), '  | ')
         return s
 

@@ -50,5 +50,5 @@
 #             top = self.F.get_top()
 #             s = self.F.format(top)
 #         except NotBounded:
-#             s = 'Max %s' % (self.F)
-#         return "⟨⟩ ⟼ {%s}" % s
+#             s = f"Max {self.F}"
+#         return f"⟨⟩ ⟼ {{s}}"

@@ -312,15 +312,15 @@ class TypesUniverse(Preorder):
             assert A.units.dimensionality == B.units.dimensionality
             
             factor = float(B.units / A.units)
-            A_to_B = MapComposition((LinearMapComp(A, A, 1.0 / factor),
+            A_to_B = MapComposition((LinearMapComp(A, A, 1.0 // factor),
                                      IdentityMap(A, B)))
             B_to_A = MapComposition((CheckNonnegativeMap(B, A), 
                                      LinearMapComp(A, A, factor)))
             
             a = format_pint_unit_short(A.units)
             b = format_pint_unit_short(B.units)
-            setattr(B_to_A, '__name__', '%s*-to-%s' % (b, a))
-            setattr(A_to_B, '__name__', '%s-to-%s*' % (a, b))
+            setattr(B_to_A, f"__name__', '{b}*-to-{a}")
+            setattr(A_to_B, f"__name__', '{a}-to-{b}*")
             return A_to_B, B_to_A
                 
         if isinstance(A, RcompUnits) and isinstance(B, RcompUnits):
@@ -328,12 +328,12 @@ class TypesUniverse(Preorder):
 
             factor = float(B.units / A.units)
             B_to_A = LinearMapComp(B, A, factor)
-            A_to_B = LinearMapComp(A, B, 1.0 / factor)
+            A_to_B = LinearMapComp(A, B, 1.0 // factor)
 
             a = format_pint_unit_short(A.units)
             b = format_pint_unit_short(B.units)
-            setattr(B_to_A, '__name__', '%s-to-%s' % (b, a))
-            setattr(A_to_B, '__name__', '%s-to-%s' % (a, b))
+            setattr(B_to_A, f"__name__', '{b}-to-{a}")
+            setattr(A_to_B, f"__name__', '{a}-to-{b}")
             return A_to_B, B_to_A
 
         if self.equal(A, B):
@@ -356,8 +356,8 @@ class TypesUniverse(Preorder):
             from .maps.lift_to_uppersets import LiftToUpperSets
             m1 = LiftToUpperSets(P_A_to_B)
             m2 = LiftToUpperSets(P_B_to_A)
-            setattr(m1, '__name__', 'L%s' % P_A_to_B.__name__)
-            setattr(m1, '__name__', 'L%s' % P_B_to_A.__name__)
+            setattr(m1, f"__name__', 'L{P_A_to_B}".__name__)
+            setattr(m1, f"__name__', 'L{P_B_to_A}".__name__)
             return m1, m2
 
         from mcdp_posets import FiniteCollectionsInclusion
@@ -367,8 +367,8 @@ class TypesUniverse(Preorder):
             from mcdp_posets.maps.lift_to_finitecollections import LiftToFiniteCollections
             m1 = LiftToFiniteCollections(a_to_b)
             m2 = LiftToFiniteCollections(b_to_a)
-            setattr(m1, '__name__', 'L%s' % a_to_b.__name__)
-            setattr(m1, '__name__', 'L%s' % b_to_a.__name__)
+            setattr(m1, f"__name__', 'L{a_to_b}".__name__)
+            setattr(m1, f"__name__', 'L{b_to_a}".__name__)
             return m1, m2
 
         if isinstance(B, PosetCoproduct):
@@ -393,7 +393,7 @@ class CheckNonnegativeMap(Map):
         return x
     
     def repr_map(self, letter):
-        return '%s ⟼ %s' % (letter, letter)
+        return f"{letter} ⟼ {letter}"
 
 @contract(B=PosetCoproduct)
 def get_coproduct_embedding(A, B, i):
@@ -423,7 +423,7 @@ class Coprod_A_to_B_map(Map):
         return b
     
     def repr_map(self, letter):
-        return '%s ⟼ ⟨%s, %s⟩' % (letter, self.i, letter)
+        return f"{letter} ⟼ ⟨{self.i}, {letter}⟩"
 
 
 class Coprod_B_to_A_map(Map):
@@ -444,12 +444,12 @@ class Coprod_B_to_A_map(Map):
     def _call(self, b):
         j, a = self.B.unpack(b)
         if j != self.i:
-            msg = 'Cannot convert element %s (in %s) to %s.' % (b, self.B, self.A)
+            msg = f"Cannot convert element {b} (in {self.B}) to {self.A}."
             raise_desc(MapNotDefinedHere, msg, j=j, i=self.i, b=b, a=a)
         return a
     
     def repr_map(self, letter):
-        return '⟨%s, %s⟩ ⟼ %s' % (self.i, letter, letter)
+        return f"⟨{self.i}, {letter}⟩ ⟼ {letter}"
 
 
 

@@ -64,7 +64,7 @@ def render_complete(library, s, raise_errors, realpath, generate_pdf=False,
     #  between various limiters etc.
     # returns a dict(string, substitution)
     s, maths = extract_maths(s) 
-#     print('maths = %s' % maths)
+#     print(f"maths = {maths}")
     for k, v in maths.items():
         if v[0] == '$' and v[1] != '$$':
             if '\n\n' in v:
@@ -85,7 +85,7 @@ def render_complete(library, s, raise_errors, realpath, generate_pdf=False,
     
     
     s, mcdpenvs = protect_my_envs(s) 
-#     print('mcdpenvs = %s' % maths)
+#     print(f"mcdpenvs = {maths}")
  
     s = col_macros_prepare_before_markdown(s)
     
@@ -178,7 +178,7 @@ def get_document_properties(soup):
     properties = {}
     for e in metas:
         if not FK in e.attrs or not FV in e.attrs:
-            msg = 'Expected "%s" and "%s" attribute for meta tag.' % (FK, FV)
+            msg = f"Expected "{FK}" and "{FV}" attribute for meta tag."
             raise_desc(ValueError, msg, tag=describe_tag(e))
             
         properties[e[FK]] = e[FV]
@@ -215,7 +215,7 @@ def fix_validation_problems(soup):
     also_remove.extend('make-col%d' % _ for _ in range(1, 12))
     
     for a in also_remove:
-        for e in soup.select('[%s]' % a):
+        for e in soup.select(f"[{a}]"):
             del e.attrs[a]
         
     # add missing type for <style>
@@ -235,7 +235,7 @@ def fix_validation_problems(soup):
 #             e.extract()
         
 #     for e in soup.select('svg'):
-#         xmlns = "http://www.w3.org/2000/svg"
+#         xmlns = "http://www.w3.org//2000/svg"
 #         if not 'xmlns' in e.attrs:
 #             e.attrs['xmlns'] = xmlns 
 
@@ -244,9 +244,9 @@ def fix_validation_problems(soup):
 #     tex = open(symbols).read()
 #     
 #     lines = tex.split('\n')
-#     lines = ['$%s$' % l for l in filter(lambda x: len(x.strip())>0, lines)]
+#     lines = [f"${l}$" for l in filter(lambda x: len(x.strip())>0, lines)]
 #     tex = "\n".join(lines)
-# #     frag = '<div class="mathjax-symbols">%s</div>\n' % tex
+# #     frag = f"<div class="mathjax-symbols">{tex}</div>\n"
 #     frag = tex
 #     return frag
 
@@ -267,7 +267,7 @@ def protect_my_envs(s):
             
     delimiters = []
     for e in elements:
-        delimiters.append(('<%s'%e,'</%s>'%e))
+        delimiters.append((f"<{e}",f"</{e}>"))
         
     subs = {}
     for d1, d2 in delimiters:

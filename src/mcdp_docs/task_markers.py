@@ -31,6 +31,6 @@ def substitute_task_marker_p(p, sub, klass):
                 ns = NavigableString(s2)
                 element.replaceWith(ns)
     except AttributeError as e: # a bug with bs4
-        msg = 'Bug with descendants: %s' % e
+        msg = f"Bug with descendants: {e}"
         logger.debug(msg)
         pass

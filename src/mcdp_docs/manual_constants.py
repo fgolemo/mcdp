@@ -26,9 +26,9 @@ class MCDPManualConstants:
     keywords = ['co-design', 'optimization', 'systems']
     macros['KEYWORDS_PDF'] = "; ".join(keywords)
     macros['KEYWORDS_HTML'] = ", ".join(keywords)
-    macros['PRODUCER'] = 'PyMCDP %s + PrinceXML + pdftk' % mcdp.__version__
+    macros[f"PRODUCER'] = 'PyMCDP {mcdp} + PrinceXML + pdftk".__version__
     macros['GENERATOR'] = macros['PRODUCER']
-    macros['CREATOR'] = 'PyMCDP %s' % mcdp.__version__
+    macros[f"CREATOR'] = 'PyMCDP {mcdp}".__version__
     
     # D:19970915110347
     macros['CREATION_DATE_PDF'] = "D:" + now.strftime("%Y%m%d%H%M%S-05'00'")

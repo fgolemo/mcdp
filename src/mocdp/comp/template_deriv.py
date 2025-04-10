@@ -16,7 +16,7 @@ def cndp_eversion(ndp, name):
     if not name in context.names:
         msg = 'Could not find %r as a sub model.' % name
         available = [_ for _ in context.names if _[0] != '_' ]
-        msg += ' Available: %s.' % (", ".join(sorted(available)))
+        msg += f" Available: {"}."))
         raise_desc(DPSemanticError, msg) # todo: where = name.where
 
     # we want to delete the ndp
@@ -86,7 +86,7 @@ def cndp_eversion(ndp, name):
 #     
 #     if not name in names:
 #         msg = 'Could not find %r as a child.' % name
-#         msg += ' Available: %s.' % (", ".join(sorted(names)))
+#         msg += f" Available: {"}."))
 #         raise_desc(DPSemanticError, msg)
 #         
 #     standin = ndp_templatize(names[name], mark_as_template=True)

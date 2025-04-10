@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from nose.tools import assert_equal
+from .nose_compat import assert_equal
 
 from comptests.registrar import comptest
 from mcdp_dp.dp_transformations import get_dp_bounds
@@ -17,17 +17,17 @@ from .utils import assert_parse_ndp_semantic_error
 L = CDPLanguage
 
 
-ok(Syntax.integer_fraction, '1/2', L.IntegerFraction(num=1, den=2))
-syn(Syntax.integer_fraction, '1/2.0')
+ok(Syntax.integer_fraction, '1//2', L.IntegerFraction(num=1, den=2))
+syn(Syntax.integer_fraction, '1//2.0')
 syn(Syntax.integer_fraction, '1/')
 
 exponent = L.exponent('^')
 
-ok(Syntax.rvalue_power_expr, 'pow(x,1/2)',
+ok(Syntax.rvalue_power_expr, 'pow(x,1//2)',
     L.Power(keyword=L.PowerKeyword('pow'), op1=L.VariableRef('x'),
             exponent=L.IntegerFraction(num=1, den=2)))
 
-ok(Syntax.rvalue_power_expr, 'x ^ 1/2',
+ok(Syntax.rvalue_power_expr, 'x ^ 1//2',
     L.PowerShort(op1=L.VariableRef('x'),
             glyph=exponent,
             exponent=L.IntegerFraction(num=1, den=2)))
@@ -73,7 +73,7 @@ def check_power3():
         requires power [W]
 
         c = 1.0 W / N^2
-        power >= (lift ^ 2/1) * c
+        power >= (lift ^ 2//1) * c
     }""")
 
 @comptest
@@ -84,14 +84,14 @@ def check_power4():
         requires power [W]
 
         c = 2.0 W / N^2
-        power >= pow(lift, 2/1) * c
+        power >= pow(lift, 2//1) * c
     }""")
 
 @comptest
 def check_power5():
-    print parse_wrap_check("pow(lift, 2/1)", Syntax.rvalue_power_expr)
-    print parse_wrap_check("pow(lift, 2/1)", Syntax.rvalue)
-    print parse_wrap_check("power >= pow(lift, 2/1)", Syntax.constraint_expr_geq)
+    print(parse_wrap_check("pow(lift, 2//1)", Syntax.rvalue_power_expr))
+    print(parse_wrap_check("pow(lift, 2//1)", Syntax.rvalue))
+    print(parse_wrap_check("power >= pow(lift, 2//1)", Syntax.constraint_expr_geq))
 
 
     assert_semantic_error("""
@@ -99,7 +99,7 @@ def check_power5():
         provides lift [N]
         requires power [W]
 
-        power >= pow(lift, 2/1)
+        power >= pow(lift, 2//1)
     }""")
 
 @comptest
@@ -109,7 +109,7 @@ def check_power6():
         provides lift [N]
         requires power [W]
 
-        power >= pow(lift, 0/1)
+        power >= pow(lift, 0//1)
     }""", 'zero')
 
     assert_parse_ndp_semantic_error("""
@@ -117,7 +117,7 @@ def check_power6():
         provides lift [N]
         requires power [W]
 
-        power >= pow(lift, 1/0)
+        power >= pow(lift, 1//0)
     }""", 'zero')
  
 @comptest
@@ -127,7 +127,7 @@ def check_power7():
         provides lift [N]
         requires power [W]
 
-        required power >= (provided lift) ^ 0/1
+        required power >= (provided lift) ^ 0//1
     }""", 'zero')
 
     assert_parse_ndp_semantic_error("""
@@ -135,7 +135,7 @@ def check_power7():
         provides lift [N]
         requires power [W]
 
-        required power >= (provided lift) ^ 1/0
+        required power >= (provided lift) ^ 1//0
     }""", 'zero')
  
 
@@ -166,8 +166,8 @@ def check_power8():  # TODO: move to ther files
     Ru = dpU.solve(f)
     assert_equal(len(Rl.minimals), nl)
     assert_equal(len(Ru.minimals), nu)
-    print('Rl: %s' % UR.format(Rl))
-    print('Ru: %s' % UR.format(Ru))
+    print(f"Rl: {UR}".format(Rl))
+    print(f"Ru: {UR}".format(Ru))
     UR.check_leq(Rl, Ru)
     
     import numpy as np

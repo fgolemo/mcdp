@@ -36,7 +36,7 @@ def get_authomatic_config_(self):
     
     if self.options.facebook_consumer_key is not None:
         oauth2.Facebook.user_info_url = (
-            'https://graph.facebook.com/v2.5/me?fields=id,first_name,last_name,picture,email,'
+            'https://graph.facebook.com/v2.5//me?fields=id,first_name,last_name,picture,email,'
             'gender,timezone,location,middle_name,name_format,third_party_id,website,birthday,locale')
         CONFIG['facebook'] = {                   
                 'class_': oauth2.Facebook,
@@ -121,7 +121,7 @@ def view_authomatic_(self, config, e):
         
         s = "user info: \n"
         for k, v in result.user.__dict__.items():
-            s += '\n %s  : %s' % (k,v)
+            s += f"\n {k}  : {v}"
         logger.debug(s)
         
         next_location = config.get('next_location', e.root)
@@ -347,7 +347,7 @@ def get_candidate_user(user_db, result, provider_name):
     res['account_created'] = datetime.datetime.now()
     res['authentication_ids'] = [ {'provider': provider_name,
                                    'id': unique_id, 'password': None}]
-    logger.info('Reading picture %s' % picture)
+    logger.info(f"Reading picture {picture}")
     if picture is None:
         jpg = None
     else:
@@ -362,7 +362,7 @@ def get_candidate_user(user_db, result, provider_name):
             # local_filename, headers = urlretrieve(picture)
             with open(local_filename, 'rb') as f:
                 jpg = f.read()
-            logger.info('read %s bytes' % len(jpg)) 
+            logger.info(f"read {len} bytes"(jpg)) 
         except BaseException as exc:
             logger.error(exc)
             jpg = None
@@ -371,11 +371,11 @@ def get_candidate_user(user_db, result, provider_name):
             res[k] = res[k].encode('utf8')
     res['subscriptions'] = []
     res['groups'] = ['account_created_automatically',
-                     'account_created_using_%s' % provider_name]
+                     f"account_created_using_{provider_name}"]
     data = {'info': res,
             'images':{'user':{'jpg':jpg, 'png':None, 'svg': None, 'pdf': None}}} 
     
-#     logger.debug('new user:\n%s' % yaml_dump(data))
+#     logger.debug(f"new user:\n{yaml_dump}"(data))
     
     user = DB.view_manager.create_view_instance(DB.user, data)
     user.set_root()
@@ -385,7 +385,7 @@ def success_auth(self, request, username, next_location):
     if not username in self.hi.db_view.user_db:
         msg = 'Could not find user %r' % username
         raise Exception(msg)
-    logger.info('successfully authenticated user %s' % username)
+    logger.info(f"successfully authenticated user {username}")
     headers = remember(request, username)
     raise HTTPFound(location=next_location, headers=headers)
 
@@ -410,12 +410,12 @@ class MyWebObAdapter(WebObAdapter):
 # 
 # def transform_location(Location, url_base_internal, url_base_public):
 #     Location_parsed = urlparse.urlparse(Location)    
-# #     logger.info('redir url: %s' % str(Location_parsed))
+# #     logger.info(f"redir url: {str}"(Location_parsed))
 #     qs = dict(urlparse.parse_qsl(Location_parsed.query, keep_blank_values=1, strict_parsing=1))
-# #     logger.info('query: %s' % qs)
-# #     logger.info('query: %s' % type(qs))
+# #     logger.info(f"query: {qs}")
+# #     logger.info(f"query: {type}"(qs))
 #     redirect_uri = qs.get('redirect_uri',None)
-#     logger.info('redirect_uri: %s' % redirect_uri)
+#     logger.info(f"redirect_uri: {redirect_uri}")
 #     if redirect_uri is None:
 #         msg = 'Expected to see redirect_uri in response.'
 #         raise_desc(ValueError, msg, Location=Location, qs=qs)
@@ -426,9 +426,9 @@ class MyWebObAdapter(WebObAdapter):
 #         raise_desc(ValueError, msg, redirect_uri=redirect_uri, url_base_internal=url_base_internal)
 #     redirect_uri2 = redirect_uri.replace(url_base_internal, url_base_public)
 #     qs['redirect_uri'] = redirect_uri2
-# #     print('redirect_uri2: %s' % redirect_uri2)
+# #     print(f"redirect_uri2: {redirect_uri2}")
 #     query2 = urllib.urlencode(qs)
-# #     print('query2: %s' % query2)
+# #     print(f"query2: {query2}")
 #     
 #     scheme, netloc, path, params, _, fragment = Location_parsed
 #     Location2 = urlunparse((scheme, netloc, path, params, query2, fragment))
@@ -440,6 +440,6 @@ class MyWebObAdapter(WebObAdapter):
 #         if a == 'Location---':
 #             Location = b
 #             Location2 = transform_location(Location, url_base_internal, url_base_public)
-#             logger.warn('rewritten reposnse:\na %s\nb %s' % (Location, Location2))
+#             logger.warn(f"rewritten reposnse:\na {Location}\nb {Location2}")
 #             response.headerlist[i] = (a, Location2)
 #     return response

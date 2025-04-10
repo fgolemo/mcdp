@@ -44,9 +44,12 @@ class Single(Poset):
 
     def __eq__(self, other):
         return isinstance(other, Single) and other.element == self.element
+        
+    def __hash__(self):
+        return hash(self.element)
 
     def __repr__(self):
-        return "{%s}" % self.element
+        return f"{{{self.element}}}"
 
     def format(self, x):
         return x.__str__()

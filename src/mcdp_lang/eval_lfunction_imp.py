@@ -45,7 +45,7 @@ def eval_lfunction(lf, context):
                  CDP.SpecialConstant)
         
     if isinstance(lf, constants):
-        from mcdp_lang.eval_constant_imp import eval_constant
+        from .eval_constant_imp import eval_constant
         res = eval_constant(lf, context)
         assert isinstance(res, ValueWithUnits)
         return get_valuewithunits_as_function(res, context)
@@ -55,9 +55,9 @@ def eval_lfunction(lf, context):
     from .eval_lfunction_imp_label_index import eval_lfunction_label_index
     from .eval_lfunction_imp_label_index import eval_lfunction_tupleindexfun
     
-    from mcdp_lang.eval_uncertainty import eval_lfunction_FValueBetween
-    from mcdp_lang.eval_uncertainty import eval_lfunction_FValuePlusOrMinus
-    from mcdp_lang.eval_uncertainty import eval_lfunction_FValuePlusOrMinusPercent
+    from .eval_uncertainty import eval_lfunction_FValueBetween
+    from .eval_uncertainty import eval_lfunction_FValuePlusOrMinus
+    from .eval_uncertainty import eval_lfunction_FValuePlusOrMinusPercent
     cases = {
         CDP.Function: eval_lfunction_Function,
         CDP.NewResource: eval_lfunction_newresource,
@@ -84,6 +84,8 @@ def eval_lfunction(lf, context):
         CDP.SumFunctions: eval_fvalue_SumFunctions,
     }
 
+    # In Python 3, items() returns a view object which is memory efficient
+    # Only use list() if we need to modify the dictionary during iteration
     for klass, hook in cases.items():
         if isinstance(lf, klass):
             return hook(lf, context)
@@ -96,7 +98,7 @@ def eval_lfunction(lf, context):
             
             
 def eval_fvalue_SumFunctions(lf, context):
-    from mcdp_lang.eval_resources_imp import iterate_normal_ndps
+    from .eval_resources_imp import iterate_normal_ndps
     check_isinstance(lf, CDP.SumFunctions)
     fname = lf.fname.value
     
@@ -193,8 +195,7 @@ def eval_lfunction_variableref(lf, context):
 
     s = dummy_ndp.get_rnames()[0]
     
-    msg = ('Please use the more precise form "required %s" rather than simply "%s".'
-           % (lf.name, lf.name))
+    msg = f'Please use the more precise form "required {s}" rather than simply "{lf.name}".'
     warn_language(lf, MCDPWarnings.LANGUAGE_REFERENCE_OK_BUT_IMPRECISE, msg, context)
 
     return context.make_function(get_name_for_res_node(lf.name), s)
@@ -231,7 +232,7 @@ def eval_lfunction_FValueMinusN(lf, context):
     elif isinstance(F, RcompUnits):
         dp = PlusValueDP(F=F, c_value=constant.value, c_space=constant.unit)
     else:
-        msg = 'Could not create this operation with %s. ' % F
+        msg = f"Could not create this operation with {F}. "
         raise_desc(DPSemanticError, msg, F=F)
              
     return create_operation_lf(context, dp=dp, functions=[fvalue],
@@ -327,8 +328,7 @@ def get_invplus_op(context, lf, c):
         # f2 <= required rb + Rcomp:2.3
         dp = MinusValueRcompDP(c.value)
     else:
-        msg = ('Cannot create inverse addition operation between variable of type %s '
-               'and constant of type %s.' % (T1, T2))  
+        msg = f'Cannot create inverse addition operation between variable of type {T2} and constant of type {T1}.'  
         raise_desc(DPInternalError, msg)
 
     r2 = create_operation_lf(context, dp, functions=[lf], name_prefix='_invplusop')
@@ -342,17 +342,18 @@ def eval_lfunction_invplus_ops(fs, context):
         rest = eval_lfunction_invplus_ops(fs[1:], context)
         return eval_lfunction_invplus_ops([fs[0], rest], context) 
     else:   
-        Fs = map(context.get_ftype, fs)
+        # Map result immediately used for indexing, so list conversion is needed
+        Fs = list(map(context.get_ftype, fs))
         R = Fs[0]
     
         if all(isinstance(_, RcompUnits) for _ in Fs):
             tu = get_types_universe()
             if not tu.leq(Fs[1], Fs[0]):
-                msg = 'Inconsistent units %s and %s.' % (Fs[1], Fs[0])
+                msg = f"Inconsistent units {Fs[1]} and {Fs[0]}."
                 raise_desc(DPSemanticError, msg, Fs0=Fs[0], Fs1=Fs[1])
     
             if not tu.equal(Fs[1], Fs[0]):
-                msg = 'This case was not implemented yet. Differing units %s and %s.' % (Fs[1], Fs[0])
+                msg = f"This case was not implemented yet. Differing units {Fs[1]} and {Fs[0]}."
                 raise_desc(DPNotImplementedError, msg, Fs0=Fs[0], Fs1=Fs[1])
             
             dp = InvPlus2(R, tuple(Fs))            
@@ -424,7 +425,7 @@ def eval_lfunction_create_invmultvalue(lf, constant, context):
         R = mult_table(F1, F2)
         dp = InvMultValueDP(R, F1, constant.unit, constant.value)
     else:
-        msg = 'Cannot get InvMultValue for spaces %s and %s' % (F1, F2)
+        msg = f"Cannot get InvMultValue for spaces {F1} and {F2}"
         raise_desc(DPNotImplementedError, msg, F1=F1, F2=F2)
 
     return create_operation_lf(context, dp=dp, functions=[lf],
@@ -433,7 +434,7 @@ def eval_lfunction_create_invmultvalue(lf, constant, context):
     
 def eval_lfunction_invmult(lf, context, wants_constant=False):
     assert isinstance(lf, CDP.InvMult)
-    from mcdp_lang.misc_math import generic_mult_constantsN
+    from .misc_math import generic_mult_constantsN
         
     ops_list = get_odd_ops(unwrap_list(lf.ops))
     ops = flatten_invmult(ops_list)
@@ -465,6 +466,7 @@ def eval_lfunction_invmult_ops(fs, context):
         return eval_lfunction_invmult_ops([fs[0], rest], context) 
     else:   
         assert len(fs) == 2
+        # In Python 3, tuple() will consume the iterator from map()
         Fs = tuple(map(context.get_ftype, fs))
     
         if isinstance(Fs[0], Nat) and isinstance(Fs[1], Nat):
@@ -478,7 +480,7 @@ def eval_lfunction_invmult_ops(fs, context):
                 R = Rcomp()
                 dp = InvMult2(R, Fs)
             else:
-                msg = 'Could not create invplus for types {}.'.format(Fs)
+                msg = f'Could not create invplus for types {Fs}.'
                 raise_desc(DPNotImplementedError, msg, Fs0=Fs[0], Fs1=Fs[1])
                 
         return create_operation_lf(context, dp=dp, functions=fs,
@@ -497,7 +499,7 @@ def eval_lfunction_newresource(lf, context):
             msg += ' Available: %s.' % ", ".join(context.rnames)
         else:
             msg += ' No resources declared so far.'
-        # msg += '\n%s' % str(e)
+        # msg += f"\n{str}"(e)
         raise DPSemanticError(msg, where=lf.where)
 
     return context.make_function(get_name_for_res_node(rname),

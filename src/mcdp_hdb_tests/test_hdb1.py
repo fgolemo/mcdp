@@ -25,9 +25,9 @@ def check_db_schema_default():
 def run_tests(schema, dm, name):
     data1 = schema.generate()
     schema.validate(data1)
-    print('This is the schema:\n%s' % indent(str(schema), ' ~ '))
+    print(f"This is the schema:\n{indent}"(str(schema), ' ~ '))
     
-    print('This is the data:\n%s' % indent(yaml.dump(data1), ' > '))
+    print(f"This is the data:\n{indent}"(yaml.dump(data1), ' > '))
     # serialize
     h = dm.create_hierarchy_(schema, data1)
     
@@ -37,7 +37,7 @@ def run_tests(schema, dm, name):
     
     where = os.path.join('test_hdb1', name)
     
-    print('Creating directory %s' % where)
+    print(f"Creating directory {where}")
     if os.path.exists(where):
         shutil.rmtree(where)    
     os.makedirs(where)
@@ -46,14 +46,14 @@ def run_tests(schema, dm, name):
     
     print('Reading it back.')
     h2 = ProxyDirectory.from_disk(where)
-    print('These are the files found:\n%s' % indent(h2.tree(), '  '))
+    print(f"These are the files found:\n{indent}"(h2.tree(), '  '))
     
     # now re-interpret the data
     data2 = dm.interpret_hierarchy_(schema, h2)
     
     if data1 != data2:
-        print ('data1:\n%s' % yaml.dump(data1))
-        print('data2:\n%s' % yaml.dump(data2)) 
+        print (f"data1:\n{yaml}".dump(data1))
+        print(f"data2:\n{yaml}".dump(data2)) 
         msg = 'De-serialization did not work'
         raise_desc(Exception, msg, data1=data1,data2=data2)
         

@@ -47,7 +47,7 @@ class DiskMap(object):
             return HintDir()
         if isinstance(s, SchemaList):
             return HintDir() 
-        msg = 'Cannot find hint for %s' % describe_value(s)
+        msg = f"Cannot find hint for {describe_value}"(s)
         raise ValueError(msg)
  
     @contract(s=SchemaBase,pattern=str,translations='None|dict(str:(str|None))')
@@ -86,8 +86,7 @@ class DiskMap(object):
         
         elif isinstance(schema, SchemaContext):
             if not first in schema.children:
-                msg = ('Could not translate data url %r because could not find child %r: found %s' %
-                       (data_url, first, format_list(schema.children)))
+                msg = (f"Could not translate data url %r because could not find child %r: found {data_url}"))
                 raise_desc(ValueError, msg, schema=str(schema))
             schema_child = schema.children[first]
             rest_translated = self.dirname_from_data_url_(schema_child, rest)
@@ -124,7 +123,7 @@ class DiskMap(object):
                 check_isinstance(hint, HintDir)
                 
                 first_translated = hint.key_from_filename(first)
-                print('first_translated: %s' % first_translated) 
+                print(f"first_translated: {first_translated}") 
                 
                 if isinstance(schema, SchemaHash):
                     rest_translated = self.data_url_from_dirname_(schema.prototype, rest)
@@ -142,7 +141,7 @@ class DiskMap(object):
                         assert len(translations) == 1, translations
                         use = translations[0]
                         child = schema.children[use]
-                        logger.info('I know translation of first = %s to be %s' % (first, use))
+                        logger.info(f"I know translation of first = {first} to be {use}")
                         rest_translated = self.data_url_from_dirname_(child, rest)
                         return (first_translated,) + rest_translated
                     
@@ -150,8 +149,8 @@ class DiskMap(object):
                     children_with_none = [k for k in schema.children if hint.translations.get(k, 'ok') is None]
                     if len(children_with_none) > 1:
         #                 msg = 'This is a situation in which there are more than one child that have no translation.'
-        #                 msg += ' These are children_with_none = %s' % children_with_none
-        #                 msg += ' first = %s rest = %s first_translated %s' % (first, rest, first_translated)
+        #                 msg += f" These are children_with_none = {children_with_none}"
+        #                 msg += f" first = {first} rest = {rest} first_translated {first_translated}"
         #                 logger.debug(msg)
                         successful = {}
                         for maybe_child in children_with_none:
@@ -162,10 +161,10 @@ class DiskMap(object):
                                 continue
                             successful[maybe_child] = rest_translated
                         if not successful:
-                            msg = 'Could not translate rest = %s '% str(rest)
+                            msg = f"Could not translate rest = {str} "(rest)
                             raise ValueError(msg)
                         if len(successful) > 1: 
-                            msg = 'Too many ways to translate rest = %s : %s'% (str(rest), successful)
+                            msg = f"Too many ways to translate rest = {str(rest} : %s", successful)
                             raise ValueError(msg)
                         child_succeded = list(successful)[0]
                         rest_translated = successful[child_succeded]
@@ -187,7 +186,7 @@ class DiskMap(object):
                         logger.debug('Result is dirname %r -> res %r' % (dirname, res))
                         return res
         except ValueError as e:
-            msg = 'Could not get data_url_from_dirname_(%s, %s):' % (type(schema), dirname)
+            msg = f"Could not get data_url_from_dirname_({type(schema}, %s):", dirname)
             raise_wrapped(ValueError, e, msg, compact=False)
              
         
@@ -229,9 +228,9 @@ class DiskMap(object):
             msg = 'NotImplemented'
             raise_desc(NotImplementedError, msg, schema=type(schema), hint=hint)
         except IncorrectFormat as e:
-            msg = 'While interpreting schema %s' % type(schema)
-            msg += ', hint: %s' % str(self.get_hint(schema))
-            msg += '\nDisk representation (1) level:\n%s' % indent(fh.tree(1), ' tree(1) ')
+            msg = f"While interpreting schema {type}"(schema)
+            msg += f", hint: {str}"(self.get_hint(schema))
+            msg += f"\nDisk representation (1) level:\n{indent}"(fh.tree(1), ' tree(1) ')
             raise_wrapped(IncorrectFormat, e, msg, compact=True, 
                           exc = sys.exc_info()) 
 
@@ -268,7 +267,7 @@ class DiskMap(object):
             if isinstance(hint, HintFile):
                 return ProxyFile(yaml_dump(data)) 
         
-        msg = 'Not implemented for %s, hint %s' % (schema, hint)
+        msg = f"Not implemented for {schema}, hint {hint}"
         raise ValueError(msg)
 
 
@@ -305,7 +304,7 @@ def interpret_SchemaList_SER_DIR(self, schema, fh):
     n = max_found + 1
     res = [None] * n
     if len(found) != n:
-        msg = 'Incomplete data. Found %s' % found
+        msg = f"Incomplete data. Found {found}"
         raise_incorrect_format(msg, schema, fh.tree())
     for filename in fh:
         try:
@@ -360,7 +359,7 @@ def read_SchemaHash_SER_DIR(self, schema, fh):
     msg = 'read_SchemaHash_SER_DIR\n'
     msg += indent(fh.tree(0), 'files  ') + '\n'
     msg += 'pattern is %r\n' % hint.pattern
-    msg += 'list is %s\n' % seq 
+    msg += f"list is {seq}\n" 
     
     for filename, data in seq:
         try:
@@ -414,7 +413,7 @@ def write_SchemaHash_Extensions(self, schema, data):
         for ext in hint.extensions:
             filedata = data[k][ext]
             if filedata is not None:
-                filename = '%s.%s' % (k, ext)
+                filename = f"{k}.{ext}"
                 res[filename] = self.create_hierarchy_(schema.prototype[ext], filedata)
     return res 
 
@@ -460,9 +459,9 @@ def fill_in_none(schema, data):
         extra = set(present) - needed
     
         if extra:
-            msg = 'Extra fields: %s.' % format_list(sorted(extra))
-            msg += '\nPresent: %s' % format_list(present)
-            msg += '\nNeeded: %s' % format_list(needed)
+            msg = f"Extra fields: {format_list}."(sorted(extra))
+            msg += f"\nPresent: {format_list}"(present)
+            msg += f"\nNeeded: {format_list}"(needed)
             raise_incorrect_format(msg, schema, data)
         schema.validate(res)
         return res
@@ -503,16 +502,16 @@ def read_SchemaContext_SER_DIR(self, schema, fh):
                 
                 if schema_child.can_be_none:
                     res[k] = None
-#                     logger.debug('Using default for key %s' % k)
+#                     logger.debug(f"Using default for key {k}")
                 else:
                     msg = 'Expected filename "%s".' % filename
-                    msg += '\n available: %s' % format_list(fh)
+                    msg += f"\n available: {format_list}"(fh)
                     raise_incorrect_format(msg, schema, fh.tree())
             else:
                 try:
                     res[k] = self.interpret_hierarchy_(schema_child, fh[filename])
                 except IncorrectFormat as e:
-                    msg = 'While interpreting child "%s", filename "%s":' % (k, filename)
+                    msg = f"While interpreting child "{k}", filename "{filename}":"
                     raise_wrapped(IncorrectFormat, e, msg, compact=True, exc=sys.exc_info())
     schema.validate(res)
     return res

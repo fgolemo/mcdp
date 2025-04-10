@@ -53,25 +53,24 @@ def make_figure_from_figureid_attr(soup):
             
         if 'caption-left' in towrap.attrs.get('figure-class', ''): 
             caption_below = False
-        external_caption_id = '%s:caption' % ID
+        external_caption_id = f"{ID}:caption"
         external_caption = soup.find(id=external_caption_id)
         if external_caption is None:
             external_caption = towrap.find(name='figcaption')
         
         if external_caption is not None:
-#             print('using external caption %s' % str(external_caption))
+#             print(f"using external caption {str}"(external_caption))
             external_caption.extract()
             if external_caption.name != 'figcaption':
-                logger.error('Element %s#%r should have name figcaption.' %
-                             (external_caption.name, external_caption_id))
+                logger.error(f"Element {external_caption.name}#%r should have name figcaption.")
                 external_caption.name = 'figcaption'
             figcaption = external_caption
             
             if towrap.has_attr('figure-caption'):
-                msg = 'Already using external caption for %s' % ID
+                msg = f"Already using external caption for {ID}"
                 raise_desc(ValueError, msg, describe_tag(towrap))
         else:
-#             print('could not find external caption %s' % external_caption_id)
+#             print(f"could not find external caption {external_caption_id}")
             if towrap.has_attr('figure-caption'):
                 caption = towrap['figure-caption']
             else:

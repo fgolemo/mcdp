@@ -31,7 +31,7 @@ class Tracer(object):
         self.logger = logger
 
     def __repr__(self):
-        return 'Tracer(%s)' % len(self.chronology)
+        return f"Tracer({len})"(self.chronology)
 
     def repr_long(self):
         return self.__repr__()
@@ -148,11 +148,11 @@ class TracerRecursion(TracerEvent):
         self.result = result
 
     def __repr__(self):
-        return 'TracerRecursion(%s,%s,%s)' % (self.name, self.trace, self.result)
+        return f"TracerRecursion({self.name},{self.trace},{self.result})"
 
     def format(self):
         name = self.name
-        start = '%s: ' % name
+        start = f"{name}: "
         fill = '|' + ' ' * (len(start) - 1)
         return indent(self.trace.format(), fill, start)
 
@@ -162,17 +162,17 @@ class TracerValue(TracerEvent):
         self.value = value
 
     def __repr__(self):
-        return 'TracerValue(%s,%s)' % (self.name, self.value)
+        return f"TracerValue({self.name},{self.value})"
 
     def format(self):
-        return '%s = %s' % (self.name, self.value)
+        return f"{self.name} = {self.value}"
 
 class TracerResult(TracerValue):
     def __init__(self, value):
         TracerValue.__init__(self, 'return', value)
         
     def format(self):
-        return 'return %s' % str(self.value)
+        return f"return {str}"(self.value)
 
 class TracerLog(TracerEvent):
     @contract(s='str')

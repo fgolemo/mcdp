@@ -64,7 +64,7 @@ def get_context_from_url(root, url):
     while pieces:
         first = pieces.pop(0)
         current = current[first]
-        logger.debug('resolving %r -> %s '% (first, type(current).__name__))
+        logger.debug(f"resolving %r -> {first} ".__name__))
         
     logger.debug('\n'+context_display_in_detail(current))
     return current

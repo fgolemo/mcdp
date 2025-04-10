@@ -56,7 +56,7 @@ def eval_rvalue_TupleIndex(ti, context):
     # Now we check that the length is consistent
     l = len(F)
     if ti.index >= l:
-        msg = 'Invalid index %d for product of size %d.' % (index, l)
+        msg = f"Invalid index {index} for product of size {l}."
         raise_desc(DPSemanticError, msg)
 
     return context.ires_get_index(value, index)

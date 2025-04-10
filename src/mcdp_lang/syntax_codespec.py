@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from .parts import CDPLanguage
-from .pyparsing_bundled import (Combine, Optional, Word, ZeroOrMore, alphanums, alphas,
+from .pyparsing_compat import (Combine, Optional, Word, ZeroOrMore, alphanums, alphas,
     oneOf, quotedString)
 from .syntax import SyntaxBasics, SyntaxIdentifiers
 from .syntax_utils import L, O, S, SCOMMA, SLPAR, SRPAR, sp, keyword

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import itertools
 import random
+from functools import reduce
 
 from contracts import contract
 from contracts.utils import raise_desc, check_isinstance
@@ -66,14 +67,14 @@ class UpperSet(Space):
         for p in self.minimals:
             if self.P.leq(p, x):
                 return
-        msg = 'The point {} does not belong to this upperset.'.format(x)
+        msg = f'The point {x} does not belong to this upperset.'
         raise_desc(NotBelongs, msg)
 
     def __repr__(self):
         contents = ", ".join(self.P.format(m)
                         for m in sorted(self.minimals))
 
-        return "↑{%s}" % contents
+        return f"↑{{{contents}}}"
 
 
 class UpperSets(Poset):
@@ -118,7 +119,7 @@ class UpperSets(Poset):
             msg = 'Not an upperset.'
             raise_desc(NotBelongs, msg, x=x)
         if not x.P == self.P:
-            msg = 'Different poset: %s ≠ %s' % (self.P, x.P)
+            msg = f'Different poset: {self.P} ≠ {x.P}'
             raise_desc(NotBelongs, msg, self=self, x=x)
         return True
 
@@ -126,7 +127,7 @@ class UpperSets(Poset):
         m1 = a.minimals
         m2 = b.minimals
         if not (m1 == m2):
-            msg = 'The two sets are not equal\n   %s\n!= %s' % (self.format(a), self.format(b))
+            msg = f'The two sets are not equal\n   {self.format(a)}\n!= {self.format(b)}'
             raise NotEqual(msg)
 
     def check_leq(self, a, b):
@@ -171,8 +172,8 @@ class UpperSets(Poset):
         for b in B.minimals:
             is_dominated, whynot = dominated(b)
             if not is_dominated:
-                msg = "b = %s not dominated by any a in %s" % (b, A.minimals)
-                msg += '\n' + '\n- '.join(map(str, whynot))
+                msg = f"b = {b} not dominated by any a in {A.minimals}"
+                msg += '\n' + '\n- '.join(str(p) for p in whynot)
                 raise NotLeq(msg)
 
     def _my_leq_fast(self, A, B):
@@ -205,22 +206,22 @@ class UpperSets(Poset):
         return r
 
     def format0(self, x):
-        contents = " v ".join("x ≥ %s" % self.P.format(m)
+        contents = " v ".join(f"x ≥ {self.P.format(m)}"
                         for m in sorted(x.minimals))
 
-        return "{x ∣ %s }" % contents
+        return f"{{x ∣ {contents} }}"
 
     def format(self, x):
         contents = ", ".join(self.P.format(m)
                         for m in sorted(x.minimals))
 
-        return "↑{%s}" % contents
+        return f"↑{{{contents}}}"
 
     def __repr__(self):
-        return "UpperSets(%r)" % self.P
+        return f"UpperSets({self.P!r})"
     
     def __str__(self):
-        return "U(%s)" % self.P
+        return f"U({self.P})"
  
 
 class LowerSets(Poset):
@@ -261,7 +262,7 @@ class LowerSets(Poset):
             raise NotBelongs(msg)
         if not x.P == self.P:
             mcdp_dev_warning('should we try casting?')
-            msg = 'Different poset: %s ≠ %s' % (self.P, x.P)
+            msg = f'Different poset: {self.P} ≠ {x.P}'
             raise_desc(NotBelongs, msg, self=self, x=x)
         return True
 
@@ -269,7 +270,7 @@ class LowerSets(Poset):
         m1 = a.maximals
         m2 = b.maximals
         if not (m1 == m2):
-            msg = 'The two sets are not equal\n   %s\n!= %s' % (self.format(a), self.format(b))
+            msg = f'The two sets are not equal\n   {self.format(a)}\n!= {self.format(b)}'
             raise NotEqual(msg)
 
     def check_leq(self, a, b):
@@ -307,8 +308,8 @@ class LowerSets(Poset):
         for b in B.maximals:
             is_dominated, whynot = dominated(b)
             if not is_dominated:
-                msg = "b = %s not dominated by any a in %s" % (b, A.maximals)
-                msg += '\n' + '\n- '.join(map(str, whynot))
+                msg = f"b = {b} not dominated by any a in {A.maximals}"
+                msg += '\n' + '\n- '.join(str(p) for p in whynot)
                 raise NotLeq(msg)
 
     def meet(self, a, b):  # "min" ∨
@@ -328,13 +329,13 @@ class LowerSets(Poset):
         contents = ", ".join(self.P.format(m)
                         for m in sorted(x.maximals))
 
-        return "↓{%s}" % contents
+        return f"↓{{{contents}}}"
 
     def __repr__(self):
-        return "LowerSets(%r)" % self.P
+        return f"LowerSets({self.P!r})"
 
     def __str__(self):
-        return "L(%s)" % self.P
+        return f"L({self.P})"
 
 
 class LowerSet(Space):
@@ -381,7 +382,7 @@ class LowerSet(Space):
         contents = ", ".join(self.P.format(m)
                         for m in sorted(self.maximals))
 
-        return "↓{%s}" % contents
+        return f"↓{{{contents}}}"
 
 # 
 @contract(s1=UpperSet, s2=UpperSet, returns=UpperSet)
@@ -443,7 +444,7 @@ def upperset_project(ur, i):
     check_isinstance(ur, UpperSet)
     check_isinstance(ur.P, PosetProduct)
     if not (0 <= i < len(ur.P)):
-        msg = 'Index %d not valid.' % i
+        msg = f'Index {i} not valid.'
         raise_desc(ValueError, msg, P=ur.P)
     minimals = set()
     Pi = ur.P.subs[i]
@@ -457,7 +458,7 @@ def lowerset_project(lf, i):
     assert isinstance(lf, LowerSet), lf
     assert isinstance(lf.P, PosetProduct), lf
     if not (0 <= i < len(lf.P)):
-        msg = 'Index %d not valid.' % i
+        msg = f'Index {i} not valid.'
         raise_desc(ValueError, msg, P=lf.P)
     maximals = set()
     Pi = lf.P.subs[i]

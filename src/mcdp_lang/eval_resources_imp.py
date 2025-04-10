@@ -97,6 +97,8 @@ def eval_rvalue(rvalue, context):
         CDP.SumResources: eval_rvalue_SumResources,
     }
 
+    # In Python 3, items() returns a view object which is memory efficient
+    # Only use list() if we need to modify the dictionary during iteration
     for klass, hook in cases.items():
         if isinstance(rvalue, klass):
             return hook(rvalue, context)
@@ -107,7 +109,9 @@ def eval_rvalue(rvalue, context):
         raise_desc(DoesNotEvalToResource, msg, rvalue=rvalue)
  
 def iterate_normal_ndps(context):
-    for n, ndp in context.names.items():
+    # Need list() here because we're creating a generator that might be used 
+    # while the names dictionary is being modified
+    for n, ndp in list(context.names.items()):
         normal = not context.is_new_function(n) and not context.is_new_resource(n)
         if normal:
             yield n, ndp
@@ -189,8 +193,7 @@ def eval_rvalue_VariableRef(rvalue, context):
 
     s = dummy_ndp.get_rnames()[0]
     
-    msg = ('Please use the more precise form "provided %s" rather than simply "%s".'
-           % (rvalue.name, rvalue.name))
+    msg = f'Please use the more precise form "provided {s}" rather than simply "{rvalue.name}".'
     warn_language(rvalue, MCDPWarnings.LANGUAGE_REFERENCE_OK_BUT_IMPRECISE, msg, context)
 
     return context.make_resource(get_name_for_fun_node(rvalue.name), s)
@@ -229,8 +232,7 @@ def eval_rvalue_approx_u(r, context):
     try:
         tu.check_leq(step.unit, R)
     except NotLeq as e:
-        msg = ('The step is specified in a unit (%s), which is not compatible '
-               'with the resource (%s).' % (step.unit, R))
+        msg = f'The step is specified in a unit ({R}), which is not compatible with the resource ({step.unit}).'
         raise_wrapped(DPSemanticError, e, msg, compact=True)
 
     stepu = step.cast_value(R)
@@ -268,14 +270,13 @@ def eval_rvalue_approx_step(r, context):
     try:
         tu.check_leq(step.unit, R)
     except NotLeq:
-        msg = ('The step is specified in a unit (%s), which is not compatible '
-               'with the resource (%s).' % (step.unit, R))
+        msg = f'The step is specified in a unit ({R}), which is not compatible with the resource ({step.unit}).'
         raise_desc(DPSemanticError, msg)
 
     stepu = express_value_in_isomorphic_space(S1=step.unit, s1=step.value, S2=R)
 
     if not isinstance(R, (RcompUnits)):
-        msg = 'approx() not implemented for %s.'%R
+        msg = f"approx() not implemented for {R}."
         raise_desc(DPNotImplementedError, msg)
         
     dp = makeLinearCeilDP(R, stepu)

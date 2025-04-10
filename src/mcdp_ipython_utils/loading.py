@@ -57,7 +57,7 @@ def friendly_solve(ndp, query, result_like='dict(str:str)', upper=None, lower=No
         s = solve
     
     """
-    #print('friendly_solve(upper=%s, lower=%s)' % (upper, lower))
+    #print(f"friendly_solve(upper={upper}, lower={lower})")
     # TODO: replace with convert_string_query(ndp, query, context):
     fnames = ndp.get_fnames()
     rnames = ndp.get_rnames()
@@ -74,7 +74,7 @@ def friendly_solve(ndp, query, result_like='dict(str:str)', upper=None, lower=No
 
         F = ndp.get_ftype(fname)
         q, qs = query[fname]
-        s = '%s %s' % (q, qs)
+        s = f"{q} {qs}"
 
         try:
             val = interpret_params_1string(s, F=F)
@@ -111,8 +111,8 @@ def friendly_solve(ndp, query, result_like='dict(str:str)', upper=None, lower=No
     res = dp.solve_trace(value, trace)
     R = dp.get_res_space()
     UR = UpperSets(R)
-    print('value: %s' % F.format(value))
-    print('results: %s' % UR.format(res))
+    print(f"value: {F}".format(value))
+    print(f"results: {UR}".format(res))
 
     ares = []
     implementations = []

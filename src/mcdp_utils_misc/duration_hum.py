@@ -7,7 +7,7 @@ __all__ = [
 # 
 # def duration_human(seconds):
 # ''' Code modified from
-#     http://darklaunch.com/2009/10/06
+#     http://darklaunch.com//2009/10//06
 #     /python-time-duration-human-friendly-timestamp
 #     '''
 #     seconds = int(math.ceil(seconds))
@@ -43,6 +43,17 @@ __all__ = [
 
 
 def duration_compact(seconds):
+    """
+    Format a duration in seconds as a compact human-readable string.
+    
+    For example, 3661 seconds would be formatted as "1h 1m 1s".
+    
+    Args:
+        seconds: The duration in seconds
+        
+    Returns:
+        str: A compact representation of the duration
+    """
     seconds = int(math.ceil(seconds))
     minutes, seconds = divmod(seconds, 60)
     hours, minutes = divmod(minutes, 60)
@@ -56,19 +67,19 @@ def duration_compact(seconds):
 
     duration = []
     if years > 0:
-        duration.append('%dy' % years)
+        duration.append(f"{years}y")
     else:
         if days > 0:
-            duration.append('%dd' % days)
+            duration.append(f"{days}d")
         if (days < 3) and (years == 0):
             if hours > 0:
-                duration.append('%dh' % hours)
+                duration.append(f"{hours}h")
             if (hours < 3) and (days == 0):
                 if minutes > 0:
-                    duration.append('%dm' % minutes)
+                    duration.append(f"{minutes}m")
                 if (minutes < 3) and (hours == 0):
                     if seconds > 0:
-                        duration.append('%ds' % seconds)
+                        duration.append(f"{seconds}s")
 
     return ' '.join(duration)
 

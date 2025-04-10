@@ -47,7 +47,7 @@ class Nat(Poset):
             if x >= 0:
                 return
             else:
-                msg = '%s ≰ %s' % (0, x)
+                msg = f'{0} ≰ {x}'
                 raise_desc(NotBelongs, msg, x=x)
         else:
             if x == self.top:
@@ -82,7 +82,8 @@ class Nat(Poset):
         s = [0]
         
         if MCDPConstants.Nat_chain_include_maxint:
-            s.append(sys.maxint)
+            # sys.maxint is removed in Python 3, use sys.maxsize instead
+            s.append(sys.maxsize)
         
         f = lambda: random.randint(1, n) # xxx
         while len(s) < n - 1: # leave 1:  top 
@@ -104,9 +105,7 @@ class Nat(Poset):
 
     def format(self, x):
         if isinstance(x, int):
-            return '%d' % x
-        elif isinstance(x, long):
-            return '%dL!' % x
+            return f'{x}'
         else:
             if x == self.top:
                 return self.top.__repr__()
@@ -135,12 +134,12 @@ class Nat(Poset):
             self.belongs(a)
             self.belongs(b)
         if not self._leq(a, b):
-            msg = '%s ≰ %s' % (a, b)
+            msg = f'{a} ≰ {b}'
             raise NotLeq(msg)
 
     def check_equal(self, x, y):
         if not (x == y):
-            raise NotEqual('%s != %s' % (x, y))
+            raise NotEqual(f'{x} != {y}')
 
 
 # Optimization: we use these instances
@@ -160,7 +159,8 @@ def Nat_add(a, b):
     assert isinstance(b, int), (b, type(b))
     res = a + b
     
-    if res > sys.maxint:
+    # sys.maxint is removed in Python 3, use sys.maxsize instead
+    if res > sys.maxsize:
         return N.get_top()
     
     assert isinstance(res, int), (res, type(res))
@@ -189,7 +189,8 @@ def Nat_mult_uppersets_continuous(a, b):
     assert isinstance(a, int), (a, type(a))
     assert isinstance(b, int), (b, type(b))
     res = a * b
-    if res > sys.maxint:
+    # sys.maxint is removed in Python 3, use sys.maxsize instead
+    if res > sys.maxsize:
         return N.get_top()
     
     assert isinstance(res, int), (res, type(res))
@@ -208,7 +209,8 @@ def Nat_mult_lowersets_continuous(a, b):
     assert isinstance(b, int), (b, type(b))
 
     res = a * b
-    if res > sys.maxint:
+    # sys.maxint is removed in Python 3, use sys.maxsize instead
+    if res > sys.maxsize:
         return N.get_top()
     
     assert isinstance(res, int), (res, type(res))
@@ -292,7 +294,7 @@ class Int(Poset):
             return self.top.__repr__()
         if x == self.bottom:
             return self.bottom.__repr__()
-        return '%d' % x
+        return f'{x}'
 
     def _leq(self, a, b):
         if a == b:
@@ -315,11 +317,11 @@ class Int(Poset):
             self.belongs(a)
             self.belongs(b)
         if not self._leq(a, b):
-            msg = '%s ≰ %s' % (a, b)
+            msg = f'{a} ≰ {b}'
             raise NotLeq(msg)
 
     def check_equal(self, x, y):
         if not (x == y):
-            raise NotEqual('%s != %s' % (x, y))
+            raise NotEqual(f'{x} != {y}')
 
 

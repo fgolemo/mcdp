@@ -74,16 +74,16 @@ def go():
     discarded = []
     for name, v in types.items():
         if not v['specific_cost']:
-            print('skipping %s because no specific cost' % name)
+            print(f"skipping {name} because no specific cost")
             discarded.append(name)
             continue
 
         v['cycles'] = '%s []'% v['cycles']
         s2 = string.Template(template).substitute(v)
 
-        print s2
+        print(s2)
         # ndp = parse_ndp(s2)
-        model_name = 'Battery_%s' % name
+        model_name = f"Battery_{name}"
         fname = model_name + '.mcdp'
         with open(fname, 'w') as f:
             f.write(s2)
@@ -92,14 +92,14 @@ def go():
 
         summary += '\n%10s %10s %10s %10s  %s' % (name, v['specific_energy'], v['specific_cost'],
             v['cycles'], v['desc'])
-    print summary
+    print(summary)
     with open('summary.txt', 'w') as f:
         f.write(summary)
     ss = """
 choose(
     %s
 )
-    """ % ",\n    ".join("%8s: (load Battery_%s)" % (g,g) for g in good)
+    f""" % ",\n    ".join("%8s: (load Battery_{g})" for g in good)
     with open('batteries.mcdp', 'w') as f:
         f.write(ss)
 

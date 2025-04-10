@@ -19,7 +19,7 @@ class Template(PrimitiveDP):
     def solve(self, _f):
         minimals = self.R.get_minimal_elements()
         if not minimals: 
-            msg = 'No minimal elements for poset %s' % self.R
+            msg = f"No minimal elements for poset {self}".R
             raise_desc(DPInternalError, msg, ndp=self)
 
         return self.R.Us(minimals)
@@ -27,7 +27,7 @@ class Template(PrimitiveDP):
     def solve_r(self, _r):
         maximals = self.F.get_maximal_elements()
         if not maximals:
-            msg = 'No maximal elements for poset %s' % self.R
+            msg = f"No maximal elements for poset {self}".R
             raise_desc(DPInternalError, msg, ndp=self)
 
         return self.F.Ls(maximals)
@@ -43,20 +43,20 @@ class Template(PrimitiveDP):
     def repr_h_map(self):
         try:
             bot = self.R.get_bottom()
-            return "f ⟼ {%s}" % self.R.format(bot)
+            return f"f ⟼ {{self}}".R.format(bot)
         except:
             els = self.R.get_minimal_elements()
             con = ", ".join( self.R.format(_) for _ in els)
-            return "f ⟼ {%s}" % con
+            return f"f ⟼ {{con}}"
         
     def repr_hd_map(self):
         try:
             top = self.F.get_top()
-            return "r ⟼ {%s}" % self.R.format(top)
+            return f"r ⟼ {{self}}".R.format(top)
         except:
             els = self.F.get_maximal_elements()
             con = ", ".join( self.F.format(_) for _ in els)
-            return "r ⟼ {%s}" % con
+            return f"r ⟼ {{con}}"
         
 
 mcdp_dev_warning('Remove Dummy name')

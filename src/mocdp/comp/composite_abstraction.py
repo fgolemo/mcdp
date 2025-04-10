@@ -36,8 +36,7 @@ def cndp_abstract_loop2(ndp):
 
     cycles = res['cycles']
     if len(cycles) > 1:
-        msg = ('I expected that the cycles were already compacted, while %s remain.' %
-               cycles)
+        msg = (f"I expected that the cycles were already compacted, while {cycles} remain.")
         raise_desc(NotImplementedError, msg, res=res)
 
     inner = res['inner']

@@ -31,8 +31,8 @@ class ActionCreate(Action):
     def __call__(self, opt, s):
         s2 = self.call(opt, s)
 
-        s.info('Created from #%s.' % s.creation_order)
-        s.info('Using action %s' % self)
+        s.info(f"Created from #{s.creation_order}")
+        s.info(f"Using action {self}")
 
         opt.note_edge(s, self, s2)
 
@@ -41,8 +41,8 @@ class ActionCreate(Action):
             return []
 
         if len(s2.ur.minimals) == 0:
-            msg = 'Unfortunately this is not feasible (%s)' % s2.ur.P
-            msg += '%s' % s2.lower_bounds
+            msg = f"Unfortunately this is not feasible ({s2.ur.P})"
+            msg += f"{s2.lower_bounds}"
             s2.info(msg)
             opt.mark_abandoned(s2)
             return []
@@ -50,7 +50,7 @@ class ActionCreate(Action):
         dominated, by_what = opt.is_dominated_by_open(s2)
 
         if dominated:
-            s2.info('Dominated by #%s' % by_what.creation_order)
+            s2.info(f"Dominated by #{by_what.creation_order}")
             opt.mark_abandoned(s2)
             opt.note_domination_relation(dominated=s2, dominator=by_what)
             return []
@@ -144,10 +144,10 @@ class ActionAddNDP(ActionCreate):
                                              lower_bounds=lower_bounds)
         for k, u in lower_bounds_a.items():
             if len(u.minimals) == 0:
-                msg = 'Unfeasible: %s' % (lower_bounds_a)
+                msg = f"Unfeasible: {lower_bounds_a}"
                 raise Exception(msg)
 
-        print('new lowerbounds: %s' % lower_bounds_a)
+        print(f"new lowerbounds: {lower_bounds_a}")
         for rname in ndp.get_rnames():
             r = CResource(name, rname)
             if not r in lower_bounds_a:
@@ -167,8 +167,8 @@ class ActionAddNDP(ActionCreate):
                                  forbidden=forbidden, lower_bounds=lower_bounds, ur=ur,
                                  creation_order=opt.get_next_creation())
 
-        s2.info('Parent: #%s' % c.creation_order)
-        s2.info('Action: #%s' % self)
+        s2.info(f"Parent: #{c.creation_order}")
+        s2.info(f"Action: {self}")
         return s2
 
 
@@ -191,7 +191,7 @@ def get_new_lowerbounds(context, name, lower_bounds):
             F = context.get_ftype(cf)
             lb = F.Us(F.get_minimal_elements())
 
-#         print('lb for %r: %s' % (fname, lb))
+#         print(f"lb for {fname!r}: {lb}")
         return lb
 
     lbs = []
@@ -207,7 +207,7 @@ def get_new_lowerbounds(context, name, lower_bounds):
     dp = ndp.get_dp()
 
     ur = dp.solveU(lbF)
-#     print('Solving with %s -> %s ' % (lbF, ur))
+#     print(f"Solving with {lbF} -> {ur}")
 
     lower_bounds_new = {}
     rnames = ndp.get_rnames()

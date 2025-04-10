@@ -44,4 +44,4 @@ class MapComposition(Map):
         return res
 
     def repr_map(self, letter):
-        return '%s ⟼ m2(m1(%s))' % (letter, letter)
+        return f"{letter} ⟼ m2(m1({letter}))"

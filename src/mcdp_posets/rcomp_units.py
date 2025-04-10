@@ -39,7 +39,7 @@ class MyUnitRegistry(UnitRegistry):
         self.define(' episodes = [episodes] = episode')
         
         for currency, value in currencies.items():
-            self.define(' %s = %s dollars' % (currency, value))
+            self.define(f" {currency} = {value} dollars")
             
         
 
@@ -78,18 +78,18 @@ class RcompUnits(RcompBase):
         c = 'R'
 
         if self.units == R_dimensionless.units:
-            return '%s[]' % c
+            return f"{c}[]"
 
-        return "%s[%s]" % (c, self.units_formatted)
+        return f"{c}[{self.units_formatted}]"
 
     def __copy__(self):
         other = RcompUnits(self.units, self.string)
         return other
 
     def __getstate__(self):
-        # print('__getstate__  %s %s' % (id(self), self.__dict__))
+        # print(f"__getstate__  {id(self} %s", self.__dict__))
 
-        # See: https://github.com/hgrecco/pint/issues/349
+        # See: https://github.com/hgrecco/pint/issues//349
         # This is a hack
 
         state = {
@@ -104,7 +104,7 @@ class RcompUnits(RcompBase):
         return state
 
     def __setstate__(self, x):
-        # print('__setstate__ %s %r' % (id(self), x))
+        # print(f"__setstate__ {id(self} %r", x))
         self.top = x['top']
         self.string = x['string']
         self.units = parse_pint(self.string)
@@ -127,7 +127,7 @@ class RcompUnits(RcompBase):
             s = RcompBase.format(self, x)
 
         if self.units_formatted:
-            return '%s %s' % (s, self.units_formatted)
+            return f"{s} {self.units_formatted}"
         else:
             return s
 
@@ -165,18 +165,18 @@ class RbicompUnits(Rbicomp):
         c = 'Rbi'
 
         if self.units == R_dimensionless.units:
-            return '%s[]' % c
+            return f"{c}[]"
 
-        return "%s[%s]" % (c, self.units_formatted)
+        return f"{c}[{self.units_formatted}]"
 
     def __copy__(self):
         other = RbicompUnits(self.units, self.string)
         return other
 
     def __getstate__(self):
-        # print('__getstate__  %s %s' % (id(self), self.__dict__))
+        # print(f"__getstate__  {id(self} %s", self.__dict__))
 
-        # See: https://github.com/hgrecco/pint/issues/349
+        # See: https://github.com/hgrecco/pint/issues//349
         # This is a hack
 
         state = {
@@ -192,7 +192,7 @@ class RbicompUnits(Rbicomp):
         return state
 
     def __setstate__(self, x):
-        # print('__setstate__ %s %r' % (id(self), x))
+        # print(f"__setstate__ {id(self} %r", x))
         self.top = x['top']
         self.bottom = x['bottom']
         self.string = x['string']
@@ -218,7 +218,7 @@ class RbicompUnits(Rbicomp):
             s = Rbicomp.format(self, x)
 
         if self.units_formatted:
-            return '%s %s' % (s, self.units_formatted)
+            return f"{s} {self.units_formatted}"
         else:
             return s
 
@@ -249,14 +249,14 @@ def parse_pint(s0):
     try:
         return ureg.parse_expression(s)
     except UndefinedUnitError as e:
-        msg = 'Cannot parse units %r: %s.' % (s0, str(e))
+        msg = f"Cannot parse units {s0!r}:"
         raise_desc(DPSemanticError, msg)
     except SyntaxError as e:
         msg = 'Cannot parse units %r.' % s0
         raise_wrapped(DPSemanticError, e, msg, compact=True, exc=sys.exc_info())
         # ? for some reason compact does not have effect here
     except Exception as e:
-        msg = 'Cannot parse units %r (%s).' % (s0, type(e))
+        msg = f"Cannot parse units {s0!r}"
         raise_wrapped(DPSemanticError, e, msg, compact=True, exc=sys.exc_info())
 
 
@@ -312,7 +312,7 @@ def format_pint_unit_short(units):
     x = '{:~}'.format(units)
     x = x.replace('1.0', '')
     if not '/' in x:
-        x = x.replace('1', '')  # otherwise 1 / s -> / s
+        x = x.replace('1', '')  # otherwise 1 // s -> / s
     x = x.replace('dollars', '$')
     x = x.replace(' ', '')
     x = x.replace('**', '^')
@@ -363,7 +363,7 @@ def mult_table(a, b):
     check_isinstance(b, RcompUnits)
 
     unit2 = a.units * b.units
-    s = ('%s' % unit2).encode('utf-8')
+    s = (f"{unit2}").encode('utf-8')
     return RcompUnits(unit2, s)
 
 def check_mult_units_consistency_seq(factors, c):
@@ -372,7 +372,7 @@ def check_mult_units_consistency_seq(factors, c):
     check_isinstance(c, RcompUnits)
     c_expected = mult_table_seq(factors)
     if c.units != c_expected.units:
-        msg = 'For the multiplication of %s  I expected %s but got %s' % (factors, c_expected, c)
+        msg = f"For the multiplication of {factors}  I expected {c_expected} but got {c}"
         raise_desc(AssertionError, msg)
 
 
@@ -383,15 +383,15 @@ def check_mult_units_consistency(a, b, c):
     check_isinstance(c, RcompUnits)
     c_expected = mult_table(a, b)
     if c.units != c_expected.units:
-        msg = 'For %s x %s I expected %s but got %s' % (a, b, c_expected, c)
+        msg = f"For {a} x {b} I expected {c_expected} but got {c}"
         raise_desc(AssertionError, msg)
 
 
 @contract(a=RcompUnits)
 def inverse_of_unit(a):
     check_isinstance(a, RcompUnits)
-    unit2 = 1 / a.units
-    s = ('%s' % unit2).encode('utf-8')
+    unit2 = 1 // a.units
+    s = (f"{unit2}").encode('utf-8')
     return RcompUnits(unit2, s)
 
 def RbicompUnits_reflect(P, x):
@@ -478,7 +478,7 @@ def rcompunits_pow(a, num, den):
     check_isinstance(a, RcompUnits)
     x = 1.0 * num / den
     u = a.units ** x
-    s = ('%s' % u).encode('utf-8')
+    s = (f"{u}").encode('utf-8')
     return RcompUnits(u, s)
 
 
@@ -509,10 +509,10 @@ class RCompUnitsPowerMap(Map):
         s = '^ '
         s += '%d' % self.num
         if self.den != 1:
-            s += '/%s' % self.den
+            s += f"/{self}".den
         return s
     
     def repr_map(self, letter):
-        return '%s ⟼ %s ^ %s/%s ' % (letter, letter, self.num, self.den)
+        return f"{letter} ⟼ {letter} ^ {self.num}/{self.den} "
 
         

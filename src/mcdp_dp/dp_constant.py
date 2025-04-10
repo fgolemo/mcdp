@@ -52,13 +52,13 @@ class Constant(PrimitiveDP):
             return F.Ls([]) # infeasible
     
     def __repr__(self):
-        return 'Constant(%s:%s)' % (self.R, self.c)
+        return f"Constant({self.R}:{self.c})"
 
     def repr_h_map(self):
-        return '⟨⟩ ⟼ {%s}' % self.R.format(self.c)
+        return f"⟨⟩ ⟼ {{self}}".R.format(self.c)
     
     def repr_hd_map(self):
-        return 'r ⟼ {⟨⟩} if r ≼ %s, else ø' % self.R.format(self.c)
+        return f"r ⟼ {⟨⟩} if r ≼ {self}, else ø".R.format(self.c)
     
 
 class ConstantMinimals(PrimitiveDP):
@@ -98,15 +98,15 @@ class ConstantMinimals(PrimitiveDP):
     def repr_h_map(self):
         contents = ", ".join(self.R.format(m)
                 for m in sorted(self.ur.minimals))
-        return '⟨⟩ ⟼ {%s}' % contents
+        return f"⟨⟩ ⟼ {{contents}}"
     
     def repr_hd_map(self):
         UR = UpperSets(self.R)
 
-        return 'r ⟼ {⟨⟩} if r ∈ %s, else ø' % UR.format(self.ur)
+        return f"r ⟼ {⟨⟩} if r ∈ {UR}, else ø".format(self.ur)
     
     
     def __repr__(self):
         s = len(self.values)
-        return 'ConstantMins(%s:%s)' % (self.R, s)
+        return f"ConstantMins({self.R}:{s})"
 

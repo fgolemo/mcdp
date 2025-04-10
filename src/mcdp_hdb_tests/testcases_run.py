@@ -59,7 +59,7 @@ for k, tc in tcs.items():
     
 @contract(tc=DataTestCase)
 def run_for_test_case(name, tc):
-    out = 'out/test_translation/testcases/%s' % name
+    out = f"out/test_translation/testcases/{name}"
     tc.run()
     data_rep0 = tc.get_data1()
     data_rep1 = tc.get_data2()

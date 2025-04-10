@@ -49,7 +49,7 @@ def get_value_from_impdict(imp_dict, ndp_name):
 #             use = k
     use = k
     if not use in imp_dict:
-        msg = 'get_value_from_impdict: Expected to see key %r among %s' % (use, list(imp_dict))
+        msg = f"get_value_from_impdict: Expected to see key %r among {use}")
         raise_desc(ValueMissing, msg)
 
     sub = imp_dict[use]
@@ -57,7 +57,7 @@ def get_value_from_impdict(imp_dict, ndp_name):
     try:
         return get_value_from_impdict(sub, ndp_name[1:])
     except ValueMissing as e:
-        msg = 'get_value_from_impdict: Cannot find value for %s.' % ndp_name.__str__()
+        msg = f"get_value_from_impdict: Cannot find value for {ndp_name}.".__str__()
         raise_wrapped(ValueMissing, e, msg, imp_dict=imp_dict, compact=True)
 
 def get_ndp_recursive(ndp, ndp_name):
@@ -69,7 +69,7 @@ def get_ndp_recursive(ndp, ndp_name):
         children = ndp.get_name2ndp()
         use = k
         if not use in children:
-            msg = 'get_ndp_recursive: Expected to see key %r in %s' % (use, list(children))
+            msg = f"get_ndp_recursive: Expected to see key %r in {use}")
             raise_desc(ValueMissing, msg, key=use)
      
         child = children[use]
@@ -77,7 +77,7 @@ def get_ndp_recursive(ndp, ndp_name):
         i = ndp.labels.index(k)
         child = ndp.ndps[i]
     else:
-        msg = 'get_ndp_recursive(%s, %s)' % (type(ndp), ndp_name)
+        msg = f"get_ndp_recursive({type(ndp}, %s)", ndp_name)
         raise_desc(DPInternalError, msg, ndp=ndp)
     return get_ndp_recursive(child, ndp_name[1:])
 
@@ -111,7 +111,7 @@ class GetValues(PlottingInfo):
         try:
             I.belongs(imp)
         except NotBelongs as e:
-            msg = 'Invalid value for implementation of %s.' % ndp_name.__str__()
+            msg = f"Invalid value for implementation of {ndp_name}.".__str__()
             raise_wrapped(DPInternalError, e, msg, imp=imp, I=I)
         lf, ur = dp.evaluate(imp)
         return ndp, (lf, ur)
@@ -121,7 +121,7 @@ class GetValues(PlottingInfo):
         try:
             ndp = self.get_ndp(ndp_name)
         except DPInternalError as e:
-            msg = 'get_fname_label(%s,%s) failed' % (ndp_name, fname)
+            msg = f"get_fname_label({ndp_name},{fname}) failed"
             raise_wrapped(DPInternalError, e, msg, compact=True)
 
         if isinstance(ndp, CompositeNamedDP):
@@ -139,7 +139,7 @@ class GetValues(PlottingInfo):
         except ValueMissing:
             if isinstance(ndp, SimpleWrap) and isinstance(ndp.dp, (Mux, IdentityDP)):
                 # Muxes and identities could be optimized away and disappear
-                print('get_fname_label: Ignoring %s / %s because could be optimized away' % (ndp_name, fname))
+                print(f"get_fname_label: Ignoring {ndp_name} / {fname} because could be optimized away")
                 return self.VALUE_FOR_MISSING
             else:
                 raise
@@ -287,7 +287,7 @@ def plot_different_solutions(libname, ndpname, query, out, upper=None):
     report = Report()
 
     res = dp.solve(f)
-    print('num solutions: %s' % len(res.minimals))
+    print(f"num solutions: {len}"(res.minimals))
     for ri, r in enumerate(res.minimals):
         ms = dp.get_implementations_f_r(f, r)
 
@@ -303,13 +303,13 @@ def plot_different_solutions(libname, ndpname, query, out, upper=None):
                                 image_source=image_source,
                                 plotting_info=gv)
 
-            with report.subsection('%s-%s' % (ri, j)) as rr:
+            with report.subsection(f"{ri}-{j}") as rr:
                 gg_figure(rr, 'figure', gg, do_png=True, do_pdf=False,
                           do_svg=False, do_dot=False)
 
 
     fn = os.path.join(out, 'solutions.html')
-    print('writing to %s' % fn)
+    print(f"writing to {fn}")
     report.to_html(fn)
 
 

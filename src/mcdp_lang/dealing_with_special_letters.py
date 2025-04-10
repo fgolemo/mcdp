@@ -51,7 +51,13 @@ greek_letters = {
     u'Psi': u'Ψ',
     u'Omega': u'Ω',
 }
-greek_letters_utf8 = dict( (k.encode('utf8'),v.encode('utf8')) for k,v in greek_letters.items())
+from mcdp.py_compatibility import PY2
+
+# In Python 3, strings are already Unicode
+if PY2:
+    greek_letters_utf8 = dict((k.encode('utf8'), v.encode('utf8')) for k, v in greek_letters.items())
+else:
+    greek_letters_utf8 = dict((k, v) for k, v in greek_letters.items())
 
 subscripts = { 
     0: u'₀',
@@ -66,7 +72,11 @@ subscripts = {
     9: u'₉',
 }
 
-subscripts_utf8 = dict( (k, v.encode('utf8')) for k, v in subscripts.items())
+# In Python 3, strings are already Unicode
+if PY2:
+    subscripts_utf8 = dict((k, v.encode('utf8')) for k, v in subscripts.items())
+else:
+    subscripts_utf8 = dict((k, v) for k, v in subscripts.items())
 
 # these count as dividers
 dividers = ['_','0','1','2','3','4','5','6','7','8','9']
@@ -84,19 +94,37 @@ digit2superscript = {
     '9':'⁹',
 }
 
-@contract(s=bytes)
-def ends_with_divider(s):
-    check_isinstance(s, bytes)
-    if not s: return False
-    last_char = unicode(s, 'utf-8')[-1].encode('utf8')
-    #print('last_char: %s %r' % (last_char, last_char))
-    return  last_char in dividers
+from mcdp.py_compatibility import string_types
 
-@contract(s=bytes)
-def starts_with_divider(s):
-    check_isinstance(s, bytes)
+@contract(s='str')
+def ends_with_divider(s):
+    """Check if string ends with a divider character."""
+    check_isinstance(s, string_types)
     if not s: return False
-    first_char = unicode(s, 'utf-8')[0].encode('utf8')
-    #print('last_char: %s %r' % (first_char, first_char))
+    
+    if PY2:
+        if isinstance(s, bytes):
+            last_char = unicode(s, 'utf-8')[-1].encode('utf8')
+        else:
+            last_char = s[-1].encode('utf8')
+    else:
+        last_char = s[-1]
+    
+    return last_char in dividers
+
+@contract(s='str')
+def starts_with_divider(s):
+    """Check if string starts with a divider character."""
+    check_isinstance(s, string_types)
+    if not s: return False
+    
+    if PY2:
+        if isinstance(s, bytes):
+            first_char = unicode(s, 'utf-8')[0].encode('utf8')
+        else:
+            first_char = s[0].encode('utf8')
+    else:
+        first_char = s[0]
+    
     return first_char in dividers
 

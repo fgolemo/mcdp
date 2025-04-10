@@ -10,17 +10,17 @@ from mcdp.exceptions import DPNotImplementedError
 
 @for_all_dps
 def check_solve_top_bottom(id_dp, dp):
-    print('Testing %s: %s' % (id_dp, dp))
+    print(f"Testing {id_dp}: {dp}")
     F = dp.get_fun_space()
     R = dp.get_res_space()
     UR = UpperSets(R)
-    print('F: %s' % F)
-    print('R: %s' % R)
+    print(f"F: {F}")
+    print(f"R: {R}")
 
     I = dp.get_imp_space()
     M = dp.get_imp_space()
-    print('I: %s' % I)
-    print('M: %s' % M)
+    print(f"I: {I}")
+    print(f"M: {M}")
 
     try:
         f_top = F.get_top()
@@ -28,8 +28,8 @@ def check_solve_top_bottom(id_dp, dp):
     except NotBounded:
         return
     
-    print('⊥ = %s' % F.format(f_bot))
-    print('⊤ = %s' % F.format(f_top))
+    print(f"⊥ = {F}".format(f_bot))
+    print(f"⊤ = {F}".format(f_top))
 
     try:
         ur0 = dp.solve(f_bot)
@@ -37,8 +37,8 @@ def check_solve_top_bottom(id_dp, dp):
     except NotSolvableNeedsApprox:
         return
 
-    print('f(%s) = %s' % (f_bot,  ur0))
-    print('f(%s) = %s' % (f_top,  ur1))
+    print(f"f({f_bot}) = {ur0}")
+    print(f"f({f_top}) = {ur1}")
     print('Checking that the order is respected')
 
     try:
@@ -64,9 +64,9 @@ def try_with_approximations(id_dp, dp, test):
         print(msg)
         return
     
-    #print('approx: %s -> %s, %s' % (dp, dpL, dpU))    
-    test(id_dp + '_lower_%s' % nl, dpL)
-    test(id_dp + '_upper_%s' % nu, dpU)
+    #print(f"approx: {dp} -> {dpL}, {dpU}")    
+    test(id_dp + f"_lower_{nl}", dpL)
+    test(id_dp + f"_upper_{nu}", dpU)
     
     
 @for_all_dps
@@ -130,7 +130,7 @@ def check_repr(id_dp, dp):  # @UnusedVariable
     print(s1)
     print(s2)
     if not '⟼' in s1 or not '⟼' in s2:
-        msg = '%s: Malformed output' % (type(dp).__name__) 
+        msg = f"{type(dp}: Malformed output".__name__) 
         raise_desc(ValueError, msg, repr_h_map=s1, repr_hd_map=s2)
 
     if not '_approx_' in id_dp and isinstance(dp, ApproximableDP):

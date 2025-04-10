@@ -55,7 +55,7 @@ def get_it(seq, coords, reduce_list):
 
 
     except (InvalidCoords, IndexError) as e:
-        msg = 'Error while calling %s { %s }' % (seq, coords)
+        msg = f"Error while calling {seq} { {coords} }"
         raise_wrapped(ValueError, e, msg, compact=True,
                       seq=seq, coords=coords, reduce_list=reduce_list)
 

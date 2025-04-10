@@ -55,8 +55,7 @@ def wrap_with_counts(P, maxleq=None):
             self.nleq += 1
             if maxleq is not None:
                 if self.nleq >= maxleq:
-                    msg = ('%d leqs (true: %d, false: %d)' %
-                           (self.nleq, self.nleq_true, self.nleq_false))
+                    msg = (f"{self.nleq} leqs (true: {self.nleq_true}, false: {self.nleq_false})")
                     raise ValueError(msg)
             return res
 
@@ -81,7 +80,7 @@ def stats_for_poset_minima(P, xs, f, maxleq):  # @UnusedVariable
     print('nres: %d' % len(res))
 
     for s in P:
-        print('component %s' % s)
+        print(f"component {s}")
         print(' nleq:  %d' % s.nleq)
         print(' nleqt: %d' % s.nleq_true)
         print(' nleqf: %d' % s.nleq_false)
@@ -101,13 +100,13 @@ if False:
         method = poset_minima_n2
         N2w = wrap_with_counts(N2)
         r = stats_for_poset_minima(N2w, Ps, method, maxleq=None)
-        print r
+        print(r)
 
 #
 # def get_random_antichain(n, point_generation, leq):
 #     cur = set()
 #     while len(cur) < n:
-#         print('Current size: %d < %d' % (len(cur), n))
+#         print(f"Current size: {len(cur} < %d", n))
 #         remaining = n - len(cur)
 #         Ps = point_generation(n * 10)
 #         cur.update(Ps)
@@ -120,7 +119,7 @@ def get_random_antichain(n, ndim):
     
     xs = np.linspace(0, 100, n)
     deltas = np.random.rand(n)
-    ys = 1.0 / np.cumsum(deltas)
+    ys = 1.0 // np.cumsum(deltas)
     return zip(xs, ys)
 
 
@@ -144,18 +143,18 @@ def pmin2():
 
 def run_all(poset, Ps):
     method = poset_minima_n2
-    print('method: %s' % method)
+    print(f"method: {method}")
     _r = stats_for_poset_minima(poset, Ps, method, maxleq=None)
     def poset_minima_n2_sort_first(P, ps):
         f = sorted(ps)
         return poset_minima_n2(P, f)
 
     method = poset_minima_n2_sort_first
-    print('method: %s' % method)
+    print(f"method: {method}")
     _r = stats_for_poset_minima(poset, Ps, method, maxleq=None)
 
     method = poset_minima_n2_optimizedPP
-    print('method: %s' % method)
+    print(f"method: {method}")
     _r = stats_for_poset_minima(poset, Ps, method, maxleq=None)
 
 @comptest
@@ -187,7 +186,7 @@ def poset_minima_n2_optimizedPP(P, ps):
     res = set()
     min_y = None
     for p in sx:
-        # print('p: %s min_y: %s' % (str(p), min_y))
+        # print(f"p: {str(p} min_y: %s", min_y))
         if min_y is None or (l2(p[1], min_y)):
             res.add(p)
             min_y = p[1]

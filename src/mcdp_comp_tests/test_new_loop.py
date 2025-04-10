@@ -29,7 +29,7 @@ mcdp {
     """)
 
     r = cndp_abstract_loop2(ndp)
-    print r
+    print(r)
 
 
 @comptest

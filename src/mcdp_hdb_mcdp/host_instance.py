@@ -42,7 +42,7 @@ class HostInstance(object):
         self.repo_local = repo_local
         for repo_name, remote_url in repo_git.items():
             where = os.path.join(root, repo_name)
-            logger.info('Loading %r = %r in dir %s' % (repo_name, remote_url, where)) 
+            logger.info(f"Loading %r = %r in dir {repo_name}") 
             repo = Repo.init(where)
             origin = repo.create_remote('origin', url=remote_url)
             assert origin.exists()
@@ -61,10 +61,10 @@ class HostInstance(object):
                 head.checkout()
             else:
                 # we create it from the upstream branch
-                logger.info('Creating local %s from remote %r' % (instance, upstream))
+                logger.info(f"Creating local {instance} from remote %r")
                 head = repo.create_head(instance, origin.refs[upstream])
                 head.checkout()
-                logger.info('Pushing local %s' % (instance)) 
+                logger.info(f"Pushing local {instance}") 
                 repo.git.push('-u', 'origin', instance) 
                  
             self.repos[repo_name] = repo
@@ -72,14 +72,14 @@ class HostInstance(object):
         if not 'user_db' in self.repos and not 'user_db' in self.repo_local:
             dirname = os.path.join(root, 'user_db_local') 
             create_empty_dir_from_schema(dirname=dirname, schema=DB.user_db, disk_map=DB.dm)
-            logger.info('No repository with name "user_db" passed. Creating empty one in %s' % dirname)
+            logger.info(f"No repository with name "user_db" passed. Creating empty one in {dirname}")
             self.repo_local['user_db'] = dirname
         self.mount()
         
-        logger.info('Set up repositories %s.' % format_list(self.db_view.repos))
+        logger.info(f"Set up repositories {format_list}."(self.db_view.repos))
         for repo_name, repo in self.db_view.repos.items():
-            logger.info('* repo %r has shelves %s ' % (repo_name, format_list(repo.shelves)))
-        logger.info('Set up users %s.' % format_list(self.db_view.user_db.users))
+            logger.info(f"* repo %r has shelves {repo_name} "))
+        logger.info(f"Set up users {format_list}."(self.db_view.user_db.users))
         
         self.host_cache = HostCache(self.db_view)
         
@@ -111,7 +111,7 @@ class HostInstance(object):
                 this_view = view_repos.child(repo_name)
                 repo = view_repos[repo_name]
             assert this_view._notify_callback is not None
-            #logger.info('callback for repo.%s: %s' % (repo_name, view_repo._notify_callback)
+            #logger.info(f"callback for repo.{repo_name}: {view_repo._notify_callback}"
             PushCallback.add_to(this_view)
          
         all_repo_names = set(list(self.repos) + list(self.repo_local))

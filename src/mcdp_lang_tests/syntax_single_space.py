@@ -20,7 +20,7 @@ def check_lang_singlespace1():
                      CDP.SingleElementPoset(CDP.SingleElementPosetKeyword('S'),
                                             CDP.SingleElementPosetTag(value='singleton')))
 
-    print recursive_print(p)
+    print(recursive_print(p))
 
 @comptest
 def check_lang_singlespace2():
@@ -66,12 +66,12 @@ def check_lang_singlespace3():
     dp1 = ndp1.get_dp()
     dp2 = ndp2.get_dp()
     R = dp1.get_res_space()
-    print type(R), R
+    print(type(R), R)
     UR = UpperSets(R)
     res1 = dp1.solve(('electric_power', 10.0))
     res2 = dp2.solve(('electric_power', 10.0))
-    print UR.format(res1)
-    print UR.format(res2)
+    print(UR.format(res1))
+    print(UR.format(res2))
 
 @comptest
 def check_lang_singlespace4():

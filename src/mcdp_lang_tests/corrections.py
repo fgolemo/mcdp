@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from contracts.utils import indent
-from nose.tools import assert_equal
+from .nose_compat import assert_equal
 
 from comptests.registrar import comptest, run_module_tests
 from mcdp_lang.dealing_with_special_letters import ends_with_divider,\
@@ -61,7 +61,7 @@ b = lift provided by actuation
 # #     
 # #     if isinstance(x, CDP.Resource) and isinstance(x.keyword, CDP.DotPrep):
 # # #         w0 = x.where
-# #         s = '%s required by %s' % (x.s.value, x.dp.value)
+# #         s = f"{x.s.value} required by {x.dp.value}"
 # #         print s.__repr__()
 # #         x2 = parse_wrap(Syntax.rvalue_resource_fancy, s)[0]
 # #         
@@ -93,13 +93,13 @@ def try_corrections2(s):
     context = Context()
     xr = parse_ndp_refine(x, context)
     
-    print indent(recursive_print(xr), 'xr|')
+    print(indent(recursive_print(xr), 'xr|'))
     suggestions = get_suggestions(xr)
    
     for orig_where, sub in suggestions:
         orig_1 = orig_where.string[orig_where.character:orig_where.character_end]
         
-        print 'Change %r in %r' % (orig_1, sub)
+        print('Change %r in %r' % (orig_1, sub))
         
     s2 = apply_suggestions(s, suggestions)
     #print s2

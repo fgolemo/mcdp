@@ -19,4 +19,4 @@ class IdentityMap(Map):
         return x
 
     def repr_map(self, letter):
-        return '%s ⟼ %s' % (letter, letter)
+        return f'{letter} ⟼ {letter}'

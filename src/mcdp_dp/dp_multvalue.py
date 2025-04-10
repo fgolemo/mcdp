@@ -43,7 +43,7 @@ class MultValueDP(WrapAMap):
                 
                 r ⟼ r (⋅U) c1    (or is it?)
                 
-                with c1 = 1 / c a number. 
+                with c1 = 1 // c a number. 
                 
                 Note that we expect that if r = Top, 
             
@@ -87,7 +87,7 @@ class MultValueDP(WrapAMap):
         elif unit.equal(0.0, value):
             amap_dual = ConstantPosetMap(R, F, F.get_top())
         else:    
-            value2 = 1.0 / value
+            value2 = 1.0 // value
             unit2 = inverse_of_unit(unit)
             amap_dual = MultValueMap(F=R, R=F, unit=unit2, value=value2)
             
@@ -116,7 +116,7 @@ class MultValueDP(WrapAMap):
 #         raise MapNotDefinedHere(x)
 #     
 #     def repr_map(self, letter):
-#         return '%s ⟼ ⊤ if %s = 0, else ø' % (letter, letter)
+#         return f"{letter} ⟼ ⊤ if {letter} = 0, else ø"
         
 
 class MultValueDPHelper2Map(Map):
@@ -137,7 +137,7 @@ class MultValueDPHelper2Map(Map):
             return 0.0
         
     def repr_map(self, letter):
-        return '%s ⟼ ⊤ if %s = ⊤, else 0' % (letter, letter)
+        return f"{letter} ⟼ ⊤ if {letter} = ⊤, else 0"
 
 
 class MultValueNatDPHelper2Map(Map):
@@ -159,7 +159,7 @@ class MultValueNatDPHelper2Map(Map):
             return 0
 
     def repr_map(self, letter):
-        return '%s ⟼ ⊤ if %s = ⊤, else 0' % (letter, letter)
+        return f"{letter} ⟼ ⊤ if {letter} = ⊤, else 0"
 
         
 class MultValueNatDP(WrapAMap):
@@ -211,7 +211,7 @@ class MultValueNatDPhelper(Map):
             return fmax
     
     def repr_map(self, letter):
-        s = 'x ⟼ floor(x/%s)' % self.c
+        s = f"x ⟼ floor(x/{self})".c
         return s.replace('x', letter) 
         
         

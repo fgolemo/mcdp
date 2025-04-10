@@ -66,7 +66,7 @@ def define_load_all_jobs(context, dirname, outdir, name_filter=None, errors_only
         c = context.comp(process, dirname, e, job_id = e.id)
         results[e.id] = (e, c)
     if not results:
-        msg = 'Could not find anything to parse. (filter: %s)' % name_filter
+        msg = f"Could not find anything to parse. (filter: {name_filter})"
         raise Exception(msg)
     context.comp(summary, results, outdir, errors_only)
     context.comp(raise_if_any_error, results)
@@ -103,7 +103,7 @@ def raise_if_any_error(results):
             del errors[e]
     
     if errors:
-        msg = 'Found %s errors.\n\n' % len(errors)
+        msg = f"Found {len} errors.\n\n"(errors)
         msg += "\n".join(sorted(errors))
         raise Exception(msg)
         
@@ -153,15 +153,15 @@ def summary(results, out, errors_only):
             nerrors += 1
         if e.shelf_name != shelf_name:
             shelf_name = e.shelf_name
-            s += c1('\n Shelf %s' % shelf_name)
+            s += c1(f"\n Shelf {shelf_name}")
         if e.library_name != library_name:
             library_name = e.library_name
-            s += c1('\n   Library %s' % library_name)
+            s += c1(f"\n   Library {library_name}")
         if e.spec_name != spec_name:
             spec_name = e.spec_name
-            s += c1('\n     %s' % spec_name)
+            s += c1(f"\n     {spec_name}")
         if result.error_type:
-            s += ce('\n     %20s  %s' % (result.error_type, e.thing_name))
+            s += ce(f"\n     %20s  {result.error_type}")
             s += '\n' + indent(result.error_string[:200], '       > ')
         else:
             if not errors_only:
@@ -175,24 +175,24 @@ def summary(results, out, errors_only):
                     ctime = cyellow
                 else:
                     ctime = lambda x:x
-                s += ctime('\n     %20s' % ok ) + '   ' + cok('%s   %s' % (e.thing_name, warnings))
+                s += ctime(f"\n     %20s' % ok ) + '   ' + cok('{e.thing_name}   {warnings}")
                 
         if result.error_type:
-            fn = os.path.join(out, '%s.txt' % e.id)
+            fn = os.path.join(out, f"{e}.txt".id)
             with open(fn, 'w') as f:
                 f.write(result.error_string)
-            logger.info('wrote %s' % fn)
+            logger.info(f"wrote {fn}")
             
     s += '\n'
     
     s += '\nNumber of errors: %d' % nerrors
     import numpy as np
-    s += '\nCPU median: %s ms' % (1000 * np.median(cpu)) 
+    s += f"\nCPU median: {1000 * np.median(cpu} ms") 
     print(s)
     fn = os.path.join(out, 'stats.txt')
     with open(fn,'w') as f:
         f.write(s)
-    logger.info('wrote %s' % fn)
+    logger.info(f"wrote {fn}")
 
 
 def process(dirname, e):
@@ -228,7 +228,7 @@ def process(dirname, e):
             error_string = None
         else:
             error = 'Unexpected'
-            error_string = 'Expected DPSyntaxError error, got %s' % type(exc).__name__
+            error_string = f"Expected DPSyntaxError error, got {type}"(exc).__name__
             error_string += '\n' + indent(error_string, 'obtained > ')
     elif gives_semantic_error(source):
         if isinstance(exc, DPSemanticError):
@@ -236,7 +236,7 @@ def process(dirname, e):
             error_string = None
         else:
             error = 'Unexpected'
-            error_string = 'Expected DPSemanticError error, got %s' % type(exc).__name__
+            error_string = f"Expected DPSemanticError error, got {type}"(exc).__name__
             error_string += '\n' + indent(error_string, 'obtained > ')
     elif gives_not_implemented_error(source):
         if isinstance(exc, DPNotImplementedError):
@@ -244,7 +244,7 @@ def process(dirname, e):
             error_string = None
         else:
             error = 'Unexpected'
-            error_string = 'Expected DPNotImplementedError error, got %s' % type(exc).__name__
+            error_string = f"Expected DPNotImplementedError error, got {type}"(exc).__name__
             error_string += '\n' + indent(error_string, 'obtained > ')
         
     if error:

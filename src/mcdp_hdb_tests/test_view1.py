@@ -51,7 +51,7 @@ def test_view1a():
     
     class UserView(object):
         def get_complete_address(self):
-            return '%s <%s>' %  (self.name, self.email)
+            return f"{self.name} <{self.email}>"
     
     viewmanager = ViewManager(db_schema)
     viewmanager.set_view_class(schema_user, UserView) 
@@ -102,7 +102,7 @@ def test_view1a():
     assert 'another' not in users
 
     for group in u.groups:
-        print('%s is in group %s' % (u.name, group))
+        print(f"{u.name} is in group {group}")
     
     assert_equal(list(u.groups), ['group:admin', 'group:FDM'])
     

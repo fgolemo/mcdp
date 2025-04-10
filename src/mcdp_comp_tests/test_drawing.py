@@ -52,8 +52,8 @@ mcdp_dev_warning('disabled this for now')
 #     rnames = ndp.get_rnames()
 #     assert len(fnames) == 1
 #     assert len(rnames) == 1
-#     xl = '%s (%s)' % (fnames[0], ndp.get_ftype(fnames[0]))
-#     yl = '%s (%s)' % (rnames[0], ndp.get_rtype(rnames[0]))
+#     xl = f"{fnames[0]} ({ndp.get_ftype(fnames[0]})")
+#     yl = f"{rnames[0]} ({ndp.get_rtype(rnames[0]})")
 # 
 # 
 #     f, rmin = unzip(solutions)
@@ -93,7 +93,7 @@ mcdp_dev_warning('disabled this for now')
 # 
 # def pylab_label_generic(pf, s):
 #     prop = FontProperties()
-# #     f = '/Volumes/1506-env_fault/sw/canopy/User/lib/python2.7/site-packages/matplotlib/mpl-data/fonts/ttf/STIXGeneral.ttf'
+# #     f = '/Volumes//1506-env_fault/sw/canopy/User/lib/python2.7//site-packages/matplotlib/mpl-data/fonts/ttf/STIXGeneral.ttf'
 #     fs = ['/Library/Fonts/Microsoft/Cambria Math.ttf']
 #     for f in fs:
 #         if os.path.exists(f):
@@ -114,7 +114,7 @@ mcdp_dev_warning('disabled this for now')
 #     except UnicodeDecodeError as e:
 #         yl = yl.decode('utf-8')
 #         pylab.ylabel(yl)
-#         # print('Cannot set label %s %r: %s' % (yl, yl, e))
+#         # print(f"Cannot set label {yl} %r: {yl}")
 
 # 
 # def solve_ndp(ndp, n=20):

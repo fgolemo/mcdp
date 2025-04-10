@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from nose.tools import assert_equal
+from .nose_compat import assert_equal
 
 from comptests.registrar import comptest, run_module_tests
 from mcdp_lang.dealing_with_special_letters import subscripts,\
@@ -94,7 +94,7 @@ def special_letters_identifiers():
 
         res = parse_wrap_check(appears, idn)
         #print('- %r %r -> %r' % (identifier, appears, res))
-#         x = '  %s %s -> %s' % (identifier.decode('utf8'),
+#         x = f"  {identifier.decode('utf8'} %s -> %s",
 #                                appears.decode('utf8'),
 #                                res.decode('utf8'))
         #print(x)

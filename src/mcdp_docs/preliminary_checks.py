@@ -44,7 +44,7 @@ def check_no_forbidden(s): # pragma: no cover
         if f in s:
             msg = 'Found forbidden sequence %r. This will not end well.' % f
             subs = forbidden[f]
-            msg += ' Try one of these substitutions: %s' % format_list(subs)
+            msg += f" Try one of these substitutions: {format_list}"(subs)
             c = s.index(f)
             where = Where(s, c, c + len(f)) 
             raise DPSyntaxError(msg, where=where)
@@ -78,7 +78,7 @@ def fix_tag(m):
                 return m2.group(1) + '="" ' +  char 
             else:
                 return m2.group(1) + char
-        r = '(%s)(.)?' % att
+        r = f"({att})(.)?"
         contents = re.sub(r, fix_if_empty, contents)
     
     return "<" + tagname + contents + ">"
@@ -122,9 +122,9 @@ def check_parsable(s):
         line = line1 - 1
         col = col1 - 1
         character = location(line, col, s)
-        msg = 'Invalid XML: %s' % e
+        msg = f"Invalid XML: {e}"
         where = Where(s, character)
-        logger.error('line %s col %s' % (where.line, where.col))
+        logger.error(f"line {where.line} col {where.col}")
         logger.error(where)
         raise DPSyntaxError(msg, where=where)
     

@@ -41,7 +41,7 @@ class ACLRule(object):
         else:
             pass
         if not valid:
-            msg = 'Invalid to_whom spec: %s' % to_whom
+            msg = f"Invalid to_whom spec: {to_whom}"
             logger.error(msg)
 
     def as_pyramid_acl(self):
@@ -55,8 +55,7 @@ class ACLRule(object):
         return (a,b,c)
     
     def __repr__(self):
-        return ('ACLRule(%s %s to %s)' % 
-                (self.allow_or_deny, self.privilege, self.to_whom))
+        return (f"ACLRule({self.allow_or_deny} {self.privilege} to {self.to_whom})")
 
 class ACL(object):
     
@@ -80,7 +79,7 @@ class ACL(object):
             principals.append(username)
         if groups:
             for g in groups:
-                principals.append('group:%s'%g)
+                principals.append(f"group:{g}")
         
         return self.allowed_(privilege, principals)
     
@@ -107,7 +106,7 @@ class ACL(object):
                 else: 
                     assert False, r
         
-        msg = 'Permission %r denied for %s' % (privilege, principals)
+        msg = f"Permission %r denied for {privilege}"
         msg += '\n' + indent('\n'.join(str(_) for _ in self.rules), '  ')
         logger_access.debug(msg)
         return False 
@@ -115,7 +114,7 @@ class ACL(object):
     def __str__(self):
         s = 'ACL('
         for r in self.rules:
-            s += '\n %s' % r  
+            s += f"\n {r}"  
         s += '\n)'
         return s
 

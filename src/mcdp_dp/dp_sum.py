@@ -52,13 +52,13 @@ class SumNNatDP(WrapAMap, ApproximableDP):
         WrapAMap.__init__(self, amap, amap_dual)
     
     def __repr__(self):
-        return 'SumNNatDP(%s)' % self.n
+        return f"SumNNatDP({self})".n
     
     def solve_r(self, r):  # @UnusedVariable
         
         # Max { (f1, f2): f1 + f2 <= r }
         if self.n > 2:
-            msg = 'SumNNatDP(%s).solve_r not implemented yet' % self.n
+            msg = f"SumNNatDP({self}).solve_r not implemented yet".n
             raise_desc(DPNotImplementedError, msg)
         
         mcdp_dev_warning('move away')    
@@ -70,7 +70,7 @@ class SumNNatDP(WrapAMap, ApproximableDP):
         assert isinstance(r, int)
 
         if r >= 100000:
-            msg = 'This would create an antichain of %s items.' % r
+            msg = f"This would create an antichain of {r} items."
             raise NotSolvableNeedsApprox(msg)
         
         s = set()        
@@ -80,11 +80,11 @@ class SumNNatDP(WrapAMap, ApproximableDP):
         return self.F.Ls(s)
     
     def get_lower_bound(self, nl):  # @UnusedVariable
-        msg = 'SumNNatDP(%s).get_lower_bound() not implemented yet' % self.n
+        msg = f"SumNNatDP({self}).get_lower_bound() not implemented yet".n
         raise_desc(DPNotImplementedError, msg)
 
     def get_upper_bound(self, nu):  # @UnusedVariable
-        msg = 'SumNNatDP(%s).get_upper_bound() not implemented yet' % self.n
+        msg = f"SumNNatDP({self}).get_upper_bound() not implemented yet".n
         raise_desc(DPNotImplementedError, msg)
         
     def repr_hd_map(self):
@@ -235,7 +235,7 @@ class SumNIntDP(WrapAMap):
         WrapAMap.__init__(self, amap)
         
     def __repr__(self):
-        return 'SumNIntDP(%s)' % (self.n)
+        return f"SumNIntDP({self.n})"
     
 
     def repr_hd_map(self):

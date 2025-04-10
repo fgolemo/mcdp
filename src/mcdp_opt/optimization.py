@@ -82,8 +82,8 @@ class Optimization(object):
         for u in unconnected:
             options.remove(u)
 
-        print('Removing the unusable options %s' % sorted(unconnected))
-        print('Remaining with %s' % sorted(options))
+        print(f"Removing the unusable options {sorted}"(unconnected))
+        print(f"Remaining with {sorted}"(options))
 
         lower_bounds = {}
         for fname, F0, f0 in zip(flabels, F0s, f0s):
@@ -133,7 +133,7 @@ class Optimization(object):
     def note_edge(self, s, a, s1):
         """ Note that there was a state s1 generated that
             led from s using action a """
-        # print('%s --> %s' % (s.creation_order, s1.creation_order))
+        # print(f"{s.creation_order} --> {s1.creation_order}")
         self.G.add_node(s)
         self.G.add_node(s1)
         self.G.add_edge(s, s1, action=a)
@@ -155,7 +155,7 @@ class Optimization(object):
         fn = os.path.join(outdir, 'step%03d_tree.html' % self.iteration)
 
         r = self.get_tree_report()
-        print('writing to %s   %s ' % (fn, fn0))
+        print(f"writing to {fn}   {fn0} ")
         r.to_html(fn)
 
         shutil.copy(fn, fn0)
@@ -183,7 +183,7 @@ class Optimization(object):
 
     def draw_tree_get_tree_expand(self):
         def label_for_node(n):
-            s = '#%s' % n.creation_order
+            s = f"#{n}".creation_order
             s += ' (%d)' % len(n.context.names)
             return s
 
@@ -195,7 +195,7 @@ class Optimization(object):
     def draw_tree_get_tree_compact(self):
         def label_for_node(n):
             nactions = len([() for (s, _) in self.actions if s is n])
-            s = '#%s' % n.creation_order
+            s = f"#{n}".creation_order
 
             #             s += ' (%d)' % len(n.context.names)
             if nactions:
@@ -248,7 +248,7 @@ class Optimization(object):
 
         # domination is dashed
         for n1, n2 in self.G_dom.edges():
-            # print('drawing dom %s -> %s' % (n1.creation_order, n2.creation_order))
+            # print(f"drawing dom {n1.creation_order} -> {n2.creation_order}")
             gn1 = get_ggn_node(n1)
             gn2 = get_ggn_node(n2)
             label = "D"
@@ -276,13 +276,13 @@ class Optimization(object):
             return
             
         (s0, a0) = self.choose_action()
-        s0.info('Popped at iteration %d with %s' % (self.iteration, a0))
+        s0.info(f"Popped at iteration {a0} with {self.iteration}")
         
         new_actions = a0.__call__(self, s0)
 
         for (s, a) in new_actions:
 
-            print('%s -> %s' % (a0, a))
+            print(f"{a0} -> {a}")
             self.actions.append((s,a))
             
     def already_known(self, s1): 
@@ -363,9 +363,9 @@ class Optimization(object):
             F.belongs(f)
             ur = dp.solve(f)
             if ur.minimals:
-                print('Yes %s:%s provides at least %s' % (id_ndp, fname, lb))
-                print('  f = %s ' % F.format(f))
-                print(' ur = %s ' % ur)
+                print(f"Yes {id_ndp}:{fname} provides at least {lb}")
+                print(f"  f = {F} ".format(f))
+                print(f" ur = {ur} ")
                 return True
         return False
 
@@ -392,7 +392,7 @@ class Optimization(object):
                         s = re.sub('[^0-9a-zA-Z]+', '_', s)
                         return s
                         
-                    newname = sanitize('limit_%s' % R)
+                    newname = sanitize(f"limit_{R}")
                     options.append((newname, 'limit'))
                     self.additional[newname] = ndp
 
@@ -401,7 +401,7 @@ class Optimization(object):
             if self.does_provider_provide(id_ndp, fname, R, lb):
                 options.append((id_ndp, fname))
 
-        print('Options for %s >= %s: %r' % (R, lb, options))
+        print(f"Options for {R} >= {lb}: %r")
         return options
     
     @memoize_simple
@@ -441,7 +441,7 @@ class Optimization(object):
         tableres = {}
         for cresource, rname in table.items():
             i = rnames.index(rname)
-            # print('ur: %s i = %s' % (ur, i))
+            # print(f"ur: {ur} i = {i}")
             uri = upperset_project(ur, i)
             tableres[cresource] = uri
         R = ur.P

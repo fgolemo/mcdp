@@ -93,8 +93,8 @@ def report(res):
         ieee_spines_zoom3(pylab)
         total_massL = np.array(list(get_value(dataL, 'total_mass')))
         total_massU = np.array(list(get_value(dataU, 'total_mass')))
-        print endurance
-        print total_massL, total_massU
+        print(endurance)
+        print(total_massL, total_massU)
         pylab.plot(endurance, total_massL, **LOWER2)
         pylab.plot(endurance, total_massU, **UPPER2)
         set_axis_colors(pylab, color_functions, color_resources)
@@ -131,16 +131,16 @@ class DroneU(QuickApp):
         for l in ['batteries_uncertain1',
                   'batteries_uncertain2',
                   'batteries_uncertain3']:
-            battery = '`%s.batteries' % l
+            battery = f"`{l}.batteries"
             s = get_ndp_code(battery)
 
-            fn = os.path.join('generated', 'drone_unc1', 'drone_unc1_%s.mcdp' % (l))
+            fn = os.path.join(f"generated', 'drone_unc1', 'drone_unc1_{l}.mcdp")
             dn = os.path.dirname(fn)
             if not os.path.exists(dn):
                 os.makedirs(dn)
             with open(fn, 'w') as f:
                 f.write(s)
-            print('Generated %s' % fn)
+            print(f"Generated {fn}")
 
             result = context.comp(process, s)
             r = context.comp(report, result)

@@ -1,4 +1,4 @@
-from nose.tools import assert_equal
+from .nose_compat import assert_equal
 
 from comptests.registrar import run_module_tests
 from mcdp import mcdp_dev_warning
@@ -19,7 +19,7 @@ def warning_unused_variable1(): # TODO: rename
     context = ModelBuildingContext()
     ndp = parse_ndp(s, context)
     w = context.warnings
-    print ndp.repr_long()
+    print(ndp.repr_long())
     assert_equal(len(w), 1)
     assert_equal(w[0].which, MCDPWarnings.LANGUAGE_UNUSED_CONSTANT)
 

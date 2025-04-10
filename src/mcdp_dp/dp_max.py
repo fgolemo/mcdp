@@ -46,10 +46,10 @@ class MaxF1DP(WrapAMap):
         self.value = value
     
     def __repr__(self):
-        return 'Max1(%r, %s)' % (self.F, self.value)
+        return f"Max1(%r, {self.F})"
 
     def repr_hd_map(self):
-        return "r ⟼ {r} if r ≽ %s, else ø" % (self.F.format(self.value))
+        return f"r ⟼ {r} if r ≽ {self.F.format(self.value}, else ø")
 
 
 class MaxR1DP(WrapAMap):
@@ -70,10 +70,10 @@ class MaxR1DP(WrapAMap):
         self.value = value
     
     def __repr__(self):
-        return 'MaxR1DP(%r, %s)' % (self.F, self.value)
+        return f"MaxR1DP(%r, {self.F})"
 
     def repr_h_map(self):
-        return "r ⟼ {r} if r ≼ %s, else ø" % (self.F.format(self.value))
+        return f"r ⟼ {r} if r ≼ {self.F.format(self.value}, else ø")
 
 class MinR1DP(WrapAMap):
     """        
@@ -93,10 +93,10 @@ class MinR1DP(WrapAMap):
         self.value = value
     
     def __repr__(self):
-        return 'MaxR1DP(%r, %s)' % (self.F, self.value)
+        return f"MaxR1DP(%r, {self.F})"
 
     def repr_h_map(self):
-        return "r ⟼ {r} if r ≼ %s, else ø" % (self.F.format(self.value))
+        return f"r ⟼ {r} if r ≼ {self.F.format(self.value}, else ø")
     
     
     
@@ -116,7 +116,7 @@ class MinF1DP(WrapAMap):
         self.value = value
     
     def __repr__(self):
-        return 'Min1(%r, %s)' % (self.F, self.value) 
+        return f"Min1(%r, {self.F})" 
     
         
 class MeetNDP(WrapAMap):
@@ -163,7 +163,7 @@ class MeetNDP(WrapAMap):
         return 'Min'
     
     def __repr__(self):
-        return 'MeetNDP(%s,%r)' % (self.n, self.F0)
+        return f"MeetNDP({self.n},%r)"
     
         
 
@@ -267,7 +267,7 @@ else:
 #             elements = get_string_list_of_elements("r", n)
 #             start = get_string_vector("r", n)
 #             end = " ∨ ".join(elements)
-#             return '%s ⟼ { %s }' % (start, end)
+#             return f"{start} ⟼ { {end} }"
             
             
             

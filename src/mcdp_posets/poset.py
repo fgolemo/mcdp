@@ -48,6 +48,7 @@ class Preorder(Space):
             return False
         
 class Poset(Preorder):
+    """A partially ordered set (antisymmetric preorder)."""
 
     @contract(returns='set')
     def get_minimal_elements(self):
@@ -102,7 +103,7 @@ class Poset(Preorder):
             return a
 
         if True: # pragma: no cover
-            msg = 'The join %s ∨ %s does not exist in %s.' % (a, b, self)
+            msg = f'The join {a} ∨ {b} does not exist in {self}.'
             raise NotJoinable(msg)
 
     def meet(self, a, b):  # "min" ∧
@@ -112,7 +113,7 @@ class Poset(Preorder):
             return b
 
         if True: # pragma: no cover
-            msg = 'The meet %s ∧ %s does not exist in %s.' % (a, b, self)
+            msg = f'The meet {a} ∧ {b} does not exist in {self}.'
             raise NotJoinable(msg)
 
     def U(self, a):
@@ -151,5 +152,5 @@ def is_top(poset, x):
     return poset.equal(x, poset.get_top())
 
 def is_bottom(poset, x):
-    """ Returns True if the element is the Top """
+    """ Returns True if the element is the Bottom """
     return poset.equal(x, poset.get_bottom())

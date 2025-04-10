@@ -22,7 +22,7 @@ class GenericInterval(Poset):
         self.P.check_leq(a, b)
 
     def __repr__(self):
-        return 'GenericInterval(%r,%r,%r)' % (self.P, self.a, self.b)
+        return f'GenericInterval({self.P!r},{self.a!r},{self.b!r})'
 
     def witness(self):
         return self.a
@@ -76,22 +76,21 @@ class Interval(Poset):
 
     def check_equal(self, a, b):
         if not (a == b):
-            raise NotEqual('%s != %s' % (a, b))
+            raise NotEqual(f'{a} != {b}')
 
     def check_leq(self, a, b):
         if not(a <= b):
-            raise NotLeq('%s ≰ %s' % (a, b))
+            raise NotLeq(f'{a} ≰ {b}')
 
     def belongs(self, x):
         if not isinstance(x, float):
-            raise NotBelongs('Not a float: {}'.format(x))
+            raise NotBelongs(f'Not a float: {x}')
         if not self.L <= x <= self.U:
-            msg = '%s ∉ [%s, %s]' % (x, self.format(self.L),
-                                     self.format(self.U))
+            msg = f'{x} ∉ [{self.format(self.L)}, {self.format(self.U)}]'
             raise NotBelongs(msg)
 
     def format(self, x):
-        return '%.3f' % x
+        return f'{x:.3f}'
 
     def __repr__(self):
-        return "[%s,%s]" % (self.L, self.U)
+        return f"[{self.L},{self.U}]"

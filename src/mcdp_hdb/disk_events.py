@@ -29,7 +29,7 @@ def ff(f):
     @contract(_id=str, who='assert_valid_who')
     def f2(_id, who, *args, **kwargs):
         check_isinstance(_id, str)
-        #logger.debug('Calling %s with args = %s kwargs = %s' % (f, args, kwargs))
+        #logger.debug(f"Calling {f} with args = {args} kwargs = {kwargs}")
         event_name, arguments = f(*args, **kwargs)
         e =  disk_event_make(_id, event_name, who, arguments)
         return e
@@ -41,11 +41,11 @@ def ff(f):
 def valid_dirname(x):
     ''' Checks that it is a sequence of strings - not None '''
     if None in x:
-        msg = 'Invalid dirname %s' % x.__repr__()
+        msg = f"Invalid dirname {x}".__repr__()
         raise ValueError(msg) 
     for c in x:
         if c == '':
-            msg = 'Invalid component in %s' %str(x)
+            msg = f"Invalid component in {str}"(x)
             raise ValueError(msg)
      
 @ff
@@ -169,7 +169,7 @@ def disk_event_interpret(disk_rep, disk_event):
     intf = fs[ename]
     arguments = disk_event['arguments']
     try:
-        logger.info('%s %s' % (ename, arguments))
+        logger.info(f"{ename} {arguments}")
         intf(disk_rep=disk_rep, **arguments)
     except Exception as e:
         msg = 'Could not complete the replay of this event: \n'
@@ -194,7 +194,7 @@ def apply_disk_event_to_filesystem(wd, disk_event, repo=None):
     def path_relative_to_repo(fn):
         repo_dir = repo.working_dir
         x = os.path.relpath(fn, repo_dir)
-#         logger.debug('%s %s - > %s ' % (repo_dir, fn, x))
+#         logger.debug(f"{repo_dir} {fn} - > {x} ")
         return x
     
     def descendants_tracked(dirname):
@@ -234,12 +234,12 @@ def apply_disk_event_to_filesystem(wd, disk_event, repo=None):
         if repo_index:
 #             fn1 = path_relative_to_repo(p1)
 #             fn2 = path_relative_to_repo(p2)
-#             logger.debug('fn1: %s' % fn1)
-#             logger.debug('fn2: %s' % fn2)
+#             logger.debug(f"fn1: {fn1}")
+#             logger.debug(f"fn2: {fn2}")
 #             # repo_index.move(fn1, fn2)
-#             logger.debug('working dir: %s' % repo.working_dir)
-#             logger.debug('p1: %s' % p1)
-#             logger.debug('p2: %s' % p2)
+#             logger.debug(f"working dir: {repo}".working_dir)
+#             logger.debug(f"p1: {p1}")
+#             logger.debug(f"p2: {p2}")
             repo_index.move([p1, p2])
         else:
             os.rename(p1, p2)
@@ -295,12 +295,12 @@ def apply_disk_event_to_filesystem(wd, disk_event, repo=None):
     intf = fs[ename]
     arguments = disk_event['arguments']
     try:
-#         logger.info('Arguments: %s' % arguments)
+#         logger.info(f"Arguments: {arguments}")
         intf(**arguments)
     except Exception as e:
         msg = 'Could not apply this event to filesystem: \n'
         msg += indent(yaml_dump(disk_event), 'disk_event: ')
-        msg += '\nwd: %s' % wd
+        msg += f"\nwd: {wd}"
         from mcdp_hdb.memdataview import InvalidOperation
         raise_wrapped(InvalidOperation, e, msg)
 

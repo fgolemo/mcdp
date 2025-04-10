@@ -62,7 +62,7 @@ class PosetHasse(GGFormatter):
         image_source = mf.get_image_source()
 #         images_paths = library.get_images_paths() if library is not None else []
         import mcdp_report.my_gvgen as gvgen
-        gg = gvgen.GvGen(options="rankdir=%s" % self.direction)
+        gg = gvgen.GvGen(options=f"rankdir={self}".direction)
         
         e2n = {}
         for e in poset.elements:

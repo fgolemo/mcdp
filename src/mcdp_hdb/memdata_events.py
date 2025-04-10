@@ -86,7 +86,7 @@ def event_leaf_set_interpret(view, name, leaf, value):
         msg = 'leaf_set can be done only for SchemaSimple'
         raise_desc(InvalidOperation, msg, name=name, leaf=leaf, value=value)
         
-#     logger.debug('vc type is %s, %s' % (type(vc), vc))
+#     logger.debug(f"vc type is {type(vc}, %s", vc))
     vc.set(value)
     
 def get_the_list(view, name): 
@@ -253,8 +253,7 @@ def event_dict_rename_interpret(view, name, key, key2):
     # permissions
     v.check_can_write() 
     if not key in v._data:
-        msg = ('Cannot rename key %r to %r if it does not exist in %s.' % 
-               (key, key2, format_list(v._data)))
+        msg = (f"Cannot rename key %r to %r if it does not exist in {key}."))
         raise InvalidOperation(msg)
     v._data[key2] = v._data.pop(key)
   

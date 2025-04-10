@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from nose.tools import assert_equal
-from numpy.testing.utils import assert_allclose
+from .nose_compat import assert_equal
+try:
+    from numpy.testing.utils import assert_allclose  # Old numpy versions
+except ImportError:
+    from numpy.testing import assert_allclose  # Newer numpy versions
 
 from comptests.registrar import comptest, comptest_fails
 from mcdp_lang import parse_ndp
@@ -90,7 +93,7 @@ def check_unit1():
     parse_wrap_check('12 Wh', nu)
     parse_wrap_syntax_error('12 W\n h', nu)
 
-    parse_wrap_check('1 / s', Syntax.space_pint_unit)
+    parse_wrap_check('1 // s', Syntax.space_pint_unit)
 
     
     # print('unit_simple:')
@@ -103,8 +106,8 @@ def check_unit1():
     parse_wrap_syntax_error('/', Syntax.space_pint_unit)
     parse_wrap_syntax_error('^2', Syntax.space_pint_unit)
     good = ['g', 'g^2', 'g^ 2', 'g ^ 2', 'm/g ^2',
-            'm^2/g^2', 'N*m', '$', 'V', 'A', 'm/s',
-            'any', '1/s',
+            'm^2//g^2', 'N*m', '$', 'V', 'A', 'm/s',
+            'any', '1//s',
             ]
     results = []
     for g in good:
@@ -118,7 +121,7 @@ def check_unit1():
     exceptions = []
     for g, ok, e, r in results:
         if ok:
-            print('%20s: OK   %s' % (g, r))
+            print(f"%20s: OK   {g}")
             pass
         if not ok:  # pragma: no cover
             print('%20s: FAIL ' % g)
@@ -134,7 +137,7 @@ def check_numbers3():
 
     assert_parsable_to_connected_ndp("""    
     mcdp  {
-        provides a [1/s]
+        provides a [1//s]
         provides b [s]
         
         a * b <= 1 dimensionless
@@ -193,7 +196,7 @@ mcdp {
     dp = ndp.get_dp()
 
     r = dp.solve(0.0)
-    print r
+    print(r)
     limit = list(r.minimals)[0]
 
     # 1 MPH = 0.44704 m / s
@@ -216,15 +219,15 @@ def check_unit_conversions2():
     assert not tu.equal(A, B)
 
     B_from_A, A_from_B = tu.get_embedding(A, B)
-    print('B_from_A: %s' % B_from_A)
-    print('A_from_B: %s' % A_from_B)
+    print(f"B_from_A: {B_from_A}")
+    print(f"A_from_B: {A_from_B}")
 
     tu.check_equal(B_from_A.dom, A)
     tu.check_equal(B_from_A.cod, B)
     tu.check_equal(A_from_B.dom, B)
     tu.check_equal(A_from_B.cod, A)
 
-    print('B_from_A: %s  a=1.0 B_from_A(1.0) = %s' % (B_from_A, B_from_A(1.0)))
+    print(f"B_from_A: {B_from_A}  a=1.0 B_from_A(1.0) = {B_from_A(1.0}"))
     assert_allclose(B_from_A(1.0), ONE_MPH_IN_M_S)
     assert_allclose(A_from_B(ONE_MPH_IN_M_S), 1.0)
 
@@ -241,19 +244,19 @@ mcdp {
     d >= a + b
 }
     """)
-    print ndp.repr_long()
+    print(ndp.repr_long())
     dp = ndp.get_dp()
-    print dp.repr_long()
+    print(dp.repr_long())
     cases = (
       ((0.0, 1.0), (ONE_MPH_IN_M_S, 1.0)),
-      ((1.0, 0.0), (1.0, 1.0 / ONE_MPH_IN_M_S)),
+      ((1.0, 0.0), (1.0, 1.0 // ONE_MPH_IN_M_S)),
     )
 
     for func, expected in cases:
-        print('func: %s   F = %s' % (str(func), dp.get_fun_space()))
-        print('expected: %s' % str(expected))
+        print(f"func: {str(func}   F = %s", dp.get_fun_space()))
+        print(f"expected: {str}"(expected))
         r = dp.solve(func)
-        print('obtained: %s %s' % (str(r), dp.get_res_space()))
+        print(f"obtained: {str(r} %s", dp.get_res_space()))
         limit = list(r.minimals)[0]
         assert_allclose(limit, expected)
 

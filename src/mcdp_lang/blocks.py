@@ -54,29 +54,29 @@ def check_missing_connections(context):
             if False:
                 msg = 'One way to fix this is to add an explicit function:\n'
                 fn2 = 'f'
-                fix = "provides %s [unit]" % fn2
+                fix = f"provides {fn2} [unit]"
                 if context.is_new_resource(n):
                     ref = n
                 else:
-                    ref = '%s.%s' % (n, fn)
-                fix += '\n' + "%s >= %s" % (ref, fn2)
+                    ref = f"{n}.{fn}"
+                fix += f"\n{ref} >= {fn2}"
                 msg += indent(fix, '    ')
                 s += '\n' + indent(msg, 'help: ')
 
     if unconnected_res:
         s += "\nThere are some unconnected resources:"
         for n, rn in xsorted(unconnected_res):
-            s += '\n- resource %s of dp %r' % (rn, n)
+            s += f"\n- resource {rn!r} of dp {n!r}"
             if False:
                 msg = 'One way to fix this is to add an explicit resource:\n'
                 rn2 = 'r'
-                fix = "requires %s [unit]" % rn2
+                fix = f"requires {rn2} [unit]"
                 if context.is_new_function(n):
                     ref = n
                 else:
-                    ref = '%s.%s' % (n, rn)
+                    ref = f"{n}.{rn}"
                 # todo: omit '.' if n is
-                fix += '\n' + "%s >= %s" % (rn2, ref)
+                fix += f"\n{rn2} >= {ref}"
                 msg += indent(fix, '    ')
                 s += '\n' + indent(msg, 'help: ')
 

@@ -141,9 +141,9 @@ class Parallel(PrimitiveDP):
     def repr_long(self):
         r1 = self.dp1.repr_long()
         r2 = self.dp2.repr_long()
-        s = 'Parallel2  %% %s ⇸ %s' % (self.get_fun_space(), self.get_res_space())
-        s += '\n' + indent(r1, '. ', first='\ ')
-        s += '\n' + indent(r2, '. ', first='\ ') 
+        s = f"Parallel2  %% {self.get_fun_space(} ⇸ %s", self.get_res_space())
+        s += '\n' + indent(r1, '. ', first='\\ ')
+        s += '\n' + indent(r2, '. ', first='\\ ') 
         return s
     
     def repr_h_map(self):

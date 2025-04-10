@@ -59,7 +59,7 @@ class AppQR(object):
             if 'http' in x:
                 return x
             else:
-                return 'http://minimality.mit.edu/rdg/decks/1/cards/%s.html' % x
+                return f"http://minimality.mit.edu/rdg/decks//1/cards/{x}.html"
 
         entries = map(abbrev, entries)
         for e in entries:
@@ -135,7 +135,7 @@ class AppQR(object):
 
         for i, r in enumerate(resources):
             if r.type == 'mcdp/icon':
-                path = 'scraped/%s/%s' % (encoded, i)
+                path = f"scraped/{encoded}/{i}"
                 s += '<img src="%s"/>' % path
 
         if imported:
@@ -194,10 +194,10 @@ class AppQR(object):
                 if r.content_type == 'text/mcdp':
                     extension = 'mcdp'
                 else:
-                    msg = 'Expect content-type to be text/mcdp: %s' % r
+                    msg = f"Expect content-type to be text/mcdp: {r}"
                     raise ValueError(msg)
 
-            filename = os.path.join(where, '%s.%s' % (r.name, extension))
+            filename = os.path.join(where, f"{r.name}.{extension}")
             print('written %r' % filename)
             with open(filename, 'wb') as f:
                 f.write(r.content)

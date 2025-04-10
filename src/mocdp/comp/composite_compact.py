@@ -24,7 +24,7 @@ def compact_context(context):
         return context
     else:
         name1, name2, their_connections = s[0]
-        logger.debug('Will compact %s, %s, %s' % s[0])
+        logger.debug(f"Will compact {s}, {s}, {s}"[0])
 
         # establish order
         their_connections = list(their_connections)

@@ -1,5 +1,15 @@
 # -*- coding: utf-8 -*-
 import collections
+try:
+    from collections.abc import Sequence, MutableMapping, Mapping, Set, MutableSet, Iterable
+except ImportError:
+    # Python 2 compatibility
+    Sequence = Sequence
+    MutableMapping = MutableMapping
+    Mapping = Mapping
+    Set = Set
+    MutableSet = MutableSet
+    Iterable = Iterable
 import itertools
 
 from contracts import contract
@@ -21,7 +31,7 @@ class PosetProduct(SpaceProduct, Poset):
 
     @contract(subs='seq($Poset)')
     def __init__(self, subs):
-        if not isinstance(subs, collections.Iterable):
+        if not isinstance(subs, Iterable):
             msg = 'PosetProduct expects a sequence of Posets.'
             raise_desc(ValueError, msg, subs=subs)
         subs = tuple(subs)
@@ -72,7 +82,7 @@ class PosetProduct(SpaceProduct, Poset):
             try:
                 sub.check_leq(x, y)
             except NotLeq as e:
-                msg = '#%d (%s): %s ≰ %s.' % (i, sub, x, y)
+                msg = f'#{i} ({sub}): {x} ≰ {y}.'
                 msg += '\n' + indent(str(e).strip(), '| ')
                 problems.append(msg)
         if problems:
@@ -103,5 +113,5 @@ class PosetProduct(SpaceProduct, Poset):
             Returns a test chain of length n
         """
         chains = [s.get_test_chain(n) for s in self.subs]
-        res = zip(*tuple(chains))
+        res = list(zip(*tuple(chains)))
         return res

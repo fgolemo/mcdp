@@ -50,7 +50,7 @@ class HintDir(object):
             
             filename2 = pattern.replace('%', key)
             if filename2 != filename:
-                msg = 'Filename "%s" does not follow pattern "%s".' % (filename, pattern)
+                msg = f"Filename "{filename}" does not follow pattern "{pattern}"."
                 raise NotKey(msg)
             return key
         else:

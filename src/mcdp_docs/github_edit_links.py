@@ -43,9 +43,9 @@ def add_edit_links(soup, filename):
     repo = repo_info['repo']
     relpath = os.path.relpath(filename, repo_root)
     
-    repo_base = 'https://github.com/%s/%s' % (org, repo)
-    blob_base = repo_base + '/blob/%s' % (branch)
-    edit_base = repo_base + '/edit/%s' % (branch)
+    repo_base = f"https://github.com/{org}/{repo}"
+    blob_base = repo_base + f"/blob/{branch}"
+    edit_base = repo_base + f"/edit/{branch}"
     
     blob_url = blob_base + "/" + relpath
     edit_url = edit_base + "/" + relpath
@@ -69,7 +69,7 @@ def org_repo_from_url(url):
     match = re.search(pattern=pattern, string=url)
     if not match:
         msg = 'Cannot match this url string: %r' % url
-        msg += ' with this regexp: %s' % pattern
+        msg += f" with this regexp: {pattern}"
         raise NotImplementedError(msg)
     org = match.group(1)
     repo = match.group(2)

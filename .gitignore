@@ -1,4 +1,5 @@
 Icon?
+*.bak
 node_modules
 *.egg-info
 out-*

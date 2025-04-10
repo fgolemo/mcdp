@@ -66,7 +66,7 @@ def col_macro(soup, n):
         #logger.debug('No elements matching %r found.' % selector)
     else:
         pass
-        #logger.debug('Found %d elements matching %r.' % (num, selector))
+        #logger.debug(f"Found {num} elements matching %r.")
 
 def col_macro_(e, ncols):
     """
@@ -85,8 +85,7 @@ def col_macro_(e, ncols):
     children = [_ for _ in children if not is_string(_)]
     
     if len(children) < ncols:
-        msg = ('Cannot create table with %r cols with only %d children' % 
-               (ncols, len(children)))
+        msg = (f"Cannot create table with %r cols with only {ncols} children"))
         raise_desc(ValueError, msg, tag=describe_tag(e))
     
     for c in children:
@@ -133,7 +132,7 @@ def col_macro_(e, ncols):
                 child = children[i]
                 td.append(child)
             else:
-                td.append(Comment('empty row %d col %d' % (row, col)))
+                td.append(Comment(f"empty row {row} col {col}"))
             tr.append(NavigableString(S+S+S))
             tr.append(td)
             tr.append(NavigableString(NL))

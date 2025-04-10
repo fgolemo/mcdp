@@ -40,7 +40,7 @@
 #             raise_desc(NotBelongs, 'Not an integer.', x=x)
 # 
 #         if not 0 <= x:
-#             msg = '%s ≰ %s' % (0, x)
+#             msg = f'{0} ≰ {x}'
 #             raise_desc(NotBelongs, msg, x=x)
 # 
 #         return
@@ -80,7 +80,7 @@
 #             return self.top.__repr__()
 #         else:
 #             # TODO: add parameter
-#             return '%d' % x
+#             return f'{x}'
 # 
 #     def _leq(self, a, b):
 #         if a == b:
@@ -95,7 +95,7 @@
 #         self.belongs(a)
 #         self.belongs(b)
 #         if not self._leq(a, b):
-#             msg = '%s ≰ %s' % (a, b)
+#             msg = f'{a} ≰ {b}'
 #             raise NotLeq(msg)
 # 
 #     def multiply(self, a, b):
@@ -112,4 +112,4 @@
 # 
 #     def check_equal(self, x, y):
 #         if not x == y:
-#             raise NotEqual('%s != %s' % (x, y))
+#             raise NotEqual(f'{x} != {y}')

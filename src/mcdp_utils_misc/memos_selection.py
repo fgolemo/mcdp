@@ -29,7 +29,7 @@ def memo_disk_cache2(cache_file, data, f):
                 raise
 
     if os.path.exists(cache_file):
-        # logger.info('Reading from cache %r.' % cache_file)
+        # logger.info(f'Reading from cache {cache_file!r}.')
         try:
             res = safe_pickle_load(cache_file)
             if data != res['data']:
@@ -37,12 +37,12 @@ def memo_disk_cache2(cache_file, data, f):
             else:
                 return res['result']
         except Exception as e:
-            logger.error(e)
+            logger.error(str(e))
 
     result = f()
 
     if MCDPConstants.log_cache_writes:
-        logger.info('Writing to cache %s.' % cache_file)
+        logger.info(f'Writing to cache {cache_file}.')
     res = dict(data=data, result=result)
     
     safe_pickle_dump(res, cache_file)

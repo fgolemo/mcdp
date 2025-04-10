@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from nose.tools import assert_almost_equal
+from .nose_compat import assert_almost_equal
 
 from comptests.registrar import run_module_tests, comptest, comptest_fails
 from mcdp_dp.dp_transformations import get_dp_bounds

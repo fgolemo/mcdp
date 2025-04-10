@@ -77,7 +77,7 @@ def enumerate_test_libraries():
                     s = 'will do'
                 else:
                     s = 'skipped because of parallelism'
-                logger.debug('%20s: %s' % (libname, s))
+                logger.debug(f"%20s: {libname}")
                 
             
             ntot = sum(len(_) for _ in buckets)
@@ -148,7 +148,7 @@ def mcdplib_run_make(mcdplib):
         cmd.append('-j')
         
     from system_cmd.meat import system_cmd_result
-    logger.debug('$ cd %s' % cwd)
+    logger.debug(f"$ cd {cwd}")
     env = os.environ.copy()
     if all_disabled():
         env['DISABLE_CONTRACTS'] = '1'
@@ -207,7 +207,7 @@ def mcdplib_run_make(mcdplib):
 #                 for ftest in for_all_nameddps.registered:
 #                     
 #                     if accepts_arg(ftest, 'libname'):
-#                         #print('using libname for %s' % ftest)
+#                         #print(f"using libname for {ftest}")
 #                         c.comp(ftest, model_name, ndp, libname=libname,
 #                                job_id=ftest.__name__)
 #                     else:
@@ -216,7 +216,7 @@ def mcdplib_run_make(mcdplib):
 #                 for ftest in for_all_nameddps_dyn.registered:
 #                     
 #                     if accepts_arg(ftest, 'libname'):
-#                         #print('using libname for %s' % ftest)
+#                         #print(f"using libname for {ftest}")
 #                         c.comp_dynamic(ftest, model_name, ndp, libname=libname,
 #                                        job_id=ftest.__name__)
 #                     else:
@@ -272,7 +272,7 @@ def mcdplib_test_setup_spec(context, spec_name, libname):
                 for ftest in regular.registered:
                     
                     if accepts_arg(ftest, 'libname'):
-                        #print('using libname for %s' % ftest)
+                        #print(f"using libname for {ftest}")
                         c.comp(ftest, thing_name, thing, libname=libname,
                                job_id=ftest.__name__)
                     else:
@@ -281,7 +281,7 @@ def mcdplib_test_setup_spec(context, spec_name, libname):
                 for ftest in dynamic.registered:
                     
                     if accepts_arg(ftest, 'libname'):
-                        #print('using libname for %s' % ftest)
+                        #print(f"using libname for {ftest}")
                         c.comp_dynamic(ftest, thing_name, thing, libname=libname,
                                        job_id=ftest.__name__)
                     else:
@@ -369,7 +369,7 @@ def mcdplib_assert_not_implemented_error_fn(libname, model_name):
     except DPNotImplementedError:
         pass
     except BaseException as e:
-        msg = "Expected DPNotImplementedError, got %s." % type(e)
+        msg = f"Expected DPNotImplementedError, got {type}."(e)
         raise_wrapped(Exception, e, msg)
     else:
         msg = "Expected DPNotImplementedError, instead succesfull instantiation."
@@ -383,7 +383,7 @@ def mcdplib_assert_semantic_error_fn(libname, model_name):
     except DPSemanticError:
         pass
     except BaseException as e:
-        msg = "Expected DPSemanticError, got %s." % type(e)
+        msg = f"Expected DPSemanticError, got {type}."(e)
         raise_wrapped(Exception, e, msg)
     else:
         msg = "Expected DPSemanticError, instead succesfull instantiation."

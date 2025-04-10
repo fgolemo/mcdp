@@ -2,12 +2,12 @@
 
 def repr_map_invmultvalue(letter, c_space, c_value):
     c = c_space.format(c_value)
-    return "%s ⟼ %s / (%s)" % (letter, letter, c)
+    return f"{letter} ⟼ {letter} / ({c})"
 
 
 def repr_map_multvalue(letter, space, value):
-    c = ' %s' % space.format(value)
-    return  '%s ⟼ %s × %s' % (letter, letter, c)
+    c = f" {space}".format(value)
+    return  f"{letter} ⟼ {letter} × {c}"
 
 
 def repr_map_invmultdual(letter, value, space):
@@ -18,14 +18,14 @@ def repr_map_joinn(letter, n):
     elements = get_string_list_of_elements(letter, n)
     start = "⟨" +", ".join(elements) + "⟩"
     transformed = " ∧ ".join(elements)
-    return '%s ⟼ %s' % (start, transformed)
+    return f"{start} ⟼ {transformed}"
 
 
 def repr_map_meetn(letter, n):
     elements = get_string_list_of_elements(letter, n)
     transformed = " ∨ ".join(elements)    
     start = get_string_vector(letter, n)
-    return '%s ⟼ %s' % (start, transformed)
+    return f"{start} ⟼ {transformed}"
 
 
 def get_string_vector(letter, n):
@@ -51,27 +51,27 @@ def repr_map_product(letter, n):
     start = get_string_vector(letter, n)
     elements = get_string_list_of_elements(letter, n)
     transformed =  "⋅".join(elements)
-    return "%s ⟼ %s" % (start, transformed)
+    return f"{start} ⟼ {transformed}"
 
 
 def plusvaluedualmap_repr(letter, space, value):
     c = space.format(value)
-    return  '%s ⟼ %s - %s if %s ≽ %s, else ø' % (letter, letter, c, letter, c)
+    return  f"{letter} ⟼ {letter} - {c} if {letter} ≽ {c}, else ø"
             
             
 def plusvaluemap_repr(letter, space, value):
-    label = '+ %s' % space.format(value)
-    return  '%s ⟼ %s %s' % (letter, letter, label)
+    label = f"+ {space}".format(value)
+    return  f"{letter} ⟼ {letter} {label}"
 
 
 def minusvaluemap_repr(letter, space, value):
-    label = '- %s' % space.format(value)
-    return  '%s ⟼ %s %s' % (letter, letter, label)
+    label = f"- {space}".format(value)
+    return  f"{letter} ⟼ {letter} {label}"
 
 
 def sumn_repr_map(letter, n):
     start = get_string_vector(letter, n)
     elements = get_string_list_of_elements(letter, n)
     transformed =  " + ".join(elements)
-    return "%s ⟼ %s" % (start, transformed)
+    return f"{start} ⟼ {transformed}"
 

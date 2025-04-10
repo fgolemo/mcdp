@@ -27,7 +27,7 @@ def assert_generic(r, context, which):
     try:
         tu.check_leq(v2.unit, v1.unit)
     except NotLeq as e:
-        msg = 'Cannot cast %s to %s.' % (v2.unit, v1.unit)
+        msg = f"Cannot cast {v2.unit} to {v1.unit}."
         raise_wrapped(DPSemanticError, e, msg, compact=True)
     value2 = express_value_in_isomorphic_space(v2.unit, v2.value, v1.unit)
     
@@ -109,7 +109,7 @@ def get_sequence(vu):
     elif isinstance(vu.unit, FiniteCollectionsInclusion):
         return vu.value.elements
     else:
-        msg = 'Could not get sequence from element %s.' % type(vu.unit)
+        msg = f"Could not get sequence from element {type(vu.unit)}."
         raise_desc(DPSemanticError, msg, vu=vu)
 
 

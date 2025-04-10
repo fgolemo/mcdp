@@ -209,7 +209,7 @@ class GvGen(object):
 
     def debug(self):
         for e in self.__nodes:
-            print "element = " + str(e['id'])
+            print("element = " + str(e['id']))
 
     def collectLeaves(self, parent):
         """
@@ -289,11 +289,11 @@ class GvGen(object):
         allProps.update(props)
 
         if self.__has_children(node):
-            propStringList = ["%s=%s;\n" % (k, format_property(k, v)) for k, v in allProps.iteritems()]
+            propStringList = [f"{k}={format_property(k, v};\n") for k, v in allProps.iteritems()]
             properties = ''.join(propStringList)
         else:
             if props:
-                propStringList = ["%s=%s" % (k, format_property(k, v)) for k, v in allProps.iteritems()]
+                propStringList = [f"{k}={format_property(k, v}") for k, v in allProps.iteritems()]
                 properties = '[' + ','.join(propStringList) + ']'
             else:
                 properties = ''
@@ -317,7 +317,7 @@ class GvGen(object):
 
         properties = ''
         if props:
-            properties += ','.join(["%s=%s" % (str(k), format_property(k, val)) for k, val in props.iteritems()])
+            properties += f",'.join(["{str(k}=%s", format_property(k, val)) for k, val in props.iteritems()])
         return properties
 
     def propertyForeachLinksAppend(self, node, key, val):
@@ -378,9 +378,9 @@ class GvGen(object):
 
     def tree_debug(self, level, node, children):
         if children:
-            print "(level:%d) Eid:%d has children (%s)" % (level,node['id'],str(children))
+            print(f"(level:{node['id']}) Eid:{str(children} has children ({level})"))
         else:
-            print "Eid:"+str(node['id'])+" has no children"
+            print("Eid:"+str(node['id'])+" has no children")
 
     #
     # Core function that outputs the data structure tree into dot language
@@ -393,11 +393,11 @@ class GvGen(object):
 #         print('%stree(level %s, ID %s, %s)' % ('  ' * level, level, node['id'],
 #                                                 len(children) if children else 'no children'))
         if debug:
-            print "/* Grabed node = %s*/" % str(node['id'])
+            print(f"/* Grabed node = {str}*/"(node['id']))
 
         if node['lock'] == 1:            # The node is locked, nothing should be printed
             if debug:
-                print "/* The node (%s) is locked */" % str(node['id'])
+                print(f"/* The node ({str}) is locked */"(node['id']))
 
             if self.__opened_braces:
                 self.fd.write(level * self.padding_str)
@@ -411,17 +411,17 @@ class GvGen(object):
             node['lock'] = 1
             self.fd.write(level * self.padding_str)
 
-            # print('level %d Starting subcluster for %d %r' % (level, node['id'], node.get('label', '(no label)')))
+            # print(f"level {level} Starting subcluster for {node['id']} %r"')))
 
             self.fd.write(self.padding_str + "subgraph cluster%d {\n" % node['id'])
             properties = self.propertiesAsStringGet(node, props)
             self.fd.write(level * self.padding_str)
-            self.fd.write(self.padding_str + "%s" % properties)
+            self.fd.write(self.padding_str + f"{properties}")
             self.__opened_braces.append([node,level])
         else:
             # We grab appropriate properties
             properties = self.propertiesAsStringGet(node, props)
-# "node%d %s;\n" % (node['id'], properties))
+# f"node{properties} {node['id']};\n")
             # We get the latest opened elements
             if self.__opened_braces:
                 last_cluster,last_level = self.__opened_braces[-1]
@@ -438,7 +438,7 @@ class GvGen(object):
                     last_cluster_str = str(last_cluster['id'])
                 else:
                     last_cluster_str = 'None'
-                print "/* e[parent] = %s, last_cluster = %s, last_level = %d, opened_braces: %s */" % (parent_str, last_cluster_str,last_level,str(self.__opened_braces))
+                print(f"/* e[parent] = {parent_str}, last_cluster = {last_cluster_str}, last_level = {str(self.__opened_braces}, opened_braces: {last_level} */"))
 
             # Write children/parent with properties
             if node['parent']:
@@ -449,7 +449,7 @@ class GvGen(object):
                             last_level += 1
                             # We browse any property to build a string
                             self.fd.write(last_level * self.padding_str)
-                            self.fd.write(self.padding_str + "node%d %s;\n" % (node['id'], properties))
+                            self.fd.write(self.padding_str + f"node{properties} {node['id']};\n")
                             node['lock'] = 1
                         else:
                             self.fd.write(last_level * self.padding_str)
@@ -457,14 +457,14 @@ class GvGen(object):
                             self.__opened_braces.pop()
                 else:
                     self.fd.write(level * self.padding_str)
-                    self.fd.write(self.padding_str + "node%d %s;\n" % (node['id'], properties) )
+                    self.fd.write(self.padding_str + f"node{properties} {node['id']};\n" )
                     node['lock'] = 1
                     cl = self.collectUnlockedLeaves(node['parent'])
                     for l in cl:
                         props = l['properties']
                         properties = self.propertiesAsStringGet(l, props)
                         self.fd.write(last_level * self.padding_str)
-                        self.fd.write(self.padding_str + self.padding_str + "node%d %s;\n" % (l['id'], properties))
+                        self.fd.write(self.padding_str + self.padding_str + f"node{properties} {l['id']};\n")
                         node['lock'] = 1
                         self.lockNode(l)
 
@@ -472,7 +472,7 @@ class GvGen(object):
                     self.__opened_braces.pop()
 
             else:
-                self.fd.write(self.padding_str + "node%d %s;\n" % (node['id'], properties))
+                self.fd.write(self.padding_str + f"node{properties} {node['id']};\n")
                 node['lock'] = 1
 
 
@@ -523,8 +523,8 @@ class GvGen(object):
     def structure(self):
         def example(level, node, children_results):  # @UnusedVariable
             if children_results:
-                c = ", ".join(["%s" % (v) for k, v in children_results.items()])  # @UnusedVariable
-                return "%s { %s } " % (node['id'], c)
+                c = f", ".join(["{v}" for k, v in children_results.items()])  # @UnusedVariable
+                return f"{node['id']} { {c} } "
             else:
                 return node['id']
         return self.browse2(example)
@@ -547,7 +547,7 @@ class GvGen(object):
  
             if self.options:
                 for key, value in self.options.iteritems():
-                    s += ("    %s=%s;" % (key, value))
+                    s += (f"    {key}={value};")
                 s += ("\n")
             assert isinstance(s, str), s.__repr__()
             r = indented_results(children_results)  # .decode("unicode_escape")
@@ -578,7 +578,7 @@ class GvGen(object):
 
         def render_dot_node(level, node, children_results):  # @UnusedVariable
             properties = self.propertiesAsStringGet(node, node['properties'])
-            return "node%d %s;\n" % (node['id'], properties)
+            return f"node{properties} {node['id']};\n"
 
         def render_dot(level, node, children_results):  # @UnusedVariable
             
@@ -622,7 +622,7 @@ class GvGen(object):
                     dst = l['to_node']['id']
                     cluster_dst = ''
 
-                self.fd.write("node%d->node%d" % (src, dst))
+                self.fd.write(f"node{src}->node{dst}")
 
                 props = self.propertiesLinkAsStringGet(l)
 
@@ -637,7 +637,7 @@ class GvGen(object):
                     props += "lhead=cluster%d" % cluster_dst
 
                 if props:
-                    self.fd.write(" [%s]" % props)
+                    self.fd.write(f" [{props}]")
 
                 self.fd.write(";\n")
 
@@ -648,13 +648,13 @@ class GvGen(object):
         try:
             self.fd = fd
 
-#             self.fd.write("/* Generated by GvGen v.%s (http://www.picviz.com/sections/opensource/gvgen.html) */\n\n" % (gvgen_version))
+#             self.fd.write(f"/* Generated by GvGen v.{gvgen_version} (http://www.picviz.com/sections/opensource/gvgen.html) */\n\n")
 
             self.fd.write("digraph G {\n")
             
             if self.options:
                 for key, value in self.options.iteritems():
-                    self.fd.write("%s=%s;" % (key, value))
+                    self.fd.write(f"{key}={value};")
                 self.fd.write("\n")
 
             # We write parents and children in order
@@ -711,7 +711,7 @@ class GvGen(object):
     #             else:
     #                 nmatches += 1
     #         if not nmatches:
-    #             raise ValueError('No link %s - %s found' % (tail, head))
+    #             raise ValueError(f"No link {tail} - {head} found")
     #         self.__links = links
 
     #     def remove_node(n):
@@ -773,7 +773,7 @@ def format_property(k, v):  # @UnusedVariable
     def escape(x):
         return x.replace('\n', '\\n')
     if s and s[0] == '<':
-        res = '<%s>' % escape(s)
+        res = f"<{escape}>"(s)
     else:
         res = '"%s"' % escape(s)
     return res
@@ -839,6 +839,6 @@ def indentu(s, prefix, first=None):
     first = ' ' * (m - len(first)) + first
 
     # differnet first prefix
-    res = ['%s%s' % (prefix, line.rstrip()) for line in lines]
-    res[0] = '%s%s' % (first, lines[0].rstrip())
+    res = [f"{prefix}{line.rstrip(}") for line in lines]
+    res[0] = f"{first}{lines[0].rstrip(}")
     return '\n'.join(res)

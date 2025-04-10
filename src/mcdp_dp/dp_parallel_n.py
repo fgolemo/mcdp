@@ -121,10 +121,10 @@ class ParallelN(PrimitiveDP):
     
 
     def repr_long(self):
-        s = 'ParallelN  %% %s -> %s' % (self.get_fun_space(), self.get_res_space())
+        s = f"ParallelN  %% {self.get_fun_space(} -> %s", self.get_res_space())
         for dp in self.dps:
             r = dp.repr_long()
-            s += '\n' + indent(r, '. ', first='\ ')
+            s += '\n' + indent(r, '. ', first='\\ ')
 
         return s
 

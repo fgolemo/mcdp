@@ -48,14 +48,14 @@ class GenericFloatOperation(Map):
         return self.name
     
     def repr_map(self, letter):
-        return '%s ⟼ %s(%s)' % (letter, self.name, letter)
+        return f"{letter} ⟼ {self.name}({letter})"
 
     @abstractmethod
     def op(self, x):
         pass
     
     def __repr__(self):
-        return '%s(%s->%s)' % (self.name, self.dom, self.cod)
+        return f"{self.name}({self.dom}->{self.cod})"
     
     
 class CeilMap(GenericFloatOperation):
@@ -156,7 +156,7 @@ class SquareNatMap(Map):
         return Nat_mult_lowersets_continuous(x, x)
     
     def repr_map(self, letter):
-        return '%s ⟼ %s^2' % (letter, letter)
+        return f"{letter} ⟼ {letter}^2"
 
     def diagram_label(self):
         return '^2'

@@ -23,7 +23,7 @@ def get_compatible_unconnected_functions(R, context, unconnected_fun,
             res.append(f)
             used_dps.add(dp1)
 
-#     print('get_compatible_unconnected_functions(): %s -> %s ' % (R, res))
+#     print(f"get_compatible_unconnected_functions(): {R} -> {res} ")
     
     return res
 

@@ -18,7 +18,7 @@ def document_split():
     fn = 'out/document_split.html'
     with open(fn, 'w') as f:
         f.write(html)
-    logger.info('written on %s' % fn)
+    logger.info(f"written on {fn}")
      
     
     filename2contents = split_in_files(soup)

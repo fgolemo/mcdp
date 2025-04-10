@@ -1,0 +1,8 @@
+[flake8]
+max-line-length = 100
+exclude = .git,__pycache__,build,dist
+ignore = D100,D104,E203,W503
+# D100: Missing docstring in public module
+# D104: Missing docstring in public package
+# E203: Whitespace before ':' (conflicts with Black)
+# W503: Line break before binary operator (conflicts with Black)

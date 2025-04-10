@@ -8,7 +8,7 @@ def add_style(tag, after=True, **kwargs):
     """
     def quote(x):
         return x
-    s1 = '; '.join('%s: %s' % (k, quote(v)) for k,v in kwargs.items())
+    s1 = f"; '.join('{k}: {quote(v}") for k,v in kwargs.items())
     s0 = tag.attrs.get('style', None)
     
     if s0 is None:

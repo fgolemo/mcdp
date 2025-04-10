@@ -74,7 +74,7 @@ def get_combinations(db_schema, db0, prefix, operation_sequences, disk_maps):
     for s in operation_sequences:
         for id_dm, dm in disk_maps.items():
             dtc = DataTestCase(schema=db_schema, data1=db0,  disk_map=dm, run=s)
-            k = '%s-%s-%s' % (prefix, s.__name__, id_dm)
+            k = f"{prefix}-{s.__name__}-{id_dm}"
             res[k] = dtc 
      
     return res

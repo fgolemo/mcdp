@@ -3,6 +3,7 @@ from contextlib import contextmanager
 import gzip
 import os
 import random
+import sys
 
 
 __all__ = [
@@ -16,7 +17,7 @@ def is_gzip_filename(filename):
 
 
 @contextmanager
-def safe_write(filename, mode='wb', compresslevel=5):
+def safe_write(filename, mode='wb', compresslevel=5, encoding=None):
     """ 
         Makes atomic writes by writing to a temp filename. 
         Also if the filename ends in ".gz", writes to a compressed stream.
@@ -24,6 +25,8 @@ def safe_write(filename, mode='wb', compresslevel=5):
         
         It is thread safe because it renames the file.
         If there is an error, the file will be removed if it exists.
+        
+        In Python 3, adds encoding support for text modes.
     """
     dirname = os.path.dirname(filename)
     if dirname:
@@ -33,30 +36,45 @@ def safe_write(filename, mode='wb', compresslevel=5):
             except:
                 pass
 
-                # Dont do this!
-                # if os.path.exists(filename):
-                # os.unlink(filename)
-                #     assert not os.path.exists(filename)
-                #
     n = random.randint(0, 10000)
-    tmp_filename = '%s.tmp.%s.%s' % (filename, os.getpid(), n)
+    if sys.version_info[0] >= 3:
+        tmp_filename = f'{filename}.tmp.{os.getpid()}.{n}'
+    else:
+        tmp_filename = '%s.tmp.%s.%s' % (filename, os.getpid(), n)
+        
     try:
         if is_gzip_filename(filename):
-            fopen = lambda fname, fmode: gzip.open(filename=fname, mode=fmode,
-                                                   compresslevel=compresslevel)
+            # Handle Python 3's gzip.open with encoding for text modes
+            if sys.version_info[0] >= 3 and 't' in mode and encoding:
+                fopen = lambda fname, fmode: gzip.open(
+                    filename=fname, 
+                    mode=fmode,
+                    compresslevel=compresslevel, 
+                    encoding=encoding
+                )
+            else:
+                fopen = lambda fname, fmode: gzip.open(
+                    filename=fname, 
+                    mode=fmode,
+                    compresslevel=compresslevel
+                )
         else:
-            fopen = open
+            # Handle Python 3's open with encoding for text modes
+            if sys.version_info[0] >= 3 and 't' in mode and encoding:
+                fopen = lambda fname, fmode: open(
+                    fname, 
+                    fmode, 
+                    encoding=encoding
+                )
+            else:
+                fopen = open
 
         with fopen(tmp_filename, mode) as f:
             yield f
-        f.close()
+            # No need for explicit close as with statement handles it
 
-        # if os.path.exists(filename):
-        # msg = 'Race condition for writing to %r.' % filename
-        #             raise Exception(msg)
-        #
         # On Unix, if dst exists and is a file, it will be replaced silently
-        #  if the user has permission.
+        # if the user has permission.
         os.rename(tmp_filename, filename)
     except:
         if os.path.exists(tmp_filename):
@@ -67,22 +85,33 @@ def safe_write(filename, mode='wb', compresslevel=5):
 
 
 @contextmanager
-def safe_read(filename, mode='rb'):
+def safe_read(filename, mode='rb', encoding=None):
     """ 
         If the filename ends in ".gz", reads from a compressed stream.
         Yields a file descriptor.
+        
+        In Python 3, adds encoding support for text modes.
     """
     try:
         if is_gzip_filename(filename):
-            f = gzip.open(filename, mode)
+            # Handle Python 3's gzip.open with encoding for text modes
+            if sys.version_info[0] >= 3 and 't' in mode and encoding:
+                f = gzip.open(filename, mode, encoding=encoding)
+            else:
+                f = gzip.open(filename, mode)
+                
             try:
                 yield f
             finally:
                 f.close()
-
         else:
-            with open(filename, mode) as f:
-                yield f
+            # Handle Python 3's open with encoding for text modes
+            if sys.version_info[0] >= 3 and 't' in mode and encoding:
+                with open(filename, mode, encoding=encoding) as f:
+                    yield f
+            else:
+                with open(filename, mode) as f:
+                    yield f
     except:
-        # TODO
+        # Re-raise the exception with original traceback
         raise

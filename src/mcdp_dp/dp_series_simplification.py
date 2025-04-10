@@ -40,10 +40,10 @@ class SeriesSimplificationRule(object):
 #             msg = 'Error while executing Series simplification rule.'
 #             raise_wrapped(DPInternalError, e, msg, rule=self)
 
-#         print('\n\nExecuting simplification %s' % (type(self).__name__))
-#         print('dp1----\n%s' % dp1.repr_long())
-#         print('dp2----\n%s' % dp2.repr_long())
-#         print('result-----\n%s' % res.repr_long())
+#         print(f"\n\nExecuting simplification {type(self}".__name__))
+#         print(f"dp1----\n{dp1}".repr_long())
+#         print(f"dp2----\n{dp2}".repr_long())
+#         print(f"result-----\n{res}".repr_long())
 
         if do_extra_checks():
             dp0 = Series(dp1, dp2)
@@ -86,9 +86,9 @@ class RuleEvaluateMuxTimesLimit(SeriesSimplificationRule):
         F = dp1.get_fun_space()
 
         res = Limit(F, f)
-#         print('dp1: %s -> %s   dp2: %s -> %s ' % (dp1.get_fun_space(),dp1.get_res_space(),
+#         print(f"dp1: {dp1.get_fun_space(} -> %s   dp2: %s -> %s ",dp1.get_res_space(),
 #                                                   dp2.get_fun_space(), dp2.get_res_space()))
-#         print('res: %s -> %s' % (res.get_fun_space(), res.get_res_space()))
+#         print(f"res: {res.get_fun_space(} -> %s", res.get_res_space()))
         return res
 
 
@@ -305,7 +305,7 @@ class RuleLoop1b(SeriesSimplificationRule):
         F1= F[0]
         P = F1[0]
         m1F = PosetProduct((P, F2))
-        #print('m1F: %s' % m1F)
+        #print(f"m1F: {m1F}")
         m1 = Mux(m1F, coords)
 
         #print 'm1', m1.tree_long()
@@ -608,8 +608,8 @@ def make_series(dp1, dp2):
         return res
 
 #     print('Cannot simplify:')
-#     print(' dp1: %s' % dp1)
-#     print(' dp2: %s' % dp2)
+#     print(f" dp1: {dp1}")
+#     print(f" dp2: {dp2}")
 #     print('\n- '.join([str(x) for x in unwrap_series(a)]))
 
     dp1s = unwrap_series(dp1)
@@ -618,7 +618,7 @@ def make_series(dp1, dp2):
     for rule in rules:
         # [dp1s[:-1] dp1s[-1]] --- [dp2s[0] dp2s[1:]]
         if rule.applies(dp1s[-1], dp2s[0]):
-            # logger.debug('Applying series simplification rule %s' % type(rule).__name__)
+            # logger.debug(f"Applying series simplification rule {type}"(rule).__name__)
             r = rule.execute(dp1s[-1], dp2s[0])
             try:
                 check_same_fun(r, dp1s[-1])

@@ -14,14 +14,14 @@ def create_a_to_data(download, data_format, data):
     from mcdp_web.images.images import (get_mime_for_format)
     mime = get_mime_for_format(data_format)
     encoded = base64.b64encode(data)
-    href = 'data:%s;base64,%s' % (mime, encoded)
+    href = f"data:{mime};base64,{encoded}"
     attrs = dict(href=href, download=download)
     return Tag(name='a', attrs=attrs)
 
 
 def create_img_png_base64(png, **attrs):
     encoded = base64.b64encode(png)
-    src = 'data:image/png;base64,%s' % encoded
+    src = f"data:image/png;base64,{encoded}"
     attrs = dict(**attrs)
     attrs['src'] =src
     return Tag(name='img', attrs=attrs)

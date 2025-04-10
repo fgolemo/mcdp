@@ -13,7 +13,7 @@ def check_lang_interval1():
 def check_lang_interval2():
     one = 'Interval(0.0 [], 1.0 [])'
     rgb = " x ".join([one] * 3)
-    print parse_poset(rgb)
+    print(parse_poset(rgb))
 
 @comptest
 def check_lang_interval3():
@@ -24,7 +24,7 @@ def check_lang_interval4():  # TODO: coporduct
     parse_wrap(Syntax.space_coproduct, 'coproduct(g, V)')
 
     P = parse_poset('coproduct(g, V)')
-    print P
+    print(P)
 
 @comptest
 def check_lang_interval5():

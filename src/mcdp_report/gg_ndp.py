@@ -100,13 +100,13 @@ def gvgen_from_ndp(ndp, style='default', direction='LR', images_paths=None, your
 
     import my_gvgen as gvgen
     assert direction in ['LR', 'TB']
-    gg = gvgen.GvGen(options="rankdir=%s;nodesep=0;esep=0" % direction)
+    gg = gvgen.GvGen(options=f"rankdir={direction};nodesep=0;esep=0")
 
-    rel_to_8 = MCDPConstants.diagrams_fontsize / 8.0
+    rel_to_8 = MCDPConstants.diagrams_fontsize // 8.0
     gg.styleDefaultAppend('fontsize', MCDPConstants.diagrams_fontsize)
 #     marginx = 0.07 * 1.2* rel_to_8
 #     marginy = 0.03 * 1.2*  rel_to_8
-#     gg.styleDefaultAppend('margin', "%f,%f" % (marginx , marginy ))
+#     gg.styleDefaultAppend(f"margin', "{marginx},{marginy}")
 #     0.11,0.055.
     gg.styleDefaultAppend("width", 0.2 * rel_to_8)  # minimum width of node
     gg.styleDefaultAppend("height", 0.2 * rel_to_8)  # minimum width of node
@@ -167,7 +167,7 @@ def gvgen_from_ndp(ndp, style='default', direction='LR', images_paths=None, your
 
     gg.styleAppend("container", "shape", "box")
     gg.styleAppend("container", "style", "rounded")
-#     gg.styleDefaultAppend('margin', "%f,%f" % (marginx * rel_to_8 * 3, marginy * rel_to_8 * 3))
+#     gg.styleDefaultAppend(f"margin', "{marginx * rel_to_8 * 3},{marginy * rel_to_8 * 3}")
 
     gg.styleAppend("sum", "shape", "box")
     gg.styleAppend("sum", "style", "rounded")
@@ -374,9 +374,9 @@ def create_simplewrap(gdc, ndp, plotting_info):  # @UnusedVariable
         'default',
     ]
     best_icon = gdc.get_icon(iconoptions)
-    #print('icon options: %s' % iconoptions)
+    #print(f"icon options: {iconoptions}")
     #print('best_icon: %r' % best_icon)
-#     print('type %s' % type(ndp).__name__)
+#     print(f"type {type}"(ndp).__name__)
 #     print('only_string: %r' % only_string)
 #     print('is special: %r' % is_special)
     if is_special and 'default.png' in best_icon:  # pragma: no cover
@@ -392,18 +392,18 @@ def create_simplewrap(gdc, ndp, plotting_info):  # @UnusedVariable
             label = ndp.dp.diagram_label()
 
             if isinstance(ndp.dp.amap, MuxMap):
-                label = 'Mux(%s)' % ndp.dp.amap.coords
+                label = f"Mux({ndp})".dp.amap.coords
 
         sname = 'simple'
     else:
 
         if is_special_dp(ndp.dp):
-            sname = 'style%s' % id(ndp)
+            sname = f"style{id}"(ndp)
             gdc.styleAppend(sname, 'image', best_icon)
             gdc.styleAppend(sname, 'imagescale', 'true')
             gdc.styleAppend(sname, 'fixedsize', 'true')
 
-            rel_to_8 = MCDPConstants.diagrams_fontsize / 8
+            rel_to_8 = MCDPConstants.diagrams_fontsize // 8
             diagrams_smallimagesize = MCDPConstants.diagrams_smallimagesize_rel * \
                 rel_to_8
             #diagrams_leqimagesize = 0.2 * rel_to_8
@@ -423,7 +423,7 @@ def create_simplewrap(gdc, ndp, plotting_info):  # @UnusedVariable
                     # shortlabel = classname
                     shortlabel = None
 
-                # shortlabel = '<I><B>%sa</B></I>' % shortlabel
+                # shortlabel = f"<I><B>{shortlabel}a</B></I>"
                 sname = classname
                 gdc.styleAppend(sname, 'imagescale', 'true')
 #                 gdc.styleAppend(sname, 'height', MCDPConstants.diagrams_bigimagesize)
@@ -432,7 +432,7 @@ def create_simplewrap(gdc, ndp, plotting_info):  # @UnusedVariable
 #                 label = ("<TABLE CELLBORDER='0' BORDER='0'><TR><TD>%s</TD></TR>"
 #                 "<TR><TD'><IMG SRC='%s' SCALE='TRUE'/></TD></TR></TABLE>")
                 # these work as max size
-                rel_to_8 = MCDPConstants.diagrams_fontsize / 8
+                rel_to_8 = MCDPConstants.diagrams_fontsize // 8
                 diagrams_bigimagesize = MCDPConstants.diagrams_bigimagesize_rel * \
                     rel_to_8  # points
 
@@ -490,7 +490,7 @@ def create_simplewrap(gdc, ndp, plotting_info):  # @UnusedVariable
 
 #     if label[:2] != '<T':
 #         # Only available in svg or cairo renderer
-#         label = '<I>%s</I>' % label
+#         label = f"<I>{label}</I>"
 
     node = gdc.newItem(label)
 
@@ -525,14 +525,14 @@ def format_unit(R):
         # TODO: make option
         return ''
     elif isinstance(R, RcompUnits):
-        return '[%s]' % format_pint_unit_short(R.units)
+        return f"[{format_pint_unit_short}]"(R.units)
     elif isinstance(R, Rcomp):
         return '[]'
     elif hasattr(R, MCDPConstants.ATTR_LOAD_NAME):
         n = getattr(R, MCDPConstants.ATTR_LOAD_NAME)
-        return '[`%s]' % n
+        return f"[`{n}]"
     else:
-        return '[%s]' % str(R)
+        return f"[{str}]"(R)
 
 
 @contract(ndp=NamedDPCoproduct)
@@ -561,7 +561,7 @@ def create_coproduct(gdc0, ndp, plotting_info):
         altnames = ndp.labels
     else:
         n = len(ndp.ndps)
-        altnames = ['alternative %d' % (i + 1) for i in range(n)]
+        altnames = [f"alternative {i + 1}" for i in range(n)]
 
     for i, ndpi in enumerate(ndp.ndps):
         altname = altnames[i]
@@ -569,14 +569,14 @@ def create_coproduct(gdc0, ndp, plotting_info):
         should_I = plotting_info.should_I_expand(
             ndp_name=(), alternative=altname)
         if not should_I:
-            # print('Not expanding alternative %s' % altname)
+            # print(f"Not expanding alternative {altname}")
             continue
         else:
             # print('Expanding %r' % altname)
             pass
 
         if gdc0.yourname is not None:
-            header = '%s - %s' % (gdc0.yourname, altname)
+            header = f"{gdc0.yourname} - {altname}"
         else:
             header = altname
 
@@ -606,7 +606,7 @@ def create_coproduct(gdc0, ndp, plotting_info):
 def create_composite(gdc0, ndp, plotting_info):
     try:
         SKIP_INITIAL = gdc0.skip_initial
-        #print('Skip initial: %s' % SKIP_INITIAL)
+        #print(f"Skip initial: {SKIP_INITIAL}")
         return create_composite_(gdc0, ndp, plotting_info=plotting_info, SKIP_INITIAL=SKIP_INITIAL)
     except Exception as e:
         logger.error(e)
@@ -657,7 +657,7 @@ def create_composite_(gdc0, ndp, plotting_info, SKIP_INITIAL):
                 # this makes the nodes appear as red dots
                 if is_function_with_no_connections(ndp, name):
                     # only draw the balloon
-                    item = gdc.newItem("%s" % name)
+                    item = gdc.newItem(f"{name}")
                     gdc.styleApply('unconnected', item)
                     for fn in value.get_fnames():
                         names2functions[name][fn] = item
@@ -667,7 +667,7 @@ def create_composite_(gdc0, ndp, plotting_info, SKIP_INITIAL):
 
                 if is_resource_with_no_connections(ndp, name):
                     # only draw the balloon instead of "Identity" node
-                    item = gdc.newItem("%s" % name)
+                    item = gdc.newItem(f"{name}")
                     gdc.styleApply('unconnected', item)
                     for fn in value.get_fnames():
                         names2functions[name][fn] = item
@@ -679,7 +679,7 @@ def create_composite_(gdc0, ndp, plotting_info, SKIP_INITIAL):
                 plotting_info2 = RecursiveEdgeLabeling(plotting_info, name)
                 f, r = create(child, value, plotting_info=plotting_info2)
 
-            # print('name %s -> functions %s , resources = %s' % (name, list(f), list(r)))
+            # print(f"name {name} -> functions {list(f} , resources = %s", list(r)))
             names2resources[name] = r
             names2functions[name] = f
 
@@ -706,7 +706,7 @@ def create_composite_(gdc0, ndp, plotting_info, SKIP_INITIAL):
 
                     if not only_one.dp2 in names2functions:
                         msg = ('Cannot find function node ref for %r' % only_one.dp2
-                               + ' while drawing one connection %s' % str(only_one))
+                               + f" while drawing one connection {str}"(only_one))
     #                     warnings.warn('giving up')
     #                     continue
                         raise_desc(ValueError, msg, names=list(ndp.context.names),
@@ -727,7 +727,7 @@ def create_composite_(gdc0, ndp, plotting_info, SKIP_INITIAL):
                         #                     continue
 
                         raise ValueError('Cannot find function node ref for %r' % only_one.dp1
-                                         + ' while drawing one connection %s' % str(only_one))
+                                         + f" while drawing one connection {str}"(only_one))
 
                     node = names2resources[only_one.dp1][only_one.s1]
                     names2resources[name][only_one.s2] = node
@@ -736,7 +736,7 @@ def create_composite_(gdc0, ndp, plotting_info, SKIP_INITIAL):
 
         for c in ndp.context.connections:
             if c in ignore_connections:
-                # print('ignoring connection %s' % str(c))
+                # print(f"ignoring connection {str}"(c))
                 continue
 
             dpa = names2functions[c.dp2]
@@ -762,7 +762,7 @@ def create_composite_(gdc0, ndp, plotting_info, SKIP_INITIAL):
 
             else:
                 box = gdc.newItem('')  # '≼') # LEQ
-                rel_to_8 = MCDPConstants.diagrams_fontsize / 8
+                rel_to_8 = MCDPConstants.diagrams_fontsize // 8
                 diagrams_leqimagesize = MCDPConstants.diagrams_leqimagesize_rel * \
                     rel_to_8
 
@@ -779,7 +779,7 @@ def create_composite_(gdc0, ndp, plotting_info, SKIP_INITIAL):
                 if isinstance(ndp_second, SimpleWrap) and isinstance(ndp_second.dp, ResourceNode):
                     l1_label = 'required ' + l1_label
 
-#                 print('Creating label with %r %s' % l1_label)
+#                 print(f"Creating label with %r {l1_label}")
                 l1 = gdc.newLink(box, n_a, label=l1_label)
 
 #                 if False:
@@ -966,7 +966,7 @@ def get_connections_to_dp_resource(ndp, name, rn):
 def resource_has_more_than_one_connected(ndp, name, rn):
     res = get_connections_to_dp_resource(ndp, name, rn)
     # print(ndp.context.connections)
-    # print('number connected to %s.%s: %s' % (name, rn, len(res)))
+    # print(f"number connected to {name}.{rn}: {len(res}"))
     return len(res) > 1
 
 

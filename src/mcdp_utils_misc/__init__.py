@@ -1,5 +1,6 @@
 from .fileutils import *
-from .memoize_simple_imp import *
+# Use Python 3 version of memoize_simple directly
+from .memoize_simple_py3 import *
 from .natsort import *
 from .string_repr import *
 from .string_utils import *

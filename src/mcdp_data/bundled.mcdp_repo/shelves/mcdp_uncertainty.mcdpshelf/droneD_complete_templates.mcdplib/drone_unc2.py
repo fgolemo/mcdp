@@ -74,14 +74,14 @@ def go():
         s = get_ndp_code(interval_mw=interval_mw)
         ndp = parse_ndp(s, context=context)
 
-        basename = ('drone_unc2_%02d_%s_mw' % (i, interval_mw)).replace('.', '_')
+        basename = (f"drone_unc2_%02d_{i}_mw").replace('.', '_')
         fn = os.path.join('generated', 'drone_unc2', basename + '.mcdp')
         dn = os.path.dirname(fn)
         if not os.path.exists(dn):
             os.makedirs(dn)
         with open(fn, 'w') as f:
             f.write(s)
-        print('Generated %s' % fn)
+        print(f"Generated {fn}")
 
         result = solve_stats(ndp)
         result['ndp'] = ndp
@@ -116,8 +116,8 @@ def solve_stats(ndp):
     resU = dpU.solve_trace(f, traceU)
     R = dp0.get_res_space()
     UR = UpperSets(R)
-    print('resultsL: %s' % UR.format(resL))
-    print('resultsU: %s' % UR.format(resU))
+    print(f"resultsL: {UR}".format(resL))
+    print(f"resultsU: {UR}".format(resU))
     
     res['traceL'] = traceL
     res['traceU'] = traceU
@@ -149,10 +149,10 @@ def report(data):
 
     num_iterations = np.array(num_iterations_L) + np.array(num_iterations_U)
 
-    print res_L
-    print res_U
-    print num_iterations_L
-    print num_iterations_U
+    print(res_L)
+    print(res_U)
+    print(num_iterations_L)
+    print(num_iterations_U)
 
     intervals = data['intervals']
 

@@ -37,12 +37,11 @@ def decorate_belongs(f):
     return bel
 
 def decorate_methods(cls, name, bases, dct, method2dec):  # @UnusedVariable
-    # import warnings
     for method_name, decorator in method2dec.items():
         if method_name in cls.__dict__:
             orig = cls.__dict__[method_name]
             decorated = decorator(orig)
             setattr(cls, method_name, decorated)
-    else:
-        # mcdp_dev_warning("Not decorating %s :%s " % (name, cls))
-        pass
+            # Note: removed the else clause that was unreachable
+            # In Python 3, for-else means the else runs if the loop completes without a break
+            # The original code had an else directly under an if, making it unreachable

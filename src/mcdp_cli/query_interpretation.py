@@ -42,7 +42,7 @@ def convert_string_query(ndp, query, context):
 
         F0 = ndp.get_ftype(fname)
         if not tu.leq(vu.unit, F0):
-            msg = 'Invalid value for %r: %s does not cast to %s.' % (fname, vu, F0)
+            msg = f"Invalid value for %r: {fname} does not cast to {vu}."
             raise_desc(ValueError, msg)
 
     Fd = PosetProduct(tuple(Fds))
@@ -63,8 +63,8 @@ def convert_string_query(ndp, query, context):
     A_to_B, _ = tu.get_embedding(Fd, F)
     fg = A_to_B(fd)
 
-    #print('Fd: %s' % Fd.format(fd))
-    #print('F: %s' % F.format(fg))
+    #print(f"Fd: {Fd}".format(fd))
+    #print(f"F: {F}".format(fg))
     return fg
  
 

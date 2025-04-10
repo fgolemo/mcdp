@@ -25,9 +25,9 @@ def graphviz_run(filename_dot, output, prog='dot'):
 
     encoder = suff
 
-    cmd = [prog, '-T%s' % encoder, '-o', output, filename_dot]
+    cmd = [prog, f"-T{encoder}", '-o', output, filename_dot]
     
-    with timeit_wall('running graphviz on %s' % filename_dot, 1.0):
+    with timeit_wall(f"running graphviz on {filename_dot}", 1.0):
         try:
             # print('running graphviz')
             system_cmd_result(cwd='.', cmd=cmd,
@@ -64,7 +64,7 @@ def graphvizgen_plot(ggraph, output, prog='dot'):
         except:
             contents = open(filename_dot).read()
             s = get_md5(contents)
-            filename = 'out-%s.dot' % s
+            filename = f"out-{s}.dot"
             with open(filename, 'w') as f:
                 f.write(contents)
             print('Saved problematic dot as %r.' % filename)
@@ -102,7 +102,7 @@ def gg_figure(r, name, ggraph, do_png=True, do_pdf=True, do_svg=True,
             fo.write(s)
 
 #         if False:
-#             ff = '%s.dot' % id(r)
+#             ff = f"{id}.dot"(r)
 #             print('writing to %r' % ff)
 #             with open(ff, 'w') as f2:
 #                 f2.write(s)
@@ -188,7 +188,7 @@ def gg_get_format(gg, data_format):
     do_pdf = data_format == 'pdf'
     do_svg = data_format == 'svg'
 
-    with timeit_wall('gg_figure %s' % data_format): 
+    with timeit_wall(f"gg_figure {data_format}"): 
         gg_figure(r, 'graph', gg, do_dot=do_dot,
                     do_png=do_png, do_pdf=do_pdf, do_svg=do_svg)
 

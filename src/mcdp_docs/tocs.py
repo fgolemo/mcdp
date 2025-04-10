@@ -41,19 +41,17 @@ def fix_header_id(header):
         default_prefix = allowed_prefixes[0]
 
         if ID is None:
-            header['id'] = '%s:%s' % (default_prefix, GlobalCounter.header_id)
+            header[f"id'] = '{default_prefix}:{GlobalCounter.header_id}"
             GlobalCounter.header_id += 1
         else:
             if prefix is None:
                 if ID != 'booktitle':
-                    msg = ('Adding prefix %r to current id %r for %s.' %
-                           (default_prefix, ID, header.name))
+                    msg = (f"Adding prefix %r to current id %r for {default_prefix}.")
                     header.insert_before(Comment('Warning: ' + msg))
                     header['id'] = default_prefix + ':' + ID
             else:
                 if prefix not in allowed_prefixes:
-                    msg = ('The prefix %r is not allowed for %s (ID=%r)' %
-                           (prefix, header.name, ID))
+                    msg = (f"The prefix %r is not allowed for {prefix} (ID=%r)")
                     logger.error(msg)
                     header.insert_after(Comment('Error: ' + msg))
 
@@ -216,8 +214,7 @@ class Item(object):
     def to_html(self, root, max_levels, ):
         s = u''
         if not root:
-            s += (u"""<a class="toc_link toc_link-depth-%s number_name toc_a_for_%s" href="#%s"></a>""" %
-                  (self.depth, self.header_level, self.id))
+            s += (uf"""<a class="toc_link toc_link-depth-{self.depth} number_name toc_a_for_{self.header_level}" href="#{self.id}"></a>""")
             
 #             logger.info(str(bs(s)))
 
@@ -227,8 +224,7 @@ class Item(object):
             for item in self.items:
                 sitem = item.to_html(root=False, max_levels=max_levels - 1)
                 sitem = indent(sitem, '  ')
-                s += ('\n  <li class="toc_li-depth-%s toc_ul_for_%s">\n%s\n  </li>' %
-                      (self.depth, self.header_level, sitem))
+                s += (f"\n  <li class="toc_li-depth-{self.depth} toc_ul_for_{self.header_level}">\n{sitem}\n  </li>")
             s += '\n</ul>'
         return s
 
@@ -305,7 +301,7 @@ def number_items2(root):
 
     for item in root.depth_first_descendants():
         counter = item.id.split(":")[0]
-#         print('counter %s id %s %s' % (counter, item.id, counter_state))
+#         print(f"counter {counter} id {item.id} {counter_state}")
         if counter in counters:
             counter_state[counter] += 1
             for counter_to_reset in resets[counter]:
@@ -332,7 +328,7 @@ def number_items2(root):
                         LABEL_WHAT_NUMBER_NAME, LABEL_NUMBER, LABEL_SELF]
             for c in counters:
                 if c in counter_parents[counter] or c == counter:
-                    attname = 'counter-%s' % c
+                    attname = f"counter-{c}"
                     allattrs.append(attname)
                     item.tag.attrs[attname] = counter_state[c]
 
@@ -356,8 +352,8 @@ def render(s, counter_state):
     reps = {}
     for c, v in counter_state.items():
         for style in number_styles:
-            reps['${%s|%s}' % (c, style)] = render_number(v, style)
-        reps['${%s}' % c] = render_number(v, 'decimal')
+            reps[f"${{c}|{style}}"] = render_number(v, style)
+        reps[f"${{c}}"] = render_number(v, 'decimal')
 
     for k, v in reps.items():
         s = s.replace(k, v)
@@ -404,7 +400,7 @@ def substituting_empty_links(soup, raise_errors=False):
         
         n += 1
         if not element:
-            msg = ('Cannot find %s' % element_id)
+            msg = (f"Cannot find {element_id}")
             note_error_msg(a, msg)
             nerrors += 1
             if raise_errors:
@@ -414,12 +410,11 @@ def substituting_empty_links(soup, raise_errors=False):
         if le.query is not None:
             new_href = '#' + le.eid
             a.attrs['href'] = new_href
-            logger.info('setting new href= %s' % (new_href))
+            logger.info(f"setting new href= {new_href}")
             
         if (not LABEL_WHAT_NUMBER  in element.attrs) or \
                 (not LABEL_NAME in element.attrs):
-            msg = ('substituting_empty_links: Could not find attributes %s or %s in %s' %
-                   (LABEL_NAME, LABEL_WHAT_NUMBER, element))
+            msg = (f"substituting_empty_links: Could not find attributes {LABEL_NAME} or {LABEL_WHAT_NUMBER} in {element}")
             if True:
                 logger.warning(msg)
             else:
@@ -499,8 +494,7 @@ def substituting_empty_links(soup, raise_errors=False):
             span1.string = label
             a.append(span1)
        
-    logger.debug('substituting_empty_links: %d total, %d errors' %
-                 (n, nerrors))
+    logger.debug(f"substituting_empty_links: {n} total, {nerrors} errors")
 
 
 LinkElement = namedtuple('LinkElement', 'linker eid linked query')

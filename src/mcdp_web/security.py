@@ -28,10 +28,10 @@ class AppLogin(object):
         context = request.context
         e = Environment(context, request)
         
-        logger.error('forbidden url: %s' % request.url)
-        logger.error('forbidden referrer: %s' % request.referrer)
-        logger.error('forbidden exception: %s' % request.exception.message)
-        logger.error('forbidden result: %s' % request.exception.result)
+        logger.error(f"forbidden url: {request}".url)
+        logger.error(f"forbidden referrer: {request}".referrer)
+        logger.error(f"forbidden exception: {request}".exception.message)
+        logger.error(f"forbidden result: {request}".exception.result)
         request.response.status = 403
         config = self.get_authomatic_config()
         
@@ -42,7 +42,7 @@ class AppLogin(object):
         else:
             url_external = url_internal
         
-        logger.debug('next_location:\n internal: %s\n external: %s' % (url_internal, url_external))
+        logger.debug(f"next_location:\n internal: {url_internal}\n external: {url_external}")
         config['next_location'] = url_external
         
         res = {}
@@ -85,11 +85,11 @@ class AppLogin(object):
                     
         came_from = e.request.params.get('came_from', None)
         if came_from is not None:
-            logger.info('came_from from params: %s' % came_from)
+            logger.info(f"came_from from params: {came_from}")
         else:
             came_from = e.request.referrer
             if came_from is not None:
-                logger.info('came_from from referrer: %s' % came_from)
+                logger.info(f"came_from from referrer: {came_from}")
             else:
                 msg = 'Cannot get referrer or "came_from" - using root'
                 logger.info(msg)
@@ -105,7 +105,7 @@ class AppLogin(object):
             else:
                 if user_db.authenticate(login, password):
                     headers = remember(e.request, login)
-                    logger.info('successfully authenticated user %s' % login)
+                    logger.info(f"successfully authenticated user {login}")
                     raise HTTPFound(location=came_from, headers=headers)
                 else:
                     error = 'Password does not match.'
@@ -126,7 +126,7 @@ class AppLogin(object):
     def logout(self, request):
         logger.info('logging out')
         headers = forget(request)
-        logger.debug('headers: %s' % headers)
+        logger.debug(f"headers: {headers}")
         came_from = request.referrer
         if came_from is None:
             came_from = self.get_root_relative_to_here(request)
@@ -140,7 +140,7 @@ def groupfinder(userid, request):  # @UnusedVariable
         msg = 'The user is authenticated as "%s" but no such user in DB.' % userid
         logger.error(msg)
         userid = None # anonymous 
-    return ['group:%s' % _ for _ in user_db[userid].groups]  
+    return [f"group:{_}" for _ in user_db[userid].groups]  
 # 
 # def hash_password(pw):
 #     pwhash = bcrypt.hashpw(pw.encode('utf8'), bcrypt.gensalt())

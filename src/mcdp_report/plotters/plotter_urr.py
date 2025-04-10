@@ -38,7 +38,7 @@ class PlotterURRpR(Plotter):
             try:
                 tu.check_leq(P, self.S)
             except NotLeq as e:
-                msg = ('cannot convert from %s to %s' % (P, self.S))
+                msg = (f"cannot convert from {P} to {self.S}")
                 raise_wrapped(NotPlottable, e, msg, compact=True)
     
             self.P_to_S, _f2 = tu.get_embedding(P, self.S)

@@ -9,7 +9,7 @@ def cr2e(f):
         e = Environment(context, request)
         res = f(self, e)
         return res
-    f2.__name__ = 'cr2e_%s' % f.__name__
+    f2.__name__ = f"cr2e_{f}".__name__
     return f2
 
 class Environment(object):

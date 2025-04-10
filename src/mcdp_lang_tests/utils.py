@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from nose.tools import assert_equal
+from .nose_compat import assert_equal
 
 from comptests.registrar import register_indep
 from contracts import contract
@@ -21,7 +21,7 @@ def assert_syntax_error(s, expr, desc=None):
     except DPSyntaxError:
         pass
     except BaseException as e:
-        msg = "Expected syntax error, got %s." % type(e)
+        msg = f"Expected syntax error, got {type}."(e)
         raise_wrapped(Exception, e, msg, s=s)
     else:
         msg = "Expected an exception, instead succesfull instantiation."
@@ -37,7 +37,7 @@ def assert_syntax_error_fn(filename, expr, desc=None):
     except DPSyntaxError:
         pass
     except BaseException as e:
-        msg = "Expected syntax error, got %s." % type(e)
+        msg = f"Expected syntax error, got {type}."(e)
         raise_wrapped(Exception, e, msg, filename=filename)
     else:
         msg = "Expected an exception, instead succesfull instantiation."
@@ -53,7 +53,7 @@ def assert_semantic_error_fn(filename, desc=None):
     except DPSemanticError:
         pass
     except BaseException as e:
-        msg = "Expected semantic error, got %s." % type(e)
+        msg = f"Expected semantic error, got {type}."(e)
         raise_wrapped(Exception, e, msg)
     else:
         msg = "Expected an exception, instead succesfull instantiation."
@@ -68,7 +68,7 @@ def assert_not_implemented_error_fn(filename, desc=None):
     except DPNotImplementedError:
         pass
     except BaseException as e:
-        msg = "Expected DPNotImplementedError, got %s." % type(e)
+        msg = f"Expected DPNotImplementedError, got {type}."(e)
         raise_wrapped(Exception, e, msg)
     else:
         msg = "Expected a DPNotImplementedError, instead succesfull instantiation."
@@ -84,7 +84,7 @@ def assert_semantic_error(s , desc=None): # TODO: redundant with assert_parse_nd
     except DPSemanticError:
         pass
     except BaseException as e:
-        msg = "Expected semantic error, got %s." % type(e)
+        msg = f"Expected semantic error, got {type}."(e)
         raise_wrapped(Exception, e, msg, s=s)
     else:
         msg = "Expected an exception, instead succesfull instantiation."
@@ -100,7 +100,7 @@ def assert_semantic_error(s , desc=None): # TODO: redundant with assert_parse_nd
 #     except DPNotImplementedError:
 #         pass
 #     except BaseException as e:
-#         msg = "Expected DPNotImplementedError error, got %s." % type(e)
+#         msg = f"Expected DPNotImplementedError error, got {type}."(e)
 #         raise_wrapped(Exception, e, msg, s=s)
 #     else:
 #         msg = "Expected an exception, instead succesfull instantiation."
@@ -147,7 +147,7 @@ def assert_parsable_to_connected_ndp(s , desc=None):  # @UnusedVariable
 class TestFailed(Exception):
     pass
 
-@contract(string=bytes)
+@contract(string='str')
 def parse_wrap_check(string, expr, result=None):
     check_isinstance(string, str)
     if isinstance(expr, ParsingElement):
@@ -192,7 +192,7 @@ def assert_parse_ndp_semantic_error(string, contains=None):
         else:
             return e
     except BaseException as e:
-        msg = 'Expected DPSemanticError, but obtained %s.' % type(e)
+        msg = f"Expected DPSemanticError, but obtained {type}."(e)
         raise_wrapped(TestFailed, e, msg, string=string)
 
     msg = 'Expected DPSemanticError, but no exception was thrown.'
@@ -223,7 +223,7 @@ def parse_wrap_semantic_error(string, expr, contains=None):
         else:
             return e
     except BaseException as e:
-        msg = 'Expected DPSemanticError, but obtained %s.' % type(e)
+        msg = f"Expected DPSemanticError, but obtained {type}."(e)
         raise_wrapped(TestFailed, e, msg,
                       expr=find_parsing_element(expr), string=string)
 

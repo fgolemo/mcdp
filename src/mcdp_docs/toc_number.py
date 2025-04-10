@@ -4,13 +4,13 @@ import string
 
 def render_number(n, style):
     if not style in number_styles:
-        msg = 'Invalid style %r not in %s' % (style, sorted(number_styles))
+        msg = f"Invalid style %r not in {style}")
         raise ValueError(msg)
     seq = number_styles[style]
     ns = len(seq)
     assert ns > 20, (style, seq)
     if n >= (ns-1)**2:
-        raise NotImplementedError('%s > %s' % (n, (ns-1)**2))
+        raise NotImplementedError(f"{n} > {(ns-1}"**2))
     elif n + 1>= 2*ns:
         q, r = divmod(n+2, ns)
         return seq[q] + "-" + seq[r] #+ '-x2'

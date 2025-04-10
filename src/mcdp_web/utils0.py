@@ -54,7 +54,7 @@ def add_other_fields(self, res, request, context):
         repos = session.app.hi.db_view.repos
         repo = repos[repo_name]
         if not sname in repo.shelves:
-            msg = 'Cannot find shelf "%s" in repo "%s".' % (sname, repo_name)
+            msg = f"Cannot find shelf "{sname}" in repo "{repo_name}"."
             msg += '\n available: ' + format_list(repo.shelves)
             raise ValueError(msg)
         acl = repo.shelves[sname].get_acl()
@@ -100,7 +100,7 @@ def add_other_fields(self, res, request, context):
         return url.format(root=e.root,  repo_name=repo_name, shelf_name=shelf_name, library_name=library_name)
 
     def thing_url(t):
-        url = '{root}/repos/{repo_name}/shelves/{shelf_name}/libraries/{library_name}/{spec_name}/%s' % t
+        url = f"{root}/repos/{repo_name}/shelves/{shelf_name}/libraries/{library_name}/{spec_name}/{t}"
         return url.format(**e.__dict__)
 
     res['thing_url'] = thing_url
@@ -140,7 +140,7 @@ def add_other_fields(self, res, request, context):
     res['other_logins'] = other_logins
 
     def icon_spec(spec_name):
-        return res['icon_%s' % spec_name]
+        return res[f"icon_{spec_name}"]
     res['icon_spec'] = icon_spec
 
 #     def get_user(username):
@@ -214,7 +214,7 @@ def add_std_vars_context_(f, redir):
                            url_base_internal=url_base_internal)
                 
         if '//' in urlparse.urlparse(request.url).path:
-            msg = 'This is an invalid URL with 2 slashes: %s' % request.url
+            msg = f"This is an invalid URL with 2 slashes: {request}".url
             response = Response(msg)
             response.status_int = 500
             return response
@@ -234,8 +234,8 @@ def add_std_vars_context_(f, redir):
                     url2 = url2.replace(p.path, p.path + '/')
             
             if url2 != url:
-                logger.info('Context: %s' % context)
-                logger.info('Redirection:\n from: %s\n   to: %s' % (url, url2))
+                logger.info(f"Context: {context}")
+                logger.info(f"Redirection:\n from: {url}\n   to: {url2}")
                 raise HTTPFound(url2)
 
             if request.authenticated_userid:
@@ -255,7 +255,7 @@ def add_std_vars_context_(f, redir):
         except HTTPException:
             raise
         except Exception as e:
-            msg = 'While running %s:' % (f.__name__)
+            msg = f"While running {f.__name__}:"
             msg += '\n' + indent(traceback.format_exc(e), ' >')
             logger.error(msg)
             raise
@@ -265,7 +265,7 @@ def add_std_vars_context_(f, redir):
         try:
             add_other_fields(self, res, request, context=context)
         except:
-            logger.error('Error after executing view %s' % f)
+            logger.error(f"Error after executing view {f}")
             if isinstance(context, Resource):
                 logger.debug(context_display_in_detail(context))
             raise

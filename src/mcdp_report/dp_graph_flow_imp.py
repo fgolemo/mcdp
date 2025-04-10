@@ -43,7 +43,7 @@ def dp_graph_flow(dp0, imp=None, direction='LR'):
         from .dp_graph_tree_imp import get_dp_label
         label = get_dp_label(dp)
         if imp is not None:
-            label += ' m=%s' % dp.M.format(imp)
+            label += f" m={dp}".M.format(imp)
         n = gg.newItem(label)
 
         gg.styleApply("simple", n)
@@ -63,7 +63,7 @@ def dp_graph_flow(dp0, imp=None, direction='LR'):
         R1 = str(dp.dp1.get_res_space())
         label = str(R1)
         if m_extra is not None:
-            label += ' m_extra: %s' % str(m_extra)
+            label += f" m_extra: {str}"(m_extra)
         
         l = gg.newLink(n1o, n2i, label=label)
         gg.propertyAppend(l, 'arrowhead', 'none')
@@ -137,8 +137,8 @@ def dp_graph_flow(dp0, imp=None, direction='LR'):
 #         if False:
 #             M = dp.get_imp_space_mod_res()
 #             M0 = dp.dp1.get_imp_space_mod_res()
-#             loop_label += ' M0: %s' % M0
-#             loop_label += ' M: %s' % M
+#             loop_label += f" M0: {M0}"
+#             loop_label += f" M: {M}"
         l = gg.newLink(o, i, label=loop_label)
         gg.propertyAppend(l, "color", "red")
         gg.propertyAppend(l, "headport", "sw")
@@ -173,8 +173,8 @@ def dp_graph_flow(dp0, imp=None, direction='LR'):
 #         if False:
 #             M = dp.get_imp_space_mod_res()
 #             M0 = dp.dp1.get_imp_space_mod_res()
-#             loop_label += ' M0: %s' % M0
-#             loop_label += ' M: %s' % M
+#             loop_label += f" M0: {M0}"
+#             loop_label += f" M: {M}"
         l = gg.newLink(o, i, label=loop_label)
         gg.propertyAppend(l, "color", "red")
         gg.propertyAppend(l, "headport", "sw")
@@ -187,7 +187,7 @@ def dp_graph_flow(dp0, imp=None, direction='LR'):
 
     import my_gvgen as gvgen
     assert direction in ['LR', 'TB']
-    gg = gvgen.GvGen(options="rankdir=%s" % direction)
+    gg = gvgen.GvGen(options=f"rankdir={direction}")
 
     gg.styleAppend("prim", "shape", "plaintext")
     gg.styleAppend("connector", "shape", "plaintext")

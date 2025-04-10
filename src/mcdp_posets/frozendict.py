@@ -66,6 +66,6 @@ class frozendict2(dict):
             return h
 
     def __repr__(self):
-        return "frozendict(%s)" % dict.__repr__(self)
+        return f"frozendict({dict})".__repr__(self)
 
 

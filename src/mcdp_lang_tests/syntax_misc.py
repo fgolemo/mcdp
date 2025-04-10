@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from nose.tools import assert_equal, assert_raises
+from .nose_compat import assert_equal, assert_raises
 
 from comptests.registrar import comptest, run_module_tests, comptest_fails
 from contracts.utils import raise_desc, check_isinstance
@@ -220,7 +220,7 @@ def check_lang49():
 @comptest
 def check_lang51():
     """ Shortcuts "using" """
-    print parse_wrap(Syntax.space_pint_unit, 'R')
+    print(parse_wrap(Syntax.space_pint_unit, 'R'))
 #     print parse_wrap(Syntax.unitst, '[dimensionless]')
 
     parse_wrap(Syntax.valuewithunit, '4.0 [dimensionless]')
@@ -302,7 +302,7 @@ def check_lang53():
 })""")
 
 def add_def_poset(l, name, data):
-    fn = '%s.mcdp_poset' % name
+    fn = f"{name}.mcdp_poset"
     l.file_to_contents[fn] = dict(realpath='#', data=data)
 
 @comptest
@@ -412,7 +412,7 @@ def check_get_names_used1():
     setattr(P, att, ('prod',))
 
     S, _pack, _unpack = get_product_compact(P, S12)
-    print S.__repr__()
+    print(S.__repr__())
     assert get_names_used(S) == [('prod',), ('S1',), ('S2',)]
     
     
@@ -439,7 +439,7 @@ def check_ignore_resources1():
     
     """)
     rnames = ndp.get_rnames()
-    print rnames
+    print(rnames)
     assert rnames == ['mass']
 
 @comptest
@@ -570,7 +570,7 @@ mcdp {
     """
     ndp = parse_ndp(s)
     dp = ndp.get_dp()
-    print dp.repr_long()
+    print(dp.repr_long())
 
 
 @comptest
@@ -585,22 +585,22 @@ mcdp {
     """
     ndp = parse_ndp(s)
     dp = ndp.get_dp()
-    print dp.repr_long()
+    print(dp.repr_long())
     s = 'provided f'
-    print parse_wrap(Syntax.rvalue, s)
+    print(parse_wrap(Syntax.rvalue, s))
     
     s = 'x - Nat:1'
-    print parse_wrap(Syntax.rvalue, s)
+    print(parse_wrap(Syntax.rvalue, s))
     
     s = 'provided f - Nat:1'
-    print parse_wrap(Syntax.rvalue, s)
+    print(parse_wrap(Syntax.rvalue, s))
     
 
 @comptest
 def check_lang81(): # TODO: rename
     
-    print parse_wrap(Syntax.rvalue_power_base, '(provided f)')
-    print parse_wrap(Syntax.rvalue_power_expr_2, '(provided f) ^ 5')
+    print(parse_wrap(Syntax.rvalue_power_base, '(provided f)'))
+    print(parse_wrap(Syntax.rvalue_power_expr_2, '(provided f) ^ 5'))
     
 
     pass
@@ -638,7 +638,7 @@ mcdp {
     required r >= f1 - f2
 }
     """
-    print assert_parse_ndp_semantic_error(s)
+    print(assert_parse_ndp_semantic_error(s))
 
 @comptest
 def check_lang84(): # TODO: rename to LF
@@ -787,7 +787,7 @@ def check_lang88(): # TODO: rename
     """
     dp = parse_ndp(s).get_dp()
     
-    print dp.repr_long()
+    print(dp.repr_long())
     R = dp.get_res_space()
     assert R == Nat(), R
     
@@ -925,7 +925,7 @@ def check_lang89e(): # TODO: rename
     }
     """
     dp = parse_ndp(s).get_dp()
-    print dp.repr_long()
+    print(dp.repr_long())
     
 @comptest
 def check_lang89f(): # TODO: rename
@@ -939,7 +939,7 @@ def check_lang89f(): # TODO: rename
     }
     """
     dp = parse_ndp(s).get_dp()
-    print dp.repr_long()
+    print(dp.repr_long())
     
 @comptest
 def check_lang89g(): # TODO: rename
@@ -953,7 +953,7 @@ def check_lang89g(): # TODO: rename
     }
     """
     dp = parse_ndp(s).get_dp()
-    print dp.repr_long()
+    print(dp.repr_long())
     
 @comptest
 def check_lang89h(): # TODO: rename
@@ -966,9 +966,9 @@ def check_lang89h(): # TODO: rename
         required r >= ceil(Rcomp:1.2) 
     }
     """
-    print s
+    print(s)
     dp = parse_ndp(s).get_dp()
-    print dp.repr_long()
+    print(dp.repr_long())
     check_isinstance(dp, Constant)
     
 @comptest
@@ -983,7 +983,7 @@ def check_lang89i(): # TODO: rename
     }
     """
     dp = parse_ndp(s).get_dp()
-    print dp.repr_long()
+    print(dp.repr_long())
     
 @comptest
 def check_lang89j(): # TODO: rename
@@ -1011,7 +1011,7 @@ def check_lang89k(): # TODO: rename
     }
     """
     dp = parse_ndp(s).get_dp()
-    print dp.repr_long()
+    print(dp.repr_long())
     
 @comptest
 def check_lang89l(): # TODO: rename
@@ -1026,7 +1026,7 @@ def check_lang89l(): # TODO: rename
     }
     """
     dp = parse_ndp(s).get_dp()
-    print dp.repr_long()
+    print(dp.repr_long())
     
 @comptest
 def check_lang89m(): # TODO: rename
@@ -1041,7 +1041,7 @@ def check_lang89m(): # TODO: rename
     }
     """
     dp = parse_ndp(s).get_dp()
-    print dp.repr_long()
+    print(dp.repr_long())
     
 @comptest
 def check_lang89n(): # TODO: rename
@@ -1056,7 +1056,7 @@ def check_lang89n(): # TODO: rename
     }
     """
     dp = parse_ndp(s).get_dp()
-    print dp.repr_long()
+    print(dp.repr_long())
     
 @comptest
 def check_lang89o(): # TODO: rename
@@ -1071,7 +1071,7 @@ def check_lang89o(): # TODO: rename
     }
     """
     dp = parse_ndp(s).get_dp()
-    print dp.repr_long()
+    print(dp.repr_long())
     
 @comptest
 def check_lang89p(): # TODO: rename
@@ -1089,7 +1089,7 @@ def check_lang89p(): # TODO: rename
     """
     ndp = parse_ndp(s)
     dp = ndp.get_dp()
-    print dp.repr_long()
+    print(dp.repr_long())
     
 @comptest
 def check_lang89q(): # TODO: rename
@@ -1155,7 +1155,7 @@ def check_lang91(): # TODO: rename
     }
     """
     dp = parse_ndp(s).get_dp()
-    print dp.repr_long()
+    print(dp.repr_long())
      
 
 @comptest
@@ -1169,7 +1169,7 @@ def check_lang92(): # TODO: rename
     }
     """
     dp = parse_ndp(s).get_dp()
-    print dp.repr_long()
+    print(dp.repr_long())
 
 
 
@@ -1184,7 +1184,7 @@ def check_lang93(): # TODO: rename
     }
     """
     dp = parse_ndp(s).get_dp()
-    print dp.repr_long() 
+    print(dp.repr_long() )
 
 @comptest
 def check_lang94(): # TODO: rename
@@ -1197,7 +1197,7 @@ def check_lang94(): # TODO: rename
     }
     """
     dp = parse_ndp(s).get_dp()
-    print dp.repr_long() 
+    print(dp.repr_long() )
 
 
 @comptest
@@ -1238,7 +1238,7 @@ def check_lang95(): # TODO: rename
     }
     """
     dp = parse_ndp(s).get_dp()
-    print dp.repr_long()
+    print(dp.repr_long())
     
     # rcomp
     s = """
@@ -1277,7 +1277,7 @@ def check_lang95b(): # TODO: rename
     }
     """
     dp = parse_ndp(s).get_dp()
-    print dp.repr_long()
+    print(dp.repr_long())
     
     s = """
     mcdp {
@@ -1287,7 +1287,7 @@ def check_lang95b(): # TODO: rename
     }
     """
     dp = parse_ndp(s).get_dp()
-    print dp.repr_long()
+    print(dp.repr_long())
     
     s = """
     mcdp {
@@ -1322,7 +1322,7 @@ def check_lang96(): # TODO: rename
     }
     """
     dp = parse_ndp(s).get_dp()
-    print dp.repr_long() 
+    print(dp.repr_long() )
     
     
     
@@ -1347,7 +1347,7 @@ def check_lang97(): # TODO: rename
     }
     """
     dp = parse_ndp(s).get_dp()
-    print dp.repr_long() 
+    print(dp.repr_long() )
     
     
 
@@ -1442,7 +1442,7 @@ def check_optimization_RuleEvaluateConstantTimesMux(): # TODO: rename
     }
 """
     dp = parse_ndp(s).get_dp()
-    print dp.repr_long()
+    print(dp.repr_long())
     check_isinstance(dp, Constant)
 
 def check_optimization_RuleEvaluateMuxTimesLimit(): # TODO: rename
@@ -1457,7 +1457,7 @@ def check_optimization_RuleEvaluateMuxTimesLimit(): # TODO: rename
     }
 """
     dp = parse_ndp(s).get_dp()
-    print dp.repr_long()
+    print(dp.repr_long())
     check_isinstance(dp, Limit)
     
 @comptest
@@ -1588,7 +1588,7 @@ def check_lang111(): # TODO: rename
     """
     ndp = parse_ndp(s)
     dp = ndp.get_dp()
-    print dp.repr_long()
+    print(dp.repr_long())
  
 @comptest
 def check_lang112(): # TODO: rename
@@ -1624,7 +1624,7 @@ def check_lang113(): # TODO: rename
     
     ndp = parse_ndp(s)
     dp = ndp.get_dp()
-    print dp.repr_long()
+    print(dp.repr_long())
     
     
 @comptest
@@ -1835,7 +1835,7 @@ def imlements2():
 def constant_inverse_constant():
     s = """
     mcdp {
-        constant x = 1 / 2 m
+        constant x = 1 // 2 m
     }
     """
     parse_ndp(s)
@@ -1844,8 +1844,8 @@ def constant_inverse_constant():
 def constant_inverse2():
     s = """
     mcdp {
-        provides precision [1/mm]
-        provided precision <= 1 / 2 m
+        provides precision [1//mm]
+        provided precision <= 1 // 2 m
     }
     """
     parse_ndp(s)
@@ -1854,8 +1854,8 @@ def constant_inverse2():
 def constant_inverse3():
     s = """
     mcdp {
-        provides precision [1/mm]
-        provided precision <= 1 / 2 m
+        provides precision [1//mm]
+        provided precision <= 1 // 2 m
     }
     """
     parse_ndp(s)
@@ -1863,37 +1863,37 @@ def constant_inverse3():
 
 @comptest
 def constant_fvalue():
-    s = """ 1 / 2 m """
-    print parse_wrap(Syntax.constant_value_divided, s)[0]
+    s = """ 1 // 2 m """
+    print(parse_wrap(Syntax.constant_value_divided, s)[0])
     
-    print parse_wrap(Syntax.fvalue, s)[0]
+    print(parse_wrap(Syntax.fvalue, s)[0])
 
 @comptest_fails
 def constant_fail():
-    s = """ 1 / 2 m """
-    print parse_wrap(Syntax.constant_value, s)[0]
+    s = """ 1 // 2 m """
+    print(parse_wrap(Syntax.constant_value, s)[0])
     
 @comptest_fails
 def constant_fail2():
-    s = """ 1 / 2 m """
-    print parse_wrap(Syntax.constant_value_op, s)[0]
+    s = """ 1 // 2 m """
+    print(parse_wrap(Syntax.constant_value_op, s)[0])
     
 @comptest
 def constant_rvalue():
-    s = """ 1 / 2 m """
+    s = """ 1 // 2 m """
     val = parse_wrap(Syntax.rvalue, s)[0]
-    print val
+    print(val)
     
     
 @comptest 
 def constant_inverse_ok():
-    s = """ 1 / 2 m """
+    s = """ 1 // 2 m """
     val = parse_constant(s)
-    print val
+    print(val)
     
 @comptest_fails
 def constant_inverse():
-    s = """ 1 / 2 """
+    s = """ 1 // 2 """
     val = parse_constant(s)
     print(val)
     

@@ -19,10 +19,10 @@ class Coproduct1(Space):
         
         is represented as tuples of the kind
         
-        (c, (a, b)) | c \in {0, ..., n-1}  
+        (c, (a, b)) | c in {0, ..., n-1}  
         
-        (0, (a, fill)) | a \in A
-        (1, (fill, b)) | b \in B
+        (0, (a, fill)) | a in A
+        (1, (fill, b)) | b in B
     
     """
     fill = '-'
@@ -31,9 +31,17 @@ class Coproduct1(Space):
     def __init__(self, spaces):
         self.spaces = spaces
         
+    def __eq__(self, other):
+        if not isinstance(other, Coproduct1):
+            return False
+        return self.spaces == other.spaces
+        
+    def __hash__(self):
+        return hash(self.spaces)
+        
     def __repr__(self):
-        s = "+".join('%s' % sub for sub in self.spaces)
-        return "Coproduct1(%s)" % s
+        s = "+".join(f'{sub}' for sub in self.spaces)
+        return f"Coproduct1({s})"
 
     def witness(self):
         import numpy as np
@@ -64,7 +72,7 @@ class Coproduct1(Space):
                     try:
                         self.spaces[j].belongs(sj)
                     except NotBelongs as e:
-                        msg = 'Element %d' % j
+                        msg = f'Element {j}'
                         raise_wrapped(NotBelongs, e, msg, j=j, sj=sj,
                                       spacej=self.spaces[j])
                 else:
@@ -108,7 +116,7 @@ class Coproduct1(Space):
 
     def format(self, x):
         i, e = self.unpack(x)
-        return 'alt%s:(%s)' % ((i + 1), self.spaces[i].format(e))
+        return f'alt{i+1}:({self.spaces[i].format(e)})'
 
 
 class Coproduct1Labels(Space):
@@ -119,8 +127,8 @@ class Coproduct1Labels(Space):
         
         (label, (a, b, c))   
         
-        ('l1', (a, fill, fill)) | a \in A
-        ('l2', (fill, b, fill)) | b \in B
+        ('l1', (a, fill, fill)) | a in A
+        ('l2', (fill, b, fill)) | b in B
     
     """
     fill = '-'
@@ -132,21 +140,29 @@ class Coproduct1Labels(Space):
             msg = 'Invalid argument "labels".'
             raise_desc(ValueError, msg, labels=labels)
         self.labels = labels
+        
+    def __eq__(self, other):
+        if not isinstance(other, Coproduct1Labels):
+            return False
+        return self.spaces == other.spaces and self.labels == other.labels
+        
+    def __hash__(self):
+        return hash((tuple(self.spaces), tuple(self.labels)))
 
     def __repr__(self):
-        s = "+".join('%s:%s' % (l, sub) for l, sub in zip(self.labels, self.spaces))
-        return "Coproduct1Labels(%s)" % s
+        s = "+".join(f'{l}:{sub}' for l, sub in zip(self.labels, self.spaces))
+        return f"Coproduct1Labels({s})"
 
     def repr_long(self):
-        s = "%s[%s]" % (type(self).__name__, len(self.spaces))
+        s = f"{type(self).__name__}[{len(self.spaces)}]"
         for label, S in zip(self.labels, self.spaces):
-            prefix0 = " %s. " % label
+            prefix0 = f" {label}. "
             prefix1 = " " * len(prefix0)
             s += "\n" + indent(S.repr_long(), prefix1, first=prefix0)
             att = MCDPConstants.ATTRIBUTE_NDP_RECURSIVE_NAME
             if hasattr(S, att):
                 a = getattr(S, att)
-                s += '\n  labeled as %s' % a.__str__()
+                s += f'\n  labeled as {a.__str__()}'
         return s
 
     def belongs(self, x):
@@ -170,7 +186,7 @@ class Coproduct1Labels(Space):
                     try:
                         self.spaces[j].belongs(sj)
                     except NotBelongs as e:
-                        msg = 'Element %d' % j
+                        msg = f'Element {j}'
                         raise_wrapped(NotBelongs, e, msg, j=j, sj=sj,
                                       spacej=self.spaces[j])
                 else:
@@ -233,4 +249,4 @@ class Coproduct1Labels(Space):
 
     def format(self, x):
         i, e = self.unpack(x)
-        return 'alt%s(%s):(%s)' % ((i + 1), self.labels[i], self.spaces[i].format(e))
+        return f'alt{i+1}({self.labels[i]}):({self.spaces[i].format(e)})'

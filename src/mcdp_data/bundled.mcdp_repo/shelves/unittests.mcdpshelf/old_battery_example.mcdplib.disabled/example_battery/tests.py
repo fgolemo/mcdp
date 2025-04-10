@@ -20,7 +20,7 @@ def check_ex16b_r(dp):
     funsp = dp.get_fun_space()
     bot = funsp.get_bottom()
     res = dp.solve(bot)
-    print 'res', res
+    print('res', res)
     r = Report()
 
     return r

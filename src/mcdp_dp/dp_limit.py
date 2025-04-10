@@ -70,13 +70,13 @@ class FuncNotMoreThan(PrimitiveDP):
 #             return empty
         
     def __repr__(self):
-        return 'FuncNotMoreThan(%s)' % (self.F.format(self.limit))
+        return f"FuncNotMoreThan({self.F.format(self.limit})")
 
     def repr_h_map(self):
-        return 'f ⟼ f if f ≼ %s, else ø' % self.F.format(self.limit)
+        return f"f ⟼ f if f ≼ {self}, else ø".F.format(self.limit)
 
     def repr_hd_map(self):
-        return 'r ⟼ {%s}' % self.F.format(self.limit)
+        return f"r ⟼ {{self}}".F.format(self.limit)
 
 
 class Limit(PrimitiveDP):
@@ -120,13 +120,13 @@ class Limit(PrimitiveDP):
         return self.F.L(self.limit)
         
     def __repr__(self):
-        return 'Limit(%s, %s)' % (self.F, self.F.format(self.limit))
+        return f"Limit({self.F}, {self.F.format(self.limit})")
 
     def repr_h_map(self):
-        return 'f ⟼ {⟨⟩} if f ≼ %s, else ø' % self.F.format(self.limit)
+        return f"f ⟼ {⟨⟩} if f ≼ {self}, else ø".F.format(self.limit)
 
     def repr_hd_map(self):
-        return '⟨⟩ ⟼ {%s}' % self.F.format(self.limit)
+        return f"⟨⟩ ⟼ {{self}}".F.format(self.limit)
 
 
 class LimitMaximals(PrimitiveDP):
@@ -174,14 +174,14 @@ class LimitMaximals(PrimitiveDP):
     
     def __repr__(self):
         s = len(self.limit.maximals)
-        return 'LimitMaximals(%s, %s els)' % (self.F, s)
+        return f"LimitMaximals({self.F}, {s} els)"
     
     def repr_h_map(self):
         LF = LowerSets(self.F)
-        return 'f ⟼ {⟨⟩} if f ∈ %s, else ø' % LF.format(self.limit)
+        return f"f ⟼ {⟨⟩} if f ∈ {LF}, else ø".format(self.limit)
 
     def repr_hd_map(self):
         contents = ", ".join(self.F.format(m)
                 for m in sorted(self.limit.maximals))
-        return '⟨⟩ ⟼ {%s}' % contents
+        return f"⟨⟩ ⟼ {{contents}}"
 

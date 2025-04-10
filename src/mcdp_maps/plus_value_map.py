@@ -40,13 +40,13 @@ class PlusValueMap(Map):
         Map.__init__(self, dom=P, cod=P)
         
     def __str__(self):
-        return "+ %s" % self.c_space.format(self.c_value)
+        return f"+ {self}".c_space.format(self.c_value)
 
     def diagram_label(self):  
         return self.__str__()
     
     def __repr__(self):
-        return "PlusValueMap(%s)" % self.__str__()
+        return f"PlusValueMap({self})".__str__()
 
     def _call(self, x):
         return rcompunits_add(self.dom, x, self.c) 
@@ -92,7 +92,7 @@ class PlusValueDualMap(Map):
         self.c_space = c_space
         
     def __repr__(self):
-        return "Dual(+ %s)" % self.c_space.format(self.c_value)
+        return f"Dual(+ {self})".c_space.format(self.c_value)
 
     def _call(self, x): 
         if is_top(self.dom, self.c):
@@ -122,7 +122,7 @@ class PlusValueDualRcompMap(Map):
         Map.__init__(self, dom, cod)
         
     def __repr__(self):
-        return "Dual(+ %s)" % self.dom.format(self.c)
+        return f"Dual(+ {self})".dom.format(self.c)
 
     def _call(self, x): 
         if is_top(self.dom, self.c):
@@ -154,7 +154,7 @@ class PlusValueDualNatMap(Map):
         Map.__init__(self, dom, cod)
         
     def __repr__(self):
-        return "Dual(+ %s)" % self.dom.format(self.c)
+        return f"Dual(+ {self})".dom.format(self.c)
 
     def _call(self, x): 
         if is_top(self.dom, self.c):
@@ -189,7 +189,7 @@ class PlusValueRcompMap(Map):
         self.c_value = c_value
 
     def __str__(self):
-        return "+ %s" % self.dom.format(self.c_value)
+        return f"+ {self}".dom.format(self.c_value)
 
     def diagram_label(self):  
         return self.__str__()
@@ -215,7 +215,7 @@ class MinusValueRcompMap(Map):
         self.top = dom.get_top()
 
     def __str__(self):
-        return "- %s" % self.dom.format(self.c)
+        return f"- {self}".dom.format(self.c)
 
     def repr_map(self, letter):
         return minusvaluemap_repr(letter, self.dom, self.c)
@@ -266,7 +266,7 @@ class MinusValueMap(Map):
         self.top = P.get_top()
 
     def __str__(self):
-        return "- %s" % self.c_space.format(self.c_value)
+        return f"- {self}".c_space.format(self.c_value)
 
     def diagram_label(self):  
         return self.__str__()
@@ -275,7 +275,7 @@ class MinusValueMap(Map):
         return minusvaluemap_repr(letter, self.c_space, self.c_value)
 
     def __repr__(self):
-        return "MinusValueMap(%s)" % self.__str__()
+        return f"MinusValueMap({self})".__str__()
 
     def _call(self, x):
         dom, cod = self.dom, self.cod 
@@ -313,7 +313,7 @@ class PlusValueNatMap(Map):
         return plusvaluemap_repr(letter, self.N, self.value)
 
     def __str__(self):
-        return '+ %s' % self.N.format(self.value)
+        return f"+ {self}".N.format(self.value)
 
 
 class MinusValueNatMap(Map):
@@ -363,5 +363,5 @@ class MinusValueNatMap(Map):
         return minusvaluemap_repr(letter, self.dom, self.c)
 
     def __str__(self):
-        return '- %s' % self.c
+        return f"- {self}".c
     

@@ -20,7 +20,7 @@
 #     with tmpdir('test_repo_urls', erase=False) as d:
 #             
 #         urls = [
-#             'mcdpr:git:%s' % (d + '/' + 'local_repo'),
+#             f"mcdpr:git:{d + '/' + 'local_repo'}",
 #             'mcdpr:git:git://github.com',
 #             'mcdpr:git:https://github.com/',
 #             'mcdpr:git:ssh://git@github.com/<user>/<repo>',
@@ -47,7 +47,7 @@
 #     assert repo.available() == True
 #     shelves = repo.get_shelves()
 #     assert len(shelves) > 2
-#     print('shelves: %s' % list(shelves))
+#     print(f"shelves: {list}"(shelves))
 # 
 # def create_file_and_yield(files0, d):
 #     flattened = mockup_flatten(files0)
@@ -72,8 +72,8 @@
 #         
 #         for filename in create_file_and_yield(setup_shelve_01, r0):
 # #             print('written %r' % filename)
-# #             print('untracked_files: %s' % repo0.untracked_files)
-# #             print('Dirty: %s' % repo0.is_dirty(untracked_files=True))
+# #             print(f"untracked_files: {repo0}".untracked_files)
+# #             print(f"Dirty: {repo0}".is_dirty(untracked_files=True))
 #             repo0.index.add(repo0.untracked_files)
 #             message = 'author: system'
 #             repo0.index.commit(message, author=author)

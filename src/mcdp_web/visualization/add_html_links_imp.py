@@ -69,7 +69,7 @@ def add_html_links(frag, library_name, get_link, get_link_library):
 
 #             if False:
 #                 # TODO: add this as a feature
-#                 img = '/solver/%s/compact_graph' % name
+#                 img = f"/solver/{name}/compact_graph"
 #                 attrs = {'src': img, 'class': 'popup'}
 #                 new_tag = soup.new_tag("img", **attrs)
 #                 tag.append(new_tag)

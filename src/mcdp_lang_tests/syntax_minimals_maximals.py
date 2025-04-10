@@ -6,11 +6,11 @@ from mcdp_lang.parse_interface import parse_constant
 @comptest
 def check_minimals1():  # TODO: rename
     p = parse_constant('Minimals V')
-    print p
+    print(p)
     p = parse_constant('Minimals poset{a b}')
-    print p
+    print(p)
 
 @comptest
 def check_maximals1():  # TODO: rename
     p = parse_constant('Maximals V')
-    print p
+    print(p)

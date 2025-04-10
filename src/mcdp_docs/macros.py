@@ -47,7 +47,7 @@ def replace_macros(s):
             if '.' in key:
                 i = key.index('.')
                 first, last = key[:i], key[i+1:]
-                #print('%s -> %s, %s' % (key, first, last))
+                #print(f"{key} -> {first}, {last}")
                 return self[first][last]
             
             raise KeyError(key)

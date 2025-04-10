@@ -14,19 +14,19 @@ def get_dp_label(dp):
     label = type(dp).__name__
 #     if False:
 #         if isinstance(dp, Mux):
-#             label = 'Mux\nh: %s' % transform_pretty_print(dp.amap.dom, dp.amap.coords)
+#             label = f"Mux\nh: {transform_pretty_print}"(dp.amap.dom, dp.amap.coords)
 #             if dp.amap_dual is not None:
-#                 label += '\nh*: %s' %  transform_pretty_print(dp.amap_dual.dom, dp.amap_dual.coords, 'A')
+#                 label += f"\nh*: {transform_pretty_print}"(dp.amap_dual.dom, dp.amap_dual.coords, 'A')
 #             return label
 #         elif isinstance(dp, Constant):
-#             # x = '%s %s' % (dp.R.format(dp.c), dp.R)
+#             # x = f"{dp.R.format(dp.c} %s", dp.R)
 #             x = dp.R.format(dp.c)
-#             label = 'Constant\n%s' % x
+#             label = f"Constant\n{x}"
 #         elif isinstance(dp, Limit):
-#             x = '<= %s [%s]' % (dp.F.format(dp.limit), dp.F)
-#             label = 'Limit\n%s' % x
+#             x = f"<= {dp.F.format(dp.limit} [%s]", dp.F)
+#             label = f"Limit\n{x}"
 #         elif isinstance(dp, WrapAMap):
-#             label = 'WrapAMap\n%s' % dp.diagram_label()
+#             label = f"WrapAMap\n{dp}".diagram_label()
         
 #     label = type(dp).__name__ + '/' + label
     
@@ -121,7 +121,7 @@ def dp_graph_tree(dp0, imp=
         if add_leaf_text:
             label = get_dp_label(dp)
             if imp is not None:
-                label += ' m=%s' % dp.M.format(imp)
+                label += f" m={dp}".M.format(imp)
         else:
             label = ""
 
@@ -134,7 +134,7 @@ def dp_graph_tree(dp0, imp=
             label = get_dp_label(dp)
 
             if imp is not None:
-                label += ' m=%s' % dp.M.format(imp)
+                label += f" m={dp}".M.format(imp)
         else:
             label = ""
         n = gg.newItem(label)
@@ -276,13 +276,13 @@ def dp_graph_tree(dp0, imp=
     def get_edge_label(dp):
         F = dp.get_fun_space()
         R = dp.get_res_space()
-        s = '%s\n↓\n%s' % (F, R)
+        s = f"{F}\n↓\n{R}"
         return s
 
     import my_gvgen as gvgen
     
     assert direction in ['TB', 'LR']
-    gg = gvgen.GvGen(options="rankdir=%s" % direction)
+    gg = gvgen.GvGen(options=f"rankdir={direction}")
 
     gg.styleAppend("root", "shape", "none")
 

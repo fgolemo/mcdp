@@ -22,7 +22,7 @@ def get_all_available_plotters():
 def get_best_plotter(space):
     p = list(get_plotters(get_all_available_plotters(), space))
     if not p:
-        msg = 'Could not find any plotter for space %s.' % space
+        msg = f"Could not find any plotter for space {space}."
         raise_desc(ValueError, msg, space=space)
         
     return p[0][1]
@@ -38,9 +38,9 @@ def get_plotters(plotters, space):
             errors.append((name, plotter, e))
     if available:
         return available
-    msg = 'Could not find any plotter for space %s.' % space
-    msg += '\n None of these worked: %s' % plotters.keys()
+    msg = f"Could not find any plotter for space {space}."
+    msg += f"\n None of these worked: {plotters}".keys()
     msg += '\nTraceback:'
     for name, plotter, e in errors:
-        msg += '\n%r (%s)\n%s' % (name, type(plotter), indent(str(e), '  '))
+        msg += f"\n%r ({name})\n{type(plotter}", indent(str(e), '  '))
     raise_desc(NotPlottable, msg)

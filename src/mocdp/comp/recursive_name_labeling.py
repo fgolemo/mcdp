@@ -173,7 +173,7 @@ def get_imp_as_recursive_dict(I, imp):  # , ignore_hidden=True):
     I.belongs(imp)
     res = collect(I, imp)
 
-    # print('collected: %s' % res)
+    # print(f"collected: {res}")
 
     if len(res) == 1 and list(res)[0] == ():
         return res[()]

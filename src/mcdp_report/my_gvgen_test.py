@@ -24,4 +24,4 @@ gdc.newLink(C, B)
 
 # gg.dot()
 
-print gg.dot2()
+print(gg.dot2())

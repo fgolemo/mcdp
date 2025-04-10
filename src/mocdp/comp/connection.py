@@ -199,7 +199,7 @@ def connect2(ndp1, ndp2, connections, split, repeated_ok=False):
                        connections=connections, split=split)
 
     if len(set(split)) != len(split):
-        msg = 'Repeated signals in split: %s' % str(split)
+        msg = f"Repeated signals in split: {str}"(split)
         raise ValueError(msg)
     try:
         if not connections:
@@ -223,11 +223,11 @@ def connect2(ndp1, ndp2, connections, split, repeated_ok=False):
         def s2_from_s1(s1):
             for c in connections:
                 if c.s1 == s1: return c.s2
-            assert False, 'Cannot find connection with s1 = %s' % s1
+            assert False, f"Cannot find connection with s1 = {s1}"
         def s1_from_s2(s2):
             for c in connections:
                 if c.s2 == s2: return c.s1
-            assert False, 'Cannot find connection with s2 = %s' % s2
+            assert False, f"Cannot find connection with s2 = {s2}"
 
         f1 = ndp1.get_fnames()
         r1 = ndp1.get_rnames()
@@ -247,12 +247,12 @@ def connect2(ndp1, ndp2, connections, split, repeated_ok=False):
         A = list_diff(r1, B1 + C1)
         D = list_diff(f2, B2 + C2)
 
-        # print('B1: %s' % B1)
-        # print('B2: %s' % B2)
-        # print('C2: %s' % C1)
-        # print('C1: %s' % C1)
-        # print(' A: %s' % A)
-        # print(' D: %s' % D)
+        # print(f"B1: {B1}")
+        # print(f"B2: {B2}")
+        # print(f"C2: {C1}")
+        # print(f"C1: {C1}")
+        # print(f" A: {A}")
+        # print(f" D: {D}")
         fntot = f1 + D
         rntot = A + B1 + r2
 
@@ -263,20 +263,20 @@ def connect2(ndp1, ndp2, connections, split, repeated_ok=False):
         f1_types = ndp1.get_ftypes(f1)
 
         D_types = ndp2.get_ftypes(D)
-#         print('f1: %s' % f1)
-#         print('f1 types: %s' % f1_types)
-#         print('D: %s' % D)
-#         print('D types: %s' % D_types)
+#         print(f"f1: {f1}")
+#         print(f"f1 types: {f1_types}")
+#         print(f"D: {D}")
+#         print(f"D types: {D_types}")
 
         Ftot = PosetProduct(tuple(list(f1_types) + list(D_types)))
         Rtot = PosetProduct(tuple(list(ndp1.get_rtypes(A)) +
                                   list(ndp1.get_rtypes(B1)) +
                                   list(ndp2.get_rtypes(r2))))
 
-        # print('Ftot: %s' % str(Ftot))
-        # print('      %s' % str(fntot))
-        # print('Rtot: %s' % str(Rtot))
-        # print('      %s' % str(rntot))
+        # print(f"Ftot: {str}"(Ftot))
+        # print(f"      {str}"(fntot))
+        # print(f"Rtot: {str}"(Rtot))
+        # print(f"      {str}"(rntot))
         assert len(fntot) == len(Ftot), (fntot, Ftot)
         assert len(rntot) == len(Rtot), (rntot, Rtot)
 
@@ -289,8 +289,8 @@ def connect2(ndp1, ndp2, connections, split, repeated_ok=False):
         m1coords = [m1_for_f1, m1_for_D]
         m1 = Mux(Ftot, m1coords)
 
-        # print('m1: %s' % m1)
-        # print('m1.R: %s' % m1.get_res_space())
+        # print(f"m1: {m1}")
+        # print(f"m1.R: {m1}".get_res_space())
 
         # Get Identity on D
         D_types = ndp2.get_ftypes(D)
@@ -301,8 +301,8 @@ def connect2(ndp1, ndp2, connections, split, repeated_ok=False):
 
         # make sure we can connect
         m1_X = make_series(m1, X)
-        # print('m1_X = %s' % m1_X)
-        # print('m1_X.R = %s' % m1_X.get_res_space()  )
+        # print(f"m1_X = {m1_X}")
+        # print(f"m1_X.R = {m1_X}".get_res_space()  )
         
         def coords_cat(c1, m):
             if m != ():
@@ -314,9 +314,9 @@ def connect2(ndp1, ndp2, connections, split, repeated_ok=False):
         Id_A_B1 = Identity(A_B1_types)
         ndp2_p = its_dp_as_product(ndp2)
         Z = make_parallel(Id_A_B1, ndp2_p)
-        # print('Z.R = %s' % Z.get_res_space())
-        # print('B1: %s' % B1)
-        # print('R2: %s' % r2)
+        # print(f"Z.R = {Z}".get_res_space())
+        # print(f"B1: {B1}")
+        # print(f"R2: {r2}")
         m2coords_A = [(0, (A + B1).index(x)) for x in A]
         m2coords_B1 = [(0, (A + B1).index(x)) for x in B1]
         m2coords_r2 = [(1, r2.index(x)) for x in r2]
@@ -326,7 +326,7 @@ def connect2(ndp1, ndp2, connections, split, repeated_ok=False):
         # print('m2coords_r2: %r' % m2coords_r2)
         # print('m2coords: %r' % m2coords)
 
-        # print('Z.R: %s' % Z.get_res_space())
+        # print(f"Z.R: {Z}".get_res_space())
         m2 = Mux(Z.get_res_space(), m2coords)
         
         assert len(m2.get_res_space()) == len(rntot), ((m2.get_res_space(), rntot))
@@ -376,8 +376,8 @@ def connect2(ndp1, ndp2, connections, split, repeated_ok=False):
             else:
                 assert False
 
-        # print ('Y_coords_A_B1: %s' % Y_coords_A_B1)
-        # print ('Y_coords_B2_C2_D: %s' % Y_coords_B2_C2_D)
+        # print (f"Y_coords_A_B1: {Y_coords_A_B1}")
+        # print (f"Y_coords_B2_C2_D: {Y_coords_B2_C2_D}")
         Y_coords = [Y_coords_A_B1, Y_coords_B2_C2_D]
         Y = Mux(m1_X.get_res_space(), Y_coords)
 
@@ -394,7 +394,7 @@ def connect2(ndp1, ndp2, connections, split, repeated_ok=False):
 
         res_dp, fnames, rnames = simplify_if_only_one_name(res_dp, fnames, rnames)
 
-        # print('res_dp: %s' % res_dp)
+        # print(f"res_dp: {res_dp}")
         res = dpwrap(res_dp, fnames, rnames)
 
         return res
@@ -456,8 +456,8 @@ def order_dps(name2dp, connections):
 # #         if not ndp.get_rnames():
 # #             no_resources.add(name)
 #
-#     print('no_functions: %s' % no_functions)
-#     print('no_resources: %s' % no_resources)
+#     print(f"no_functions: {no_functions}")
+#     print(f"no_resources: {no_resources}")
 
     G = get_connection_graph(names, connections)
     # I should probably think more about this
@@ -468,13 +468,13 @@ def order_dps(name2dp, connections):
     Gu = G.to_undirected()
     if not is_connected(Gu):
         msg = 'The graph is not weakly connected. (missing constraints?)'
-        msg += '\nNames: %s' % names
-        msg += '\nconnections: %s' % connections
+        msg += f"\nNames: {names}"
+        msg += f"\nconnections: {connections}"
         raise DPSemanticError(msg)
     l = topological_sort(G)
     if not (set(l) == names):
-        msg = 'names = %s\n returned = %s\n connections: %s' % (names, l, connections)
-        msg += '\n graph: %s %s' % (list(Gu.nodes()), list(Gu.edges()))
+        msg = f"names = {names}\n returned = {l}\n connections: {connections}"
+        msg += f"\n graph: {list(Gu.nodes(} %s"), list(Gu.edges()))
         raise DPInternalError(msg)
     return l
 
@@ -518,8 +518,8 @@ def order_dps(name2dp, connections):
 #         else:
 #             F = PosetProduct((ndp.get_ftypes(A), R))
 # 
-#         # print('A: %s' % A)
-#         # print('F: %s' % F)
+#         # print(f"A: {A}")
+#         # print(f"F: {F}")
 # 
 #         coords = []
 #         for x in ndp.get_fnames():
@@ -530,7 +530,7 @@ def order_dps(name2dp, connections):
 #                 else:
 #                     coords.append(0)  # just get the one A
 #             if x == lf:
-#                 # print('x = lf = %s' % x)
+#                 # print(f"x = lf = {x}")
 #                 xc = coord_concat((1,), ndp.rindex(lr))
 #                 coords.append(xc)
 # 
@@ -540,11 +540,11 @@ def order_dps(name2dp, connections):
 #             coords = coords[0]
 #     
 #         X = Mux(F, coords)
-#         # print('X = %s' % X.repr_long())
+#         # print(f"X = {X}".repr_long())
 #         dp = ndp.get_dp()
-#         # print('dp = %s' % dp.repr_long())
+#         # print(f"dp = {dp}".repr_long())
 #         S = make_series(X, dp)
-#         # print('S = %s' % S)
+#         # print(f"S = {S}")
 #         
 #         res_dp = make_loop(S)
 #         rnames = ndp.get_rnames()
@@ -567,7 +567,7 @@ def order_dps(name2dp, connections):
 #         res = dpwrap(res_dp, fnames, rnames)
 #         return res
 #     except DPInternalError as e:
-#         msg = 'Error while calling dploop0( lr = %s -> lf = %s) ' % (lr, lf)
+#         msg = f"Error while calling dploop0( lr = {lr} -> lf = {lf}) "
 #         raise_wrapped(DPInternalError, e, msg, ndp=ndp.repr_long())
 
 @contract(cndp=CompositeNamedDP, returns=SimpleWrap)
@@ -609,7 +609,7 @@ def dpgraph(name2dp, connections, split):
         
     """
     if not len(set(split)) == len(split):
-        raise ValueError('dpgraph: Repeated signals in split: %s' % str(split))
+        raise ValueError(f"dpgraph: Repeated signals in split: {str}"(split))
 
     if not(name2dp):
         assert not connections
@@ -630,7 +630,7 @@ def dpgraph(name2dp, connections, split):
     # check that there are no repetitions
     if there_are_reps(name2dp):
         name2dp_, connections_, relabeling = relabel(name2dp, connections)
-        print('relabeling: %s' % relabeling)
+        print(f"relabeling: {relabeling}")
         assert not there_are_reps(name2dp_)
         # XXX: what do we do with split?
         return dpgraph(name2dp_, connections_, split)
@@ -685,10 +685,9 @@ def choose_connection_to_cut1(connections, name2dp):
 
     its_connection = find_one(best_edge[0], best_edge[1])
     F = name2dp[its_connection.dp1].get_rtype(its_connection.s1)
-    print('Min cut: breaking %d of %d cycles by removing %s, space = %s.' %
-        (ncycles_broken, ncycles, str(its_connection), F))
-    # print('its connection is %s' % str(its_connection))
-    # print('querying F = %s ' % name2dp[its_connection.dp1].get_rtype(its_connection.s1))
+    print(f"Min cut: breaking {str(its_connection} of %d cycles by removing {ncycles_broken}, space = {ncycles}.", F))
+    # print(f"its connection is {str}"(its_connection))
+    # print(f"querying F = {name2dp} "[its_connection.dp1].get_rtype(its_connection.s1))
     return its_connection
 
 
@@ -796,7 +795,7 @@ def get_connection_multigraph_weighted(name2dp, connections):
 #         for i in range(len(cycle) - 1):
 #             # XXX
 #             _val = G.edge[cycle[i]][cycle[i + 1]]['spaces']
-#             # print('%s -> %s -> %s' % (cycle[i], val, cycle[i + 1]))
+#             # print(f"{cycle[i]} -> {val} -> {cycle[i + 1]}")
 
     return G
     

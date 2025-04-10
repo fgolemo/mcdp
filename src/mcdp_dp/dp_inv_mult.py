@@ -61,7 +61,7 @@ class InvMult2(ApproximableDP):
         return InvMult2U(self.F, self.Rs, n)
 
     def __repr__(self):
-        return 'InvMult2(%s → %s)' % (self.F, self.R)
+        return f"InvMult2({self.F} → {self.R})"
 
 
 class InvMult2U(PrimitiveDP):
@@ -203,7 +203,7 @@ class InvMult2Nat(ApproximableDP):
         return set([(f, r)])
 
     def __repr__(self):
-        return 'InvMult2Nat(%s -> %s)' % (self.F, self.R)
+        return f"InvMult2Nat({self.F} -> {self.R})"
     
     def repr_h_map(self):
         return repr_h_map_invmult(len(self.R))

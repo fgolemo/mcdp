@@ -65,7 +65,7 @@ def get_git_repo(d, original_query=None):
     if original_query is None:
         original_query = d
     if not d:
-        msg = 'Could not find repo for %s' % original_query
+        msg = f"Could not find repo for {original_query}"
         raise ValueError(msg)
     g = os.path.join(d, '.git')
     if os.path.exists(g):
@@ -101,14 +101,14 @@ class WriteToDiskCallback(object):
         self.data_events = []
         
     def __repr__(self):
-        return 'WriteToDiskCallback(%s; %s so far)' % (self.dirname, len(self.data_events))
+        return f"WriteToDiskCallback({self.dirname}; {len(self.data_events} so far)")
          
     def __call__(self, data_event):
         from mcdp_hdb.disk_map_disk_events_from_data_events import disk_events_from_data_event
         from mcdp_hdb.disk_events import apply_disk_event_to_filesystem
         # A good one to debug
         # s = yaml_dump(data_event)
-        # logger.debug('Event #%d:\n%s' % (len(self.data_events), indent(s, '> ')) )
+        # logger.debug(f"Event #%d:\n{len(self.data_events}", indent(s, '> ')) )
         self.data_events.append(data_event)
         disk_events = disk_events_from_data_event(disk_map=self.disk_map, 
                                                  schema=self.view._schema, 
@@ -116,7 +116,7 @@ class WriteToDiskCallback(object):
                                                  data_event=data_event)
         
         for disk_event in disk_events:
-            # logger.debug('Disk event:\n%s' % yaml_dump(disk_event))
+            # logger.debug(f"Disk event:\n{yaml_dump}"(disk_event))
             apply_disk_event_to_filesystem(self.dirname, disk_event)
             
     
@@ -128,13 +128,13 @@ class WriteToRepoCallback(object):
         self.data_events = []
         
     def __repr__(self):
-        return 'WriteToRepo(%s; %s so far)' % (self.repo.working_dir, len(self.data_events))
+        return f"WriteToRepo({self.repo.working_dir}; {len(self.data_events} so far)")
          
     def __call__(self, data_event):
         from mcdp_hdb.disk_map_disk_events_from_data_events import disk_events_from_data_event
         from mcdp_hdb.disk_events import apply_disk_event_to_filesystem
         s = yaml_dump(data_event)
-        logger.debug('Event #%d:\n%s' % (len(self.data_events), indent(s, '> ')) )
+        logger.debug(f"Event #%d:\n{len(self.data_events}", indent(s, '> ')) )
         self.data_events.append(data_event)
         disk_events = disk_events_from_data_event(disk_map=self.disk_map, 
                                                  schema=self.view._schema, 
@@ -142,7 +142,7 @@ class WriteToRepoCallback(object):
                                                  data_event=data_event)
         
         for disk_event in disk_events:
-            logger.debug('Disk event:\n%s' % yaml_dump(disk_event))
+            logger.debug(f"Disk event:\n{yaml_dump}"(disk_event))
             wd = self.repo.working_dir
             apply_disk_event_to_filesystem(wd, disk_event, repo=self.repo)
             
@@ -157,8 +157,8 @@ class WriteToRepoCallback(object):
             host = host_name()
             instance = 'unspecified'
             
-        author = Actor(actor, '%s@%s' % (actor, instance))
-        committer = Actor(instance, '%s@%s' % (instance, host))
+        author = Actor(actor, f"{actor}@{instance}")
+        committer = Actor(instance, f"{instance}@{host}")
         _commit = self.repo.index.commit(message, author=author, committer=committer)
         
         

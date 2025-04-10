@@ -29,8 +29,7 @@ Connection0 = namedtuple('Connection', 'dp1 s1 dp2 s2')
 
 class Connection(Connection0):
     def __repr__(self):
-        return ("Constraint(%s.%s <= %s.%s)" %
-                (self.dp1, self.s1, self.dp2, self.s2))
+        return (f"Constraint({self.dp1}.{self.s1} <= {self.dp2}.{self.s2})")
 
     @contract(nodes='set(str)|seq(str)')
     def involves_any_of_these_nodes(self, nodes):
@@ -57,11 +56,11 @@ class ValueWithUnits(object):
 
 def get_name_for_fun_node(fname):
     check_isinstance(fname, str) # also more conditions
-    return '_fun_%s' % fname
+    return f"_fun_{fname}"
 
 def get_name_for_res_node(rname):
     check_isinstance(rname, str) # also more conditions
-    return '_res_%s' % rname
+    return f"_res_{rname}"
 
 @contract(returns='tuple(bool, str|None)')
 def is_fun_node_name(name):
@@ -134,12 +133,12 @@ class Context(object):
 
     def __repr__(self):
         s = 'Context:'
-        s += '\n' + '  names: %s' % list(self.names)
-        s += '\n' + '  connections: %s' % self.connections
-        s += '\n' + '  var2resource: %s' % self.var2resource
-        s += '\n' + '  var2function: %s' % self.var2function
-        s += '\n' + '  var2model: %s' % self.var2model
-        s += '\n' + '  constants: %s' % self.constants
+        s += f"\n' + '  names: {list}"(self.names)
+        s += f"\n' + '  connections: {self}".connections
+        s += f"\n' + '  var2resource: {self}".var2resource
+        s += f"\n' + '  var2function: {self}".var2function
+        s += f"\n' + '  var2model: {self}".var2model
+        s += f"\n' + '  constants: {self}".constants
 
         return s
  
@@ -209,7 +208,7 @@ class Context(object):
                     errors.append(e)
 
         s = "\n\n".join(map(str, errors))
-        msg = 'Could not load %r: \n%s' % (load_arg, s)
+        msg = f"Could not load %r: \n{load_arg}"
         raise DPSemanticError(msg)
 
     @contract(s='str', dp='str', returns=CFunction)
@@ -223,7 +222,7 @@ class Context(object):
 
         if not s in ndp.get_fnames():
             msg = 'Unknown function %r for design problem %r.' % (s, dp)
-            msg += ' Known functions: %s.' % format_list(ndp.get_fnames())
+            msg += f" Known functions: {format_list}."(ndp.get_fnames())
             raise DPSemanticError(msg)
 
         return CFunction(dp, s)
@@ -240,7 +239,7 @@ class Context(object):
 
         if not s in ndp.get_rnames():
             msg = 'Unknown resource %r for design problem %r.' % (s, dp)
-            msg += ' Known functions: %s.' % format_list(ndp.get_rnames())
+            msg += f" Known functions: {format_list}."(ndp.get_rnames())
             raise DPSemanticError(msg)
 
         return CResource(dp, s)
@@ -280,9 +279,9 @@ class Context(object):
     def get_var2model(self, name):
         if not name in self.var2model:
             msg = 'I cannot find the MCDP type %r.' % name
-            msg += '\n Known types: %s' % list(self.var2model)
-            msg += '\n Known constants: %s' % list(self.constants)
-            msg += '\n Known resources: %s' % list(self.var2resource)
+            msg += f"\n Known types: {list}"(self.var2model)
+            msg += f"\n Known constants: {list}"(self.constants)
+            msg += f"\n Known resources: {list}"(self.var2resource)
             raise NoSuchMCDPType(msg)
         return self.var2model[name]
 
@@ -356,15 +355,13 @@ class Context(object):
     def get_ndp_res(self, rname):
         name = get_name_for_res_node(rname)
         if not name in self.names:
-            raise ValueError('Resource name %r (%r) not found in %s.' %
-                             (rname, name, list(self.names)))
+            raise ValueError(f"Resource name %r (%r) not found in {rname}."))
         return self.names[name]
 
     def get_ndp_fun(self, fname):
         name = get_name_for_fun_node(fname)
         if not name in self.names:
-            raise ValueError('Function name %r (%r) not found in %s.' %
-                             (fname, name, list(self.names)))
+            raise ValueError(f"Function name %r (%r) not found in {fname}."))
         return self.names[name]
 
     @contract(c=Connection)
@@ -400,18 +397,18 @@ class Context(object):
 
         rnames = ndp1.get_rnames()
         if not c.s1 in rnames:
-            msg = "Resource %r does not exist (known: %s)" % (c.s1, format_list(rnames))
+            msg = f"Resource %r does not exist (known: {c.s1})")
             raise_desc(DPSemanticError, msg, known=rnames)
 
         fnames = ndp2.get_fnames()
         if not c.s2 in fnames:
-            msg = "Function %r does not exist (known: %s)" % (c.s2,format_list(fnames))
+            msg = f"Function %r does not exist (known: {c.s2})")
             raise_desc(DPSemanticError, msg, known=fnames)
 
 
         R1 = ndp1.get_rtype(c.s1)
         F2 = ndp2.get_ftype(c.s2)
-        # print('connecting R1 %s to R2 %s' % (R1, F2))
+        # print(f"connecting R1 {R1} to R2 {F2}")
         if not (R1 == F2):
             msg = 'Connection between different spaces.'
             raise_desc(DPSemanticError, msg, c=c,
@@ -513,7 +510,7 @@ class Context(object):
                         msg = 'Missing value %r for %r.' % (fname, which)
                         raise_desc(DPSemanticError, msg)
                     else:
-                        msg = 'Using default value for unconnected resource %s %s' % (created, fname)
+                        msg = f"Using default value for unconnected resource {created} {fname}"
                         # logger.warn(msg)
 
                     try:
@@ -550,7 +547,7 @@ class Context(object):
                         msg = 'Missing value %r for %r.' % (rname, which)
                         raise_desc(DPSemanticError, msg)
                     else:
-                        msg = 'Using default value for unconnected function %s %s' % (created, rname)
+                        msg = f"Using default value for unconnected function {created} {rname}"
                         # logger.warn(msg)
                     try:
                         top = R.get_top()

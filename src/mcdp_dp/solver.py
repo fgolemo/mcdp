@@ -54,15 +54,15 @@
 #     R = dp.get_res_space()
 #     S = UpperSets(R)
 #     s0 = S.get_bottom()
-#     print('s0: %s' % str(s0))
+#     print(f"s0: {str}"(s0))
 #     ss = [s0]
 #     sr = [dp.solveU(s0)]
 # 
-#     print('sr0: %s' % str(sr[0]))
+#     print(f"sr0: {str}"(sr[0]))
 # 
 #     result = None
 # 
-#     print('Iterating in the space %s' % S)
+#     print(f"Iterating in the space {S}")
 #     for i in range(100000):
 #         if max_steps:
 #             if i >= max_steps:
@@ -72,7 +72,7 @@
 #         s_last = ss[-1]
 #         s_next = beta((uf, s_last))
 # 
-#         print('%d: si  = %s' % (i, S.format(s_next)))
+#         print(f"{S.format(s_next}: si  = {i}"))
 # 
 #         if S.equal(ss[-1], s_next):
 #             print('%d: breaking because converged' % i)
@@ -80,7 +80,7 @@
 #             break
 # 
 #         rn = alpha((uf, s_next))
-#         # print('%d: rn  = %s' % (i, UR.format(rn)))
+#         # print(f"{UR.format(rn}: rn  = {i}"))
 # 
 #         ss.append(s_next)
 #         sr.append(rn)
@@ -115,15 +115,15 @@
 #     S, alpha, beta = dp.get_normal_form()
 # 
 #     s0 = S.get_bottom()
-#     print('s0: %s' % str(s0))
+#     print(f"s0: {str}"(s0))
 #     ss = [s0]
 #     sr = [alpha((uf, s0))]
 # 
-#     print('sr0: %s' % str(sr[0]))
+#     print(f"sr0: {str}"(sr[0]))
 # 
 #     result = None
 # 
-#     print('Iterating in the space %s' % S)
+#     print(f"Iterating in the space {S}")
 #     for i in range(100000):
 #         if max_steps:
 #             if i >= max_steps:
@@ -133,7 +133,7 @@
 #         s_last = ss[-1]
 #         s_next = beta((uf, s_last))
 # 
-#         print('%d: si  = %s' % (i, S.format(s_next)))
+#         print(f"{S.format(s_next}: si  = {i}"))
 # 
 #         if S.equal(ss[-1], s_next):
 #             print('%d: breaking because converged' % i)
@@ -141,7 +141,7 @@
 #             break
 # 
 #         rn = alpha((uf, s_next))
-#         # print('%d: rn  = %s' % (i, UR.format(rn)))
+#         # print(f"{UR.format(rn}: rn  = {i}"))
 #         
 #         ss.append(s_next)
 #         sr.append(rn)

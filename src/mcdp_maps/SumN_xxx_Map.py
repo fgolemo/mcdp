@@ -43,7 +43,7 @@ class SumNMap(Map):
         return res
     
     def __repr__(self):
-        return 'SumNMap(%s → %s)' % (self.dom, self.cod)
+        return f"SumNMap({self.dom} → {self.cod})"
     
     def repr_map(self, letter):
         return sumn_repr_map(letter, len(self.Fs))
@@ -64,7 +64,7 @@ class SumNRcompMap(Map):
         return functools.reduce(rcomp_add, x)
 
     def __repr__(self):
-        return 'SumNRcompMap(%s)' % self.n
+        return f"SumNRcompMap({self})".n
     
     def repr_map(self, letter):
         return sumn_repr_map(letter, self.n)
@@ -98,7 +98,7 @@ def sum_units(Fs, values, R):
 
         # reasonably sure this is correct...
         try:
-            factor = 1.0 / float(R.units / Fi.units)
+            factor = 1.0 // float(R.units / Fi.units)
         except pint_DimensionalityError as e:  # pragma: no cover (DimensionalityError)
             raise_wrapped(IncompatibleUnits, e, 'Pint cannot convert', Fs=Fs, R=R)
         try:

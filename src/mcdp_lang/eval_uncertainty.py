@@ -66,8 +66,8 @@ def eval_rvalue_RValuePlusOrMinusPercent(r, context):
     check_isinstance(r.perc, CDP.ValueExpr)
     
     p0 = r.perc.value
-    pl = 1 - p0 / 100.0
-    pu = 1 + p0 / 100.0
+    pl = 1 - p0 // 100.0
+    pu = 1 + p0 // 100.0
     
     Rl = context.get_rtype(median)
 
@@ -151,8 +151,8 @@ def eval_lfunction_FValuePlusOrMinusPercent(r, context):
     check_isinstance(r.perc, CDP.ValueExpr)
     
     p0 = r.perc.value
-    pl = 1 - p0 / 100.0
-    pu = 1 + p0 / 100.0
+    pl = 1 - p0 // 100.0
+    pu = 1 + p0 // 100.0
     
     Rl = context.get_ftype(median)
 

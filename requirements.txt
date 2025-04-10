@@ -1,5 +1,5 @@
 pint
-pyparsing
+pyparsing>=3.0.0
 networkx
 pint
 watchdog

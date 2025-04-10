@@ -37,8 +37,8 @@ class WrapAMap(EmptyDP):
             ( F == amap_dual.get_codomain())
             if not ok:
                 msg = 'Maps not compatible.'
-                msg += '\n h: %s -> %s' % (amap.get_domain(), amap.get_codomain())
-                msg += '\n h*: %s -> %s' % (amap_dual.get_domain(), amap_dual.get_codomain())
+                msg += f"\n h: {amap.get_domain(} -> %s", amap.get_codomain())
+                msg += f"\n h*: {amap_dual.get_domain(} -> %s", amap_dual.get_codomain())
                 raise_desc(ValueError, msg, amap=amap, amap_dual=amap_dual)
             
         self.amap_dual = amap_dual
@@ -85,7 +85,7 @@ class WrapAMap(EmptyDP):
         m =  self.amap.repr_map('f')
         s = m.split('⟼')
         if len(s) != 2:
-            msg = ('%s:  no arrow in %s' % (type(self), m))
+            msg = (f"{type(self}:  no arrow in %s", m))
             raise ValueError(msg)
         return s[0].strip() + ' ⟼ {' + s[1].strip() + '}' 
     
@@ -95,13 +95,13 @@ class WrapAMap(EmptyDP):
             m =  self.amap_dual.repr_map('r')
             s = m.split('⟼')
             if len(s) != 2:
-                msg = ('%s:  no arrow in %s' % (type(self), m))
+                msg = (f"{type(self}:  no arrow in %s", m))
                 raise ValueError(msg)
             return  s[0].strip() + ' ⟼ {' + s[1].strip() + '}'
         else:
-            return '(unset for %s)' % type(self).__name__
+            return f"(unset for {type})"(self).__name__
 
     def __repr__(self):
         if self.amap_dual is not None:
-            return '%s(%r,%r)' % (type(self).__name__, self.amap, self.amap_dual)
-        return '%s(%r)' % (type(self).__name__, self.amap)
+            return f"{type(self}(%r,%r)".__name__, self.amap, self.amap_dual)
+        return f"{type(self}(%r)".__name__, self.amap)

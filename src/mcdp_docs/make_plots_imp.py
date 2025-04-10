@@ -69,7 +69,7 @@ def make_plots(library, soup, raise_errors, realpath):
             available = dict(get_plotters(get_all_available_plotters(), vu.unit))
             assert available
         except NotPlottable as e:
-            msg = 'No plotters available for %s' % vu.unit
+            msg = f"No plotters available for {vu}".unit
             raise_wrapped(ValueError, e, msg, compact=True)
 
         plotter = list(available.values())[0]

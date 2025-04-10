@@ -155,7 +155,7 @@ def ast_to_html(s,
      
     lines = transformed.split('\n')
     if len(lines) != len(s_comments):
-        msg = 'Lost some lines while pretty printing: %s, %s' % (len(lines), len(s_comments))
+        msg = f"Lost some lines while pretty printing: {len(lines}, %s", len(s_comments))
         raise DPInternalError(msg) 
  
 #     print('transformed', transformed)
@@ -189,9 +189,9 @@ def ast_to_html(s,
                     
                 if comment.startswith(unparsable_marker):
                     unparsable = comment[len(unparsable_marker):]
-                    linec = before + '<span class="unparsable">%s</span>' % sanitize_comment(unparsable)
+                    linec = before + f"<span class="unparsable">{sanitize_comment}</span>"(unparsable)
                 else:
-                    linec = before + '<span class="comment">%s</span>' % sanitize_comment(comment)
+                    linec = before + f"<span class="comment">{sanitize_comment}</span>"(comment)
                     
             else:
                 linec = line 
@@ -250,7 +250,7 @@ def iterate_check_order(x, it):
     cur = []
     for i in it:
         op, o, a, b, _ = i
-        cur.append('%s from %d -> %d: %s -> %r' % (type(x).__name__,
+        cur.append(f"{type(x} from %d -> %d: %s -> %r".__name__,
                                                    a, b, type(op).__name__, o))
 
         if not a >= last: # pragma: no cover
@@ -270,7 +270,7 @@ def print_html_inner(x):
         if x.label == '...': # special case
             transformed = '…' 
         else:
-            transformed = '<span class="PlaceholderLabel">⟨%s⟩</span>' % x.label
+            transformed = f"<span class="PlaceholderLabel">⟨{x}⟩</span>".label
         
         yield Snippet(op=x, orig=orig0, a=x.where.character, b=x.where.character_end,
                   transformed=transformed)
@@ -298,8 +298,7 @@ def print_html_inner(x):
 
     klass = type(x).__name__
 
-    transformed0 = ("<span class='%s' %s='%d' %s='%s'>%s</span>" 
-                    % (klass, ATTR_WHERE_CHAR, x.where.character, ATTR_WHERE_CHAR_END, x.where.character_end, out))
+    transformed0 = (f"<span class='{klass}f" {d}="f" {s}="'>{ATTR_WHERE_CHAR}</span>")
     yield Snippet(op=x, orig=orig0, a=x.where.character, b=x.where.character_end,
                   transformed=transformed0)
 
@@ -312,10 +311,10 @@ def sanitize(x):
 def print_ast(x):
     try:
         if isnamedtuplewhere(x):
-            s = '%s' % type(x).__name__
+            s = f"{type}"(x).__name__
             s += '  %r' % x.where
             for k, v in iterate_sub(x):
-                first = ' %s: ' % k
+                first = f" {k}: "
                 s += '\n' + indent(print_ast(v), ' ' * len(first), first=first)
 
             if x.where is None:
@@ -333,7 +332,7 @@ def iterate_sub(x):
         a = m[1]
         if isnamedtuplewhere(a):
             if a.where is None:
-                print('warning: no where found for %s' % str(a))
+                print(f"warning: no where found for {str}"(a))
                 return 0
             return a.where.character
         return 0
@@ -355,7 +354,7 @@ def get_css_filename(basename):
     package = dir_from_package_name('mcdp_web')
     fn = os.path.join(package, 'static', 'css', basename + '.css')
     if not os.path.exists(fn):
-        raise ValueError('File does not exist: %s' % fn)
+        raise ValueError(f"File does not exist: {fn}")
     return os.path.realpath(fn)
 
     

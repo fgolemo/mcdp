@@ -125,7 +125,7 @@
 #     username = url[i]
 #     repo = url[i+1:]
 #     
-#     url2 = 'git@github.com:%s/%s.git' % (username, repo)
+#     url2 = f"git@github.com:{username}/{repo}.git"
 #     return MCDPGitRepo(url2)
 # 
 # @contract(url=str, returns=MCDPRepo)    
@@ -158,10 +158,10 @@
 #         if where is None:
 #             where = create_tmpdir(prefix='git_repo')
 #             create = True
-#             logger.debug('Created tmpdir %s' % where)
+#             logger.debug(f"Created tmpdir {where}")
 #         else:
 #             if not os.path.exists(where):
-#                 logger.debug('Created dir %s' % where)
+#                 logger.debug(f"Created dir {where}")
 #                 os.makedirs(where)
 #                 create = True
 #             else:
@@ -242,7 +242,7 @@
 #                     res[k] = v.encode('utf8')   
 #             
 #             if not 'thing_name' in res or not 'shelf_name' in res or not 'library_name' in res:
-#                 #print('skipping %s' % res)
+#                 #print(f"skipping {res}")
 #                 pass
 #             else:
 #                 # only show things that are current
@@ -257,7 +257,7 @@
 #                         exists = True
 #                         
 #                 res['exists'] = exists
-#                 #print('change: %s' % res)
+#                 #print(f"change: {res}")
 #                 self.changes.append(res)
 #             
 #     def get_changes(self):

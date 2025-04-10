@@ -35,14 +35,14 @@ def report_dp1(dp, imp=None):
 #         S, alpha, beta = dp.get_normal_form()
 # 
 #         s = ""
-#         s += 'S: %s' % S
-#         s += '\nα: %s' % alpha
-#         s += '\nβ: %s' % beta
+#         s += f"S: {S}"
+#         s += f"\nα: {alpha}"
+#         s += f"\nβ: {beta}"
 # 
 #         r.text('normalform', s)
 #         r.text('tree_long', dp.tree_long())
 #     except Exception as e:
-#         warnings.warn('Normal form not implemented %s' % e)
+#         warnings.warn(f"Normal form not implemented {e}")
 
 
 
@@ -60,13 +60,13 @@ def report_dp1(dp, imp=None):
             ms = [0.0, 0.25, 0.5, 0.75, 1.0]
             for m in ms:
                 feasible = dp.is_feasible(Fbot, (m,), Rinf)
-                s += '\n m = %s  = %s' % (m, feasible)
+                s += f"\n m = {m}  = {feasible}"
             r.text('scalarres', s)
         else:
             m = M.witness()
             print(Fbot, m, Rinf)
             feasible = dp.is_feasible(Fbot, m, Rinf)
-            r.text('some', 'bot feasible( %s, %s,%s): %s' % (Fbot, m, Rinf, feasible))
+            r.text(f"some', 'bot feasible( {Fbot}, {m},{Rinf}): {feasible}")
 
     return r
 

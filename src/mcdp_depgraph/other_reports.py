@@ -32,7 +32,7 @@ def other_jobs(context, maindir, config_dirs, outdir, res):
                      maindir=maindir,
                      config_dirs=config_dirs,
                      outdir=outdir,
-                     entry=entry)#, job_id='other_reports-%s-%s' % (entry.libname, entry.name))
+                     entry=entry)#, job_id=f"other_reports-{entry.libname}-{entry.name}")
         texs.append(tex)
 
     context.comp(write_tex, outdir, texs)
@@ -69,7 +69,7 @@ def other_reports(outdir, maindir, config_dirs, entry):
         base = entry.libname + '-' + entry.name + '-ndp_template_graph_enclosed.pdf'
         out = os.path.join(outdir, base)
         write_to_file(out, pdf)
-        tex += '\n\\includegraphics{%s}' % base
+        tex += f"\n\\includegraphics{{base}}"
 
         source_code = library._get_file_data(entry.name +'.mcdp_template')['data']
         code_pdf = get_ast_as_pdf(s=source_code, parse_expr=Syntax.template)
@@ -77,7 +77,7 @@ def other_reports(outdir, maindir, config_dirs, entry):
         base = entry.libname + '-' + entry.name + '-syntax_pdf.pdf'
         out = os.path.join(outdir, base)
         write_to_file(out, code_pdf)
-        tex += '\n\\includegraphics{%s}' % base
+        tex += f"\n\\includegraphics{{base}}"
 
     if isinstance(entry, EntryNDP):
         
@@ -117,14 +117,14 @@ def other_reports(outdir, maindir, config_dirs, entry):
                 assert isinstance(x, str), x
                 ext = mime
 
-                base = entry.libname + '-' + entry.name + '-%s.%s' % (name, ext)
+                base = entry.libname + f"-' + entry.name + '-{name}.{ext}"
                 out = os.path.join(outdir, base)
                 write_to_file(out, x)
                 if ext == 'pdf':
-                    tex += '\n\\includegraphics{%s}' % base
+                    tex += f"\n\\includegraphics{{base}}"
 
 
-    print('outdir: %s' % outdir)
+    print(f"outdir: {outdir}")
     print('entry: {}'.format(entry))
 
     return tex
@@ -136,4 +136,4 @@ def write_to_file(out, contents):
 
     with open(out, 'w') as f:
         f.write(contents)
-    print('Writing to %s' % out)
+    print(f"Writing to {out}")

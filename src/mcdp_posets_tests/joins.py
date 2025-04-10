@@ -16,10 +16,10 @@ def check_poset_join(_id_poset, poset):
 
         j = P.join(a, b)
         m = P.meet(a, b)
-        print('a = %s' % str(a))
-        print('b = %s' % str(b))
-        print('join = %s' % str(j))
-        print('meet = %s' % str(m))
+        print(f"a = {str}"(a))
+        print(f"b = {str}"(b))
+        print(f"join = {str}"(j))
+        print(f"meet = {str}"(m))
         P.check_equal(j, b)
         P.check_equal(m, a)
     except Uninhabited:

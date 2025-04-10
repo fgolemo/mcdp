@@ -51,7 +51,7 @@ class PrimitiveDP(WithInternalLog):
         future:
             solve : F ⟶ U(R)
         
-        f' is feasible for I if f' \in eval(I).f
+        f' is feasible for I if f' \\in eval(I).f
     
     """
     __metaclass__ = PrimitiveMeta
@@ -128,7 +128,7 @@ class PrimitiveDP(WithInternalLog):
 
     def _assert_inited(self):
         if not '_inited' in self.__dict__:
-            msg = 'Class %s not inited.' % (type(self))
+            msg = f"Class {type(self)} not inited."
             raise Exception(msg)
 
     @contract(returns=Space)
@@ -251,7 +251,7 @@ class PrimitiveDP(WithInternalLog):
 #         return NormalFormApprox(S=S, gamma=gamma, delta=delta)
 
     def __repr__(self):
-        return '%s(%s→%s)' % (type(self).__name__, self.F, self.R)
+        return f"{type(self).__name__}({self.F}→{self.R})"
 
     def repr_long(self):
         """ A long, multiline representation """
@@ -260,12 +260,12 @@ class PrimitiveDP(WithInternalLog):
     @abstractmethod
     def repr_h_map(self):
         """ Returns a string of the type "f |-> P(f)" """
-#         return '(undefined for %s)' %  type(self).__name__
+#         return f"(undefined for {type})"(self).__name__
 
     @abstractmethod    
     def repr_hd_map(self):
         """ Returns a string of the type "f |-> P(f)" """  
-#         return '(undefined for %s)' %  type(self).__name__
+#         return f"(undefined for {type})"(self).__name__
 
 #     def _add_extra_info(self):
 #         if False:
@@ -276,14 +276,14 @@ class PrimitiveDP(WithInternalLog):
 #                 s += ' named: ' + x.__str__()
 # 
 #             s3 = self.get_imp_space().__repr__()
-#             s += ' I = %s' % s3
+#             s += f" I = {s3}"
 # 
 #             from mocdp.comp.recursive_name_labeling import get_names_used
 #             if isinstance(self.I, SpaceProduct):
 #                 names = get_names_used(self.I)
 #                 # names = filter(None, names)
 #                 if names:
-#                     s += ' names: %s' % names
+#                     s += f" names: {names}"
 #         else:
 #             return ""
 
@@ -402,6 +402,6 @@ class ApproximableDP(PrimitiveDP):
 #
 #     def _call(self, x):
 #         _F, s, _nl, _nu = x
-#         # print('Beta() for %s' % (self.dp))
-#         # print(' f = %s s = %s -> unchanged ' % (_F, s))
+#         # print(f"Beta() for {self.dp}")
+#         # print(f" f = {_F} s = {s} -> unchanged ")
 #         return s, s

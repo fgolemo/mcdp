@@ -27,7 +27,7 @@ def go():
     what_to_plot_fun = dict(lift="N")
 
     for model_name in ['actuation_a1', 'actuation_a2', 'actuation_a3', 'actuation']:
-        fn = 'out/%s.html' % model_name
+        fn = f"out/{model_name}.html"
         go_(model_name, queries, result_like, what_to_plot_res, what_to_plot_fun, fn)
 
 

@@ -32,12 +32,12 @@ class CoerceToInt(Map):
             return self.cod.get_top()
         r = int(x)
         if r != x:
-            msg = 'We cannot just coerce %r into an int.' % x
+            msg = f'We cannot just coerce {x!r} into an int.'
             raise MapNotDefinedHere(msg)
         return r
     
     def repr_map(self, letter):
-        return "%s ⟼ (int) %s" % (letter, letter)
+        return f"{letter} ⟼ (int) {letter}"
     
 class FloorRNMap(Map):
 
@@ -62,7 +62,7 @@ class FloorRNMap(Map):
         return r
     
     def repr_map(self, letter):
-        return "%s ⟼ floor(%s)" % (letter, letter)
+        return f"{letter} ⟼ floor({letter})"
 
 class CeilRNMap(Map):
 
@@ -87,4 +87,4 @@ class CeilRNMap(Map):
         return r
     
     def repr_map(self, letter):
-        return "%s ⟼ ceil(%s)" % (letter, letter)
+        return f"{letter} ⟼ ceil({letter})"

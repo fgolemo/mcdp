@@ -247,7 +247,7 @@ def cndp_create_one_without_some_connections(ndp, exclude_connections, names):
     for c in ndp.get_connections():
         if c in exclude_connections:
             continue
-        # print('adding connection %s' % str(c))
+        # print(f"adding connection {str}"(c))
         context.connections.append(c)
 
     # print('done')
@@ -346,7 +346,7 @@ def enumerate_minimal_solution(G, edge_weight):
         cycles2champion = {}
         cycles2weight = {}
         for cycles, edges in cycles2edges.items():
-            logger.debug('Found %s edges that remove a set of %s cycles' % (len(edges), len(cycles)))
+            logger.debug(f"Found {len(edges} edges that remove a set of %s cycles", len(cycles)))
 
             best = min(edges, key=edge_weight)
 
@@ -369,13 +369,13 @@ def enumerate_minimal_solution(G, edge_weight):
                 # not dominated
                 consider.add(cycles2champion[cycles1])
 
-        logger.debug('From %d to %d edges to consider' % (len(edges_belonging_to_cycles), len(consider)))
+        logger.debug(f"From {len(edges_belonging_to_cycles} to %d edges to consider", len(consider)))
         return consider
 
 
     edges_to_consider = get_edges_to_consider()
 
-    logger.debug('Deciding between %s hot of %d edges' % (len(edges_to_consider), len(all_edges)))
+    logger.debug(f"Deciding between {len(edges_to_consider} hot of %d edges", len(all_edges)))
 
     best_weight = np.inf
     
@@ -387,8 +387,7 @@ def enumerate_minimal_solution(G, edge_weight):
         # choose the solution to expand with minimum weight
         removed, state = pop_solution_minimum_weight(current_partial_solutions)
         examined.add(removed)
-        logger.debug('nsolutions %s best w %s / current_partial_solutions %s / removed %s' %
-              (len(current_solutions), best_weight, len(current_partial_solutions), removed))
+        logger.debug(f"nsolutions {len(current_solutions} best w %s / current_partial_solutions %s / removed %s", best_weight, len(current_partial_solutions), removed))
 
         # now look at edges that we could remove
         to_remove = edges_to_consider - removed
@@ -418,7 +417,7 @@ def enumerate_minimal_solution(G, edge_weight):
     best = solutions[np.argmin(weights)]
     state = current_solutions[best]
 
-    logger.debug('best: %s %s' % (best, state))
+    logger.debug(f"best: {best} {state}")
     return best
 
 

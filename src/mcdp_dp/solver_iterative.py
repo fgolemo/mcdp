@@ -26,8 +26,8 @@
 #             with ti.child('dpU') as t:
 #                 rU = dpU.solve_trace(f, t)
 # 
-#             ti.log('rL: %s' % UR.format(rL))
-#             ti.log('rU: %s' % UR.format(rU))
+#             ti.log(f"rL: {UR}".format(rL))
+#             ti.log(f"rU: {UR}".format(rU))
 # 
 # 
 #     return res
